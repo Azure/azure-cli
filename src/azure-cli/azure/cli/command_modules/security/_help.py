@@ -517,3 +517,72 @@ examples:
     text: >
         az security sub-assessment show --assessed-resource-id '/subscriptions/f8b197db-3b2b-4404-a3a3-0dfec293d0d0/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1' --assessment-name '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' -n 'd7c4d9ec-227c-4fb3-acf9-25fdd97c1bf1'
 """
+
+helps['security regulatory-compliance-standards'] = """
+type: group
+short-summary: regulatory compliance standards.
+"""
+
+helps['security regulatory-compliance-standards list'] = """
+type: command
+short-summary: List supported regulatory compliance standards details and state results.
+examples:
+  - name: Get regulatory compliance standards list.
+    text: >
+        az security regulatory-compliance-standards list
+"""
+
+helps['security regulatory-compliance-standards show'] = """
+type: command
+short-summary: Shows a regulatory compliance details state for selected standard.
+examples:
+  - name: Get regulatory compliance standard details.
+    text: >
+        az security regulatory-compliance-standards show -n 'Azure-CIS-1.1.0'
+"""
+
+helps['security regulatory-compliance-controls'] = """
+type: group
+short-summary: regulatory compliance controls.
+"""
+
+helps['security regulatory-compliance-controls list'] = """
+type: command
+short-summary: List supported of regulatory compliance controls details and state for selected standard.
+examples:
+  - name: Get regulatory compliance controls list.
+    text: >
+        az security regulatory-compliance-controls list --standard-name 'Azure-CIS-1.1.0'
+"""
+
+helps['security regulatory-compliance-controls show'] = """
+type: command
+short-summary: Shows a regulatory compliance details state for selected standard.
+examples:
+  - name: Get selected regulatory compliance control details and state.
+    text: >
+        az security regulatory-compliance-controls show --standard-name 'Azure-CIS-1.1.0' -n '1.1'
+"""
+
+helps['security regulatory-compliance-assessments'] = """
+type: group
+short-summary: regulatory compliance assessments.
+"""
+
+helps['security regulatory-compliance-assessments list'] = """
+type: command
+short-summary: Get details and state of assessments mapped to selected regulatory compliance control.
+examples:
+  - name: Get state of mapped assessments.
+    text: >
+        az security regulatory-compliance-assessments list --standard-name 'Azure-CIS-1.1.0' --control-name '1.1'
+"""
+
+helps['security regulatory-compliance-assessments show'] = """
+type: command
+short-summary: Shows supported regulatory compliance details and state for selected assessment.
+examples:
+  - name: Get selected regulatory compliance control details and state.
+    text: >
+        az security regulatory-compliance-assessments show --standard-name 'Azure-CIS-1.1.0' --control-name '1.1' -n '94290b00-4d0c-d7b4-7cea-064a9554e681'
+"""
