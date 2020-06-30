@@ -22,7 +22,7 @@ VERSION = "2.8.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
-    with open('azure/cli/command_modules/__init__.py', 'r', encoding='utf-8') as f:
+    with open('azure/cli/__init__.py', 'r', encoding='utf-8') as f:
         content = f.read()
 except OSError:
     pass
@@ -170,7 +170,7 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure"]),
     install_requires=DEPENDENCIES,
     package_data={
         'azure.cli.core': ['auth_landing_pages/*.html'],
