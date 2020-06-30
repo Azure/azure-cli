@@ -78,7 +78,7 @@ def cf_security_assessment_metadata(cli_ctx, _):
 def cf_security_sub_assessment(cli_ctx, _):
     return _cf_security(cli_ctx).sub_assessments
 
-  
+
 def cf_security_iot_solution(cli_ctx, _):
     return _cf_security(cli_ctx).iot_security_solution
 
@@ -94,7 +94,7 @@ def cf_security_iot_alerts(cli_ctx, _):
 def cf_security_iot_recommendations(cli_ctx, _):
     return _cf_security(cli_ctx).iot_security_solutions_analytics_recommendation
 
-  
+
 def cf_security_regulatory_compliance_standards(cli_ctx, _):
     return _cf_security(cli_ctx).regulatory_compliance_standards
 
@@ -105,4 +105,3 @@ def cf_security_regulatory_compliance_control(cli_ctx, _):
 
 def cf_security_regulatory_compliance_assessment(cli_ctx, _):
     return _cf_security(cli_ctx).regulatory_compliance_assessments
-

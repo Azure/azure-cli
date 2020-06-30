@@ -458,7 +458,7 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
                       assessment_name=assessment_name,
                       scope=assessed_resource_id)
 
- 
+
 # --------------------------------------------------------------------------------------------
 # Security IoT Solution
 # --------------------------------------------------------------------------------------------
@@ -467,37 +467,38 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
 def list_security_iot_solution(client, resource_group_name=None):
 
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name= resource_group_name)
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
 
     return client.list_by_subscription()
 
 
 def get_security_iot_solution(client, resource_group_name, iot_solution_name):
 
-    return client.get(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name)
+    return client.get(resource_group_name=resource_group_name, solution_name=iot_solution_name)
 
 
 def delete_security_iot_solution(client, resource_group_name, iot_solution_name):
 
-    return client.delete(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name)
+    return client.delete(resource_group_name=resource_group_name, solution_name=iot_solution_name)
 
 
-def create_security_iot_solution(client, resource_group_name, iot_solution_name, iot_solution_display_name=None, iot_solution_iot_hubs=None,location=None):
+def create_security_iot_solution(client, resource_group_name, iot_solution_name,
+                                 iot_solution_display_name=None, iot_solution_iot_hubs=None, location=None):
+
     if iot_solution_display_name:
-        iot_security_solution_data = IoTSecuritySolutionModel(display_name= iot_solution_display_name,iot_hubs= iot_solution_iot_hubs.split(","), location= location)
+        iot_security_solution_data = IoTSecuritySolutionModel(display_name=iot_solution_display_name,
+                                                              iot_hubs=iot_solution_iot_hubs.split(","),
+                                                              location=location)
+
         return client.create_or_update(
-            resource_group_name= resource_group_name,
-            solution_name= iot_solution_name,
-            iot_security_solution_data= iot_security_solution_data)
+            resource_group_name=resource_group_name,
+            solution_name=iot_solution_name,
+            iot_security_solution_data=iot_security_solution_data)
 
     return client.update(
-            resource_group_name= resource_group_name,
-            solution_name= iot_solution_name,
-            update_iot_security_solution_data= UpdateIotSecuritySolutionData(displayName= None,iotHubs= None))
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        update_iot_security_solution_data=UpdateIotSecuritySolutionData(displayName=None, iotHubs=None))
 
 
 # --------------------------------------------------------------------------------------------
@@ -508,15 +509,15 @@ def create_security_iot_solution(client, resource_group_name, iot_solution_name,
 def list_security_iot_analytics(client, resource_group_name, iot_solution_name):
 
     return client.list(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name)
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
 
 
 def get_security_iot_analytics(client, resource_group_name, iot_solution_name):
 
     return client.get(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name)
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -527,24 +528,24 @@ def get_security_iot_analytics(client, resource_group_name, iot_solution_name):
 def list_security_iot_alerts(client, resource_group_name, iot_solution_name):
 
     return client.list(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name)
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
 
 
 def get_security_iot_alerts(client, resource_group_name, iot_solution_name, resource_name):
 
     return client.get(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name,
-        aggregated_alert_name= resource_name)
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_alert_name=resource_name)
 
 
 def dismiss_security_iot_alerts(client, resource_group_name, iot_solution_name, resource_name):
 
     return client.dismiss(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name,
-        aggregated_alert_name= resource_name)
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_alert_name=resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -555,16 +556,16 @@ def dismiss_security_iot_alerts(client, resource_group_name, iot_solution_name, 
 def list_security_iot_recommendations(client, resource_group_name, iot_solution_name):
 
     return client.list(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name)
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
 
 
 def get_security_iot_recommendations(client, resource_group_name, iot_solution_name, resource_name):
 
     return client.get(
-        resource_group_name= resource_group_name,
-        solution_name= iot_solution_name,
-        aggregated_recommendation_name= resource_name)
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_recommendation_name=resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -604,4 +605,3 @@ def get_regulatory_compliance_assessment(client, resource_name, standard_name, c
     return client.get(regulatory_compliance_standard_name=standard_name,
                       regulatory_compliance_control_name=control_name,
                       regulatory_compliance_assessment_name=resource_name)
-

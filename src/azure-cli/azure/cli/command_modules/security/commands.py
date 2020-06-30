@@ -23,7 +23,7 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_iot_solution,
                               cf_security_iot_analytics,
                               cf_security_iot_alerts,
-                              cf_security_iot_recommendations)
+                              cf_security_iot_recommendations,
                               cf_security_regulatory_compliance_standards,
                               cf_security_regulatory_compliance_control,
                               cf_security_regulatory_compliance_assessment)
@@ -159,7 +159,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#IotRecommendationsOperations.{}',
         client_factory=cf_security_iot_recommendations
     )
-    
+
     with self.command_group('security regulatory-compliance-standards',
                             security_regulatory_compliance_standards_sdk,
                             client_factory=cf_security_regulatory_compliance_standards) as g:
@@ -314,3 +314,4 @@ def load_command_table(self, _):
 
     with self.command_group('security', is_preview=True):
         pass
+    
