@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import threading
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class TokenUpdater(object):
@@ -29,10 +32,15 @@ class TokenUpdater(object):
             resource="https://storage.azure.com", subscription=self.cli_ctx.data['subscription_id'])[0][2]
         try:
             self.token_credential.token = token['accessToken']
+            expire = token['expiresOn']
             seconds_left = (datetime.strptime(token['expiresOn'], "%Y-%m-%d %H:%M:%S.%f") - datetime.now()).seconds
         except KeyError:  # needed to deal with differing unserialized MSI token payload
             self.token_credential.token = token['access_token']
+            expire = datetime.datetime.fromtimestamp(int(token['expires_on']))
             seconds_left = (datetime.fromtimestamp(int(token['expires_on'])) - datetime.now()).seconds
+
+        if seconds_left < 180:
+            logger.warning("Acquired token will expire on %s.", expire)
 
         with self.lock:
             self.timer = threading.Timer(seconds_left - 180, self.timer_callback)
