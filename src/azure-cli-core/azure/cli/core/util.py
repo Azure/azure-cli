@@ -490,7 +490,6 @@ def should_disable_connection_verify():
 
 def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
-
     from msrest.polling.poller import LROPoller
     from azure.core.polling import LROPoller as AzureCoreLROPoller
     return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)

@@ -785,10 +785,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
             if operation.startswith(rt.import_prefix + '.'):
-                    operation = operation.replace(rt.import_prefix,
-                                                  get_versioned_sdk_path(
-                                                      self.cli_ctx.cloud.profile, rt,
-                                                      operation_group=operation_group))
+                operation = operation.replace(rt.import_prefix,
+                                              get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
+                                                                     operation_group=operation_group))
 
         try:
             mod_to_import, attr_path = operation.split('#')
