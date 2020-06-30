@@ -141,7 +141,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
             'key': 'key1'
         })
 
-        _create_keyvault(self, self.kwargs)
+        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false')
 
         # create a key
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
@@ -261,7 +261,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
             'sec': 'secret1'
         })
 
-        _create_keyvault(self, self.kwargs)
+        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false')
 
         # create a secret
         secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
@@ -724,8 +724,8 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
 
-        if self.is_live:
-            time.sleep(20)
+        #if self.is_live:
+        time.sleep(20)
 
         # recover secrets keys and certificates
         self.cmd('keyvault secret recover --vault-name {kv} -n secret1')

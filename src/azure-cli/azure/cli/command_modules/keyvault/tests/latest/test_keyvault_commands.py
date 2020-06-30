@@ -95,7 +95,7 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
                       '--connection-name {pe_connection} --private-connection-resource-id {kv_id} '
-                      '--group-ids vault').get_output_in_json()
+                      '--group-id vault').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
 
         # Show the connection at vault side
@@ -248,6 +248,9 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                          self.check('properties.enablePurgeProtection', True)])
 
         # test '--enable-rbac-authorization'
+        # (BadRequest) Error at property "enableRbacAuthorization": RBAC authorization is not supported for subscription xxxx
+        # temporarily disabled
+        """
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
             'loc': 'eastus2'
@@ -266,6 +269,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('properties.enableRbacAuthorization', False))
         self.cmd('keyvault update -n {kv} --enable-rbac-authorization true',
                  checks=self.check('properties.enableRbacAuthorization', True))
+        """
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):

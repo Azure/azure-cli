@@ -31,19 +31,19 @@ interactions:
       dataserviceversion:
       - 3.0;
       date:
-      - Tue, 30 Jun 2020 09:02:55 GMT
+      - Tue, 30 Jun 2020 08:24:12 GMT
       duration:
-      - '2358886'
+      - '2353473'
       expires:
       - '-1'
       ocp-aad-diagnostics-server-name:
-      - iuFONCDuOWoJ730FHlBCSiE3tw5MP6Gp0oI38Zgl2ys=
+      - yC4FoNH5zaigswiTATamsh+qChtVV7hUxoBzZdFV+XU=
       ocp-aad-session-key:
-      - aBNmiMKDnUZ1D6Kg7L3M8kSzwadPZlMUuzN5CEkhQ7gI9VrY6h-aM1ZWS5V9_OO2lKLquuJ4lja8XCMjwxA28MoHzxg9iw0-MdQ0Mo9ikQ3qLrc9cBtMgZSB-T6R2UsJ.tWGiF0ztyUc195h8NJ-K7dTD60ADs5dIe8GSK9hZ5sY
+      - mdINiTCiNWbH1U3I0YIx-zoQiD8a5hobMwIrczmMer1vucpoZHlcVNi6RJxxXQGHWv3X-2-KNOQgf4fklFYiDJCnXWnAISaLrfL1sZm4-obbyQQG3xngyPkYh3SD-t4T.T5ZWKzAeBh7MWkRfRF7ytZUJzBjBTeaSjyPP2RF8B-U
       pragma:
       - no-cache
       request-id:
-      - 97b772d2-3edb-41de-a9aa-a017bde6d09c
+      - bc1a374b-4e96-411a-ae80-afc8497d448d
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aad-resource-unit:
@@ -66,9 +66,9 @@ interactions:
       "recover"], "certificates": ["get", "list", "delete", "create", "import", "update",
       "managecontacts", "getissuers", "listissuers", "setissuers", "deleteissuers",
       "manageissuers", "recover"], "storage": ["get", "list", "delete", "set", "update",
-      "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}], "softDeleteRetentionInDays":
-      90, "networkAcls": {"bypass": "AzureServices", "defaultAction": "Allow", "ipRules":
-      [], "virtualNetworkRules": []}}}'
+      "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}], "enableSoftDelete":
+      false, "softDeleteRetentionInDays": 90, "networkAcls": {"bypass": "AzureServices",
+      "defaultAction": "Allow", "ipRules": [], "virtualNetworkRules": []}}}'
     headers:
       Accept:
       - application/json
@@ -79,27 +79,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '890'
+      - '917'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n -l --sku
+      - -g -n -l --sku --enable-soft-delete
       User-Agent:
       - AZURECLI/2.8.0 azsdk-python-azure-mgmt-keyvault/7.0.0b1 Python/3.7.5 (Windows-10-10.0.18362-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-keyvault-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1160'
+      - '1161'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:02 GMT
+      - Tue, 30 Jun 2020 08:24:21 GMT
       expires:
       - '-1'
       pragma:
@@ -119,7 +119,7 @@ interactions:
       x-ms-keyvault-service-version:
       - 1.1.0.282
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1190'
+      - '1196'
       x-powered-by:
       - ASP.NET
     status:
@@ -137,23 +137,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l --sku
+      - -g -n -l --sku --enable-soft-delete
       User-Agent:
       - AZURECLI/2.8.0 azsdk-python-azure-mgmt-keyvault/7.0.0b1 Python/3.7.5 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-keyvault-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1156'
+      - '1157'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:32 GMT
+      - Tue, 30 Jun 2020 08:24:51 GMT
       expires:
       - '-1'
       pragma:
@@ -196,7 +196,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
       string: '{"error":{"code":"Unauthorized","message":"Request is missing a Bearer
@@ -209,7 +209,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:34 GMT
+      - Tue, 30 Jun 2020 08:24:53 GMT
       expires:
       - '-1'
       pragma:
@@ -253,7 +253,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
       string: '{"error":{"code":"ContactsNotFound","message":"Contacts not found"}}'
@@ -265,7 +265,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:35 GMT
+      - Tue, 30 Jun 2020 08:24:54 GMT
       expires:
       - '-1'
       pragma:
@@ -307,10 +307,10 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
-      string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
         Doe","phone":"123-456-7890"}]}'
     headers:
       cache-control:
@@ -320,7 +320,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:35 GMT
+      - Tue, 30 Jun 2020 08:24:55 GMT
       expires:
       - '-1'
       pragma:
@@ -359,10 +359,10 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
-      string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
         Doe","phone":"123-456-7890"}]}'
     headers:
       cache-control:
@@ -372,7 +372,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:37 GMT
+      - Tue, 30 Jun 2020 08:24:56 GMT
       expires:
       - '-1'
       pragma:
@@ -414,10 +414,10 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
-      string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
         Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
     headers:
       cache-control:
@@ -427,7 +427,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:38 GMT
+      - Tue, 30 Jun 2020 08:24:58 GMT
       expires:
       - '-1'
       pragma:
@@ -466,10 +466,10 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
-      string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
         Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
     headers:
       cache-control:
@@ -479,7 +479,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:39 GMT
+      - Tue, 30 Jun 2020 08:24:58 GMT
       expires:
       - '-1'
       pragma:
@@ -518,10 +518,10 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
-      string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
         Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
     headers:
       cache-control:
@@ -531,7 +531,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:40 GMT
+      - Tue, 30 Jun 2020 08:25:00 GMT
       expires:
       - '-1'
       pragma:
@@ -570,10 +570,10 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
-      string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
         Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
     headers:
       cache-control:
@@ -583,7 +583,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:41 GMT
+      - Tue, 30 Jun 2020 08:25:02 GMT
       expires:
       - '-1'
       pragma:
@@ -624,10 +624,10 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
-      string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'
     headers:
       cache-control:
       - no-cache
@@ -636,7 +636,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:42 GMT
+      - Tue, 30 Jun 2020 08:25:03 GMT
       expires:
       - '-1'
       pragma:
@@ -675,10 +675,10 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=7.0
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=7.0
   response:
     body:
-      string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'
     headers:
       cache-control:
       - no-cache
@@ -687,7 +687,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 30 Jun 2020 09:03:43 GMT
+      - Tue, 30 Jun 2020 08:25:04 GMT
       expires:
       - '-1'
       pragma:
