@@ -22,7 +22,7 @@ VERSION = "2.8.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
-    with open('azure/cli/__init__.py', 'r', encoding='utf-8') as f:
+    with open('azure/cli/command_modules/__init__.py', 'r', encoding='utf-8') as f:
         content = f.read()
 except OSError:
     pass
