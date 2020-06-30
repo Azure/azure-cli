@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
+
 # pylint: disable=line-too-long, too-many-lines
 
 helps['hdinsight'] = """
@@ -182,7 +183,7 @@ short-summary: Restart the specific hosts of the specified HDInsight cluster.
 examples:
   - name: Restart the specific hosts of the specified HDInsight cluster.
     text: |-
-        az hdinsight host restart --resource-group MyResourceGroup --cluster-name MyCluster --hosts hostname
+        az hdinsight host restart --resource-group MyResourceGroup --cluster-name MyCluster --host-names hostname1 hostname2
 """
 
 helps['hdinsight wait'] = """

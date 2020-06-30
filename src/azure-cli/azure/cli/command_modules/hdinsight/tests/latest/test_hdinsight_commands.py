@@ -330,7 +330,7 @@ class HDInsightClusterTests(ScenarioTest):
                 break
         self.kwargs['target_host'] = target_host
         # restart host of the cluster
-        self.cmd('az hdinsight host restart --resource-group {rg} --cluster-name {cluster} --hosts {target_host} --yes')
+        self.cmd('az hdinsight host restart --resource-group {rg} --cluster-name {cluster} --host-names {target_host} --yes')
 
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
