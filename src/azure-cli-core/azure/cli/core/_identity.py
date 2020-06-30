@@ -69,8 +69,7 @@ class Identity:
         self.tenant_id = tenant_id or "organizations"
         self.client_id = client_id or _CLIENT_ID
         self._cred_cache = kwargs.pop('cred_cache', None)
-        # todo: MSAL support force encryption
-        self.allow_unencrypted = True
+        self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
 
         # Store for Service principal credential persistence
         self._msal_store = MSALSecretStore(fallback_to_plaintext=self.allow_unencrypted)
@@ -114,17 +113,24 @@ class Identity:
             # expires_on is discarded
             logger.warning("To sign in, use a web browser to open the page %s and enter the code %s to authenticate.",
                            verification_uri, user_code)
+        try:
+            credential = DeviceCodeCredential(authority=self.authority,
+                                              tenant_id=self.tenant_id,
+                                              client_id=self.client_id,
+                                              enable_persistent_cache=True,
+                                              prompt_callback=prompt_callback,
+                                              allow_unencrypted_cache=self.allow_unencrypted)
 
-        credential = DeviceCodeCredential(authority=self.authority,
-                                          tenant_id=self.tenant_id,
-                                          client_id=self.client_id,
-                                          enable_persistent_cache=True,
-                                          prompt_callback=prompt_callback,
-                                          allow_unencrypted_cache=self.allow_unencrypted)
-        auth_record = credential.authenticate()
-        # todo: remove after ADAL token deprecation
-        self._cred_cache.add_credential(credential)
-        return credential, auth_record
+            auth_record = credential.authenticate()
+            # todo: remove after ADAL token deprecation
+            self._cred_cache.add_credential(credential)
+            return credential, auth_record
+        except ValueError as ex:
+            logger.debug('Device code authentication failed: %s', str(ex))
+            if 'PyGObject' in str(ex):
+                raise CLIError("PyGObject is required to encrypt the persistent cache. Please install that lib or "
+                               "allow fallback to plaintext if encrypt credential fail via 'az configure'.")
+            raise
 
     def login_with_username_password(self, username, password):
         # Use UsernamePasswordCredential
@@ -628,13 +634,13 @@ class MSALSecretStore:
             return FilePersistenceWithDataProtection(self._token_file)
         if sys.platform.startswith('darwin'):
             # todo: support darwin
-            return KeychainPersistence(self._token_file, "my_service_name", "my_account_name")
+            return KeychainPersistence(self._token_file, "Microsoft.Developer.IdentityService", "MSALCustomCache")
         if sys.platform.startswith('linux'):
             try:
                 return LibsecretPersistence(
                     self._token_file,
-                    schema_name="msalCustomToken",
-                    attributes={"MsalClientID": "Microsoft.Developer.IdentityService"},
+                    schema_name="MSALCustomToken",
+                    attributes={"MsalClientID": "Microsoft.Developer.IdentityService"}
                 )
             except:  # pylint: disable=bare-except
                 if not self._fallback_to_plaintext:

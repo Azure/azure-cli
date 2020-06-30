@@ -3,8 +3,8 @@ FROM ${base_image} AS build-env
 
 # Update APT packages
 RUN apt-get update
-RUN apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev wget
-
+RUN apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev wget libgirepository1.0-dev \
+    libcairo2-dev gir1.2-secret-1 gnome-keyring
 # Download Python source code
 ARG python_version="3.6.10"
 ENV PYTHON_SRC_DIR=/usr/src/python

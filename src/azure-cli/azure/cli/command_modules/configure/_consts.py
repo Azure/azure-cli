@@ -49,3 +49,5 @@ MSG_PROMPT_TELEMETRY = '\nMicrosoft would like to collect anonymous Azure CLI us
 MSG_PROMPT_FILE_LOGGING = '\nWould you like to enable logging to file?'
 
 MSG_PROMPT_CACHE_TTL = '\nCLI object cache time-to-live (TTL) in minutes [Default: {}]: '.format(DEFAULT_CACHE_TTL)
+
+MSG_PROMPT_ALLOW_PLAINTEXT = '\nWould you like to allow fallback to plaintext if encrypt credential fail?'
