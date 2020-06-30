@@ -191,7 +191,7 @@ short-summary: Grant the app an API Delegated permissions
 long-summary: >
     A service principal must exist for the app when running this command. To create a corresponding service
     principal, use `az ad sp create`.
-    
+
     For Application permissions, please use "ad app permission admin-consent"
 examples:
   - name: Grant a native application with permissions to access an existing API with TTL of 2 years
