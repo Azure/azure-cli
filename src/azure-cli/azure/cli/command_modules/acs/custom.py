@@ -2627,11 +2627,8 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         workspace_region = AzureFairfaxRegionToOmsRegionMap.get(rg_location, "usgovvirginia")
         workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(workspace_region, "USGV")
     else:
-        try:
-            workspace_region = rg_location
-            workspace_region_code = (rg_location.replace(" ", "")).upper()
-        except:
-            logger.error("AKS Monitoring addon workspace region and code set failed in cloud : %s", cloud_name)
+        workspace_region = rg_location
+        workspace_region_code = rg_location.upper()
 
     default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
     default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_region_code)
