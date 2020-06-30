@@ -9,13 +9,10 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 
 from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_client_private_endpoint_connections_factory,
-    keyvault_client_private_link_resources_factory, keyvault_data_plane_factory,
-    keyvault_data_plane_track2_key_factory, keyvault_data_plane_track2_secret_factory,
-    keyvault_data_plane_track2_certificate_factory)
+    keyvault_client_private_link_resources_factory, keyvault_data_plane_factory)
 
 from ._transformers import (
-    filter_out_managed_resources, multi_transformers, transform_key_bundle, transform_key_property_list,
-    transform_deleted_key, transform_secret_property_list, transform_secret_property, transform_secret)
+    filter_out_managed_resources, multi_transformers, extract_subresource_name)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -30,10 +27,6 @@ def load_command_table(self, _):
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT))
     data_api_version = data_api_version.replace('.', '_').replace('-', '_')
     data_doc_string = 'azure.keyvault.v' + data_api_version + '#KeyVaultClient.{}'
-
-    keys_data_doc_string = 'azure.keyvault.keys._client#KeyClient.{}'
-    secrets_data_doc_string = 'azure.keyvault.secrets._client#SecretClient.{}'
-    certificates_data_doc_string = 'azure.keyvault.certificates._client#CertificateClient.{}'
 
     # region Command Types
     kv_vaults_custom = CliCommandType(
@@ -64,25 +57,6 @@ def load_command_table(self, _):
         client_factory=keyvault_data_plane_factory,
         resource_type=ResourceType.DATA_KEYVAULT
     )
-
-    kv_keys_data_sdk = CliCommandType(
-        operations_tmpl='azure.keyvault.keys._client#KeyClient.{}',
-        client_factory=keyvault_data_plane_track2_key_factory,
-        resource_type=ResourceType.DATA_KEYVAULT_KEYS
-    )
-
-    kv_secrets_data_sdk = CliCommandType(
-        operations_tmpl='azure.keyvault.secrets._client#SecretClient.{}',
-        client_factory=keyvault_data_plane_track2_secret_factory,
-        resource_type=ResourceType.DATA_KEYVAULT_SECRETS
-    )
-
-    kv_certificates_data_sdk = CliCommandType(
-        operations_tmpl='azure.keyvault.certificates._client#CertificateClient.{}',
-        client_factory=keyvault_data_plane_track2_certificate_factory,
-        resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES
-    )
-
     # endregion
 
     # Management Plane Commands
@@ -133,91 +107,91 @@ def load_command_table(self, _):
         g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
-    with self.command_group('keyvault key', kv_keys_data_sdk) as g:
-        g.keyvault_command('list', 'list_properties_of_keys',
-                           transform=multi_transformers(transform_key_property_list(), filter_out_managed_resources))
-        g.keyvault_command('list-versions', 'list_properties_of_key_versions', transform=transform_key_property_list())
-        g.keyvault_command('list-deleted', 'list_deleted_keys', transform=transform_key_property_list(deleted=True))
-        g.keyvault_custom('create', 'create_key', doc_string_source=keys_data_doc_string.format('create_key'),
-                          transform=transform_key_bundle)
-        g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_bundle)
-        g.keyvault_command('show', 'get_key', transform=transform_key_bundle)
-        g.keyvault_command('show-deleted', 'get_deleted_key', transform=transform_deleted_key)
-        g.keyvault_command('delete', 'begin_delete_key', supports_no_wait=True, transform=transform_deleted_key)
+    with self.command_group('keyvault key', kv_data_sdk) as g:
+        g.keyvault_command('list', 'get_keys',
+                           transform=multi_transformers(
+                               filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
+        g.keyvault_command('list-versions', 'get_key_versions', transform=extract_subresource_name(id_parameter='kid'))
+        g.keyvault_command('list-deleted', 'get_deleted_keys', transform=extract_subresource_name(id_parameter='kid'))
+        g.keyvault_custom('create', 'create_key', doc_string_source=data_doc_string.format('create_key'))
+        g.keyvault_command('set-attributes', 'update_key')
+        g.keyvault_command('show', 'get_key')
+        g.keyvault_command('show-deleted', 'get_deleted_key')
+        g.keyvault_command('delete', 'delete_key')
         g.keyvault_command('purge', 'purge_deleted_key')
-        g.keyvault_command('recover', 'begin_recover_deleted_key', supports_no_wait=True,
-                           transform=transform_key_bundle)
-        g.keyvault_custom('backup', 'backup_key', doc_string_source=keys_data_doc_string.format('backup_key'))
-        g.keyvault_custom('restore', 'restore_key', doc_string_source=keys_data_doc_string.format('restore_key_backup'),
-                          transform=transform_key_bundle)
-        g.keyvault_custom('import', 'import_key', transform=transform_key_bundle)
+        g.keyvault_command('recover', 'recover_deleted_key')
+        g.keyvault_custom('backup', 'backup_key', doc_string_source=data_doc_string.format('backup_key'))
+        g.keyvault_custom('restore', 'restore_key', doc_string_source=data_doc_string.format('restore_key'))
+        g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
+        g.keyvault_command('encrypt', 'encrypt', is_preview=True)
+        g.keyvault_command('decrypt', 'decrypt', is_preview=True)
 
-    with self.command_group('keyvault secret', kv_secrets_data_sdk) as g:
-        g.keyvault_command('list', 'list_properties_of_secrets',
-                           transform=multi_transformers(transform_secret_property_list(), filter_out_managed_resources))
-        g.keyvault_command('list-versions', 'list_properties_of_secret_versions',
-                           transform=transform_secret_property_list())
-        g.keyvault_command('list-deleted', 'list_deleted_secrets',
-                           transform=transform_secret_property_list(deleted=True))
+    with self.command_group('keyvault secret', kv_data_sdk) as g:
+        g.keyvault_command('list', 'get_secrets',
+                           transform=multi_transformers(filter_out_managed_resources, extract_subresource_name()))
+        g.keyvault_command('list-versions', 'get_secret_versions', transform=extract_subresource_name())
+        g.keyvault_command('list-deleted', 'get_deleted_secrets', transform=extract_subresource_name())
         g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace,
-                           transform=transform_secret)
-        g.keyvault_command('set-attributes', 'update_secret_properties')
-        g.keyvault_command('show', 'get_secret')
-        g.keyvault_command('show-deleted', 'get_deleted_secret')
-        g.keyvault_command('delete', 'delete_secret')
+                           transform=extract_subresource_name())
+        g.keyvault_command('set-attributes', 'update_secret', transform=extract_subresource_name())
+        g.keyvault_command('show', 'get_secret', transform=extract_subresource_name())
+        g.keyvault_command('show-deleted', 'get_deleted_secret', transform=extract_subresource_name())
+        g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name())
         g.keyvault_command('purge', 'purge_deleted_secret')
-        g.keyvault_command('recover', 'recover_deleted_secret')
+        g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_secret')
-        g.keyvault_custom('backup', 'backup_secret', doc_string_source=secrets_data_doc_string.format('backup_secret'))
-        g.keyvault_custom('restore', 'restore_secret',
-                          doc_string_source=secrets_data_doc_string.format('restore_secret'))
+        g.keyvault_custom('backup', 'backup_secret', doc_string_source=data_doc_string.format('backup_secret'))
+        g.keyvault_custom('restore', 'restore_secret', doc_string_source=data_doc_string.format('restore_secret'),
+                          transform=extract_subresource_name())
 
-    with self.command_group('keyvault certificate', kv_certificates_data_sdk) as g:
+    with self.command_group('keyvault certificate', kv_data_sdk) as g:
         g.keyvault_custom('create',
                           'create_certificate',
-                          doc_string_source=certificates_data_doc_string.format('create_certificate'))
-        g.keyvault_command('list', 'get_certificates')
-        g.keyvault_command('list-versions', 'get_certificate_versions')
-        g.keyvault_command('list-deleted', 'get_deleted_certificates')
-        g.keyvault_command('show', 'get_certificate')
-        g.keyvault_command('show-deleted', 'get_deleted_certificate')
-        g.keyvault_command('delete', 'delete_certificate')
+                          doc_string_source=data_doc_string.format('create_certificate'),
+                          transform=extract_subresource_name())
+        g.keyvault_command('list', 'get_certificates', transform=extract_subresource_name())
+        g.keyvault_command('list-versions', 'get_certificate_versions', transform=extract_subresource_name())
+        g.keyvault_command('list-deleted', 'get_deleted_certificates', transform=extract_subresource_name())
+        g.keyvault_command('show', 'get_certificate', transform=extract_subresource_name())
+        g.keyvault_command('show-deleted', 'get_deleted_certificate', transform=extract_subresource_name())
+        g.keyvault_command('delete', 'delete_certificate', transform=extract_subresource_name())
         g.keyvault_command('purge', 'purge_deleted_certificate')
-        g.keyvault_command('recover', 'recover_deleted_certificate')
-        g.keyvault_command('set-attributes', 'update_certificate')
-        g.keyvault_custom('import', 'import_certificate')
+        g.keyvault_command('recover', 'recover_deleted_certificate', transform=extract_subresource_name())
+        g.keyvault_command('set-attributes', 'update_certificate', transform=extract_subresource_name())
+        g.keyvault_custom('import', 'import_certificate', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
-    with self.command_group('keyvault certificate pending', kv_certificates_data_sdk) as g:
-        g.keyvault_command('merge', 'merge_certificate')
-        g.keyvault_command('show', 'get_certificate_operation')
-        g.keyvault_command('delete', 'delete_certificate_operation', validator=process_certificate_cancel_namespace)
+    with self.command_group('keyvault certificate pending', kv_data_sdk) as g:
+        g.keyvault_command('merge', 'merge_certificate', transform=extract_subresource_name())
+        g.keyvault_command('show', 'get_certificate_operation', transform=extract_subresource_name())
+        g.keyvault_command('delete', 'delete_certificate_operation', validator=process_certificate_cancel_namespace,
+                           transform=extract_subresource_name())
 
-    with self.command_group('keyvault certificate contact', kv_certificates_data_sdk) as g:
+    with self.command_group('keyvault certificate contact', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_certificate_contacts')
         g.keyvault_custom('add', 'add_certificate_contact')
         g.keyvault_custom('delete', 'delete_certificate_contact')
 
-    with self.command_group('keyvault certificate issuer', kv_certificates_data_sdk) as g:
+    with self.command_group('keyvault certificate issuer', kv_data_sdk) as g:
         g.keyvault_custom('update', 'update_certificate_issuer')
         g.keyvault_command('list', 'get_certificate_issuers')
         g.keyvault_custom('create', 'create_certificate_issuer')
         g.keyvault_command('show', 'get_certificate_issuer')
         g.keyvault_command('delete', 'delete_certificate_issuer')
 
-    with self.command_group('keyvault certificate issuer admin', kv_certificates_data_sdk) as g:
+    with self.command_group('keyvault certificate issuer admin', kv_data_sdk) as g:
         g.keyvault_custom('list', 'list_certificate_issuer_admins')
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
     if data_api_version != '2016_10_01':
-        with self.command_group('keyvault certificate', kv_certificates_data_sdk) as g:
+        with self.command_group('keyvault certificate', kv_data_sdk) as g:
             g.keyvault_custom('backup', 'backup_certificate',
-                              doc_string_source=certificates_data_doc_string.format('backup_certificate'))
+                              doc_string_source=data_doc_string.format('backup_certificate'))
             g.keyvault_custom('restore', 'restore_certificate',
-                              doc_string_source=certificates_data_doc_string.format('restore_certificate'))
+                              doc_string_source=data_doc_string.format('restore_certificate'))
 
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault storage', kv_data_sdk) as g:

@@ -61,6 +61,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
         self._check_stale()
 
         merged_kwargs = self._flatten_kwargs(kwargs, command_type_name)
+        self._apply_tags(merged_kwargs, kwargs, name)
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
 
@@ -97,25 +98,6 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 command_args[client_arg_name] = client
             if 'cmd' not in op_args:
                 command_args.pop('cmd')
-
-            class_name = op.__qualname__.split('.')[0]
-            if class_name in ['KeyClient', 'SecretClient', 'CertificateClient']:
-                abandoned_args = ['vault_base_url', 'identifier', 'no_wait', 'secret_attributes']
-                for abandoned_arg in abandoned_args:
-                    if abandoned_arg in command_args:
-                        command_args.pop(abandoned_arg)
-
-                if 'maxresults' in command_args:
-                    command_args['max_page_size'] = command_args.pop('maxresults')
-
-                if 'expires' in command_args:
-                    command_args['expires_on'] = command_args.pop('expires')
-
-                if 'disabled' in command_args:
-                    if command_args.get('disabled') is not None:
-                        command_args['enabled'] = not command_args.pop('disabled')
-                    else:
-                        command_args.pop('disabled')
 
             try:
                 result = op(**command_args)

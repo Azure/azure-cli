@@ -27,7 +27,7 @@ from ._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_id, validate_sas_definition_id,
     validate_storage_account_id, validate_storage_disabled_attribute,
-    validate_deleted_vault_name)
+    validate_deleted_vault_name, validate_encryption, validate_decryption)
 
 # CUSTOM CHOICE LISTS
 
@@ -37,19 +37,13 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
-     SasDefinitionAttributes, StorageAccountAttributes) = self.get_models(
-         'JsonWebKeyOperation', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
-         'SasDefinitionAttributes', 'StorageAccountAttributes',
-         resource_type=ResourceType.DATA_KEYVAULT)  # TODO
-
-    KeyAttributes = self.get_models('KeyAttributes', import_prefix='azure.keyvault.keys._shared._generated',
-                                    resource_type=ResourceType.DATA_KEYVAULT_KEYS)
-    KeyVaultSecret = self.get_models('KeyVaultSecret', no_version=True, mod='_models',
-                                     resource_type=ResourceType.DATA_KEYVAULT_SECRETS)
-    CertificateAttributes = self.get_models('CertificateAttributes',
-                                            import_prefix='azure.keyvault.certificates._shared._generated',
-                                            resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
+     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes,
+     JsonWebKeyEncryptionAlgorithm) = self.get_models(
+         'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
+         'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
+         'JsonWebKeyEncryptionAlgorithm',
+         resource_type=ResourceType.DATA_KEYVAULT)
 
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
@@ -164,53 +158,31 @@ def load_arguments(self, _):
 
     # region Shared
     for item in ['key', 'secret', 'certificate']:
-        for cmd in ['backup', 'create', 'download', 'import', 'restore']:
+        with self.argument_context('keyvault ' + item, arg_group='Id') as c:
+            c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+            c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
+
+        for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                if cmd in ['backup', 'download']:
-                    c.extra('identifier', options_list=['--id'],
-                            help='Id of the {}. '
-                                 'If specified all other \'Id\' arguments should be omitted.'.format(item),
-                            validator=validate_vault_id(item))
-                c.argument('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
-                           id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+                try:
+                    c.extra('identifier', options_list=['--id'], help='Id of the {}. If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
+                except ValueError:
+                    pass
+                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
+                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+                c.argument(item + '_version', required=False)
 
-                is_no_id = cmd in ['create', 'import', 'restore']
-                c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
-                           help='Name of the key vault.{}'.
-                           format('' if is_no_id else ' Required if --id is not specified.'))
-
-        for cmd in ['delete', 'list-versions', 'purge', 'set-attributes', 'recover', 'show', 'show-deleted']:
+        for cmd in ['purge', 'recover', 'show-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                is_recovery_id = cmd in ['purge', 'recover', 'show-deleted']
-                c.extra('identifier', options_list=['--id'],
-                        help='{} of the {}. '
-                             'If specified all other \'Id\' arguments should be omitted.'.
-                        format('The recovery id' if is_recovery_id else 'Id', item),
-                        validator=validate_vault_id('{}{}'.format('deleted' if is_recovery_id else '', item)))
-                c.argument('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
-                           id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-                c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
-                        help='Name of the key vault. Required if --id is not specified.')
-
-                if cmd in ['show']:
-                    c.argument('version', options_list=['--version', '-v'],
-                               help='The {} version. If omitted, uses the latest version.'.format(item), default='',
-                               required=False, completer=get_keyvault_version_completion_list(item))
+                c.extra('identifier', options_list=['--id'], help='The recovery id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id('deleted' + item))
+                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
+                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+                c.argument(item + '_version', required=False)
 
         for cmd in ['list', 'list-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
-                if item == 'certificate':
-                    c.extra('include_pending', arg_type=get_three_state_flag())
-
-            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
-                        help='Name of the key vault.', required=True)
-
-        for cmd in ['list', 'list-deleted', 'list-versions']:
-            with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
-                c.extra('maxresults', options_list=['--maxresults'], type=int,
-                        help='Maximum number of results to return in a page. If not specified the service '
-                             'will return up to 25 results.')
+                c.argument('include_pending', arg_type=get_three_state_flag())
     # endregion
 
     # region keys
@@ -251,34 +223,34 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
+
+    for scope in ['encrypt', 'decrypt']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
+
+    with self.argument_context('keyvault key encrypt') as c:
+        c.argument('value', help='The value to be encrypted.', validator=validate_encryption)
+
+    with self.argument_context('keyvault key decrypt') as c:
+        c.argument('value', help='The value to be decrypted.', validator=validate_decryption)
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
     # endregion
 
     # region KeyVault Secret
     with self.argument_context('keyvault secret set') as c:
-        c.extra('content_type', options_list=['--description'],
-                help='Description of the secret contents (e.g. password, connection string, etc)')
-        c.extra('tags', tags_type,
-                help='Space-separated tags: key[=value] [key[=value] ...]. Use \'\' to clear existing tags.')
-        c.attributes_argument('secret', KeyVaultSecret, create=True)
-
-    with self.argument_context('keyvault secret set', arg_group='Id') as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the secret.'.format(item),
-                   id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-        c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
-                help='Name of the key vault.', required=True)
+        c.argument('content_type', options_list=['--description'], help='Description of the secret contents (e.g. password, connection string, etc)')
+        c.attributes_argument('secret', SecretAttributes, create=True)
 
     with self.argument_context('keyvault secret set', arg_group='Content Source') as c:
-        c.argument('value', options_list=['--value'],
-                   help='Plain text secret value. Cannot be used with "--file" or "--encoding"', required=False)
-        c.extra('file_path', options_list=['--file', '-f'], type=file_type,
-                help='Source file for secret. Use in conjunction with "--encoding"', completer=FilesCompleter())
-        c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'),
-                options_list=['--encoding', '-e'],
-                help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) '
-                     'and used during download to automatically encode the resulting file.')
+        c.argument('value', options_list=['--value'], help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False)
+        c.extra('file_path', options_list=['--file', '-f'], type=file_type, help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter())
+        c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'), options_list=['--encoding', '-e'], help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) and used during download to automatically encode the resulting file.')
 
     with self.argument_context('keyvault secret set-attributes') as c:
-        c.attributes_argument('secret', KeyVaultSecret.properties)
+        c.attributes_argument('secret', SecretAttributes)
 
     with self.argument_context('keyvault secret download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
@@ -287,6 +259,11 @@ def load_arguments(self, _):
     for scope in ['backup', 'restore']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault secret {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
+
     # endregion
 
     # region KeyVault Storage Account
@@ -407,4 +384,8 @@ def load_arguments(self, _):
         c.argument('admin_last_name')
         c.argument('admin_email')
         c.argument('admin_phone')
+
+    for scope in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault certificate {}'.format(scope)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int)
     # endregion

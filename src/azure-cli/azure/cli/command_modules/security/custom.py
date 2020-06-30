@@ -3,7 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.security.models import SecurityContact, AutoProvision
+from azure.mgmt.security.models import (SecurityContact,
+                                        AutoProvision,
+                                        SecurityAssessment,
+                                        SecurityAssessmentMetadata,
+                                        AzureResourceDetails,
+                                        AssessmentStatus)
+from msrestazure.tools import resource_id
+from msrestazure.azure_exceptions import CloudError
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -249,7 +256,7 @@ def get_security_pricing(client, resource_name, resource_group_name=None):
     if resource_group_name:
         return client.get_resource_group_pricing(resource_group_name, resource_name)
 
-    return client.get_subscription_pricing(resource_name)
+    return client.get(resource_name)
 
 
 def create_security_pricing(client, resource_name, tier, resource_group_name=None):
@@ -257,7 +264,7 @@ def create_security_pricing(client, resource_name, tier, resource_group_name=Non
     if resource_group_name:
         return client.create_or_update_resource_group_pricing(resource_group_name, resource_name, tier)
 
-    return client.update_subscription_pricing(resource_name, tier)
+    return client.update(resource_name, tier)
 
 
 # --------------------------------------------------------------------------------------------
@@ -324,10 +331,165 @@ def update_atp_setting(client, resource_group_name, storage_account_name, is_ena
 
 def _construct_resource_id(client, resource_group_name, storage_account_name):
 
-    from msrestazure.tools import resource_id
     return resource_id(
         subscription=client.config.subscription_id,
         resource_group=resource_group_name,
         namespace='Microsoft.Storage',
         type='storageAccounts',
         name=storage_account_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Assessments
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_assessments(client):
+
+    return client.list(scope='/subscriptions/' + client.config.subscription_id)
+
+
+def get_security_assessment(client, resource_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + client.config.subscription_id
+
+    return client.get(assessed_resource_id,
+                      assessment_name=resource_name)
+
+
+def create_security_assessment(client,
+                               resource_name,
+                               status_code,
+                               status_cause=None,
+                               status_description=None,
+                               additional_data=None,
+                               assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = resource_id(subscription=client.config.subscription_id)
+
+    resource_details = AzureResourceDetails(source="Azure")
+
+    status = AssessmentStatus(code=status_code,
+                              cause=status_cause,
+                              description=status_description)
+
+    new_assessment = SecurityAssessment(resource_details=resource_details,
+                                        status=status,
+                                        additional_data=additional_data,
+                                        assessed_resource_id=assessed_resource_id)
+
+    return client.create_or_update(resource_id=assessed_resource_id,
+                                   assessment_name=resource_name,
+                                   assessment=new_assessment)
+
+
+def delete_security_assessment(client, resource_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = resource_id(subscription=client.config.subscription_id)
+
+    return client.delete(assessment_name=resource_name,
+                         resource_id=assessed_resource_id)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Assessment Metadata
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_assessment_metadata(client):
+
+    return client.list_by_subscription()
+
+
+def get_security_assessment_metadata(client, resource_name):
+
+    try:
+        return client.get(resource_name)
+    except CloudError:
+        return client.get_in_subscription(resource_name)
+
+
+def create_security_assessment_metadata(client, resource_name,
+                                        display_name,
+                                        severity,
+                                        description,
+                                        remediation_description=None):
+
+    new_assessment_metadata = SecurityAssessmentMetadata(display_name=display_name,
+                                                         severity=severity,
+                                                         assessment_type="CustomerManaged",
+                                                         remediation_description=remediation_description,
+                                                         description=description)
+
+    return client.create_in_subscription(assessment_metadata_name=resource_name,
+                                         assessment_metadata=new_assessment_metadata)
+
+
+def delete_security_assessment_metadata(client, resource_name):
+
+    return client.delete_in_subscription(resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Sub Assessment
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_sub_assessments(client, assessment_name=None, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + client.config.subscription_id
+        return client.list_all(scope=assessed_resource_id)
+
+    return client.list(scope=assessed_resource_id, assessment_name=assessment_name)
+
+
+def get_security_sub_assessment(client, resource_name, assessment_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + client.config.subscription_id
+
+    return client.get(sub_assessment_name=resource_name,
+                      assessment_name=assessment_name,
+                      scope=assessed_resource_id)
+
+# --------------------------------------------------------------------------------------------
+# Security Regulatory Compliance
+# --------------------------------------------------------------------------------------------
+
+
+def list_regulatory_compliance_standards(client):
+
+    return client.list()
+
+
+def get_regulatory_compliance_standard(client, resource_name):
+
+    return client.get(regulatory_compliance_standard_name=resource_name)
+
+
+def list_regulatory_compliance_controls(client, standard_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name)
+
+
+def get_regulatory_compliance_control(client, resource_name, standard_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=resource_name)
+
+
+def list_regulatory_compliance_assessments(client, standard_name, control_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name,
+                       regulatory_compliance_control_name=control_name)
+
+
+def get_regulatory_compliance_assessment(client, resource_name, standard_name, control_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=control_name,
+                      regulatory_compliance_assessment_name=resource_name)

@@ -276,13 +276,28 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
             'loc': 'westus',
             'key': 'key1'
         })
-        _create_keyvault(self, self.kwargs)
+        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
+        key_perms.extend(['encrypt', 'decrypt'])
+        self.kwargs['key_perms'] = ' '.join(key_perms)
 
         # create a key
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
                        checks=self.check('attributes.enabled', True)).get_output_in_json()
         first_kid = key['key']['kid']
         first_version = first_kid.rsplit('/', 1)[1]
+
+        # encrypt/decrypt
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+        self.kwargs['plaintext_value_for_encryption'] = '123456'
+        self.kwargs['base64_value_for_encryption'] = 'YWJjZGVm'  # plaintext: "abcdef"
+        self.kwargs['encryption_result1'] = self.cmd('keyvault key encrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{plaintext_value_for_encryption}"').get_output_in_json()['result']
+        self.kwargs['encryption_result2'] = self.cmd('keyvault key encrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{base64_value_for_encryption}"').get_output_in_json()['result']
+        self.cmd('keyvault key decrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{encryption_result1}"',
+                 checks=self.check('result', 'MTIzNDU2'))  # plaintext: "123456"
+        self.cmd('keyvault key decrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{encryption_result2}"',
+                 checks=self.check('result', '{base64_value_for_encryption}'))
 
         # list keys
         self.cmd('keyvault key list --vault-name {kv}',

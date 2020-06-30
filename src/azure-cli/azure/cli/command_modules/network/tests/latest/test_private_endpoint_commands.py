@@ -750,6 +750,93 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection delete --id {pec_id} -y')
 
 
+class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    def test_private_link_resource_webapp(self, resource_group):
+        self.kwargs.update({
+            'plan_name': self.create_random_name('webapp-privatelink-asp', 40),
+            'webapp_name': self.create_random_name('webapp-privatelink-webapp', 40),
+            'resource_group': resource_group
+        })
+        self.cmd('appservice plan create -g {resource_group} -n {plan_name} --sku P1V2')
+        result = self.cmd('webapp create -g {resource_group} -n {webapp_name} --plan {plan_name}').get_output_in_json()
+        self.kwargs['webapp_id'] = result['id']
+
+        self.cmd('network private-link-resource list --id {webapp_id}', checks=[
+            self.check('length(@)', 1),
+        ])
+
+    @ResourceGroupPreparer(location='westus2')
+    def test_private_endpoint_connection_webapp(self, resource_group):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'webapp_name': self.create_random_name('webapp-privatelink-webapp', 40),
+            'plan_name': self.create_random_name('webapp-privatelink-asp', 40),
+            'vnet_name': self.create_random_name('webapp-privatelink-vnet', 40),
+            'subnet_name': self.create_random_name('webapp-privatelink-subnet', 40),
+            'endpoint_name': self.create_random_name('webapp-privatelink-endpoint', 40),
+            'endpoint_conn_name': self.create_random_name('webapp-privatelink-endpointconn', 40),
+            'second_endpoint_name': self.create_random_name('webapp-privatelink-endpoint2', 40),
+            'second_endpoint_conn_name': self.create_random_name('webapp-privatelink-endpointconn2', 40),
+            'description_msg': 'somedescription'
+        })
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create appService
+        self.cmd('appservice plan create -g {resource_group} -n {plan_name} --sku P1V2')
+        webapp = self.cmd('webapp create -g {resource_group} -n {webapp_name} --plan {plan_name}').get_output_in_json()
+        self.kwargs['webapp_id'] = webapp['id']
+
+        # Create endpoint
+        result = self.cmd('network private-endpoint create -g {resource_group} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+                          '--connection-name {endpoint_conn_name} --private-connection-resource-id {webapp_id} '
+                          '--group-id sites --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+
+        result = self.cmd('network private-endpoint-connection list -g {resource_group} -n {webapp_name} --type Microsoft.Web/sites', checks=[
+            self.check('length(@)', 1),
+        ]).get_output_in_json()
+        self.kwargs['endpoint_request'] = result[0]['name']
+
+        self.cmd('network private-endpoint-connection approve -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        # Create second endpoint
+        result = self.cmd('network private-endpoint create -g {resource_group} -n {second_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+                          '--connection-name {second_endpoint_conn_name} --private-connection-resource-id {webapp_id} '
+                          '--group-id sites --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['second_endpoint_name'].lower() in result['name'].lower())
+
+        result = self.cmd('network private-endpoint-connection list -g {resource_group} -n {webapp_name} --type Microsoft.Web/sites', checks=[
+            self.check('length(@)', 2),
+        ]).get_output_in_json()
+        self.kwargs['second_endpoint_request'] = [conn['name'] for conn in result if
+                                                  self.kwargs['second_endpoint_name'].lower() in
+                                                  conn['properties']['privateEndpoint']['id'].lower()][0]
+
+        self.cmd('network private-endpoint-connection reject -g {resource_group} --resource-name {webapp_name} -n {second_endpoint_request} --type Microsoft.Web/sites',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejecting')])
+
+        # Remove endpoints
+        self.cmd('network private-endpoint-connection delete -g {resource_group} --resource-name {webapp_name} -n {second_endpoint_request} --type Microsoft.Web/sites -y')
+        self.cmd('network private-endpoint-connection show -g {resource_group} --resource-name {webapp_name} -n {second_endpoint_request} --type Microsoft.Web/sites', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Disconnecting'),
+            self.check('name', '{second_endpoint_request}')
+        ])
+        self.cmd('network private-endpoint-connection show -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('name', '{endpoint_request}')
+        ])
+
+        self.cmd('network private-endpoint-connection delete -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites -y')
+
+
 class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
     def setUp(self):
         super(NetworkPrivateLinkEventGridScenarioTest, self).setUp()
