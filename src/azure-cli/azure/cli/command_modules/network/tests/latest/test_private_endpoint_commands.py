@@ -682,7 +682,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
 
-        self.cmd('network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts',
+        self.cmd('az network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts',
                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'Sql')])
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pe')
@@ -699,14 +699,14 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         # Prepare cosmos db account and network
         account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
         self.kwargs['acc_id'] = account['id']
-        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
-        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
         # Create a private endpoint connection
-        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
                       '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
                       '--group-id Sql').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
@@ -717,12 +717,12 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         self.kwargs[
             'pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(
             results[2], results[4], self.kwargs['acc'], results[-1])
-        self.cmd('network private-endpoint-connection show --id {pec_id}',
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
                  checks=self.check('id', '{pec_id}'))
         self.cmd(
-            'network private-endpoint-connection show --resource-name {acc} --name {pe_name} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts',
+            'az network private-endpoint-connection show --resource-name {acc} --name {pe_name} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts',
             checks=self.check('name', '{pe_name}'))
-        self.cmd('network private-endpoint-connection show --resource-name {acc} -n {pe_name} -g {rg} --type Microsoft.DocumentDB/databaseAccounts',
+        self.cmd('az network private-endpoint-connection show --resource-name {acc} -n {pe_name} -g {rg} --type Microsoft.DocumentDB/databaseAccounts',
                  checks=self.check('name', '{pe_name}'))
 
         # Test approval/rejection
@@ -731,23 +731,23 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
             'rejection_desc': 'You are rejected!'
         })
         self.cmd(
-            'network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pe_name} --type Microsoft.DocumentDB/databaseAccounts '
+            'az network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pe_name} --type Microsoft.DocumentDB/databaseAccounts '
             '--description "{approval_desc}"', checks=[
-                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
-                self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')
+                self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
             ])
-        self.cmd('network private-endpoint-connection reject --id {pec_id} '
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
                  '--description "{rejection_desc}"',
                  checks=[
-                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
                  ])
-        self.cmd('network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts', checks=[
+        self.cmd('az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts', checks=[
             self.check('length(@)', 1)
         ])
 
         # Test delete
-        self.cmd('network private-endpoint-connection delete --id {pec_id} -y')
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
