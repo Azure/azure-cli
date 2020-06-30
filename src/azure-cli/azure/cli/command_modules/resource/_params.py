@@ -206,7 +206,6 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_name_type)
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
-        c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'),
                    help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
         c.argument('parameters', arg_type=deployment_parameters_type)

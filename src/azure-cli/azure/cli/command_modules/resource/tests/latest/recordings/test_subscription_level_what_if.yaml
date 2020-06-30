@@ -30,92 +30,26 @@ interactions:
       ParameterSetName:
       - --location --template-file
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/9.0.0
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
         Azure-SDK-For-Python AZURECLI/2.8.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy","name":"policy_definition_deploy","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"6791821466041245512","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-06-23T18:17:19.6904133Z","duration":"PT0S","correlationId":"47e521e4-2119-4871-8681-859fd8ead5f7","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
+      string: '{"error":{"code":"ScopeLocked","message":"The scope ''/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy''
+        cannot perform write operation because following scope(s) are locked: ''/subscriptions/00000000-0000-0000-0000-000000000000''.
+        Please remove the lock and try again."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '338'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Jun 2020 18:17:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: "{\"location\": \"westus\", \"properties\": {\"parameters\": {}, \"mode\":
-      \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"denyLocation\":
-      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"northeurope\"\r\n
-      \   }\r\n  },\r\n  \"variables\": {\r\n      \"policyDefinitionName\": \"policy-for-what-if-test\"\r\n
-      \ },\r\n  \"resources\": [\r\n    {\r\n      \"name\": \"[variables('policyDefinitionName')]\",\r\n
-      \     \"type\": \"Microsoft.Authorization/policyDefinitions\",\r\n      \"apiVersion\":
-      \"2018-05-01\",\r\n      \"properties\": {\r\n        \"policyType\": \"Custom\",\r\n
-      \       \"policyRule\": {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n
-      \           \"equals\": \"[parameters('denyLocation')]\"\r\n          },\r\n
-      \         \"then\": {\r\n            \"effect\": \"deny\"\r\n          }\r\n
-      \       }\r\n      }\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"policyDefinitionId\":
-      {\r\n      \"type\": \"string\",\r\n      \"value\": \"[resourceId('Microsoft.Authorization/policyDefinitions',
-      variables('policyDefinitionName'))]\"\r\n    }\r\n  }\r\n}}}"
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - deployment sub create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '1087'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --template-file
-      User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/9.0.0
-        Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy","name":"policy_definition_deploy","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"6791821466041245512","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-06-23T18:17:21.1939068Z","duration":"PT1.1969028S","correlationId":"0518fddc-de99-458a-8907-7440fd5a44d7","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[]}}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/policy_definition_deploy/operationStatuses/08586086706454805986?api-version=2019-07-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '666'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 23 Jun 2020 18:17:21 GMT
+      - Mon, 29 Jun 2020 17:26:40 GMT
       expires:
       - '-1'
       pragma:
@@ -124,9 +58,9 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 201
-      message: Created
+      code: 409
+      message: Conflict
 version: 1

@@ -40,7 +40,6 @@ def transform_resource_list(result):
         transformed.append(res)
     return transformed
 
-
 # Resource group deployment commands
 def transform_deployment(result):
     r = result

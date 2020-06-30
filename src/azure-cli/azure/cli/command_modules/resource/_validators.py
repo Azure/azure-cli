@@ -15,6 +15,25 @@ except ImportError:
 
 MSI_LOCAL_ID = '[system]'
 
+def _validate_deployment_name_with_template_specs(namespace):
+    # If missing,try come out with a name associated with the template name
+    if namespace.deployment_name is None:
+        template_filename = None
+        if namespace.template_file and os.path.isfile(namespace.template_file):
+            template_filename = namespace.template_file
+        if namespace.template_uri and urlparse(namespace.template_uri).scheme:
+            template_filename = urlsplit(namespace.template_uri).path
+        if namespace.template_spec:
+            from msrestazure.tools import parse_resource_id, is_valid_resource_id
+            if not is_valid_resource_id(namespace.template_spec):
+                raise CLIError('--template-spec is not a valid resource ID. ')
+            template_filename = parse_resource_id(namespace.template_spec).get('resource_name') #REVIEW.get
+        if template_filename:
+            template_filename = os.path.basename(template_filename)
+            namespace.deployment_name = os.path.splitext(template_filename)[0]
+        else:
+            namespace.deployment_name = 'deployment1'
+
 
 def _validate_deployment_name(namespace):
     # If missing,try come out with a name associated with the template name
@@ -24,11 +43,6 @@ def _validate_deployment_name(namespace):
             template_filename = namespace.template_file
         if namespace.template_uri and urlparse(namespace.template_uri).scheme:
             template_filename = urlsplit(namespace.template_uri).path
-        if namespace.template_spec: #REVIEW
-            from msrestazure.tools import parse_resource_id, is_valid_resource_id
-            if not is_valid_resource_id(namespace.template_spec):
-                raise CLIError('--template-spec is not a valid resource ID. ')
-            template_filename = parse_resource_id(namespace.template_spec).get('resource_name') #REVIEW.get
         if template_filename:
             template_filename = os.path.basename(template_filename)
             namespace.deployment_name = os.path.splitext(template_filename)[0]
