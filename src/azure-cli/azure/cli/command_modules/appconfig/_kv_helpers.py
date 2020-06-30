@@ -643,6 +643,7 @@ def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
 
 
 def __is_json_content_type(content_type):
+    # pylint: disable=too-many-return-statements
     if not content_type:
         return False
 
@@ -652,7 +653,7 @@ def __is_json_content_type(content_type):
 
     if not type_parts or len(type_parts) != 2:
         return False
-       
+
     (main_type, sub_type) = type_parts
     if main_type != "application":
         return False
@@ -663,8 +664,8 @@ def __is_json_content_type(content_type):
 
     # if sub_types list is not empty, one of the sub_types should exactly match json
     if sub_types:
-    	if "json" in sub_types:
-    		return True
+        if "json" in sub_types:
+            return True
     # if sub_types list is empty, sub_type should exactly match json
     elif sub_type == "json":
         return True
@@ -771,7 +772,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
                     # Convert JSON string value to python object
                     kv.value = json.loads(kv.value)
                 except ValueError:
-                    logger.debug('Error while converting value "%s" for key "%s" to JSON. Value will be treated as string.', kv.value, kv.key )
+                    logger.debug('Error while converting value "%s" for key "%s" to JSON. Value will be treated as string.', kv.value, kv.key)
 
             if prefix is not None:
                 if not key.startswith(prefix):
