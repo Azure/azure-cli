@@ -207,7 +207,7 @@ parameters:
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.11.8" or "1.12.6".
+    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
   - name: --ssh-key-value
@@ -354,12 +354,12 @@ examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
   - name: Create a Kubernetes cluster with a specific version.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.12.6
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.16.9
   - name: Create a Kubernetes cluster with a larger node pool.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
   - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
-  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSet).
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.16.9 --vm-set-type AvailabilitySet
+  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSets).
     text: az aks create -g MyResourceGroup -n MyManagedCluster
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -400,6 +400,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --uptime-sla
+    type: bool
+    short-summary: Enable a paid managed cluster service with a financially backed SLA.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -611,7 +614,7 @@ parameters:
     short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
+    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
   - name: --node-osdisk-size
@@ -714,7 +717,7 @@ short-summary: Upgrade the node pool in a managed Kubernetes cluster.
 parameters:
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to upgrade the node pool to, such as "1.11.12".
+    short-summary: Version of Kubernetes to upgrade the node pool to, such as "1.16.9".
 """
 
 helps['aks remove-connector'] = """
@@ -817,7 +820,7 @@ long-summary: "Kubernetes will be unavailable during cluster upgrades."
 parameters:
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.11.8" or "1.12.6".
+    short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.16.9".
     populator-commands:
       - "`az aks get-upgrades`"
   - name: --control-plane-only

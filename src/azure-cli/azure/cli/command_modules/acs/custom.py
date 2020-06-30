@@ -2098,10 +2098,11 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
         raise CLIError('There are more than one node pool in the cluster. '
                        'Please specify nodepool name or use az aks nodepool command to scale node pool')
 
-    if node_count == 0:
-        raise CLIError("Can't scale down to 0 nodes.")
     for agent_profile in instance.agent_pool_profiles:
         if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
+            if agent_profile.enable_auto_scaling:
+                raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
+
             agent_profile.count = int(node_count)  # pylint: disable=no-member
             # null out the SP and AAD profile because otherwise validation complains
             instance.service_principal_profile = None
@@ -2116,6 +2117,7 @@ def aks_update(cmd, client, resource_group_name, name,
                disable_cluster_autoscaler=False,
                update_cluster_autoscaler=False,
                min_count=None, max_count=None,
+               uptime_sla=False,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
@@ -2132,9 +2134,11 @@ def aks_update(cmd, client, resource_group_name, name,
                                                           load_balancer_outbound_ports,
                                                           load_balancer_idle_timeout)
 
+    # pylint: disable=too-many-boolean-expressions
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
             not detach_acr and
+            not uptime_sla and
             api_server_authorized_ip_ranges is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
@@ -2144,7 +2148,8 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-outbound-ip-prefixes" or'
                        '"--load-balancer-outbound-ports" or'
                        '"--load-balancer-idle-timeout" or'
-                       '"--attach-acr" or "--dettach-acr" or'
+                       '"--attach-acr" or "--detach-acr" or'
+                       '"--uptime-sla" or'
                        '"--"api-server-authorized-ip-ranges')
 
     instance = client.get(resource_group_name, name)
@@ -2209,6 +2214,12 @@ def aks_update(cmd, client, resource_group_name, name,
                         acr_name_or_id=detach_acr,
                         subscription_id=subscription_id,
                         detach=True)
+
+    if uptime_sla:
+        instance.sku = ManagedClusterSKU(
+            name="Basic",
+            tier="Paid"
+        )
 
     if update_lb_profile:
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
@@ -2883,8 +2894,8 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
                         no_wait=False):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     new_node_count = int(node_count)
-    if new_node_count == 0:
-        raise CLIError("Can't scale down to 0 nodes.")
+    if instance.enable_auto_scaling:
+        raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
     if new_node_count == instance.count:
         raise CLIError("The new node count is the same as the current node count.")
     instance.count = new_node_count  # pylint: disable=no-member

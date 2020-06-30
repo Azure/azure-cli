@@ -1001,6 +1001,14 @@ examples:
     text: az feature register --namespace Microsoft.Compute --name GalleryPreview
 """
 
+helps['feature unregister'] = """
+type: command
+short-summary: unregister a preview feature.
+examples:
+  - name: unregister the "Shared Image Gallery" feature
+    text: az feature unregister --namespace Microsoft.Compute --name GalleryPreview
+"""
+
 helps['group'] = """
 type: group
 short-summary: Manage resource groups and template deployments.

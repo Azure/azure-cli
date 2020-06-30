@@ -2411,6 +2411,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
             naming_prefix = computer_name_prefix
 
+        if os_version and os_version != 'latest':
+            logger.warning('You are deploying VMSS pinned to a specific image version from Azure Marketplace. '
+                           'Consider using "latest" as the image version.')
+
         vmss_resource = build_vmss_resource(
             cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
             overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,

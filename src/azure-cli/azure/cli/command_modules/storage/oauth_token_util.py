@@ -33,12 +33,12 @@ class TokenUpdater(object):
         except KeyError:  # needed to deal with differing unserialized MSI token payload
             self.token_credential.token = token['access_token']
             seconds_left = (datetime.fromtimestamp(int(token['expires_on'])) - datetime.now()).seconds
-        if seconds_left < 240:
-            # acquired token expires in less than 4 mins
-            raise Exception("Acquired a token expiring in less than 4 minutes")
+        if seconds_left < 180:
+            # acquired token expires in less than 3 mins
+            raise Exception("Acquired a token expiring in less than 3 minutes")
 
         with self.lock:
-            self.timer = threading.Timer(seconds_left - 240, self.timer_callback)
+            self.timer = threading.Timer(seconds_left - 180, self.timer_callback)
             self.timer.daemon = True
             self.timer.start()
 

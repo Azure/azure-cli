@@ -14,6 +14,8 @@ class StorageQueueScenarioTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
     def test_storage_queue_general_scenario(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+
         account_key = self.get_account_key(resource_group, storage_account)
 
         self.set_env('AZURE_STORAGE_ACCOUNT', storage_account)
@@ -29,7 +31,8 @@ class StorageQueueScenarioTests(ScenarioTest):
         res = self.cmd('storage queue list').get_output_in_json()
         self.assertIn(queue, [x['name'] for x in res], 'The newly created queue is not listed.')
 
-        sas = self.cmd('storage queue generate-sas -n {} --permissions r'.format(queue)).output
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        sas = self.cmd('storage queue generate-sas -n {} --permissions r --expiry {}'.format(queue, expiry)).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
 
         self.cmd('storage queue metadata show -n {}'.format(queue), checks=[

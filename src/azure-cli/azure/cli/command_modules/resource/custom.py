@@ -1741,6 +1741,12 @@ def register_feature(client, resource_provider_namespace, feature_name):
     return client.register(resource_provider_namespace, feature_name)
 
 
+def unregister_feature(client, resource_provider_namespace, feature_name):
+    logger.warning("Once the feature '%s' is unregistered, invoking 'az provider register -n %s' is required "
+                   "to get the change propagated", feature_name, resource_provider_namespace)
+    return client.unregister(resource_provider_namespace, feature_name)
+
+
 # pylint: disable=inconsistent-return-statements,too-many-locals
 def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,

@@ -18,6 +18,7 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 import requests
 from pkg_resources import parse_version
 
+from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli,
@@ -188,8 +189,8 @@ def _augment_telemetry_with_ext_info(extension_name, ext=None):
 
 def check_version_compatibility(azext_metadata):
     is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
+    # logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+    #              "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
         min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
                           "You have CLI core version {} and this extension " \
@@ -244,6 +245,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                            "Please use with discretion.", extension_name)
         elif extension_name and ext.preview:
             logger.warning("The installed extension '%s' is in preview.", extension_name)
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException:
         pass
 
@@ -263,6 +265,7 @@ def remove_extension(extension_name):
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name, ext)
         shutil.rmtree(ext.path, onerror=log_err)
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -315,6 +318,7 @@ def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=N
             logger.debug('Copying %s to %s', backup_dir, extension_path)
             shutil.copytree(backup_dir, extension_path)
             raise CLIError('Failed to update. Rolled {} back to {}.'.format(extension_name, cur_version))
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -357,6 +361,24 @@ def reload_extension(extension_name, extension_module=None):
 def add_extension_to_path(extension_name, ext_dir=None):
     ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
+    # If this path update should have made a new "azure" module available,
+    # extend the existing module with its path. This allows extensions to
+    # include (or depend on) Azure SDK modules that are not yet part of
+    # the CLI. This applies to both the "azure" and "azure.mgmt" namespaces,
+    # but ensures that modules installed by the CLI take priority.
+    azure_dir = os.path.join(ext_dir, "azure")
+    if os.path.isdir(azure_dir):
+        import azure
+        azure.__path__.append(azure_dir)
+        azure_mgmt_dir = os.path.join(azure_dir, "mgmt")
+        if os.path.isdir(azure_mgmt_dir):
+            try:
+                # Should have been imported already, so this will be quick
+                import azure.mgmt
+            except ImportError:
+                pass
+            else:
+                azure.mgmt.__path__.append(azure_mgmt_dir)
 
 
 def get_lsb_release():
