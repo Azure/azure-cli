@@ -2595,28 +2595,6 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "usgovvirginia": "usgovvirginia"
     }
 
-    # mapping for JEDI - USNat
-    AzureUSNatLocationToOmsRegionCodeMap = {
-        "usnateast": "USNATEAST",
-        "usnatwest": "USNATWEST"
-    }
-
-    AzureUSNatRegionToOmsRegionMap = {
-        "usnateast": "usnateast",
-        "usnatwest": "usnatwest"
-    }
-
-    # mapping for JEDI - USSec
-    AzureUSSecLocationToOmsRegionCodeMap = {
-        "usseceast": "USSECEAST",
-        "ussecwest": "USSECWEST"
-    }
-
-    AzureUSSecRegionToOmsRegionMap = {
-        "usseceast": "usseceast",
-        "ussecwest": "ussecwest"
-    }
-
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
 
@@ -2625,38 +2603,18 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # sanity check that locations and clouds match.
     if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurecloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurecloud' and AzureUSNatRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurecloud' and AzureUSSecRegionToOmsRegionMap.get(rg_location, False))):
+            (cloud_name.lower() == 'azurecloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
         raise CLIError('Wrong cloud (azurecloud) setting for region {}, please use "az cloud set ..."'
                        .format(rg_location))
 
     if ((cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurechinacloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurechinacloud' and AzureUSNatRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurechinacloud' and AzureUSSecRegionToOmsRegionMap.get(rg_location, False))):
+            (cloud_name.lower() == 'azurechinacloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
         raise CLIError('Wrong cloud (azurechinacloud) setting for region {}, please use "az cloud set ..."'
                        .format(rg_location))
 
     if ((cloud_name.lower() == 'azureusgovernment' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azureusgovernment' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azureusgovernment' and AzureUSNatRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azureusgovernment' and AzureUSSecRegionToOmsRegionMap.get(rg_location, False))):
+            (cloud_name.lower() == 'azureusgovernment' and AzureChinaRegionToOmsRegionMap.get(rg_location, False))):
         raise CLIError('Wrong cloud (azureusgovernment) setting for region {}, please use "az cloud set ..."'
-                       .format(rg_location))
-
-    if ((cloud_name.lower() == 'usnat' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'usnat' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'usnat' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'usnat' and AzureUSSecRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (usnat) setting for region {}, please use "az cloud set ..."'
-                       .format(rg_location))
-
-    if ((cloud_name.lower() == 'ussec' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'ussec' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'ussec' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'ussec' and AzureUSNatRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (ussec) setting for region {}, please use "az cloud set ..."'
                        .format(rg_location))
 
     if cloud_name.lower() == 'azurecloud':
@@ -2668,14 +2626,9 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     elif cloud_name.lower() == 'azureusgovernment':
         workspace_region = AzureFairfaxRegionToOmsRegionMap.get(rg_location, "usgovvirginia")
         workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(workspace_region, "USGV")
-    elif cloud_name.lower() == 'usnat':
-        workspace_region = AzureUSNatRegionToOmsRegionMap.get(rg_location, "usnateast")
-        workspace_region_code = AzureUSNatLocationToOmsRegionCodeMap.get(workspace_region, "USNATEAST")
-    elif cloud_name.lower() == 'ussec':
-        workspace_region = AzureUSSecRegionToOmsRegionMap.get(rg_location, "usseceast")
-        workspace_region_code = AzureUSSecLocationToOmsRegionCodeMap.get(workspace_region, "USSECEAST")
     else:
-        logger.error("AKS Monitoring addon not supported in cloud : %s", cloud_name)
+        workspace_region = rg_location
+        workspace_region_code = rg_location.upper()
 
     default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
     default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_region_code)
