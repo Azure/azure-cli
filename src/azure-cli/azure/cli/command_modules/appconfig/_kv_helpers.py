@@ -8,7 +8,6 @@
 import io
 import json
 import re
-import sys
 
 import chardet
 import javaproperties
@@ -122,7 +121,12 @@ def validate_import_feature(feature):
 # File <-> List of KeyValue object
 
 
-def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", depth=None):
+def __read_kv_from_file(file_path,
+                        format_,
+                        separator=None,
+                        prefix_to_add="",
+                        depth=None,
+                        content_type=None):
     config_data = {}
     try:
         with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
@@ -154,16 +158,30 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
     except OSError:
         raise CLIError('File is not available.')
     flattened_data = {}
-    index = 0
-    is_list = isinstance(config_data, list)
-    for key in config_data:
-        if is_list:
-            __flatten_key_value(prefix_to_add + str(index), key, flattened_data,
-                                sys.maxsize if depth is None else int(depth), separator)
-            index += 1
-        else:
-            __flatten_key_value(
-                prefix_to_add + key, config_data[key], flattened_data, sys.maxsize if depth is None else int(depth), separator)
+    if format_ == 'json' and content_type and __is_json_content_type(content_type):
+        for key in config_data:
+            __flatten_json_key_value(key=prefix_to_add + key,
+                                     value=config_data[key],
+                                     flattened_data=flattened_data,
+                                     depth=depth,
+                                     separator=separator)
+    else:
+        index = 0
+        is_list = isinstance(config_data, list)
+        for key in config_data:
+            if is_list:
+                __flatten_key_value(key=prefix_to_add + str(index),
+                                    value=key,
+                                    flattened_data=flattened_data,
+                                    depth=depth,
+                                    separator=separator)
+                index += 1
+            else:
+                __flatten_key_value(key=prefix_to_add + key,
+                                    value=config_data[key],
+                                    flattened_data=flattened_data,
+                                    depth=depth,
+                                    separator=separator)
 
     # convert to KeyValue list
     key_values = []
@@ -318,7 +336,8 @@ def __write_kv_and_features_to_config_store(cmd,
         for kv in key_values:
             if not preserve_labels:
                 kv.label = label
-            if content_type:
+            # Don't overwrite the content type of feature flags
+            if content_type and not __is_feature_flag(kv):
                 kv.content_type = content_type
 
             azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
@@ -623,6 +642,55 @@ def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
     return True
 
 
+def __is_json_content_type(content_type):
+    if not content_type:
+        return False
+
+    content_type = content_type.strip().lower()
+    mime_type = content_type.split(';')[0].strip() if ';' in content_type else content_type
+    type_parts = mime_type.split('/') if '/' in mime_type else None
+
+    if not type_parts or len(type_parts) != 2:
+        return False
+       
+    (main_type, sub_type) = type_parts
+    if main_type != "application":
+        return False
+    if "json" not in sub_type:
+        return False
+
+    sub_types = sub_type.split('+') if '+' in sub_type else None
+
+    # if sub_types list is not empty, one of the sub_types should exactly match json
+    if sub_types:
+    	if "json" in sub_types:
+    		return True
+    # if sub_types list is empty, sub_type should exactly match json
+    elif sub_type == "json":
+        return True
+
+    return False
+
+
+def __flatten_json_key_value(key, value, flattened_data, depth, separator):
+    if depth > 1:
+        depth = depth - 1
+        if value and isinstance(value, dict):
+            if separator is None or not separator:
+                raise CLIError(
+                    "A non-empty separator is required for importing hierarchical configurations.")
+            for nested_key in value:
+                __flatten_json_key_value(
+                    key + separator + nested_key, value[nested_key], flattened_data, depth, separator)
+        else:
+            if key in flattened_data:
+                logger.debug(
+                    "The key %s already exist, value has been overwritten.", key)
+            flattened_data[key] = json.dumps(value)
+    else:
+        flattened_data[key] = json.dumps(value)
+
+
 def __flatten_key_value(key, value, flattened_data, depth, separator):
     if depth > 1:
         depth = depth - 1
@@ -698,6 +766,13 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
     try:
         for kv in fetched_items:
             key = kv.key
+            if __is_json_content_type(kv.content_type):
+                try:
+                    # Convert JSON string value to python object
+                    kv.value = json.loads(kv.value)
+                except ValueError:
+                    logger.debug('Error while converting value "%s" for key "%s" to JSON. Value will be treated as string.', kv.value, kv.key )
+
             if prefix is not None:
                 if not key.startswith(prefix):
                     continue

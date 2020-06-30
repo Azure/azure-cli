@@ -101,14 +101,14 @@ def load_arguments(self, _):
         c.argument('source', options_list=['--source', '-s'], arg_type=get_enum_type(['file', 'appconfig', 'appservice']), validator=validate_import, help="The source of importing. Note that importing feature flags from appservice is not supported.")
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
-        c.argument('content_type', help='Content type of all imported items.')
+        c.argument('content_type', help='Content type of all imported items. If you are using JSON content type, make sure the values are in valid JSON format.')
 
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='Imported file format. Required for file arguments. Currently, feature flags are not supported in properties format.')
-        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not applicable for property files or feature flags.")
+        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default if --separator is provided. Not applicable for property files or feature flags.")
         # bypass cli allowed values limition
-        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
+        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
         c.argument('src_name', help='The name of the source App Configuration.')
@@ -132,9 +132,9 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='File format exporting to. Required for file arguments. Currently, feature flags are not supported in properties format.')
-        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not appicable for property files or feature flags.")
+        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the key-value pairs to json or yaml file. Flatten to the deepest level by default. Not applicable for property files or feature flags.")
         # bypass cli allowed values limition
-        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
+        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the key-value pairs to json or yaml file. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
 
@@ -151,7 +151,7 @@ def load_arguments(self, _):
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
-        c.argument('content_type', help='Content type of the keyvalue to be set.')
+        c.argument('content_type', help='Content type of the keyvalue to be set. If you are using JSON content type, make sure the value is in valid JSON format.')
         c.argument('value', help='Value of the keyvalue to be set.')
 
     with self.argument_context('appconfig kv set-keyvault') as c:
