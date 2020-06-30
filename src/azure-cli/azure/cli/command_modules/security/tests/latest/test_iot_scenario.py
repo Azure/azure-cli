@@ -27,4 +27,3 @@ class SecurityCenterIotTests(ScenarioTest):
         self.cmd('az security iot-solution create --solution-name "azurecli-hub" --resource-group "AzureCLI" --iot-hubs /subscriptions/ba3e71a7-6385-4944-9f01-d611121199bb/resourcegroups/AzureCLI/providers/Microsoft.Devices/IotHubs/azurecli-hub --display-name "Solution Default" --location "east us"')
         azure_cli_new_iot_security_solution = self.cmd('az security iot-solution list --resource-group "AzureCLI"').get_output_in_json()
         assert len(azure_cli_new_iot_security_solution) == 1
-

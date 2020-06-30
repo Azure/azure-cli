@@ -556,7 +556,7 @@ short-summary: List all IoT Security solutions.
 examples:
   - name: Get List of all IoT Security solutions in subscription.
     text: >
-        az security iot-solution list 
+        az security iot-solution list
 """
 
 helps['security iot-analytics'] = """
