@@ -15,6 +15,7 @@ def validate_failover_policies(ns):
         fp_dict.append(FailoverPolicy(location_name=comps[0], failover_priority=int(comps[1])))
     ns.failover_policies = fp_dict
 
+
 def validate_ip_range_filter(ns):
     """ Extracts multiple comma-separated ip rules """
     from azure.mgmt.cosmosdb.models import IpAddressOrRange

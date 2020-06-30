@@ -677,7 +677,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
     def test_private_link_resource_cosmosdb(self, resource_group):
         self.kwargs.update({
             'acc': self.create_random_name('cli-test-cosmosdb-plr-', 28),
-            'loc': 'centraluseuap'
+            'loc': 'eastus'
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
@@ -689,7 +689,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
     def test_private_endpoint_connection_cosmosdb(self, resource_group):
         self.kwargs.update({
             'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
-            'loc': 'centraluseuap',
+            'loc': 'eastus',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
@@ -733,14 +733,12 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         self.cmd(
             'az network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pe_name} --type Microsoft.DocumentDB/databaseAccounts '
             '--description "{approval_desc}"', checks=[
-                self.check('privateLinkServiceConnectionState.status', 'Approved'),
-                self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
             ])
         self.cmd('az network private-endpoint-connection reject --id {pec_id} '
                  '--description "{rejection_desc}"',
                  checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
                  ])
         self.cmd('az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts', checks=[
             self.check('length(@)', 1)
