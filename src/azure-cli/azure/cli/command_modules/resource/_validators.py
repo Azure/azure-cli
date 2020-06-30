@@ -53,7 +53,10 @@ def _validate_deployment_name(namespace):
 def process_deployment_create_namespace(namespace):
     if bool(namespace.template_uri) == bool(namespace.template_file) == bool(namespace.template_spec):
         raise CLIError('incorrect usage: --template-file FILE | --template-uri URI | --template-spec ID')
-    _validate_deployment_name(namespace)
+    if(bool(namespace.template_uri) or bool(namespace.template_file)):
+            _validate_deployment_name(namespace)
+    else: 
+          _validate_deployment_name_with_template_specs(namespace)
 
 
 def internal_validate_lock_parameters(namespace, resource_group, resource_provider_namespace,
