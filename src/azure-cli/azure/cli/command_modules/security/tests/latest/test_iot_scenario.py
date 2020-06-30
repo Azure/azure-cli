@@ -11,8 +11,6 @@ class SecurityCenterIotTests(ScenarioTest):
 
     @AllowLargeResponse()
     def test_security_iot(self):
-        self.cmd('az account set -s ba3e71a7-6385-4944-9f01-d611121199bb')
-
         if(self.cmd('az security iot-solution list --resource-group "AzureCLI"').get_output_in_json() == 0):
             return
 

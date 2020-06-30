@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+# pylint: disable=too-many-statements
 
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 resource_group_name_type)
@@ -62,7 +63,6 @@ iot_solution_iot_hubs_arg_type = CLIArgumentType(options_list=('--iot-hubs'), me
 # Regulatory Compliance
 regulatory_compliance_standard_name = CLIArgumentType(option_list=('--standard-name'), metave='STANDARDNAME', help='The compliance standard name')
 regulatory_compliance_control_name = CLIArgumentType(option_list=('--control-name'), metave='CONTROLNAME', help='The compliance control name')
-
 
 def load_arguments(self, _):
     for scope in ['alert',
