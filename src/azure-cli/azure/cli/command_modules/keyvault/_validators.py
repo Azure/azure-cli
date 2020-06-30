@@ -62,8 +62,7 @@ def process_secret_set_namespace(cmd, namespace):
         raise use_error
 
     from azure.cli.core.profiles import ResourceType
-    SecretAttributes = cmd.get_models('SecretAttributes', import_prefix='azure.keyvault.secrets._shared._generated',
-                                      resource_type=ResourceType.DATA_KEYVAULT_SECRETS)
+    SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     namespace.secret_attributes = SecretAttributes()
     if namespace.expires:
         namespace.secret_attributes.expires = namespace.expires
@@ -108,9 +107,6 @@ def process_secret_set_namespace(cmd, namespace):
     tags.update({'file-encoding': encoding})
     namespace.tags = tags
     namespace.value = content
-
-    del namespace.file_path
-    del namespace.encoding
 
 
 # PARAMETER NAMESPACE VALIDATORS
@@ -335,16 +331,16 @@ def validate_vault_id(entity_type):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
-        name = getattr(ns, 'name', None)
+        name = getattr(ns, pure_entity_type + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
         identifier = getattr(ns, 'identifier', None)
 
         if identifier:
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
-            setattr(ns, 'name', ident.name)
+            setattr(ns, pure_entity_type + '_name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            if hasattr(ns, 'version'):
-                setattr(ns, 'version', ident.version)
+            if hasattr(ns, pure_entity_type + '_version'):
+                setattr(ns, pure_entity_type + '_version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME [--version VERSION]')
 

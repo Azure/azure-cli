@@ -59,10 +59,7 @@ DEPENDENCIES = [
     'azure-datalake-store~=0.0.48',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
-    'azure-keyvault-keys~=4.1.0',
-    'azure-keyvault-secrets~=4.1.0',
-    'azure-keyvault-certificates~=4.1.0',
-    'azure-keyvault~=1.1.0',
+    'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement~=0.1.0',
     'azure-mgmt-applicationinsights~=0.1.1',
@@ -93,7 +90,7 @@ DEPENDENCIES = [
     'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.12.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-keyvault~=3.0.0b1',
+    'azure-mgmt-keyvault~=2.2.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.6.0',
     'azure-mgmt-managedservices~=1.0',
@@ -139,7 +136,7 @@ DEPENDENCIES = [
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
-    'jsondiff==1.2.0',
+    'jsondiff==1.2.0'
 ]
 
 TESTS_REQUIRE = [

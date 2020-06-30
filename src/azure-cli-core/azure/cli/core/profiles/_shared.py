@@ -50,9 +50,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_DEPLOYMENTSCRIPTS = ('azure.mgmt.resource.deploymentscripts', 'DeploymentScriptsClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
-    DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
-    DATA_KEYVAULT_SECRETS = ('azure.keyvault.secrets', 'SecretClient')
-    DATA_KEYVAULT_CERTIFICATES = ('azure.keyvault.certificates', 'CertificateClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
@@ -160,9 +157,6 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
         ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_KEYVAULT_KEYS: '7.0',
-        ResourceType.DATA_KEYVAULT_SECRETS: '7.0',
-        ResourceType.DATA_KEYVAULT_CERTIFICATES: '7.0',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2018-11-09',
@@ -501,7 +495,7 @@ def get_client_class(resource_type):
     return _get_attr(resource_type.import_prefix, '#' + resource_type.client_name)
 
 
-def get_versioned_sdk_path(api_profile, resource_type, operation_group=None, import_prefix=None):
+def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
     """ Patch the unversioned sdk path to include the appropriate API version for the
         resource type in question.
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
@@ -515,16 +509,14 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None, imp
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
         api_version = getattr(api_version, operation_group)
-
-    if not import_prefix:
-        import_prefix = resource_type.import_prefix
-
-    return '{}.v{}'.format(import_prefix, api_version.replace('-', '_').replace('.', '_'))
+    return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
 
 
-def _get_sdk(sdk_path, *attr_args, **kwargs):
+def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
     checked = kwargs.get('checked', True)
     sub_mod_prefix = kwargs.get('mod', None)
+    operation_group = kwargs.get('operation_group', None)
+    sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group)
     if not attr_args:
         # No attributes to load. Return the versioned sdk
         return import_module(sdk_path)
@@ -535,17 +527,3 @@ def _get_sdk(sdk_path, *attr_args, **kwargs):
         loaded_obj = _get_attr(sdk_path, mod_attr_path, checked)
         results.append(loaded_obj)
     return results[0] if len(results) == 1 else results
-
-
-def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
-    operation_group = kwargs.get('operation_group', None)
-    import_prefix = kwargs.get('import_prefix')
-    sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group, import_prefix=import_prefix)
-    return _get_sdk(sdk_path, *attr_args, **kwargs)
-
-
-def get_unversioned_sdk(resource_type, *attr_args, **kwargs):
-    sdk_path = kwargs.get('import_prefix')
-    if not sdk_path:
-        sdk_path = resource_type.import_prefix
-    return _get_sdk(sdk_path, *attr_args, **kwargs)

@@ -690,31 +690,32 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 
 # region KeyVault Key
-def create_key(client, vault_base_url, name, protection=None,  # pylint: disable=unused-argument
+def create_key(cmd, client, vault_base_url, key_name, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None):
-    return client.create_key(name=name,
-                             key_type=kty,
-                             size=key_size,
-                             key_operations=key_ops,
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    return client.create_key(vault_base_url=vault_base_url,
+                             key_name=key_name,
+                             kty=kty,
+                             key_size=key_size,
+                             key_ops=key_ops,
+                             key_attributes=key_attrs,
                              tags=tags,
-                             curve=curve,
-                             enabled=not disabled,
-                             expires_on=expires,
-                             not_before=not_before)
+                             curve=curve)
 
 
 def backup_key(client, file_path, vault_base_url=None,
-               name=None, identifier=None):  # pylint: disable=unused-argument
-    backup = client.backup_key(name)
+               key_name=None, identifier=None):  # pylint: disable=unused-argument
+    backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
-def restore_key(client, vault_base_url, file_path):  # pylint: disable=unused-argument
+def restore_key(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    return client.restore_key_backup(data)
+    return client.restore_key(vault_base_url, data)
 
 
 def _int_to_bytes(i):
@@ -758,15 +759,15 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, vault_base_url,  # pylint: disable=unused-argument
-               name, protection=None, key_ops=None, disabled=False, expires=None,
+def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    JsonWebKey = cmd.get_models('JsonWebKey', no_version=True, mod='_models',
-                                resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
 
+    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
         if pem_file:
@@ -805,17 +806,7 @@ def import_key(cmd, client, vault_base_url,  # pylint: disable=unused-argument
         key_obj.kty = 'RSA-HSM'
         key_obj.t = byok_data
 
-    hardware_protected = protection == 'hsm'
-
-    return client.import_key(
-        name,
-        key_obj,
-        hardware_protected=hardware_protected,
-        enabled=not disabled,
-        not_before=not_before,
-        expires_on=expires,
-        tags=tags
-    )
+    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
 
 
 def _bytes_to_int(b):
@@ -895,13 +886,13 @@ def _extract_ec_public_key_from_jwk(jwk_dict):
     return public.public_key(default_backend())
 
 
-def download_key(client, file_path, name=None, key_version='',
-                 encoding=None, vault_base_url=None, identifier=None):  # pylint: disable=unused-argument
+def download_key(client, file_path, vault_base_url=None, key_name=None, key_version='',
+                 encoding=None, identifier=None):  # pylint: disable=unused-argument
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    key = client.get_key(name, key_version)
+    key = client.get_key(vault_base_url, key_name, key_version)
     json_web_key = _jwk_to_dict(key.key)
     key_type = json_web_key['kty']
     pub_key = ''

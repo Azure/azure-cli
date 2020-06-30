@@ -156,21 +156,6 @@ type: group
 short-summary: Manage keys.
 """
 
-helps['keyvault key list'] = """
-type: command
-short-summary: List keys in the specified vault.
-long-summary: |
-    Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the
-    public part of a stored key. The LIST operation is applicable to all key types, however only
-    the base key identifier, attributes, and tags are provided in the response. Individual
-    versions of a key are not listed in the response. This operation requires the keys/list
-    permission.
-examples:
-  - name: List keys in the specified vault.
-    text: |
-        az keyvault key list --vault-name MyKeyVault
-"""
-
 helps['keyvault key download'] = """
 type: command
 short-summary: Downloads the public part of a stored key.

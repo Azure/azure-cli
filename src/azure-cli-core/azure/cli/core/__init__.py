@@ -690,11 +690,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles import get_sdk
         resource_type = kwargs.get('resource_type', self._get_resource_type())
         operation_group = kwargs.get('operation_group', self.module_kwargs.get('operation_group', None))
-        no_version = kwargs.get('no_version', False)
-        import_prefix = kwargs.get('import_prefix')
-        mod = kwargs.get('mod', 'models')
-        return get_sdk(self.cli_ctx, resource_type, *attr_args, mod=mod,
-                       operation_group=operation_group, no_version=no_version, import_prefix=import_prefix)
+        return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models', operation_group=operation_group)
 
     def command_group(self, group_name, command_type=None, **kwargs):
         if command_type:
@@ -787,25 +783,12 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
-        # azure.keyvault.key_vault_client#KeyVaultClient.{} -> azure.keyvault
-        # azure.keyvault.keys._client#KeyClient.{} -> azure.keyvault.keys
-        # azure.mgmt.keyvault.operations#VaultsOperations.{} -> azure.mgmt.keyvault
-        operation_prefix = '.'.join(operation.split('#')[0].split('.')[:-1])
-
-        track2_sdks = [
-            'azure.keyvault.keys',
-            'azure.keyvault.secrets',
-            'azure.keyvault.certificates'
-        ]
-
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if operation_prefix == rt.import_prefix:
-                if operation_prefix not in track2_sdks:
+            if operation.startswith(rt.import_prefix + '.'):
                     operation = operation.replace(rt.import_prefix,
                                                   get_versioned_sdk_path(
                                                       self.cli_ctx.cloud.profile, rt,
                                                       operation_group=operation_group))
-                    break
 
         try:
             mod_to_import, attr_path = operation.split('#')

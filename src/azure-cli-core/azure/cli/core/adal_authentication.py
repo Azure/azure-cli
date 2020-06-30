@@ -6,7 +6,6 @@
 import time
 import requests
 import adal
-import time
 
 from msrest.authentication import Authentication
 from azure.core.credentials import AccessToken

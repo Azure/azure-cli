@@ -14,12 +14,7 @@ def multi_transformers(*transformers):
 
 
 def filter_out_managed_resources(output):
-    new_output = []
-    for item in output:
-        managed = item.get('managed') if isinstance(item, dict) else getattr(item, 'managed')
-        if not managed:
-            new_output.append(item)
-    return new_output
+    return [_ for _ in output if not getattr(_, 'managed')] if output else output
 
 
 def _extract_subresource_name_from_single_output(output, id_parameter):

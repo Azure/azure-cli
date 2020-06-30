@@ -529,7 +529,7 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
     def test_keyvault_secret_soft_delete(self, resource_group):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-se-sd-', 24),
-            'loc': 'eastus',
+            'loc': 'westus',
             'sec': 'secret1'
         })
         _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')

@@ -12,7 +12,8 @@ from ._client_factory import (
     keyvault_client_private_link_resources_factory, keyvault_data_plane_factory)
 
 from ._transformers import (
-    filter_out_managed_resources, multi_transformers, extract_subresource_name)
+    extract_subresource_name, filter_out_managed_resources,
+    multi_transformers)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -25,9 +26,9 @@ def load_command_table(self, _):
     mgmt_api_version = mgmt_api_version.replace('-', '_')
 
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT))
-    data_api_version = data_api_version.replace('.', '_').replace('-', '_')
-    data_doc_string = 'azure.keyvault.v' + data_api_version + '#KeyVaultClient.{}'
-
+    data_api_version = data_api_version.replace('.', '_')
+    data_api_version = data_api_version.replace('-', '_')
+    data_doc_string = 'azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.{}'
     # region Command Types
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
