@@ -188,7 +188,11 @@ examples:
 helps['ad app permission grant'] = """
 type: command
 short-summary: Grant the app an API Delegated permissions
-long-summary: for Application permissions, please use "ad app permission admin-consent"
+long-summary: >
+    A service principal must exist for the app when running this command. To create a corresponding service
+    principal, use `az ad sp create`.
+    
+    For Application permissions, please use "ad app permission admin-consent"
 examples:
   - name: Grant a native application with permissions to access an existing API with TTL of 2 years
     text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --api a0322f79-57df-498f-9d9f-12678 --expires 2
