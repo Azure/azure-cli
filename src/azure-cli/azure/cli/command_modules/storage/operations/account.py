@@ -20,7 +20,7 @@ def str2bool(v):
     return v
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
@@ -28,7 +28,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
-                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None):
+                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
+                           require_infrastructure_encryption=None, allow_blob_public_access=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -36,7 +37,12 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if kind is None:
         logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
                        "in the future")
-    params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags)
+    params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags,
+                                            encryption=Encryption())
+    # TODO: remove this part when server side remove the constraint
+    if encryption_services is None:
+        params.encryption.services = {'blob': {}}
+
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
     if encryption_services:
@@ -112,6 +118,11 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             publish_microsoft_endpoints=str2bool(publish_microsoft_endpoints),
             publish_internet_endpoints=str2bool(publish_internet_endpoints)
         )
+    if allow_blob_public_access is not None:
+        params.allow_blob_public_access = allow_blob_public_access
+
+    if require_infrastructure_encryption:
+        params.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -187,7 +198,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
-                           publish_microsoft_endpoints=None, publish_internet_endpoints=None):
+                           publish_microsoft_endpoints=None, publish_internet_endpoints=None,
+                           allow_blob_public_access=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -329,6 +341,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         if publish_internet_endpoints is not None:
             params.routing_preference.publish_internet_endpoints = str2bool(publish_internet_endpoints)
 
+    if allow_blob_public_access is not None:
+        params.allow_blob_public_access = allow_blob_public_access
     return params
 
 

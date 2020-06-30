@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -155,6 +155,20 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('largeFileSharesState', 'Enabled')
         ])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_create_storage_account_with_double_encryption(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {} --require-infrastructure-encryption'.format(
+            name, resource_group), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('encryption.requireInfrastructureEncryption', True)
+        ])
+        self.cmd('az storage account show -n {} -g {}'.format(name, resource_group), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('encryption.requireInfrastructureEncryption', True)
+        ])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-10-01')
     @ResourceGroupPreparer(parameter_name_for_location='location', location='southcentralus')
     def test_create_storage_account_v2(self, resource_group, location):
@@ -217,6 +231,34 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('encryption.services.table.enabled', True),
             JMESPathCheck('encryption.services.table.keyType', 'Account'),
         ])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
+    def test_storage_create_with_public_access(self, resource_group):
+        name1 = self.create_random_name(prefix='cli', length=24)
+        name2 = self.create_random_name(prefix='cli', length=24)
+        name3 = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {} --allow-blob-public-access'.format(name1, resource_group),
+                 checks=[JMESPathCheck('allowBlobPublicAccess', True)])
+
+        self.cmd('az storage account create -n {} -g {} --allow-blob-public-access true'.format(name2, resource_group),
+                 checks=[JMESPathCheck('allowBlobPublicAccess', True)])
+
+        self.cmd('az storage account create -n {} -g {} --allow-blob-public-access false'.format(name3, resource_group),
+                 checks=[JMESPathCheck('allowBlobPublicAccess', False)])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
+    @StorageAccountPreparer(name_prefix='blob')
+    def test_storage_update_with_public_access(self, storage_account):
+        self.cmd('az storage account update -n {} --allow-blob-public-access'.format(storage_account),
+                 checks=[JMESPathCheck('allowBlobPublicAccess', True)])
+
+        self.cmd('az storage account update -n {} --allow-blob-public-access true'.format(storage_account),
+                 checks=[JMESPathCheck('allowBlobPublicAccess', True)])
+
+        self.cmd('az storage account update -n {} --allow-blob-public-access false'.format(storage_account),
+                 checks=[JMESPathCheck('allowBlobPublicAccess', False)])
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
@@ -322,6 +364,35 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('table.retentionPolicy.enabled', False),
             JMESPathCheck('table.retentionPolicy.days', None)
         ])
+
+        with self.assertRaisesRegexp(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
+            self.cmd('storage logging update --services t --log r --retention 1 '
+                     '--version 2.0 --connection-string {}'.format(connection_string))
+        self.cmd('storage logging update --services t --log r --retention 1 '
+                 '--version 1.0 --connection-string {}'.format(connection_string))
+
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_logging_error_operations(self, resource_group):
+        # BlobStorage doesn't support logging for some services
+        blob_storage = self.create_random_name(prefix='blob', length=24)
+        self.cmd('storage account create -g {} -n {} --kind BlobStorage --access-tier hot --https-only'.format(
+            resource_group, blob_storage))
+
+        blob_connection_string = self.cmd(
+            'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, blob_storage)).output
+        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+            self.cmd('storage logging show --services q --connection-string {}'.format(blob_connection_string))
+
+        # PremiumStorage doesn't support logging for some services
+        premium_storage = self.create_random_name(prefix='premium', length=24)
+        self.cmd('storage account create -g {} -n {} --sku Premium_LRS --https-only'.format(
+            resource_group, premium_storage))
+
+        premium_connection_string = self.cmd(
+            'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, premium_storage)).output
+        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+            self.cmd('storage logging show --services q --connection-string {}'.format(premium_connection_string))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -1029,3 +1100,19 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             self.check('name', '{sa}'),
             self.check('failoverInProgress', True)
         ])
+
+
+class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    def test_storage_account_local_context(self):
+        self.kwargs.update({
+            'account_name': self.create_random_name(prefix='cli', length=24)
+        })
+        self.cmd('storage account create -g {rg} -n {account_name} --https-only',
+                 checks=[self.check('name', self.kwargs['account_name'])])
+        self.cmd('storage account show',
+                 checks=[self.check('name', self.kwargs['account_name'])])
+        with self.assertRaises(CLIError):
+            self.cmd('storage account delete')
+        self.cmd('storage account delete -n {account_name} -y')

@@ -31,7 +31,7 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     fields_arg_type = CLIArgumentType(
         nargs='+',
-        help='Customize output fields.',
+        help='Space-separated customized output fields.',
         validator=validate_query_fields,
         arg_type=get_enum_type(['key', 'value', 'label', 'content_type', 'etag', 'tags', 'locked', 'last_modified'])
     )

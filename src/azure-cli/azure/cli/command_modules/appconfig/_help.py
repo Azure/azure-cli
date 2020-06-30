@@ -242,6 +242,8 @@ examples:
     text: az appconfig revision list -n MyAppConfiguration --key color --label test,prod,\\0
   - name: List revision history for key "color" with any labels using connection string
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
+  - name: List revision history for all items and query only key, value and last_modified.
+    text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value last_modified
 """
 
 helps['appconfig show'] = """

@@ -28,7 +28,7 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
@@ -40,7 +40,7 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')

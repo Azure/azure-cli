@@ -108,6 +108,10 @@ def cf_load_balancers(cli_ctx, _):
     return network_client_factory(cli_ctx).load_balancers
 
 
+def cf_load_balancer_backend_pools(cli_ctx, _):
+    return network_client_factory(cli_ctx).load_balancer_backend_address_pools
+
+
 def cf_local_network_gateways(cli_ctx, _):
     return network_client_factory(cli_ctx).local_network_gateways
 

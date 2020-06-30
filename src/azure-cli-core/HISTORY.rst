@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.8.0
+++++++
+* Add get_command_loader() entry to support to load customized CommandLoader (#13763)
+
+2.7.0
+++++++
+* Enable local context for location (#13682)
+
 2.6.0
 ++++++
 * Update local context on/off status to global user level (#13277)

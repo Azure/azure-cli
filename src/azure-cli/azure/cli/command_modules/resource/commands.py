@@ -216,6 +216,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('register', 'register_feature')
+        g.custom_command('unregister', 'unregister_feature')
 
     # Tag commands
     with self.command_group('tag', resource_tag_sdk) as g:
@@ -409,9 +410,3 @@ def load_command_table(self, _):
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
-
-    with self.command_group('') as g:
-        g.custom_command('rest', 'rest_call')
-
-    with self.command_group('') as g:
-        g.custom_command('version', 'show_version')
