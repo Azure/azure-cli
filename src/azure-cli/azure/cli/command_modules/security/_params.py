@@ -239,4 +239,3 @@ def load_arguments(self, _):
             c.argument(
                 'iot_solution_name',
                 arg_type=iot_solution_name_arg_type)
-                

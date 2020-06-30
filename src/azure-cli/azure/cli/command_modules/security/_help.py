@@ -559,7 +559,7 @@ examples:
         az security iot-solution list 
 """
 
-helps['security iot-analytics'] = """ 
+helps['security iot-analytics'] = """
 type: group
 short-summary:  View IoT Security Analytics metrics.
 """
@@ -611,7 +611,7 @@ short-summary: List all yours IoT Security solution aggregated alerts.
 examples:
   - name: Get list of all IoT Security solution aggregated alerts.
     text: >
-        az security iot-alerts show --solution-name 'IoT-Hub1' --resource-group 'rg1'
+        az security iot-alerts list --solution-name 'IoT-Hub1' --resource-group 'rg1'
 """
 
 helps['security iot-recommendations'] = """
@@ -625,7 +625,7 @@ short-summary: Shows a single aggregated recommendation of yours IoT Security so
 examples:
   - name: Get an IoT Security solution aggregated recommendation.
     text: >
-        az security iot-recommendations list --solution-name 'IoT-Hub1' --resource-group 'rg1' --name 'IoT_PermissiveFirewallPolicy'
+        az security iot-recommendations show --solution-name 'IoT-Hub1' --resource-group 'rg1' --name 'IoT_PermissiveFirewallPolicy'
 """
 
 helps['security iot-recommendations list'] = """
