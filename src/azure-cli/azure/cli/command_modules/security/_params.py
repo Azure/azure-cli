@@ -64,6 +64,7 @@ iot_solution_iot_hubs_arg_type = CLIArgumentType(options_list=('--iot-hubs'), me
 regulatory_compliance_standard_name = CLIArgumentType(option_list=('--standard-name'), metave='STANDARDNAME', help='The compliance standard name')
 regulatory_compliance_control_name = CLIArgumentType(option_list=('--control-name'), metave='CONTROLNAME', help='The compliance control name')
 
+
 def load_arguments(self, _):
     for scope in ['alert',
                   'atp',
