@@ -328,7 +328,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('exists', False))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_storage_blob_soft_delete(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info)
@@ -354,6 +354,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
                                               account_info, container).get_output_in_json()), 0)
 
+        import time
+        time.sleep(10)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {} --include d',
                                               account_info, container).get_output_in_json()), 1)
 
