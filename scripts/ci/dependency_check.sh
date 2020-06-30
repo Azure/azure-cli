@@ -2,6 +2,8 @@
 
 set -ev
 
+apt install libgirepository1.0-dev libcairo2-dev gir1.2-secret-1
+
 REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/../.."
 
 # Uninstall any cruft that can poison the rest of the checks in this script.
