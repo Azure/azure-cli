@@ -20,7 +20,7 @@ echo "Replace with version: $version"
 
 platform=`uname`
 
-for each in $(find src -name __init__.py); do
+for each in $(find src -name __main__.py); do
     if [ "$platform" == "Darwin" ]; then
         sed -i "" "s/^__version__ = [\"']\(.*\)[\"']/__version__ = \"\1.dev$version\"/" $each
     else
