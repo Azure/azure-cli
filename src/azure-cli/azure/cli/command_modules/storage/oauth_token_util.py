@@ -36,7 +36,7 @@ class TokenUpdater(object):
             seconds_left = (datetime.strptime(token['expiresOn'], "%Y-%m-%d %H:%M:%S.%f") - datetime.now()).seconds
         except KeyError:  # needed to deal with differing unserialized MSI token payload
             self.token_credential.token = token['access_token']
-            expire = datetime.datetime.fromtimestamp(int(token['expires_on']))
+            expire = datetime.fromtimestamp(int(token['expires_on']))
             seconds_left = (datetime.fromtimestamp(int(token['expires_on'])) - datetime.now()).seconds
 
         if seconds_left < 180:
