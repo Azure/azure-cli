@@ -44,9 +44,36 @@ def delegated():
         print(result.get("error_description"))
         raise Exception()
 
+    # Get profile of me
     response = requests.get(
-        endpoint,
+        'https://graph.microsoft.com/v1.0/me',
         headers={'Authorization': 'Bearer ' + token}
+    )
+
+    print(response.json())
+
+    # Send email
+    payload = {
+        "message": {
+            "subject": "Meet for lunch?",
+            "body": {
+                "contentType": "Text",
+                "content": "The new cafeteria is open."
+            },
+            "toRecipients": [
+                {
+                    "emailAddress": {
+                        "address": "fey@microsoft.com"
+                    }
+                }
+            ]
+        }
+    }
+
+    response = requests.post(
+        'https://graph.microsoft.com/v1.0/me/sendMail',
+        headers={'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'},
+        json=payload
     )
 
     print(response.json())
