@@ -18,7 +18,8 @@ pushd ${REPO_ROOT} > /dev/null
 
 find src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip install --no-deps
 pip install -r ./src/azure-cli/requirements.$(python ./scripts/get-python-version.py).$(uname).txt
-if [ -f ${WORKDIR}/src/azure-cli/requirements.opt.py3.$(uname).txt ]; then
-    pip3 install -r ${WORKDIR}/src/azure-cli/requirements.opt.py3.$(uname).txt
+if [ -f "./src/azure-cli/requirements.opt.$(python ./scripts/get-python-version.py).$(uname).txt" ]; then
+    echo "./src/azure-cli/requirements.opt.$(python ./scripts/get-python-version.py).$(uname).txt exists."
+    pip install -r ./src/azure-cli/requirements.opt.$(python ./scripts/get-python-version.py).$(uname).txt
 fi
 popd > /dev/null
