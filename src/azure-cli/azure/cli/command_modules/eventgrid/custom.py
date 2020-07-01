@@ -381,19 +381,6 @@ def cli_partner_registration_create_or_update(
         partner_registration_name,
         partner_registration_info)
 
-# TODO: to be added once operation is enabled.
-#
-# def cli_partner_registration_update(
-#        client,
-#        resource_group_name,
-#        partner_registration_name,
-#        tags=None):
-
-#    return client.update(
-#        resource_group_name=resource_group_name,
-#        partner_registration_name=partner_registration_name,
-#        tags=tags)
-
 
 def cli_partner_namespace_list(
         client,
@@ -423,19 +410,6 @@ def cli_partner_namespace_create_or_update(
         resource_group_name,
         partner_namespace_name,
         partner_namespace_info)
-
-
-# TODO: to be added once operation is enabled.
-# def cli_partner_namespace_update(
-#        client,
-#        resource_group_name,
-#        partner_namespace_name,
-#        tags=None):
-#
-#    return client.update(
-#        resource_group_name=resource_group_name,
-#        partner_namespace_name=partner_namespace_name,
-#        tags=tags)
 
 
 def cli_event_channel_list(
@@ -485,18 +459,6 @@ def cli_event_channel_create_or_update(
         event_channel_info)
 
 
-# def cli_event_channel_update(
-#        client,
-#        resource_group_name,
-#        event_channel_name,
-#        tags=None):
-#
-#    return client.update(
-#        resource_group_name=resource_group_name,
-#        event_channel_name=event_channel_name,
-#        tags=tags)
-
-
 def cli_partner_topic_list(
         client,
         resource_group_name=None,
@@ -523,17 +485,6 @@ def cli_partner_topic_create_or_update(
         resource_group_name,
         partner_topic_name,
         partner_topic_info)
-
-# def cli_partner_topic_update(
-#        client,
-#        resource_group_name,
-#        partner_topic_name,
-#        tags=None):
-#
-#    return client.update(
-#        resource_group_name=resource_group_name,
-#        partner_topic_name=partner_topic_name,
-#        tags=tags)
 
 
 def cli_partner_topic_event_subscription_create_or_update(    # pylint: disable=too-many-locals
