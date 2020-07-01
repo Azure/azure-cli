@@ -864,9 +864,17 @@ jobs:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
+      set -ev
+      . env/bin/activate
       azdev perf load-times
+    displayName: "Load Performance"
+  - bash: |
+      set -ev
+      . env/bin/activate
+      azdev perf benchmark --prefix "version" --prefix ""
+    displayName: "Execution Performance"
 
 - job: CheckLinter
   displayName: "Check CLI Linter"
