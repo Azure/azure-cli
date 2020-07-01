@@ -2,7 +2,9 @@
 
 set -ev
 
-sudo apt-get -y install libgirepository1.0-dev libcairo2-dev gir1.2-secret-1
+if [ "$(uname)" != "Darwin" ]; then
+    sudo apt-get -y install libgirepository1.0-dev libcairo2-dev gir1.2-secret-1
+fi
 
 REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/../.."
 
