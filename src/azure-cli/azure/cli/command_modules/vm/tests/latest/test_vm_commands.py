@@ -1050,7 +1050,7 @@ class VMExtensionScenarioTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm1'
         })
-        vm_id = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS').get_output_in_json()['id']
+        vm_id = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --generate-ssh-keys').get_output_in_json()['id']
         self.kwargs.update({
             'vm_id': vm_id
         })
@@ -1304,7 +1304,7 @@ class VMMonitorTestCreateLinux(ScenarioTest):
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace} --nsg {nsg}')
+            self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace} --nsg {nsg} --generate-ssh-keys')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()['id']
         uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
@@ -1371,7 +1371,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
             'nsg': self.create_random_name('clinsg', 20)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --nsg {nsg}')
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --nsg {nsg} --generate-ssh-keys')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
 
