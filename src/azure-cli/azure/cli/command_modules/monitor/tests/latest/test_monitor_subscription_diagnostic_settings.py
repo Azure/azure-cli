@@ -12,7 +12,8 @@ class TestDiagnosticSettingsSubscriptionScenarios(ScenarioTest):
     @StorageAccountPreparer(location='southcentralus')
     def test_monitor_diagnostic_settings_subscription(self, resource_group, storage_account):
         self.kwargs.update({
-            'name': self.create_random_name('clitest', 20)
+            'name': self.create_random_name('clitest', 20),
+            'ws': self.create_random_name('cliws', 20)
         })
         self.kwargs['storage'] = self.cmd('storage account show -n {sa} -g {rg} --query id -otsv').output.strip()
         self.kwargs['log_config'] = json.dumps([
@@ -49,11 +50,22 @@ class TestDiagnosticSettingsSubscriptionScenarios(ScenarioTest):
                 "enabled": True,
             }
         ])
-        self.cmd("monitor diagnostic-settings subscription create --location southcentralus --name {name} --storage-account {storage} "
-                 "--logs \'{log_config}\'", checks=[
+        self.cmd("monitor diagnostic-settings subscription create -l southcentralus --name {name} --storage-account {storage} "
+                 "--logs \'{log_config}\'",
+                 checks=[
+                     self.check('storageAccountId', '{storage}'),
+                     self.check('serviceBusRuleId', None),
+                 ])
+        self.cmd("monitor diagnostic-settings subscription show --name {name}", checks=[
             self.check('storageAccountId', '{storage}'),
             self.check('serviceBusRuleId', None),
         ])
-        self.cmd("monitor diagnostic-settings subscription show --name {name}")
-        self.cmd("monitor diagnostic-settings subscription list")
+        self.cmd("monitor diagnostic-settings subscription list", checks=[
+            self.check('length(@)', 1)
+        ])
+        self.kwargs['ws_id'] = self.cmd('monitor log-analytics workspace create -n {ws} -g {rg} --query id -otsv').output.strip()
+        self.cmd('monitor diagnostic-settings subscription update --name {name} --workspace {ws_id}', checks=[
+            self.check('storageAccountId', '{storage}'),
+            self.check('workspaceId', '{ws_id}')
+        ])
         self.cmd("monitor diagnostic-settings subscription delete --name {name} -y")

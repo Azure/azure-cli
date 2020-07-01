@@ -248,7 +248,13 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor diagnostic-settings subscription') as c:
         c.argument('subscription_id', validator=process_subscription_id, deprecate_info=c.deprecate(hide=True), required=False)
-        c.argument('logs', type=get_json_object)
+        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file.")
+        c.argument('name', help='The name of the diagnostic setting.', options_list=['--name', '-n'])
+        c.argument('event_hub_name', help='The name of the event hub. If none is specified, the default event hub will be selected.')
+        c.argument('event_hub_auth_rule', help='The resource Id for the event hub authorization rule.')
+        c.argument('workspace', help='The resource id of the log analytics workspace.')
+        c.argument('storage_account', help='The resource id of the storage account to which you would like to send the Activity Log.')
+        c.argument('service_bus_rule', help="The service bus rule ID of the service bus namespace in which you would like to have Event Hubs created for streaming the Activity Log. The rule ID is of the format '{service bus resource ID}/authorizationrules/{key name}'.")
     # endregion
 
     # region LogProfiles

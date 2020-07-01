@@ -462,4 +462,4 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='update_subscription_diagnostic_settings')

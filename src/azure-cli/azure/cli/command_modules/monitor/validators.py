@@ -344,6 +344,7 @@ def validate_storage_accounts_name_or_id(cmd, namespace):
                     name=storage_account_id
                 )
 
+
 def process_subscription_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     namespace.subscription_id = get_subscription_id(cmd.cli_ctx)
