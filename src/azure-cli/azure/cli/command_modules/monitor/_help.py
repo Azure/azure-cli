@@ -875,7 +875,7 @@ short-summary: Create diagnostic settings for a subscription
 examples:
   - name: Create diagnostic settings for a subscription with EventHub.
     text: |
-        az monitor diagnostic-settings subscription create -n {name} --event-hub-auth-rule {eventHubRuleID} --storage-account {storageAccount} \\
+        az monitor diagnostic-settings subscription create -n {name} --location westus --event-hub-auth-rule {eventHubRuleID} --storage-account {storageAccount} \\
         --logs '[
            {
              "category": "Security",
