@@ -49,7 +49,7 @@ def load_arguments(self, _):
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
                                                     help="a template file path in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
-    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], help='The resource id to the template-spec', is_preview=True, min_api='2019-06-01')
+    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-t'], help='The resource id to the template-spec', is_preview=True, min_api='2019-06-01')
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '

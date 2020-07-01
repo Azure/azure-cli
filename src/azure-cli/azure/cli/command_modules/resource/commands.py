@@ -293,12 +293,6 @@ def load_command_table(self, _):
         g.custom_command('show-log', 'get_deployment_script_logs')
         g.custom_command('delete', 'delete_deployment_script', confirmation=True)
 
-    with self.command_group('template-spec', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, is_preview=True) as g:
-        g.custom_command('list', 'list_template_specs')
-        g.custom_show_command('show', 'get_template_spec')
-        g.custom_command('show-log', 'get_template_spec_logs')
-        g.custom_command('delete', 'delete_template_spec', confirmation=True)
-
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('list', 'list_deployments_at_resource_group', table_transformer=transform_deployments_list)

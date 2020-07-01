@@ -58,18 +58,350 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
   response:
     body:
-      string: '{"error":{"code":"ScopeLocked","message":"The scope ''/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/subscription_level_template''
-        cannot perform write operation because following scope(s) are locked: ''/subscriptions/00000000-0000-0000-0000-000000000000''.
-        Please remove the lock and try again."}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/subscription_level_template","name":"subscription_level_template","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"13231341667663423384","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-06-30T23:33:23.858065Z","duration":"PT0S","correlationId":"47e9738e-c1d4-40cb-890d-9f6cc1d2558b","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo18221"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '341'
+      - '2624'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 17:26:40 GMT
+      - Tue, 30 Jun 2020 23:33:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - close
+      Host:
+      - raw.githubusercontent.com
+      User-Agent:
+      - Python-urllib/3.8
+    method: GET
+    uri: https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json
+  response:
+    body:
+      string: "{\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#\",\n
+        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {\n     /** comment1\n
+        \       comment2\n        comment3\n      **/\n      // comment\n      /**
+        comment **/\n    \"storageAccountName\": {\n      \"value\": \"armbuilddemo18221\"
+        \ // comment\n    },\n    \"nestedRGName\": {\n      /** comment1\n        comment2\n
+        \       comment3\n      **/\n      // comment\n      /** comment **/\n      \"value\":
+        \"cli_test_subscription_level_deployment\" /** comment **/\n      /** comment1\n
+        \       comment2\n        comment3\n      **/\n      // comment\n      /**
+        comment **/\n    }\n      /** comment1\n        comment2\n        comment3\n
+        \     **/\n      // comment\n      /** comment **/\n  }\n}"
+    headers:
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - close
+      content-length:
+      - '743'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 30 Jun 2020 23:33:24 GMT
+      etag:
+      - '"79cf9050f422e6c9fef2a7ec4857b9816421227463500c581f531a808d563754"'
+      expires:
+      - Tue, 30 Jun 2020 23:38:24 GMT
+      source-age:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding
+      via:
+      - 1.1 varnish (Varnish/6.0)
+      - 1.1 varnish
+      x-cache:
+      - MISS, MISS
+      x-cache-hits:
+      - 0, 0
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - da3df503847314177f2ed25f5bc9542fe5b58cee
+      x-frame-options:
+      - deny
+      x-github-request-id:
+      - 33F6:40A2:77FF4:8CB2D:5EFBCBC3
+      x-served-by:
+      - cache-atl6237-ATL
+      x-timer:
+      - S1593560004.419165,VS0,VE96
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"location\": \"WestUS\", \"properties\": {\"parameters\": {\"storageAccountName\":
+      {\"value\": \"armbuilddemo18221\"}, \"nestedRGName\": {\"value\": \"cli_test_subscription_level_deployment\"}},
+      \"mode\": \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"storageAccountName\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"armbuilddemo1801\"\r\n
+      \   },\r\n    \"nestedRGName\": {\r\n      \"type\": \"string\",\r\n      \"defaultValue\":
+      \"cli_test_subscription_level_deployment\"\r\n    }\r\n  },\r\n  \"variables\":
+      {},\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Authorization/policyDefinitions\",\r\n
+      \     \"name\": \"policy2\",\r\n      \"apiVersion\": \"2016-12-01\",\r\n      \"properties\":
+      {\r\n        \"policyType\": \"Custom\",\r\n        \"parameters\": {},\r\n
+      \       \"policyRule\": {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n
+      \           \"equals\": \"northeurope\"\r\n          },\r\n          \"then\":
+      {\r\n            \"effect\": \"deny\"\r\n          }\r\n        }\r\n      }\r\n
+      \   },\r\n    {\r\n      \"type\": \"Microsoft.Authorization/policyAssignments\",\r\n
+      \     \"name\": \"location-lock\",\r\n      \"apiVersion\": \"2016-12-01\",\r\n
+      \     \"dependsOn\": [\r\n        \"policy2\"\r\n      ],\r\n      \"properties\":
+      {\r\n        \"scope\": \"[subscription().id]\",\r\n        \"policyDefinitionId\":
+      \"[resourceId('Microsoft.Authorization/policyDefinitions', 'policy2')]\"\r\n
+      \     }\r\n    },\r\n    {\r\n      \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
+      \     \"name\": \"[parameters('nestedRGName')]\",\r\n      \"apiVersion\": \"2018-05-01\",\r\n
+      \     \"location\": \"WestUS\",\r\n      \"properties\": {\r\n      }\r\n    },\r\n
+      \   {\r\n      \"type\": \"Microsoft.Resources/deployments\",\r\n      \"name\":
+      \"rg-nested6\",\r\n      \"apiVersion\": \"2017-05-10\",\r\n      \"resourceGroup\":
+      \"[parameters('nestedRGName')]\",\r\n      \"dependsOn\": [ \"[parameters('nestedRGName')]\"
+      ],\r\n      \"properties\": {\r\n        \"template\": {\r\n          \"$schema\":
+      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {},\r\n
+      \         \"variables\": {},\r\n          \"resources\": [\r\n            {\r\n
+      \             \"type\": \"Microsoft.Storage/storageAccounts\",\r\n              \"name\":
+      \"[parameters('storageAccountName')]\",\r\n              \"apiVersion\": \"2015-06-15\",\r\n
+      \             \"location\": \"East US\",\r\n              \"properties\": {\r\n
+      \               \"accountType\": \"Standard_LRS\",\r\n                \"supportsHttpsTrafficOnly\":
+      true\r\n              }\r\n            }\r\n          ]\r\n        },\r\n        \"mode\":\"Incremental\"\r\n
+      \     }\r\n    }\r\n  ] // comment\r\n}}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2613'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --location --template-file --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/subscription_level_template","name":"subscription_level_template","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"13231341667663423384","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-06-30T23:33:24.8747741Z","duration":"PT0S","correlationId":"722733d1-0229-4095-8615-e6f5278232fb","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo18221"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2625'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Jun 2020 23:33:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"location\": \"WestUS\", \"properties\": {\"parameters\": {\"storageAccountName\":
+      {\"value\": \"armbuilddemo18221\"}, \"nestedRGName\": {\"value\": \"cli_test_subscription_level_deployment\"}},
+      \"mode\": \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"storageAccountName\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"armbuilddemo1801\"\r\n
+      \   },\r\n    \"nestedRGName\": {\r\n      \"type\": \"string\",\r\n      \"defaultValue\":
+      \"cli_test_subscription_level_deployment\"\r\n    }\r\n  },\r\n  \"variables\":
+      {},\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Authorization/policyDefinitions\",\r\n
+      \     \"name\": \"policy2\",\r\n      \"apiVersion\": \"2016-12-01\",\r\n      \"properties\":
+      {\r\n        \"policyType\": \"Custom\",\r\n        \"parameters\": {},\r\n
+      \       \"policyRule\": {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n
+      \           \"equals\": \"northeurope\"\r\n          },\r\n          \"then\":
+      {\r\n            \"effect\": \"deny\"\r\n          }\r\n        }\r\n      }\r\n
+      \   },\r\n    {\r\n      \"type\": \"Microsoft.Authorization/policyAssignments\",\r\n
+      \     \"name\": \"location-lock\",\r\n      \"apiVersion\": \"2016-12-01\",\r\n
+      \     \"dependsOn\": [\r\n        \"policy2\"\r\n      ],\r\n      \"properties\":
+      {\r\n        \"scope\": \"[subscription().id]\",\r\n        \"policyDefinitionId\":
+      \"[resourceId('Microsoft.Authorization/policyDefinitions', 'policy2')]\"\r\n
+      \     }\r\n    },\r\n    {\r\n      \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
+      \     \"name\": \"[parameters('nestedRGName')]\",\r\n      \"apiVersion\": \"2018-05-01\",\r\n
+      \     \"location\": \"WestUS\",\r\n      \"properties\": {\r\n      }\r\n    },\r\n
+      \   {\r\n      \"type\": \"Microsoft.Resources/deployments\",\r\n      \"name\":
+      \"rg-nested6\",\r\n      \"apiVersion\": \"2017-05-10\",\r\n      \"resourceGroup\":
+      \"[parameters('nestedRGName')]\",\r\n      \"dependsOn\": [ \"[parameters('nestedRGName')]\"
+      ],\r\n      \"properties\": {\r\n        \"template\": {\r\n          \"$schema\":
+      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {},\r\n
+      \         \"variables\": {},\r\n          \"resources\": [\r\n            {\r\n
+      \             \"type\": \"Microsoft.Storage/storageAccounts\",\r\n              \"name\":
+      \"[parameters('storageAccountName')]\",\r\n              \"apiVersion\": \"2015-06-15\",\r\n
+      \             \"location\": \"East US\",\r\n              \"properties\": {\r\n
+      \               \"accountType\": \"Standard_LRS\",\r\n                \"supportsHttpsTrafficOnly\":
+      true\r\n              }\r\n            }\r\n          ]\r\n        },\r\n        \"mode\":\"Incremental\"\r\n
+      \     }\r\n    }\r\n  ] // comment\r\n}}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2613'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --location --template-file --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000001","name":"azure-cli-subscription_level_deployment000001","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"13231341667663423384","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-06-30T23:33:25.9272277Z","duration":"PT0S","correlationId":"903cbc70-1ab6-49c8-bfb8-b8417ece8121","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo18221"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2691'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Jun 2020 23:33:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"location\": \"WestUS\", \"properties\": {\"parameters\": {\"storageAccountName\":
+      {\"value\": \"armbuilddemo18221\"}, \"nestedRGName\": {\"value\": \"cli_test_subscription_level_deployment\"}},
+      \"mode\": \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"storageAccountName\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"armbuilddemo1801\"\r\n
+      \   },\r\n    \"nestedRGName\": {\r\n      \"type\": \"string\",\r\n      \"defaultValue\":
+      \"cli_test_subscription_level_deployment\"\r\n    }\r\n  },\r\n  \"variables\":
+      {},\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Authorization/policyDefinitions\",\r\n
+      \     \"name\": \"policy2\",\r\n      \"apiVersion\": \"2016-12-01\",\r\n      \"properties\":
+      {\r\n        \"policyType\": \"Custom\",\r\n        \"parameters\": {},\r\n
+      \       \"policyRule\": {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n
+      \           \"equals\": \"northeurope\"\r\n          },\r\n          \"then\":
+      {\r\n            \"effect\": \"deny\"\r\n          }\r\n        }\r\n      }\r\n
+      \   },\r\n    {\r\n      \"type\": \"Microsoft.Authorization/policyAssignments\",\r\n
+      \     \"name\": \"location-lock\",\r\n      \"apiVersion\": \"2016-12-01\",\r\n
+      \     \"dependsOn\": [\r\n        \"policy2\"\r\n      ],\r\n      \"properties\":
+      {\r\n        \"scope\": \"[subscription().id]\",\r\n        \"policyDefinitionId\":
+      \"[resourceId('Microsoft.Authorization/policyDefinitions', 'policy2')]\"\r\n
+      \     }\r\n    },\r\n    {\r\n      \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
+      \     \"name\": \"[parameters('nestedRGName')]\",\r\n      \"apiVersion\": \"2018-05-01\",\r\n
+      \     \"location\": \"WestUS\",\r\n      \"properties\": {\r\n      }\r\n    },\r\n
+      \   {\r\n      \"type\": \"Microsoft.Resources/deployments\",\r\n      \"name\":
+      \"rg-nested6\",\r\n      \"apiVersion\": \"2017-05-10\",\r\n      \"resourceGroup\":
+      \"[parameters('nestedRGName')]\",\r\n      \"dependsOn\": [ \"[parameters('nestedRGName')]\"
+      ],\r\n      \"properties\": {\r\n        \"template\": {\r\n          \"$schema\":
+      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {},\r\n
+      \         \"variables\": {},\r\n          \"resources\": [\r\n            {\r\n
+      \             \"type\": \"Microsoft.Storage/storageAccounts\",\r\n              \"name\":
+      \"[parameters('storageAccountName')]\",\r\n              \"apiVersion\": \"2015-06-15\",\r\n
+      \             \"location\": \"East US\",\r\n              \"properties\": {\r\n
+      \               \"accountType\": \"Standard_LRS\",\r\n                \"supportsHttpsTrafficOnly\":
+      true\r\n              }\r\n            }\r\n          ]\r\n        },\r\n        \"mode\":\"Incremental\"\r\n
+      \     }\r\n    }\r\n  ] // comment\r\n}}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2613'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --location --template-file --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000001","name":"azure-cli-subscription_level_deployment000001","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateHash":"13231341667663423384","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-06-30T23:33:29.9284183Z","duration":"PT3.1940443S","correlationId":"d9005f32-3e7a-45b4-8db0-beff49744714","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000001/operationStatuses/08586080468787432452?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1967'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Jun 2020 23:33:30 GMT
       expires:
       - '-1'
       pragma:
@@ -78,11 +410,101 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
     status:
-      code: 409
-      message: Conflict
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --location --template-file --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586080468787432452?api-version=2020-06-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Jun 2020 23:34:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --location --template-file --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586080468787432452?api-version=2020-06-01
+  response:
+    body:
+      string: '{"status":"Failed","error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/DeployOperations for usage details.","details":[{"code":"Conflict","message":"{\r\n  \"status\":
+        \"Canceled\",\r\n  \"error\": {\r\n    \"code\": \"ResourceDeploymentFailure\",\r\n    \"message\":
+        \"The resource operation completed with terminal provisioning state ''Canceled''.\"\r\n  }\r\n}"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '484'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 30 Jun 2020 23:34:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -107,18 +529,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock?api-version=2019-09-01
   response:
     body:
-      string: '{"error":{"code":"ScopeLocked","message":"The scope ''/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock''
-        cannot perform delete operation because following scope(s) are locked: ''/subscriptions/00000000-0000-0000-0000-000000000000''.
-        Please remove the lock and try again."}}'
+      string: ''
     headers:
       cache-control:
       - no-cache
-      content-length:
-      - '338'
-      content-type:
-      - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 17:26:41 GMT
+      - Tue, 30 Jun 2020 23:34:31 GMT
       expires:
       - '-1'
       pragma:
@@ -127,9 +543,179 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
     status:
-      code: 409
-      message: Conflict
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2?api-version=2019-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Tue, 30 Jun 2020 23:34:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_subscription_level_deployment?api-version=2020-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 30 Jun 2020 23:34:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU1VCU0NSSVBUSU9OOjVGTEVWRUw6NUZERVBMT1lNRU5ULVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2020-06-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU1VCU0NSSVBUSU9OOjVGTEVWRUw6NUZERVBMT1lNRU5ULVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2020-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 30 Jun 2020 23:34:50 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU1VCU0NSSVBUSU9OOjVGTEVWRUw6NUZERVBMT1lNRU5ULVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2020-06-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU1VCU0NSSVBUSU9OOjVGTEVWRUw6NUZERVBMT1lNRU5ULVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2020-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 30 Jun 2020 23:35:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1
