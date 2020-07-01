@@ -103,4 +103,4 @@ def load_command_table(self, _):
     with self.command_group('hdinsight host', hdinsight_virtual_machines_sdk,
                             client_factory=cf_hdinsight_virtual_machines) as g:
         g.command('list', 'list_hosts')
-        g.command('restart', 'restart_hosts', confirmation=True, supports_no_wait=True)
+        g.command('restart', 'restart_hosts', confirmation=True)
