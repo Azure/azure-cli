@@ -700,6 +700,10 @@ class AzCliCommandInvoker(CommandInvoker):
             elif _is_paged(result):
                 result = list(result)
 
+            if cmd_copy.cli_ctx.data.get('_query_recommend'):
+                from .recommend import parse_output
+                result = parse_output(result)
+
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
             event_data = {'result': result}
             cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
