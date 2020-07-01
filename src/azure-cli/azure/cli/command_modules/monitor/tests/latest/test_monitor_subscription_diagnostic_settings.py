@@ -56,4 +56,4 @@ class TestDiagnosticSettingsSubscriptionScenarios(ScenarioTest):
         ])
         self.cmd("monitor diagnostic-settings subscription show --name {name}")
         self.cmd("monitor diagnostic-settings subscription list")
-        self.cmd("monitor diagnostic-settings subscription delete --name {name}")
+        self.cmd("monitor diagnostic-settings subscription delete --name {name} -y")
