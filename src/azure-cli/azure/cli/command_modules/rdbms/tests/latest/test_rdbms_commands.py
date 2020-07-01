@@ -108,11 +108,27 @@ class ServerMgmtScenarioTest(ScenarioTest):
         loc = 'eastus'
         default_public_network_access = 'Enabled'
         public_network_access = 'Disabled'
+        minimal_tls_version = 'TLS1_2'
+        default_minimal_tls_version = 'TLSEnforcementDisabled'
 
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
         infrastructureEncryption = 'Enabled'
         geoloc = 'eastus'
+
+        list_checks = [JMESPathCheck('name', servers[0]),
+                       JMESPathCheck('resourceGroup', resource_group_1),
+                       JMESPathCheck('administratorLogin', admin_login),
+                       JMESPathCheck('sslEnforcement', 'Enabled'),
+                       JMESPathCheck('tags.key', '1'),
+                       JMESPathCheck('sku.capacity', old_cu),
+                       JMESPathCheck('sku.tier', edition),
+                       JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                       JMESPathCheck('publicNetworkAccess', default_public_network_access),
+                       JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)]
+
+        if database_engine != 'mariadb':
+            list_checks.append(JMESPathCheck('minimalTlsVersion', default_minimal_tls_version))
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -122,34 +138,22 @@ class ServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group_1, servers[0], loc,
                          admin_login, admin_passwords[0], skuname,
                          geoRedundantBackup, backupRetention),
-                 checks=[
-                     JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('sslEnforcement', 'Enabled'),
-                     JMESPathCheck('tags.key', '1'),
-                     JMESPathCheck('sku.capacity', old_cu),
-                     JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
-                     JMESPathCheck('publicNetworkAccess', default_public_network_access),
-                     JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
+                 checks=list_checks)
 
         # test show server
         result = self.cmd('{} server show -g {} --name {}'
                           .format(database_engine, resource_group_1, servers[0]),
-                          checks=[
-                              JMESPathCheck('name', servers[0]),
-                              JMESPathCheck('resourceGroup', resource_group_1),
-                              JMESPathCheck('administratorLogin', admin_login),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('tags.key', '1'),
-                              JMESPathCheck('sku.capacity', old_cu),
-                              JMESPathCheck('sku.tier', edition),
-                              JMESPathCheck('publicNetworkAccess', default_public_network_access),
-                              JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
-                              JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)]).get_output_in_json()  # pylint: disable=line-too-long
+                          checks=list_checks).get_output_in_json()
 
         # test update server
+        if database_engine != 'mariadb':
+            self.cmd('{} server update -g {} --name {} --minimal-tls-version {}'
+                     .format(database_engine, resource_group_1, servers[0], minimal_tls_version),
+                     checks=[
+                         JMESPathCheck('name', servers[0]),
+                         JMESPathCheck('resourceGroup', resource_group_1),
+                         JMESPathCheck('minimalTlsVersion', minimal_tls_version)])
+
         self.cmd('{} server update -g {} --name {} --admin-password {} '
                  '--ssl-enforcement Disabled --tags key=2'
                  .format(database_engine, resource_group_1, servers[0], admin_passwords[1]),
