@@ -9,7 +9,7 @@ import os
 from azure_devtools.scenario_tests import AllowLargeResponse, live_only
 
 from azure.cli.core.util import CLIError
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.testsdk import (

@@ -12,7 +12,7 @@ from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.parser import AzCliCommandParser
 
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from knack.arguments import enum_choice_list
 

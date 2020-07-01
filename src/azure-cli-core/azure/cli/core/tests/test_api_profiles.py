@@ -10,7 +10,7 @@ from azure.cli.core.profiles import (ResourceType, PROFILE_TYPE, CustomResourceT
                                      get_api_version, supported_api_version, register_resource_type)
 from azure.cli.core.profiles._shared import APIVersionException, get_versioned_sdk_path
 from azure.cli.core.cloud import Cloud
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 
 class TestAPIProfiles(unittest.TestCase):

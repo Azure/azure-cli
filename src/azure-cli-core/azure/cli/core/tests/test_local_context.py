@@ -7,7 +7,7 @@ import mock
 import unittest
 
 from azure.cli.core.local_context import AzCLILocalContext, ALL
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 
 class TestLocalContext(unittest.TestCase):

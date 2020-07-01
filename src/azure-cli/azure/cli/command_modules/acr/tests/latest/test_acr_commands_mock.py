@@ -38,7 +38,7 @@ from azure.cli.command_modules.acr._docker_utils import (
     EMPTY_GUID
 )
 from azure.cli.command_modules.acr._docker_utils import ResourceNotFound
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 
 TEST_TENANT = 'testtenant'

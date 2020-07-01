@@ -19,7 +19,7 @@ from azure.mgmt.resource.subscriptions.v2016_06_01.models import \
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, _AUTH_CTX_FACTORY)
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from knack.util import CLIError
 

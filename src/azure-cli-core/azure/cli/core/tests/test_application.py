@@ -13,7 +13,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.commands.validators import IterateAction
 
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from knack.util import CLIError
 

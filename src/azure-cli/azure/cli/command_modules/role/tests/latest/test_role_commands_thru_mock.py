@@ -9,7 +9,7 @@ import unittest
 import uuid
 import mock
 
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from azure.mgmt.authorization.models import RoleDefinition, RoleAssignmentCreateParameters
 from azure.graphrbac.models import (Application, ServicePrincipal, GraphErrorException,

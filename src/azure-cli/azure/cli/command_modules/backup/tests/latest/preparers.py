@@ -19,7 +19,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME'):
         super(VaultPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
@@ -77,7 +77,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME'):
         super(VMPreparer, self).__init__(name_prefix, 15)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
@@ -128,7 +128,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME'):
         super(ItemPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
@@ -186,7 +186,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  instant_rp_days=None):
         super(PolicyPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
@@ -241,7 +241,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
                  vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_RP_NAME'):
         super(RPPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
@@ -301,7 +301,7 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  instant_rp_days=None):
         super(AFSPolicyPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
@@ -357,7 +357,7 @@ class FileSharePreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', file_parameter_name=None,
                  parameter_name='afs_name', file_upload=False):
         super(FileSharePreparer, self).__init__(name_prefix, 24)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None
@@ -427,7 +427,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
                  parameter_name='item_name', afs_parameter_name='afs_name',
                  policy_parameter_name='policy_name'):
         super(AFSItemPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -503,7 +503,7 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', vault_parameter_name='vault_name',
                  parameter_name='rp_name', afs_parameter_name='afs_name'):
         super(AFSRPPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
         self.resource_group = None

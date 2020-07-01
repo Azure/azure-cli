@@ -29,7 +29,7 @@ from azure.cli.core.cloud import (Cloud,
 
 from azure.cli.core._profile import Profile
 
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from knack.util import CLIError
 

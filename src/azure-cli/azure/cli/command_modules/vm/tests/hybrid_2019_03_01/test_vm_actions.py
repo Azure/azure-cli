@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_vm_vmss_msi,
                                                       _validate_vm_vmss_accelerated_networking)
 from azure.cli.command_modules.vm._vm_utils import normalize_disk_info, update_disk_sku_info
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 from knack.util import CLIError
 
 

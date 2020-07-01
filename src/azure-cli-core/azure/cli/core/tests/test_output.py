@@ -9,7 +9,7 @@ import unittest
 class TestCoreCLIOutput(unittest.TestCase):
     def test_create_AzOutputProducer(self):
         from azure.cli.core._output import AzOutputProducer
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
 
         output_producer = AzOutputProducer(DummyCli())
         self.assertEqual(7, len(output_producer._FORMAT_DICT))  # six types: json, jsonc, table, tsv, yaml, yamlc, none
@@ -19,7 +19,7 @@ class TestCoreCLIOutput(unittest.TestCase):
     # regression test for https://github.com/Azure/azure-cli/issues/9263
     def test_yaml_output_with_ordered_dict(self):
         from azure.cli.core._output import AzOutputProducer
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         from knack.util import CommandResultItem
         from collections import OrderedDict
         import yaml

@@ -41,7 +41,7 @@ class MonitorNameOrIdTest(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', _mock_get_subscription_id)
     def test_monitor_resource_id(self):
         from azure.cli.command_modules.monitor.validators import get_target_resource_validator
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
 
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()

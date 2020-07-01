@@ -35,7 +35,7 @@ from azure.cli.core.profiles import ResourceType
 
 
 def _get_test_cmd():
-    from azure.cli.core.mock import DummyCli
+    from azure.cli.core.mock_cli import DummyCli
     from azure.cli.core import AzCommandsLoader
     from azure.cli.core.commands import AzCliCommand
     cli_ctx = DummyCli()

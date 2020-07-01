@@ -13,7 +13,7 @@ logger = getLogger(__name__)
 
 from knack.util import CLIError
 from knack.help_files import helps
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 from azure.cli.core.util import get_installed_cli_distributions
 from azure.cli.core._help import CliCommandHelpFile, CliGroupHelpFile
 from azure.cli.core.file_util import _store_parsers, _is_group

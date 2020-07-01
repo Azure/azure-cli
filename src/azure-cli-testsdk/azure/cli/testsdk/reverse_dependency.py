@@ -6,11 +6,11 @@
 from importlib import import_module
 
 DUMMY_CLI_TYPE = 'DummyCli'
-DUMMY_CLI_MODULE = 'azure.cli.core.mock'
+DUMMY_CLI_MODULE = 'azure.cli.core.mock_cli'
 
 
 def get_dummy_cli(*args, **kwargs):
-    mod = import_module('azure.cli.core.mock')
+    mod = import_module('azure.cli.core.mock_cli')
     return getattr(mod, 'DummyCli')(*args, **kwargs)
 
 

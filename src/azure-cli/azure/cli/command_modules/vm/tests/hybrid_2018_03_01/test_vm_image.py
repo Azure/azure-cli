@@ -8,13 +8,13 @@ import unittest
 import mock
 
 from azure.cli.core.cloud import CloudEndpointNotSetException
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from knack.util import CLIError
 
 
 def _get_test_cmd():
-    from azure.cli.core.mock import DummyCli
+    from azure.cli.core.mock_cli import DummyCli
     from azure.cli.core import AzCommandsLoader
     from azure.cli.core.commands import AzCliCommand
     from azure.cli.core.profiles import ResourceType

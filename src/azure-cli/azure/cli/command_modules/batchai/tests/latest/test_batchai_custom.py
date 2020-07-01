@@ -23,7 +23,7 @@ from azure.cli.command_modules.batchai.custom import (
     _add_setup_task,
     _get_effective_resource_parameters)
 from azure.cli.core.util import CLIError
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 from azure.mgmt.batchai.models import (
     Cluster, ClusterCreateParameters, UserAccountSettings, MountVolumes, NodeSetup, FileServer,
     FileServerCreateParameters, AzureFileShareReference, AzureBlobFileSystemReference, AzureStorageCredentialsInfo,

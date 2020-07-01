@@ -10,7 +10,7 @@ import sys
 from msrest.serialization import Model
 from azure.cli.core import AzCommandsLoader
 
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from knack.util import CLIError
 

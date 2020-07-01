@@ -11,7 +11,7 @@ except ImportError:
 
 
 def mock_echo_args(command_name, parameters):
-    from azure.cli.core.mock import DummyCli
+    from azure.cli.core.mock_cli import DummyCli
     try:
         # TODO: continue work on this...
         argv = ' '.join((command_name, parameters)).split()
@@ -39,7 +39,7 @@ class TestVMValidators(unittest.TestCase):
         from azure.cli.command_modules.vm._validators import _validate_vm_create_nics
 
         def _get_test_cmd():
-            from azure.cli.core.mock import DummyCli
+            from azure.cli.core.mock_cli import DummyCli
             from azure.cli.core import AzCommandsLoader
             from azure.cli.core.commands import AzCliCommand
             from azure.cli.core.profiles import ResourceType

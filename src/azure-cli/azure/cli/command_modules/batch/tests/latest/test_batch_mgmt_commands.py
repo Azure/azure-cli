@@ -9,7 +9,7 @@ import tempfile
 import time
 
 from knack.util import CLIError
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin

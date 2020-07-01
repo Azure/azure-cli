@@ -25,7 +25,7 @@ from azure.cli.core.commands import AzCliCommand
 from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, encrypt_vmss, decrypt_vmss)
 from azure.cli.core.profiles import get_sdk, ResourceType
 
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 
 NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \

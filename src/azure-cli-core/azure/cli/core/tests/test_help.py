@@ -17,7 +17,7 @@ import tempfile
 from knack.help import GroupHelpFile, HelpAuthoringException
 from azure.cli.core._help import CliCommandHelpFile
 
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 from azure.cli.core.commands import _load_command_loader
 from azure.cli.core.file_util import get_all_help
 

@@ -6,7 +6,7 @@
 import unittest
 
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 

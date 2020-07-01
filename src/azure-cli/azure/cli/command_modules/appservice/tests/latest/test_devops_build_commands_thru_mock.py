@@ -6,7 +6,7 @@
 import unittest
 from mock import MagicMock, patch
 from knack.util import CLIError
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 from azure.cli.command_modules.appservice.azure_devops_build_interactive import (
     AzureDevopsBuildInteractive
 )

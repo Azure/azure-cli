@@ -12,7 +12,7 @@ from collections import namedtuple
 from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from knack.arguments import CLICommandArgument, CLIArgumentType
 

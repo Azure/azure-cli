@@ -359,7 +359,7 @@ class TestCustom(unittest.TestCase):
     @mock.patch("azure.cli.command_modules.resource.custom.LongRunningOperation.__call__", autospec=True)
     def test_what_if_exclude_change_types(self, long_running_operation_stub):
         # Arrange.
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         from azure.cli.core import AzCommandsLoader
         from azure.cli.core.commands import AzCliCommand
         from azure.cli.core.profiles._shared import ResourceType

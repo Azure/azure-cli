@@ -17,7 +17,7 @@ from azure.cli.core.extension.operations import (add_extension_to_path, list_ext
                                                  list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION,
                                                  OUT_KEY_METADATA, OUT_KEY_PATH)
 from azure.cli.core.extension._resolve import NoExtensionCandidatesError
-from azure.cli.core.mock import DummyCli
+from azure.cli.core.mock_cli import DummyCli
 
 from . import IndexPatch, mock_ext
 

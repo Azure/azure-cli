@@ -12,7 +12,7 @@ from azure.cli.testsdk import ScenarioTest, LocalContextScenarioTest
 class TestConfigure(unittest.TestCase):
     def test_configure_output_options(self):
         from azure.cli.core._output import AzOutputProducer
-        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.mock_cli import DummyCli
         from azure.cli.command_modules.configure._consts import OUTPUT_LIST
 
         output_producer = AzOutputProducer(DummyCli())
