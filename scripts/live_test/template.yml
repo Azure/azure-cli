@@ -48,7 +48,8 @@ jobs:
         source env/bin/activate
         pip install azdev
         azdev setup -c azure-cli
-        az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
+        # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
+        az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n 8"
     - task: PublishTestResults@2
       condition: succeededOrFailed()
