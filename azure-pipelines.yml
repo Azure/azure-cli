@@ -856,14 +856,19 @@ jobs:
 
 - job: PerformanceCheck
   displayName: "PerformanceCheck"
-
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
+    displayName: 'Use Python $(python.version)'
     inputs:
-      versionSpec: 3.6
+      versionSpec: '$(python.version)'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
