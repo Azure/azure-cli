@@ -5,7 +5,7 @@
 yum check-update
 yum install -y gcc rpm-build rpm-level rpmlint make bash corutils diffutils \
                path rpmdevtools python libffi-devel python3-devel openssl-devel \
-               wget
+               wget gobject-introspection-devel cairo-devel pkg-config
 
 set -ev
 
