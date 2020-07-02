@@ -581,7 +581,6 @@ def _deploy_arm_template_at_management_group(cmd,
     ScopedDeployment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ScopedDeployment', mod='models')
     deployment_obj = ScopedDeployment(location=deployment_location, properties=deployment_properties)
 
-    #validation_poller = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, parameters=deployment_obj, properties=deployment_properties)
     validation_poller = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, parameters=deployment_obj)
     validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
@@ -633,7 +632,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
     ScopedDeployment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ScopedDeployment', mod='models')
     deployment_obj = ScopedDeployment(location=deployment_location, properties=deployment_properties)
-    validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment_obj)
+    validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment_obj, location=deployment_location)
     validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:

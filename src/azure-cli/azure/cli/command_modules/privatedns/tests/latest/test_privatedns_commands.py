@@ -512,6 +512,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
         with self.assertRaisesRegexp(CLIError, 'exists already'):
             self.cmd('az network private-dns link vnet create -g {rg} -n {link} -z {zone} -v {vnet} -e {registrationEnabled}')
 
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkExistsIfMatchSuccess_ExpectLinkUpdated(self, resource_group):
         linkCreated = self._Create_VirtualNetworkLink()
@@ -522,6 +523,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('provisioningState', 'Succeeded')
         ])
 
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkExistsIfMatchFailure_ExpectError(self, resource_group):
         self._Create_VirtualNetworkLink()
@@ -544,6 +546,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
         with self.assertRaisesRegexp(CloudError, 'ResourceNotFound'):
             self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone}')
 
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkExistsEmptyRequest_ExpectNoError(self, resource_group):
         self._Create_VirtualNetworkLink()
@@ -552,6 +555,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('provisioningState', 'Succeeded')
         ])
 
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_EnableRegistration_ExpectRegistrationEnabled(self, resource_group):
         self._Create_VirtualNetworkLink()
@@ -562,6 +566,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('provisioningState', 'Succeeded')
         ])
 
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_DisableRegistration_ExpectRegistrationDisabled(self, resource_group):
         self._Create_VirtualNetworkLink(registrationEnabled=True)
@@ -572,6 +577,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('provisioningState', 'Succeeded')
         ])
 
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkExistsAddTags_ExpectTagsAdded(self, resource_group):
         self._Create_VirtualNetworkLink()
@@ -582,6 +588,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('provisioningState', 'Succeeded')
         ])
 
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkExistsChangeTags_ExpectTagsChanged(self, resource_group):
         self._Create_VirtualNetworkLink()
@@ -598,6 +605,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
             self.check('provisioningState', 'Succeeded')
         ])
 
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkExistsRemoveTags_ExpectTagsRemoved(self, resource_group):
         self._Create_VirtualNetworkLink()
