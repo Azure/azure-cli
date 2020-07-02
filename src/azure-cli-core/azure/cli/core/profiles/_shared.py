@@ -131,7 +131,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
-        ResourceType.MGMT_NETWORK: '2020-04-01',
+        ResourceType.MGMT_NETWORK: '2020-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-07-01', {
             'resource_skus': '2019-04-01',
             'disks': '2019-11-01',
@@ -163,7 +163,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_EVENTHUB: '2017-04-01',
+        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
@@ -230,7 +230,7 @@ AZURE_API_PROFILES = {
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2017-04-01',
+        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22'
     },
     '2018-03-01-hybrid': {

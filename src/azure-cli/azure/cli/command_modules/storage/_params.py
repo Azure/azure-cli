@@ -232,6 +232,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_three_state_flag(),
                    help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
                    'platform managed keys for data at rest.')
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+                   help='Allow or disallow public access to all blobs or containers in the storage account. '
+                   'The default interpretation is true for this property.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -271,6 +274,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+                   help='Allow or disallow public access to all blobs or containers in the storage account. '
+                   'The default interpretation is true for this property.')
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
@@ -408,7 +414,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
         c.argument('account_name', acct_name_type, options_list=['--account-name'])
-        c.argument('permission', options_list=('--permissions',),
+        c.argument('permission', options_list=('--permissions',), required=True,
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
                    validator=get_permission_validator(t_account_permissions))
@@ -470,7 +476,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
                                                                   'get_container_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
         c.ignore('sas_token')
@@ -499,11 +505,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     'this query parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
-        from azure.cli.command_modules.storage._validators import blob_tier_validator
+        from azure.cli.command_modules.storage._validators import (blob_tier_validator,
+                                                                   blob_rehydrate_priority_validator)
 
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
         c.argument('tier', validator=blob_tier_validator)
         c.argument('timeout', type=int)
+        c.argument('rehydrate_priority', options_list=('--rehydrate-priority', '-r'),
+                   arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
+                   is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
+                                         "The priority can be set on a blob only once, default value is Standard.")
 
     with self.argument_context('storage blob service-properties delete-policy update') as c:
         c.argument('enable', arg_type=get_enum_type(['true', 'false']), help='Enables/disables soft-delete.')
@@ -791,7 +802,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
                                                                   'get_container_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_container_permissions)),
                    validator=get_permission_validator(t_container_permissions))
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
@@ -884,7 +895,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_share_permissions, 'share_name', 'get_share_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
@@ -935,7 +946,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_container_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_file_permissions)),
                    validator=get_permission_validator(t_file_permissions))
         c.ignore('sas_token')
@@ -1045,7 +1056,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_queue_permissions, 'queue_name', 'get_queue_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
         c.ignore('sas_token')
@@ -1126,7 +1137,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the table\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
                    validator=table_permission_validator)
         c.ignore('sas_token')
