@@ -25,53 +25,27 @@ logger = get_logger(__name__)
 
 def register_global_query_recommend(cli_ctx):
     def add_query_recommend_parameter(_, **kwargs):
-        recommend_dest = '_query_recommend'
+        arg_group = kwargs.get('arg_group')
+        arg_group.add_argument('--query-recommend', dest='_query_recommend',
+            help="Recommend JMESPath string for you", action='store_true')
 
-        class QueryRecommendAction(argparse.Action):  # pylint:disable=too-few-public-methods
+    def handle_recommend_parameter(cli, **kwargs):
+        args = kwargs['args']
+        query_recommend = args._query_recommend
+        if query_recommend:
+            logger.warning("Analyze output")
 
-            def __call__(self, parser, namespace, value, option_string=None):
-                if value != False:
-                    setattr(namespace, recommend_dest, True)
-                    cmd = getattr(namespace, 'cmd', None) or getattr(
-                        namespace, '_cmd', None)
-                    cmd.cli_ctx.data[recommend_dest] = True
-                # from azure.cli.core._profile import Profile
-                # profile = Profile(cli_ctx=namespace._cmd.cli_ctx)  # pylint: disable=protected-access
-                # subscriptions_list = profile.load_cached_subscriptions()
-                # sub_id = None
-                # for sub in subscriptions_list:
-                #     match_val = value.lower()
-                #     if sub['id'].lower() == match_val or sub['name'].lower() == match_val:
-                #         sub_id = sub['id']
-                #         break
-                # if not sub_id:
-                #     logger.warning("Subscription '%s' not recognized.", value)
-                #     sub_id = value
+            def analyze_output(cli_ctx, **kwargs):
+                kwargs['event_data']['result'] = parse_output(kwargs['event_data']['result'])
+                cli_ctx.unregister_event(events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
 
-        commands_loader = kwargs['commands_loader']
-        cmd_tbl = commands_loader.command_table
-
-        for _, cmd in cmd_tbl.items():
-            cmd.arguments[recommend_dest] = CLICommandArgument(
-                '_query_recommend',
-                options_list='--query-recommend',
-                nargs='?',
-                action=QueryRecommendAction,
-                help='Generate query recommend for you.',
-                is_preview=True
-
-            )
-        # cmd.add_argument('_query_recommend', '--query-recommend', **default_sub_kwargs)
-        # cmd.add_argument('_query_recommend', '--query-recommend', arg_group='Global',
-        #                  help='Generate recommend for you', action='store_true')
-
-    def analyze_output(cli, event_data):
-        pass
+            cli_ctx.register_event(events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
+            cli_ctx.invocation.data['query_active'] = True
 
     cli_ctx.register_event(
-        events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_query_recommend_parameter)
+        events.EVENT_PARSER_GLOBAL_CREATE, add_query_recommend_parameter)
     cli_ctx.register_event(
-        events.EVENT_INVOKER_TRANSFORM_RESULT, analyze_output)
+        events.EVENT_INVOKER_POST_PARSE_ARGS, handle_recommend_parameter)
 
 
 def parse_dict(data):
