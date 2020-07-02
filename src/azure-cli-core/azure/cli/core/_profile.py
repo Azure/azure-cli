@@ -588,6 +588,13 @@ class Profile(object):
             if self._msi_creds is None:
                 self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
             auth_object = self._msi_creds
+            token = auth_object.token
+            import time
+            from datetime import datetime
+            a = int(int(token['expires_in']) + time.time())
+            b = int(token['expires_on'])
+            print(datetime.fromtimestamp(a))
+            print(datetime.fromtimestamp(b))
 
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),

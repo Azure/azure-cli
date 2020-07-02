@@ -63,7 +63,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))
         except KeyError:
-            return AccessToken(token, full_token['expires_on'])
+            return AccessToken(token, int(full_token['expires_on']))
 
     # This method is exposed for msrest.
     def signed_session(self, session=None):  # pylint: disable=arguments-differ
