@@ -1807,8 +1807,8 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
         # validate keys and features during file import
         imported_file_path = os.path.join(TEST_DIR, 'import_invalid_kv_and_features.json')
-        expected_export_file_path = os.path.join(TEST_DIR, 'export_valid_kv_and_features.json')
-        actual_export_file_path = os.path.join(TEST_DIR, 'export.json')
+        expected_export_file_path = os.path.join(TEST_DIR, 'expected_export_valid_kv_and_features.json')
+        actual_export_file_path = os.path.join(TEST_DIR, 'actual_export_valid_kv_and_features.json')
         self.kwargs.update({
             'import_source': 'file',
             'imported_format': 'json',
