@@ -21,10 +21,10 @@ Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
 BuildArch:      x86_64
-Requires:       %{python_cmd}, gobject-introspection-devel, cairo-devel, pkgconfig
+Requires:       %{python_cmd}, gobject-introspection-devel, cairo-devel, pkgconfig, cairo-gobject-devel
 
 BuildRequires:  gcc, libffi-devel, openssl-devel, perl
-BuildRequires:  %{python_cmd}-devel, gobject-introspection-devel, cairo-devel, pkgconfig
+BuildRequires:  %{python_cmd}-devel, gobject-introspection-devel, cairo-devel, pkgconfig, cairo-gobject-devel
 
 %global _python_bytecompile_errors_terminate_build 0
 
