@@ -272,18 +272,21 @@ def cli_cosmosdb_sql_database_exists(client,
 
 def _populate_sql_container_definition(sql_container_resource,
                                        partition_key_path,
+                                       partition_key_version,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
                                        conflict_resolution_policy):
     if all(arg is None for arg in
-           [partition_key_path, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
+           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
         return False
 
     if partition_key_path is not None:
         container_partition_key = ContainerPartitionKey()
         container_partition_key.paths = [partition_key_path]
         container_partition_key.kind = 'Hash'
+        if partition_key_version is not None:
+            container_partition_key.version = partition_key_version
         sql_container_resource.partition_key = container_partition_key
 
     if default_ttl is not None:
@@ -307,6 +310,7 @@ def cli_cosmosdb_sql_container_create(client,
                                       database_name,
                                       container_name,
                                       partition_key_path,
+                                      partition_key_version=None,
                                       default_ttl=None,
                                       indexing_policy=DEFAULT_INDEXING_POLICY,
                                       throughput=None,
@@ -318,6 +322,7 @@ def cli_cosmosdb_sql_container_create(client,
 
     _populate_sql_container_definition(sql_container_resource,
                                        partition_key_path,
+                                       partition_key_version,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
