@@ -354,7 +354,6 @@ Release History
 **SQL**
 
 * `az sql instance-pool`: Add instance pools command group (#11721)
-* `az sql mi`: Add parameter --tags to support tags on create and update (#13479)
 
 **Storage**
 
