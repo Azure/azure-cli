@@ -4,7 +4,7 @@ FROM centos:${tag} AS build-env
 ARG cli_version=dev
 
 RUN yum update -y
-RUN yum install -y wget rpm-build gcc libffi-devel python3-devel openssl-devel make bash coreutils diffutils patch dos2unix python3-virtualenv
+RUN yum install -y wget rpm-build gcc libffi-devel python3-devel openssl-devel make bash coreutils diffutils patch dos2unix python3-virtualenv gobject-introspection-devel cairo-devel pkg-config
 
 WORKDIR /azure-cli
 
