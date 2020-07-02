@@ -71,6 +71,7 @@ def load_arguments(self, _):
                   'workspace-setting',
                   'assessment',
                   'assessment-metadata',
+                  'allowed_connections',
                   'sub-assessment']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(

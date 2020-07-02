@@ -77,3 +77,7 @@ def cf_security_assessment_metadata(cli_ctx, _):
 
 def cf_security_sub_assessment(cli_ctx, _):
     return _cf_security(cli_ctx).sub_assessments
+
+def cf_security_allowed_connections(cli_ctx, _):
+    # do not return cli_ctx.allowed_connections for home region compatibility
+    return _cf_security(cli_ctx)

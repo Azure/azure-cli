@@ -19,7 +19,9 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_advanced_threat_protection,
                               cf_security_assessment,
                               cf_security_assessment_metadata,
-                              cf_security_sub_assessment)
+                              cf_security_sub_assessment,
+                              cf_security_allowed_connections)
+
 
 
 # pylint: disable=line-too-long
@@ -116,6 +118,12 @@ def load_command_table(self, _):
     security_sub_assessment_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#SubAssessmentsOperations.{}',
         client_factory=cf_security_sub_assessment
+    )
+
+    security_allowed_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AllowedConnectionsOperations.{}',
+        client_factory=cf_security_allowed_connections,
+        operation_group='security_allowed_connections'
     )
 
     with self.command_group('security task',
@@ -224,6 +232,13 @@ def load_command_table(self, _):
                             client_factory=cf_security_sub_assessment) as g:
         g.custom_command('list', 'list_security_sub_assessments')
         g.custom_command('show', 'get_security_sub_assessment')
+
+    with self.command_group('security allowed_connections',
+                            security_allowed_connections_sdk,
+                            client_factory=cf_security_allowed_connections) as g:
+        g.custom_command('list', 'list_security_allowed_connections')
+        g.custom_command('show', 'get_security_allowed_connections')
+
 
     with self.command_group('security', is_preview=True):
         pass
