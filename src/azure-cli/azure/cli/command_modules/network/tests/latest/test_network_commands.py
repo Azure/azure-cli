@@ -537,6 +537,10 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
                  '--name MySSLCert '
                  '--key-vault-secret-id {secret_id}')
 
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gw} -n cert1 --keyvault-secret {secret_id}', checks=[
+            self.check('trustedRootCertificates[0].keyVaultSecretId', '{secret_id}')
+        ])
+
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
 
