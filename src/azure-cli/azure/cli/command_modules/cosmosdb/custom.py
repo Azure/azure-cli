@@ -361,6 +361,7 @@ def cli_cosmosdb_sql_container_update(client,
 
     if _populate_sql_container_definition(sql_container_resource,
                                           None,
+                                          None,
                                           default_ttl,
                                           indexing_policy,
                                           None,
