@@ -408,7 +408,6 @@ class TestCommandRegistration(unittest.TestCase):
 
         # Test azext_always_loaded is loaded when command index is rebuilt
         with mock.patch('azure.cli.core.ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
-            # Call again with the new command index. Irrelevant commands are not loaded
             cmd_tbl = loader.load_command_table(["hello", "mod-only"])
             self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
 
@@ -416,7 +415,6 @@ class TestCommandRegistration(unittest.TestCase):
 
         # Test azext_always_loaded is loaded when command index is used
         with mock.patch('azure.cli.core.ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
-            # Call again with the new command index. Irrelevant commands are not loaded
             cmd_tbl = loader.load_command_table(["hello", "mod-only"])
             self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
 
