@@ -486,6 +486,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.generic_update_command('update', setter_name='update', setter_arg_name='file_share',
                                  custom_func_name='update_share_rm')
         g.custom_command('stats', 'get_stats', transform=lambda x: getattr(x, 'share_usage_bytes'))
+        g.custom_command('restore', 'restore_share_rm')
 
     with self.command_group('storage share', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:

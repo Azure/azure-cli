@@ -54,6 +54,14 @@ def list_share_rm(client, cmd, resource_group_name, account_name, include_delete
                        expand=expand)
 
 
+def restore_share_rm(client, resource_group_name, account_name, share_name, deleted_version, restored_name=None):
+
+    restored_name = restored_name if restored_name else share_name
+
+    return client.restore(resource_group_name=resource_group_name, account_name=account_name, share_name=restored_name,
+                          deleted_share_name=share_name, deleted_share_version=deleted_version)
+
+
 def update_share_rm(cmd, instance, metadata=None, share_quota=None, root_squash=None, access_tier=None):
     FileShare = cmd.get_models('FileShare', resource_type=ResourceType.MGMT_STORAGE)
 
