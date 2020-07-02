@@ -157,7 +157,7 @@ class AzCli(CLI):
 class MainCommandsLoader(CLICommandsLoader):
 
     # Format string for pretty-print the command module table
-    header_mod = "%-20s %10s %9s %9s" % ("Extension", "Load Time", "Groups", "Commands")
+    header_mod = "%-20s %10s %9s %9s" % ("Name", "Load Time", "Groups", "Commands")
     item_format_string = "%-20s %10.3f %9d %9d"
     header_ext = header_mod + "  Directory"
     item_ext_format_string = item_format_string + "  %s"
