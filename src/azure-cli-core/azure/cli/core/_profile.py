@@ -97,16 +97,19 @@ def _get_cloud_console_token_endpoint():
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
 class Profile(object):
 
-    def __init__(self, authority=None, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
-                 async_persist=True, cli_ctx=None):
+    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
+                 async_persist=True, cli_ctx=None, store_adal_cache=True):
         from azure.cli.core import get_default_cli
 
         self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
 
-        self._authority = authority or self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
+        self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
 
-        self._adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        if store_adal_cache:
+            self._adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        else:
+            self._adal_cache = None
 
     # pylint: disable=too-many-branches,too-many-statements
     def login(self,
@@ -193,7 +196,8 @@ class Profile(object):
 
         self._set_subscriptions(consolidated)
         # todo: remove after ADAL token deprecation
-        self._adal_cache.persist_cached_creds()
+        if self._adal_cache:
+            self._adal_cache.persist_cached_creds()
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 

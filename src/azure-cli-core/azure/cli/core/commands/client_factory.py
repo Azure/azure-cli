@@ -148,10 +148,9 @@ def _get_mgmt_service_client(cli_ctx,
     if not scopes:
         resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     
-    authority = kwargs.pop('authority', None)
     client_id = kwargs.pop('client_id', None)
 
-    profile = Profile(cli_ctx=cli_ctx, authority=authority)
+    profile = Profile(cli_ctx=cli_ctx)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id,
                                                              resource=resource, scopes=scopes,
                                                              client_id=client_id,
