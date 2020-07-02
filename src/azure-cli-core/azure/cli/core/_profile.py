@@ -21,6 +21,8 @@ from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.core.credentials import AccessToken
+from msrestazure.azure_active_directory import MSIAuthentication
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -588,13 +590,6 @@ class Profile(object):
             if self._msi_creds is None:
                 self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
             auth_object = self._msi_creds
-            token = auth_object.token
-            import time
-            from datetime import datetime
-            a = int(int(token['expires_in']) + time.time())
-            b = int(token['expires_on'])
-            print(datetime.fromtimestamp(a))
-            print(datetime.fromtimestamp(b))
 
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
@@ -767,6 +762,13 @@ class Profile(object):
         return installation_id
 
 
+class MsiAuthentication(MSIAuthentication):
+    # This method is exposed for Azure Core.
+    def get_token(self, resource):
+        token_entry = self._vm_msi.get_token(self.resource)
+        return AccessToken(token_entry['access_token'], token_entry['expires_on'])
+
+
 class MsiAccountTypes(object):
     # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
@@ -781,15 +783,14 @@ class MsiAccountTypes(object):
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from msrestazure.azure_active_directory import MSIAuthentication
         if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthentication(resource=resource)
+            return MsiAuthentication(resource=resource)
         if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthentication(resource=resource, client_id=identity)
+            return MsiAuthentication(resource=resource, client_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthentication(resource=resource, object_id=identity)
+            return MsiAuthentication(resource=resource, object_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthentication(resource=resource, msi_res_id=identity)
+            return MsiAuthentication(resource=resource, msi_res_id=identity)
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
