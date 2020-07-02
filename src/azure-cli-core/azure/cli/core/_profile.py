@@ -125,7 +125,10 @@ class Profile(object):
 
         credential = None
         auth_record = None
-        identity = Identity(self._authority, tenant, cred_cache=self._adal_cache)
+        identity = Identity(self._authority, tenant, cred_cache=self._adal_cache,
+                            allow_unencrypted=self.cli_ctx.config
+                            .getboolean('core', 'allow_fallback_to_plaintext', fallback=True)
+                            )
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
@@ -788,7 +791,9 @@ class SubscriptionFinder(object):
             if hasattr(t, 'additional_properties'):  # Remove this line once SDK is fixed
                 t.display_name = t.additional_properties.get('displayName')
 
-            identity = Identity(self.authority, tenant_id)
+            identity = Identity(self.authority, tenant_id,
+                                allow_unencrypted=self.cli_ctx.config
+                                .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
             try:
                 specific_tenant_credential = identity.get_user_credential(auth_record.home_account_id,
                                                                           auth_record.username)
