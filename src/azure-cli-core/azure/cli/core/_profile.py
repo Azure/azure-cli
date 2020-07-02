@@ -762,7 +762,7 @@ class Profile(object):
         return installation_id
 
 
-class MsiAuthentication(MSIAuthentication):
+class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core.
     def get_token(self, resource):
         token_entry = self._vm_msi.get_token(self.resource)
@@ -784,13 +784,13 @@ class MsiAccountTypes(object):
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
         if cli_account_name == MsiAccountTypes.system_assigned:
-            return MsiAuthentication(resource=resource)
+            return MSIAuthenticationWrapper(resource=resource)
         if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MsiAuthentication(resource=resource, client_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MsiAuthentication(resource=resource, object_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MsiAuthentication(resource=resource, msi_res_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
