@@ -1028,5 +1028,10 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
         self.cmd('az eventgrid domain delete --name {domain_name} --resource-group {rg}')
 
 
+class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
+    def test_appgw_private_endpoint(self, resource_group):
+        pass
+
+
 if __name__ == '__main__':
     unittest.main()
