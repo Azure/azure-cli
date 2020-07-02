@@ -876,7 +876,7 @@ def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gat
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     root_cert = ApplicationGatewayTrustedRootCertificate(name=item_name, data=cert_data,
-                                                         keyvault_secret_id=keyvault_secret)
+                                                         key_vault_secret_id=keyvault_secret)
     upsert_to_collection(ag, 'trusted_root_certificates', root_cert, 'name')
     return sdk_no_wait(no_wait, ncf.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -886,7 +886,7 @@ def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=No
     if cert_data is not None:
         instance.data = cert_data
     if keyvault_secret is not None:
-        instance.keyvault_secret_id = keyvault_secret
+        instance.key_vault_secret_id = keyvault_secret
     return parent
 
 
