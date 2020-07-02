@@ -8,7 +8,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class SecurityCenterAllowedConnectionsTests(ScenarioTest):
-    
+
     @AllowLargeResponse()
     def test_allowed_connections(self):
 

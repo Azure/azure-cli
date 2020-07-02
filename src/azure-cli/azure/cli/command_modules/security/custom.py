@@ -456,7 +456,7 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
                       assessment_name=assessment_name,
                       scope=assessed_resource_id)
 
-  
+
 # --------------------------------------------------------------------------------------------
 # Allowed Connections
 # --------------------------------------------------------------------------------------------
@@ -476,8 +476,8 @@ def get_security_allowed_connections(client, resource_name, resource_group_name)
         client.config.asc_location = loc.name
 
     return client.allowed_connections.get(resource_group_name, resource_name)
-  
-  
+
+
 # --------------------------------------------------------------------------------------------
 # Security Regulatory Compliance
 # --------------------------------------------------------------------------------------------

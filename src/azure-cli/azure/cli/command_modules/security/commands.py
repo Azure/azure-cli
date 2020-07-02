@@ -142,7 +142,7 @@ def load_command_table(self, _):
         client_factory=cf_security_allowed_connections,
         operation_group='security_allowed_connections'
     )
-    
+
     with self.command_group('security regulatory-compliance-standards',
                             security_regulatory_compliance_standards_sdk,
                             client_factory=cf_security_regulatory_compliance_standards) as g:
@@ -273,7 +273,6 @@ def load_command_table(self, _):
                             client_factory=cf_security_allowed_connections) as g:
         g.custom_command('list', 'list_security_allowed_connections')
         g.custom_command('show', 'get_security_allowed_connections')
-
 
     with self.command_group('security', is_preview=True):
         pass
