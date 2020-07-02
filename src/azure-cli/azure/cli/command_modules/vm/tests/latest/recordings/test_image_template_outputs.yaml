@@ -7,14 +7,112 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","name":"img_tmpl_customizers000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-06-03T08:10:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Jun 2020 08:10:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-msi/0.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1?api-version=2015-08-31-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus2","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"b3c30782-0093-43f1-b550-e9967ed450f6","clientId":"405d5dac-2691-4ee5-95ff-1467f3405efc","clientSecretUrl":"https://control-westus2.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1/credentials?tid=72f988bf-86f1-41af-91ab-2d7cd011db47&oid=b3c30782-0093-43f1-b550-e9967ed450f6&aid=405d5dac-2691-4ee5-95ff-1467f3405efc"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '890'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Jun 2020 08:10:23 GMT
+      expires:
+      - '-1'
+      location:
+      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - role assignment create
       Connection:
       - keep-alive
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
@@ -31,7 +129,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:06:12 GMT
+      - Wed, 03 Jun 2020 08:11:10 GMT
       expires:
       - '-1'
       pragma:
@@ -63,43 +161,40 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27cf32a0cc-373c-47c9-9156-0db11f6a6dfc%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27405d5dac-2691-4ee5-95ff-1467f3405efc%27%29&api-version=1.6
   response:
     body:
-      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"6d61a178-3216-4ba7-bdc3-0fbc62b65ac9","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"Azure
-        Virtual Machine Image Builder","appId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","applicationTemplateId":null,"appOwnerTenantId":"f8cdef31-a31e-4b4a-93e4-5f571e91255a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"Azure
-        Virtual Machine Image Builder","errorUrl":null,"homepage":null,"informationalUrls":{"termsOfService":null,"support":null,"privacy":null,"marketing":null},"keyCredentials":[],"logoutUrl":null,"notificationEmailAddresses":[],"oauth2Permissions":[],"passwordCredentials":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyEndDateTime":null,"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft
-        Services","replyUrls":[],"samlMetadataUrl":null,"samlSingleSignOnSettings":null,"servicePrincipalNames":["cf32a0cc-373c-47c9-9156-0db11f6a6dfc"],"servicePrincipalType":"Application","signInAudience":"AzureADMultipleOrgs","tags":[],"tokenEncryptionKeyId":null}]}'
+      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"b3c30782-0093-43f1-b550-e9967ed450f6","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appId":"405d5dac-2691-4ee5-95ff-1467f3405efc","applicationTemplateId":null,"appOwnerTenantId":null,"appRoleAssignmentRequired":false,"appRoles":[],"displayName":"ide1","errorUrl":null,"homepage":null,"informationalUrls":null,"keyCredentials":[{"customKeyIdentifier":"AD2EB8664F21342624F964C382C901882FEB55D4","endDate":"2020-09-01T08:05:00Z","keyId":"23a695aa-f12e-49c3-ba51-5cf1af75563b","startDate":"2020-06-03T08:05:00Z","type":"AsymmetricX509Cert","usage":"Verify","value":null}],"logoutUrl":null,"notificationEmailAddresses":[],"oauth2Permissions":[],"passwordCredentials":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyEndDateTime":null,"preferredTokenSigningKeyThumbprint":null,"publisherName":null,"replyUrls":[],"samlMetadataUrl":null,"samlSingleSignOnSettings":null,"servicePrincipalNames":["405d5dac-2691-4ee5-95ff-1467f3405efc","https://identity.azure.net/idama1xL7mlH0q5mpzLHAI/lIpz8ce/2GQLbuOfqwn4="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null}]}'
     headers:
       access-control-allow-origin:
       - '*'
       cache-control:
       - no-cache
       content-length:
-      - '1278'
+      - '1624'
       content-type:
       - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
       dataserviceversion:
       - 3.0;
       date:
-      - Thu, 26 Mar 2020 13:06:13 GMT
+      - Wed, 03 Jun 2020 08:11:12 GMT
       duration:
-      - '2371746'
+      - '419431'
       expires:
       - '-1'
       ocp-aad-diagnostics-server-name:
-      - Ez+TdC7bFFGYmpPs1kSLU/DUQRykmD+tv2PK5rCaxjY=
+      - 77GS1zJUQSQxohW8FuTGHXiZw6pcDsYD8IAPRE2oT7U=
       ocp-aad-session-key:
-      - k9sUktJOYPImZV6eG4NLZ9cFit4gOnoTciXcjLVyJqyblGxz1Cy0Wf1qfDn6uBZLM8sMUj3fpU7Rrb2x3fj8xK_bNUazZONYD3M2D_uyeDwvvLeXYUFJ1ewGrOlFYY3w.zEnoHjct5gnbu1tgkHn21oyScaBlXykrPD8u3GgsDxA
+      - smt_lr6q0JCjnh8u2TmF-h12pxZ5zsIme-GZY8X0zdWqR_6n9MYmyBvRWEuN6i8wO3AH2OH4SL9prllrLFsE_3jd_uBr0Rj6U7jg0R424D5LZs0LMKCrGlHWUHNpE3Jc.1YHrqWpL9OJQ0DWEKc9idfCNM-m_WcStCZF2KEyh7_w
       pragma:
       - no-cache
       request-id:
-      - ea61cb94-0651-4ceb-b4ab-03f6d4a57ab3
+      - d7b18111-beef-41f8-b6ab-383659d638d5
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
@@ -113,7 +208,7 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "6d61a178-3216-4ba7-bdc3-0fbc62b65ac9"}}'
+      "principalId": "b3c30782-0093-43f1-b550-e9967ed450f6"}}'
     headers:
       Accept:
       - application/json
@@ -132,15 +227,15 @@ interactions:
       ParameterSetName:
       - --assignee --role --scope
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Authorization/roleAssignments/8868fb3a-0825-4f26-ae0c-72db5f5a92a3?api-version=2018-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001?api-version=2018-09-01-preview
   response:
     body:
-      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"6d61a178-3216-4ba7-bdc3-0fbc62b65ac9","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","createdOn":"2020-03-26T13:06:14.7808884Z","updatedOn":"2020-03-26T13:06:14.7808884Z","createdBy":null,"updatedBy":"b5ed59e8-f00d-4396-af62-8297e36d8b52"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Authorization/roleAssignments/8868fb3a-0825-4f26-ae0c-72db5f5a92a3","type":"Microsoft.Authorization/roleAssignments","name":"8868fb3a-0825-4f26-ae0c-72db5f5a92a3"}'
+      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"b3c30782-0093-43f1-b550-e9967ed450f6","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","createdOn":"2020-06-03T08:11:13.6388927Z","updatedOn":"2020-06-03T08:11:13.6388927Z","createdBy":null,"updatedBy":"8917b591-e9ee-4ad8-8340-a202d5f619e7"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
     headers:
       cache-control:
       - no-cache
@@ -149,7 +244,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:06:16 GMT
+      - Wed, 03 Jun 2020 08:11:14 GMT
       expires:
       - '-1'
       pragma:
@@ -161,7 +256,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1181'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -177,26 +272,26 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --scripts --image-source --defer
+      - -n -g --scripts --image-source --identity --defer
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","name":"img_tmpl_customizers000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-03-26T13:06:02Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","name":"img_tmpl_customizers000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-06-03T08:10:11Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '472'
+      - '429'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:06:17 GMT
+      - Wed, 03 Jun 2020 08:11:16 GMT
       expires:
       - '-1'
       pragma:
@@ -222,10 +317,10 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --scripts --image-source --defer
+      - -n -g --scripts --image-source --identity --defer
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
@@ -281,7 +376,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:06:17 GMT
+      - Wed, 03 Jun 2020 08:11:17 GMT
       expires:
       - '-1'
       pragma:
@@ -309,8 +404,8 @@ interactions:
       ParameterSetName:
       - -n -g --managed-image --managed-image-location --defer
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
@@ -366,7 +461,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:06:18 GMT
+      - Wed, 03 Jun 2020 08:11:19 GMT
       expires:
       - '-1'
       pragma:
@@ -394,8 +489,8 @@ interactions:
       ParameterSetName:
       - -n -g --managed-image --managed-image-location --defer
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
@@ -451,7 +546,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:06:18 GMT
+      - Wed, 03 Jun 2020 08:11:20 GMT
       expires:
       - '-1'
       pragma:
@@ -479,8 +574,8 @@ interactions:
       ParameterSetName:
       - -n -g --output-name --artifact-tags --is-vhd --defer
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
@@ -536,7 +631,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:06:19 GMT
+      - Wed, 03 Jun 2020 08:11:21 GMT
       expires:
       - '-1'
       pragma:
@@ -564,24 +659,24 @@ interactions:
       ParameterSetName:
       - -n -g --output-name --artifact-tags --is-vhd --defer
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","name":"img_tmpl_customizers000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-03-26T13:06:02Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","name":"img_tmpl_customizers000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-06-03T08:10:11Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '472'
+      - '429'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:06:19 GMT
+      - Wed, 03 Jun 2020 08:11:22 GMT
       expires:
       - '-1'
       pragma:
@@ -603,7 +698,9 @@ interactions:
       "distribute": [{"runOutputName": "managed_img_1", "artifactTags": {}, "type":
       "ManagedImage", "imageId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Compute/images/managed_img_1",
       "location": "westus2"}, {"runOutputName": "vhd_1", "artifactTags": {"is_vhd":
-      "True"}, "type": "VHD"}]}}'''
+      "True"}, "type": "VHD"}]}, "identity": {"type": "UserAssigned", "userAssignedIdentities":
+      {"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1":
+      {}}}}'''
     headers:
       Accept:
       - application/json
@@ -614,18 +711,18 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '783'
+      - '1063'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-imagebuilder/0.2.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-imagebuilder/0.4.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2020-02-14
   response:
     body:
       string: "{\n \"properties\": {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n
@@ -638,20 +735,22 @@ interactions:
         \   \"type\": \"ManagedImage\"\n   },\n   {\n    \"artifactTags\": {\n     \"is_vhd\":
         \"True\"\n    },\n    \"runOutputName\": \"vhd_1\",\n    \"type\": \"VHD\"\n
         \  }\n  ],\n  \"provisioningState\": \"Creating\",\n  \"buildTimeoutInMinutes\":
-        0\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
+        0\n },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
+        {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
+        {}\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
         \"name\": \"template01\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
         \"location\": \"westus2\",\n \"tags\": {}\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/62411cca-19d5-443e-ba4c-92160feb1285?api-version=2019-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/7d223748-ef89-4ec1-bc18-f92eaf8ca640?api-version=2020-02-14
       cache-control:
       - no-cache
       content-length:
-      - '1269'
+      - '1564'
       content-type:
       - application/json
       date:
-      - Thu, 26 Mar 2020 13:06:28 GMT
+      - Wed, 03 Jun 2020 08:11:36 GMT
       expires:
       - '-1'
       pragma:
@@ -663,7 +762,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1179'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -681,15 +780,15 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-imagebuilder/0.2.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-imagebuilder/0.4.0 Azure-SDK-For-Python AZURECLI/2.7.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/62411cca-19d5-443e-ba4c-92160feb1285?api-version=2019-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus2/operations/7d223748-ef89-4ec1-bc18-f92eaf8ca640?api-version=2020-02-14
   response:
     body:
-      string: "{\n \"name\": \"62411CCA-19D5-443E-BA4C-92160FEB1285\",\n \"status\":
-        \"Succeeded\",\n \"startTime\": \"2020-03-26T13:06:27.0964312Z\",\n \"endTime\":
-        \"2020-03-26T13:06:57.2403669Z\"\n}"
+      string: "{\n \"name\": \"7D223748-EF89-4EC1-BC18-F92EAF8CA640\",\n \"status\":
+        \"Succeeded\",\n \"startTime\": \"2020-06-03T08:11:35.2421983Z\",\n \"endTime\":
+        \"2020-06-03T08:12:05.5622244Z\"\n}"
     headers:
       cache-control:
       - no-cache
@@ -698,7 +797,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 26 Mar 2020 13:06:59 GMT
+      - Wed, 03 Jun 2020 08:12:09 GMT
       expires:
       - '-1'
       pragma:
@@ -730,10 +829,10 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-imagebuilder/0.2.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-imagebuilder/0.4.0 Azure-SDK-For-Python AZURECLI/2.7.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2020-02-14
   response:
     body:
       string: "{\n \"properties\": {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n
@@ -747,18 +846,21 @@ interactions:
         \   \"type\": \"ManagedImage\"\n   },\n   {\n    \"artifactTags\": {\n     \"is_vhd\":
         \"True\"\n    },\n    \"runOutputName\": \"vhd_1\",\n    \"type\": \"VHD\"\n
         \  }\n  ],\n  \"provisioningState\": \"Succeeded\",\n  \"buildTimeoutInMinutes\":
-        0\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
+        0\n },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
+        {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
+        {\n    \"principalId\": \"b3c30782-0093-43f1-b550-e9967ed450f6\",\n    \"clientId\":
+        \"405d5dac-2691-4ee5-95ff-1467f3405efc\"\n   }\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
         \"name\": \"template01\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
         \"location\": \"westus2\",\n \"tags\": {}\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1360'
+      - '1773'
       content-type:
       - application/json
       date:
-      - Thu, 26 Mar 2020 13:07:01 GMT
+      - Wed, 03 Jun 2020 08:12:10 GMT
       expires:
       - '-1'
       pragma:
@@ -790,12 +892,12 @@ interactions:
       ParameterSetName:
       - -n -g --defer
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-imagebuilder/0.2.1 Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-imagebuilder/0.4.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2020-02-14
   response:
     body:
       string: "{\n \"properties\": {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n
@@ -809,18 +911,21 @@ interactions:
         \   \"type\": \"ManagedImage\"\n   },\n   {\n    \"artifactTags\": {\n     \"is_vhd\":
         \"True\"\n    },\n    \"runOutputName\": \"vhd_1\",\n    \"type\": \"VHD\"\n
         \  }\n  ],\n  \"provisioningState\": \"Succeeded\",\n  \"buildTimeoutInMinutes\":
-        0\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
+        0\n },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
+        {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
+        {\n    \"principalId\": \"b3c30782-0093-43f1-b550-e9967ed450f6\",\n    \"clientId\":
+        \"405d5dac-2691-4ee5-95ff-1467f3405efc\"\n   }\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
         \"name\": \"template01\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
         \"location\": \"westus2\",\n \"tags\": {}\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1360'
+      - '1773'
       content-type:
       - application/json
       date:
-      - Thu, 26 Mar 2020 13:07:03 GMT
+      - Wed, 03 Jun 2020 08:12:12 GMT
       expires:
       - '-1'
       pragma:

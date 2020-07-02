@@ -34,31 +34,31 @@ class KeyVaultPrivateEndpointClient(PrivateEndpointClient):
         return client.list_by_vault(resource_group_name, name)
 
     def approve_private_endpoint_connection(self, cmd, resource_group_name,
-                                            service_name, name, approval_description=None):
+                                            resource_name, name, approval_description=None):
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
         return _update_private_endpoint_connection_status(cmd=cmd,
                                                           client=client,
                                                           resource_group_name=resource_group_name,
-                                                          vault_name=service_name,
+                                                          vault_name=resource_name,
                                                           private_endpoint_connection_name=name,
                                                           is_approved=True,
                                                           description=approval_description)
 
     def reject_private_endpoint_connection(self, cmd, resource_group_name,
-                                           service_name, name, rejection_description=None):
+                                           resource_name, name, rejection_description=None):
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
         return _update_private_endpoint_connection_status(cmd=cmd,
                                                           client=client,
                                                           resource_group_name=resource_group_name,
-                                                          vault_name=service_name,
+                                                          vault_name=resource_name,
                                                           private_endpoint_connection_name=name,
                                                           is_approved=False,
                                                           description=rejection_description)
 
-    def remove_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
+    def remove_private_endpoint_connection(self, cmd, resource_group_name, resource_name, name):
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
-        return client.delete(resource_group_name, service_name, name)
+        return client.delete(resource_group_name, resource_name, name)
 
-    def show_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
+    def show_private_endpoint_connection(self, cmd, resource_group_name, resource_name, name):
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
-        return client.get(resource_group_name, service_name, name)
+        return client.get(resource_group_name, resource_name, name)

@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import (get_location_type, get_resource_
                                                 get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
-from azure.cli.core.local_context import LocalContextAttribute, SET, GET, ALL
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 from azure.cli.command_modules.network._validators import (
     dns_zone_name_type,
     validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
@@ -36,12 +36,14 @@ from azure.cli.command_modules.network._validators import (
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
     validate_application_gateway_identity, validate_virtul_network_gateway, validate_private_dns_zone,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
-    process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument)
+    process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
+    process_vnet_name_or_id)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
     get_sdk_completer)
+from azure.cli.command_modules.network._actions import AddBackendAddressCreate
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -90,9 +92,9 @@ def load_arguments(self, _):
     nsg_name_type = CLIArgumentType(options_list='--nsg-name', metavar='NAME', help='Name of the network security group.')
     circuit_name_type = CLIArgumentType(options_list='--circuit-name', metavar='NAME', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
     virtual_network_name_type = CLIArgumentType(options_list='--vnet-name', metavar='NAME', help='The virtual network (VNet) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'),
-                                                local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[GET]))
+                                                local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
     subnet_name_type = CLIArgumentType(options_list='--subnet-name', metavar='NAME', help='The subnet name.',
-                                       local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[GET]))
+                                       local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
     load_balancer_name_type = CLIArgumentType(options_list='--lb-name', metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
     private_ip_address_type = CLIArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
     cookie_based_affinity_type = CLIArgumentType(arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
@@ -211,10 +213,16 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway root-cert') as c:
         c.argument('keyvault_secret', help='KeyVault secret ID.')
 
-    with self.argument_context('network application-gateway frontend-ip') as c:
-        c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
+    with self.argument_context('network application-gateway frontend-ip create') as c:
         c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-        c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
+
+    for item in ['create', 'update']:
+        with self.argument_context('network application-gateway frontend-ip {}'.format(item)) as c:
+            c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
+            c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
+
+    with self.argument_context('network application-gateway frontend-ip update') as c:
+        c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), deprecate_info=c.deprecate(hide=True))
 
     for item in ['frontend-port', 'http-settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -527,7 +535,7 @@ def load_arguments(self, _):
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
 
-        c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
+        c.argument('zone_type', help='Type of DNS zone to create.', deprecate_info=c.deprecate(), arg_type=get_enum_type(ZoneType))
 
         c.argument('registration_vnets',
                    arg_group='Private Zone',
@@ -602,7 +610,7 @@ def load_arguments(self, _):
         c.argument('tag', help='Record tag')
 
     with self.argument_context('network dns record-set cname') as c:
-        c.argument('cname', options_list=['--cname', '-c'], help='Canonical name.')
+        c.argument('cname', options_list=['--cname', '-c'], help='Value of the cname record-set. It should be Canonical name.')
 
     with self.argument_context('network dns record-set mx') as c:
         c.argument('exchange', options_list=['--exchange', '-e'], help='Exchange metric.')
@@ -653,7 +661,9 @@ def load_arguments(self, _):
         c.argument('bandwidth_in_mbps', er_bandwidth_type, validator=bandwidth_validator_factory(mbps=True), help='Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps')
         c.argument('service_provider_name', options_list='--provider', help="Name of the ExpressRoute Service Provider.")
         c.argument('peering_location', help="Name of the peering location.")
-        c.argument('device_path', options_list='--path', arg_type=get_enum_type(device_path_values))
+        c.argument('peering_name', help='The name of the peering')
+        c.argument('device_path', options_list='--path', arg_type=get_enum_type(device_path_values),
+                   help='The path of the device')
         c.argument('vlan_id', type=int)
         c.argument('allow_global_reach', arg_type=get_three_state_flag(), min_api='2018-07-01', help='Enable global reach on the circuit.')
         c.argument('express_route_port', help='Name or ID of an ExpressRoute port.', min_api='2018-08-01', validator=validate_express_route_port)
@@ -771,9 +781,9 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help=subnet_help, id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
-        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az keyvault(storage/etc) private-link-resource list" to obtain the list of group ids.')
+        c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'], help='The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use "az network private-link-resource list" to obtain the list of group ids.')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
-        c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
+        c.argument('manual_request', help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.", arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
 
@@ -869,6 +879,23 @@ def load_arguments(self, _):
         c.argument('vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
         c.ignore('vnet_type', 'subnet_type')
 
+    with self.argument_context('network lb address-pool') as c:
+        c.argument('load_balancer_name', load_balancer_name_type, id_part=None)
+        c.argument('backend_address_pool_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('backend_addresses', options_list=['--backend-address'], nargs='+', action=AddBackendAddressCreate, is_preview=True)
+        c.argument('backend_addresses_config_file', type=get_json_object, is_preview=True)
+        c.argument('vnet', help='Name or Id of the virtual network applied to all backend addresses.', validator=process_vnet_name_or_id)
+
+    with self.argument_context('network lb address-pool address') as c:
+        c.argument('backend_address_pool_name',
+                   options_list=['--pool-name'],
+                   help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('address_name', options_list=['--name', '-n'], help='Name of the backend address.')
+        c.argument('vnet', help='Name or Id of the virtual network.', validator=process_vnet_name_or_id)
+        c.argument('ip_address', help='Ip Address within the Virtual Network.')
+
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01')
 
@@ -916,7 +943,7 @@ def load_arguments(self, _):
 
     for item in ['local-gateway', 'vnet-gateway']:
         with self.argument_context('network {}'.format(item)) as c:
-            c.argument('asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
+            c.argument('asn', type=int, arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
             c.argument('peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
     # endregion
 
@@ -938,7 +965,7 @@ def load_arguments(self, _):
         nsg_help = get_folded_parameter_help_string('network security group', allow_none=True, default_none=True)
         c.argument('network_security_group', help=nsg_help, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
 
-        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
+        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_cross_sub=False)
         c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
 
     with self.argument_context('network nic update') as c:
@@ -1595,13 +1622,14 @@ def load_arguments(self, _):
     with self.argument_context('network vnet create') as c:
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('vnet_name', virtual_network_name_type, options_list=['--name', '-n'], completer=None,
-                   local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[SET], scopes=[ALL]))
+                   local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
 
     with self.argument_context('network vnet create', arg_group='Subnet') as c:
         c.argument('subnet_name', help='Name of a new subnet to create within the VNet.',
-                   local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[SET], scopes=[ALL]))
+                   local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX', max_api='2018-07-01')
         c.argument('subnet_prefix', options_list='--subnet-prefixes', nargs='+', min_api='2018-08-01', help='Space-separated list of address prefixes in CIDR format for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIXES')
+        c.argument('network_security_group', options_list=['--network-security-group', '--nsg'], validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
 
     with self.argument_context('network vnet update') as c:
         c.argument('address_prefixes', nargs='+')
@@ -1626,7 +1654,7 @@ def load_arguments(self, _):
         c.argument('address_prefix', metavar='PREFIX', help='Address prefix in CIDR format.', max_api='2018-07-01')
         c.argument('address_prefix', metavar='PREFIXES', options_list='--address-prefixes', nargs='+', help='Space-separated list of address prefixes in CIDR format.', min_api='2018-08-01')
         c.argument('virtual_network_name', virtual_network_name_type)
-        c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
+        c.argument('network_security_group', options_list=['--network-security-group', '--nsg'], validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
         c.argument('service_endpoint_policy', nargs='+', min_api='2018-07-01', help='Space-separated list of names or IDs of service endpoint policies to apply.', validator=validate_service_endpoint_policy)
@@ -1636,7 +1664,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet subnet create') as c:
         c.argument('subnet_name', arg_type=subnet_name_type, options_list=['--name', '-n'], id_part='child_name_1',
-                   local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[SET], scopes=[ALL]))
+                   local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
 
     with self.argument_context('network vnet subnet update') as c:
         c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string "" to detach it.')
@@ -1814,5 +1842,5 @@ def load_arguments(self, _):
             c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type',
                        arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
             c.argument('resource_group_name', required=False)
-            c.argument('service_name', required=False, help='Name of the resource')
+            c.argument('resource_name', required=False, help='Name of the resource')
     # endregion

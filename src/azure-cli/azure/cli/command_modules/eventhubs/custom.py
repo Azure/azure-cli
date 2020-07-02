@@ -11,22 +11,29 @@ from azure.cli.core.profiles import ResourceType
 
 # , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
-def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, default_action=None):
-    # from azure.mgmt.eventhub.models import EHNamespace, Sku
+def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
+    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
+    IdentityType = cmd.get_models('IdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
 
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
+        ehparam = EHNamespace()
+        ehparam.location = location
+        ehparam.tags = tags
+        ehparam.sku = Sku(name=sku, tier=sku, capacity=capacity)
+        ehparam.is_auto_inflate_enabled = is_auto_inflate_enabled
+        ehparam.maximum_throughput_units = maximum_throughput_units
+        ehparam.kafka_enabled = is_kafka_enabled
+        ehparam.zone_redundant = zone_redundant
+        ehparam.cluster_arm_id = cluster_arm_id
+        if identity:
+            ehparam.identity = Identity(type=IdentityType.system_assigned)
+
         client.create_or_update(
             resource_group_name=resource_group_name,
             namespace_name=namespace_name,
-            parameters=EHNamespace(
-                location=location,
-                tags=tags,
-                sku=Sku(name=sku, tier=sku, capacity=capacity),
-                is_auto_inflate_enabled=is_auto_inflate_enabled,
-                maximum_throughput_units=maximum_throughput_units,
-                kafka_enabled=is_kafka_enabled)).result()
+            parameters=ehparam).result()
 
     if default_action:
         netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
@@ -36,9 +43,15 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     return client.get(resource_group_name, namespace_name)
 
 
-def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, default_action=None):
+def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
+                         maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
+                         identity=None, key_source=None, key_name=None, key_vault_uri=None, key_version=None):
+    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
+    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
+    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
+    IdentityType = cmd.get_models('IdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
 
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
         if tags:
             instance.tags = tags
 
@@ -58,6 +71,17 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
         if is_kafka_enabled:
             instance.kafka_enabled = is_kafka_enabled
 
+        if identity is True and instance.identity is None:
+            instance.identity = Identity(type=IdentityType.system_assigned)
+        elif instance.identity and instance.encryption is None:
+            instance.encryption = Encryption()
+            if key_source:
+                instance.encryption.key_source = key_source
+            if key_name and key_vault_uri:
+                keyprop = []
+                keyprop.append(KeyVaultProperties(key_name=key_name, key_vault_uri=key_vault_uri, key_version=key_version))
+                instance.encryption.key_vault_properties = keyprop
+
         if default_action:
             resourcegroup = instance.id.split('/')[4]
             netwrokruleset = client.get_network_rule_set(resourcegroup, instance.name)
@@ -68,7 +92,7 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
 
 
 def cli_namespace_list(cmd, client, resource_group_name=None):
-    if cmd.supported_api_version(min_api='2017-04-01'):
+    if cmd.supported_api_version(min_api='2018-01-01-preview'):
         if resource_group_name:
             return client.list_by_resource_group(resource_group_name=resource_group_name)
 
@@ -128,7 +152,6 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
                           enabled=None, skip_empty_archives=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
-    # from azure.mgmt.eventhub.models import CaptureDescription, Destination, EncodingCaptureDescription
     capturedescription, destination, encodingcapturedescription = cmd.get_models('CaptureDescription', 'Destination', 'EncodingCaptureDescription')
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
@@ -150,9 +173,9 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
         if enabled and instance.capture_description:
             instance.capture_description.enabled = enabled
             if capture_interval_seconds:
-                instance.interval_in_seconds = capture_interval_seconds
+                instance.capture_description.interval_in_seconds = capture_interval_seconds
             if capture_size_limit_bytes:
-                instance.size_limit_in_bytes = capture_size_limit_bytes
+                instance.capture_description.size_limit_in_bytes = capture_size_limit_bytes
             if destination_name:
                 instance.capture_description.destination.name = destination_name
             if storage_account_resource_id:

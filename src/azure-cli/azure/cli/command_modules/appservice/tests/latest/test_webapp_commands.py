@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 import unittest
-import jmespath
 import mock
-import uuid
 import os
 import time
 import tempfile
@@ -14,7 +12,7 @@ import requests
 import datetime
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -747,7 +745,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
                 self.cmd('webapp ssh -g {} -n {} --timeout 5'.format("foo", "bar"))
             return
 
-        runtime = 'node|8.11'
+        runtime = 'node|12-lts'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)
         self.cmd(
@@ -781,7 +779,7 @@ class LinuxASESSHScenarioTest(ScenarioTest):
 class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_remote_ssh(self, resource_group):
-        runtime = 'node|8.11'
+        runtime = 'node|12-lts'
         plan = self.create_random_name(
             prefix='webapp-remote-ssh-plan', length=40)
         webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
@@ -800,7 +798,7 @@ class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
 class LinuxWebappRemoteDebugScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_remote_debug(self, resource_group):
-        runtime = 'node|8.11'
+        runtime = 'node|12-lts'
         plan = self.create_random_name(
             prefix='webapp-remote-debug-plan', length=40)
         webapp = self.create_random_name(
@@ -1354,6 +1352,41 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
+            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
+            JMESPathCheck('thumbprint', cert_thumbprint)
+        ])
+
+        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                webapp_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
+                webapp_name), cert_thumbprint)
+        ])
+
+    @ResourceGroupPreparer(parameter_name='kv_resource_group', location='westeurope')
+    @ResourceGroupPreparer(location='westeurope')
+    def test_webapp_ssl_import_crossrg(self, resource_group, kv_resource_group):
+        plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
+        webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
+        kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
+        # Cert Generated using
+        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-cert'
+        # we configure tags here in a hope to capture a repro for https://github.com/Azure/azure-cli/issues/6929
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        kv_id = self.cmd('keyvault create -g {} -n {}'.format(kv_resource_group, kv_name)).get_output_in_json()['id']
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
+            kv_resource_group, kv_name, 'Microsoft.Azure.WebSites'))
+        self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
+            cert_name, kv_name, pfx_file, cert_password))
+
+        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_id, cert_name), checks=[
             JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
@@ -2019,6 +2052,7 @@ class WebappAuthenticationTest(ScenarioTest):
             JMESPathCheck('tokenStoreEnabled', None),
             JMESPathCheck('allowedExternalRedirectUrls', None),
             JMESPathCheck('tokenRefreshExtensionHours', None),
+            JMESPathCheck('runtimeVersion', None),
             JMESPathCheck('clientId', None),
             JMESPathCheck('clientSecret', None),
             JMESPathCheck('allowedAudiences', None),
@@ -2030,7 +2064,7 @@ class WebappAuthenticationTest(ScenarioTest):
 
         # update and verify
         result = self.cmd('webapp auth update -g {} -n {} --enabled true --action LoginWithFacebook '
-                          '--token-store false --token-refresh-extension-hours 7.2 '
+                          '--token-store false --token-refresh-extension-hours 7.2 --runtime-version 1.2.8 '
                           '--aad-client-id aad_client_id --aad-client-secret aad_secret '
                           '--aad-allowed-token-audiences https://audience1 --aad-token-issuer-url https://issuer_url '
                           '--facebook-app-id facebook_id --facebook-app-secret facebook_secret '
@@ -2042,6 +2076,7 @@ class WebappAuthenticationTest(ScenarioTest):
                               JMESPathCheck('enabled', True),
                               JMESPathCheck('tokenStoreEnabled', False),
                               JMESPathCheck('tokenRefreshExtensionHours', 7.2),
+                              JMESPathCheck('runtimeVersion', '1.2.8'),
                               JMESPathCheck('clientId', 'aad_client_id'),
                               JMESPathCheck('clientSecret', 'aad_secret'),
                               JMESPathCheck('issuer', 'https://issuer_url'),
@@ -2365,6 +2400,173 @@ class WebappNetworkConnectionTests(ScenarioTest):
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
+
+
+# LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
+class FunctionappDeploymentLogsScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_functionapp_show_deployment_logs(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='show-deployment-funcapp', length=40)
+        plan_name = self.create_random_name(prefix='show-deployment-funcapp', length=40)
+        zip_file = os.path.join(TEST_DIR, 'sample_dotnet_function/sample_dotnet_function.zip')
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp log deployment show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+        deployment_1 = self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)
+        ]).get_output_in_json()
+        self.cmd('functionapp log deployment show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('id', deployment_1['id'])
+        ])
+
+        deployment_2 = self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)
+        ]).get_output_in_json()
+        self.cmd('functionapp log deployment show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('id', deployment_2['id'])
+        ])
+        self.cmd('functionapp log deployment show -g {} -n {} --deployment-id {}'.format(resource_group, functionapp_name, deployment_1['id']), checks=[
+            JMESPathCheck('id', deployment_1['id'])
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_functionapp_list_deployment_logs(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='show-deployment-funcapp', length=40)
+        plan_name = self.create_random_name(prefix='show-deployment-funcapp', length=40)
+        zip_file = os.path.join(TEST_DIR, 'sample_dotnet_function/sample_dotnet_function.zip')
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp log deployment list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+        deployment_1 = self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)
+        ]).get_output_in_json()
+        self.cmd('functionapp log deployment list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].id', deployment_1['id']),
+        ])
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)
+        ]).get_output_in_json()
+        self.cmd('functionapp log deployment list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 2)
+        ])
+
+
+class WebappDeploymentLogsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_show_deployment_logs(self, resource_group):
+        webapp_name = self.create_random_name('show-deployment-webapp', 40)
+        plan_name = self.create_random_name('show-deployment-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'test.zip')
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('id', deployment_1['id']),
+        ])
+
+        deployment_2 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('id', deployment_2['id']),
+        ])
+        self.cmd('webapp log deployment show -g {} -n {} --deployment-id {}'.format(resource_group, webapp_name, deployment_1['id']), checks=[
+            JMESPathCheck('id', deployment_1['id']),
+        ])
+
+    @ResourceGroupPreparer()
+    def test_webapp_list_deployment_logs(self, resource_group):
+        webapp_name = self.create_random_name('list-deployment-webapp', 40)
+        plan_name = self.create_random_name('list-deployment-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'test.zip')
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].id', deployment_1['id']),
+        ])
+
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 2)
+        ])
+
+
+class WebappLocalContextScenarioTest(LocalContextScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    def test_webapp_local_context(self, resource_group):
+        from knack.util import CLIError
+        self.kwargs.update({
+            'plan_name': self.create_random_name(prefix='webapp-plan-', length=24),
+            'webapp_name': self.create_random_name(prefix='webapp-', length=24)
+        })
+
+        self.cmd('appservice plan create -g {rg} -n {plan_name}')
+        self.cmd('appservice plan show')
+        with self.assertRaises(CLIError):
+            self.cmd('appservice plan delete')
+
+        self.cmd('webapp create -n {webapp_name}')
+        self.cmd('webapp show')
+        with self.assertRaises(CLIError):
+            self.cmd('webapp delete')
+
+        self.cmd('webapp delete -n {webapp_name}')
+        self.cmd('appservice plan delete -n {plan_name} -y')
+
+
+class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    @StorageAccountPreparer()
+    def test_functionapp_local_context(self, resource_group, storage_account):
+        from knack.util import CLIError
+        self.kwargs.update({
+            'plan_name': self.create_random_name(prefix='functionapp-plan-', length=24),
+            'functionapp_name': self.create_random_name(prefix='functionapp-', length=24),
+            'storage_account': storage_account
+        })
+
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku B2')
+        self.cmd('functionapp plan show')
+        with self.assertRaises(CLIError):
+            self.cmd('functionapp plan delete')
+
+        self.cmd('functionapp create -n {functionapp_name} --storage-account {storage_account}')
+        self.cmd('functionapp show')
+        with self.assertRaises(CLIError):
+            self.cmd('functionapp delete')
+
+        self.cmd('functionapp delete -n {functionapp_name}')
+        self.cmd('functionapp plan delete -n {plan_name} -y')
 
 
 if __name__ == '__main__':

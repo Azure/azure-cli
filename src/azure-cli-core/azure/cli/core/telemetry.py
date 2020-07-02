@@ -203,6 +203,10 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 _session = TelemetrySession()
 
 
+def has_exceptions():
+    return len(_session.exceptions) > 0
+
+
 def _user_agrees_to_telemetry(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
@@ -433,6 +437,7 @@ def _get_azure_subscription_id():
 
 
 def _get_shell_type():
+    # This method is not accurate and needs improvement, for instance all shells on Windows return 'cmd'.
     if 'ZSH_VERSION' in os.environ:
         return 'zsh'
     if 'BASH_VERSION' in os.environ:
@@ -441,6 +446,9 @@ def _get_shell_type():
         return 'ksh'
     if 'WINDIR' in os.environ:
         return 'cmd'
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        return 'cloud-shell'
     return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
 

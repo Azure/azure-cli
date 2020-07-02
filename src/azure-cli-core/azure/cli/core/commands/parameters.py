@@ -12,7 +12,7 @@ from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_P
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.local_context import LocalContextAttribute, SET, GET, ALL
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
@@ -242,7 +242,7 @@ resource_group_name_type = CLIArgumentType(
     configured_default='group',
     local_context_attribute=LocalContextAttribute(
         name='resource_group_name',
-        actions=[SET, GET],
+        actions=[LocalContextAction.SET, LocalContextAction.GET],
         scopes=[ALL]
     ))
 
@@ -257,7 +257,12 @@ def get_location_type(cli_ctx):
         help="Location. Values from: `az account list-locations`. "
              "You can configure the default location using `az configure --defaults location=<location>`.",
         metavar='LOCATION',
-        configured_default='location')
+        configured_default='location',
+        local_context_attribute=LocalContextAttribute(
+            name='location',
+            actions=[LocalContextAction.SET, LocalContextAction.GET],
+            scopes=[ALL]
+        ))
     return location_type
 
 
@@ -302,6 +307,13 @@ zone_type = CLIArgumentType(
     choices=['1', '2', '3'],
     nargs=1
 )
+
+vnet_name_type = CLIArgumentType(
+    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET])
+)
+
+subnet_name_type = CLIArgumentType(
+    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
 
 def patch_arg_make_required(argument):

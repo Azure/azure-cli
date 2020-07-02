@@ -71,8 +71,10 @@ def load_command_table(self, _):
         g.custom_command('set-policy', 'set_policy')
         g.custom_command('delete-policy', 'delete_policy')
         g.command('list-deleted', 'list_deleted')
-        g.generic_update_command('update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
-                                 custom_func_name='update_keyvault')
+        g.generic_update_command(
+            'update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
+            custom_func_name='update_keyvault',
+            doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
 
     with self.command_group('keyvault network-rule',
                             kv_vaults_sdk,
@@ -121,6 +123,8 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_key', doc_string_source=data_doc_string.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
+        g.keyvault_command('encrypt', 'encrypt', is_preview=True)
+        g.keyvault_command('decrypt', 'decrypt', is_preview=True)
 
     with self.command_group('keyvault secret', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_secrets',

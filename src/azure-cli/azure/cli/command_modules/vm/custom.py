@@ -983,8 +983,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     if size:
         result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
     if zone:
-        result = [x for x in result if x.resource_type == 'virtualMachines' and
-                  x.location_info and x.location_info[0].zones]
+        result = [x for x in result if x.location_info and x.location_info[0].zones]
     return result
 
 
@@ -2411,6 +2410,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
 
         if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
             naming_prefix = computer_name_prefix
+
+        if os_version and os_version != 'latest':
+            logger.warning('You are deploying VMSS pinned to a specific image version from Azure Marketplace. '
+                           'Consider using "latest" as the image version.')
 
         vmss_resource = build_vmss_resource(
             cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,

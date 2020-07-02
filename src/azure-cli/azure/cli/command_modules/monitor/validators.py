@@ -7,16 +7,6 @@ from knack.util import CLIError
 from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
 
 
-def make_cluster_creation_as_no_wait_by_default(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-
-    # Make cluster creation no wait by default before ADX cluster can be provisioned automatically.
-    # TODO: remove this method and make cluster creation support both wait and no wait
-    #  after ADX cluster can be provisioned automatically.
-    cmd.supports_no_wait = True
-    namespace.no_wait = True
-
-
 def process_autoscale_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
 

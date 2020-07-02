@@ -216,6 +216,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('register', 'register_feature')
+        g.custom_command('unregister', 'unregister_feature')
 
     # Tag commands
     with self.command_group('tag', resource_tag_sdk) as g:
@@ -256,9 +257,11 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub wait', hide=True))
         g.custom_command('cancel', 'cancel_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub cancel', hide=True))
 
-    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, deprecate_info=self.deprecate(redirect='deployment operation sub', hide=True)) as g:
-        g.custom_command('list', 'list_deployment_operations_at_subscription_scope')
-        g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations)
+    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+        g.custom_command('list', 'list_deployment_operations_at_subscription_scope',
+                         deprecate_info=self.deprecate(redirect='deployment operation sub list', hide=True))
+        g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations,
+                              deprecate_info=self.deprecate(redirect='deployment operation sub show', hide=True))
 
     # az deployment sub
     with self.command_group('deployment sub', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
@@ -407,9 +410,3 @@ def load_command_table(self, _):
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
-
-    with self.command_group('') as g:
-        g.custom_command('rest', 'rest_call')
-
-    with self.command_group('') as g:
-        g.custom_command('version', 'show_version')

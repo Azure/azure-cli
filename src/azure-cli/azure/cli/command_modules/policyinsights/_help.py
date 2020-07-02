@@ -241,6 +241,21 @@ examples:
         az policy state summarize --filter "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
 """
 
+helps['policy state trigger-scan'] = """
+type: command
+short-summary: Trigger a policy compliance evaluation for a scope.
+examples:
+  - name: Trigger a policy compliance evaluation at the current subscription scope.
+    text: >
+        az policy state trigger-scan
+  - name: Trigger a policy compliance evaluation for a resource group.
+    text: >
+        az policy state trigger-scan -g "myRg"
+  - name: Trigger a policy compliance evaluation for a resource group and do not wait for it to complete.
+    text: >
+        az policy state trigger-scan -g "myRg" --no-wait
+"""
+
 helps['policy metadata'] = """
 type: group
 short-summary: Get policy metadata resources.

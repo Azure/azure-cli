@@ -4,10 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from .resource_providers import GeneralPrivateEndpointClient
+from .resource_providers.batch_provider import BatchPrivateEndpointClient
 from knack.util import CLIError
 
 TYPE_CLIENT_MAPPING = {
     # 'Microsoft.Keyvault/vaults': KeyVaultPrivateEndpointClient # vaults
+    'Microsoft.Batch/batchAccounts': BatchPrivateEndpointClient
 }
 
 
@@ -19,6 +21,12 @@ def register_providers():
     _register_one_provider('Microsoft.DBforMySQL/servers', '2018-06-01', False, '2017-12-01-preview')
     _register_one_provider('Microsoft.DBforMariaDB/servers', '2018-06-01', False)
     _register_one_provider('Microsoft.DBforPostgreSQL/servers', '2018-06-01', False, '2017-12-01-preview')
+    _register_one_provider('Microsoft.DocumentDB/databaseAccounts', '2019-08-01-preview', False, '2020-03-01')
+    _register_one_provider('Microsoft.Devices/IotHubs', '2020-03-01', True)
+    _register_one_provider('Microsoft.Web/sites', '2019-08-01', False)
+    _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
+    _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
+    _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None):
@@ -54,30 +62,30 @@ def list_private_link_resource(cmd, resource_group_name, name, resource_provider
     return client.list_private_link_resource(cmd, resource_group_name, name)
 
 
-def approve_private_endpoint_connection(cmd, resource_group_name, service_name, resource_provider,
+def approve_private_endpoint_connection(cmd, resource_group_name, resource_name, resource_provider,
                                         name, approval_description=None):
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
     return client.approve_private_endpoint_connection(cmd, resource_group_name,
-                                                      service_name, name,
+                                                      resource_name, name,
                                                       approval_description)
 
 
-def reject_private_endpoint_connection(cmd, resource_group_name, service_name, resource_provider,
+def reject_private_endpoint_connection(cmd, resource_group_name, resource_name, resource_provider,
                                        name, rejection_description=None):
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
     return client.reject_private_endpoint_connection(cmd, resource_group_name,
-                                                     service_name, name,
+                                                     resource_name, name,
                                                      rejection_description)
 
 
-def remove_private_endpoint_connection(cmd, resource_group_name, service_name, resource_provider, name):
+def remove_private_endpoint_connection(cmd, resource_group_name, resource_name, resource_provider, name):
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
-    return client.remove_private_endpoint_connection(cmd, resource_group_name, service_name, name)
+    return client.remove_private_endpoint_connection(cmd, resource_group_name, resource_name, name)
 
 
-def show_private_endpoint_connection(cmd, resource_group_name, service_name, resource_provider, name):
+def show_private_endpoint_connection(cmd, resource_group_name, resource_name, resource_provider, name):
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
-    return client.show_private_endpoint_connection(cmd, resource_group_name, service_name, name)
+    return client.show_private_endpoint_connection(cmd, resource_group_name, resource_name, name)
 
 
 def list_private_endpoint_connection(cmd, resource_group_name, name, resource_provider):
