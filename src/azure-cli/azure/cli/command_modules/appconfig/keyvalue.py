@@ -66,7 +66,7 @@ def import_config(cmd,
             # JSON content type is only supported with JSON format.
             # Error out if user has provided JSON content type with any other format.
             if format_ != 'json' and __is_json_content_type(content_type):
-                raise CLIError("Failed to import '{}' file format with '{}' content type. Please provide JSON content type with JSON file format only.")
+                raise CLIError("Failed to import '{}' file format with '{}' content type. Please provide JSON file format if your content type is JSON.")
 
         if separator:
             # If separator is provided, use max depth by default unless depth is specified.
@@ -303,7 +303,7 @@ def set_key(cmd,
                 try:
                     # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
                     value = '""' if value is None else value
-                    value = json.dumps(json.loads(value))
+                    value = json.dumps(json.loads(value), separators=(',', ':'))
                 except ValueError:
                     raise CLIError('Value "{}" cannot be parsed as JSON. Since the content type of this setting is "{}", make sure that the value is valid JSON.'.format(value, content_type))
 
@@ -314,7 +314,7 @@ def set_key(cmd,
             if content_type and __is_json_content_type(content_type):
                 try:
                     # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
-                    value = json.dumps(json.loads(value))
+                    value = json.dumps(json.loads(value), separators=(',', ':'))
                 except ValueError:
                     raise CLIError('Value "{}" cannot be parsed as JSON. Since the content type of this setting is "{}", set the value again in valid JSON format.'.format(value, content_type))
 

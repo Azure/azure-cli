@@ -687,9 +687,9 @@ def __flatten_json_key_value(key, value, flattened_data, depth, separator):
             if key in flattened_data:
                 logger.debug(
                     "The key %s already exist, value has been overwritten.", key)
-            flattened_data[key] = json.dumps(value)
+            flattened_data[key] = json.dumps(value, separators=(',', ':'))
     else:
-        flattened_data[key] = json.dumps(value)
+        flattened_data[key] = json.dumps(value, separators=(',', ':'))
 
 
 def __flatten_key_value(key, value, flattened_data, depth, separator):
