@@ -1826,7 +1826,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|8')])
+            JMESPathCheck('linuxFxVersion', 'Node|10')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -1853,7 +1853,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|10')])
+            JMESPathCheck('linuxFxVersion', 'Node|10')])
 
     @ResourceGroupPreparer(location='westus')
     @StorageAccountPreparer()
@@ -1866,7 +1866,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'PYTHON|3.7')])
+            JMESPathCheck('linuxFxVersion', 'Python|3.7')])
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
@@ -1899,13 +1899,11 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|12')
+            JMESPathCheck('linuxFxVersion', 'Node|12')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
-                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
-            JMESPathCheck(
-                "[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')
+                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
         ])
 
     @ResourceGroupPreparer(location='westus')
@@ -1919,13 +1917,11 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|12')
+            JMESPathCheck('linuxFxVersion', 'Node|12')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
-                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
-            JMESPathCheck(
-                "[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')
+                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
         ])
 
     @ResourceGroupPreparer(location='westus')
