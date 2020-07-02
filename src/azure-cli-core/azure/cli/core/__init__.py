@@ -30,8 +30,12 @@ logger = get_logger(__name__)
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
-# Extensions that will always be loaded if installed. These extensions don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSION_MODNAMES = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
+
+# [Reserved]
+# Modules that will always be loaded. They don't expose commands but hook into CLI core.
+ALWAYS_LOADED_MODULES = []
+# Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
 
 
 class AzCli(CLI):
@@ -186,7 +190,9 @@ class MainCommandsLoader(CLICommandsLoader):
             If the module is not found, all commands are loaded.
             '''
 
-            if not command_modules:
+            if command_modules is not None:
+                command_modules.extend(ALWAYS_LOADED_MODULES)
+            else:
                 # Perform module discovery
                 command_modules = []
                 try:
@@ -251,7 +257,6 @@ class MainCommandsLoader(CLICommandsLoader):
             def _filter_modname(extensions):
                 # Extension's name may not be the same as its modname. eg. name: virtual-wan, modname: azext_vwan
                 filtered_extensions = []
-                extension_modname.extend(ALWAYS_LOADED_EXTENSION_MODNAMES)
                 for ext in extensions:
                     ext_name = ext.name
                     ext_dir = ext.path or get_extension_path(ext.name)
@@ -263,7 +268,8 @@ class MainCommandsLoader(CLICommandsLoader):
 
             extensions = get_extensions()
             if extensions:
-                if extension_modname:
+                if extension_modname is not None:
+                    extension_modname.extend(ALWAYS_LOADED_EXTENSIONS)
                     extensions = _filter_modname(extensions)
                 allowed_extensions = _handle_extension_suppressions(extensions)
                 module_commands = set(self.command_table.keys())
@@ -375,17 +381,20 @@ class MainCommandsLoader(CLICommandsLoader):
             index_result = command_index.get(args)
             if index_result:
                 index_modules, index_extensions = index_result
-                if index_modules:
-                    _update_command_table_from_modules(args, index_modules)
-                if index_extensions:
-                    # The index won't contain suppressed extensions
-                    _update_command_table_from_extensions([], index_extensions)
+                # Always load modules and extensions, because some of them (like those in
+                # ALWAYS_LOADED_EXTENSIONS) don't expose a command, but hooks into handlers in CLI core
+                _update_command_table_from_modules(args, index_modules)
+                # The index won't contain suppressed extensions
+                _update_command_table_from_extensions([], index_extensions)
 
                 logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
                 # The index may be outdated. Make sure the command appears in the loaded command table
                 command_str = _roughly_parse_command(args)
-                if command_str in self.command_table or command_str in self.command_group_table:
+                if command_str in self.command_table:
                     logger.debug("Found a match in the command table for '%s'", command_str)
+                    return self.command_table
+                if command_str in self.command_group_table:
+                    logger.debug("Found a match in the command group table for '%s'", command_str)
                     return self.command_table
 
                 logger.debug("Could not find a match in the command table for '%s'. The index may be outdated",
