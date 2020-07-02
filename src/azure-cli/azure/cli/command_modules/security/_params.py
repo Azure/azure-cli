@@ -54,6 +54,10 @@ assessment_metadata_severity_arg_type = CLIArgumentType(options_list=('--severit
 # Sub Assessment
 sub_assessment_assessment_name_arg_type = CLIArgumentType(options_list=('--assessment-name'), metavar='ASSESSMENTNAME', help='Name of the assessment resource')
 
+# Regulatory Compliance
+regulatory_compliance_standard_name = CLIArgumentType(option_list=('--standard-name'), metave='STANDARDNAME', help='The compliance standard name')
+regulatory_compliance_control_name = CLIArgumentType(option_list=('--control-name'), metave='CONTROLNAME', help='The compliance control name')
+
 
 def load_arguments(self, _):
     for scope in ['alert',
@@ -71,8 +75,11 @@ def load_arguments(self, _):
                   'workspace-setting',
                   'assessment',
                   'assessment-metadata',
-                  'allowed_connections',
-                  'sub-assessment']:
+                  'sub-assessment',
+                  'regulatory-compliance-standards',
+                  'regulatory-compliance-controls',
+                  'regulatory-compliance-assessments',
+                  'allowed_connections']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',
@@ -87,6 +94,21 @@ def load_arguments(self, _):
             c.argument(
                 'storage_account_name',
                 arg_type=storage_account_arg_type)
+
+    for scope in ['regulatory-compliance-controls']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'standard_name',
+                arg_type=regulatory_compliance_standard_name)
+
+    for scope in ['regulatory-compliance-assessments']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'standard_name',
+                arg_type=regulatory_compliance_standard_name)
+            c.argument(
+                'control_name',
+                arg_type=regulatory_compliance_control_name)
 
     for scope in ['alert update']:
         with self.argument_context('security {}'.format(scope)) as c:

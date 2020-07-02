@@ -456,10 +456,11 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
                       assessment_name=assessment_name,
                       scope=assessed_resource_id)
 
-
+  
 # --------------------------------------------------------------------------------------------
 # Allowed Connections
 # --------------------------------------------------------------------------------------------
+
 
 def list_security_allowed_connections(client):
 
@@ -475,3 +476,42 @@ def get_security_allowed_connections(client, resource_name, resource_group_name)
         client.config.asc_location = loc.name
 
     return client.allowed_connections.get(resource_group_name, resource_name)
+  
+  
+# --------------------------------------------------------------------------------------------
+# Security Regulatory Compliance
+# --------------------------------------------------------------------------------------------
+
+
+def list_regulatory_compliance_standards(client):
+
+    return client.list()
+
+
+def get_regulatory_compliance_standard(client, resource_name):
+
+    return client.get(regulatory_compliance_standard_name=resource_name)
+
+
+def list_regulatory_compliance_controls(client, standard_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name)
+
+
+def get_regulatory_compliance_control(client, resource_name, standard_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=resource_name)
+
+
+def list_regulatory_compliance_assessments(client, standard_name, control_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name,
+                       regulatory_compliance_control_name=control_name)
+
+
+def get_regulatory_compliance_assessment(client, resource_name, standard_name, control_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=control_name,
+                      regulatory_compliance_assessment_name=resource_name)
