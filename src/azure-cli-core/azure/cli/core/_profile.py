@@ -309,7 +309,6 @@ class Profile(object):
 
         import jwt
         from requests import HTTPError
-        from msrestazure.azure_active_directory import MSIAuthentication
         from msrestazure.tools import is_valid_resource_id
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
@@ -390,7 +389,6 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        from msrestazure.azure_active_directory import MSIAuthentication
         auth = MSIAuthentication(resource=resource)
         auth.set_token()
         token_entry = auth.token
@@ -764,9 +762,9 @@ class Profile(object):
 
 class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core.
-    def get_token(self, resource):
-        token_entry = self._vm_msi.get_token(self.resource)
-        return AccessToken(token_entry['access_token'], token_entry['expires_on'])
+    def get_token(self):
+        self.set_token()
+        return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
 
 class MsiAccountTypes(object):
