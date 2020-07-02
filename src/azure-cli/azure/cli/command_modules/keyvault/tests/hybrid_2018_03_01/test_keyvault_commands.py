@@ -724,8 +724,8 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
 
-        #if self.is_live:
-        time.sleep(20)
+        if self.is_live:
+            time.sleep(20)
 
         # recover secrets keys and certificates
         self.cmd('keyvault secret recover --vault-name {kv} -n secret1')

@@ -30,6 +30,12 @@ from ._validators import _construct_vnet, secret_text_encoding_values
 logger = get_logger(__name__)
 
 
+def _azure_stack_wrapper(cmd, client, function_name, *args, **kwargs):
+    if cmd.cli_ctx.cloud.profile == 'latest':
+        function_name = 'begin_' + function_name
+    return getattr(client, function_name)(*args, **kwargs)
+
+
 def _default_certificate_profile(cmd):
 
     Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
@@ -259,9 +265,10 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                                        'sku': Sku(name=SkuName.standard.value),
                                                        'create_mode': CreateMode.recover.value})
 
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         vault_name=vault_name,
-                                         parameters=params)
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=params)
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
@@ -435,19 +442,22 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         vault_name=vault_name,
-                                         parameters=parameters)
+
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=parameters)
 
 
 def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name):
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         vault_name=vault_name,
-                                         parameters=VaultCreateOrUpdateParameters(
-                                             location=parameters.location,
-                                             properties=parameters.properties))
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=parameters.location,
+                                    properties=parameters.properties))
 
 
 def update_keyvault(cmd, instance, enabled_for_deployment=None,
@@ -562,12 +572,14 @@ def set_policy(cmd, client, resource_group_name, vault_name,
             if certificate_permissions is None else certificate_permissions
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
         policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         vault_name=vault_name,
-                                         parameters=VaultCreateOrUpdateParameters(
-                                             location=vault.location,
-                                             tags=vault.tags,
-                                             properties=vault.properties))
+
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=vault.location,
+                                    tags=vault.tags,
+                                    properties=vault.properties))
 
 
 def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
@@ -604,12 +616,13 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
         if to_modify:
             rules.ip_rules.append(IPRule(value=ip_address))
 
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         vault_name=vault_name,
-                                         parameters=VaultCreateOrUpdateParameters(
-                                             location=vault.location,
-                                             tags=vault.tags,
-                                             properties=vault.properties))
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=vault.location,
+                                    tags=vault.tags,
+                                    properties=vault.properties))
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
@@ -644,12 +657,13 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
         return vault
 
     # otherwise update
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         vault_name=vault_name,
-                                         parameters=VaultCreateOrUpdateParameters(
-                                             location=vault.location,
-                                             tags=vault.tags,
-                                             properties=vault.properties))
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=vault.location,
+                                    tags=vault.tags,
+                                    properties=vault.properties))
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
@@ -680,12 +694,14 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
                                         object_id.lower() != p.object_id.lower()]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         vault_name=vault_name,
-                                         parameters=VaultCreateOrUpdateParameters(
-                                             location=vault.location,
-                                             tags=vault.tags,
-                                             properties=vault.properties))
+
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=vault.location,
+                                    tags=vault.tags,
+                                    properties=vault.properties))
 # endregion
 
 
