@@ -117,14 +117,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('name', name),
             JMESPathCheck('location', location),
             JMESPathCheck('sku.name', 'Standard_LRS'),
-            JMESPathCheck('kind', 'Storage')
+            JMESPathCheck('kind', 'StorageV2')
         ])
 
         self.cmd('az storage account show -n {}'.format(name), checks=[
             JMESPathCheck('name', name),
             JMESPathCheck('location', location),
             JMESPathCheck('sku.name', 'Standard_LRS'),
-            JMESPathCheck('kind', 'Storage')
+            JMESPathCheck('kind', 'StorageV2')
         ])
 
         self.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(
@@ -1074,8 +1074,8 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
 class StorageAccountSkuScenarioTest(ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
-    @StorageAccountPreparer(name_prefix='clistoragesku', location='westus2', kind='StorageV2', sku='Standard_ZRS')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='eastus2euap')
+    @StorageAccountPreparer(name_prefix='clistoragesku', location='eastus2euap', kind='StorageV2', sku='Standard_ZRS')
     def test_storage_account_sku(self, resource_group, storage_account):
         self.kwargs = {
             'gzrs_sa': self.create_random_name(prefix='cligzrs', length=24),
@@ -1085,12 +1085,12 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
         }
 
         # Create storage account with GZRS
-        self.cmd('az storage account create -n {gzrs_sa} -g {rg} --sku {GZRS} --https-only', checks=[
+        self.cmd('az storage account create -n {gzrs_sa} -g {rg} --sku {GZRS} --https-only --kind StorageV2', checks=[
             self.check('sku.name', '{GZRS}'),
             self.check('name', '{gzrs_sa}')
         ])
 
-        # Convert RS to GZRS
+        # Convert ZRS to GZRS
         self.cmd('az storage account show -n {sa} -g {rg}', checks=[
             self.check('sku.name', 'Standard_ZRS'),
             self.check('name', '{sa}')
