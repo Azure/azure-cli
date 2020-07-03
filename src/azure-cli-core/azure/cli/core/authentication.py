@@ -40,7 +40,7 @@ class AuthenticationWrapper(Authentication):
         external_tenant_tokens = []
         if not scopes:
             if self._resource:
-                scopes = _create_scopes(self._resource)
+                scopes = [_create_scopes(self._resource)]
             else:
                 raise CLIError("Unexpected error: Resource or Scope need be specified to get access token")
         try:
