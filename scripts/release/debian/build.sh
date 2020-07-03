@@ -23,7 +23,7 @@ apt-get update
 apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev
 apt-get install -y wget
 apt-get install -y libgirepository1.0-dev libcairo2-dev gir1.2-secret-1 pkg-config gnome-keyring libgtk2.0-dev
-apt-get install -y glib-2.0
+apt-get install -y glib-2.0 gir1.2-gtk-3.0
 
 # Download Python source code
 PYTHON_SRC_DIR=$(mktemp -d)
