@@ -314,12 +314,12 @@ class Profile(object):
 
         if identity_id:
             if is_valid_resource_id(identity_id):
-                msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
+                msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
                 authenticated = False
                 try:
-                    msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
+                    msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
                     authenticated = True
                 except HTTPError as ex:
@@ -331,7 +331,7 @@ class Profile(object):
                 if not authenticated:
                     try:
                         identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
                         authenticated = True
                     except HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
@@ -344,7 +344,7 @@ class Profile(object):
 
         else:
             identity_type = MsiAccountTypes.system_assigned
-            msi_creds = MSIAuthentication(resource=resource)
+            msi_creds = MSIAuthenticationWrapper(resource=resource)
 
         token_entry = msi_creds.token
         token = token_entry['access_token']

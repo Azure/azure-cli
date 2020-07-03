@@ -899,7 +899,7 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual([], subs)
 
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
     @mock.patch('azure.cli.core._profile._get_cloud_console_token_endpoint', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
