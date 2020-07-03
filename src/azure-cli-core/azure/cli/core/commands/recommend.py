@@ -24,6 +24,8 @@ logger = get_logger(__name__)
 
 
 def register_global_query_recommend(cli_ctx):
+    '''Register --query-recommend argument, and register handler
+    '''
     def add_query_recommend_parameter(_, **kwargs):
         arg_group = kwargs.get('arg_group')
         arg_group.add_argument('--query-recommend', dest='_query_recommend',
@@ -33,10 +35,10 @@ def register_global_query_recommend(cli_ctx):
         args = kwargs['args']
         query_recommend = args._query_recommend
         if query_recommend:
-            logger.warning("Analyze output")
-
             def analyze_output(cli_ctx, **kwargs):
-                kwargs['event_data']['result'] = parse_output(kwargs['event_data']['result'])
+                tree_builder = TreeBuilder()
+                tree_builder.build(kwargs['event_data']['result'])
+                kwargs['event_data']['result'] = tree_builder.generate_recommend()
                 cli_ctx.unregister_event(events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
 
             cli_ctx.register_event(events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
@@ -48,27 +50,77 @@ def register_global_query_recommend(cli_ctx):
         events.EVENT_INVOKER_POST_PARSE_ARGS, handle_recommend_parameter)
 
 
+class TreeNode:
+    def __init__(self, name):
+        self._name = name
+        self._parent = None
+        self._keys = None
+        self._child = None
+        self._from_list = False
+
+    def get_select_string(self, select_item=None):
+        if self._parent:
+            pass
+        else:
+            if select_item is None:
+                return str(self._keys[0])
+            else:
+                raise Exception("Unfinished function!")
+
+
+class TreeBuilder:
+    def __init__(self):
+        self._root = TreeNode('root')
+        self._all_nodes = {}
+
+    def build(self, data):
+        '''Build a query tree with a given json file
+        :param str data: json format data
+        '''
+        if isinstance(data, list):
+            if len(data) > 0:
+                self._root = self._parse_dict('root', data[0], from_list=True)
+        elif isinstance(data, dict):
+            self._root = self._parse_dict('root', data)
+
+    def generate_recommend(self):
+        for node in self._all_nodes.values():
+            print(node.get_select_string())
+
+    def _parse_dict(self, name, data, from_list=False):
+        node = TreeNode(name)
+        node._keys = list(data.keys())
+        self._all_nodes[name] = node
+
+
 def parse_dict(data):
     all_keys = list(data.keys())
-    help_str = 'You can use --query \"{}\" to query {} value. Available values are:{}'.format(
+    help_str = 'You can use --query "{}" to query {} value. Available values are:{}'.format(
         all_keys[0], all_keys[0], all_keys
     )
     return help_str
 
 
-def parse_list(data):
-    help_str = []
-    for item in data:
-        help_str.append(parse_dict(item))
-    return '\n'.join(help_str)
-
-
 def parse_output(data):
+    '''Parse entry. Generate recommendation from json
+    :param str data: Command output in json format
+    '''
     help_str = "Output format is not supported"
     if isinstance(data, dict):
         help_str = parse_dict(data)
     elif isinstance(data, list):
         help_str = parse_list(data)
     else:
-        logger.warning("Ootput format is not supported")
+        logger.warning("Output format is not supported")
     return help_str
+
+
+def handle_escape_char(raw_str):
+    def escape_char(raw_str, ch):
+        return raw_str.replace(ch, '\\{}'.format(ch))
+    # handle quotes
+    ret = escape_char(raw_str, '"')
+    # handle brackets
+    ret = escape_char(ret, '[')
+    ret = escape_char(ret, ']')
+    return ret
