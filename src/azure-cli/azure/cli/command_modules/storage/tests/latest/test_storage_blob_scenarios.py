@@ -17,6 +17,7 @@ from ..storage_test_util import StorageScenarioMixin
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 
+@AllowLargeResponse()
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
@@ -487,7 +488,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('skv=', container_sas)
         self.assertIn('skv=', container_sas)
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @api_version_constraint(resource_type=ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
