@@ -14,7 +14,6 @@ import re
 import string
 from copy import deepcopy
 from enum import Enum
-from six.moves import BaseHTTPServer
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
@@ -1176,43 +1175,42 @@ class ServicePrincipalAuth(object):
         return entry
 
 
-class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-few-public-methods
-    query_params = {}
-
-
-class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    # pylint: disable=line-too-long
-
-    def do_GET(self):
-        try:
-            from urllib.parse import parse_qs
-        except ImportError:
-            from urlparse import parse_qs  # pylint: disable=import-error
-
-        if self.path.endswith('/favicon.ico'):  # deal with legacy IE
-            self.send_response(204)
-            return
-
-        query = self.path.split('?', 1)[-1]
-        query = parse_qs(query, keep_blank_values=True)
-        self.server.query_params = query
-
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-        landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
-                                    'ok.html' if 'code' in query else 'fail.html')
-        with open(landing_file, 'rb') as html_file:
-            self.wfile.write(html_file.read())
-
-    def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
-        pass  # this prevent http server from dumping messages to stdout
-
-
 def _get_authorization_code_worker(authority_url, resource, results):
     import socket
     import random
+    import http.server
+
+    class ClientRedirectServer(http.server.HTTPServer):  # pylint: disable=too-few-public-methods
+        query_params = {}
+
+    class ClientRedirectHandler(http.server.BaseHTTPRequestHandler):
+        # pylint: disable=line-too-long
+
+        def do_GET(self):
+            try:
+                from urllib.parse import parse_qs
+            except ImportError:
+                from urlparse import parse_qs  # pylint: disable=import-error
+
+            if self.path.endswith('/favicon.ico'):  # deal with legacy IE
+                self.send_response(204)
+                return
+
+            query = self.path.split('?', 1)[-1]
+            query = parse_qs(query, keep_blank_values=True)
+            self.server.query_params = query
+
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
+                                        'ok.html' if 'code' in query else 'fail.html')
+            with open(landing_file, 'rb') as html_file:
+                self.wfile.write(html_file.read())
+
+        def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
+            pass  # this prevent http server from dumping messages to stdout
 
     reply_url = None
 
