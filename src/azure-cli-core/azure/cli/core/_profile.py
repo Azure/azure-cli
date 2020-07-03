@@ -128,7 +128,7 @@ class Profile(object):
 
         credential = None
         auth_record = None
-        identity = Identity(self._authority, tenant, client_id, cred_cache=self._adal_cache)
+        identity = Identity(self._authority, tenant, client_id, self._get_scopes(scopes), cred_cache=self._adal_cache)
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
@@ -140,13 +140,13 @@ class Profile(object):
             if not use_device_code:
                 from azure.identity import CredentialUnavailableError
                 try:
-                    credential, auth_record = identity.login_with_interactive_browser(scopes)
+                    credential, auth_record = identity.login_with_interactive_browser()
                 except CredentialUnavailableError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
-                credential, auth_record = identity.login_with_device_code(scopes)
+                credential, auth_record = identity.login_with_device_code()
         else:
             if is_service_principal:
                 if not tenant:
@@ -208,9 +208,8 @@ class Profile(object):
         # Managed identities for Azure resources is the new name for the service formerly known as
         # Managed Service Identity (MSI).
 
-        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        identity = Identity()
-        credential, mi_info = identity.login_with_managed_identity(resource, identity_id)
+        identity = Identity(scopes=self._get_scopes(scopes))
+        credential, mi_info = identity.login_with_managed_identity(identity_id)
 
         tenant = mi_info[Identity.MANAGED_IDENTITY_TENANT_ID]
         if find_subscriptions:
@@ -251,9 +250,8 @@ class Profile(object):
 
     def login_in_cloud_shell(self, allow_no_subscriptions=None, find_subscriptions=True):
         # TODO: deprecate allow_no_subscriptions
-        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        identity = Identity()
-        credential, identity_info = identity.login_in_cloud_shell(resource)
+        identity = Identity(scopes=self._get_scopes(scopes))
+        credential, identity_info = identity.login_in_cloud_shell()
 
         tenant = identity_info[Identity.MANAGED_IDENTITY_TENANT_ID]
         if find_subscriptions:
@@ -275,6 +273,12 @@ class Profile(object):
             s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
+
+    def _get_scopes(self, scopes=None):
+        if scopes:
+            return scopes
+        else:
+            return (self.cli_ctx.cloud.endpoints.active_directory_resource_id.rstrip('/') + '/.default',)
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
                               user_assigned_identity_id=None, home_account_id=None, managed_identity_info=None):
