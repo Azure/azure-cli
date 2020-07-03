@@ -3775,5 +3775,37 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
         self.cmd('network security-partner-provider delete -n {name} -g {rg}')
 
 
+class NetworkVirtualApplianceScenarioTest(ScenarioTest):
+    def setUp(self):
+        super(NetworkVirtualApplianceScenarioTest, self).setUp()
+        self.cmd('extension add -n virtual-wan')
+
+    def tearDown(self):
+        self.cmd('extension remove -n virtual-wan')
+        super(NetworkVirtualApplianceScenarioTest, self).tearDown()
+
+    @ResourceGroupPreparer()
+    def test_network_virtual_appliance(self, resource_group):
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clitestvhub',
+            'name': 'cli_virtual_appliance',
+            'rg': resource_group
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 -l westus --sku Standard')
+
+        self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "barracudasdwanrelease" '
+                 '--scale-unit 2 -v latest --asn 10000 --init-config "echo $abc"')
+        self.cmd('network virtual-appliance update -n {name} -g {rg} --asn 20000 --init-config "echo $abcd"')
+        self.cmd('network virtual-appliance show -n {name} -g {rg}')
+        self.cmd('network virtual-appliance list -g {rg}')
+        self.cmd('network virtual-appliance list')
+
+        self.cmd('network virtual-appliance sku list')
+        self.cmd('network virtual-appliance sku show --name "barracuda sdwan release"')
+
+
 if __name__ == '__main__':
     unittest.main()

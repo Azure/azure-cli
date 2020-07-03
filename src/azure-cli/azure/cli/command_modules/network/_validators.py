@@ -287,7 +287,7 @@ def validate_dns_record_type(namespace):
             return
 
 
-def validate_application_gateway_identity(cmd, namespace):
+def validate_user_assigned_identity(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
     if namespace.user_assigned_identity and not is_valid_resource_id(namespace.user_assigned_identity):
@@ -882,7 +882,7 @@ def process_ag_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_custom_error_pages(namespace)
     validate_waf_policy(cmd, namespace)
-    validate_application_gateway_identity(cmd, namespace)
+    validate_user_assigned_identity(cmd, namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):
