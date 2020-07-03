@@ -633,7 +633,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.client_id, test_client_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_user_assigned_with_object_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
