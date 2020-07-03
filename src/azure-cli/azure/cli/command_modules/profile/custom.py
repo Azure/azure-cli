@@ -76,7 +76,7 @@ def get_access_token(cmd, subscription=None, resource=None, resource_type=None, 
 
     token_entry = creds[2]
     # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`
-    # Unify to UTC `expiresOn`, like "2020-06-30 06:14:41"
+    # Unify to ISO `expiresOn`, like "2020-06-30 06:14:41"
     if 'expires_on' in token_entry:
         from datetime import datetime
         # https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
