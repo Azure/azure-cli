@@ -21,8 +21,8 @@ from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.core.credentials import AccessToken
-from msrestazure.azure_active_directory import MSIAuthentication
+
+from .adal_authentication import MSIAuthenticationWrapper
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -758,13 +758,6 @@ class Profile(object):
             installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
-
-
-class MSIAuthenticationWrapper(MSIAuthentication):
-    # This method is exposed for Azure Core.
-    def get_token(self):
-        self.set_token()
-        return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
 
 class MsiAccountTypes(object):

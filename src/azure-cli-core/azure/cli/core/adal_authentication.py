@@ -8,6 +8,7 @@ import requests
 import adal
 
 from msrest.authentication import Authentication
+from msrestazure.azure_active_directory import MSIAuthentication
 from azure.core.credentials import AccessToken
 from azure.cli.core.util import in_cloud_console
 
@@ -85,3 +86,10 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         logger = get_logger(__name__)
         logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
                        "below, please mention the hostname '%s'", socket.gethostname())
+
+
+class MSIAuthenticationWrapper(MSIAuthentication):
+    # This method is exposed for Azure Core.
+    def get_token(self):
+        self.set_token()
+        return AccessToken(self.token['access_token'], int(self.token['expires_on']))
