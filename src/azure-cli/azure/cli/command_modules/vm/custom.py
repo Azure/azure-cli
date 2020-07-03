@@ -2690,7 +2690,15 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None,
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, **kwargs):
     vmss = kwargs['parameters']
-    client = _compute_client_factory(cmd.cli_ctx)
+    aux_subscriptions = None
+    if vmss.virtual_machine_profile and vmss.virtual_machine_profile.storage_profile and \
+            vmss.virtual_machine_profile.storage_profile.image_reference and \
+            vmss.virtual_machine_profile.storage_profile.image_reference.id:
+        from msrestazure.tools import is_valid_resource_id, parse_resource_id
+        if is_valid_resource_id(vmss.virtual_machine_profile.storage_profile.image_reference.id):
+            res = parse_resource_id(vmss.virtual_machine_profile.storage_profile.image_reference.id)
+            aux_subscriptions = [res['subscription']]
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
     VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
 
@@ -3047,7 +3055,13 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
         'TargetRegion')
-    client = _compute_client_factory(cmd.cli_ctx)
+    aux_subscriptions = None
+    if managed_image:
+        from msrestazure.tools import is_valid_resource_id, parse_resource_id
+        if is_valid_resource_id(managed_image):
+            res = parse_resource_id(managed_image)
+            aux_subscriptions = [res['subscription']]
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if managed_image and not is_valid_resource_id(managed_image):
