@@ -248,6 +248,8 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                          self.check('properties.enablePurgeProtection', True)])
 
         # test '--enable-rbac-authorization'
+        # temporarily disable this test: RBAC authorization is not supported for subscription xxxxxx
+        """
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
             'loc': 'eastus2'
@@ -266,6 +268,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('properties.enableRbacAuthorization', False))
         self.cmd('keyvault update -n {kv} --enable-rbac-authorization true',
                  checks=self.check('properties.enableRbacAuthorization', True))
+        """
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
