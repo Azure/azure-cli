@@ -23,7 +23,7 @@ Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
 BuildArch:      x86_64
 Requires:       %{python_cmd}, gobject-introspection-devel, cairo-devel, pkgconfig, cairo-gobject-devel
 
-BuildRequires:  gcc, libffi-devel, openssl-devel, perl
+BuildRequires:  gcc, libffi-devel, openssl-devel, perl, binutils
 BuildRequires:  %{python_cmd}-devel, gobject-introspection-devel, cairo-devel, pkgconfig, cairo-gobject-devel
 
 %global _python_bytecompile_errors_terminate_build 0
@@ -38,7 +38,7 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 %{python_cmd} -m venv %{buildroot}%{cli_lib_dir}
 source %{buildroot}%{cli_lib_dir}/bin/activate
 
-source %{repo_path}/scripts/install_full.sh
+source %{repo_path}/scripts/install_full.sh %{cli_lib_dir}
 
 deactivate
 
@@ -50,7 +50,14 @@ mkdir -p %{buildroot}%{_bindir}
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | grep "^python" | head -n 1)
 printf "#!/usr/bin/env bash\nAZ_INSTALLER=RPM PYTHONPATH=%{cli_lib_dir}/lib/${python_version}/site-packages /usr/bin/%{python_cmd} -sm azure.cli \"\$@\"" > %{buildroot}%{_bindir}/az
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
-rm %{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/gi/_gi_cairo.cpython-36m-x86_64-linux-gnu.so
+
+# strip debug info which contains build root info
+set +e
+find "%{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/gi" -type f -name "*.so" | while read so_file
+do
+    strip --strip-debug "$so_file"
+done
+set -e
 
 # Set up tab completion
 mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d/
