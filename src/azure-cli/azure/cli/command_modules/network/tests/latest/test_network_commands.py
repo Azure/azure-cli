@@ -3784,28 +3784,37 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         self.cmd('extension remove -n virtual-wan')
         super(NetworkVirtualApplianceScenarioTest, self).tearDown()
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='westcentralus')
     def test_network_virtual_appliance(self, resource_group):
         self.kwargs.update({
             'vwan': 'clitestvwan',
             'vhub': 'clitestvhub',
-            'name': 'cli_virtual_appliance',
+            'name': 'cli-virtual-appliance',
+            'site': 'cli-site',
+            'blob': 'https://azurecliprod.blob.core.windows.net/cli-extensions/account-0.1.0-py2.py3-none-any.whl',
             'rg': resource_group
         })
 
         self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
-        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 -l westus --sku Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 --sku Standard')
 
         self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "barracudasdwanrelease" '
-                 '--scale-unit 2 -v latest --asn 10000 --init-config "echo $abc"')
+                 '--scale-unit 2 -v latest --asn 10000 --init-config "echo $abc" '
+                 '--boot-blobs {blob} {blob} --cloud-blobs {blob} {blob}')
         self.cmd('network virtual-appliance update -n {name} -g {rg} --asn 20000 --init-config "echo $abcd"')
         self.cmd('network virtual-appliance show -n {name} -g {rg}')
         self.cmd('network virtual-appliance list -g {rg}')
         self.cmd('network virtual-appliance list')
 
         self.cmd('network virtual-appliance sku list')
-        self.cmd('network virtual-appliance sku show --name "barracuda sdwan release"')
+        self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"')
 
+        self.cmd('network virtual-appliance site create -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.0/24 --allow --default --optimize')
+        self.cmd('network virtual-appliance site update -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.1/24 --allow false --default false --optimize false')
+        self.cmd('network virtual-appliance site show -n {site} -g {rg} --appliance-name {name}')
+        self.cmd('network virtual-appliance site list -g {rg} --appliance-name {name}')
+        self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name}')
+        self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
 if __name__ == '__main__':
     unittest.main()

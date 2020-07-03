@@ -1249,11 +1249,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_network_virtual_appliance')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('network virtual-appliance identity', command_type=network_virtual_appliances_sdk, min_api='2020-05-01') as g:
-        g.custom_command('assign', 'assign_appliance_identity', supports_no_wait=True)
-        g.custom_command('remove', 'remove_appliance_identity', supports_no_wait=True)
-        g.custom_show_command('show', 'show_appliance_identity')
-
     with self.command_group('network virtual-appliance site', virtual_appliance_sites_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_network_virtual_appliance_site')
         g.generic_update_command('update', custom_func_name='update_network_virtual_appliance_site')

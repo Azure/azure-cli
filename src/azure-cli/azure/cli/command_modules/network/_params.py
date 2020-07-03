@@ -1857,7 +1857,6 @@ def load_arguments(self, _):
         c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
         c.argument('cloud_init_configuration', options_list=['--cloud-init-config', '--init-config'], help='CloudInitConfiguration string in plain text.')
         c.argument('asn', type=int, help='VirtualAppliance ASN. The valid value ranges from 1 to 4294967295. ')
-        c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_user_assigned_identity)
 
     with self.argument_context('network virtual-appliance sku') as c:
         c.argument('sku_name', help='The name of Network Virtual Appliance SKU', options_list=['--name', '-n'])

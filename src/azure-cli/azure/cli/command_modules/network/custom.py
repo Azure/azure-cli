@@ -5941,7 +5941,6 @@ def create_network_virtual_appliance(cmd, resource_group_name, network_virtual_a
                                      virtual_hub, boot_strap_configuration_blobs=None,
                                      cloud_init_configuration_blobs=None,
                                      cloud_init_configuration=None, asn=None,
-                                     user_assigned_identity=None,
                                      location=None, tags=None, no_wait=False):
     client = network_client_factory(cmd.cli_ctx).network_virtual_appliances
     (NetworkVirtualAppliance,
@@ -5967,18 +5966,6 @@ def create_network_virtual_appliance(cmd, resource_group_name, network_virtual_a
                                                 location=location,
                                                 tags=tags)
 
-    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
-
-    user_assigned_identities_instance = dict()
-
-    user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
-
-    identity_instance = ManagedServiceIdentity(
-        type="UserAssigned",
-        user_assigned_identities=user_assigned_identities_instance
-    )
-    virtual_appliance.identity = identity_instance if user_assigned_identity else None
-
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, network_virtual_appliance_name, virtual_appliance)
 
 
@@ -5996,49 +5983,10 @@ def list_network_virtual_appliance(cmd, resource_group_name=None):
     return client.list()
 
 
-def assign_appliance_identity(cmd, resource_group_name, network_virtual_appliance_name,
-                              user_assigned_identity, no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).network_virtual_appliances
-    virtual_appliance = client.get(resource_group_name, network_virtual_appliance_name)
-    ManagedServiceIdentity, ManagedServiceIdentityUserAssignedIdentitiesValue = \
-        cmd.get_models('ManagedServiceIdentity', 'ManagedServiceIdentityUserAssignedIdentitiesValue')
-    user_assigned_indentity_instance = ManagedServiceIdentityUserAssignedIdentitiesValue()
-
-    user_assigned_identities_instance = dict()
-
-    user_assigned_identities_instance[user_assigned_identity] = user_assigned_indentity_instance
-
-    identity_instance = ManagedServiceIdentity(
-        type="UserAssigned",
-        user_assigned_identities=user_assigned_identities_instance
-    )
-    virtual_appliance.identity = identity_instance
-
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, network_virtual_appliance_name, virtual_appliance)
-
-
-def remove_appliance_identity(cmd, resource_group_name, network_virtual_appliance_name, no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).network_virtual_appliances
-    virtual_appliance = client.get(resource_group_name, network_virtual_appliance_name)
-    if virtual_appliance.identity is None:
-        logger.warning("This command will be ignored. The identity doesn't exist.")
-    virtual_appliance.identity = None
-
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, network_virtual_appliance_name, virtual_appliance)
-
-
-def show_appliance_identity(cmd, resource_group_name, network_virtual_appliance_name):
-    client = network_client_factory(cmd.cli_ctx).network_virtual_appliances
-    virtual_appliance = client.get(resource_group_name, network_virtual_appliance_name)
-    if virtual_appliance.identity is None:
-        raise CLIError("Please first use 'az network virtual-appliance identity assign` to init the identity.")
-    return virtual_appliance.identity
-
-
 def create_network_virtual_appliance_site(cmd, resource_group_name, network_virtual_appliance_name,
                                           site_name, address_prefix, allow=None, optimize=None, default=None,
                                           no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).network_virtual_appliances
+    client = network_client_factory(cmd.cli_ctx).virtual_appliance_sites
     (BreakOutCategoryPolicies,
      Office365PolicyProperties,
      VirtualApplianceSite) = cmd.get_models('BreakOutCategoryPolicies',
