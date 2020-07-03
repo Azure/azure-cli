@@ -38,12 +38,13 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 %{python_cmd} -m venv %{buildroot}%{cli_lib_dir}
 source %{buildroot}%{cli_lib_dir}/bin/activate
 
-source %{repo_path}/scripts/install_full.sh %{cli_lib_dir}
+source %{repo_path}/scripts/install_full.sh
 
 deactivate
 
 # Fix up %{buildroot} appearing in some files...
 for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
+for d in %{buildroot}%{cli_lib_dir}/lib/pkgconfig/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
 
 # Create executable
 mkdir -p %{buildroot}%{_bindir}

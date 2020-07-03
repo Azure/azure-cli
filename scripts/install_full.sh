@@ -20,10 +20,6 @@ find src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-te
 pip install -r ./src/azure-cli/requirements.$(python ./scripts/get-python-version.py).$(uname).txt
 if [ -f "./src/azure-cli/requirements.opt.$(python ./scripts/get-python-version.py).$(uname).txt" ]; then
     echo "./src/azure-cli/requirements.opt.$(python ./scripts/get-python-version.py).$(uname).txt exists."
-    if [ -z "$1" ]; then
-        pip install -r ./src/azure-cli/requirements.opt.$(python ./scripts/get-python-version.py).$(uname).txt
-    else
-        pip install -r ./src/azure-cli/requirements.opt.$(python ./scripts/get-python-version.py).$(uname).txt --prefix "$1"
-    fi
+    pip install -r ./src/azure-cli/requirements.opt.$(python ./scripts/get-python-version.py).$(uname).txt
 fi
 popd > /dev/null
