@@ -884,7 +884,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
     def test_get_raw_token_in_cloud_console(self, mock_msi_auth, mock_read_cred_file, mock_in_cloud_console):
         mock_read_cred_file.return_value = []
         mock_in_cloud_console.return_value = True

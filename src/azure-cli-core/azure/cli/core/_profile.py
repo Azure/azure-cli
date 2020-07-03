@@ -389,7 +389,7 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        auth = MSIAuthentication(resource=resource)
+        auth = MSIAuthenticationWrapper(resource=resource)
         auth.set_token()
         token_entry = auth.token
         return (token_entry['token_type'], token_entry['access_token'], token_entry)
