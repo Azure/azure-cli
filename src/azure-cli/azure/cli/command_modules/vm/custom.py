@@ -2691,7 +2691,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
-    if vmss.virtual_machine_profile and vmss.virtual_machine_profile.storage_profile and \
+    if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
+            vmss.virtual_machine_profile.storage_profile and \
             vmss.virtual_machine_profile.storage_profile.image_reference and \
             vmss.virtual_machine_profile.storage_profile.image_reference.id:
         from msrestazure.tools import is_valid_resource_id, parse_resource_id
@@ -3057,7 +3058,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         'TargetRegion')
     aux_subscriptions = None
     if managed_image:
-        from msrestazure.tools import is_valid_resource_id, parse_resource_id
+        from msrestazure.tools import parse_resource_id
         if is_valid_resource_id(managed_image):
             res = parse_resource_id(managed_image)
             aux_subscriptions = [res['subscription']]
