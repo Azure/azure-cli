@@ -46,7 +46,7 @@ class AuthenticationWrapper(Authentication):
         try:
             token = self._credential.get_token(*scopes)
             if self._external_credentials:
-                external_tenant_tokens = [cred.get_token(scopes) for cred in self._external_credentials]
+                external_tenant_tokens = [cred.get_token(*scopes) for cred in self._external_credentials]
         except CLIError as err:
             if in_cloud_console():
                 AuthenticationWrapper._log_hostname()
