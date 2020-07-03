@@ -55,17 +55,20 @@ class TreeNode:
         self._name = name
         self._parent = None
         self._keys = None
-        self._child = None
+        self._child = []  # list of child node
         self._from_list = False
 
     def get_select_string(self, select_item=None):
+        help_str = ""
         if self._parent:
-            pass
+            help_str = "{}.".format(self._parent.get_select_string())
+
+        if select_item is None:
+            if len(self._keys) > 0:
+                help_str = help_str + self._keys[0]
         else:
-            if select_item is None:
-                return str(self._keys[0])
-            else:
-                raise Exception("Unfinished function!")
+            raise Exception("Unfinished function!")
+        return help_str
 
 
 class TreeBuilder:
@@ -90,7 +93,20 @@ class TreeBuilder:
     def _parse_dict(self, name, data, from_list=False):
         node = TreeNode(name)
         node._keys = list(data.keys())
+        node._from_list = from_list
+        for key in data.keys():
+            child_node = None
+            if isinstance(data[key], list):
+                if len(data[key]) > 0:
+                    child_node = self._parse_dict(key, data[key][0], from_list=True)
+            elif isinstance(data[key], dict) and not len(data[key]) == 0:
+                child_node = self._parse_dict(key, data[key])
+            if child_node:
+                node._child.append(child_node)
+                child_node._parent = node
+
         self._all_nodes[name] = node
+        return node
 
 
 def parse_dict(data):
@@ -109,7 +125,7 @@ def parse_output(data):
     if isinstance(data, dict):
         help_str = parse_dict(data)
     elif isinstance(data, list):
-        help_str = parse_list(data)
+        pass
     else:
         logger.warning("Output format is not supported")
     return help_str
