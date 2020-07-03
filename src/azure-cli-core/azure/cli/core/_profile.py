@@ -1176,6 +1176,7 @@ class ServicePrincipalAuth(object):
 
 
 def _get_authorization_code_worker(authority_url, resource, results):
+    # pylint: disable=too-many-statements
     import socket
     import random
     import http.server
