@@ -272,12 +272,13 @@ class MainCommandsLoader(CLICommandsLoader):
                 # Extension's name may not be the same as its modname. eg. name: virtual-wan, modname: azext_vwan
                 filtered_extensions = []
                 for ext in extensions:
-                    ext_name = ext.name
-                    ext_dir = ext.path or get_extension_path(ext.name)
-                    ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
+                    ext_mod = get_extension_modname(ext.name, ext.path)
                     # Filter the extensions according to the index
                     if ext_mod in extension_modname:
                         filtered_extensions.append(ext)
+                        extension_modname.remove(ext_mod)
+                if extension_modname:
+                    logger.debug("These extensions are not installed and will be skipped: %s", extension_modname)
                 return filtered_extensions
 
             extensions = get_extensions()
