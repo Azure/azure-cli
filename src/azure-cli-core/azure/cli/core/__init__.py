@@ -31,7 +31,7 @@ EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 
-# [Reserved]
+# [Reserved, in case of future usage]
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
@@ -185,11 +185,16 @@ class MainCommandsLoader(CLICommandsLoader):
             get_extensions, get_extension_path, get_extension_modname)
 
         def _update_command_table_from_modules(args, command_modules=None):
-            '''Loads command table(s)
-            When `module_name` is specified, only commands from that module will be loaded.
-            If the module is not found, all commands are loaded.
-            '''
+            """Loads command tables from modules and merge into the main command table.
 
+            :param args: Arguments of the command.
+            :param list command_modules: Command modules to load, in the format like ['resource', 'profile'].
+             If None, will do module discovery and load all modules.
+             If [], only ALWAYS_LOADED_MODULES will be loaded.
+             Otherwise, the list will be extended using ALWAYS_LOADED_MODULES.
+            """
+
+            # As command modules are built-in, the existence of modules in ALWAYS_LOADED_MODULES is NOT checked
             if command_modules is not None:
                 command_modules.extend(ALWAYS_LOADED_MODULES)
             else:
@@ -240,6 +245,15 @@ class MainCommandsLoader(CLICommandsLoader):
                          cumulative_group_count, cumulative_command_count)
 
         def _update_command_table_from_extensions(ext_suppressions, extension_modname=None):
+            """Loads command tables from extensions and merge into the main command table.
+
+            :param ext_suppressions: Extension suppression information.
+            :param extension_modname: Command modules to load, in the format like ['azext_timeseriesinsights'].
+             If None, will do extension discovery and load all extensions.
+             If [], only ALWAYS_LOADED_EXTENSIONS will be loaded.
+             Otherwise, the list will be extended using ALWAYS_LOADED_EXTENSIONS.
+             If the extensions in the list are not installed, it will be skipped.
+            """
 
             from azure.cli.core.extension.operations import check_version_compatibility
 
