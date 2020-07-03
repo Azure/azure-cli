@@ -645,7 +645,7 @@ class TestProfile(unittest.TestCase):
                                                                      aux_tenants=[test_tenant_id2])
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
