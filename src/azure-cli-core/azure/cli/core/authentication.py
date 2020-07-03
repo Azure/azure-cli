@@ -44,7 +44,7 @@ class AuthenticationWrapper(Authentication):
             else:
                 raise CLIError("Unexpected error: Resource or Scope need be specified to get access token")
         try:
-            token = self._credential.get_token(scopes)
+            token = self._credential.get_token(*scopes)
             if self._external_credentials:
                 external_tenant_tokens = [cred.get_token(scopes) for cred in self._external_credentials]
         except CLIError as err:
