@@ -271,10 +271,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_lease_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         g.storage_custom_command_oauth('acquire', 'acquire_blob_lease')
+        g.storage_command_oauth('break', 'break_lease')
+        g.storage_command_oauth('change', 'change')
         g.storage_command_oauth('renew', 'renew')
         g.storage_command_oauth('release', 'release')
-        g.storage_command_oauth('change', 'change')
-        g.storage_command_oauth('break', 'break_lease')
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
