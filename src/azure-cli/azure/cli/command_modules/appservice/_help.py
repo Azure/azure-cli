@@ -637,7 +637,7 @@ short-summary: manage web app's managed service identity
 
 helps['functionapp identity assign'] = """
 type: command
-short-summary: assign or disable managed service identity to the web app
+short-summary: assign managed service identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
@@ -645,6 +645,9 @@ examples:
   - name: enable identity for the web app.
     text: >
         az functionapp identity assign -g MyResourceGroup -n MyUniqueApp
+  - name: assign local identity and a user assigned identity to a function app.
+    text: >
+        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --identities [system] myAssignedId
 """
 
 helps['functionapp identity remove'] = """
@@ -1581,7 +1584,7 @@ short-summary: manage web app's managed service identity
 
 helps['webapp identity assign'] = """
 type: command
-short-summary: assign or disable managed service identity to the web app
+short-summary: assign managed service identity to the web app
 examples:
   - name: assign local identity and assign a reader role to the current resource group.
     text: >
@@ -1589,6 +1592,9 @@ examples:
   - name: enable identity for the web app.
     text: >
         az webapp identity assign -g MyResourceGroup -n MyUniqueApp
+  - name: assign local identity and a user assigned identity to a webapp.
+    text: >
+        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --identities [system] myAssignedId
 """
 
 helps['webapp identity remove'] = """

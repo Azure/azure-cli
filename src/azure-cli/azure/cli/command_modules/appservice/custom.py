@@ -691,14 +691,55 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     return result
 
 
-def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def _build_identities_info(identities):
+    from ._appservice_utils import MSI_LOCAL_ID
+    identities = identities or []
+    identity_types = []
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_types.append('SystemAssigned')
+    external_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if external_identities:
+        identity_types.append('UserAssigned')
+    identity_types = ','.join(identity_types)
+    info = {'type': identity_types}
+    if external_identities:
+        info['userAssignedIdentities'] = {e: {} for e in external_identities}
+    return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
+
+
+def assign_identity(cmd, resource_group_name, name, assign_identity=None, role='Contributor', slot=None, scope=None):
+    ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
+                                                                  'ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        if webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned and external_identities:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif webapp.identity and webapp.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities:
+            identity_types = ResourceIdentityType.user_assigned
+        else:
+            identity_types = ResourceIdentityType.system_assigned
+
+        if webapp.identity:
+            webapp.identity.type = identity_types
+        else:
+            webapp.identity = ManagedServiceIdentity(type=identity_types)
+        if external_identities:
+            if not webapp.identity.user_assigned_identities:
+                webapp.identity.user_assigned_identities = {}
+            for identity in external_identities:
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
