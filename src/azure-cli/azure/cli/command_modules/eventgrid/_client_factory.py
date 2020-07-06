@@ -60,11 +60,3 @@ def event_subscriptions_factory(cli_ctx, _):
 
 def topic_types_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).topic_types
-
-
-def private_endpoint_connections_factory(cli_ctx, _):
-    return cf_eventgrid(cli_ctx).private_endpoint_connections
-
-
-def private_link_resources_factory(cli_ctx, _):
-    return cf_eventgrid(cli_ctx).private_link_resources
