@@ -45,7 +45,7 @@ fi
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian
-if [[ "${CLI_VERSION_REVISION:=1}" != *"trusty" && "${CLI_VERSION_REVISION:=1}" != *"jessie" ]]; then
+if [[ "${CLI_VERSION_REVISION:=1}" == *"trusty" || "${CLI_VERSION_REVISION:=1}" == *"jessie" ]]; then
     $SCRIPT_DIR/prepare.sh $WORKDIR/debian $WORKDIR/az.completion $WORKDIR
 else
     PYOBJECT_DEPENDENCY="libgirepository1.0-dev, libcairo2-dev, gir1.2-secret-1, gnome-keyring"
