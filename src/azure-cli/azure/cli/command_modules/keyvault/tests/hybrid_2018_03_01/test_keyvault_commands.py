@@ -642,7 +642,7 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
     def test_keyvault_certificate_import(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ci-', 24),
             'loc': 'eastus2'
         })
 
