@@ -1407,7 +1407,7 @@ def load_arguments(self, _):
         c.argument('family',
                    arg_type=family_param_type,
                    help='The compute generation component of the sku. '
-                   'Allowed values include: Gen5.')
+                   'Allowed values include: Gen4, Gen5.')
 
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
