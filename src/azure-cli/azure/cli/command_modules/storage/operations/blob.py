@@ -646,3 +646,8 @@ def set_blob_tier_v2(client, container_name, blob_name, tier, blob_type='block',
 def acquire_blob_lease(client, lease_duration=-1, **kwargs):
     client.acquire(lease_duration=lease_duration, **kwargs)
     return client.id
+
+
+def renew_blob_lease(client, **kwargs):
+    client.renew(**kwargs)
+    return client.id

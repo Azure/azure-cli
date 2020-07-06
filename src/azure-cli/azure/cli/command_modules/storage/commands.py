@@ -273,7 +273,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('acquire', 'acquire_blob_lease')
         g.storage_command_oauth('break', 'break_lease')
         g.storage_command_oauth('change', 'change')
-        g.storage_command_oauth('renew', 'renew')
+        g.storage_custom_command_oauth('renew', 'renew_blob_lease')
         g.storage_command_oauth('release', 'release')
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
