@@ -4577,7 +4577,8 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         self.cmd('network vnet create -g {resource_group} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
         self.cmd('network vnet subnet create -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
         self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name} --delegations Microsoft.Sql/managedInstances',
-            checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
+                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
+
         subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
@@ -4586,20 +4587,19 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
         # Create sql managed_instance
         self.cmd('sql mi create -g {} -n {} -l {} '
-                    '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
-                    .format(resource_group, managed_instance_name, loc, user, admin_password, subnet['id'], license_type, v_cores, storage_size_in_gb, edition, family),
-                    checks=[
-                        JMESPathCheck('name', managed_instance_name),
-                        JMESPathCheck('resourceGroup', resource_group),
-                        JMESPathCheck('administratorLogin', user),
-                        JMESPathCheck('vCores', v_cores),
-                        JMESPathCheck('storageSizeInGb', storage_size_in_gb),
-                        JMESPathCheck('licenseType', license_type),
-                        JMESPathCheck('sku.tier', edition),
-                        JMESPathCheck('sku.family', family),
-                        JMESPathCheck('sku.capacity', v_cores),
-                        JMESPathCheck('identity', None)]).get_output_in_json()
+                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
+                 .format(resource_group, managed_instance_name, loc, user, admin_password, subnet['id'], license_type, v_cores, storage_size_in_gb, edition, family),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('vCores', v_cores),
+                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                     JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family),
+                     JMESPathCheck('sku.capacity', v_cores),
+                     JMESPathCheck('identity', None)]).get_output_in_json()
 
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
-
