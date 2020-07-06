@@ -2440,11 +2440,11 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name_2)
         ])
-        self.cmd(
-            'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
-        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('length(@)', 0)
-        ])
+        # self.cmd(
+        #     'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        # self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+        #     JMESPathCheck('length(@)', 0)
+        # ])
 
 
 # LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
