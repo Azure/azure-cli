@@ -560,9 +560,9 @@ class EventGridTests(ScenarioTest):
         #    self.check('[0].provisioningState', 'Succeeded'),
         # ])
 
-        self.cmd('az eventgrid system-topic event-subscription delete -g devexprg --name {event_subscription_name}  --system-topic-name {system_topic_name} ')
+        self.cmd('az eventgrid system-topic event-subscription delete -g devexprg --name {event_subscription_name} --system-topic-name {system_topic_name} -y')
 
-        self.cmd('az eventgrid system-topic delete -n {system_topic_name} -g devexprg')
+        self.cmd('az eventgrid system-topic delete -n {system_topic_name} -g devexprg -y')
 
     @ResourceGroupPreparer()
     @unittest.skip('Will be re-enabled once global operations are enabled for 2020-01-01-preview API version')
@@ -1401,8 +1401,8 @@ class EventGridTests(ScenarioTest):
         #    self.check('[0].provisioningState', 'Succeeded'),
         # ])
 
-        self.cmd('az eventgrid partner topic event-subscription delete -g {rg} --name {event_subscription_name}  --partner-topic-name {partner_topic_name} ')
-        self.cmd('az eventgrid partner topic delete --name {partner_topic_name} --resource-group {rg}')
-        self.cmd('az eventgrid partner namespace event-channel delete --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name}')
-        self.cmd('az eventgrid partner namespace delete --name {partner_namespace_name} --resource-group {rg}')
-        self.cmd('az eventgrid partner registration delete -n {partner_registration_name} -g {rg}')
+        self.cmd('az eventgrid partner topic event-subscription delete -y -g {rg} --name {event_subscription_name} --partner-topic-name {partner_topic_name} ')
+        self.cmd('az eventgrid partner topic delete -y --name {partner_topic_name} --resource-group {rg}')
+        self.cmd('az eventgrid partner namespace event-channel delete -y --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name}')
+        self.cmd('az eventgrid partner namespace delete -y --name {partner_namespace_name} --resource-group {rg}')
+        self.cmd('az eventgrid partner registration delete -y -n {partner_registration_name} -g {rg}')
