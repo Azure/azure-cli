@@ -25,6 +25,8 @@ WAIT_MESSAGE = ['Finding examples...']
 
 EXTENSION_NAME = 'find'
 
+DEFAULT_GUID = "00000000-0000-0000-0000-000000000000"
+
 
 Example = namedtuple("Example", "title snippet")
 
@@ -37,7 +39,7 @@ def process_query(cli_term):
         response = call_aladdin_service(cli_term)
 
         if response.status_code != 200:
-            logger.error('[?] Unexpected Error: [HTTP %s]: Content: %s', response.status_code, response.content)
+            logger.error('Unexpected Error: If it persists, please file a bug.')
         else:
             if (platform.system() == 'Windows' and should_enable_styling()):
                 colorama.init(convert=True)
@@ -95,19 +97,19 @@ def should_enable_styling():
 
 
 def call_aladdin_service(query):
-    correlation_id = telemetry_core._session.correlation_id  # pylint: disable=protected-access
-    subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
     version = str(parse_version(core_version))
 
-    context = {
-        "correlationId": "",
-        "subscriptionId": "",
-        "versionNumber": version
-    }
+    # Only pull in the contextual values if we have consent
+    telemetry_consent = telemetry_core.is_telemetry_enabled()
+    correlation_id = telemetry_core._session.correlation_id if telemetry_consent else DEFAULT_GUID  # pylint: disable=protected-access
+    subscription_id = telemetry_core._get_azure_subscription_id() if telemetry_consent else DEFAULT_GUID  # pylint: disable=protected-access
 
-    # Only pull in the other values if we have consent
-    if telemetry_core.is_telemetry_enabled():
-        context.update(correlationId=correlation_id, subscriptionId=subscription_id)
+    context = {
+        "versionNumber": version,
+        "correlationId": correlation_id,
+        # In case the user is not logged in
+        "subscriptionId": "subscription_id" if subscription_id is not None else DEFAULT_GUID
+    }
 
     api_url = 'https://app.aladdin.microsoft.com/api/v1.0/examples'
     headers = {'Content-Type': 'application/json'}
