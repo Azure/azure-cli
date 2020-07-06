@@ -289,7 +289,7 @@ def load_command_table(self, _):
                             security_iot_solution_sdk,
                             client_factory=cf_security_iot_solution) as g:
         g.custom_command('list', 'list_security_iot_solution')
-        g.custom_command('show', 'get_security_iot_solution')
+        g.custom_command('show', 'show_security_iot_solution')
         g.custom_command('create', 'create_security_iot_solution')
         g.custom_command('delete', 'delete_security_iot_solution')
 
@@ -297,20 +297,20 @@ def load_command_table(self, _):
                             security_iot_analytics_sdk,
                             client_factory=cf_security_iot_analytics) as g:
         g.custom_command('list', 'list_security_iot_analytics')
-        g.custom_command('show', 'get_security_iot_analytics')
+        g.custom_command('show', 'show_security_iot_analytics')
 
     with self.command_group('security iot-alerts',
                             security_iot_alerts_sdk,
                             client_factory=cf_security_iot_alerts) as g:
         g.custom_command('list', 'list_security_iot_alerts')
-        g.custom_command('show', 'get_security_iot_alerts')
+        g.custom_command('show', 'show_security_iot_alerts')
         g.custom_command('delete', 'dismiss_security_iot_alerts')
 
     with self.command_group('security iot-recommendations',
                             security_iot_recommendations_sdk,
                             client_factory=cf_security_iot_recommendations) as g:
         g.custom_command('list', 'list_security_iot_recommendations')
-        g.custom_command('show', 'get_security_iot_recommendations')
+        g.custom_command('show', 'show_security_iot_recommendations')
 
     with self.command_group('security', is_preview=True):
         pass

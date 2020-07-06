@@ -472,7 +472,7 @@ def list_security_iot_solution(client, resource_group_name=None):
     return client.list_by_subscription()
 
 
-def get_security_iot_solution(client, resource_group_name, iot_solution_name):
+def show_security_iot_solution(client, resource_group_name, iot_solution_name):
 
     return client.get(resource_group_name=resource_group_name, solution_name=iot_solution_name)
 
@@ -513,7 +513,7 @@ def list_security_iot_analytics(client, resource_group_name, iot_solution_name):
         solution_name=iot_solution_name)
 
 
-def get_security_iot_analytics(client, resource_group_name, iot_solution_name):
+def show_security_iot_analytics(client, resource_group_name, iot_solution_name):
 
     return client.get(
         resource_group_name=resource_group_name,
@@ -532,7 +532,7 @@ def list_security_iot_alerts(client, resource_group_name, iot_solution_name):
         solution_name=iot_solution_name)
 
 
-def get_security_iot_alerts(client, resource_group_name, iot_solution_name, resource_name):
+def show_security_iot_alerts(client, resource_group_name, iot_solution_name, resource_name):
 
     return client.get(
         resource_group_name=resource_group_name,
@@ -560,7 +560,7 @@ def list_security_iot_recommendations(client, resource_group_name, iot_solution_
         solution_name=iot_solution_name)
 
 
-def get_security_iot_recommendations(client, resource_group_name, iot_solution_name, resource_name):
+def show_security_iot_recommendations(client, resource_group_name, iot_solution_name, resource_name):
 
     return client.get(
         resource_group_name=resource_group_name,
