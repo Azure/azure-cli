@@ -335,9 +335,11 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     from azure.graphrbac import GraphRbacManagementClient
 
     try:
-        return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+        client.get(resource_group_name=resource_group_name, vault_name=vault_name)
     except:  # pylint: disable=bare-except
         pass
+    else:
+        raise CLIError('Vault {} already exists.'.format(vault_name))
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
