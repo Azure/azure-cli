@@ -440,6 +440,9 @@ parameters:
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+  - name: --enable-aad
+    type: bool
+    short-summary: Enable managed AAD feature for cluster.
   - name: --aad-admin-group-object-ids
     type: string
     short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
@@ -465,6 +468,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 0.0.0.0/32
   - name: Update a AKS-managed AAD cluster with tenant ID or admin group object IDs.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Update an existing AKS AAD-Integrated cluster to the new AKS-managed AAD experience.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad
 """
 
 helps['aks delete'] = """

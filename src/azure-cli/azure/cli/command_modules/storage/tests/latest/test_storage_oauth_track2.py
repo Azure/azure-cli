@@ -4,16 +4,16 @@
 # --------------------------------------------------------------------------------------------
 import os
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint, record_only)
+                               StorageAccountPreparer, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
-@record_only()
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
     def oauth_cmd(self, cmd, *args, **kwargs):
         return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
 
+    @api_version_constraint(ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_oauth')
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_storage_filedatalake_oauth(self, resource_group, storage_account):
