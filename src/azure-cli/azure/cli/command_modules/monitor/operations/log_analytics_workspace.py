@@ -116,6 +116,4 @@ def update_log_analytics_workspace_saved_search(cmd, instance, category=None, di
         c.set_param('function_alias', function_alias)
         c.set_param('function_parameters', function_parameters)
         c.set_param('tags', _format_tags(tags))
-        # workaround for server's issue. server would return etag instead of eTag.
-        c.set_param('e_tag', instance.additional_properties['etag'])
     return instance
