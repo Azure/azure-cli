@@ -2139,6 +2139,7 @@ def aks_update(cmd, client, resource_group_name, name,
                attach_acr=None,
                detach_acr=None,
                api_server_authorized_ip_ranges=None,
+               enable_aad=False,
                aad_tenant_id=None,
                aad_admin_group_object_ids=None,
                no_wait=False):
@@ -2155,6 +2156,7 @@ def aks_update(cmd, client, resource_group_name, name,
             not detach_acr and
             not uptime_sla and
             api_server_authorized_ip_ranges is None and
+            not enable_aad and
             not update_aad_profile):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
@@ -2167,6 +2169,7 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--attach-acr" or "--detach-acr" or'
                        '"--uptime-sla" or'
                        '"--api-server-authorized-ip-ranges" or '
+                       '"--enable-aad" or '
                        '"--aad-tenant-id" or '
                        '"--aad-admin-group-object-ids"')
 
@@ -2253,10 +2256,18 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.api_server_access_profile = \
             _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=instance)
 
+    if enable_aad:
+        if instance.aad_profile is None:
+            raise CLIError('Cannot specify "--enable-aad" for a non-AAD cluster')
+        if instance.aad_profile.managed:
+            raise CLIError('Cannot specify "--enable-aad" if managed AAD is already enabled')
+        instance.aad_profile = ManagedClusterAADProfile(
+            managed=True
+        )
     if update_aad_profile:
         if instance.aad_profile is None or not instance.aad_profile.managed:
             raise CLIError('Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids"'
-                           ' if managed aad not is enabled')
+                           ' if managed AAD is not enabled')
         if aad_tenant_id is not None:
             instance.aad_profile.tenant_id = aad_tenant_id
         if aad_admin_group_object_ids is not None:
