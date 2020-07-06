@@ -358,7 +358,9 @@ def process_workspace_data_export_destination(namespace):
         result = parse_resource_id(namespace.destination)
         if result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
             namespace.data_export_type = 'StorageAccount'
-        elif result['namespace'].lower() == 'microsoft.eventhub' and 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
+        elif result['namespace'].lower() == 'microsoft.eventhub' \
+                and 'child_type_1' in result \
+                and result['child_type_1'].lower() == 'eventhubs':
             namespace.data_export_type = 'EventHub'
             namespace.destination = resource_id(
                 subscription=result['subscription'],
