@@ -794,6 +794,7 @@ jobs:
 
        DISTROS=(jessie stretch xenial trusty)
        BASE_IMAGES=(debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
+       DEPENDENCIES=("apt-transport-https" "apt-transport-https libgirepository1.0-dev libcairo2-dev gir1.2-secret-1 gnome-keyring" "apt-transport-https libgirepository1.0-dev libcairo2-dev gir1.2-secret-1 gnome-keyring" "apt-transport-https" )
 
        # Distros that don't require libssl1.1
        for i in ${!DISTROS[@]}; do
@@ -803,7 +804,7 @@ jobs:
 
            docker pull ${BASE_IMAGES[$i]}
 
-           docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y apt-transport-https && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
+           docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y ${DEPENDENCIES[$i]} && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
        done
 
        # Distros that do require libssl1.1
