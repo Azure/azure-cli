@@ -58,10 +58,27 @@ class TreeNode:
         self._child = []  # list of child node
         self._from_list = False
 
+    def _get_trace(self):
+        traces = []
+        if self._parent:  # only calculate non-root node
+            traces.extend(self._parent._get_trace())
+            traces.append(self._name)
+        return traces
+
+    def _get_trace_str(self):
+        '''The correct JMESPath to get to current node'''
+        trace_str = ""
+        if self._parent:
+            trace_str += self._parent._get_trace_str()
+            trace_str += "." + self._name
+        if self._from_list:
+            trace_str += "[]"
+        return trace_str
+
     def get_select_string(self, select_item=None):
         help_str = ""
         if self._parent:
-            help_str = "{}.".format(self._parent.get_select_string())
+            help_str = "{}.".format(self._get_trace_str())
 
         if select_item is None:
             if len(self._keys) > 0:
