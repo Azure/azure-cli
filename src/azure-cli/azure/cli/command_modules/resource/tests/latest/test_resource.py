@@ -296,158 +296,158 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
                  checks=self.check('responseBody.properties.publishingUsername', '${app}'))
 
 
-# class TagScenarioTest(ScenarioTest):
+class TagScenarioTest(ScenarioTest):
 
-#     def test_tag_scenario(self):
+    def test_tag_scenario(self):
 
-#         self.kwargs.update({
-#             'tag': 'cli_test_tag'
-#         })
+        self.kwargs.update({
+            'tag': 'cli_test_tag'
+        })
 
-#         tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
-#         for tag in tags:
-#             self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
-#         self.cmd('tag delete -n {tag}')
+        tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
+        for tag in tags:
+            self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
+        self.cmd('tag delete -n {tag}')
 
-#         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
-#         self.cmd('tag create -n {tag}', checks=[
-#             self.check('tagName', '{tag}'),
-#             self.check('values', []),
-#             self.check('count.value', 0)
-#         ])
-#         self.cmd('tag add-value -n {tag} --value test')
-#         self.cmd('tag add-value -n {tag} --value test2')
-#         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-#                  checks=self.check('[].values[].tagValue', [u'test', u'test2']))
-#         self.cmd('tag remove-value -n {tag} --value test')
-#         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-#                  checks=self.check('[].values[].tagValue', [u'test2']))
-#         self.cmd('tag remove-value -n {tag} --value test2')
-#         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-#                  checks=self.check('[].values[].tagValue', []))
-#         self.cmd('tag delete -n {tag}')
-#         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-#                  checks=self.is_empty())
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
+        self.cmd('tag create -n {tag}', checks=[
+            self.check('tagName', '{tag}'),
+            self.check('values', []),
+            self.check('count.value', 0)
+        ])
+        self.cmd('tag add-value -n {tag} --value test')
+        self.cmd('tag add-value -n {tag} --value test2')
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"',
+                 checks=self.check('[].values[].tagValue', [u'test', u'test2']))
+        self.cmd('tag remove-value -n {tag} --value test')
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"',
+                 checks=self.check('[].values[].tagValue', [u'test2']))
+        self.cmd('tag remove-value -n {tag} --value test2')
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"',
+                 checks=self.check('[].values[].tagValue', []))
+        self.cmd('tag delete -n {tag}')
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"',
+                 checks=self.is_empty())
 
-#     @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
-#     def test_tag_update_by_patch(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
+    def test_tag_update_by_patch(self, resource_group, resource_group_location):
 
-#         # Test Microsoft.RecoveryServices/vaults
-#         self.kwargs.update({
-#             'loc': resource_group_location,
-#             'vault': self.create_random_name('vault-', 30),
-#             'tag': 'cli-test=test',
-#             'resource_group_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
-#         })
+        # Test Microsoft.RecoveryServices/vaults
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30),
+            'tag': 'cli-test=test',
+            'resource_group_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        })
 
-#         vault = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults '
-#                          '--is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",'
-#                          '\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
-#                          checks=self.check('name', '{vault}')).get_output_in_json()
-#         self.kwargs['vault_id'] = vault['id']
-#         self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
-#         self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
+        vault = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults '
+                         '--is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",'
+                         '\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+                         checks=self.check('name', '{vault}')).get_output_in_json()
+        self.kwargs['vault_id'] = vault['id']
+        self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
 
-#         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
 
-#         # Test Microsoft.Resources/resourceGroups
-#         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
-#                  checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'})) 
+        # Test Microsoft.Resources/resourceGroups
+        self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
+                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'})) 
 
-#         # Test Microsoft.ContainerRegistry/registries/webhooks
-#         self.kwargs.update({
-#             'registry_name': self.create_random_name('clireg', 20),
-#             'webhook_name': 'cliregwebhook',
-#             'rg_loc': resource_group_location,
-#             'uri': 'http://www.microsoft.com',
-#             'actions': 'push',
-#             'sku': 'Standard'
-#         })
+        # Test Microsoft.ContainerRegistry/registries/webhooks
+        self.kwargs.update({
+            'registry_name': self.create_random_name('clireg', 20),
+            'webhook_name': 'cliregwebhook',
+            'rg_loc': resource_group_location,
+            'uri': 'http://www.microsoft.com',
+            'actions': 'push',
+            'sku': 'Standard'
+        })
 
-#         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
-#                  checks=[self.check('name', '{registry_name}')])
-#         webhook = self.cmd('acr webhook create -n {webhook_name} -r {registry_name} --uri {uri} --actions {actions}',
-#                            checks=[self.check('name', '{webhook_name}')]).get_output_in_json()
-#         self.kwargs['webhook_id'] = webhook['id']
-#         self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'})) 
-#         self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))  
-#         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty()) 
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}')])
+        webhook = self.cmd('acr webhook create -n {webhook_name} -r {registry_name} --uri {uri} --actions {actions}',
+                           checks=[self.check('name', '{webhook_name}')]).get_output_in_json()
+        self.kwargs['webhook_id'] = webhook['id']
+        self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'})) 
+        self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))  
+        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty()) 
 
-#     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
-#     def test_tag_incrementally(self, resource_group, resource_group_location):
-#         self.kwargs.update({
-#             'loc': resource_group_location,
-#             'vault': self.create_random_name('vault-', 30),
-#         })
+    @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
+    def test_tag_incrementally(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30),
+        })
 
-#         resource = self.cmd(
-#             'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
-#             checks=self.check('name', '{vault}')).get_output_in_json()
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
 
-#         self.kwargs['vault_id'] = resource['id']
+        self.kwargs['vault_id'] = resource['id']
 
-#         self.cmd('resource tag --ids {vault_id} --tags cli-test=test cli-test2=test2', checks=self.check('tags', {'cli-test': 'test', 'cli-test2': 'test2'}))
-#         self.cmd('resource tag --ids {vault_id} --tags cli-test3=test3 cli-test4=test4', checks=self.check('tags', {'cli-test3': 'test3', 'cli-test4': 'test4'}))
+        self.cmd('resource tag --ids {vault_id} --tags cli-test=test cli-test2=test2', checks=self.check('tags', {'cli-test': 'test', 'cli-test2': 'test2'}))
+        self.cmd('resource tag --ids {vault_id} --tags cli-test3=test3 cli-test4=test4', checks=self.check('tags', {'cli-test3': 'test3', 'cli-test4': 'test4'}))
 
-#         self.cmd('resource tag --ids {vault_id} --tags cli-test4=test4a cli-test5=test5 -i',
-#                  checks=self.check('tags', {'cli-test3': 'test3', 'cli-test4': 'test4a', 'cli-test5': 'test5'}))
+        self.cmd('resource tag --ids {vault_id} --tags cli-test4=test4a cli-test5=test5 -i',
+                 checks=self.check('tags', {'cli-test3': 'test3', 'cli-test4': 'test4a', 'cli-test5': 'test5'}))
 
-#         with self.assertRaises(CLIError):
-#             self.cmd('resource tag --ids {vault_id} --tags -i ')
-#         with self.assertRaises(CLIError):
-#             self.cmd('resource tag --ids {vault_id} --tags "" -i ')
-#         self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
+        with self.assertRaises(CLIError):
+            self.cmd('resource tag --ids {vault_id} --tags -i ')
+        with self.assertRaises(CLIError):
+            self.cmd('resource tag --ids {vault_id} --tags "" -i ')
+        self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
 
-#         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
 
-#     @ResourceGroupPreparer(name_prefix='cli_test_tag_default_location_scenario', location='westus')
-#     def test_tag_default_location_scenario(self, resource_group, resource_group_location):
+    @ResourceGroupPreparer(name_prefix='cli_test_tag_default_location_scenario', location='westus')
+    def test_tag_default_location_scenario(self, resource_group, resource_group_location):
 
-#         self.kwargs.update({
-#             'loc': resource_group_location,
-#             'vault': self.create_random_name('vault-', 30),
-#             'tag': 'cli-test=test'
-#         })
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30),
+            'tag': 'cli-test=test'
+        })
 
-#         resource = self.cmd(
-#             'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p '
-#             '"{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
-#             checks=self.check('name', '{vault}')).get_output_in_json()
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p '
+            '"{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
 
-#         self.kwargs['vault_id'] = resource['id']
+        self.kwargs['vault_id'] = resource['id']
 
-#         self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
 
-#         # Scenarios with default location
-#         self.cmd('configure --defaults location={loc}')
+        # Scenarios with default location
+        self.cmd('configure --defaults location={loc}')
 
-#         with self.assertRaises(IncorrectUsageError):
-#             self.cmd('resource list --tag {tag}')
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag}')
 
-#         with self.assertRaises(IncorrectUsageError):
-#             self.cmd('resource list --tag {tag} -l westus')
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} -l westus')
 
-#         with self.assertRaises(IncorrectUsageError):
-#             self.cmd('resource list --tag {tag} --l westus')
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} --l westus')
 
-#         with self.assertRaises(IncorrectUsageError):
-#             self.cmd('resource list --tag {tag} --location westus')
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} --location westus')
 
-#         # Scenarios without default location
-#         self.cmd('configure --defaults location=""')
+        # Scenarios without default location
+        self.cmd('configure --defaults location=""')
 
-#         self.cmd('resource list --tag {tag}', checks=self.check('[0].id', '{vault_id}'))
+        self.cmd('resource list --tag {tag}', checks=self.check('[0].id', '{vault_id}'))
 
-#         with self.assertRaises(IncorrectUsageError):
-#             self.cmd('resource list --tag {tag} -l westus')
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} -l westus')
 
-#         with self.assertRaises(IncorrectUsageError):
-#             self.cmd('resource list --tag {tag} --l westus')
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} --l westus')
 
-#         with self.assertRaises(IncorrectUsageError):
-#             self.cmd('resource list --tag {tag} --location westus')
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} --location westus')
 
-#         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
 
 
 class ProviderRegistrationTest(ScenarioTest):
@@ -2090,7 +2090,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         ])
 
 
-class CrossTenantDeploymentScenarioTest(LiveScenarioTest): #IDEALLY NEED TO ADD ONE, SET UP COMPLICATED, DOCUMENTATION GOKUL , personal azure, 
+class CrossTenantDeploymentScenarioTest(LiveScenarioTest): 
     
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
@@ -2340,7 +2340,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest): #IDEALLY NEED TO ADD 
             self.cmd('deployment group create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
 
 
-class InvokeActionTest(ScenarioTest): #FAILURE
+class InvokeActionTest(ScenarioTest): 
     @ResourceGroupPreparer(name_prefix='cli_test_invoke_action')
     def test_invoke_action(self, resource_group):
 
