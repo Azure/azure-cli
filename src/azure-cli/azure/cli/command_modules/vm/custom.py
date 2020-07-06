@@ -2691,6 +2691,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
+    # pylint: disable=too-many-boolean-expressions
     if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
             vmss.virtual_machine_profile.storage_profile and \
             vmss.virtual_machine_profile.storage_profile.image_reference and \
