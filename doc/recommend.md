@@ -63,7 +63,7 @@ $ az vm list --query-recommend
 
 ## Intermediate
 `--query-recommend` will accept a list of key words, and we can give suggestions based on these key words.
-For example, when you type `az vm list --query-recommend tag`, we assume that you're interested in TAG field. So we will recommend queries related with tag. Here are some expected outputs:
+For example, when you type `az vm list --query-recommend tag`, we assume that you're interested in TAG field. So we will recommend queries related with tag. Contains should also be supported. Here are some expected outputs:
 
 ```shell
 $ az vm list --query-recommend tag

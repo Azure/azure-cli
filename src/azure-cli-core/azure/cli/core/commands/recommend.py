@@ -55,6 +55,7 @@ class TreeNode:
     def __init__(self, name):
         self._name = name
         self._parent = None
+        self._data = None
         self._keys = None
         self._child = []  # list of child node
         self._from_list = False
@@ -67,7 +68,7 @@ class TreeNode:
             traces.append(self._name)
         return traces
 
-    def _get_trace_str(self, number=None):
+    def _get_trace_str(self, number=None, filter_rules=None):
         '''The correct JMESPath to get to current node'''
         trace_str = ""
         if self._parent:
@@ -76,6 +77,8 @@ class TreeNode:
         if self._from_list:
             if number:
                 trace_str += "[:{}]".format(number)
+            elif filter_rules:
+                trace_str += "[?{}]".format(self.filter_with_condiction())
             else:
                 trace_str += "[]"
         return trace_str
@@ -101,6 +104,16 @@ class TreeNode:
         help_str = self._get_trace_str(number)
         return help_str
 
+    def filter_with_condiction(self):
+        help_str = ""
+        if not self._from_list:
+            return help_str
+        for key in self._keys:
+            if not (isinstance(self._data[key], list) or
+                    isinstance(self._data[key], dict)):
+                help_str = "{}=={}".format(key, self._data[key])
+        return help_str
+
 
 class TreeBuilder:
     def __init__(self):
@@ -123,10 +136,12 @@ class TreeBuilder:
             print(node.get_select_string())
             if node._from_list:
                 print(node.select_specific_number_string())
+                print(node._get_trace_str(filter_rules=node.filter_with_condiction))
 
     def _parse_dict(self, name, data, from_list=False):
         node = TreeNode(name)
         node._keys = list(data.keys())
+        node._data = data
         node._from_list = from_list
         for key in data.keys():
             child_node = None
