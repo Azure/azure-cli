@@ -864,6 +864,59 @@ examples:
     crafted: true
 """
 
+helps['monitor diagnostic-settings subscription'] = """
+type: group
+short-summary: Manage diagnostic settings for subscription.
+"""
+
+helps['monitor diagnostic-settings subscription create'] = """
+type: command
+short-summary: Create diagnostic settings for a subscription
+examples:
+  - name: Create diagnostic settings for a subscription with EventHub.
+    text: |
+        az monitor diagnostic-settings subscription create -n {name} --location westus --event-hub-auth-rule {eventHubRuleID} --storage-account {storageAccount} \\
+        --logs '[
+           {
+             "category": "Security",
+             "enabled": true,
+           },
+           {
+             "category": "Administrative",
+             "enabled": true,
+           },
+           {
+             "category": "ServiceHealth",
+             "enabled": true,
+           },
+           {
+             "category": "Alert",
+             "enabled": true,
+           },
+           {
+             "category": "Recommendation",
+             "enabled": true,
+           },
+           {
+             "category": "Policy",
+             "enabled": true,
+           },
+           {
+             "category": "Autoscale",
+             "enabled": true,
+           },
+           {
+             "category": "ResourceHealth",
+             "enabled": true,
+           }
+           ]'
+"""
+
+helps['monitor diagnostic-settings subscription update'] = """
+type: command
+short-summary: Update diagnostic settings for a subscription.
+"""
+
 helps['monitor log-analytics'] = """
 type: group
 short-summary: Manage Azure log analytics.

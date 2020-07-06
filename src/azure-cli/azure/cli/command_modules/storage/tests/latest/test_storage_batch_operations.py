@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from azure.cli.testsdk import LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
@@ -342,6 +343,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage file download-batch -s {} -d "{}"', account_info, share_name, local_folder)
         self.assertEqual(expect_file_count, sum(len(f) for r, d, f in os.walk(local_folder)))
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()

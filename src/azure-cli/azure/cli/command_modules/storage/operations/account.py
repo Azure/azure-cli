@@ -29,7 +29,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
-                           require_infrastructure_encryption=None):
+                           require_infrastructure_encryption=None, allow_blob_public_access=None,
+                           min_tls_version=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -118,9 +119,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             publish_microsoft_endpoints=str2bool(publish_microsoft_endpoints),
             publish_internet_endpoints=str2bool(publish_internet_endpoints)
         )
+    if allow_blob_public_access is not None:
+        params.allow_blob_public_access = allow_blob_public_access
 
     if require_infrastructure_encryption:
         params.encryption.require_infrastructure_encryption = require_infrastructure_encryption
+
+    if min_tls_version:
+        params.minimum_tls_version = min_tls_version
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -196,7 +202,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
-                           publish_microsoft_endpoints=None, publish_internet_endpoints=None):
+                           publish_microsoft_endpoints=None, publish_internet_endpoints=None,
+                           allow_blob_public_access=None, min_tls_version=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -337,6 +344,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             params.routing_preference.publish_microsoft_endpoints = str2bool(publish_microsoft_endpoints)
         if publish_internet_endpoints is not None:
             params.routing_preference.publish_internet_endpoints = str2bool(publish_internet_endpoints)
+
+    if allow_blob_public_access is not None:
+        params.allow_blob_public_access = allow_blob_public_access
+    if min_tls_version:
+        params.minimum_tls_version = min_tls_version
 
     return params
 
