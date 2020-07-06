@@ -648,6 +648,16 @@ examples:
     text: az sql mi delete -g mygroup -n myinstance --yes
 """
 
+helps['sql mi failover'] = """
+type: command
+short-summary: Failover a managed instance.
+examples:
+  - name: Failover a managed instance primary replica
+    text: az sql mi failover -g mygroup -n myinstance
+  - name: Failover a managed instance readable secodary replica
+    text: az sql mi failover -g mygroup -n myinstance --replica-type ReadableSecondary
+"""
+
 helps['sql mi key'] = """
 type: group
 short-summary: Manage a SQL Instance's keys.
