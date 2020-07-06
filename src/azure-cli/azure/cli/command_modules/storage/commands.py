@@ -300,7 +300,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=create_boolean_result_output_transformer(
                                     'undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
-
         g.storage_custom_command_oauth('upload', 'upload_blob',
                                        doc_string_source='blob#BlockBlobService.create_blob_from_path')
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
