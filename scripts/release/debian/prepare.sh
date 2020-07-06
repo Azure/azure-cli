@@ -33,9 +33,9 @@ TAB=$'\t'
 debian_dir=$1
 completion_script=$2
 source_dir=$3
-SETUP_Depends=""
+setup_depends=""
 if [ ! -z "$4" ]; then
-    SETUP_Depends=$4
+    setup_depends=$4
 fi
 
 mkdir $debian_dir/source
@@ -63,7 +63,7 @@ Homepage: https://github.com/azure/azure-cli
 
 Package: azure-cli
 Architecture: all
-Depends: \${shlibs:Depends}, \${misc:Depends}, \$SETUP_Depends
+Depends: \${shlibs:Depends}, \${misc:Depends}, $setup_depends
 Description: Azure CLI
  A great cloud needs great tools; we're excited to introduce Azure CLI,
  our next generation multi-platform command line experience for Azure.
