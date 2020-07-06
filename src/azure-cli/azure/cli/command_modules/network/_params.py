@@ -1865,6 +1865,7 @@ def load_arguments(self, _):
         c.argument('network_virtual_appliance_name', help='The name of Network Virtual Appliance', options_list=['--appliance-name'])
         c.argument('site_name', help='The name of Network Virtual Appliance Site', options_list=['--name', '-n'])
         c.argument('address_prefix', help='Address Prefix of Network Virtual Appliance Site')
+    with self.argument_context('network virtual-appliance site', arg_group='Breakout of O365') as c:
         c.argument('allow', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 allow category.')
         c.argument('optimize', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 optimize category.')
         c.argument('default', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 default category.')

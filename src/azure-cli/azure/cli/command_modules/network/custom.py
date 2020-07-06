@@ -5945,13 +5945,9 @@ def create_network_virtual_appliance(cmd, resource_group_name, network_virtual_a
     client = network_client_factory(cmd.cli_ctx).network_virtual_appliances
     (NetworkVirtualAppliance,
      SubResource,
-     VirtualApplianceSkuProperties,
-     ManagedServiceIdentityUserAssignedIdentitiesValue,
-     ManagedServiceIdentity) = cmd.get_models('NetworkVirtualAppliance',
-                                              'SubResource',
-                                              'VirtualApplianceSkuProperties',
-                                              'ManagedServiceIdentityUserAssignedIdentitiesValue',
-                                              'ManagedServiceIdentity')
+     VirtualApplianceSkuProperties) = cmd.get_models('NetworkVirtualAppliance',
+                                                     'SubResource',
+                                                     'VirtualApplianceSkuProperties')
 
     virtual_appliance = NetworkVirtualAppliance(boot_strap_configuration_blobs=boot_strap_configuration_blobs,
                                                 cloud_init_configuration_blobs=cloud_init_configuration_blobs,

@@ -6113,3 +6113,94 @@ helps['network security-partner-provider show'] = """
 type: command
 short-summary: Show a Azure security partner provider.
 """
+
+helps['network virtual-appliance'] = """
+type: group
+short-summary: Manage Azure Network Virtual Appliance.
+"""
+
+helps['network virtual-appliance create'] = """
+type: command
+short-summary: Create an Azure network virtual appliance.
+examples:
+  - name: Create an Azure network virtual appliance.
+    text: |
+        az network virtual-appliance create -n MyName -g MyRG --vhub {vhubID} --vendor "barracudasdwanrelease" --scale-unit 2 -v latest --asn 10000 --init-config "echo $hello" --boot-blobs {blobUrl} {blobUrl} --cloud-blobs {blobUrl} {blobUrl}
+"""
+
+helps['network virtual-appliance update'] = """
+type: command
+short-summary: Update an Azure network virtual appliance.
+examples:
+  - name: Update an Azure network virtual appliance.
+    text: |
+        az network virtual-appliance update -n MyName -g MyRG --asn 20000 --init-config "echo $hello"
+"""
+
+helps['network virtual-appliance show'] = """
+type: command
+short-summary: Show the detail of an Azure network virtual appliance.
+"""
+
+helps['network virtual-appliance list'] = """
+type: command
+short-summary: List all Azure network virtual appliance.
+"""
+
+helps['network virtual-appliance delete'] = """
+type: command
+short-summary: Delete an Azure network virtual appliance.
+"""
+
+helps['network virtual-appliance site'] = """
+type: group
+short-summary: Manage Azure Network Virtual Appliance Site.
+"""
+
+helps['network virtual-appliance site create'] = """
+type: command
+short-summary: Create an Azure network virtual appliance site.
+examples:
+  - name: Create an Azure network virtual appliance site.
+    text: |
+        az network virtual-appliance site create -n MyName -g MyRG --appliance-name MyAppliance --address-prefix 10.0.0.0/24 --allow --default --optimize
+"""
+
+helps['network virtual-appliance site update'] = """
+type: command
+short-summary: Update an Azure network virtual appliance site.
+examples:
+  - name: Update an Azure network virtual appliance site.
+    text: |
+        az network virtual-appliance site update -n MyName -g MyRG --appliance-name MyAppliance --address-prefix 10.0.0.0/24 --allow false --default false --optimize false
+"""
+
+helps['network virtual-appliance site show'] = """
+type: command
+short-summary: Show the detail of an Azure network virtual appliance site.
+"""
+
+helps['network virtual-appliance site list'] = """
+type: command
+short-summary: List all Azure network virtual appliance site.
+"""
+
+helps['network virtual-appliance site delete'] = """
+type: command
+short-summary: Delete an Azure network virtual appliance site.
+"""
+
+helps['network virtual-appliance sku'] = """
+type: group
+short-summary: Manage Azure Network Virtual Appliance Sku.
+"""
+
+helps['network virtual-appliance sku show'] = """
+type: command
+short-summary: Show the detail of an Azure network virtual appliance sku.
+"""
+
+helps['network virtual-appliance sku list'] = """
+type: command
+short-summary: List all Azure network virtual appliance sku.
+"""

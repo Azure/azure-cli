@@ -3860,5 +3860,6 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name}')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
+
 if __name__ == '__main__':
     unittest.main()
