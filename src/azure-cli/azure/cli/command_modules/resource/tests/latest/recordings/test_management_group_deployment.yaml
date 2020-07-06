@@ -32,7 +32,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 01 Jul 2020 16:19:04 GMT
+      - Mon, 06 Jul 2020 14:14:31 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +46,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -81,7 +81,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 01 Jul 2020 16:19:14 GMT
+      - Mon, 06 Jul 2020 14:14:41 GMT
       expires:
       - '-1'
       pragma:
@@ -96,7 +96,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "AzBlueprint", "properties": {"details": {"parent": {}}}}'
+    body: '{"name": "azure-cli-management-group3bxh", "properties": {"details": {"parent":
+      {}}}}'
     headers:
       Accept:
       - application/json
@@ -109,7 +110,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '66'
+      - '85'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -120,32 +121,29 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprint?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/azure-cli-management-group3bxh?api-version=2018-03-01-preview
   response:
     body:
-      string: '{"id":"/providers/Microsoft.Management/managementGroups/AzBlueprint","type":"/providers/Microsoft.Management/managementGroups","name":"AzBlueprint","properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","displayName":"Azure
-        Blueprint","details":{"version":1,"updatedTime":"2018-05-02T17:10:51.8506417Z","updatedBy":"1c2f7300-0977-4912-bbe1-ae870f953e9b","parent":{"id":"/providers/Microsoft.Management/managementGroups/72f988bf-86f1-41af-91ab-2d7cd011db47","name":"72f988bf-86f1-41af-91ab-2d7cd011db47","displayName":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}}}'
+      string: '{"error":{"code":"BadRequest","message":"Permission to write on resources
+        of type ''Microsoft.Management/managementGroups'' is required on the management
+        group or its ancestors.","details":"Management Group ID: ''/providers/Microsoft.Management/managementGroups/azure-cli-management-group3bxh''"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '568'
+      - '293'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 01 Jul 2020 16:19:16 GMT
+      - Mon, 06 Jul 2020 14:14:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 7e0859b7-6c23-4a91-a252-461042df75f0
+      - 2ff0987a-effc-45d2-886a-e1dbe1983368
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
       x-ba-restapi:
       - 1.0.3.1577
       x-content-type-options:
@@ -153,6 +151,6 @@ interactions:
       x-ms-ratelimit-remaining-tenant-writes:
       - '1199'
     status:
-      code: 200
-      message: OK
+      code: 400
+      message: Bad Request
 version: 1
