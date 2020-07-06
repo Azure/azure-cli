@@ -635,11 +635,25 @@ def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False
 
 
 def validate_private_link_vnet_validator(cmd, namespace):
-    get_folded_parameter_validator(
-        'private_link_subnet', 'subnets', '--private-link-subnet',
-        'private_link_vnet_name', 'Microsoft.Network/virtualNetworks', '--private-link-vnet-name',
-        allow_none=True
-    )(cmd, namespace)
+    from msrestazure.tools import is_valid_resource_id, resource_id
+
+    # private_link_ip_address = namespace.private_link_ip_address
+    # private_link_ip_allocation_method = namespace.private_link_ip_allocation_method
+    # private_link_address_prefix = namespace.private_link_address_prefix
+    # private_link_subnet = namespace.private_link_subnet
+    # private_link_primary = namespace.private_link_primary
+
+    # print('=' * 100)
+    # print('private_link_ip_address =', private_link_ip_address)
+    # print('private_link_ip_allocation_method =', private_link_ip_allocation_method)
+    # print('private_link_address_prefix =', private_link_address_prefix)
+    # print('private_link_subnet =', private_link_subnet)
+    # print('private_link_primary =', private_link_primary)
+    # print('virtual_network_name =', namespace.virtual_network_name)
+    # print('=' * 100)
+
+    if is_valid_resource_id(namespace.private_link_subnet):
+        return
 
 
 def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, default_none=False):

@@ -146,11 +146,12 @@ def load_arguments(self, _):
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
 
-    with self.argument_context('network application-gateway', arg_group='Private Link Subnet Configuration') as c:
+    with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
+        c.argument('enable_private_link', action='store_true', help='Enable Private Link feature for this application gateway', default=False)
         c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link')
         c.argument('private_link_ip_allocation_method', help='The private IP address of a subnet allocation method Private Link')
-        c.argument('private_link_address_prefix', help='The CIDR prefix to use when creating a new subnet')
-        c.argument('private_link_subnet', help='The name or ID of the subnet within the same vnet of an Application Gateway')
+        c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
+        c.argument('private_link_subnet', help='The name of the subnet within the same vnet of an application gateway')
         c.argument('private_link_primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
     with self.argument_context('network application-gateway create') as c:
