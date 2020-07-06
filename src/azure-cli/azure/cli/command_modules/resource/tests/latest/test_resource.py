@@ -352,7 +352,7 @@ class TagScenarioTest(ScenarioTest):
 
         # Test Microsoft.Resources/resourceGroups
         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
-                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'})) 
+                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'}))
 
         # Test Microsoft.ContainerRegistry/registries/webhooks
         self.kwargs.update({
@@ -369,9 +369,9 @@ class TagScenarioTest(ScenarioTest):
         webhook = self.cmd('acr webhook create -n {webhook_name} -r {registry_name} --uri {uri} --actions {actions}',
                            checks=[self.check('name', '{webhook_name}')]).get_output_in_json()
         self.kwargs['webhook_id'] = webhook['id']
-        self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'})) 
-        self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))  
-        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty()) 
+        self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
+        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
@@ -503,8 +503,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
-            'ts': '/subscriptions/996a2f3f-ee01-4ffd-9765-d2c3fc98f30a/resourceGroups/giants-deep/providers/Microsoft.Resources/templateSpecs/BasicLinked01/versions/1.0', 
-            'ts_sub': '996a2f3f-ee01-4ffd-9765-d2c3fc98f30a', 
+            'ts': '/subscriptions/996a2f3f-ee01-4ffd-9765-d2c3fc98f30a/resourceGroups/giants-deep/providers/Microsoft.Resources/templateSpecs/BasicLinked01/versions/1.0',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
             'dn3': self.create_random_name('azure-cli-subscription_level_deployment', 60)
@@ -514,14 +513,14 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment sub validate --location WestUS --template-spec {ts} --subscription {ts_sub}', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-spec {ts} ', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
-        
+
         self.cmd('deployment sub validate --location WestUS')
 
         self.cmd('deployment sub create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
-               self.check('properties.provisioningState', 'Succeeded')
+            self.check('properties.provisioningState', 'Succeeded')
         ])
 
         self.cmd('deployment sub list', checks=[
@@ -548,14 +547,14 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('deployment sub cancel -n {dn2}')
 
         self.cmd('deployment sub show -n {dn2}', checks=[
-            self.check('properties.provisioningState', 'Canceled') 
+            self.check('properties.provisioningState', 'Canceled')
         ])
 
-        self.cmd('deployment sub create -n {dn3} --location WestUS --template-spec {ts} --subscription {ts_sub} --no-wait')
+        self.cmd('deployment sub create -n {dn3} --location WestUS --template-spec {ts} --no-wait')
 
-        self.cmd('deployment sub cancel -n {dn3} --subscription {ts_sub}')
+        self.cmd('deployment sub cancel -n {dn3}')
 
-        self.cmd('deployment sub show -n {dn3} --subscription {ts_sub}', checks=[
+        self.cmd('deployment sub show -n {dn3}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
 
@@ -624,9 +623,9 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'dn3': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\'),
-            'ts': '/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/templateSpecs/BasicTemplateSpecs/versions/1.1.0', 
-            'context': 'a1bfa635-f2bf-42f1-86b5-848c674fc321', 
-            'ts_rg' : 'TemplateSpecsCLI', 
+            'ts': '/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/templateSpecs/BasicTemplateSpecs/versions/1.1.0',
+            'context': 'a1bfa635-f2bf-42f1-86b5-848c674fc321',
+            'ts_rg': 'TemplateSpecsCLI',
         })
 
         self.cmd('deployment group validate --resource-group {rg} --template-file {tf} --parameters @"{params}"', checks=[
@@ -718,7 +717,7 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
 
         self.cmd('deployment group cancel -n {dn3} -g {ts_rg} --subscription {context}')
 
-        self.cmd('deployment group show -n {dn3} -g {ts_rg} --subscription {context}' , checks=[
+        self.cmd('deployment group show -n {dn3} -g {ts_rg} --subscription {context}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
 
@@ -729,7 +728,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
-            'ts' : '/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/TemplateSpecs/BasicTemplateSpecs/versions/1.1.0', 
+            'ts': '/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/TemplateSpecs/BasicTemplateSpecs/versions/1.1.0',
             'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
             'mg': 'azure-cli-management-group3bxh',
@@ -744,7 +743,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
         self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-spec {ts} '
-                 '--subscription {sub-rg}', 
+                 '--subscription {sub-rg}',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file {tf} '
@@ -787,7 +786,6 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
-
         # clean
         self.cmd('account management-group delete -n {mg}')
 
@@ -798,7 +796,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
-            'ts' : '/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/TemplateSpecs/BasicTemplateSpecs/versions/1.1.0', 
+            'ts': '/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/TemplateSpecs/BasicTemplateSpecs/versions/1.1.0',
             'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60),
             'mg': self.create_random_name('azure-cli-management-group', 40),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
@@ -859,8 +857,6 @@ class DeploymentTestAtTenantScope(ScenarioTest):
         self.cmd('group delete -n cli_tenant_level_deployment --yes')
 
         self.cmd('account management-group delete -n {mg}')
-
-        
 
 
 class DeploymentTest(ScenarioTest):
@@ -1119,13 +1115,12 @@ class DeploymentThruUriTest(ScenarioTest):
         self.cmd('deployment group list -g {rg}',
                  checks=self.is_empty())
 
+
 class DeploymentThruTemplateSpecTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_uri')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_spec')
     def test_group_deployment_thru_template_spec(self, resource_group):
         self.resource_group = resource_group
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        # same copy of the sample template file under current folder, but it is uri based now
         self.kwargs.update({
             'ts': '/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/TemplateSpecs/BasicTemplateSpecs/versions/1.1.0',
             'rg': 'TemplateSpecsCLI'
@@ -1292,7 +1287,7 @@ class ResourceMoveScenarioTest(ScenarioTest):
                  self.check('name', '{nsg2}')])
 
 
-class FeatureScenarioTest(ScenarioTest): 
+class FeatureScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     def test_feature_list(self):
@@ -1306,7 +1301,7 @@ class FeatureScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     def test_feature_unregister(self):
-        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=self.check('properties.state', 'Unregistered')) 
+        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=self.check('properties.state', 'Unregistered'))
 
 
 class PolicyScenarioTest(ScenarioTest):
@@ -1787,18 +1782,14 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                #self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
-                self.resource_policyset_operations(resource_group, None, 'a1bfa635-f2bf-42f1-86b5-848c674fc321')
+                self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
         else:
-            #self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
-            self.resource_policyset_operations(resource_group, None, 'a1bfa635-f2bf-42f1-86b5-848c674fc321')
-
+            self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
     @AllowLargeResponse()
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-
         self.kwargs.update({
             'pn': self.create_random_name('azure-cli-test-policy', 30),
             'pdn': self.create_random_name('test_policy', 20),
@@ -2049,7 +2040,8 @@ class ManagedAppScenarioTest(ScenarioTest):
         self.cmd('managedapp delete -g {rg} -n {man}')
         self.cmd('managedapp list -g {rg}', checks=self.is_empty())
 
-class CrossRGDeploymentScenarioTest(ScenarioTest): 
+
+class CrossRGDeploymentScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_alt', parameter_name='resource_group_cross')
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_deploy')
@@ -2090,8 +2082,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         ])
 
 
-class CrossTenantDeploymentScenarioTest(LiveScenarioTest): 
-    
+class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
     def test_group_deployment_cross_tenant(self, resource_group):
@@ -2340,7 +2331,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             self.cmd('deployment group create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
 
 
-class InvokeActionTest(ScenarioTest): 
+class InvokeActionTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_invoke_action')
     def test_invoke_action(self, resource_group):
 

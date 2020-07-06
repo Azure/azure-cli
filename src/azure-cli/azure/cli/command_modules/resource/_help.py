@@ -257,7 +257,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -282,7 +282,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -303,7 +303,7 @@ examples:
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
   - name: Create a deployment at subscription scope from a template-spec
     text: >
-        az deployment create --resource-group testrg --subscription MySubscription --template-spec /subscriptions/{guid}/resourceGroups/{resource-group-name}/{resource-provider-namespace}/{resource-type}/{resource-name} \\
+        az deployment create --location WestUS --template-spec resourceID
 """
 
 helps['deployment export'] = """
@@ -396,7 +396,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -424,7 +424,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -460,7 +460,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment What-If operation metadata.
   - name: --name -n
@@ -563,7 +563,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to create deployment at.
   - name: --name -n
@@ -593,7 +593,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to create deployment at.
   - name: --name -n
@@ -622,7 +622,7 @@ examples:
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
   - name: Create a deployment at subscription scope from a template-spec
     text: >
-        az deployment create --resource-group testrg --subscription MySubscription --template-spec /subscriptions/{guid}/resourceGroups/{resource-group-name}/{resource-provider-namespace}/{resource-type}/{resource-name} \\
+        az deployment group create --resource-group testrg  --template-spec resourceID
 """
 
 helps['deployment group what-if'] = """
@@ -639,7 +639,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to execute deployment What-If operation at.
   - name: --name -n
@@ -749,7 +749,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
   - name: --name -n
@@ -775,7 +775,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
   - name: --name -n
@@ -878,7 +878,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --name -n
     short-summary: The deployment name.
   - name: --location -l
@@ -902,7 +902,7 @@ parameters:
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -t
-    short-summary: The template spec resource id. 
+    short-summary: The template spec resource id.
   - name: --name -n
     short-summary: The deployment name.
   - name: --location -l

@@ -15,7 +15,7 @@ from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_resource_links,
-    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs)
+    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions)
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
 
 from ._exception_handler import managementgroups_exception_handler
@@ -39,6 +39,7 @@ def transform_resource_list(result):
             res['Status'] = ' '
         transformed.append(res)
     return transformed
+
 
 # Resource group deployment commands
 def transform_deployment(result):
@@ -154,12 +155,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.resource.custom#{}',
         client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
-    )
-
-    resource_templatespecs_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.templatespecs.operations#ResourceLinksOperations.{}',
-        client_factory=cf_resource_templatespecs,
-        resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS
     )
 
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:

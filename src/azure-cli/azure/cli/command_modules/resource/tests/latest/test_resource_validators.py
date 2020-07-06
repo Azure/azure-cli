@@ -120,7 +120,7 @@ class TestResourceValidators(unittest.TestCase):
         namespace.template_uri = 'https://templates/template123.json?foo=bar'
         namespace.template_file = None
         namespace.deployment_name = None
-        _validate_deployment_name(namespace)  #FAILURE TypeError: expected string or bytes-like object
+        _validate_deployment_name(namespace)
         self.assertEqual('template123', namespace.deployment_name)
 
         namespace = mock.MagicMock()
