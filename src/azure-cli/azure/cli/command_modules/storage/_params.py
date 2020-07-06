@@ -622,6 +622,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Required if the blob has associated snapshots.')
         c.argument('lease_id', help='The active lease id for the blob.')
 
+    with self.argument_context('storage blob lease acquire') as c:
+        c.register_precondition_options()
+        c.extra('timeout', timeout_type)
+        c.extra('blob_name', arg_type=blob_name_type, required=True)
+        c.extra('container_name', arg_type=container_name_type, required=True)
+        c.extra('lease_id', options_list='--proposed-lease-id', help='Proposed lease ID, in a GUID string format. '
+                'The Blob service returns 400 (Invalid request) if the proposed lease ID is not in the correct format.')
+        c.argument('lease_duration', help='Specify the duration of the lease, in seconds, or negative one (-1) for '
+                   'a lease that never expires. A non-infinite lease can be between 15 and 60 seconds. A lease '
+                   'duration cannot be changed using renew or change. Default is -1 (infinite lease)')
+
     with self.argument_context('storage blob lease') as c:
         c.argument('lease_duration', type=int)
         c.argument('lease_break_period', type=int)

@@ -1292,3 +1292,13 @@ def validate_logging_version(namespace):
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
             'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
+
+
+def validate_match_condition(namespace):
+    from .track2_util import _if_match, _if_none_match
+    if namespace.if_match:
+        namespace = _if_match(namespace.if_match, namespace)
+        del namespace.if_match
+    if namespace.if_none_match:
+        namespace = _if_none_match(namespace.if_none_match, namespace)
+        del namespace.if_none_match

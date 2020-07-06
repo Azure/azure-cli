@@ -72,3 +72,46 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs['download_path'] = os.path.join(self.kwargs.get('local_dir'), 'test.file')
         self.oauth_cmd('storage fs file download -p {file} -f {filesystem} -d "{download_path}"'
                        ' --account-name {account}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_lease_oauth(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        local_file = self.create_temp_file(128)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+        proposed_lease_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+        new_lease_id = 'dcbadcba-dcba-dcba-dcba-dcbadcbadcba'
+        date = '2016-04-01t12:00z'
+
+        self.oauth_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
+
+        # test lease operations
+        self.oauth_cmd('storage blob lease acquire --lease-duration 60 -b {} -c {} '
+                       '--if-modified-since {} --proposed-lease-id {}', account_info, b, c, date,
+                        proposed_lease_id)
+        self.oauth_cmd('storage blob show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
+                                JMESPathCheck('properties.lease.state', 'leased'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.oauth_cmd('storage blob lease change -b {} -c {} --lease-id {} '
+                         '--proposed-lease-id {}', account_info, b, c, proposed_lease_id,
+                         new_lease_id)
+        self.oauth_cmd('storage blob lease renew -b {} -c {} --lease-id {}', account_info, b, c,
+                         new_lease_id)
+        self.oauth_cmd('storage blob show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
+                                JMESPathCheck('properties.lease.state', 'leased'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.oauth_cmd('storage blob lease break -b {} -c {} --lease-break-period 30',
+                         account_info, b, c)
+        self.oauth_cmd('storage blob show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'breaking'),
+                                JMESPathCheck('properties.lease.status', 'locked'))
+        self.oauth_cmd('storage blob lease release -b {} -c {} --lease-id {}', account_info, b, c,
+                         new_lease_id)
+        self.oauth_cmd('storage blob show -n {} -c {}', account_info, b, c) \
+            .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'available'),
+                                JMESPathCheck('properties.lease.status', 'unlocked'))

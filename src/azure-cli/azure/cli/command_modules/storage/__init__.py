@@ -156,6 +156,17 @@ class StorageArgumentContext(AzArgumentContext):
                           resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01', nargs='+',
                           validator=validate_encryption_services, help='Specifies which service(s) to encrypt.')
 
+    def register_precondition_options(self):
+        from ._validators import validate_match_condition
+        self.extra('if_modified_since')
+        self.extra('if_unmodified_since')
+        self.extra('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform the "
+                   "operation only if the resource's ETag matches the value specified.")
+        self.extra('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                   "the operation only if the resource's ETag does not match the value specified. Specify the wildcard "                        
+                   "character (*) to perform the operation only if the resource does not exist, and fail the operation "
+                   "if it does exist.", validator=validate_match_condition)
+
 
 class StorageCommandGroup(AzCommandGroup):
     def storage_command(self, name, method_name=None, command_type=None, oauth=False, generic_update=None, **kwargs):
