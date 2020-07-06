@@ -4,6 +4,7 @@ from collections import OrderedDict
 import copy
 import json
 import re
+import random
 from six import string_types
 
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
@@ -57,6 +58,7 @@ class TreeNode:
         self._keys = None
         self._child = []  # list of child node
         self._from_list = False
+        self._list_length = None  # valid only when from_list is true
 
     def _get_trace(self):
         traces = []
@@ -65,14 +67,17 @@ class TreeNode:
             traces.append(self._name)
         return traces
 
-    def _get_trace_str(self):
+    def _get_trace_str(self, number=None):
         '''The correct JMESPath to get to current node'''
         trace_str = ""
         if self._parent:
             trace_str += self._parent._get_trace_str()
             trace_str += "." + self._name
         if self._from_list:
-            trace_str += "[]"
+            if number:
+                trace_str += "[:{}]".format(number)
+            else:
+                trace_str += "[]"
         return trace_str
 
     def get_select_string(self, select_item=None):
@@ -85,6 +90,15 @@ class TreeNode:
                 help_str = help_str + self._keys[0]
         else:
             raise Exception("Unfinished function!")
+        return help_str
+
+    def select_specific_number_string(self, number=5):
+        help_str = ""
+        if not self._from_list:
+            return help_str
+        number = min(self._list_length, number)
+        number = random.choice(range(1, number + 1))
+        help_str = self._get_trace_str(number)
         return help_str
 
 
@@ -100,12 +114,15 @@ class TreeBuilder:
         if isinstance(data, list):
             if len(data) > 0:
                 self._root = self._parse_dict('root', data[0], from_list=True)
+                self._root._list_length = len(data)
         elif isinstance(data, dict):
             self._root = self._parse_dict('root', data)
 
     def generate_recommend(self):
         for node in self._all_nodes.values():
             print(node.get_select_string())
+            if node._from_list:
+                print(node.select_specific_number_string())
 
     def _parse_dict(self, name, data, from_list=False):
         node = TreeNode(name)
@@ -116,6 +133,7 @@ class TreeBuilder:
             if isinstance(data[key], list):
                 if len(data[key]) > 0:
                     child_node = self._parse_dict(key, data[key][0], from_list=True)
+                    child_node._list_length = len(data[key])
             elif isinstance(data[key], dict) and not len(data[key]) == 0:
                 child_node = self._parse_dict(key, data[key])
             if child_node:
