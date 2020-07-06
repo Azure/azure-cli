@@ -387,7 +387,12 @@ def load_command_table(self, _):
 
     # region ApplicationGateways
     with self.command_group('network application-gateway', network_ag_sdk) as g:
-        g.custom_command('create', 'create_application_gateway', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_ag_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'create_application_gateway',
+                         transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
+                         supports_no_wait=True,
+                         table_transformer=deployment_validate_table_format,
+                         validator=process_ag_create_namespace,
+                         exception_handler=handle_template_based_exception)
         g.command('delete', 'delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_application_gateways')

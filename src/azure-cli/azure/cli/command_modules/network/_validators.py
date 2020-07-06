@@ -634,6 +634,14 @@ def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False
     return complex_validator_with_type if has_type_field else simple_validator
 
 
+def validate_private_link_vnet_validator(cmd, namespace):
+    get_folded_parameter_validator(
+        'private_link_subnet', 'subnets', '--private-link-subnet',
+        'private_link_vnet_name', 'Microsoft.Network/virtualNetworks', '--private-link-vnet-name',
+        allow_none=True
+    )(cmd, namespace)
+
+
 def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, default_none=False):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
@@ -883,6 +891,7 @@ def process_ag_create_namespace(cmd, namespace):
     validate_custom_error_pages(namespace)
     validate_waf_policy(cmd, namespace)
     validate_application_gateway_identity(cmd, namespace)
+    validate_private_link_vnet_validator(cmd, namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):

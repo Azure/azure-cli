@@ -117,6 +117,13 @@ def get_folded_parameter_validator(
         (resource_id_parts, value_was_id) = _validate_name_or_id(
             cmd.cli_ctx, namespace.resource_group_name, property_val, property_type, parent_val, parent_type)
 
+        print('-' * 100)
+        print('property_name =', property_name)
+        print('resource_id_parts =', resource_id_parts)
+        print('value_was_id =', value_was_id)
+        print('parent_val =', parent_val)
+        print('allow_new =', allow_new)
+
         # 2) resource exists
         if resource_exists(cmd.cli_ctx, **resource_id_parts):
             setattr(namespace, type_field_name, 'existingId')

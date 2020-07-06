@@ -148,7 +148,14 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
                                custom_error_pages=None, firewall_policy=None, max_capacity=None,
-                               user_assigned_identity=None):
+                               user_assigned_identity=None,
+                               private_link_name=None,
+                               private_link_ip_address=None,
+                               private_link_ip_allocation_method=None,
+                               private_link_vnet_name=None,
+                               private_link_subnet=None,
+                               private_link_subnet_type=None,
+                               private_link_primary=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -198,13 +205,43 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
+    if private_link_subnet_type:
+        print('private_link_subnet_type =', private_link_subnet_type)
+
+    print('=' * 100)
+    print(private_link_name)
+    print(private_link_ip_address)
+    print(private_link_vnet_name)
+    print(private_link_subnet)
+    print(private_link_primary)
+
+    if any([private_link_name, private_link_ip_address, private_link_vnet_name, private_link_subnet, private_link_primary]):
+        private_link_subnet_id = private_link_subnet
+        if not is_valid_resource_id(private_link_subnet_id):
+            private_link_subnet_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='virtualNetworks',
+                name=private_link_vnet_name,
+                child_type_1='subnets',
+                child_name_1=private_link_subnet
+            )
+
     app_gateway_resource = build_application_gateway_resource(
         cmd, application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
         private_ip_address, private_ip_allocation, cert_data, cert_password, key_vault_secret_id,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity, user_assigned_identity)
+        firewall_policy, max_capacity, user_assigned_identity,
+        # private_link_ip_address, private_link_subnet_id,
+        # private_link_name, private_link_ip_address,
+        )
+
+    # from pprint import pprint
+    # pprint(app_gateway_resource)
+
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -226,7 +263,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+    # return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,

@@ -146,6 +146,15 @@ def load_arguments(self, _):
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
 
+    with self.argument_context('network application-gateway', arg_group='Private Link IP Configuration') as c:
+        c.argument('private_link_ip_address', help='The static private IP address for Private Link')
+        c.argument('private_link_vnet_name', help='The virtual network (VNet) name for Private Link')
+        private_link_subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--private-link-vnet-name', allow_new=True)
+        c.argument('private_link_subnet', help=private_link_subnet_help)
+        c.ignore('private_link_subnet_type')
+        c.argument('private_link_ip_allocation_method', help='The private IP address allocation method for Private Link')
+        c.argument('private_link_primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
+
     with self.argument_context('network application-gateway create') as c:
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('routing_rule_type', arg_group='Gateway', help='The request routing rule type.', arg_type=get_enum_type(ApplicationGatewayRequestRoutingRuleType))

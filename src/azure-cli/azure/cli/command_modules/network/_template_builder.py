@@ -151,7 +151,20 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                     'backendHttpSettings': {'id': backend_http_settings_id}
                 }
             }
-        ]
+        ],
+        # 'privateLinkConfigurations': [
+        #     {
+        #         'name': '',
+        #         'id': '',
+        #         'properties': {
+        #             'ipConfigurations': [
+        #                 {
+        #                     'name'
+        #                 }
+        #             ]
+        #         }
+        #     }
+        # ]
     }
     if ssl_cert:
         ag_properties.update({'sslCertificates': [ssl_cert]})
