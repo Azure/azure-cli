@@ -108,7 +108,7 @@ def call_aladdin_service(query):
         "versionNumber": version,
         "correlationId": correlation_id,
         # In case the user is not logged in
-        "subscriptionId": "subscription_id" if subscription_id is not None else DEFAULT_GUID
+        "subscriptionId": subscription_id if subscription_id is not None else DEFAULT_GUID
     }
 
     api_url = 'https://app.aladdin.microsoft.com/api/v1.0/examples'
