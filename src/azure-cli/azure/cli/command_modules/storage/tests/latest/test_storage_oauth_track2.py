@@ -93,7 +93,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         # test lease operations
         result = self.oauth_cmd(
             'storage blob lease acquire --lease-duration 60 -b {b} -c {c} --account-name {sa} '
-            '--proposed-lease-id {proposed_lease_id} -o tsv').get_output_in_json()
+            '--proposed-lease-id {proposed_lease_id} -o tsv').output.rstrip()
         self.assertEqual(result, self.kwargs['proposed_lease_id'])
         self.oauth_cmd('storage blob show -n {b} -c {c} --account-name {sa}') \
             .assert_with_checks(JMESPathCheck('properties.lease.duration', 'fixed'),
@@ -111,7 +111,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
                                 JMESPathCheck('properties.lease.state', 'breaking'),
                                 JMESPathCheck('properties.lease.status', 'locked'))
-        self.oauth_cmd('storage blob lease release -b {b} -c {c} --lease-id {new_lease_id}')
+        self.oauth_cmd('storage blob lease release -b {b} -c {c} --lease-id {new_lease_id} --account-name {sa}')
         self.oauth_cmd('storage blob show -n {b} -c {c} --account-name {sa}') \
             .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
                                 JMESPathCheck('properties.lease.state', 'available'),
