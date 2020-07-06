@@ -39,9 +39,7 @@ export PATH=$PATH:$WORKDIR/python_env/bin
 
 find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
-if [[ "${CLI_VERSION_REVISION:=1}" == *"trusty" || "${CLI_VERSION_REVISION:=1}" == *"jessie" ]]; then
-    pip3 install -r ${WORKDIR}/src/azure-cli/requirements.opt.py3.Trusty.txt
-elif [ -f "${WORKDIR}/src/azure-cli/requirements.opt.py3.$(uname).txt" ]; then
+if [[ -f "${WORKDIR}/src/azure-cli/requirements.opt.py3.$(uname).txt" && "${CLI_VERSION_REVISION:=1}" != *"trusty" && "${CLI_VERSION_REVISION:=1}" != *"jessie" ]]; then
     pip3 install -r ${WORKDIR}/src/azure-cli/requirements.opt.py3.$(uname).txt
 fi
 
