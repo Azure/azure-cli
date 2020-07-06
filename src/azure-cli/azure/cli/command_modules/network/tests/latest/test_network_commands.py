@@ -3800,19 +3800,63 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
 
         self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "barracudasdwanrelease" '
                  '--scale-unit 2 -v latest --asn 10000 --init-config "echo $abc" '
-                 '--boot-blobs {blob} {blob} --cloud-blobs {blob} {blob}')
-        self.cmd('network virtual-appliance update -n {name} -g {rg} --asn 20000 --init-config "echo $abcd"')
-        self.cmd('network virtual-appliance show -n {name} -g {rg}')
-        self.cmd('network virtual-appliance list -g {rg}')
-        self.cmd('network virtual-appliance list')
+                 '--boot-blobs {blob} {blob} --cloud-blobs {blob} {blob}',
+                 checks=[
+                     self.check('name', '{name}'),
+                     self.check('length(bootStrapConfigurationBlobs)', 2),
+                     self.check('length(cloudInitConfigurationBlobs)', 2),
+                     self.check('virtualApplianceAsn', 10000),
+                     self.check('cloudInitConfiguration', "echo $abc")
+                 ])
+        self.cmd('network virtual-appliance update -n {name} -g {rg} --asn 20000 --init-config "echo $abcd"', checks=[
+            self.check('virtualApplianceAsn', 20000),
+            self.check('cloudInitConfiguration', "echo $abcd")
+        ])
+        self.cmd('network virtual-appliance show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('length(bootStrapConfigurationBlobs)', 2),
+            self.check('length(cloudInitConfigurationBlobs)', 2),
+            self.check('virtualApplianceAsn', 20000),
+            self.check('cloudInitConfiguration', "echo $abcd")
+        ])
+        self.cmd('network virtual-appliance list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network virtual-appliance list', checks=[
+            self.check('length(@)', 1)
+        ])
 
-        self.cmd('network virtual-appliance sku list')
-        self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"')
+        self.cmd('network virtual-appliance sku list', checks=[
+            self.check('length(@)', 4)
+        ])
+        self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"', checks=[
+            self.check('name', 'barracudasdwanrelease')
+        ])
 
-        self.cmd('network virtual-appliance site create -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.0/24 --allow --default --optimize')
-        self.cmd('network virtual-appliance site update -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.1/24 --allow false --default false --optimize false')
-        self.cmd('network virtual-appliance site show -n {site} -g {rg} --appliance-name {name}')
-        self.cmd('network virtual-appliance site list -g {rg} --appliance-name {name}')
+        self.cmd('network virtual-appliance site create -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.0/24 --allow --default --optimize', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', True),
+            self.check('o365Policy.breakOutCategories.default', True),
+            self.check('o365Policy.breakOutCategories.optimize', True),
+            self.check('addressPrefix', '10.0.0.0/24')
+        ])
+        self.cmd('network virtual-appliance site update -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.1/24 --allow false --default false --optimize false', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', False),
+            self.check('o365Policy.breakOutCategories.default', False),
+            self.check('o365Policy.breakOutCategories.optimize', False),
+            self.check('addressPrefix', '10.0.0.1/24')
+        ])
+        self.cmd('network virtual-appliance site show -n {site} -g {rg} --appliance-name {name}', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', False),
+            self.check('o365Policy.breakOutCategories.default', False),
+            self.check('o365Policy.breakOutCategories.optimize', False),
+            self.check('addressPrefix', '10.0.0.1/24')
+        ])
+        self.cmd('network virtual-appliance site list -g {rg} --appliance-name {name}', checks=[
+            self.check('length(@)', 1)
+        ])
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name}')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
