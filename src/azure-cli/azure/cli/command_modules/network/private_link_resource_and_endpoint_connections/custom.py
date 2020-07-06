@@ -26,6 +26,7 @@ def register_providers():
     _register_one_provider('Microsoft.Web/sites', '2019-08-01', False)
     _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
+    _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None):
