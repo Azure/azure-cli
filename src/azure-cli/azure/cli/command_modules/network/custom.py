@@ -149,12 +149,11 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
                                custom_error_pages=None, firewall_policy=None, max_capacity=None,
                                user_assigned_identity=None,
-                               private_link_name=None,
+                               private_link_name='DefaultPrivateLinkConfiguration',
                                private_link_ip_address=None,
                                private_link_ip_allocation_method=None,
-                               private_link_vnet_name=None,
+                               private_link_address_prefix='10.0.1.0/24',
                                private_link_subnet=None,
-                               private_link_subnet_type=None,
                                private_link_primary=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -211,8 +210,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     print('=' * 100)
     print(private_link_name)
     print(private_link_ip_address)
-    print(private_link_vnet_name)
-    print(private_link_subnet)
     print(private_link_primary)
 
     if any([private_link_name, private_link_ip_address, private_link_vnet_name, private_link_subnet, private_link_primary]):
@@ -235,12 +232,12 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
         firewall_policy, max_capacity, user_assigned_identity,
-        # private_link_ip_address, private_link_subnet_id,
-        # private_link_name, private_link_ip_address,
+        private_link_name, private_link_ip_address, private_link_ip_allocation_method,
+        private_link_subnet_id,
         )
 
-    # from pprint import pprint
-    # pprint(app_gateway_resource)
+    from pprint import pprint
+    pprint(app_gateway_resource)
 
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(

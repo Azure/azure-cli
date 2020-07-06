@@ -42,7 +42,11 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
                                        connection_draining_timeout, enable_http2, min_capacity, zones,
                                        custom_error_pages, firewall_policy, max_capacity,
-                                       user_assigned_identity):
+                                       user_assigned_identity,
+                                       private_link_name=None,
+                                       private_link_ip_address=None,
+                                       private_link_ip_allocation_method=None,
+                                       private_link_subnet_id=None):
 
     # set the default names
     frontend_ip_name = 'appGatewayFrontendIP'
@@ -152,19 +156,6 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                 }
             }
         ],
-        # 'privateLinkConfigurations': [
-        #     {
-        #         'name': '',
-        #         'id': '',
-        #         'properties': {
-        #             'ipConfigurations': [
-        #                 {
-        #                     'name'
-        #                 }
-        #             ]
-        #         }
-        #     }
-        # ]
     }
     if ssl_cert:
         ag_properties.update({'sslCertificates': [ssl_cert]})
@@ -184,6 +175,25 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ag_properties.update({'customErrorConfigurations': custom_error_pages})
     if firewall_policy and cmd.supported_api_version(min_api='2018-12-01'):
         ag_properties.update({'firewallPolicy': {'id': firewall_policy}})
+
+    if cmd.supported_api_version(min_api='2020-05-01') and private_link_name:
+        if private_link_name:
+            ag_properties['privateLinkConfigurations'] = [{
+                'name': private_link_name,
+                'properties': {
+                    'ipConfigurations': [
+                        {
+                            'name': 'DefaultPrivateLinkIPConfiguration',
+                            'properties': {
+                                'privateIPAddress': private_link_ip_address,
+                                'privateIPAllocationMethod': 'Dynamic',
+                                'primary': True,
+                                'subnet': {'id': private_link_subnet_id}
+                            }
+                        }
+                    ]
+                }
+            }]
 
     ag = {
         'type': 'Microsoft.Network/applicationGateways',
@@ -260,7 +270,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
     return public_ip
 
 
-def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, subnet_prefix=None, dns_servers=None):
+def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, subnet_prefix=None, dns_servers=None,
+                        private_link_subnet=None, private_link_subnet_prefix=None):
     vnet = {
         'name': name,
         'type': 'Microsoft.Network/virtualNetworks',
@@ -270,6 +281,7 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, 
         'tags': tags,
         'properties': {
             'addressSpace': {'addressPrefixes': [vnet_prefix]},
+            'subnets': []
         }
     }
     if dns_servers:
@@ -277,12 +289,20 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, 
             'dnsServers': dns_servers
         }
     if subnet:
-        vnet['properties']['subnets'] = [{
+        vnet['properties']['subnets'].append({
             'name': subnet,
             'properties': {
                 'addressPrefix': subnet_prefix
             }
-        }]
+        })
+    if private_link_subnet_prefix:
+        vnet['properties']['subnets'].append({
+            'name': private_link_subnet,
+            'properties': {
+                'addressPrefix': private_link_subnet_prefix
+            }
+        })
+
     return vnet
 
 
