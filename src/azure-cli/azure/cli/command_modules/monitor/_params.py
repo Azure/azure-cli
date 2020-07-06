@@ -247,7 +247,8 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', required=True)
 
     with self.argument_context('monitor diagnostic-settings subscription') as c:
-        c.argument('subscription_id', validator=process_subscription_id, deprecate_info=c.deprecate(hide=True), required=False)
+        import argparse
+        c.argument('subscription_id', validator=process_subscription_id, help=argparse.SUPPRESS, required=False)
         c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file.")
         c.argument('name', help='The name of the diagnostic setting.', options_list=['--name', '-n'])
         c.argument('event_hub_name', help='The name of the event hub. If none is specified, the default event hub will be selected.')
