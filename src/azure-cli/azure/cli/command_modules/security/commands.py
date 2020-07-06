@@ -292,6 +292,7 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_security_iot_solution')
         g.custom_command('create', 'create_security_iot_solution')
         g.custom_command('delete', 'delete_security_iot_solution')
+        g.custom_command('update', 'update_security_iot_solution')
 
     with self.command_group('security iot-analytics',
                             security_iot_analytics_sdk,

@@ -483,22 +483,27 @@ def delete_security_iot_solution(client, resource_group_name, iot_solution_name)
 
 
 def create_security_iot_solution(client, resource_group_name, iot_solution_name,
-                                 iot_solution_display_name=None, iot_solution_iot_hubs=None, location=None):
+                                 iot_solution_display_name, iot_solution_iot_hubs, location):
 
-    if iot_solution_display_name:
-        iot_security_solution_data = IoTSecuritySolutionModel(display_name=iot_solution_display_name,
-                                                              iot_hubs=iot_solution_iot_hubs.split(","),
-                                                              location=location)
+    iot_security_solution_data = IoTSecuritySolutionModel(display_name=iot_solution_display_name,
+                                                          iot_hubs=iot_solution_iot_hubs.split(","),
+                                                          location=location)
 
-        return client.create_or_update(
-            resource_group_name=resource_group_name,
-            solution_name=iot_solution_name,
-            iot_security_solution_data=iot_security_solution_data)
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        iot_security_solution_data=iot_security_solution_data)
+
+
+def update_security_iot_solution(client, resource_group_name, iot_solution_name,
+                                 iot_solution_display_name=None, iot_solution_iot_hubs=None):
 
     return client.update(
         resource_group_name=resource_group_name,
         solution_name=iot_solution_name,
-        update_iot_security_solution_data=UpdateIotSecuritySolutionData(displayName=None, iotHubs=None))
+        update_iot_security_solution_data=UpdateIotSecuritySolutionData(
+            displayName=iot_solution_display_name,
+            iotHubs=iot_solution_iot_hubs))
 
 
 # --------------------------------------------------------------------------------------------

@@ -525,11 +525,20 @@ short-summary: Manage your IoT Security solution.
 
 helps['security iot-solution create'] = """
 type: command
-short-summary: Create or update your IoT Security solution.
+short-summary: Create your IoT Security solution.
 examples:
   - name: create an IoT Security solution on existing IoT Hub.
     text: >
         az security iot-solution create --solution-name 'IoT-Hub1' --resource-group 'rg1' --iot-hubs /subscriptions/subscriptionId/resourcegroups/rg1/providers/Microsoft.Devices/IotHubs/IoT-Hub1 --display-name "Solution Default" --location "eastus"
+"""
+
+helps['security iot-solution update'] = """
+type: command
+short-summary: Update your IoT Security solution.
+examples:
+  - name: Update your IoT Security solution.
+    text: >
+        az security iot-solution update --solution-name 'IoT-Hub1' --resource-group 'rg1' --iot-hubs /subscriptions/subscriptionId/resourcegroups/rg1/providers/Microsoft.Devices/IotHubs/IoT-Hub1 --display-name "Solution Default"
 """
 
 helps['security iot-solution delete'] = """
