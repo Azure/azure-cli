@@ -752,14 +752,44 @@ def show_identity(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
 
 
-def remove_identity(cmd, resource_group_name, name, slot=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def remove_identity(cmd, resource_group_name, name, remove_identity=None, slot=None):
+    ManagedServiceIdentity, IdentityType = cmd.get_models('ManagedServiceIdentity',
+                                            'ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    _, _, external_identities, remove_local_identity = _build_identities_info(remove_identity)
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='None')
+        if webapp.identity is None:
+            return webapp
+        to_remove = []
+        if external_identities:
+            existing_identities = {x.lower() for x in list((webapp.identity.user_assigned_identities or {}).keys())}
+            to_remove = {x.lower() for x in external_identities}
+            non_existing = to_remove.difference(existing_identities)
+            if non_existing:
+                raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+            if not list(existing_identities - to_remove): 
+                if webapp.identity.type == IdentityType.user_assigned:
+                    webapp.identity.type = IdentityType.none
+                elif webapp.identity.type == IdentityType.system_assigned_user_assigned:
+                    webapp.identity.type = IdentityType.system_assigned
+        
+        webapp.identity.user_assigned_identities = None
+        if remove_local_identity:
+            webapp.identity.type = (IdentityType.none
+                                    if webapp.identity.type == IdentityType.system_assigned
+                                        or webapp.identity.type == IdentityType.none
+                                    else IdentityType.user_assigned)
+
+        if to_remove:
+            if webapp.identity.type not in [IdentityType.none, IdentityType.system_assigned]:
+                webapp.identity.user_assigned_identities = {}
+            for identity in list(existing_identities - to_remove):
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 

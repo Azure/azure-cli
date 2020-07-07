@@ -284,6 +284,8 @@ def load_arguments(self, _):
             c.argument('role', help="Role name or id the managed identity will be assigned")
         with self.argument_context(scope + ' identity assign') as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
+        with self.argument_context(scope + ' identity remove') as c:
+            c.argument('remove_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
