@@ -2269,14 +2269,26 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # pylint: disable=unused-argument
 def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
                                     peering, circuit_name=None, authorization_key=None, routing_weight=None,
-                                    enable_internet_security=None):
-    ExpressRouteConnection, SubResource = cmd.get_models('ExpressRouteConnection', 'SubResource')
+                                    enable_internet_security=None, associated_route_table=None,
+                                    propagated_route_tables=None, labels=None):
+    ExpressRouteConnection, SubResource, RoutingConfiguration, PropagatedRouteTable\
+        = cmd.get_models('ExpressRouteConnection', 'SubResource', 'RoutingConfiguration', 'PropagatedRouteTable')
     client = network_client_factory(cmd.cli_ctx).express_route_connections
+
+    propagated_route_tables = PropagatedRouteTable(
+        labels=labels,
+        ids=[SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]
+    )
+    routing_configuration = RoutingConfiguration(
+        associated_route_table=SubResource(id=associated_route_table),
+        propagated_route_tables=propagated_route_tables
+    )
     connection = ExpressRouteConnection(
         name=connection_name,
         express_route_circuit_peering=SubResource(id=peering) if peering else None,
         authorization_key=authorization_key,
-        routing_weight=routing_weight
+        routing_weight=routing_weight,
+        routing_configuration=routing_configuration
     )
 
     if enable_internet_security and cmd.supported_api_version(min_api='2019-09-01'):
@@ -2287,7 +2299,8 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
 
 # pylint: disable=unused-argument
 def update_express_route_connection(instance, cmd, circuit_name=None, peering=None, authorization_key=None,
-                                    routing_weight=None, enable_internet_security=None):
+                                    routing_weight=None, enable_internet_security=None, associated_route_table=None,
+                                    propagated_route_tables=None, labels=None):
     SubResource = cmd.get_models('SubResource')
     if peering is not None:
         instance.express_route_connection_id = SubResource(id=peering)
@@ -2297,6 +2310,20 @@ def update_express_route_connection(instance, cmd, circuit_name=None, peering=No
         instance.routing_weight = routing_weight
     if enable_internet_security is not None and cmd.supported_api_version(min_api='2019-09-01'):
         instance.enable_internet_security = enable_internet_security
+    if associated_route_table is not None or propagated_route_tables is not None or labels is not None:
+        if instance.routing_configuration is None:
+            RoutingConfiguration = cmd.get_models('RoutingConfiguration')
+            instance.routing_configuration = RoutingConfiguration()
+        if associated_route_table is not None:
+            instance.routing_configuration.associated_route_table = SubResource(id=associated_route_table)
+        if propagated_route_tables is not None or labels is not None:
+            if instance.routing_configuration.propagated_route_tables is None:
+                PropagatedRouteTable = cmd.get_models('PropagatedRouteTable')
+                instance.routing_configuration.propagated_route_tables = PropagatedRouteTable()
+            if propagated_route_tables is not None:
+                instance.routing_configuration.propagated_route_tables.ids = [SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]  # pylint: disable=line-too-long
+            if labels is not None:
+                instance.routing_configuration.propagated_route_tables.labels = labels
 
     return instance
 # endregion

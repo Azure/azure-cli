@@ -725,6 +725,11 @@ def load_arguments(self, _):
         c.argument('peering', help='Name or ID of an ExpressRoute peering.', validator=validate_express_route_peering)
         c.argument('circuit_name', er_circuit_name_type, id_part=None)
 
+    with self.argument_context('network express-route gateway connection', arg_group='Routing Configuration', min_api='2020-04-01') as c:
+        c.argument('associated_route_table', options_list=['--associated', '--associated-route-table'], help='The resource id of route table associated with this routing configuration.')
+        c.argument('propagated_route_tables', options_list=['--propagated', '--propagated-route-tables'], nargs='+', help='Space-separated list of resource id of propagated route tables.')
+        c.argument('labels', nargs='+', help='Space-separated list of labels for propagated route tables.')
+
     with self.argument_context('network express-route gateway connection list', min_api='2018-08-01') as c:
         c.argument('express_route_gateway_name', er_gateway_name_type, id_part=None)
 
