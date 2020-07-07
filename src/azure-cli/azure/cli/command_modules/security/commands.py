@@ -311,7 +311,7 @@ def load_command_table(self, _):
                             security_iot_recommendations_sdk,
                             client_factory=cf_security_iot_recommendations) as g:
         g.custom_command('list', 'list_security_iot_recommendations')
-        g.custom_command('show', 'show_security_iot_recommendations')
+        g.custom_show_command('show', 'show_security_iot_recommendations')
 
     with self.command_group('security', is_preview=True):
         pass
