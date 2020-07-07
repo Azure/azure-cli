@@ -1113,19 +1113,19 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_01
         })
-        with self.assertRaisesRegexp(CLIError, "make sure that the value is valid JSON."):
+        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'value': '[abc,def]'
         })
-        with self.assertRaisesRegexp(CLIError, "make sure that the value is valid JSON."):
+        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'value': 'True'
         })
-        with self.assertRaisesRegexp(CLIError, "make sure that the value is valid JSON."):
+        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         # Create a non-JSON key-value and update its content type in subsequent command
@@ -1136,7 +1136,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value)])
 
-        with self.assertRaisesRegexp(CLIError, "set the value again in valid JSON format."):
+        with self.assertRaisesRegexp(CLIError, "Set the value again in valid JSON format."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y')
 
         # Add a new feature flag
@@ -1297,7 +1297,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'imported_file_path': imported_file_path,
             'exported_file_path': exported_yaml_file_path
         })
-        with self.assertRaisesRegexp(CLIError, "Please provide JSON file format if your content type is JSON."):
+        with self.assertRaisesRegexp(CLIError, "Please provide JSON file format to match your content type."):
             self.cmd('appconfig kv import --connection-string {src_connection_string} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --content-type {content_type} -y')
 
         self.cmd(

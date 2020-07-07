@@ -361,7 +361,7 @@ def __discard_features_from_retrieved_kv(src_kvs):
 
 # App Service <-> List of KeyValue object
 
-def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
+def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", content_type=None):
     try:
         key_values = []
         from azure.cli.command_modules.appservice.custom import get_app_settings
@@ -407,11 +407,19 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
                         logger.debug(
                             'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', key, value, str(e))
 
+                elif content_type and __is_json_content_type(content_type):
+                    # If appservice values are being imported with JSON content type,
+                    # we need to validate that values are in valid JSON format.
+                    try:
+                        json.loads(value)
+                    except ValueError:
+                        raise CLIError('Value "{}" for key "{}" is not a valid JSON object, which conflicts with the provided content type "{}".'.format(value, key, content_type))
+
                 kv = KeyValue(key=key, value=value, tags=tags)
                 key_values.append(kv)
         return key_values
     except Exception as exception:
-        raise CLIError("Failed to read key-values from appservice." + str(exception))
+        raise CLIError("Failed to read key-values from appservice.\n" + str(exception))
 
 
 def __write_kv_to_app_service(cmd, key_values, appservice_account):
@@ -643,12 +651,12 @@ def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
 
 
 def __is_json_content_type(content_type):
-    # pylint: disable=too-many-return-statements
     if not content_type:
         return False
 
     content_type = content_type.strip().lower()
-    mime_type = content_type.split(';')[0].strip() if ';' in content_type else content_type
+    mime_type = content_type.split(';')[0].strip()
+
     type_parts = mime_type.split('/') if '/' in mime_type else None
 
     if not type_parts or len(type_parts) != 2:
@@ -657,17 +665,9 @@ def __is_json_content_type(content_type):
     (main_type, sub_type) = type_parts
     if main_type != "application":
         return False
-    if "json" not in sub_type:
-        return False
 
-    sub_types = sub_type.split('+') if '+' in sub_type else None
-
-    # if sub_types list is not empty, one of the sub_types should exactly match json
-    if sub_types:
-        if "json" in sub_types:
-            return True
-    # if sub_types list is empty, sub_type should exactly match json
-    elif sub_type == "json":
+    sub_types = sub_type.split('+')
+    if "json" in sub_types:
         return True
 
     return False
@@ -687,9 +687,9 @@ def __flatten_json_key_value(key, value, flattened_data, depth, separator):
             if key in flattened_data:
                 logger.debug(
                     "The key %s already exist, value has been overwritten.", key)
-            flattened_data[key] = json.dumps(value, separators=(',', ':'))
+            flattened_data[key] = json.dumps(value)
     else:
-        flattened_data[key] = json.dumps(value, separators=(',', ':'))
+        flattened_data[key] = json.dumps(value)
 
 
 def __flatten_key_value(key, value, flattened_data, depth, separator):

@@ -66,12 +66,14 @@ def import_config(cmd,
             # JSON content type is only supported with JSON format.
             # Error out if user has provided JSON content type with any other format.
             if format_ != 'json' and __is_json_content_type(content_type):
-                raise CLIError("Failed to import '{}' file format with '{}' content type. Please provide JSON file format if your content type is JSON.")
+                raise CLIError("Failed to import '{}' file format with '{}' content type. Please provide JSON file format to match your content type.".format(format_, content_type))
 
         if separator:
             # If separator is provided, use max depth by default unless depth is specified.
             depth = sys.maxsize if depth is None else int(depth)
         else:
+            if depth and int(depth) != 1:
+                logger.warning("Cannot flatten hierarchical data without a separator. --depth argument will be ignored.")
             depth = 1
         src_kvs = __read_kv_from_file(file_path=path,
                                       format_=format_,
@@ -108,7 +110,7 @@ def import_config(cmd,
 
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
-            cmd, appservice_account=appservice_account, prefix_to_add=prefix)
+            cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
 
     # if customer needs preview & confirmation
     if not yes:
@@ -303,9 +305,9 @@ def set_key(cmd,
                 try:
                     # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
                     value = '""' if value is None else value
-                    value = json.dumps(json.loads(value), separators=(',', ':'))
+                    json.loads(value)
                 except ValueError:
-                    raise CLIError('Value "{}" cannot be parsed as JSON. Since the content type of this setting is "{}", make sure that the value is valid JSON.'.format(value, content_type))
+                    raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
             set_kv = KeyValue(key, value, label, tags, content_type)
         else:
@@ -314,9 +316,9 @@ def set_key(cmd,
             if content_type and __is_json_content_type(content_type):
                 try:
                     # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
-                    value = json.dumps(json.loads(value), separators=(',', ':'))
+                    json.loads(value)
                 except ValueError:
-                    raise CLIError('Value "{}" cannot be parsed as JSON. Since the content type of this setting is "{}", set the value again in valid JSON format.'.format(value, content_type))
+                    raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
 
             set_kv = KeyValue(key=key,
                               label=label,
