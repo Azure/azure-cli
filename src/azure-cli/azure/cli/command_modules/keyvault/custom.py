@@ -334,13 +334,6 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     from azure.graphrbac.models import GraphErrorException
     from azure.graphrbac import GraphRbacManagementClient
 
-    try:
-        vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
-        if vault:
-            raise CLIError('Vault {} already exists.'.format(vault_name))
-    except:  # pylint: disable=bare-except
-        pass
-
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
     Permissions = cmd.get_models('Permissions', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -351,6 +344,46 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     AccessPolicyEntry = cmd.get_models('AccessPolicyEntry', resource_type=ResourceType.MGMT_KEYVAULT)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    try:
+        vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+        if vault:
+            properties = vault.properties
+            if tags:
+                vault.tags = tags
+
+            if enabled_for_deployment is not None:
+                properties.enabled_for_deployment = enabled_for_deployment
+            if enabled_for_disk_encryption is not None:
+                properties.enabled_for_disk_encryption = enabled_for_disk_encryption
+            if enabled_for_template_deployment is not None:
+                properties.enabled_for_template_deployment = enabled_for_template_deployment
+            if enable_rbac_authorization is not None:
+                properties.enable_rbac_authorization = enable_rbac_authorization
+            if enable_soft_delete is not None:
+                properties.enable_soft_delete = enable_soft_delete
+            if enable_purge_protection is not None:
+                properties.enable_purge_protection = enable_purge_protection
+            if retention_days is not None:
+                properties.retention_days = retention_days
+
+            if network_acls or network_acls_ips or network_acls_vnets:
+                if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
+                    network_acls = _create_network_rule_set(cmd, bypass, default_action) \
+                        if bypass or default_action else \
+                        _parse_network_acls(cmd, resource_group_name, network_acls,
+                                            network_acls_ips, network_acls_vnets)
+                    properties.network_acls = network_acls
+
+            parameters = VaultCreateOrUpdateParameters(location=vault.location,
+                                                       tags=vault.tags,
+                                                       properties=properties)
+
+            return client.create_or_update(resource_group_name=resource_group_name,
+                                           vault_name=vault_name,
+                                           parameters=parameters)
+    except:  # pylint: disable=bare-except
+        pass
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(

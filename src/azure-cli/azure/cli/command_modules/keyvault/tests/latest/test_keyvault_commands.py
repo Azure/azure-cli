@@ -210,6 +210,15 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
+
+        # check idempotence
+        self.cmd('keyvault create -g {rg} -n {kv} --enabled-for-deployment false', checks=[
+            self.check('properties.enabledForDeployment', False),
+            self.check('length(properties.accessPolicies[0].permissions.keys)', 2),
+            self.check('length(properties.accessPolicies[0].permissions.keys)', 2),
+            self.check('length(properties.accessPolicies[0].permissions.certificates)', 2)
+        ])
+
         self.cmd('keyvault delete-policy -g {rg} -n {kv} --object-id {policy_id}', checks=[
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 0)
