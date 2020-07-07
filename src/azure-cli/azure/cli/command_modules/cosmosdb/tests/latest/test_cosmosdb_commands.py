@@ -48,10 +48,12 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-range-filter "20.10.10.10" --server-version 3.2 --enable-analytical-storage true --enable-free-tier false')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-range-filter "20.10.10.10,12.12.122.122,12.22.11.11" --server-version 3.2 --enable-analytical-storage true --enable-free-tier false')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
             self.check('ipRules[0].ipAddressOrRange', '20.10.10.10'),
+            self.check('ipRules[1].ipAddressOrRange', '12.12.122.122'),
+            self.check('ipRules[2].ipAddressOrRange', '12.22.11.11'),
             self.check('apiProperties.serverVersion', '3.2'),
             self.check('enableAnalyticalStorage', 'True'),
             self.check('enableFreeTier', 'False')
