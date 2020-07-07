@@ -1067,6 +1067,100 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
         self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
                          show_appgw_data['privateLinkConfigurations'][0]['id'])
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['name'], 'PrivateLinkDefaultConfiguration')
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIpAllocationMethod'],
+                         'Dynamic')
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], None)
+
+        self.kwargs.update({
+            'appgw_id': show_appgw_data['id']
+        })
+
+        private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
+        self.assertEqual(len(private_link_resource), 1)
+        self.assertEqual(private_link_resource[0]['name'], 'appGatewayFrontendIP')
+
+        self.kwargs.update({
+            'private_link_group_id': private_link_resource[0]['properties']['groupId']
+        })
+
+        # Create a private endpoint against this application gateway
+        self.cmd('network private-endpoint create -g {rg} -n {appgw_pe} '
+                 '--connection-name {appgw_pec} '
+                 '--vnet-name {appgw_pe_vnet} '
+                 '--subnet {appgw_pe_subnet} '
+                 '--private-connection-resource-id {appgw_id} '
+                 '--group-id {private_link_group_id}')
+
+        list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
+        self.assertEqual(len(list_private_endpoint_conn), 1)
+        self.assertEqual(list_private_endpoint_conn[0]['properties']['privateLinkServiceConnectionState']['status'], 'Approved')
+
+        self.kwargs.update({
+            'private_endpoint_conn_id': list_private_endpoint_conn[0]['id']
+        })
+
+        self.cmd('network private-endpoint-connection reject --id {private_endpoint_conn_id}').get_output_in_json()
+
+        show_private_endpoint_conn = self.cmd('network private-endpoint-connection show --id {private_endpoint_conn_id}').get_output_in_json()
+        self.assertEqual(show_private_endpoint_conn['properties']['privateLinkServiceConnectionState']['status'], 'Rejected')
+
+        self.cmd('network private-endpoint delete -g {rg} -n {appgw_pe}')
+
+    @ResourceGroupPreparer(name_prefix='test_appgw_private_endpoint_with_overwrite_default')
+    def test_appgw_private_endpoint_with_overwrite_default(self, resource_group):
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_pe_vnet': 'appgw_private_endpoint_vnet',
+            'appgw_pe_subnet': 'appgw_private_endpoint_subnet',
+            'appgw_ip': 'appgw_ip',
+            'appgw_pe': 'appgw_private_endpoint',
+            'appgw_pec': 'appgw_private_endpoint_connection'
+        })
+
+        # Enable private link feature on Application Gateway would require a public IP with Standard tier
+        self.cmd('network public-ip create -g {rg} -n {appgw_ip} --sku Standard')
+
+        # Prepare the vnet to be connected to
+        self.cmd('network vnet create -g {rg} -n {appgw_pe_vnet} --subnet-name {appgw_pe_subnet}')
+        # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        self.cmd('network vnet subnet update -g {rg} -n {appgw_pe_subnet} '
+                 '--vnet-name {appgw_pe_vnet} '
+                 '--disable-private-endpoint-network-policies true')
+
+        # Enable private link feature on Application Gateway would require Standard_v2,WAF_v2 SKU tiers
+        # --enable-private-link would enable private link feature with default settings
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--sku Standard_v2 '
+                 '--public-ip-address {appgw_ip} '
+                 '--enable-private-link '
+                 '--private-link-subnet YetAnotherSubnetName '
+                 '--private-link-primary true '
+                 '--private-link-subnet-prefix 10.0.2.0/24')
+
+        show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
+
+        self.assertEqual(show_appgw_data['name'], self.kwargs['appgw'])
+        self.assertEqual(show_appgw_data['sku']['tier'], 'Standard_v2')
+        # One default private link would be here
+        self.assertEqual(len(show_appgw_data['privateLinkConfigurations']), 1)
+        self.assertEqual(len(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations']), 1)
+        # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
+        self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
+                         show_appgw_data['privateLinkConfigurations'][0]['id'])
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['name'], 'PrivateLinkDefaultConfiguration')
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIpAllocationMethod'],
+                         'Dynamic')
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], True)
+
+        # The vnet created along with this application gateway
+        appgw_vnet = self.cmd('network vnet show -g {rg} -n "{appgw}Vnet"').get_output_in_json()
+        self.assertEqual(len(appgw_vnet['subnets']), 2)
+        self.assertEqual(appgw_vnet['subnets'][0]['name'], 'default')
+        self.assertEqual(appgw_vnet['subnets'][0]['addressPrefix'], '10.0.0.0/24')
+        # The subnet name and CIDR is different from default one
+        self.assertEqual(appgw_vnet['subnets'][1]['name'], 'YetAnotherSubnetName')
+        self.assertEqual(appgw_vnet['subnets'][1]['addressPrefix'], '10.0.2.0/24')
 
         self.kwargs.update({
             'appgw_id': show_appgw_data['id']

@@ -150,7 +150,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                custom_error_pages=None, firewall_policy=None, max_capacity=None,
                                user_assigned_identity=None,
                                enable_private_link=False,
-                               private_link_name='PrivateLinkDefaultConfiguration',
                                private_link_ip_address=None,
                                private_link_ip_allocation_method='Dynamic',
                                private_link_subnet='PrivateLinkDefaultSubnet',
@@ -209,6 +208,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                                         public_ip_address)
 
     private_link_subnet_id = None
+    private_link_name = 'PrivateLinkDefaultConfiguration'
     if enable_private_link:
         private_link_subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template,
                                                                            virtual_network_name,
