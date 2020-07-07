@@ -1072,6 +1072,14 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                          'Dynamic')
         self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], None)
 
+        appgw_vnet = self.cmd('network vnet show -g {rg} -n "{appgw}Vnet"').get_output_in_json()
+        self.assertEqual(len(appgw_vnet['subnets']), 2)
+        self.assertEqual(appgw_vnet['subnets'][0]['name'], 'default')
+        self.assertEqual(appgw_vnet['subnets'][0]['addressPrefix'], '10.0.0.0/24')
+        # The subnet name and CIDR is default one
+        self.assertEqual(appgw_vnet['subnets'][1]['name'], 'PrivateLinkDefaultSubnet')
+        self.assertEqual(appgw_vnet['subnets'][1]['addressPrefix'], '10.0.1.0/24')
+
         self.kwargs.update({
             'appgw_id': show_appgw_data['id']
         })
