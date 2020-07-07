@@ -48,16 +48,21 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-range-filter 10.10.10.10')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-range-filter "20.10.10.10,12.12.122.122,12.22.11.11" --server-version 3.2 --enable-analytical-storage true --enable-free-tier false')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
-            self.check('ipRangeFilter', "10.10.10.10"),
+            self.check('ipRules[0].ipAddressOrRange', '20.10.10.10'),
+            self.check('ipRules[1].ipAddressOrRange', '12.12.122.122'),
+            self.check('ipRules[2].ipAddressOrRange', '12.22.11.11'),
+            self.check('apiProperties.serverVersion', '3.2'),
+            self.check('enableAnalyticalStorage', 'True'),
+            self.check('enableFreeTier', 'False')
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
-            self.check('ipRangeFilter', "10.10.10.10"),
+            self.check('ipRules[0].ipAddressOrRange', "20.10.10.10"),
         ]).get_output_in_json()
         assert len(account['capabilities']) == 1
         assert account['capabilities'][0]['name'] == "EnableAggregationPipeline"
@@ -319,7 +324,7 @@ class CosmosDBTests(ScenarioTest):
     def test_cosmosdb_private_endpoint(self, resource_group):
         self.kwargs.update({
             'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
-            'loc': 'centraluseuap',
+            'loc': 'eastus2',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
@@ -688,21 +693,23 @@ class CosmosDBTests(ScenarioTest):
             'db_name': self.create_random_name(prefix='cli', length=15),
             'col_name': col_name,
             'shard_key': "theShardKey",
-            'indexes': '"[{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"options\\": {\\"expireAfterSeconds\\": 1000}}]"'
+            'indexes': '"[{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"options\\": {\\"expireAfterSeconds\\": 1000}}]"',
+            'ttl': "3000",
+            'new_ttl': "6000"
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --enable-analytical-storage true')
         self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
 
         collection_create = self.cmd(
-            'az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key}').get_output_in_json()
+            'az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key} --analytical-storage-ttl {ttl}').get_output_in_json()
         assert collection_create["name"] == col_name
 
         indexes_size = len(collection_create["resource"]["indexes"])
         collection_update = self.cmd(
-            'az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col_name} --idx {indexes}').get_output_in_json()
+            'az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col_name} --idx {indexes} --analytical-storage-ttl {new_ttl}').get_output_in_json()
         assert len(collection_update["resource"]["indexes"]) == indexes_size + 1
 
         collection_show = self.cmd(
@@ -758,18 +765,20 @@ class CosmosDBTests(ScenarioTest):
             'table_name': table_name,
             'schema': '"{\\"columns\\": [{\\"name\\": \\"columnA\\",\\"type\\": \\"Ascii\\"}],\\"partitionKeys\\": [{\\"name\\": \\"columnA\\"}]}"',
             'new_schema': '"{\\"columns\\": [{\\"name\\": \\"columnA\\",\\"type\\": \\"Ascii\\"}, {\\"name\\": \\"columnB\\",\\"type\\": \\"Ascii\\"}],\\"partitionKeys\\": [{\\"name\\": \\"columnA\\"}]}"',
+            'ttl': "3000",
+            'new_ttl': "6000"
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableCassandra')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableCassandra --enable-analytical-storage true')
         self.cmd('az cosmosdb cassandra keyspace create -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
 
         assert not self.cmd('az cosmosdb cassandra table exists -g {rg} -a {acc} -k {ks_name} -n {table_name}').get_output_in_json()
 
-        table_create = self.cmd('az cosmosdb cassandra table create -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {schema}').get_output_in_json()
+        table_create = self.cmd('az cosmosdb cassandra table create -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {schema} --analytical-storage-ttl {ttl}').get_output_in_json()
         assert table_create["name"] == table_name
         assert len(table_create["resource"]["schema"]["columns"]) == 1
 
-        table_update = self.cmd('az cosmosdb cassandra table update -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {new_schema}').get_output_in_json()
+        table_update = self.cmd('az cosmosdb cassandra table update -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {new_schema} --analytical-storage-ttl {new_ttl}').get_output_in_json()
         assert len(table_update["resource"]["schema"]["columns"]) == 2
 
         table_show = self.cmd('az cosmosdb cassandra table show -g {rg} -a {acc} -k {ks_name} -n {table_name}').get_output_in_json()
@@ -917,6 +926,36 @@ class CosmosDBTests(ScenarioTest):
 
         ctn_througput_update = self.cmd('az cosmosdb sql container throughput update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --throughput {tp2}').get_output_in_json()
         assert ctn_througput_update["resource"]["throughput"] == tp2
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_resource_max_throughput')
+    def test_cosmosdb_sql_resource_max_throughput(self, resource_group):
+        tp1 = 6000
+        tp2 = 8000
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': self.create_random_name(prefix='cli', length=15),
+            'ctn_name': self.create_random_name(prefix='cli', length=15),
+            'part': "/thePartitionKey",
+            'tp1': tp1,
+            'tp2': tp2,
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name} --max-throughput {tp1}')
+        db_throughput_show = self.cmd('az cosmosdb sql database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        assert db_throughput_show["resource"]["autoscaleSettings"]["maxThroughput"] == tp1
+
+        db_througput_update = self.cmd('az cosmosdb sql database throughput update -g {rg} -a {acc} -n {db_name} --max-throughput {tp2}').get_output_in_json()
+        assert db_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp2
+
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --max-throughput {tp1}')
+        ctn_throughput_show = self.cmd('az cosmosdb sql container throughput show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+        assert ctn_throughput_show["resource"]["autoscaleSettings"]["maxThroughput"] == tp1
+
+        ctn_througput_update = self.cmd('az cosmosdb sql container throughput update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --max-throughput {tp2}').get_output_in_json()
+        assert ctn_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp2
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_resource_throughput')
     def test_cosmosdb_mongodb_resource_throughput(self, resource_group):
