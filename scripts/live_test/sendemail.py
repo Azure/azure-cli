@@ -13,7 +13,7 @@ def main():
     message = Mail(
         from_email='azclibot@microsoft.com',
         to_emails='AzPyCLI@microsoft.com',
-        subject='Test results of Azure CLI dev branch',
+        subject='Test results of Azure CLI',
         html_content=get_content())
     try:
         sendgrid_key = sys.argv[1]
