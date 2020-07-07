@@ -538,7 +538,7 @@ short-summary: Gets a single Adaptive Network Hardening resource.
 examples:
   - name: Adaptive Network Hardenings - Get.
     text: >
-        az security adaptive_network_hardenings list --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1' --adaptive-network-hardenings-resource-name 'default'
+        az security adaptive_network_hardenings show --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1' --adaptive-network-hardenings-resource-name 'default'
 """
 
 helps['security regulatory-compliance-standards'] = """
