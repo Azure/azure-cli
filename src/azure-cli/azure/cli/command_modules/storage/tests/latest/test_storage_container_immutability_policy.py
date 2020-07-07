@@ -5,8 +5,10 @@
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer)
 from msrestazure.azure_exceptions import CloudError
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
+@AllowLargeResponse()
 class StorageImmutabilityPolicy(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2")
