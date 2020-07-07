@@ -2661,7 +2661,8 @@ def managed_instance_update(
         public_data_endpoint_enabled=None,
         tier=None,
         family=None,
-        minimal_tls_version=None):
+        minimal_tls_version=None,
+        tags=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2696,6 +2697,9 @@ def managed_instance_update(
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
+
+    if tags is not None:
+        instance.tags = tags
 
     return instance
 
