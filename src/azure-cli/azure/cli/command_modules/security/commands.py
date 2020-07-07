@@ -289,7 +289,7 @@ def load_command_table(self, _):
                             security_iot_solution_sdk,
                             client_factory=cf_security_iot_solution) as g:
         g.custom_command('list', 'list_security_iot_solution')
-        g.custom_command('show', 'show_security_iot_solution')
+        g.custom_show_command('show', 'show_security_iot_solution')
         g.custom_command('create', 'create_security_iot_solution')
         g.custom_command('delete', 'delete_security_iot_solution')
         g.custom_command('update', 'update_security_iot_solution')
