@@ -104,9 +104,6 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
     if cmd.supported_api_version(min_api='2020-05-01') and enable_private_link:
         private_link_configuration_id = _ag_subresource_id('privateLinkConfigurations',
                                                            private_link_name)
-        print('-' * 100)
-        print(private_link_configuration_id)
-        print('-' * 100)
 
         # ag_properties['frontendIPConfigurations']
         default_private_link_ip_config = _build_appgw_private_link_ip_configuration(

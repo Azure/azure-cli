@@ -1029,8 +1029,77 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
-    def test_appgw_private_endpoint(self, resource_group):
-        pass
+    @ResourceGroupPreparer(name_prefix='test_appgw_private_endpoint_with_default')
+    def test_appgw_private_endpoint_with_default(self, resource_group):
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_pe_vnet': 'appgw_private_endpoint_vnet',
+            'appgw_pe_subnet': 'appgw_private_endpoint_subnet',
+            'appgw_ip': 'appgw_ip',
+            'appgw_pe': 'appgw_private_endpoint',
+            'appgw_pec': 'appgw_private_endpoint_connection'
+        })
+
+        # Enable private link feature on Application Gateway would require a public IP with Standard tier
+        self.cmd('network public-ip create -g {rg} -n {appgw_ip} --sku Standard')
+
+        # Prepare the vnet to be connected to
+        self.cmd('network vnet create -g {rg} -n {appgw_pe_vnet} --subnet-name {appgw_pe_subnet}')
+        # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        self.cmd('network vnet subnet update -g {rg} -n {appgw_pe_subnet} '
+                 '--vnet-name {appgw_pe_vnet} '
+                 '--disable-private-endpoint-network-policies true')
+
+        # Enable private link feature on Application Gateway would require Standard_v2,WAF_v2 SKU tiers
+        # --enable-private-link would enable private link feature with default settings
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--sku Standard_v2 '
+                 '--public-ip-address {appgw_ip} '
+                 '--enable-private-link')
+
+        show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
+
+        self.assertEqual(show_appgw_data['name'], self.kwargs['appgw'])
+        self.assertEqual(show_appgw_data['sku']['tier'], 'Standard_v2')
+        # One default private link would be here
+        self.assertEqual(len(show_appgw_data['privateLinkConfigurations']), 1)
+        self.assertEqual(len(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations']), 1)
+        # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
+        self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
+                         show_appgw_data['privateLinkConfigurations'][0]['id'])
+
+        self.kwargs.update({
+            'appgw_id': show_appgw_data['id']
+        })
+
+        private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
+        self.assertEqual(len(private_link_resource), 1)
+        self.assertEqual(private_link_resource[0]['name'], 'appGatewayFrontendIP')
+
+        self.kwargs.update({
+            'private_link_group_id': private_link_resource[0]['properties']['groupId']
+        })
+
+        # Create a private endpoint against this application gateway
+        self.cmd('network private-endpoint create -g {rg} -n {appgw_pe} '
+                 '--connection-name {appgw_pec} '
+                 '--vnet-name {appgw_pe_vnet} '
+                 '--subnet {appgw_pe_subnet} '
+                 '--private-connection-resource-id {appgw_id} '
+                 '--group-id {private_link_group_id}')
+
+        list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
+        self.assertEqual(len(list_private_endpoint_conn), 1)
+        self.assertEqual(list_private_endpoint_conn[0]['properties']['privateLinkServiceConnectionState']['status'], 'Approved')
+
+        self.kwargs.update({
+            'private_endpoint_conn_id': list_private_endpoint_conn[0]['id']
+        })
+
+        self.cmd('network private-endpoint-connection reject --id {private_endpoint_conn_id}').get_output_in_json()
+
+        show_private_endpoint_conn = self.cmd('network private-endpoint-connection show --id {private_endpoint_conn_id}').get_output_in_json()
+        self.assertEqual(show_private_endpoint_conn['properties']['privateLinkServiceConnectionState']['status'], 'Rejected')
 
 
 if __name__ == '__main__':

@@ -164,10 +164,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
-    print('-' * 100)
-    print(enable_private_link)
-    print('-' * 100)
-
     tags = tags or {}
     sku_tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
     http_listener_protocol = 'https' if (cert_data or key_vault_secret_id) else 'http'
@@ -212,11 +208,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
-    print('=' * 100)
-    print(private_link_name)
-    print(private_link_ip_address)
-    print(private_link_primary)
-
     private_link_subnet_id = None
     if enable_private_link:
         private_link_subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template,
@@ -235,9 +226,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
         private_link_subnet_id)
-
-    import json
-    print(json.dumps(app_gateway_resource, indent=2))
 
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
