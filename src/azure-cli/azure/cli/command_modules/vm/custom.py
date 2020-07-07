@@ -860,19 +860,22 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     deployment_name = 'vm_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                      aux_subscriptions=aux_subscriptions).deployments
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment, DeploymentProperties = cmd.get_models('Deployment', 'DeploymentProperties',
+                                                      resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    deployment = Deployment(properties=properties)
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        return client.validate(resource_group_name, deployment_name, properties)
+        validation_poller = client.validate(resource_group_name, deployment_name, parameters=deployment)
+        return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     # creates the VM deployment
     if no_wait:
         return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name, deployment_name, properties)
-    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+                           resource_group_name, deployment_name, parameters=deployment)
+    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, parameters=deployment))
 
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:

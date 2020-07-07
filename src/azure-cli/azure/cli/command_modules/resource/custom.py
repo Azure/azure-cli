@@ -289,9 +289,10 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
                                          template_uri=None, deployment_name=None, parameters=None,
                                          mode=None, rollback_on_error=None, validate_only=False, no_wait=False,
                                          aux_subscriptions=None, aux_tenants=None, no_prompt=False):
-    DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                                    'DeploymentProperties', 'TemplateLink',
-                                                                    'OnErrorDeployment', mod='models')
+    Deployment, DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                                                'Deployment', 'DeploymentProperties',
+                                                                                'TemplateLink', 'OnErrorDeployment',
+                                                                                mod='models')
     template_link = None
     template_obj = None
     on_error_deployment = None
@@ -317,6 +318,7 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
+    deployment = Deployment(properties=properties)
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions,
                                   aux_tenants=aux_tenants)
@@ -350,14 +352,15 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
             sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
         )
 
-    validation_result = deployment_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
+    validation_result_poller = deployment_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, parameters=deployment)
+    validation_result = LongRunningOperation(cli_ctx)(validation_result_poller)
 
     if validation_result and validation_result.error:
         raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
-    return sdk_no_wait(no_wait, deployment_client.create_or_update, resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, deployment_client.create_or_update, resource_group_name, deployment_name, parameters=deployment)
 
 
 class JsonCTemplate(object):
@@ -367,7 +370,7 @@ class JsonCTemplate(object):
 
 class JSONSerializer(Serializer):
     def body(self, data, data_type, **kwargs):
-        if data_type in ('Deployment', 'DeploymentWhatIf'):
+        if data_type in ('Deployment', 'ScopedDeployment', 'DeploymentWhatIf', 'ScopedDeploymentWhatIf'):
             # Be sure to pass a DeploymentProperties
             template = data.properties.template
             if template:
@@ -442,9 +445,13 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
                                                                       mode='Incremental',
                                                                       no_prompt=no_prompt)
 
+    Deployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment', mod='models')
+    deployment = Deployment(properties=deployment_properties, location=deployment_location)
+
     mgmt_client = _get_deployment_management_client(cli_ctx, plug_pipeline=(template_uri is None))
 
-    validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_result_poller = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, parameters=deployment)
+    validation_result = LongRunningOperation(cli_ctx)(validation_result_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -453,7 +460,7 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
         return validation_result
 
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope,
-                       deployment_name, deployment_properties, deployment_location)
+                       deployment_name, deployment)
 
 
 # pylint: disable=unused-argument
@@ -509,10 +516,14 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
                                                                       rollback_on_error=rollback_on_error,
                                                                       no_prompt=no_prompt)
 
+    Deployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment', mod='models')
+    deployment = Deployment(properties=deployment_properties)
+
     mgmt_client = _get_deployment_management_client(cli_ctx, aux_subscriptions=aux_subscriptions,
                                                     aux_tenants=aux_tenants, plug_pipeline=(template_uri is None))
 
-    validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
+    validation_poller = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, parameters=deployment)
+    validation_result = LongRunningOperation(cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -521,7 +532,7 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
         return validation_result
 
     return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name,
-                       deployment_name, deployment_properties)
+                       deployment_name, deployment)
 
 
 # pylint: disable=unused-argument
@@ -563,9 +574,13 @@ def _deploy_arm_template_at_management_group(cli_ctx,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt)
 
+    ScopedDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ScopedDeployment', mod='models')
+    deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
+
     mgmt_client = _get_deployment_management_client(cli_ctx, plug_pipeline=(template_uri is None))
 
-    validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_poller = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, parameters=deployment)
+    validation_result = LongRunningOperation(cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -574,7 +589,7 @@ def _deploy_arm_template_at_management_group(cli_ctx,
         return validation_result
 
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
-                       management_group_id, deployment_name, deployment_properties, deployment_location)
+                       management_group_id, deployment_name, deployment)
 
 
 # pylint: disable=unused-argument
@@ -610,9 +625,13 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt)
 
+    ScopedDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ScopedDeployment', mod='models')
+    deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
+
     mgmt_client = _get_deployment_management_client(cli_ctx, plug_pipeline=(template_uri is None))
 
-    validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment)
+    validation_result = LongRunningOperation(cli_ctx)(validation_poller)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -621,7 +640,7 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
         return validation_result
 
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_tenant_scope,
-                       deployment_name, deployment_properties, deployment_location)
+                       deployment_name, deployment)
 
 
 def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
@@ -1081,7 +1100,8 @@ def export_group_as_template(
 
     options = ','.join(export_options) if export_options else None
 
-    result = rcf.resource_groups.export_template(resource_group_name, resources, options=options)
+    result_poller = rcf.resource_groups.export_template(resource_group_name, resources, options=options)
+    result = LongRunningOperation(cmd.cli_ctx)(result_poller)
 
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute

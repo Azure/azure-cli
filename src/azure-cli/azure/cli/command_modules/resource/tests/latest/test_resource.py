@@ -275,7 +275,7 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'plan': 'cli_res_create_plan',
-            'app': 'clirescreateweb',
+            'app': 'clirescreateweb2',
             'loc': resource_group_location
         })
 
@@ -352,7 +352,7 @@ class TagScenarioTest(ScenarioTest):
 
         # Test Microsoft.Resources/resourceGroups
         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
-                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'}))
+                 checks=self.check('tags', {'cli-test': 'test'}))
 
         # Test Microsoft.ContainerRegistry/registries/webhooks
         self.kwargs.update({
@@ -750,6 +750,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('account management-group delete -n {mg}')
 
 
+# TODO
 class DeploymentTestAtTenantScope(ScenarioTest):
 
     def test_tenant_level_deployment(self):
@@ -1983,7 +1984,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         ])
 
         with self.assertRaises(CLIError):
-            self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg=test StorageAccountName1={sa1} StorageAccountName2={sa2}')
+            self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg=SomeRandomRG StorageAccountName1={sa1} StorageAccountName2={sa2}')
 
         self.cmd('group deployment create -g {rg1} -n {dn} --template-file "{tf}" --parameters CrossRg={rg2}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
@@ -2032,9 +2033,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'aux_sub': 'a93e8c5c-63cb-4635-933f-6d166ac25187',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_tenant': 'c445fb81-7c35-42a5-a47b-4686cb6946f7'
         })
         self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['rg']))
@@ -2155,9 +2156,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'aux_sub': 'a93e8c5c-63cb-4635-933f-6d166ac25187',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_tenant': 'c445fb81-7c35-42a5-a47b-4686cb6946f7'
         })
         self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['rg']))
