@@ -72,3 +72,78 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs['download_path'] = os.path.join(self.kwargs.get('local_dir'), 'test.file')
         self.oauth_cmd('storage fs file download -p {file} -f {filesystem} -d "{download_path}"'
                        ' --account-name {account}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_blob_update_service_properties_oauth(self):
+        self.oauth_cmd('storage blob service-properties show --account-name {sa}') \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False),
+                                JMESPathCheck('hourMetrics.enabled', True),
+                                JMESPathCheck('minuteMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.includeApis', None),
+                                JMESPathCheck('logging.delete', False))
+
+        self.oauth_cmd('storage blob service-properties update --static-website --index-document index.html '
+                       '--404-document error.html --account-name {sa}')\
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('minuteMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.includeApis', None),
+                                JMESPathCheck('logging.delete', False))
+
+        self.oauth_cmd('storage blob service-properties update --delete-retention --delete-retention-period 1 '
+                       '--account-name {sa}') \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
+                                JMESPathCheck('deleteRetentionPolicy.days', 1),
+                                JMESPathCheck('minuteMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.includeApis', None),
+                                JMESPathCheck('logging.delete', False))
+
+        self.oauth_cmd('storage blob service-properties update --set hourMetrics.enabled=false --account-name {sa}') \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
+                                JMESPathCheck('deleteRetentionPolicy.days', 1),
+                                JMESPathCheck('hourMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.includeApis', None),
+                                JMESPathCheck('logging.delete', False))
+
+        self.oauth_cmd('storage blob service-properties update --set minuteMetrics.enabled=true '
+                       'minuteMetrics.includeApis=true --account-name {sa}') \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
+                                JMESPathCheck('deleteRetentionPolicy.days', 1),
+                                JMESPathCheck('hourMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.enabled', True),
+                                JMESPathCheck('minuteMetrics.includeApis', True),
+                                JMESPathCheck('logging.delete', False))
+
+        self.oauth_cmd('storage blob service-properties update --set logging.delete=true --account-name {sa}') \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
+                                JMESPathCheck('deleteRetentionPolicy.days', 1),
+                                JMESPathCheck('hourMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.enabled', True),
+                                JMESPathCheck('minuteMetrics.includeApis', True),
+                                JMESPathCheck('logging.delete', True))
+
+        self.oauth_cmd('storage blob service-properties show --account-name {sa}') \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
+                                JMESPathCheck('deleteRetentionPolicy.days', 1),
+                                JMESPathCheck('hourMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.enabled', True),
+                                JMESPathCheck('minuteMetrics.includeApis', True),
+                                JMESPathCheck('logging.delete', True))

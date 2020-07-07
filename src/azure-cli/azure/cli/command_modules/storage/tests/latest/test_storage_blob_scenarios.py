@@ -17,7 +17,6 @@ from ..storage_test_util import StorageScenarioMixin
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 
-@AllowLargeResponse()
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
@@ -387,10 +386,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                              container, local_file, blob_name)
 
     @ResourceGroupPreparer()
-    def test_storage_blob_update_service_properties(self, resource_group):
-        storage_account = self.create_random_name(prefix='account', length=24)
-
-        self.cmd('storage account create -n {} -g {} --kind StorageV2'.format(storage_account, resource_group))
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_blob_service_properties(self, storage_account, resource_group):
         account_info = self.get_account_info(resource_group, storage_account)
 
         self.storage_cmd('storage blob service-properties show', account_info) \

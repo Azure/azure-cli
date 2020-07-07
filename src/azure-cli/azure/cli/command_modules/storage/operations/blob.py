@@ -88,9 +88,8 @@ def set_delete_policy(client, enable=None, days_retained=None):
     return client.get_blob_service_properties().delete_retention_policy
 
 
-def update_blob_service_properties(client, delete_retention=None, delete_retention_period=None, static_website=None,
-                                   index_document=None, error_document_404_path=None, timeout=None):
-    parameters = client.get_service_properties(timeout=timeout)
+def set_blob_service_properties(client, parameters, delete_retention=None, delete_retention_period=None,
+                           static_website=None, index_document=None, error_document_404_path=None, timeout=None):
     # update
     kwargs = {}
     if 'delete_retention_policy' in parameters:
@@ -112,6 +111,8 @@ def update_blob_service_properties(client, delete_retention=None, delete_retenti
         parameters['static_website'].error_document_404_path = error_document_404_path
     if 'hour_metrics' in parameters:
         kwargs['hour_metrics'] = parameters['hour_metrics']
+    if kwargs['hour_metrics'].enabled is False and kwargs['hour_metrics'].include_apis:
+        kwargs['hour_metrics'].include_apis = None
     if 'analytics_logging' in parameters:
         kwargs['analytics_logging'] = parameters['analytics_logging']
     if 'minute_metrics' in parameters:

@@ -8,7 +8,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                queue_data_service_factory, table_data_service_factory,
                                                                cloud_storage_account_service_factory,
                                                                multi_service_properties_factory,
-                                                               cf_mgmt_policy, cf_sa_for_keys,
+                                                               cf_mgmt_policy,
+                                                               cf_blob_data_gen_update, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
                                                                cf_private_link, cf_private_endpoint,
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
@@ -331,7 +332,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage blob service-properties delete-policy', command_type=blob_service_sdk,
                             min_api='2019-02-02',
                             custom_command_type=get_custom_sdk('blob', blob_service_sdk)) as g:
-        g.storage_command_oauth('show', 'get_blob_service_properties',
+        g.storage_command_oauth('show', 'get_service_properties',
                                 transform=lambda x: getattr(
                                     x, 'delete_retention_policy', x),
                                 exception_handler=show_exception_handler)
@@ -343,8 +344,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._transformers import transform_blob_service_properties
         g.storage_command_oauth('show', 'get_service_properties', exception_handler=show_exception_handler,
                                 transform=transform_blob_service_properties)
-        g.storage_custom_command_oauth('update', 'update_blob_service_properties',
-                                       transform=transform_blob_service_properties)
+        g.storage_command_oauth('update', generic_update=True, getter_name='get_service_properties',
+                                setter_type=get_custom_sdk(
+                                    'blob', cf_blob_data_gen_update),
+                                setter_name='set_blob_service_properties',
+                                client_factory=cf_blob_data_gen_update,
+                                transform=transform_blob_service_properties)
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:

@@ -170,7 +170,7 @@ def cf_mgmt_file_shares(cli_ctx, _):
 
 
 def cf_blob_data_gen_update(cli_ctx, kwargs):
-    return blob_data_service_factory(cli_ctx, kwargs.copy())
+    return cf_blob_service(cli_ctx, kwargs.copy())
 
 
 def cf_private_link(cli_ctx, _):

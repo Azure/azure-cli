@@ -534,8 +534,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', timeout_type)
 
     with self.argument_context('storage blob service-properties update', min_api='2018-03-28') as c:
+        from ._validators import process_logging_property
         c.argument('delete_retention', arg_type=get_three_state_flag(), arg_group='Soft Delete',
-                   help='Enables soft-delete.')
+                   help='Enables soft-delete.', validator=process_logging_property)
         c.argument('delete_retention_period', type=int, arg_group='Soft Delete',
                    help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
         c.argument('static_website', arg_group='Static Website', arg_type=get_three_state_flag(),

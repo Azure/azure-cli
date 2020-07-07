@@ -1292,3 +1292,11 @@ def validate_logging_version(namespace):
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
             'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
+
+
+def process_logging_property(namespace):
+    if hasattr(namespace, 'ordered_arguments'):
+        for i, item in enumerate(namespace.ordered_arguments):
+            for j, expression in enumerate(item[1]):
+                if expression.startswith('logging'):
+                    namespace.ordered_arguments[i][1][j] = 'analytics_' + expression

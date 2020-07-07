@@ -1035,7 +1035,11 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
             return instance.additional_properties[part]
         raise AttributeError()
     except (AttributeError, KeyError):
-        throw_and_show_options(instance, part, path)
+        try:
+            part = make_snake_case(part)
+            return instance[part]
+        except (AttributeError, KeyError):
+            throw_and_show_options(instance, part, path)
 
 
 def _find_property(instance, path):
