@@ -272,6 +272,7 @@ def load_command_table(self, _):
                             security_adaptive_network_hardenings_sdk,
                             client_factory=cf_security_adaptive_network_hardenings) as g:
         g.custom_command('show', 'get_security_adaptive_network_hardenings')
+        g.custom_command('list', 'list_security_adaptive_network_hardenings')
 
     with self.command_group('security', is_preview=True):
         pass
