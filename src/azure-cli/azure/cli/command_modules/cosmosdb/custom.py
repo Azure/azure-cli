@@ -272,10 +272,10 @@ def cli_cosmosdb_sql_database_exists(client,
 
 def _populate_sql_container_definition(sql_container_resource,
                                        partition_key_path,
-                                       partition_key_version,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
+                                       partition_key_version,                                       
                                        conflict_resolution_policy):
     if all(arg is None for arg in
            [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
@@ -322,10 +322,10 @@ def cli_cosmosdb_sql_container_create(client,
 
     _populate_sql_container_definition(sql_container_resource,
                                        partition_key_path,
-                                       partition_key_version,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
+                                       partition_key_version,
                                        conflict_resolution_policy)
 
     options = _get_options(throughput, max_throughput)
@@ -361,9 +361,9 @@ def cli_cosmosdb_sql_container_update(client,
 
     if _populate_sql_container_definition(sql_container_resource,
                                           None,
-                                          None,
                                           default_ttl,
                                           indexing_policy,
+                                          None,
                                           None,
                                           None):
         logger.debug('replacing SQL container')

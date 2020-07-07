@@ -21,9 +21,10 @@ def validate_ip_range_filter(ns):
     from azure.mgmt.cosmosdb.models import IpAddressOrRange
     if ns.ip_range_filter is not None:
         ip_rules_list = []
-        for item in ns.ip_range_filter.split(","):
-            ip_rules_list.append(IpAddressOrRange(ip_address_or_range=item))
-        ns.ip_range_filter = ip_rules_list
+        for item in ns.ip_range_filter:
+            for i in item.split(","):
+                ip_rules_list.append(IpAddressOrRange(ip_address_or_range=i))
+                ns.ip_range_filter = ip_rules_list
 
 
 def validate_private_endpoint_connection_id(ns):

@@ -227,153 +227,152 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb database list -n {acc} --key {primary_master_key}')
         self.cmd('az cosmosdb database list --url-connection {url} --key {primary_master_key}')
 
-    # Add these tests back when https://github.com/Azure/azure-cli/issues/14194 is resolved
-    # @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
-    # def test_cosmosdb_network_rule_list(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_network_rule_list(self, resource_group):
 
-    #     self.kwargs.update({
-    #         'acc': self.create_random_name(prefix='cli', length=40),
-    #         'vnet': self.create_random_name(prefix='cli', length=40),
-    #         'sub': self.create_random_name(prefix='cli', length=40)
-    #     })
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'vnet': self.create_random_name(prefix='cli', length=40),
+            'sub': self.create_random_name(prefix='cli', length=40)
+        })
 
-    #     vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
-    #     self.cmd('az network vnet subnet update -g {rg} --vnet-name {vnet} -n {sub} --service-endpoints Microsoft.AzureCosmosDB')
+        vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
+        self.cmd('az network vnet subnet update -g {rg} --vnet-name {vnet} -n {sub} --service-endpoints Microsoft.AzureCosmosDB')
 
-    #     self.kwargs.update({
-    #         'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
-    #     })
+        self.kwargs.update({
+            'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
+        })
 
-    #     self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network --virtual-network-rule {subnet_id}').get_output_in_json()
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network --virtual-network-rule {subnet_id}').get_output_in_json()
 
-    #     vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
+        vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
 
-    #     assert len(vnet_rules) == 1
-    #     assert vnet_rules[0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
+        assert len(vnet_rules) == 1
+        assert vnet_rules[0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
-    # def test_cosmosdb_network_rule_add(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_network_rule_add(self, resource_group):
 
-    #     self.kwargs.update({
-    #         'acc': self.create_random_name(prefix='cli', length=40),
-    #         'vnet': self.create_random_name(prefix='cli', length=40),
-    #         'sub': self.create_random_name(prefix='cli', length=40)
-    #     })
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'vnet': self.create_random_name(prefix='cli', length=40),
+            'sub': self.create_random_name(prefix='cli', length=40)
+        })
 
-    #     vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
+        vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
 
-    #     self.kwargs.update({
-    #         'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
-    #     })
+        self.kwargs.update({
+            'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
+        })
 
-    #     self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
 
-    #     with self.assertRaisesRegexp(CLIError, "usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
-    #         self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {vnet}')
+        with self.assertRaisesRegexp(CLIError, "usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
+            self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {vnet}')
 
-    #     vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
+        vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
 
-    #     assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
-    #     assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
+        assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
+        assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
 
-    #     existing_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --vnet-name {vnet} --subnet {sub} --ignore-missing-endpoint').get_output_in_json()
-    #     assert len(existing_rule["virtualNetworkRules"]) == 1
+        existing_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --vnet-name {vnet} --subnet {sub} --ignore-missing-endpoint').get_output_in_json()
+        assert len(existing_rule["virtualNetworkRules"]) == 1
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
-    # def test_cosmosdb_network_rule_remove(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_network_rule_remove(self, resource_group):
 
-    #     self.kwargs.update({
-    #         'acc': self.create_random_name(prefix='cli', length=40),
-    #         'vnet': self.create_random_name(prefix='cli', length=40),
-    #         'sub': self.create_random_name(prefix='cli', length=40)
-    #     })
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'vnet': self.create_random_name(prefix='cli', length=40),
+            'sub': self.create_random_name(prefix='cli', length=40)
+        })
 
-    #     vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
+        vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
 
-    #     self.kwargs.update({
-    #         'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
-    #     })
+        self.kwargs.update({
+            'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
+        })
 
-    #     self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
 
-    #     vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {subnet_id} --ignore-missing-vnet-service-endpoint').get_output_in_json()
+        vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {subnet_id} --ignore-missing-vnet-service-endpoint').get_output_in_json()
 
-    #     assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
-    #     assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
+        assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
+        assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
 
-    #     self.cmd('az cosmosdb network-rule remove -n {acc} -g {rg} --subnet {subnet_id}')
+        self.cmd('az cosmosdb network-rule remove -n {acc} -g {rg} --subnet {subnet_id}')
 
-    #     vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
+        vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
 
-    #     assert len(vnet_rules) == 0
+        assert len(vnet_rules) == 0
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
-    # def test_cosmosdb_private_link_resource(self, resource_group):
-    #     self.kwargs.update({
-    #         'acc': self.create_random_name('cli-test-cosmosdb-plr-', 28),
-    #         'loc': 'centraluseuap'
-    #     })
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
+    def test_cosmosdb_private_link_resource(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cli-test-cosmosdb-plr-', 28),
+            'loc': 'centraluseuap'
+        })
 
-    #     self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
 
-    #     self.cmd('cosmosdb private-link-resource list --account-name {acc} --resource-group {rg}',
-    #              checks=[self.check('length(@)', 1), self.check('[0].groupId', 'Sql')])
+        self.cmd('cosmosdb private-link-resource list --account-name {acc} --resource-group {rg}',
+                 checks=[self.check('length(@)', 1), self.check('[0].groupId', 'Sql')])
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pe')
-    # def test_cosmosdb_private_endpoint(self, resource_group):
-    #     self.kwargs.update({
-    #         'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
-    #         'loc': 'eastus2',
-    #         'vnet': self.create_random_name('cli-vnet-', 24),
-    #         'subnet': self.create_random_name('cli-subnet-', 24),
-    #         'pe': self.create_random_name('cli-pe-', 24),
-    #         'pe_connection': self.create_random_name('cli-pec-', 24)
-    #     })
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pe')
+    def test_cosmosdb_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
+            'loc': 'eastus2',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
 
-    #     # Prepare cosmos db account and network
-    #     account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
-    #     self.kwargs['acc_id'] = account['id']
-    #     self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
-    #              checks=self.check('length(newVNet.subnets)', 1))
-    #     self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
-    #              '--disable-private-endpoint-network-policies true',
-    #              checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+        # Prepare cosmos db account and network
+        account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs['acc_id'] = account['id']
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
-    #     # Create a private endpoint connection
-    #     pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
-    #                   '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
-    #                   '--group-ids Sql').get_output_in_json()
-    #     self.kwargs['pe_id'] = pe['id']
-    #     self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                      '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
+                      '--group-ids Sql').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
-    #     # Show the connection at cosmos db side
-    #     results = self.kwargs['pe_id'].split('/')
-    #     self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(results[2], results[4], self.kwargs['acc'], results[-1])
-    #     self.cmd('cosmosdb private-endpoint-connection show --id {pec_id}',
-    #              checks=self.check('id', '{pec_id}'))
-    #     self.cmd('cosmosdb private-endpoint-connection show --account-name {acc} --name {pe_name} --resource-group {rg}',
-    #              checks=self.check('name', '{pe_name}'))
-    #     self.cmd('cosmosdb private-endpoint-connection show -a {acc} -n {pe_name} -g {rg}',
-    #              checks=self.check('name', '{pe_name}'))
+        # Show the connection at cosmos db side
+        results = self.kwargs['pe_id'].split('/')
+        self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(results[2], results[4], self.kwargs['acc'], results[-1])
+        self.cmd('cosmosdb private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('cosmosdb private-endpoint-connection show --account-name {acc} --name {pe_name} --resource-group {rg}',
+                 checks=self.check('name', '{pe_name}'))
+        self.cmd('cosmosdb private-endpoint-connection show -a {acc} -n {pe_name} -g {rg}',
+                 checks=self.check('name', '{pe_name}'))
 
-    #     # Test approval/rejection
-    #     self.kwargs.update({
-    #         'approval_desc': 'You are approved!',
-    #         'rejection_desc': 'You are rejected!'
-    #     })
-    #     self.cmd('cosmosdb private-endpoint-connection approve --account-name {acc} --resource-group {rg} --name {pe_name} '
-    #              '--description "{approval_desc}"', checks=[
-    #                  self.check('privateLinkServiceConnectionState.status', 'Approved'),
-    #                  self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
-    #              ])
-    #     self.cmd('cosmosdb private-endpoint-connection reject --id {pec_id} '
-    #              '--description "{rejection_desc}"', checks=[
-    #                  self.check('privateLinkServiceConnectionState.status', 'Rejected'),
-    #                  self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
-    #              ])
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd('cosmosdb private-endpoint-connection approve --account-name {acc} --resource-group {rg} --name {pe_name} '
+                 '--description "{approval_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
+                 ])
+        self.cmd('cosmosdb private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
+                 ])
 
-    #     # Test delete
-    #     self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
+        # Test delete
+        self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):
