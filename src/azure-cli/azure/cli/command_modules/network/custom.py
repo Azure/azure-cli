@@ -164,7 +164,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
-    from pprint import pprint
     print('-' * 100)
     print(enable_private_link)
     print('-' * 100)
@@ -196,7 +195,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
             enable_private_link=enable_private_link,
             private_link_subnet=private_link_subnet,
             private_link_subnet_prefix=private_link_subnet_prefix)
-        pprint(vnet)
         master_template.add_resource(vnet)
         subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template,
                                                               virtual_network_name, subnet)
@@ -224,6 +222,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         private_link_subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template,
                                                                            virtual_network_name,
                                                                            private_link_subnet)
+        private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
+            else IPAllocationMethod.dynamic.value
 
     app_gateway_resource = build_application_gateway_resource(
         cmd, application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
@@ -236,7 +236,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
         private_link_subnet_id)
 
-    pprint(app_gateway_resource)
+    import json
+    print(json.dumps(app_gateway_resource, indent=2))
 
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(

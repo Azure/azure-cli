@@ -5,7 +5,9 @@
 
 
 def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
-                              private_ip_allocation=None, zone=None, private_ip_address_version=None):
+                              private_ip_allocation=None, zone=None, private_ip_address_version=None,
+                              enable_private_link=False,
+                              private_link_configuration_id=None):
     frontend_ip_config = {
         'name': name
     }
@@ -31,7 +33,28 @@ def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, priv
     if private_ip_address_version and cmd.supported_api_version(min_api='2019-04-01'):
         frontend_ip_config['properties']['privateIPAddressVersion'] = private_ip_address_version
 
+    if enable_private_link is True and cmd.supported_api_version(min_api='2020-05-01'):
+        frontend_ip_config['properties'].update({
+            'privateLinkConfiguration': {'id': private_link_configuration_id}
+        })
+
     return frontend_ip_config
+
+
+def _build_appgw_private_link_ip_configuration(name,
+                                               private_link_ip_address,
+                                               private_link_ip_allocation_method,
+                                               private_link_primary,
+                                               private_link_subnet_id):
+    return {
+        'name': name,
+        'properties': {
+            'privateIPAddress': private_link_ip_address,
+            'privateIPAllocationMethod': private_link_ip_allocation_method,
+            'primary': private_link_primary,
+            'subnet': {'id': private_link_subnet_id}
+        }
+    }
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -61,8 +84,6 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
     ssl_cert = None
 
-    frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id,
-                                                   private_ip_address, private_ip_allocation)
     backend_address_pool = {'name': backend_pool_name}
     if servers:
         backend_address_pool['properties'] = {'BackendAddresses': servers}
@@ -77,6 +98,35 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
     backend_http_settings_id = _ag_subresource_id('backendHttpSettingsCollection',
                                                   http_settings_name)
     ssl_cert_id = _ag_subresource_id('sslCertificates', ssl_cert_name)
+
+    private_link_configuration_id = None
+    privateLinkConfigurations = []
+    if cmd.supported_api_version(min_api='2020-05-01') and enable_private_link:
+        private_link_configuration_id = _ag_subresource_id('privateLinkConfigurations',
+                                                           private_link_name)
+        print('-' * 100)
+        print(private_link_configuration_id)
+        print('-' * 100)
+
+        # ag_properties['frontendIPConfigurations']
+        default_private_link_ip_config = _build_appgw_private_link_ip_configuration(
+            'PrivateLinkDefaultIPConfiguration',
+            private_link_ip_address,
+            private_link_ip_allocation_method,
+            private_link_primary,
+            private_link_subnet_id
+        )
+        privateLinkConfigurations.append({
+            'name': private_link_name,
+            'properties': {
+                'ipConfigurations': [default_private_link_ip_config]
+            }
+        })
+
+    frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id,
+                                                   private_ip_address, private_ip_allocation,
+                                                   enable_private_link=enable_private_link,
+                                                   private_link_configuration_id=private_link_configuration_id)
 
     http_listener = {
         'name': http_listener_name,
@@ -158,6 +208,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                 }
             }
         ],
+        'privateLinkConfigurations': privateLinkConfigurations,
     }
     if ssl_cert:
         ag_properties.update({'sslCertificates': [ssl_cert]})
@@ -177,24 +228,6 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ag_properties.update({'customErrorConfigurations': custom_error_pages})
     if firewall_policy and cmd.supported_api_version(min_api='2018-12-01'):
         ag_properties.update({'firewallPolicy': {'id': firewall_policy}})
-
-    if cmd.supported_api_version(min_api='2020-05-01') and enable_private_link:
-        ag_properties['privateLinkConfigurations'] = [{
-            'name': private_link_name,
-            'properties': {
-                'ipConfigurations': [
-                    {
-                        'name': 'DefaultPrivateLinkIPConfiguration',
-                        'properties': {
-                            'privateIPAddress': private_link_ip_address,
-                            'privateIPAllocationMethod': private_link_ip_allocation_method,
-                            'primary': private_link_primary,
-                            'subnet': {'id': private_link_subnet_id}
-                        }
-                    }
-                ]
-            }
-        }]
 
     ag = {
         'type': 'Microsoft.Network/applicationGateways',

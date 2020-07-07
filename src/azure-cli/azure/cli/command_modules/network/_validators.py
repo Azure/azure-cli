@@ -634,28 +634,6 @@ def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False
     return complex_validator_with_type if has_type_field else simple_validator
 
 
-def validate_private_link_vnet_validator(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
-    # private_link_ip_address = namespace.private_link_ip_address
-    # private_link_ip_allocation_method = namespace.private_link_ip_allocation_method
-    # private_link_address_prefix = namespace.private_link_address_prefix
-    # private_link_subnet = namespace.private_link_subnet
-    # private_link_primary = namespace.private_link_primary
-
-    # print('=' * 100)
-    # print('private_link_ip_address =', private_link_ip_address)
-    # print('private_link_ip_allocation_method =', private_link_ip_allocation_method)
-    # print('private_link_address_prefix =', private_link_address_prefix)
-    # print('private_link_subnet =', private_link_subnet)
-    # print('private_link_primary =', private_link_primary)
-    # print('virtual_network_name =', namespace.virtual_network_name)
-    # print('=' * 100)
-
-    if is_valid_resource_id(namespace.private_link_subnet):
-        return
-
-
 def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, default_none=False):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
@@ -905,7 +883,6 @@ def process_ag_create_namespace(cmd, namespace):
     validate_custom_error_pages(namespace)
     validate_waf_policy(cmd, namespace)
     validate_application_gateway_identity(cmd, namespace)
-    validate_private_link_vnet_validator(cmd, namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):
