@@ -100,7 +100,7 @@ def load_command_table(self, _):
         g.show_command('list', 'list_by_database_account', transform=gen_dict_to_list_transform(key='values'))
 
     # SQL api
-    with self.command_group('cosmosdb sql', is_preview=True):
+    with self.command_group('cosmosdb sql'):
         pass
     with self.command_group('cosmosdb sql database', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_database_create')
@@ -139,7 +139,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete_sql_user_defined_function', confirmation=True)
 
     # MongoDB api
-    with self.command_group('cosmosdb mongodb', is_preview=True):
+    with self.command_group('cosmosdb mongodb'):
         pass
     with self.command_group('cosmosdb mongodb database', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_mongodb_database_create')
@@ -157,7 +157,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete_mongo_db_collection', confirmation=True)
 
     # Cassandra api
-    with self.command_group('cosmosdb cassandra', is_preview=True):
+    with self.command_group('cosmosdb cassandra'):
         pass
     with self.command_group('cosmosdb cassandra keyspace', cosmosdb_cassandra_sdk, client_factory=cf_cassandra_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_cassandra_keyspace_create')
@@ -175,7 +175,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete_cassandra_table', confirmation=True)
 
     # Gremlin api
-    with self.command_group('cosmosdb gremlin', is_preview=True):
+    with self.command_group('cosmosdb gremlin'):
         pass
     with self.command_group('cosmosdb gremlin database', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_gremlin_database_create')
@@ -193,7 +193,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete_gremlin_graph', confirmation=True)
 
     # Table api
-    with self.command_group('cosmosdb table', cosmosdb_table_sdk, client_factory=cf_table_resources, is_preview=True) as g:
+    with self.command_group('cosmosdb table', cosmosdb_table_sdk, client_factory=cf_table_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_table_create')
         g.custom_command('exists', 'cli_cosmosdb_table_exists')
         g.command('list', 'list_tables')
