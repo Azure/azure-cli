@@ -1,0 +1,119 @@
+interactions:
+- request:
+    body: '{"name": "eventhubs-nscli000002"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace exists
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-eventhub/4.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/checkNameAvailability?api-version=2017-04-01
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"None","message":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '53'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Jul 2020 07:28:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {"{tag1": "value1}"}, "sku": {"name": "Standard",
+      "tier": "Standard"}, "identity": {"type": "SystemAssigned"}, "properties": {"clusterArmId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/prod-by3-533-rg/providers/Microsoft.EventHub/clusters/PMTestCluster",
+      "isAutoInflateEnabled": true, "maximumThroughputUnits": 4}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '370'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
+        --cluster-arm-id --assign-identity
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-eventhub/4.0.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"LinkedAuthorizationFailed","message":"The client
+        has permission to perform action ''Microsoft.EventHub/clusters/write'' on
+        scope ''/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002'',
+        however the current tenant ''54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'' is not
+        authorized to access linked subscription ''326100e2-f69d-4268-8503-075374f62b6e''."}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '508'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Jul 2020 07:28:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 403
+      message: Forbidden
+version: 1

@@ -2582,8 +2582,8 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, sn, db_name),
                  checks=[JMESPathCheck('status', 'Enabled')])
 
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_tdebyok(self, resource_group, server):
         resource_prefix = 'sqltdebyok'
 
