@@ -92,7 +92,7 @@ def get_period_type(as_timedelta=False):
 class MetricAlertConditionAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.cli.command_modules.monitor.grammar import (
+        from azure.cli.command_modules.monitor.grammar.metric_alert import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
 
         usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
@@ -232,32 +232,32 @@ class AutoscaleRemoveAction(argparse._AppendAction):
 
 class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-access
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.monitor.models import MetricTrigger
-        if len(values) == 1:
-            # workaround because CMD.exe eats > character... Allows condition to be
-            # specified as a quoted expression
-            values = values[0].split(' ')
-        name_offset = 0
+        from azure.cli.command_modules.monitor.grammar.autoscale import (
+            AutoscaleConditionLexer, AutoscaleConditionParser, AutoscaleConditionValidator)
+
+        usage = 'usage error: --condition [NAMESPACE.]METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD\n' \
+                '                         [where DIMENSION {==,!=} VALUE [or VALUE ...]\n' \
+                '                         [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]'
+
+        string_val = ' '.join(values)
+
+        lexer = AutoscaleConditionLexer(antlr4.InputStream(string_val))
+        stream = antlr4.CommonTokenStream(lexer)
+        parser = AutoscaleConditionParser(stream)
+        tree = parser.expression()
+
         try:
-            metric_name = ' '.join(values[name_offset:-4])
-            operator = get_autoscale_operator_map()[values[-4]]
-            threshold = int(values[-3])
-            aggregation = get_autoscale_aggregation_map()[values[-2].lower()]
-            window = get_period_type()(values[-1])
-        except (IndexError, KeyError):
-            raise CLIError('usage error: --condition METRIC {==,!=,>,>=,<,<=} '
-                           'THRESHOLD {avg,min,max,total,count} PERIOD')
-        condition = MetricTrigger(
-            metric_name=metric_name,
-            metric_resource_uri=None,  # will be filled in later
-            time_grain=None,  # will be filled in later
-            statistic=None,  # will be filled in later
-            time_window=window,
-            time_aggregation=aggregation,
-            operator=operator,
-            threshold=threshold
-        )
-        namespace.condition = condition
+            validator = AutoscaleConditionValidator()
+            walker = antlr4.ParseTreeWalker()
+            walker.walk(validator, tree)
+            autoscale_condition = validator.result()
+            for item in ['time_aggregation', 'metric_name', 'threshold', 'operator', 'time_window']:
+                if not getattr(autoscale_condition, item, None):
+                    raise CLIError(usage)
+        except (AttributeError, TypeError, KeyError):
+            raise CLIError(usage)
+
+        namespace.condition = autoscale_condition
 
 
 class AutoscaleScaleAction(argparse.Action):  # pylint: disable=protected-access
