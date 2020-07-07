@@ -57,11 +57,18 @@ def add_webapp_access_restriction(
         access_rules.append(rule_instance)
 
     elif ip_address:
-        rule_instance = IpSecurityRestriction(
-            name=rule_name, ip_address=ip_address,
-            priority=priority, action=action, tag='Default', description=description)
-        access_rules.append(rule_instance)
-
+        is_exists = False
+        for rule in access_rules:
+            if rule.ip_address == ip_address:
+                is_exists = True
+                break
+        if not is_exists:
+            rule_instance = IpSecurityRestriction(
+                name=rule_name, ip_address=ip_address,
+                priority=priority, action=action, tag='Default', description=description)
+            access_rules.append(rule_instance)
+        else:
+            raise CLIError('Rule is already exists with the specified criteria')
     result = _generic_site_operation(
         cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
     return result.scm_ip_security_restrictions if scm_site else result.ip_security_restrictions
