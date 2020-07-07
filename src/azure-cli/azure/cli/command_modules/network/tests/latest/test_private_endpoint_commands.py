@@ -672,81 +672,80 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint delete -n {second_endpoint_name} -g {rg}')
 
 
-# To be uncommented when https://github.com/Azure/azure-cli/issues/14194 is resolved
-# class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
-#     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
-#     def test_private_link_resource_cosmosdb(self, resource_group):
-#         self.kwargs.update({
-#             'acc': self.create_random_name('cli-test-cosmosdb-plr-', 28),
-#             'loc': 'eastus'
-#         })
+class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
+    def test_private_link_resource_cosmosdb(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cli-test-cosmosdb-plr-', 28),
+            'loc': 'eastus'
+        })
 
-#         self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
 
-#         self.cmd('az network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts',
-#                  checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'Sql')])
+        self.cmd('az network private-link-resource list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts',
+                 checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'Sql')])
 
-#     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pe')
-#     def test_private_endpoint_connection_cosmosdb(self, resource_group):
-#         self.kwargs.update({
-#             'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
-#             'loc': 'eastus',
-#             'vnet': self.create_random_name('cli-vnet-', 24),
-#             'subnet': self.create_random_name('cli-subnet-', 24),
-#             'pe': self.create_random_name('cli-pe-', 24),
-#             'pe_connection': self.create_random_name('cli-pec-', 24)
-#         })
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pe')
+    def test_private_endpoint_connection_cosmosdb(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
+            'loc': 'eastus',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
 
-#         # Prepare cosmos db account and network
-#         account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
-#         self.kwargs['acc_id'] = account['id']
-#         self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
-#                  checks=self.check('length(newVNet.subnets)', 1))
-#         self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
-#                  '--disable-private-endpoint-network-policies true',
-#                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+        # Prepare cosmos db account and network
+        account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs['acc_id'] = account['id']
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
-#         # Create a private endpoint connection
-#         pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
-#                       '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
-#                       '--group-id Sql').get_output_in_json()
-#         self.kwargs['pe_id'] = pe['id']
-#         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+        # Create a private endpoint connection
+        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                      '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
+                      '--group-id Sql').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
-#         # Show the connection at cosmos db side
-#         results = self.kwargs['pe_id'].split('/')
-#         self.kwargs[
-#             'pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(
-#             results[2], results[4], self.kwargs['acc'], results[-1])
-#         self.cmd('az network private-endpoint-connection show --id {pec_id}',
-#                  checks=self.check('id', '{pec_id}'))
-#         self.cmd(
-#             'az network private-endpoint-connection show --resource-name {acc} --name {pe_name} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts',
-#             checks=self.check('name', '{pe_name}'))
-#         self.cmd('az network private-endpoint-connection show --resource-name {acc} -n {pe_name} -g {rg} --type Microsoft.DocumentDB/databaseAccounts',
-#                  checks=self.check('name', '{pe_name}'))
+        # Show the connection at cosmos db side
+        results = self.kwargs['pe_id'].split('/')
+        self.kwargs[
+            'pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(
+            results[2], results[4], self.kwargs['acc'], results[-1])
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd(
+            'az network private-endpoint-connection show --resource-name {acc} --name {pe_name} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts',
+            checks=self.check('name', '{pe_name}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {acc} -n {pe_name} -g {rg} --type Microsoft.DocumentDB/databaseAccounts',
+                 checks=self.check('name', '{pe_name}'))
 
-#         # Test approval/rejection
-#         self.kwargs.update({
-#             'approval_desc': 'You are approved!',
-#             'rejection_desc': 'You are rejected!'
-#         })
-#         self.cmd(
-#             'az network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pe_name} --type Microsoft.DocumentDB/databaseAccounts '
-#             '--description "{approval_desc}"', checks=[
-#                 self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
-#             ])
-#         self.cmd('az network private-endpoint-connection reject --id {pec_id} '
-#                  '--description "{rejection_desc}"',
-#                  checks=[
-#                      self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
-#                  ])
-#         self.cmd('az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts', checks=[
-#             self.check('length(@)', 1)
-#         ])
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {acc} --resource-group {rg} --name {pe_name} --type Microsoft.DocumentDB/databaseAccounts '
+            '--description "{approval_desc}"', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd('az network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts', checks=[
+            self.check('length(@)', 1)
+        ])
 
-#         # Test delete
-#         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
