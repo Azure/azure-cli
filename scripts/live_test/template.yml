@@ -53,7 +53,7 @@ jobs:
         azdev setup -c azure-cli
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n 8 --json-report --json-report-summary --html=report.html"
+        azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n 8 --json-report --json-report-summary --json-report-file=$(Target).report.json --html=$(Target).report.html"
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
@@ -61,11 +61,16 @@ jobs:
         testRunTitle: 'Azure CLI live test results of $(Target)'
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
-#    - task: PublishBuildArtifacts@1
-#      inputs:
-#        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-#        ArtifactName: '$(Target).html'
-#        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Target).report.json'
+        ArtifactName: '$(Target).report.json'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Target).report.html'
+        ArtifactName: '$(Target).report.html'
+        publishLocation: 'Container'
 
 - job: SendEmail
   displayName: Send email
