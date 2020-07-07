@@ -529,6 +529,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('days_retained', type=int,
                    help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
 
+    with self.argument_context('storage blob service-properties show', min_api='2019-02-02',
+                               resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        c.extra('timeout', timeout_type)
+
     with self.argument_context('storage blob service-properties update', min_api='2018-03-28') as c:
         c.argument('delete_retention', arg_type=get_three_state_flag(), arg_group='Soft Delete',
                    help='Enables soft-delete.')

@@ -15,7 +15,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
                                                                cf_adls_file_system, cf_adls_directory,
                                                                cf_adls_file, cf_adls_service,
-                                                               cf_blob_client)
+                                                               cf_blob_client, cf_blob_service)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -244,7 +244,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE)
 
     blob_client_sdk = CliCommandType(
-        operation_tmpl='azure.multiapi.storagev2.blob._blob_client#BlobClient.{}',
+        operations_tmpl='azure.multiapi.storagev2.blob._blob_client#BlobClient.{}',
         client_factory=cf_blob_client,
         resource_type=ResourceType.DATA_STORAGE_BLOB
     )
@@ -329,23 +329,27 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             min_api='2016-05-31') as g:
         g.storage_command_oauth('cancel', 'abort_copy_blob')
 
-    with self.command_group('storage blob service-properties delete-policy', command_type=base_blob_sdk,
-                            min_api='2017-07-29',
-                            custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
+    blob_service_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.blob._blob_service_client#BlobServiceClient.{}',
+        client_factory=cf_blob_service,
+        resource_type=ResourceType.DATA_STORAGE_BLOB
+    )
+    with self.command_group('storage blob service-properties delete-policy', command_type=blob_service_sdk,
+                            min_api='2019-02-02',
+                            custom_command_type=get_custom_sdk('blob', blob_service_sdk)) as g:
         g.storage_command_oauth('show', 'get_blob_service_properties',
                                 transform=lambda x: getattr(
                                     x, 'delete_retention_policy', x),
                                 exception_handler=show_exception_handler)
         g.storage_custom_command_oauth('update', 'set_delete_policy')
 
-    with self.command_group('storage blob service-properties', command_type=base_blob_sdk) as g:
-        g.storage_command_oauth(
-            'show', 'get_blob_service_properties', exception_handler=show_exception_handler)
-        g.storage_command_oauth('update', generic_update=True, getter_name='get_blob_service_properties',
-                                setter_type=get_custom_sdk(
-                                    'blob', cf_blob_data_gen_update),
-                                setter_name='set_service_properties',
-                                client_factory=cf_blob_data_gen_update)
+    with self.command_group('storage blob service-properties', command_type=blob_service_sdk,
+                            custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_service),
+                            min_api='2019-02-02', resource_type=ResourceType.DATA_STORAGE_BLOB) as g:
+
+        g.storage_command_oauth('show', 'get_service_properties', exception_handler=show_exception_handler,
+                                )
+        g.storage_custom_command_oauth('update', 'update_blob_service_properties')
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
