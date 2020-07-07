@@ -1753,13 +1753,13 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
         self.kwargs.update({
             'admin': 'ubuntu',
-            'loc': 'westus',
+            'loc': 'eastus',
             'image': 'UbuntuLTS',
             'auth': 'ssh',
             'ssh_key': TEST_SSH_KEY_PUB,
             'vm': 'vm-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmlinuxkv', 20)
+            'vault': self.create_random_name('vmlinuxkv', 24)
         })
 
         message = 'Secret is missing vaultCertificates array or it is empty at index 0'
