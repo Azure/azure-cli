@@ -146,7 +146,7 @@ def load_arguments(self, _):
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
 
-    with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
+    with self.argument_context('network application-gateway', arg_group='Private Link Configuration', is_preview=True) as c:
         c.argument('enable_private_link', action='store_true', help='Enable Private Link feature for this application gateway', default=False)
         c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link')
         c.argument('private_link_ip_allocation_method', help='The private IP address of a subnet allocation method Private Link')
