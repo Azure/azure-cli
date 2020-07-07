@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer)
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
+@AllowLargeResponse()
 class StorageLegalHold(ScenarioTest):
     @ResourceGroupPreparer()
     def test_legal_hold(self, resource_group):
