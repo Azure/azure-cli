@@ -275,7 +275,7 @@ def _populate_sql_container_definition(sql_container_resource,
                                        default_ttl,
                                        indexing_policy,
                                        unique_key_policy,
-                                       partition_key_version,                                       
+                                       partition_key_version,
                                        conflict_resolution_policy):
     if all(arg is None for arg in
            [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
