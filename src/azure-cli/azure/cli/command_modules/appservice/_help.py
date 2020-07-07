@@ -647,7 +647,7 @@ examples:
         az functionapp identity assign -g MyResourceGroup -n MyUniqueApp
   - name: assign local identity and a user assigned identity to a function app.
     text: >
-        az webapp identity assign -g MyResourceGroup -n MyUniqueApp --identities [system] myAssignedId
+        az functionapp identity assign -g MyResourceGroup -n MyUniqueApp --identities [system] myAssignedId
 """
 
 helps['functionapp identity remove'] = """
