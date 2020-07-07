@@ -65,8 +65,6 @@ adaptive_network_hardenings_resource_resource_name = CLIArgumentType(option_list
 adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name = CLIArgumentType(option_list=('--adaptive_network_hardenings_resource_name'), metave='ADAPTIVENETWORKHARDENINGSRESOURCENAME', help='Adaptive Network Hardening resource name')
 
 
-
-
 def load_arguments(self, _):
     for scope in ['alert',
                   'atp',
