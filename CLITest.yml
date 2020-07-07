@@ -234,6 +234,8 @@ jobs:
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n 8 --json-report --json-report-summary --json-report-file=$(Target).report.json --html=$(Target).report.html"
+        pwd
+        ls
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
