@@ -518,27 +518,27 @@ examples:
         az security sub-assessment show --assessed-resource-id '/subscriptions/f8b197db-3b2b-4404-a3a3-0dfec293d0d0/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1' --assessment-name '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' -n 'd7c4d9ec-227c-4fb3-acf9-25fdd97c1bf1'
 """
 
-helps['security allowed_connections'] = """
+helps['security adaptive_network_hardenings'] = """
 type: group
-short-summary: View all possible traffic between resources for the subscription and location, based on connection type.
+short-summary: View all Adaptive Network Hardening resources
 """
 
-helps['security allowed_connections list'] = """
+helps['security adaptive_network_hardenings list'] = """
 type: command
-short-summary: list of all possible traffic between resources for the subscription.
+short-summary: Gets a list of Adaptive Network Hardenings resources in scope of an extended resource.
 examples:
-  - name: Get possible traffic between resources at the subscription level.
+  - name: Adaptive Network Hardenings - List By Extended Resource
     text: >
-        az security allowed_connections list
+        az security adaptive_network_hardenings list --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1'
 """
 
-helps['security allowed_connections show'] = """
+helps['security adaptive_network_hardenings show'] = """
 type: command
-short-summary: List all possible traffic between resources for the subscription and location, based on connection type.
+short-summary: Gets a single Adaptive Network Hardening resource.
 examples:
-  - name: Get all possible traffic between resources for the subscription and location, based on connection type.
+  - name: Adaptive Network Hardenings - Get.
     text: >
-        az security allowed_connections show --name Internal --resource-group mygroup
+        az security adaptive_network_hardenings list --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1' --adaptive-network-hardenings-resource-name 'default'
 """
 
 helps['security regulatory-compliance-standards'] = """

@@ -62,7 +62,7 @@ regulatory_compliance_control_name = CLIArgumentType(option_list=('--control-nam
 adaptive_network_hardenings_resource_namespace = CLIArgumentType(option_list=('--resource_namespace'), metave='RESOURCENAMESPACE', help='The Namespace of the resource')
 adaptive_network_hardenings_resource_resource_type = CLIArgumentType(option_list=('--resource_type'), metave='RESOURCETYPE', help='The type of the resource')
 adaptive_network_hardenings_resource_resource_name = CLIArgumentType(option_list=('--resource_name'), metave='RESOURCENAME', help='Name of the resource')
-adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name = CLIArgumentType(option_list=('--adaptive_network_hardenings_resource_name'), metave='ADAPTIVENETWORKHARDENINGSRESOURCENAME', help='The name of the Adaptive Network Hardening resource')
+adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name = CLIArgumentType(option_list=('--adaptive_network_hardenings_resource_name'), metave='ADAPTIVENETWORKHARDENINGSRESOURCENAME', help='Adaptive Network Hardening resource name')
 
 
 
