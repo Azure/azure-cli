@@ -93,10 +93,15 @@ class MonitorTests(ScenarioTest):
             'storage_account_id': storage_account_id
         })
 
-        with self.assertRaisesRegexp(CLIError, 'The metric names were not found MS-ERRORCODE-SU001'):
+        with self.assertRaisesRegexp(CLIError, 'were not found: MS-ERRORCODE-SU001'):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
                      ' --condition "count account.MS-ERRORCODE-SU001 > 4" --description "Cloud_lumico"')
+
+        with self.assertRaisesRegexp(CLIError, 'were not found: MS-ERRORCODE|,-SU001'):
+            self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
+                     ' --scopes {storage_account_id}'
+                     ' --condition "count account.MS-ERRORCODE|,-SU001 > 4" --description "Cloud_lumico"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_special_char')
     def test_metric_alert_special_char_scenario(self, resource_group):
