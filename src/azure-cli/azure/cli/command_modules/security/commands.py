@@ -20,7 +20,7 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_assessment,
                               cf_security_assessment_metadata,
                               cf_security_sub_assessment,
-                              cf_security_allowed_connections,
+                              cf_security_adaptive_network_hardenings,
                               cf_security_regulatory_compliance_standards,
                               cf_security_regulatory_compliance_control,
                               cf_security_regulatory_compliance_assessment)
@@ -137,10 +137,10 @@ def load_command_table(self, _):
         client_factory=cf_security_sub_assessment
     )
 
-    security_allowed_connections_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations#AllowedConnectionsOperations.{}',
-        client_factory=cf_security_allowed_connections,
-        operation_group='security_allowed_connections'
+    security_adaptive_network_hardenings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AdaptiveNetworkhardeningsOperations.{}',
+        client_factory=cf_security_adaptive_network_hardenings,
+        operation_group='security_adaptive_network_hardenings'
     )
 
     with self.command_group('security regulatory-compliance-standards',
@@ -268,11 +268,10 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_security_sub_assessments')
         g.custom_command('show', 'get_security_sub_assessment')
 
-    with self.command_group('security allowed_connections',
-                            security_allowed_connections_sdk,
-                            client_factory=cf_security_allowed_connections) as g:
-        g.custom_command('list', 'list_security_allowed_connections')
-        g.custom_command('show', 'get_security_allowed_connections')
+    with self.command_group('security adaptive_network_hardenings',
+                            security_adaptive_network_hardenings_sdk,
+                            client_factory=cf_security_adaptive_network_hardenings) as g:
+        g.custom_command('show', 'get_security_adaptive_network_hardenings')
 
     with self.command_group('security', is_preview=True):
         pass

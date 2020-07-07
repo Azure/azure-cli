@@ -58,6 +58,14 @@ sub_assessment_assessment_name_arg_type = CLIArgumentType(options_list=('--asses
 regulatory_compliance_standard_name = CLIArgumentType(option_list=('--standard-name'), metave='STANDARDNAME', help='The compliance standard name')
 regulatory_compliance_control_name = CLIArgumentType(option_list=('--control-name'), metave='CONTROLNAME', help='The compliance control name')
 
+# Adaptive Network hardenings
+adaptive_network_hardenings_resource_namespace = CLIArgumentType(option_list=('--resource_namespace'), metave='RESOURCENAMESPACE', help='The Namespace of the resource')
+adaptive_network_hardenings_resource_resource_type = CLIArgumentType(option_list=('--resource_type'), metave='RESOURCETYPE', help='The type of the resource')
+adaptive_network_hardenings_resource_resource_name = CLIArgumentType(option_list=('--resource_name'), metave='RESOURCENAME', help='Name of the resource')
+adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name = CLIArgumentType(option_list=('--adaptive_network_hardenings_resource_name'), metave='ADAPTIVENETWORKHARDENINGSRESOURCENAME', help='The name of the Adaptive Network Hardening resource')
+
+
+
 
 def load_arguments(self, _):
     for scope in ['alert',
@@ -79,7 +87,7 @@ def load_arguments(self, _):
                   'regulatory-compliance-standards',
                   'regulatory-compliance-controls',
                   'regulatory-compliance-assessments',
-                  'allowed_connections']:
+                  'adaptive_network_hardenings']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',
@@ -201,3 +209,18 @@ def load_arguments(self, _):
             c.argument(
                 'assessment_name',
                 arg_type=sub_assessment_assessment_name_arg_type)
+
+    for scope in ['adaptive_network_hardenings']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'resource_namespace',
+                arg_type=adaptive_network_hardenings_resource_namespace)
+            c.argument(
+                'resource_type',
+                arg_type=adaptive_network_hardenings_resource_resource_type)
+            c.argument(
+                'resource_name',
+                arg_type=adaptive_network_hardenings_resource_resource_name)
+            c.argument(
+                'adaptive_network_hardenings_resource_name',
+                arg_type=adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name)

@@ -458,24 +458,17 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
 
 
 # --------------------------------------------------------------------------------------------
-# Allowed Connections
+# Adaptive Network Hardenings
 # --------------------------------------------------------------------------------------------
 
+def get_security_adaptive_network_hardenings(client, adaptive_network_hardenings_resource_name, resource_name, resource_type, resource_namespace, resource_group):
 
-def list_security_allowed_connections(client):
-
-    for loc in client.locations.list():
-        client.config.asc_location = loc.name
-
-    return client.allowed_connections.list()
-
-
-def get_security_allowed_connections(client, resource_name, resource_group_name):
-
-    for loc in client.locations.list():
-        client.config.asc_location = loc.name
-
-    return client.allowed_connections.get(resource_group_name, resource_name)
+    return client.get(resource_group,
+                      resource_namespace,
+					  resource_type,
+					  resource_name,
+					  adaptive_network_hardenings_resource_name,
+					  )
 
 
 # --------------------------------------------------------------------------------------------
