@@ -229,3 +229,26 @@ def transform_immutability_policy(result):
     if result.immutability_period_since_creation_in_days:
         return result
     return None
+
+
+def str_to_list(result):
+    return result.split(",") if result else []
+
+
+def transform_cors(result):
+    new_result = []
+    for item in result:
+        item.allowed_headers = str_to_list(item.allowed_headers)
+        item.allowed_methods = str_to_list(item.allowed_methods)
+        item.allowed_origins = str_to_list(item.allowed_origins)
+        item.exposed_headers = str_to_list(item.exposed_headers)
+        new_result.append(item)
+    return new_result
+
+
+def transform_blob_service_properties(result):
+    from .track2_util import transform_dict_keys_to_hump
+    new_result = transform_dict_keys_to_hump(result)
+    new_result['logging'] = new_result.pop('analyticsLogging')
+    new_result['cors'] = transform_cors(result['cors'])
+    return new_result

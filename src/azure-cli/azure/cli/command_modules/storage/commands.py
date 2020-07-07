@@ -8,8 +8,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                queue_data_service_factory, table_data_service_factory,
                                                                cloud_storage_account_service_factory,
                                                                multi_service_properties_factory,
-                                                               cf_mgmt_policy,
-                                                               cf_blob_data_gen_update, cf_sa_for_keys,
+                                                               cf_mgmt_policy, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
                                                                cf_private_link, cf_private_endpoint,
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
@@ -238,11 +237,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                           table_transformer=transform_metrics_list_output,
                           exception_handler=show_exception_handler)
 
-    base_blob_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.blob.baseblobservice#BaseBlobService.{}',
-        client_factory=blob_data_service_factory,
-        resource_type=ResourceType.DATA_STORAGE)
-
     blob_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._blob_client#BlobClient.{}',
         client_factory=cf_blob_client,
@@ -346,10 +340,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage blob service-properties', command_type=blob_service_sdk,
                             custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_service),
                             min_api='2019-02-02', resource_type=ResourceType.DATA_STORAGE_BLOB) as g:
-
+        from ._transformers import transform_blob_service_properties
         g.storage_command_oauth('show', 'get_service_properties', exception_handler=show_exception_handler,
-                                )
-        g.storage_custom_command_oauth('update', 'update_blob_service_properties')
+                                transform=transform_blob_service_properties)
+        g.storage_custom_command_oauth('update', 'update_blob_service_properties',
+                                       transform=transform_blob_service_properties)
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:

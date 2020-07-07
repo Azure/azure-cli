@@ -729,7 +729,7 @@ helps['storage blob service-properties show'] = """
 type: command
 short-summary: Get the properties of a storage account's Blob service, including Azure Storage Analytics.
 examples:
-  - name: Get the properties of a storage account's Blob service. 
+  - name: Get the properties of a storage account's Blob service.
     text: |
         az storage blob service-properties show --account-name mystorageccount --account-key 0000-0000
 """
