@@ -1685,7 +1685,7 @@ examples:
 
 helps['webapp log deployment list'] = """
 type: command
-short-summary: List deployment logs of the deployments associated with web app
+short-summary: List deployments associated with web app
 examples:
   - name: List the deployment logs
     text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup

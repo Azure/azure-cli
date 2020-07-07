@@ -2422,19 +2422,11 @@ class FunctionappDeploymentLogsScenarioTest(LiveScenarioTest):
             JMESPathCheck('complete', True)
         ]).get_output_in_json()
         self.cmd('functionapp log deployment show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('id', deployment_1['id'])
+            JMESPathCheck('length(@) > `0`', True)
         ])
 
-        deployment_2 = self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
-            JMESPathCheck('status', 4),
-            JMESPathCheck('deployer', 'ZipDeploy'),
-            JMESPathCheck('complete', True)
-        ]).get_output_in_json()
-        self.cmd('functionapp log deployment show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('id', deployment_2['id'])
-        ])
-        self.cmd('functionapp log deployment show -g {} -n {} --deployment-id {}'.format(resource_group, functionapp_name, deployment_1['id']), checks=[
-            JMESPathCheck('id', deployment_1['id'])
+        self.cmd('functionapp log deployment show -g {} -n {} --deployment-id={}'.format(resource_group, functionapp_name, deployment_1['id']), checks=[
+            JMESPathCheck('length(@) > `0`', True)
         ])
 
     @ResourceGroupPreparer()
@@ -2485,15 +2477,11 @@ class WebappDeploymentLogsScenarioTest(ScenarioTest):
 
         deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
         self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('id', deployment_1['id']),
+            JMESPathCheck('length(@) > `0`', True),
         ])
 
-        deployment_2 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
-        self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('id', deployment_2['id']),
-        ])
-        self.cmd('webapp log deployment show -g {} -n {} --deployment-id {}'.format(resource_group, webapp_name, deployment_1['id']), checks=[
-            JMESPathCheck('id', deployment_1['id']),
+        self.cmd('webapp log deployment show -g {} -n {} --deployment-id={}'.format(resource_group, webapp_name, deployment_1['id']), checks=[
+            JMESPathCheck('length(@) > `0`', True),
         ])
 
     @ResourceGroupPreparer()
