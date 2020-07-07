@@ -1101,6 +1101,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         show_private_endpoint_conn = self.cmd('network private-endpoint-connection show --id {private_endpoint_conn_id}').get_output_in_json()
         self.assertEqual(show_private_endpoint_conn['properties']['privateLinkServiceConnectionState']['status'], 'Rejected')
 
+        self.cmd('network private-endpoint delete -g {rg} -n {appgw_pe}')
+
 
 if __name__ == '__main__':
     unittest.main()
