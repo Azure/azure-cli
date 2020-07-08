@@ -143,8 +143,8 @@ def load_command_table(self, _):
 
     security_adaptive_application_controls_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#AdaptiveApplicationControlsOperations.{}',
-        client_factory=cf_adaptive_application_controls,
-        operation_group='adaptive_application_controls'
+        client_factory=cf_security_adaptive_application_controls,
+        operation_group='cf_security_adaptive_application_controls'
     )
 
     security_iot_solution_sdk = CliCommandType(
@@ -294,7 +294,7 @@ def load_command_table(self, _):
 
     with self.command_group('security adaptive_application_controls',
                             security_adaptive_application_controls_sdk,
-                            client_factory=cf_adaptive_application_controls) as g:
+                            client_factory=cf_security_adaptive_application_controls) as g:
         g.custom_command('list', 'list_security_adaptive_application_controls')
         g.custom_command('show', 'get_security_adaptive_application_controls')
 
