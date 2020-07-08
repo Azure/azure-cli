@@ -466,15 +466,15 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
 
 def list_security_adaptive_application_controls(client):
 
+    return client.list()
+
+
+def get_security_topology(client, resource_name, resource_group_name):
+
     for loc in client.locations.list():
         client.config.asc_location = loc.name
 
-    return client.adaptive_application_controls.list()
-
-
-def get_security_allowed_connections(client, resource_name, resource_group_name):
-
-    return client.allowed_connections.get(resource_group_name, resource_name)
+    return client.topology.get(resource_group_name, resource_name)
 
 # --------------------------------------------------------------------------------------------
 # Security IoT Solution
