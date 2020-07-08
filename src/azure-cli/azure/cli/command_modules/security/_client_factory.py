@@ -105,3 +105,8 @@ def cf_security_regulatory_compliance_control(cli_ctx, _):
 
 def cf_security_regulatory_compliance_assessment(cli_ctx, _):
     return _cf_security(cli_ctx).regulatory_compliance_assessments
+
+
+def cf_security_allowed_connections(cli_ctx, _):
+    # do not return cli_ctx.allowed_connections for home region compatibility
+    return _cf_security(cli_ctx)

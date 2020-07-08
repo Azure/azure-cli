@@ -88,7 +88,8 @@ def load_arguments(self, _):
                   'iot-recommendations',
                   'regulatory-compliance-standards',
                   'regulatory-compliance-controls',
-                  'regulatory-compliance-assessments']:
+                  'regulatory-compliance-assessments',
+                  'allowed_connections']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',
