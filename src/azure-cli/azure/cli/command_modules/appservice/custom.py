@@ -3228,21 +3228,26 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
 
     list_all_vnets = vnet_client.virtual_networks.list_all()
 
-    vnet_id = ''
+    vnets = []
     for v in list_all_vnets:
-        if v.name == vnet:
-            vnet_id = v.id
+        if vnet in (v.name, v.id):
+            vnet_details = parse_resource_id(v.id)
+            vnet_resource_group = vnet_details['resource_group']
+            vnets.append((v.id, v.name, vnet_resource_group))
 
-    # parsing the arm uri in order to extract vnet_name and vnet_resource_group
-    vnet_id_strings = vnet_id.split('/')
+    if not vnets:
+        return logger.warning("The virtual network %s was not found in the subscription.", vnet)
 
-    vnet_resource_group = ''
-    i = 0
-    for z in vnet_id_strings:
-        if z.lower() == "resourcegroups":
-            vnet_resource_group = vnet_id_strings[i + 1]
-        i = i + 1
+    # If more than one vnet, try to use one from same resource group. Otherwise, use first and log the vnet resource id
+    found_vnet = [v for v in vnets if v[2].lower() == resource_group_name.lower()]
+    if not found_vnet:
+        found_vnet = [vnets[0]]
 
+    (vnet_id, vnet, vnet_resource_group) = found_vnet[0]
+    if len(vnets) > 1:
+        logger.warning("Multiple virtual networks of name %s were found. Using virtual network with resource ID: %s. "
+                       "To use a different virtual network, specify the virtual network resource ID using --vnet.",
+                       vnet, vnet_id)
     if slot is None:
         swift_connection_info = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
     else:
