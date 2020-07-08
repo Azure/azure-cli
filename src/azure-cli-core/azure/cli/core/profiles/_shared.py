@@ -131,7 +131,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
-        ResourceType.MGMT_NETWORK: '2020-04-01',
+        ResourceType.MGMT_NETWORK: '2020-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-07-01', {
             'resource_skus': '2019-04-01',
             'disks': '2019-11-01',
@@ -193,7 +193,8 @@ AZURE_API_PROFILES = {
             'private_link_scoped_resources': '2019-10-17-preview',
             'private_link_scope_operation_status': '2019-10-17-preview',
             'private_link_scopes': '2019-10-17-preview',
-            'private_endpoint_connections': '2019-10-17-preview'
+            'private_endpoint_connections': '2019-10-17-preview',
+            'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
         ResourceType.MGMT_IOTHUB: '2020-03-01',
