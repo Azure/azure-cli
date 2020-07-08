@@ -52,7 +52,7 @@ try:
     from ._models_py3 import DeletedStorageListResult
     from ._models_py3 import Error
     from ._models_py3 import FullBackupOperation
-    from ._models_py3 import FullRestoreOperation
+    from ._models_py3 import RestoreOperation
     from ._models_py3 import IssuerAttributes
     from ._models_py3 import IssuerBundle
     from ._models_py3 import IssuerCredentials
@@ -162,7 +162,7 @@ except (SyntaxError, ImportError):
     from ._models import DeletedStorageListResult
     from ._models import Error
     from ._models import FullBackupOperation
-    from ._models import FullRestoreOperation
+    from ._models import RestoreOperation
     from ._models import IssuerAttributes
     from ._models import IssuerBundle
     from ._models import IssuerCredentials
@@ -286,7 +286,7 @@ __all__ = [
     'DeletedStorageListResult',
     'Error',
     'FullBackupOperation',
-    'FullRestoreOperation',
+    'RestoreOperation',
     'IssuerAttributes',
     'IssuerBundle',
     'IssuerCredentials',

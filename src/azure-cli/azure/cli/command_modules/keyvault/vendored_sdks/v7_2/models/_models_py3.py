@@ -1951,17 +1951,17 @@ class FullBackupOperation(Model):
         self.azure_storage_blob_container_uri = azure_storage_blob_container_uri
 
 
-class FullRestoreOperation(Model):
-    """Full restore operation.
+class RestoreOperation(Model):
+    """Restore operation.
 
     :param status: Status of the restore operation.
     :type status: str
     :param status_details: The status details of restore operation.
     :type status_details: str
-    :param error: Error encountered, if any, during the full restore
+    :param error: Error encountered, if any, during the restore
      operation.
     :type error: ~azure.keyvault.v7_2.models.Error
-    :param job_id: Identifier for the full restore operation.
+    :param job_id: Identifier for the restore operation.
     :type job_id: str
     :param start_time: The start time of the restore operation
     :type start_time: datetime
@@ -1979,7 +1979,7 @@ class FullRestoreOperation(Model):
     }
 
     def __init__(self, *, status: str=None, status_details: str=None, error=None, job_id: str=None, start_time=None, end_time=None, **kwargs) -> None:
-        super(FullRestoreOperation, self).__init__(**kwargs)
+        super(RestoreOperation, self).__init__(**kwargs)
         self.status = status
         self.status_details = status_details
         self.error = error

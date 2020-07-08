@@ -5483,8 +5483,8 @@ class KeyVaultClientOperationsMixin:
         :type folder_to_restore: str
         :param callable cls: A custom type or function that will be passed the
          direct response
-        :return: FullRestoreOperation or the result of cls(response)
-        :rtype: ~azure.keyvault.v7_2.models.FullRestoreOperation
+        :return: RestoreOperation or the result of cls(response)
+        :rtype: ~azure.keyvault.v7_2.models.RestoreOperation
         :raises:
          :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
         """
@@ -5529,7 +5529,7 @@ class KeyVaultClientOperationsMixin:
         header_dict = {}
         deserialized = None
         if response.status_code == 202:
-            deserialized = self._deserialize('FullRestoreOperation', response)
+            deserialized = self._deserialize('RestoreOperation', response)
             header_dict = {
                 'Retry-After': self._deserialize('int', response.headers.get('Retry-After')),
                 'Azure-AsyncOperation': self._deserialize('str', response.headers.get('Azure-AsyncOperation')),
@@ -5551,8 +5551,8 @@ class KeyVaultClientOperationsMixin:
         :type job_id: str
         :param callable cls: A custom type or function that will be passed the
          direct response
-        :return: FullRestoreOperation or the result of cls(response)
-        :rtype: ~azure.keyvault.v7_2.models.FullRestoreOperation
+        :return: RestoreOperation or the result of cls(response)
+        :rtype: ~azure.keyvault.v7_2.models.RestoreOperation
         :raises:
          :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
         """
@@ -5586,7 +5586,7 @@ class KeyVaultClientOperationsMixin:
 
         deserialized = None
         if response.status_code == 200:
-            deserialized = self._deserialize('FullRestoreOperation', response)
+            deserialized = self._deserialize('RestoreOperation', response)
 
         if cls:
             return cls(response, deserialized, None)
