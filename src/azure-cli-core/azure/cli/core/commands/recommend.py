@@ -6,6 +6,7 @@ import json
 import re
 import random
 from six import string_types
+import jellyfish
 
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller, cached_get, cached_put
@@ -30,16 +31,15 @@ def register_global_query_recommend(cli_ctx):
     def add_query_recommend_parameter(_, **kwargs):
         arg_group = kwargs.get('arg_group')
         arg_group.add_argument('--query-recommend', dest='_query_recommend',
-            help="Recommend JMESPath string for you", action='store_true')
+            help="Recommend JMESPath string for you", nargs="*")
 
     def handle_recommend_parameter(cli, **kwargs):
         args = kwargs['args']
-        query_recommend = args._query_recommend
-        if query_recommend:
+        if args._query_recommend is not None:
             def analyze_output(cli_ctx, **kwargs):
                 tree_builder = TreeBuilder()
                 tree_builder.build(kwargs['event_data']['result'])
-                kwargs['event_data']['result'] = tree_builder.generate_recommend()
+                kwargs['event_data']['result'] = tree_builder.generate_recommend(args._query_recommend)
                 cli_ctx.unregister_event(events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
 
             cli_ctx.register_event(events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
@@ -60,6 +60,7 @@ class TreeNode:
         self._child = []  # list of child node
         self._from_list = False
         self._list_length = None  # valid only when from_list is true
+        self._similarity_threshold = 0.75
 
     def _get_trace(self):
         traces = []
@@ -83,15 +84,23 @@ class TreeNode:
                 trace_str += "[]"
         return trace_str
 
-    def get_select_string(self, select_item=None):
+    def get_select_string(self, select_items):
         ret = []
-        help_str = "{}.".format(self._get_trace_str())
+        trace_str = ""
+        if self._parent:
+            trace_str = "{}.".format(self._get_trace_str())
 
-        if select_item is None:
+        if len(select_items) == 0:
             for key in self._keys:
-                ret.append(help_str + key)
+                ret.append(trace_str + key)
         else:
-            raise Exception("Unfinished function!")
+            match_list = set()
+            for item in select_items:
+                for key in self._keys:
+                    if jellyfish.jaro_winkler_similarity(item, key) > self._similarity_threshold:
+                        match_list.add(key)
+            for item in match_list:
+                ret.append(trace_str + item)
         return ret
 
     def select_specific_number_string(self, number=5):
@@ -144,7 +153,7 @@ class TreeBuilder:
         elif isinstance(data, dict):
             self._root = self._parse_dict('root', data)
 
-    def generate_recommend(self):
+    def generate_recommend(self, keywords_list):
         def printlist(my_list):
             if isinstance(my_list, list):
                 for item in my_list:
@@ -153,9 +162,7 @@ class TreeBuilder:
                 print(my_list)
 
         for node in self._all_nodes.values():
-            print("Select some field:")
-            printlist(node.get_select_string())
-            print("Others:")
+            printlist(node.get_select_string(keywords_list))
             if node._from_list:
                 printlist(node.select_specific_number_string())
                 printlist(node._get_trace_str(filter_rules=node.filter_with_condiction))
@@ -169,7 +176,7 @@ class TreeBuilder:
         for key in data.keys():
             child_node = None
             if isinstance(data[key], list):
-                if len(data[key]) > 0:
+                if len(data[key]) > 0 and isinstance(data[key][0], dict):
                     child_node = self._parse_dict(key, data[key][0], from_list=True)
                     child_node._list_length = len(data[key])
             elif isinstance(data[key], dict) and not len(data[key]) == 0:
