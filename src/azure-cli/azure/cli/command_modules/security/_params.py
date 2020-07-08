@@ -218,7 +218,6 @@ def load_arguments(self, _):
                 'assessment_name',
                 arg_type=sub_assessment_assessment_name_arg_type)
 
-
     for scope in ['adaptive_network_hardenings']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
@@ -233,7 +232,7 @@ def load_arguments(self, _):
             c.argument(
                 'adaptive_network_hardenings_resource_name',
                 arg_type=adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name)
-            
+
     for scope in ['iot-solution']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(

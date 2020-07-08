@@ -539,6 +539,8 @@ examples:
   - name: Adaptive Network Hardenings - Get.
     text: >
         az security adaptive_network_hardenings show --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1' --adaptive-network-hardenings-resource-name 'default'
+"""
+
 helps['security iot-solution'] = """
 type: group
 short-summary: Manage your IoT Security solution.

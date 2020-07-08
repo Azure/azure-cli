@@ -141,7 +141,6 @@ def load_command_table(self, _):
         client_factory=cf_security_sub_assessment
     )
 
-    adaptive_network_hardenings
     security_adaptive_network_hardenings_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#AdaptiveNetworkhardeningsOperations.{}',
         client_factory=cf_security_adaptive_network_hardenings,

@@ -486,7 +486,7 @@ def list_security_adaptive_network_hardenings(client,
                                             resource_namespace,
                                             resource_type,
                                             resource_name)
-   
+
 # --------------------------------------------------------------------------------------------
 # Security IoT Solution
 # --------------------------------------------------------------------------------------------
