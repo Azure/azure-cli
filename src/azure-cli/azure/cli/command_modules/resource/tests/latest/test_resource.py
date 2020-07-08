@@ -2032,7 +2032,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
@@ -2155,7 +2155,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
