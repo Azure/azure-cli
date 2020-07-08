@@ -463,6 +463,7 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
 # Adaptive Network Hardenings
 # --------------------------------------------------------------------------------------------
 
+
 def get_security_adaptive_network_hardenings(client,
                                              adaptive_network_hardenings_resource_name,
                                              resource_name,
@@ -476,6 +477,7 @@ def get_security_adaptive_network_hardenings(client,
                       resource_name,
                       adaptive_network_hardenings_resource_name)
 
+
 def list_security_adaptive_network_hardenings(client,
                                               resource_name,
                                               resource_type,
@@ -486,6 +488,7 @@ def list_security_adaptive_network_hardenings(client,
                                             resource_namespace,
                                             resource_type,
                                             resource_name)
+
 
 # --------------------------------------------------------------------------------------------
 # Security IoT Solution
