@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import os
 
 NODE_VERSION_DEFAULT = "10.14"
 NETCORE_VERSION_DEFAULT = "2.2"
@@ -19,46 +20,32 @@ NETCORE_VERSIONS = ['1.0', '1.1', '2.1', '2.2']
 DOTNET_VERSIONS = ['3.5', '4.7']
 LINUX_SKU_DEFAULT = "P1V2"
 FUNCTIONS_VERSIONS = ['2', '3']
-# functions version : default node version
-FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION = {
-    '2': '~10',
-    '3': '~12'
+FUNCTIONS_STACKS_API_JSON_PATHS = {
+    'windows': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WindowsFunctionsStacks.json')),
+    'linux': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/LinuxFunctionsStacks.json'))
 }
-# functions version -> runtime : default runtime version
-FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION = {
-    '2': {
-        'node': '8',
-        'dotnet': '2',
-        'python': '3.7',
-        'java': '8'
-    },
-    '3': {
-        'node': '12',
-        'dotnet': '3',
-        'python': '3.7',
-        'java': '8'
-    }
-}
-# functions version -> runtime : runtime versions
-FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS = {
-    '2': {
-        'node': ['8', '10'],
-        'python': ['3.6', '3.7'],
-        'dotnet': ['2'],
-        'java': ['8']
-    },
-    '3': {
-        'node': ['10', '12'],
-        'python': ['3.6', '3.7', '3.8'],
-        'dotnet': ['3'],
-        'java': ['8']
-    }
-}
-# dotnet runtime version : dotnet linuxFxVersion
-DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION = {
-    '2': '2.2',
-    '3': '3.1'
-}
+FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
+FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
+
+
+class FUNCTIONS_STACKS_API_KEYS():
+    # pylint:disable=too-few-public-methods,too-many-instance-attributes
+    def __init__(self):
+        self.NAME = 'name'
+        self.VALUE = 'value'
+        self.PROPERTIES = 'properties'
+        self.MAJOR_VERSIONS = 'majorVersions'
+        self.DISPLAY_VERSION = 'displayVersion'
+        self.RUNTIME_VERSION = 'runtimeVersion'
+        self.IS_HIDDEN = 'isHidden'
+        self.IS_PREVIEW = 'isPreview'
+        self.IS_DEFAULT = 'isDefault'
+        self.SITE_CONFIG_DICT = 'siteConfigPropertiesDictionary'
+        self.APP_SETTINGS_DICT = 'appSettingsDictionary'
+        self.LINUX_FX_VERSION = 'linuxFxVersion'
+        self.APPLICATION_INSIGHTS = 'applicationInsights'
+        self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
+
 
 RUNTIME_STACKS = {
     'windows': [
