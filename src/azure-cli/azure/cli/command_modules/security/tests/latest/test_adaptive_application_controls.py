@@ -14,8 +14,8 @@ class SecurityCenterAdaptiveadaptiveApplicationControlsTests(ScenarioTest):
 
         adaptive_application_controls = self.cmd('az security adaptive_application_controls list').get_output_in_json()
 
-        assert len(adaptive_network_hardenings) >= 0
+        assert len(adaptive_application_controls) >= 0
 
-        adaptive_network_hardenings = self.cmd('az security adaptive_application_controls show --group-name GROUP1').get_output_in_json()
+        adaptive_application_controls = self.cmd('az security adaptive_application_controls show --group-name GROUP1').get_output_in_json()
 
-        assert len(adaptive_network_hardenings) >= 0
+        assert len(adaptive_application_controls) >= 0

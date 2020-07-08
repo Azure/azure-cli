@@ -526,7 +526,7 @@ helps['security adaptive_application_controls list'] = """
 type: command
 short-summary: Adaptive Application Controls - List
 examples:
-  - name: 
+  - name:
     text: >
         az adaptive_application_controls list
 """
