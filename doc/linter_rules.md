@@ -19,44 +19,44 @@ Rule with **low** severity is not mandatory for a PR. We use this severity as re
 ## Linter Rules
 #### Command Group Rules
 
-| Id | Rule Name |
-| --- | --- |
-| [R1001](#r1001) | [Missing Group Help](#r1001) |
-| [R1002](#r1002) | [Expired Command Group](#r1002) |
-| [R1003](#r1003) | [Require Wait Command If No Wait](#r1003) |
+| Id | Rule Name | Severity |
+| --- | --- | --- |
+| [R1001](#r1001) | [Missing Group Help](#r1001) | High |
+| [R1002](#r1002) | [Expired Command Group](#r1002) | High |
+| [R1003](#r1003) | [Require Wait Command If No Wait](#r1003) | Medium |
 
 #### Command Rules
 
-| Id | Rule Name |
-| --- | --- |
-| [R2001](#r2001) | [Missing Command Help](#r2001) |
-| [R2002](#r2002) | [No --ids For List Commands](#r2002) |
-| [R2003](#r2003) | [Expired Command](#r2003) |
-| [R2004](#r2004) | [Delete Command Should Have Confirmation](#r2004) |
+| Id | Rule Name | Severity |
+| --- | --- | --- |
+| [R2001](#r2001) | [Missing Command Help](#r2001) | High |
+| [R2002](#r2002) | [No --ids For List Commands](#r2002) | High |
+| [R2003](#r2003) | [Expired Command](#r2003) | High |
+| [R2004](#r2004) | [Delete Command Should Have Confirmation](#r2004) | Low |
 
 #### Parameter Rules
 
-| Id | Rule Name |
-| --- | --- |
-| [R3001](#r3001) | [Missing Parameter Help](#r3001) |
-| [R3002](#r3002) | [Expired Parameter](#r3002) |
-| [R3003](#r3003) | [Expired Parameter Option](#r3003) |
-| [R3004](#r3004) | [Bad Short Option](#r3004) |
-| [R3005](#r3005) | [Parameter Should Not End In Resource Group](#r3005) |
-| [R3006](#r3006) | [No Positional Parameters](#r3006) |
-| [R3007](#r3007) | [No Parameter Defaults For Update Commands](#r3007) |
-| [R3008](#r3008) | [No Required Location Parameter](#r3008) |
-| [R3009](#r3009) | [Id Parameters Only For GUID](#r3009) |
+| Id | Rule Name | Severity |
+| --- | --- | --- |
+| [R3001](#r3001) | [Missing Parameter Help](#r3001) | High |
+| [R3002](#r3002) | [Expired Parameter](#r3002) | High |
+| [R3003](#r3003) | [Expired Parameter Option](#r3003) | High |
+| [R3004](#r3004) | [Bad Short Option](#r3004) | High |
+| [R3005](#r3005) | [Parameter Should Not End In Resource Group](#r3005) | High |
+| [R3006](#r3006) | [No Positional Parameters](#r3006) | High |
+| [R3007](#r3007) | [No Parameter Defaults For Update Commands](#r3007) | High |
+| [R3008](#r3008) | [No Required Location Parameter](#r3008) | Medium |
+| [R3009](#r3009) | [Id Parameters Only For GUID](#r3009) | Low |
 
 #### Help Rules
 
-| Id | Rule Name |
-| --- | --- |
-| [R4001](#r4001) | [Unrecognized Help Entry](#r4001) |
-| [R4002](#r4002) | [Faulty Help Type](#r4002) |
-| [R4003](#r4003) | [Expired Parameter Option](#r4003) |
-| [R4004](#r4004) | [Faulty Help Example](#r4004) |
-| [R4005](#r4005) | [Faulty Help Example Parameters](#r4005) |
+| Id | Rule Name | Severity |
+| --- | --- | --- |
+| [R4001](#r4001) | [Unrecognized Help Entry](#r4001) | High |
+| [R4002](#r4002) | [Faulty Help Type](#r4002) | High |
+| [R4003](#r4003) | [Expired Parameter Option](#r4003) | High |
+| [R4004](#r4004) | [Faulty Help Example](#r4004) | High |
+| [R4005](#r4005) | [Faulty Help Example Parameters](#r4005) | High |
 
 
 ## Contributions
