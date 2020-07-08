@@ -149,7 +149,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_RESOURCES: '2020-06-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-06-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2019-10-01-preview',
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS : '2019-06-01-preview',
+        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2019-06-01-preview',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2019-09-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-09-01-preview', {
