@@ -179,6 +179,10 @@ setup(
             'template/service/template.json',
             'template/service/parameter.json'
         ],
+        'azure.cli.command_modules.appservice': [
+            'resources/WindowsFunctionsStacks.json',
+            'resources/LinuxFunctionsStacks.json'
+        ]
     },
     cmdclass=cmdclass
 )
