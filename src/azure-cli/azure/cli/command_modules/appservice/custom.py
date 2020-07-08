@@ -800,8 +800,8 @@ def list_runtimes(cmd, linux=False):
 
 def list_runtimes_hardcoded(linux=False):
     if linux:
-        return RUNTIME_STACKS['linux']
-    return RUNTIME_STACKS['windows']
+        return [s['displayName'] for s in RUNTIME_STACKS['linux']]
+    return [s['displayName'] for s in RUNTIME_STACKS['windows']]
 
 
 def _rename_server_farm_props(webapp):
@@ -2419,13 +2419,13 @@ class _StackRuntimeHelper(object):
         self._stacks = []
 
     def resolve(self, display_name):
-        self._load_stacks()
+        self._load_stacks_hardcoded()
         return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
                     None)
 
     @property
     def stacks(self):
-        self._load_stacks()
+        self._load_stacks_hardcoded()
         return self._stacks
 
     @staticmethod
@@ -2442,6 +2442,21 @@ class _StackRuntimeHelper(object):
         site_config.app_settings += [NameValuePair(name=k, value=v) for k, v in stack['configs'].items()]
         return site_config
 
+    def _load_stacks_hardcoded(self):
+        if self._stacks:
+            return
+        if self._linux:
+            self._stacks = RUNTIME_STACKS['linux']
+        else: # Windows stacks
+            result = RUNTIME_STACKS['windows']
+            for r in result:
+                r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
+                               r['displayName'] else _StackRuntimeHelper.update_site_config)
+            self._stacks = result
+
+    # Currently using hardcoded values instead of this function. This function calls the stacks API;
+    # Stacks API is updated with Antares deployments,
+    # which are infrequent and don't line up with stacks EOL schedule.
     def _load_stacks(self):
         if self._stacks:
             return

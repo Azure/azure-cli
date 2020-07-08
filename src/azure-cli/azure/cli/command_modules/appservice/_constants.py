@@ -49,63 +49,266 @@ class FUNCTIONS_STACKS_API_KEYS():
 
 RUNTIME_STACKS = {
     'windows': [
-        "aspnet|V4.7",
-        "aspnet|V3.5",
-        "DOTNETCORE|2.1",
-        "DOTNETCORE|3.1",
-        "node|10.0",
-        "node|10.6",
-        "node|10.14",
-        "node|10.15",
-        "php|7.2",
-        "php|7.3",
-        "php|7.4",
-        "python|3.6",
-        "java|1.7|Tomcat|7.0",
-        "java|1.7|Tomcat|8.0",
-        "java|1.7|Tomcat|8.5",
-        "java|1.7|Tomcat|9.0",
-        "java|1.7|Jetty|9.1",
-        "java|1.7|Jetty|9.3",
-        "java|1.7|Java SE|8",
-        "java|1.8|Tomcat|7.0",
-        "java|1.8|Tomcat|8.0",
-        "java|1.8|Tomcat|8.5",
-        "java|1.8|Tomcat|9.0",
-        "java|1.8|Jetty|9.1",
-        "java|1.8|Jetty|9.3",
-        "java|1.8|Java SE|8",
-        "java|11|Tomcat|7.0",
-        "java|11|Tomcat|8.0",
-        "java|11|Tomcat|8.5",
-        "java|11|Tomcat|9.0",
-        "java|11|Jetty|9.1",
-        "java|11|Jetty|9.3",
-        "java|11|Java SE|8"
+        {
+            "displayName": "aspnet|V4.7",
+            "configs": {
+                "net_framework_version": "v4.0"
+            }
+        },
+        {
+            "displayName": "aspnet|V3.5",
+            "configs": {
+                "net_framework_version": "v2.0"
+            }
+        },
+        {
+            "displayName": "DOTNETCORE|2.1",
+            "configs": {}
+        },
+        {
+            "displayName": "DOTNETCORE|3.1",
+            "configs": {}
+        },
+        {
+            "displayName": "node|10.0",
+            "configs": {
+                "WEBSITE_NODE_DEFAULT_VERSION": "10.0"
+            }
+        },
+        {
+            "displayName": "node|10.6",
+            "configs": {
+                "WEBSITE_NODE_DEFAULT_VERSION": "10.6"
+            }
+        },
+        {
+            "displayName": "node|10.14",
+            "configs": {
+                "WEBSITE_NODE_DEFAULT_VERSION": "10.14"
+            }
+        },
+        {
+            "displayName": "node|10.15",
+            "configs": {
+                "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2"
+            }
+        },
+        {
+            "displayName": "php|7.2",
+            "configs": {
+                "php_version": "7.2"
+            }
+        },
+        {
+            "displayName": "php|7.3",
+            "configs": {
+                "php_version": "7.3"
+            }
+        },
+        {
+            "displayName": "php|7.4",
+            "configs": {
+                "php_version": "7.4"
+            }
+        },
+        {
+            "displayName": "python|3.6",
+            "configs": {
+                "python_version": "3.4.0"
+            }
+        },
+        {
+            "displayName": "java|1.7|Tomcat|7.0",
+            "configs": {
+                "java_version": "1.7",
+                "java_container": "tomcat",
+                "java_container_version": "7.0"
+            }
+        },
+        {
+            "displayName": "java|1.7|Tomcat|8.0",
+            "configs": {
+                "java_version": "1.7",
+                "java_container": "tomcat",
+                "java_container_version": "8.0"
+            }
+        },
+        {
+            "displayName": "java|1.7|Tomcat|8.5",
+            "configs": {
+                "java_version": "1.7",
+                "java_container": "tomcat",
+                "java_container_version": "8.5"
+            }
+        },
+        {
+            "displayName": "java|1.7|Tomcat|9.0",
+            "configs": {
+                "java_version": "1.7",
+                "java_container": "tomcat",
+                "java_container_version": "9.0"
+            }
+        },
+        {
+            "displayName": "java|1.7|Jetty|9.1",
+            "configs": {
+                "java_version": "1.7",
+                "java_container": "jetty",
+                "java_container_version": "9.1"
+            }
+        },
+        {
+            "displayName": "java|1.7|Jetty|9.3",
+            "configs": {
+                "java_version": "1.7",
+                "java_container": "jetty",
+                "java_container_version": "9.3"
+            }
+        },
+        {
+            "displayName": "java|1.7|Java SE|8",
+            "configs": {
+                "java_version": "1.7",
+                "java_container": "java",
+                "java_container_version": "8"
+            }
+        },
+        {
+            "displayName": "java|1.8|Tomcat|7.0",
+            "configs": {
+                "java_version": "1.8",
+                "java_container": "tomcat",
+                "java_container_version": "7.0"
+            }
+        },
+        {
+            "displayName": "java|1.8|Tomcat|8.0",
+            "configs": {
+                "java_version": "1.8",
+                "java_container": "tomcat",
+                "java_container_version": "8.0"
+            }
+        },
+        {
+            "displayName": "java|1.8|Tomcat|8.5",
+            "configs": {
+                "java_version": "1.8",
+                "java_container": "tomcat",
+                "java_container_version": "8.5"
+            }
+        },
+        {
+            "displayName": "java|1.8|Tomcat|9.0",
+            "configs": {
+                "java_version": "1.8",
+                "java_container": "tomcat",
+                "java_container_version": "9.0"
+            }
+        },
+        {
+            "displayName": "java|1.8|Jetty|9.1",
+            "configs": {
+                "java_version": "1.8",
+                "java_container": "jetty",
+                "java_container_version": "9.1"
+            }
+        },
+        {
+            "displayName": "java|1.8|Jetty|9.3",
+            "configs": {
+                "java_version": "1.8",
+                "java_container": "jetty",
+                "java_container_version": "9.3"
+            }
+        },
+        {
+            "displayName": "java|1.8|Java SE|8",
+            "configs": {
+                "java_version": "1.8",
+                "java_container": "java",
+                "java_container_version": "8"
+            }
+        },
+        {
+            "displayName": "java|11|Tomcat|7.0",
+            "configs": {
+                "java_version": "11",
+                "java_container": "tomcat",
+                "java_container_version": "7.0"
+            }
+        },
+        {
+            "displayName": "java|11|Tomcat|8.0",
+            "configs": {
+                "java_version": "11",
+                "java_container": "tomcat",
+                "java_container_version": "8.0"
+            }
+        },
+        {
+            "displayName": "java|11|Tomcat|8.5",
+            "configs": {
+                "java_version": "11",
+                "java_container": "tomcat",
+                "java_container_version": "8.5"
+            }
+        },
+        {
+            "displayName": "java|11|Tomcat|9.0",
+            "configs": {
+                "java_version": "11",
+                "java_container": "tomcat",
+                "java_container_version": "9.0"
+            }
+        },
+        {
+            "displayName": "java|11|Jetty|9.1",
+            "configs": {
+                "java_version": "11",
+                "java_container": "jetty",
+                "java_container_version": "9.1"
+            }
+        },
+        {
+            "displayName": "java|11|Jetty|9.3",
+            "configs": {
+                "java_version": "11",
+                "java_container": "jetty",
+                "java_container_version": "9.3"
+            }
+        },
+        {
+            "displayName": "java|11|Java SE|8",
+            "configs": {
+                "java_version": "11",
+                "java_container": "java",
+                "java_container_version": "8"
+            }
+        }
     ],
     'linux': [
-        "DOTNETCORE|2.1",
-        "DOTNETCORE|3.1",
-        "NODE|12-lts",
-        "NODE|10-lts",
-        "NODE|10.1",
-        "NODE|10.10",
-        "NODE|10.12",
-        "NODE|10.14",
-        "NODE|10.16",
-        "NODE|12.9",
-        "JAVA|8-jre8",
-        "JAVA|11-java11",
-        "TOMCAT|8.5-jre8",
-        "TOMCAT|9.0-jre8",
-        "TOMCAT|8.5-java11",
-        "TOMCAT|9.0-java11",
-        "PHP|7.2",
-        "PHP|7.3",
-        "PYTHON|3.8",
-        "PYTHON|3.7",
-        "PYTHON|3.6",
-        "RUBY|2.5.5",
-        "RUBY|2.6.2",
+        { "displayName": "DOTNETCORE|2.1" },
+        { "displayName": "DOTNETCORE|3.1" },
+        { "displayName": "NODE|12-lts" },
+        { "displayName": "NODE|10-lts" },
+        { "displayName": "NODE|10.1" },
+        { "displayName": "NODE|10.10" },
+        { "displayName": "NODE|10.12" },
+        { "displayName": "NODE|10.14" },
+        { "displayName": "NODE|10.16" },
+        { "displayName": "NODE|12.9" },
+        { "displayName": "JAVA|8-jre8" },
+        { "displayName": "JAVA|11-java11" },
+        { "displayName": "TOMCAT|8.5-jre8" },
+        { "displayName": "TOMCAT|9.0-jre8" },
+        { "displayName": "TOMCAT|8.5-java11" },
+        { "displayName": "TOMCAT|9.0-java11" },
+        { "displayName": "PHP|7.2" },
+        { "displayName": "PHP|7.3" },
+        { "displayName": "PYTHON|3.8" },
+        { "displayName": "PYTHON|3.7" },
+        { "displayName": "PYTHON|3.6" },
+        { "displayName": "RUBY|2.5.5" },
+        { "displayName": "RUBY|2.6.2" }
     ]
 }
