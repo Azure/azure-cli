@@ -139,6 +139,16 @@ examples:
     text: az network application-gateway delete -g MyResourceGroup -n MyAppGateway
 """
 
+helps['network application-gateway private-link'] = """
+type: group
+short-summary: Manage Private Link of an Application Gateway
+"""
+
+helps['network application-gateway private-link add'] = """
+type: command
+short-summary: Add a new private link with a default IP Configuration and associate it with an existing frontend IP
+"""
+
 helps['network application-gateway frontend-ip'] = """
 type: group
 short-summary: Manage frontend IP addresses of an application gateway.

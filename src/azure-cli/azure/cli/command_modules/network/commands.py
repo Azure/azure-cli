@@ -505,6 +505,19 @@ def load_command_table(self, _):
         g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
         g.custom_command('remove', 'remove_ag_identity', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_identity')
+
+    with self.command_group('network application-gateway private-link',
+                            command_type=network_ag_sdk,
+                            min_api='2020-05-01',
+                            is_preview=True) as g:
+        g.custom_command('add', 'add_ag_private_link')
+        g.custom_command('remove', 'remove_ag_private_link')
+
+    with self.command_group('network application-gateway private-link ip-configuration',
+                            command_type=network_ag_sdk,
+                            min_api='2020-05-01',
+                            is_preview=True) as g:
+        pass
     # endregion
 
     # region ApplicationGatewayWAFPolicy

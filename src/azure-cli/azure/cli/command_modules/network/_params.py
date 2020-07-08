@@ -146,10 +146,9 @@ def load_arguments(self, _):
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
 
-    with self.argument_context('network application-gateway', arg_group='Private Link Configuration', is_preview=True) as c:
+    with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
         c.argument('enable_private_link', action='store_true', help='Enable Private Link feature for this application gateway', default=False)
-        c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link')
-        c.argument('private_link_ip_allocation_method', help='The private IP address of a subnet allocation method Private Link')
+        c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
         c.argument('private_link_subnet', help='The name of the subnet within the same vnet of an application gateway')
         c.argument('private_link_primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
@@ -186,7 +185,8 @@ def load_arguments(self, _):
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
         {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
-        {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'}
+        {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'},
+        {'name': 'private-link', 'display': 'private link', 'ref': 'private_link_configurations'}
     ]
     if self.supported_api_version(min_api='2018-08-01'):
         ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
@@ -251,6 +251,14 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
+
+    with self.argument_context('network application-gateway private-link', arg_group=None) as c:
+        c.argument('frontend_ip', help='The frontend IP which the Private Link will associate to')
+        c.argument('private_link_name', options_list='--name', help='The name of Private Link.')
+        c.argument('private_link_ip_address', options_list='--ip-address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
+        c.argument('private_link_subnet_prefix', options_list='--subnet-prefix', help='The CIDR prefix to use when creating a new subnet')
+        c.argument('private_link_subnet_name', options_list='--subnet', help='The name of a subnet within the same vnet of an application gateway')
+        c.argument('private_link_primary', options_list='--primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
     with self.argument_context('network application-gateway rewrite-rule') as c:
         rewrite_rule_set_name_type = CLIArgumentType(help='Name of the rewrite rule set.', options_list='--rule-set-name', id_part='child_name_1')

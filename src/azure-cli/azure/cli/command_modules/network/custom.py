@@ -151,7 +151,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                user_assigned_identity=None,
                                enable_private_link=False,
                                private_link_ip_address=None,
-                               private_link_ip_allocation_method='Dynamic',
                                private_link_subnet='PrivateLinkDefaultSubnet',
                                private_link_subnet_prefix='10.0.1.0/24',
                                private_link_primary=None):
@@ -209,6 +208,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     private_link_subnet_id = None
     private_link_name = 'PrivateLinkDefaultConfiguration'
+    private_link_ip_allocation_method = 'Dynamic'
     if enable_private_link:
         private_link_subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template,
                                                                            virtual_network_name,
@@ -454,6 +454,108 @@ def show_ag_identity(cmd, resource_group_name, application_gateway_name):
     if ag.identity is None:
         raise CLIError("Please first use 'az network application-gateway identity assign` to init the identity.")
     return ag.identity
+
+
+def add_ag_private_link(cmd,
+                        resource_group_name,
+                        application_gateway_name,
+                        frontend_ip,
+                        private_link_name,
+                        private_link_subnet_name,
+                        private_link_subnet_prefix,
+                        private_link_primary=None,
+                        private_link_ip_address=None):
+    (SubResource, IPAllocationMethod, Subnet,
+     ApplicationGatewayPrivateLinkConfiguration,
+     ApplicationGatewayPrivateLinkIpConfiguration) = cmd.get_models(
+         'SubResource', 'IPAllocationMethod', 'Subnet',
+         'ApplicationGatewayPrivateLinkConfiguration', 'ApplicationGatewayPrivateLinkIpConfiguration')
+
+    ncf = network_client_factory(cmd.cli_ctx)
+
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    private_link_config_id = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Network',
+        type='applicationGateways',
+        name=appgw.name,
+        child_type_1='privateLinkConfigurations',
+        child_name_1=private_link_name
+    )
+
+    if not any(fic for fic in appgw.frontend_ip_configurations if fic.name == frontend_ip):
+        raise CLIError("Frontend IP doesn't exist")
+
+    for fic in appgw.frontend_ip_configurations:
+        if fic.private_link_configuration and fic.private_link_configuration.id == private_link_config_id:
+            raise CLIError('FrontEnd IP already reference an existing Private Link')
+        if fic.name == frontend_ip:
+            break
+    else:
+        raise CLIError("Frontend IP doesn't exist")
+
+    for pl in appgw.private_link_configurations:
+        if pl.name == private_link_name:
+            raise CLIError('Private Link name duplicates')
+
+    # get the virtual network of this application gateway
+    vnet_name = parse_resource_id(appgw.gateway_ip_configurations[0].subnet.id)['name']
+    vnet = ncf.virtual_networks.get(resource_group_name, vnet_name)
+
+    # prepare the subnet for new private link
+    for subnet in vnet.subnets:
+        if subnet.name == private_link_subnet_name:
+            raise CLIError('Subnet name duplicates')
+        if subnet.address_prefix == private_link_subnet_prefix:
+            raise CLIError('Subnet prefix duplicates')
+        if subnet.address_prefixes and private_link_subnet_prefix in subnet.address_prefixes:
+            raise CLIError('Subnet prefix duplicates')
+
+    private_link_subnet = Subnet(name=private_link_subnet_name,
+                                 address_prefix=private_link_subnet_prefix,
+                                 private_link_service_network_policies='Disabled')
+    vnet.subnets.append(private_link_subnet)
+    ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
+
+    private_link_subnet_id = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Network',
+        type='virtualNetworks',
+        name=vnet_name,
+        child_type_1='subnets',
+        child_name_1=private_link_subnet_name
+    )
+    private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
+        else IPAllocationMethod.dynamic.value
+    private_link_ip_config = ApplicationGatewayPrivateLinkIpConfiguration(
+        name='PrivateLinkDefaultIPConfiguration',
+        private_ip_address=private_link_ip_address,
+        private_ip_allocation_method=private_link_ip_allocation_method,
+        subnet=SubResource(id=private_link_subnet_id),
+        primary=private_link_primary
+    )
+    private_link_config = ApplicationGatewayPrivateLinkConfiguration(
+        name=private_link_name,
+        ip_configurations=[private_link_ip_config]
+    )
+
+    # associate the private link with the frontend IP configuration
+    for fic in appgw.frontend_ip_configurations:
+        if fic.name == frontend_ip:
+            fic.private_link_configuration = SubResource(id=private_link_config_id)
+
+    appgw.private_link_configurations.append(private_link_config)
+
+    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+
+
+def remove_ag_private_link(cmd,
+                           resource_group_name,
+                           application_gateway_name,
+                           private_link_name):
+    pass
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,

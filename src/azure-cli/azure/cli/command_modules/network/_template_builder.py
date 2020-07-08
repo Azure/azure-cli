@@ -105,7 +105,6 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         private_link_configuration_id = _ag_subresource_id('privateLinkConfigurations',
                                                            private_link_name)
 
-        # ag_properties['frontendIPConfigurations']
         default_private_link_ip_config = _build_appgw_private_link_ip_configuration(
             'PrivateLinkDefaultIPConfiguration',
             private_link_ip_address,
