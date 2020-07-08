@@ -526,7 +526,7 @@ helps['security adaptive_application_controls list'] = """
 type: command
 short-summary: Adaptive Application Controls - List
 examples:
-  - name:lists all application control VM/server groups
+  - name: lists all application control VM/server groups.
     text: >
         az security adaptive_application_controls list
 """
