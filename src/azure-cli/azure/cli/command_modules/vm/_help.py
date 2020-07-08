@@ -579,7 +579,9 @@ examples:
   - name: Replicate to one more region
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
-
+  - name: Update --exclude-from-latest. If it is set to true, people deploying VMs with version omitted will not use this version.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --set publishingProfile.excludeFromLatest=true
 """
 
 helps['sig image-version wait'] = """
