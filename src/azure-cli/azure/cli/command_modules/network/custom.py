@@ -551,6 +551,34 @@ def add_ag_private_link(cmd,
     return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
 
 
+def show_ag_private_link(cmd,
+                         resource_group_name,
+                         application_gateway_name,
+                         private_link_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    target_private_link = None
+    for pl in appgw.private_link_configurations:
+        if pl.name == private_link_name:
+            target_private_link = pl
+            break
+    else:
+        raise CLIError("Priavte Link doesn't exist")
+
+    return target_private_link
+
+
+def list_ag_private_link(cmd,
+                         resource_group_name,
+                         application_gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    return appgw.private_link_configurations
+
+
 def remove_ag_private_link(cmd,
                            resource_group_name,
                            application_gateway_name,
@@ -592,10 +620,10 @@ def add_ag_private_link_ip(cmd,
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
 
-    updated_private_link = None
+    target_private_link = None
     for pl in appgw.private_link_configurations:
         if pl.name == private_link_name:
-            updated_private_link = pl
+            target_private_link = pl
             break
     else:
         raise CLIError("Priavte Link doesn't exist")
@@ -605,7 +633,7 @@ def add_ag_private_link_ip(cmd,
         cmd.get_models('SubResource', 'IPAllocationMethod',
                        'ApplicationGatewayPrivateLinkIpConfiguration')
 
-    private_link_subnet_id = updated_private_link.ip_configurations[0].subnet.id
+    private_link_subnet_id = target_private_link.ip_configurations[0].subnet.id
 
     private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
         else IPAllocationMethod.dynamic.value
@@ -617,10 +645,9 @@ def add_ag_private_link_ip(cmd,
         primary=private_link_primary
     )
 
-    updated_private_link.ip_configurations.append(private_link_ip_config)
+    target_private_link.ip_configurations.append(private_link_ip_config)
 
     return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
-
 
 
 def remove_ag_private_link_ip(cmd,
@@ -632,18 +659,18 @@ def remove_ag_private_link_ip(cmd,
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
 
-    updated_private_link = None
+    target_private_link = None
     for pl in appgw.private_link_configurations:
         if pl.name == private_link_name:
-            updated_private_link = pl
+            target_private_link = pl
             break
     else:
         raise CLIError("Priavte Link doesn't exist")
 
-    updated_private_link_ip_config = updated_private_link.ip_configurations
-    for pic in updated_private_link.ip_configurations:
+    target_private_link_ip_config = target_private_link.ip_configurations
+    for pic in target_private_link.ip_configurations:
         if pic.name == private_link_ip_name:
-            updated_private_link_ip_config.remove(pic)
+            target_private_link_ip_config.remove(pic)
             break
     else:
         raise CLIError("IP Configuration doesn't exist")
