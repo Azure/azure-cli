@@ -556,7 +556,7 @@ def __print_features_preview(old_json, new_json):
     for action, changes in res.items():
         if action.label == 'delete':
             continue  # we do not delete KVs while importing/exporting
-        elif action.label == 'insert':
+        if action.label == 'insert':
             logger.warning('\nAdding:')
             for key, adding in changes.items():
                 record = {'feature': key}
@@ -602,7 +602,7 @@ def __print_preview(old_json, new_json):
     for action, changes in res.items():
         if action.label == 'delete':
             continue  # we do not delete KVs while importing/exporting
-        elif action.label == 'insert':
+        if action.label == 'insert':
             logger.warning('\nAdding:')
             for key, adding in changes.items():
                 record = {'key': key}
