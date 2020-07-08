@@ -406,14 +406,14 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
 # pylint: disable=unused-argument
 def deploy_arm_template_at_subscription_scope(cmd,
-                                              template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                              template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None, no_prompt=False,
                                               confirm_with_what_if=None, what_if_result_format=None,
-                                              what_if_exclude_change_types=None):
+                                              what_if_exclude_change_types=None, template_spec=None):
     if confirm_with_what_if:
-        what_if_deploy_arm_template_at_subscription_scope(cmd, template_file, template_uri, template_spec, parameters,
-                                                          deployment_name, deployment_location, what_if_result_format,
+        what_if_deploy_arm_template_at_subscription_scope(cmd, template_file, template_uri, parameters,
+                                                          deployment_name, deployment_location, what_if_result_format, template_spec,
                                                           exclude_change_types=what_if_exclude_change_types)
         from knack.prompting import prompt_y_n
 
@@ -421,34 +421,35 @@ def deploy_arm_template_at_subscription_scope(cmd,
             return None
 
     return _deploy_arm_template_at_subscription_scope(cmd,
-                                                      template_file=template_file, template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                      template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                       deployment_name=deployment_name, deployment_location=deployment_location,
                                                       validate_only=False, no_wait=no_wait,
-                                                      no_prompt=no_prompt)
+                                                      no_prompt=no_prompt, template_spec=template_spec)
 
 
 # pylint: disable=unused-argument
 def validate_arm_template_at_subscription_scope(cmd,
-                                                template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                                template_file=None, template_uri=None, parameters=None,
                                                 deployment_name=None, deployment_location=None,
                                                 no_wait=False, handle_extended_json_format=None,
-                                                no_prompt=False):
+                                                no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_subscription_scope(cmd,
-                                                      template_file=template_file, template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                      template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                       deployment_name=deployment_name, deployment_location=deployment_location,
                                                       validate_only=True, no_wait=no_wait,
-                                                      no_prompt=no_prompt)
+                                                      no_prompt=no_prompt, template_spec=template_spec,)
 
 
 def _deploy_arm_template_at_subscription_scope(cmd,
-                                               template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                               template_file=None, template_uri=None, parameters=None,
                                                deployment_name=None, deployment_location=None, validate_only=False,
-                                               no_wait=False, no_prompt=False):
+                                               no_wait=False, no_prompt=False, template_spec=None,):
 
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
-                                                                      template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                                      template_uri=template_uri, parameters=parameters,
                                                                       mode='Incremental',
-                                                                      no_prompt=no_prompt)
+                                                                      no_prompt=no_prompt,
+                                                                      template_spec=template_spec)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
@@ -471,15 +472,15 @@ def _deploy_arm_template_at_subscription_scope(cmd,
 # pylint: disable=unused-argument
 def deploy_arm_template_at_resource_group(cmd,
                                           resource_group_name=None,
-                                          template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                          template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, mode=None, rollback_on_error=None,
                                           no_wait=False, handle_extended_json_format=None,
                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False,
                                           confirm_with_what_if=None, what_if_result_format=None,
-                                          what_if_exclude_change_types=None):
+                                          what_if_exclude_change_types=None, template_spec=None):
     if confirm_with_what_if:
-        what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name, template_file, template_uri, template_spec, parameters,
-                                                      deployment_name, mode, aux_tenants, what_if_result_format,
+        what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name, template_file, template_uri, parameters,
+                                                      deployment_name, mode, aux_tenants, what_if_result_format, template_spec,
                                                       exclude_change_types=what_if_exclude_change_types)
         from knack.prompting import prompt_y_n
 
@@ -488,38 +489,38 @@ def deploy_arm_template_at_resource_group(cmd,
 
     return _deploy_arm_template_at_resource_group(cmd,
                                                   resource_group_name=resource_group_name,
-                                                  template_file=template_file, template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                  template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                   deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
                                                   validate_only=False, no_wait=no_wait,
                                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants,
-                                                  no_prompt=no_prompt)
+                                                  no_prompt=no_prompt, template_spec=template_spec)
 
 
 # pylint: disable=unused-argument
 def validate_arm_template_at_resource_group(cmd,
                                             resource_group_name=None,
-                                            template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                            template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, mode=None, rollback_on_error=None,
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                            no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_resource_group(cmd=cmd,
                                                   resource_group_name=resource_group_name,
-                                                  template_file=template_file, template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                  template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                   deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
                                                   validate_only=True, no_wait=no_wait,
-                                                  no_prompt=no_prompt)
+                                                  no_prompt=no_prompt, template_spec=template_spec)
 
 
 def _deploy_arm_template_at_resource_group(cmd,
                                            resource_group_name=None,
-                                           template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                           template_file=None, template_uri=None, parameters=None,
                                            deployment_name=None, mode=None, rollback_on_error=None,
                                            validate_only=False, no_wait=False,
-                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False):
+                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False, template_spec=None):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd, template_file=template_file,
-                                                                      template_uri=template_uri, template_spec=template_spec,
+                                                                      template_uri=template_uri,
                                                                       parameters=parameters, mode=mode,
                                                                       rollback_on_error=rollback_on_error,
-                                                                      no_prompt=no_prompt)
+                                                                      no_prompt=no_prompt, template_spec=template_spec)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
                                                     aux_tenants=aux_tenants, plug_pipeline=(template_uri is None and template_spec is None))
@@ -543,42 +544,41 @@ def _deploy_arm_template_at_resource_group(cmd,
 # pylint: disable=unused-argument
 def deploy_arm_template_at_management_group(cmd,
                                             management_group_id=None,
-                                            template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                            template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, deployment_location=None,
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                            no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_management_group(cmd=cmd,
                                                     management_group_id=management_group_id,
-                                                    template_file=template_file, template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                    template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                     deployment_name=deployment_name, deployment_location=deployment_location,
                                                     validate_only=False, no_wait=no_wait,
-                                                    no_prompt=no_prompt)
+                                                    no_prompt=no_prompt, template_spec=template_spec)
 
 
 # pylint: disable=unused-argument
 def validate_arm_template_at_management_group(cmd,
                                               management_group_id=None,
-                                              template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                              template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None,
-                                              no_prompt=False):
+                                              no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_management_group(cmd,
                                                     management_group_id=management_group_id,
-                                                    template_file=template_file, template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                    template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                     deployment_name=deployment_name, deployment_location=deployment_location,
                                                     validate_only=True, no_wait=no_wait,
-                                                    no_prompt=no_prompt)
+                                                    no_prompt=no_prompt, template_spec=template_spec)
 
 
 def _deploy_arm_template_at_management_group(cmd,
                                              management_group_id=None,
-                                             template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                             template_file=None, template_uri=None, parameters=None,
                                              deployment_name=None, deployment_location=None, validate_only=False,
-                                             no_wait=False, no_prompt=False):
+                                             no_wait=False, no_prompt=False, template_spec=None):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
                                                                       template_uri=template_uri,
-                                                                      template_spec=template_spec,
                                                                       parameters=parameters, mode='Incremental',
-                                                                      no_prompt=no_prompt)
+                                                                      no_prompt=no_prompt, template_spec=template_spec)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
@@ -600,37 +600,36 @@ def _deploy_arm_template_at_management_group(cmd,
 
 # pylint: disable=unused-argument
 def deploy_arm_template_at_tenant_scope(cmd,
-                                        template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                        template_file=None, template_uri=None, parameters=None,
                                         deployment_name=None, deployment_location=None,
-                                        no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                        no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
-                                                template_file=template_file, template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
                                                 validate_only=False, no_wait=no_wait,
-                                                no_prompt=no_prompt)
+                                                no_prompt=no_prompt, template_spec=template_spec)
 
 
 # pylint: disable=unused-argument
 def validate_arm_template_at_tenant_scope(cmd,
-                                          template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                          template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, deployment_location=None,
-                                          no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                          no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
-                                                template_file=template_file, template_uri=template_uri, template_spec=template_spec, parameters=parameters,
+                                                template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
                                                 validate_only=True, no_wait=no_wait,
-                                                no_prompt=no_prompt)
+                                                no_prompt=no_prompt, template_spec=template_spec)
 
 
 def _deploy_arm_template_at_tenant_scope(cmd,
-                                         template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                         template_file=None, template_uri=None, parameters=None,
                                          deployment_name=None, deployment_location=None, validate_only=False,
-                                         no_wait=False, no_prompt=False):
+                                         no_wait=False, no_prompt=False, template_spec=None):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd, template_file=template_file,
-                                                                      template_spec=template_spec,
                                                                       template_uri=template_uri,
                                                                       parameters=parameters, mode='Incremental',
-                                                                      no_prompt=no_prompt)
+                                                                      no_prompt=no_prompt, template_spec=template_spec,)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
@@ -650,13 +649,13 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
 
 def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
-                                                  template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                                  template_file=None, template_uri=None, parameters=None,
                                                   deployment_name=None, mode=DeploymentMode.incremental,
                                                   aux_tenants=None, result_format=None,
                                                   no_pretty_print=None, no_prompt=False,
-                                                  exclude_change_types=None):
-    what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri, template_spec,
-                                                                parameters, mode, result_format, no_prompt)
+                                                  exclude_change_types=None, template_spec=None):
+    what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri,
+                                                                parameters, mode, result_format, no_prompt, template_spec)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants,
                                                     plug_pipeline=(template_uri is None and template_spec is None))
     what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
@@ -665,12 +664,12 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
 
 
 def what_if_deploy_arm_template_at_subscription_scope(cmd,
-                                                      template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                                      template_file=None, template_uri=None, parameters=None,
                                                       deployment_name=None, deployment_location=None,
                                                       result_format=None, no_pretty_print=None, no_prompt=False,
-                                                      exclude_change_types=None):
-    what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri, template_spec, parameters,
-                                                                DeploymentMode.incremental, result_format, no_prompt)
+                                                      exclude_change_types=None, template_spec=None):
+    what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri, parameters,
+                                                                DeploymentMode.incremental, result_format, no_prompt, template_spec)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
 
@@ -724,8 +723,8 @@ def _build_preflight_error_message(preflight_error):
     return '\n'.join(err_messages)
 
 
-def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_uri=None, template_spec=None, parameters=None,
-                                              mode=None, rollback_on_error=None, no_prompt=False):
+def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_uri=None, parameters=None,
+                                              mode=None, rollback_on_error=None, no_prompt=False, template_spec=None):
     cli_ctx = cmd.cli_ctx
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
@@ -760,14 +759,14 @@ def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_
     return properties
 
 
-def _prepare_deployment_what_if_properties(cmd, template_file, template_uri, template_spec, parameters,
-                                           mode, result_format, no_prompt):
+def _prepare_deployment_what_if_properties(cmd, template_file, template_uri, parameters,
+                                           mode, result_format, no_prompt, template_spec):
     DeploymentWhatIfProperties, DeploymentWhatIfSettings = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                    'DeploymentWhatIfProperties', 'DeploymentWhatIfSettings',
                                                                    mod='models')
 
-    deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd, template_file=template_file, template_uri=template_uri, template_spec=template_spec,
-                                                                      parameters=parameters, mode=mode, no_prompt=no_prompt)
+    deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd, template_file=template_file, template_uri=template_uri,
+                                                                      parameters=parameters, mode=mode, no_prompt=no_prompt, template_spec=template_spec)
     deployment_what_if_properties = DeploymentWhatIfProperties(template=deployment_properties.template, template_link=deployment_properties.template_link,
                                                                parameters=deployment_properties.parameters, mode=deployment_properties.mode,
                                                                what_if_settings=DeploymentWhatIfSettings(result_format=result_format))

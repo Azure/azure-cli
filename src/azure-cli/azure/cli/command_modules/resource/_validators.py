@@ -6,6 +6,7 @@
 import os
 import re
 import argparse
+import datetime
 
 from knack.util import CLIError
 try:
@@ -33,7 +34,7 @@ def _validate_deployment_name_with_template_specs(namespace):
             template_filename = os.path.basename(template_filename)
             namespace.deployment_name = os.path.splitext(template_filename)[0]
         else:
-            namespace.deployment_name = 'deployment1'
+            namespace.deployment_name = 'deployment1' + str(datetime.datetime.now().timestamp())
 
 
 def _validate_deployment_name(namespace):
@@ -48,12 +49,13 @@ def _validate_deployment_name(namespace):
             template_filename = os.path.basename(template_filename)
             namespace.deployment_name = os.path.splitext(template_filename)[0]
         else:
-            namespace.deployment_name = 'deployment1'
+            namespace.deployment_name = 'deployment1' + str(datetime.datetime.now().timestamp())
 
 
 def process_deployment_create_namespace(namespace):
     if bool(namespace.template_uri) == bool(namespace.template_file) == bool(namespace.template_spec):
-        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI | --template-spec ID')
+        raise CLIError('incorrect usage: Chose only one of'
+                       ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
     if(bool(namespace.template_uri) or bool(namespace.template_file)):
         _validate_deployment_name(namespace)
     else:

@@ -214,7 +214,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',

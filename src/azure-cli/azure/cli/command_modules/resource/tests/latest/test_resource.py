@@ -513,6 +513,10 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
         self.cmd('deployment sub validate --location WestUS --template-spec {ts} ', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
@@ -1123,7 +1127,6 @@ class DeploymentThruTemplateSpecTest(ScenarioTest):
         self.resource_group = resource_group
         self.kwargs.update({
             'ts': '/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/TemplateSpecs/BasicTemplateSpecs/versions/1.1.0',
-            'rg': 'TemplateSpecsCLI'
         })
         self.kwargs['dn'] = self.cmd('deployment group create -g {rg} --template-spec {ts} ', checks=[
             self.check('properties.provisioningState', 'Succeeded'),

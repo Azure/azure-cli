@@ -1,0 +1,190 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection:
+      - close
+      Host:
+      - raw.githubusercontent.com
+      User-Agent:
+      - Python-urllib/3.8
+    method: GET
+    uri: https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json
+  response:
+    body:
+      string: "{\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\n
+        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {\n    \"location\":
+        {\n      \"type\": \"string\",\n      \"defaultValue\": \"[resourceGroup().location]\",\n
+        \     \"metadata\": {\n        \"description\": \"Location for the network
+        security group.\"\n      }\n    },\n    \"name\": {\n      \"type\": \"string\",\n
+        \     \"metadata\": {\n        \"description\": \"Name of the network security
+        group.\"\n      }\n    }\n  },\n  \"variables\": {\n  },\n  \"resources\":
+        [\n    {\n      \"type\": \"Microsoft.Network/networkSecurityGroups\",\n      \"name\":
+        \"[parameters('name')]\",\n      \"apiVersion\": \"2015-06-15\",\n      \"location\":
+        \"[parameters('location')]\",\n      \"properties\": {\n        \"securityRules\":
+        [\n        ]\n      },\n      \"dependsOn\": [ ]\n    }\n  ],\n  \"outputs\":
+        {\n    \"NewNSG\": {\n      /** comment1\n          comment2\n          comment3\n
+        \     **/\n      // comment\n      /** comment **/\n      \"type\": \"object\",
+        /** comment **/\n      \"value\": \"[reference(parameters('name'))]\" // comment\n
+        \     // comment\n      /** comment **/\n      /** comment1\n          comment2\n
+        \         comment3\n      **/\n    }\n  } // comment\n}\n"
+    headers:
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - close
+      content-length:
+      - '1168'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 07 Jul 2020 20:44:09 GMT
+      etag:
+      - '"9d646ce8531dcaff13075823af333033fe651237e2bb9e0b816aeae683142e31"'
+      expires:
+      - Tue, 07 Jul 2020 20:49:09 GMT
+      source-age:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding
+      via:
+      - 1.1 varnish (Varnish/6.0)
+      - 1.1 varnish
+      x-cache:
+      - MISS, MISS
+      x-cache-hits:
+      - 0, 0
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - c18b668dbbbdc59e5abec9ad7e50fea107f7b44a
+      x-frame-options:
+      - deny
+      x-github-request-id:
+      - CF08:1415:1029DD:12BC2A:5F04DE99
+      x-served-by:
+      - cache-atl6247-ATL
+      x-timer:
+      - S1594154649.362375,VS0,VE164
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"uri": "https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json"},
+      "parameters": {"location": {"value": "westus"}, "name": {"value": "azure-cli-deploy-test-nsg1"}},
+      "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group deployment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '300'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --template-uri --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_uri000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_uri000001/providers/Microsoft.Resources/deployments/simple_deploy","name":"simple_deploy","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"uri":"https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json","contentVersion":"1.0.0.0"},"templateHash":"18214098974183646216","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-07T20:44:10.3439098Z","duration":"PT0S","correlationId":"ed964f60-d210-4204-8b2f-c80561060ea9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_uri000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Jul 2020 20:44:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"uri": "https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json"},
+      "parameters": {"location": {"value": "westus"}, "name": {"value": "azure-cli-deploy-test-nsg1"}},
+      "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group deployment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '300'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --template-uri --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_uri000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_uri000001/providers/Microsoft.Resources/deployments/simple_deploy","name":"simple_deploy","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"uri":"https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json","contentVersion":"1.0.0.0"},"templateHash":"18214098974183646216","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-07-07T20:44:11.8482825Z","duration":"PT0.8494417S","correlationId":"93279966-be98-4dff-a13c-472e31f22088","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_uri000001/providers/Microsoft.Resources/deployments/simple_deploy/operationStatuses/08586074522344787700?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '958'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Jul 2020 20:44:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+version: 1
