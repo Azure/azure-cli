@@ -8,9 +8,11 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccou
                                JMESPathCheck)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
+    @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli", location="eastus")
     @StorageAccountPreparer(name_prefix="sharerm", location="eastus")

@@ -14,6 +14,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
 from ..storage_test_util import StorageScenarioMixin
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -328,7 +329,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('exists', False))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_storage_blob_soft_delete(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info)
@@ -354,6 +355,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
                                               account_info, container).get_output_in_json()), 0)
 
+        import time
+        time.sleep(10)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {} --include d',
                                               account_info, container).get_output_in_json()), 1)
 

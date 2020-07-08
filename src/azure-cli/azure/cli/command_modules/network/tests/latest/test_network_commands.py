@@ -14,7 +14,8 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
+    record_only)
 
 from knack.util import CLIError
 
@@ -536,6 +537,10 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
                  ' -g {rg} --gateway-name {gw} '
                  '--name MySSLCert '
                  '--key-vault-secret-id {secret_id}')
+
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gw} -n cert1 --keyvault-secret {secret_id}', checks=[
+            self.check('trustedRootCertificates[0].keyVaultSecretId', '{secret_id}')
+        ])
 
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
@@ -1764,6 +1769,49 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegexp(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
+
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route')
+    def test_network_express_route_connection_routing_configuration(self, resource_group):
+        self.kwargs = {
+            'rg': 'dedharrtv3final',
+            'gw': '16297a6ff5314c0f8d0eb580aa7861b3-eastus-er-gw',
+            'connection': 'yuerconnection',
+            'peering': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/expressRouteCircuits/clicktfinal/peerings/AzurePrivatePeering',
+            'route_table1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/virtualHubs/blhub/hubRouteTables/routetable1',
+            'route_table2': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/virtualHubs/blhub/hubRouteTables/routetable2'
+        }
+
+        self.cmd('network express-route gateway connection update '
+                 '-n {connection} '
+                 '-g {rg} '
+                 '--gateway-name {gw} '
+                 '--peering {peering} '
+                 '--associated-route-table {route_table1} '
+                 '--propagated-route-tables {route_table1} {route_table2} '
+                 '--labels label1 label2',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('name', self.kwargs['connection']),
+                     self.check('routingConfiguration.associatedRouteTable.id', self.kwargs['route_table1']),
+                     self.check('length(routingConfiguration.propagatedRouteTables.ids)', 2),
+                     self.check('routingConfiguration.propagatedRouteTables.ids[0].id', self.kwargs['route_table1']),
+                     self.check('routingConfiguration.propagatedRouteTables.ids[1].id', self.kwargs['route_table2']),
+                     self.check('length(routingConfiguration.propagatedRouteTables.labels)', 2),
+                     self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label1'),
+                     self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')])
+
+        self.cmd('network express-route gateway connection show -n {connection} -g {rg} --gateway-name {gw}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['connection']),
+            self.check('routingConfiguration.associatedRouteTable.id', self.kwargs['route_table1']),
+            self.check('length(routingConfiguration.propagatedRouteTables.ids)', 2),
+            self.check('routingConfiguration.propagatedRouteTables.ids[0].id', self.kwargs['route_table1']),
+            self.check('routingConfiguration.propagatedRouteTables.ids[1].id', self.kwargs['route_table2']),
+            self.check('length(routingConfiguration.propagatedRouteTables.labels)', 2),
+            self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label1'),
+            self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')
+        ])
 
 
 class NetworkExpressRoutePortScenarioTest(ScenarioTest):
