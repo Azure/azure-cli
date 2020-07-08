@@ -86,13 +86,14 @@ jobs:
         versionSpec: '3.8'
         addToPath: true
         architecture: 'x64'
-#    - task: DownloadBuildArtifacts@0
-#      inputs:
-#        buildType: 'current'
-#        downloadType: 'single'
-#        artifactName: 'drop'
-#        downloadPath: '$(System.ArtifactsDirectory)'
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: '$(System.ArtifactsDirectory)'
     - bash: |
+        echo $(System.ArtifactsDirectory)
+        ls $(System.ArtifactsDirectory)
         pwd
         # Send notification when target is all.
         if [[ "$(USER_TARGET)" == "" ]]; then
