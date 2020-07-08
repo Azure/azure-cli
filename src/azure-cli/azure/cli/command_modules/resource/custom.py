@@ -2656,7 +2656,8 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
         # to properties will fail due to the lack of properties, so the PATCH type should be used
         need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
-                              'Microsoft.ContainerRegistry/registries/webhooks']
+                              'Microsoft.ContainerRegistry/registries/webhooks',
+                              'Microsoft.ContainerInstance/containerGroups']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)

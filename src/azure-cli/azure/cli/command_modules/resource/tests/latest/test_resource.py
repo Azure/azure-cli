@@ -352,7 +352,7 @@ class TagScenarioTest(ScenarioTest):
 
         # Test Microsoft.Resources/resourceGroups
         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
-                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'}))
+                 checks=self.check('tags', {'cli-test': 'test'}))
 
         # Test Microsoft.ContainerRegistry/registries/webhooks
         self.kwargs.update({
@@ -372,6 +372,18 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
+
+        # Test Microsoft.ContainerInstance/containerGroups
+        self.kwargs.update({
+            'container_group_name': self.create_random_name('clicontainer', 16),
+            'image': 'nginx:latest',
+        })
+
+        container = self.cmd('container create -g {rg} -n {container_group_name} --image {image}',
+                             checks=self.check('name', '{container_group_name}')).get_output_in_json()
+        self.kwargs['container_id'] = container['id']
+        self.cmd('resource tag --ids {container_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {container_id} --tags', checks=self.check('tags', {}))
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
@@ -2114,7 +2126,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
@@ -2237,7 +2249,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })

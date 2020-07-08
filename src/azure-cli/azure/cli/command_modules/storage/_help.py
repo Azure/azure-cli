@@ -30,8 +30,8 @@ long-summary: >
     properties for Storage Analytics and CORS (Cross-Origin Resource
     Sharing) rules.
 examples:
-  - name: Show the properties of the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties show -n MyStorageAccount -g MyResourceGroup
+  - name: Show the properties of the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties show -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account blob-service-properties update'] = """
@@ -49,12 +49,12 @@ parameters:
   - name: --delete-retention-days
     short-summary: 'Indicate the number of days that the deleted blob should be retained. The value must be in range [1,365]. It must be provided when `--enable-delete-retention` is true.'
 examples:
-  - name: Enable the change feed for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-change-feed true -n MyStorageAccount -g MyResourceGroup
-  - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n MyStorageAccount -g MyResourceGroup
-  - name: Enable versioning for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
-    text: az storage account blob-service-properties update --enable-versioning -n MyStorageAccount -g MyResourceGroup
+  - name: Enable the change feed for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-change-feed true -n mystorageaccount -g MyResourceGroup
+  - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
+  - name: Enable versioning for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-versioning -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account create'] = """
@@ -412,8 +412,8 @@ short-summary: Revoke all user delegation keys for a storage account.
 examples:
   - name: Revoke all user delegation keys for a storage account by resource ID.
     text: az storage account revoke-delegation-keys --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Storage/storageAccounts/{StorageAccount}
-  - name: Revoke all user delegation keys for a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
-    text: az storage account revoke-delegation-keys -n MyStorageAccount -g MyResourceGroup
+  - name: Revoke all user delegation keys for a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
+    text: az storage account revoke-delegation-keys -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account show'] = """
