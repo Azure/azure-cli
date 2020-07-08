@@ -1346,16 +1346,18 @@ def _deploy_arm_template_core(cli_ctx,
                               mode='incremental',
                               validate_only=False,
                               no_wait=False):
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
+    Deployment, DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                               'Deployment', 'DeploymentProperties', mod='models')
 
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
+    deployment = Deployment(properties=properties)
     client = resource_client_factory(cli_ctx)
     if validate_only:
-        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, properties)
+        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, deployment)
 
     deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
-                              deployment_name, properties)
+                              deployment_name, deployment)
     result = LongRunningOperation(cli_ctx)(deploy_poll)
     return result
 

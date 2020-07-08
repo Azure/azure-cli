@@ -25,8 +25,8 @@ class BotTemplateDeployer:
     def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                             template_file=None, deployment_name=None,
                             parameters=None, mode=None):
-        DeploymentProperties, _ = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                          'DeploymentProperties', 'TemplateLink', mod='models')
+        Deployment, DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                   'Deployment', 'DeploymentProperties', mod='models')
 
         template = {}
         # TODO: get_file_json() can return None if specified, otherwise it can throw an error.
@@ -44,12 +44,13 @@ class BotTemplateDeployer:
 
         properties = DeploymentProperties(template=template, template_link=None,
                                           parameters=parameters, mode=mode)
+        deployment = Deployment(properties=properties)
 
         resource_management_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
         return LongRunningOperation(cli_ctx, 'Deploying ARM Tempalte')(
             resource_management_client.deployments.create_or_update(resource_group_name,
                                                                     deployment_name,
-                                                                    properties, raw=False))
+                                                                    deployment, raw=False))
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements

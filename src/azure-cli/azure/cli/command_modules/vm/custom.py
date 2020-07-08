@@ -868,14 +868,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        validation_poller = client.validate(resource_group_name, deployment_name, parameters=deployment)
+        validation_poller = client.validate(resource_group_name, deployment_name, deployment)
         return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     # creates the VM deployment
     if no_wait:
         return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name, deployment_name, parameters=deployment)
-    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, parameters=deployment))
+                           resource_group_name, deployment_name, deployment)
+    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, deployment))
 
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
@@ -1282,18 +1282,22 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     # deploy ARM template
     deployment_name = 'av_set_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment, DeploymentProperties = cmd.get_models('Deployment', 'DeploymentProperties',
+                                                      resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
 
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    deployment = Deployment(properties=properties)
+
     if validate:
-        return client.validate(resource_group_name, deployment_name, properties)
+        validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+        return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     if no_wait:
         return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name, deployment_name, properties)
+                           resource_group_name, deployment_name, deployment)
 
     LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                  resource_group_name, deployment_name, properties))
+                                                  resource_group_name, deployment_name, deployment))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
 
@@ -2492,18 +2496,21 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     deployment_name = 'vmss_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                      aux_subscriptions=aux_subscriptions).deployments
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    Deployment, DeploymentProperties = cmd.get_models('Deployment', 'DeploymentProperties',
+                                                      resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    deployment = Deployment(properties=properties)
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        return sdk_no_wait(no_wait, client.validate, resource_group_name, deployment_name, properties)
+        return sdk_no_wait(no_wait, client.validate, resource_group_name, deployment_name, deployment)
 
     # creates the VMSS deployment
     deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-        sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
+        sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment))
 
     if orchestration_mode.lower() == scale_set_vm_str.lower() and assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
