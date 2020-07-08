@@ -2447,7 +2447,7 @@ class _StackRuntimeHelper(object):
             return
         if self._linux:
             self._stacks = RUNTIME_STACKS['linux']
-        else: # Windows stacks
+        else:  # Windows stacks
             result = RUNTIME_STACKS['windows']
             for r in result:
                 r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
