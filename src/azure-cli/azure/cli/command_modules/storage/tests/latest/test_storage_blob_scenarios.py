@@ -17,7 +17,6 @@ from ..storage_test_util import StorageScenarioMixin
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 
-@AllowLargeResponse()
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
