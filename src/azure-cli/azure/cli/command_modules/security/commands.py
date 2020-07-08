@@ -146,7 +146,7 @@ def load_command_table(self, _):
         client_factory=cf_security_allowed_connections,
         operation_group='security_allowed_connections'
     )
-    
+
     security_iot_solution_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#IotSolutionOperations.{}',
         client_factory=cf_security_iot_solution
@@ -291,7 +291,6 @@ def load_command_table(self, _):
                             client_factory=cf_security_sub_assessment) as g:
         g.custom_command('list', 'list_security_sub_assessments')
         g.custom_command('show', 'get_security_sub_assessment')
-
 
     with self.command_group('security allowed_connections',
                             security_allowed_connections_sdk,
