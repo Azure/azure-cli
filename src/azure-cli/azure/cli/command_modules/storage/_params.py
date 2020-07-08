@@ -524,8 +524,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
                                          "The priority can be set on a blob only once, default value is Standard.")
 
+    with self.argument_context('storage blob service-properties delete-policy show', min_api='2019-02-02',
+                               resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        c.extra('timeout', timeout_type)
+
     with self.argument_context('storage blob service-properties delete-policy update') as c:
-        c.argument('enable', arg_type=get_enum_type(['true', 'false']), help='Enables/disables soft-delete.')
+        c.argument('enable', arg_type=get_enum_type(['true', 'false']), help='Enable/disable soft-delete.')
         c.argument('days_retained', type=int,
                    help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
 

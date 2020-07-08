@@ -330,11 +330,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE_BLOB
     )
     with self.command_group('storage blob service-properties delete-policy', command_type=blob_service_sdk,
-                            min_api='2019-02-02',
-                            custom_command_type=get_custom_sdk('blob', blob_service_sdk)) as g:
+                            min_api='2019-02-02', resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_service)) as g:
         g.storage_command_oauth('show', 'get_service_properties',
-                                transform=lambda x: getattr(
-                                    x, 'delete_retention_policy', x),
+                                transform=lambda x: x.get('delete_retention_policy'),
                                 exception_handler=show_exception_handler)
         g.storage_custom_command_oauth('update', 'set_delete_policy')
 

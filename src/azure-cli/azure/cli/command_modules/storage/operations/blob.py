@@ -74,7 +74,7 @@ def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', ti
 
 
 def set_delete_policy(client, enable=None, days_retained=None):
-    policy = client.get_blob_service_properties().delete_retention_policy
+    policy = client.get_service_properties()['delete_retention_policy']
 
     if enable is not None:
         policy.enabled = enable == 'true'
@@ -84,8 +84,8 @@ def set_delete_policy(client, enable=None, days_retained=None):
     if policy.enabled and not policy.days:
         raise CLIError("must specify days-retained")
 
-    client.set_blob_service_properties(delete_retention_policy=policy)
-    return client.get_blob_service_properties().delete_retention_policy
+    client.set_service_properties(delete_retention_policy=policy)
+    return client.get_service_properties()['delete_retention_policy']
 
 
 def set_blob_service_properties(client, parameters, delete_retention=None, delete_retention_period=None,
