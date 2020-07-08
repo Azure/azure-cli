@@ -352,7 +352,7 @@ class TagScenarioTest(ScenarioTest):
 
         # Test Microsoft.Resources/resourceGroups
         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
-                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'}))
+                 checks=self.check('tags', {'cli-test': 'test'}))
 
         # Test Microsoft.ContainerRegistry/registries/webhooks
         self.kwargs.update({
@@ -373,6 +373,18 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
 
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
+
+        # Test Microsoft.ContainerInstance/containerGroups
+        self.kwargs.update({
+            'container_group_name': self.create_random_name('clicontainer', 16),
+            'image': 'nginx:latest',
+        })
+
+        container = self.cmd('container create -g {rg} -n {container_group_name} --image {image}',
+                             checks=self.check('name', '{container_group_name}')).get_output_in_json()
+        self.kwargs['container_id'] = container['id']
+        self.cmd('resource tag --ids {container_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {container_id} --tags', checks=self.check('tags', {}))
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
