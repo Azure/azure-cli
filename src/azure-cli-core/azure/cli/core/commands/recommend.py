@@ -114,8 +114,20 @@ class TreeNode:
                 help_str = "{}=={}".format(key, self._data[key])
         return help_str
 
+    def get_function_recommend(self):
+        ret = []
+        if not self._from_list:
+            return None
+        # currently contains and length
+        query_str = "length({})".format(self._get_trace_str())
+        ret.append(query_str)
+        return ret
+
 
 class TreeBuilder:
+    '''Parse entry. Generate parse tree from json. And
+    then give recommendation
+    '''
     def __init__(self):
         self._root = TreeNode('root')
         self._all_nodes = {}
@@ -137,6 +149,7 @@ class TreeBuilder:
             if node._from_list:
                 print(node.select_specific_number_string())
                 print(node._get_trace_str(filter_rules=node.filter_with_condiction))
+                print(node.get_function_recommend())
 
     def _parse_dict(self, name, data, from_list=False):
         node = TreeNode(name)
@@ -157,28 +170,6 @@ class TreeBuilder:
 
         self._all_nodes[name] = node
         return node
-
-
-def parse_dict(data):
-    all_keys = list(data.keys())
-    help_str = 'You can use --query "{}" to query {} value. Available values are:{}'.format(
-        all_keys[0], all_keys[0], all_keys
-    )
-    return help_str
-
-
-def parse_output(data):
-    '''Parse entry. Generate recommendation from json
-    :param str data: Command output in json format
-    '''
-    help_str = "Output format is not supported"
-    if isinstance(data, dict):
-        help_str = parse_dict(data)
-    elif isinstance(data, list):
-        pass
-    else:
-        logger.warning("Output format is not supported")
-    return help_str
 
 
 def handle_escape_char(raw_str):
