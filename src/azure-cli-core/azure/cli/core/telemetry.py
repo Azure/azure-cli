@@ -46,7 +46,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.raw_command = None
         self.mode = 'default'
         self.init_time_elapsed = None
-        self.invoke_time_elapsd = None
+        self.invoke_time_elapsed = None
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
