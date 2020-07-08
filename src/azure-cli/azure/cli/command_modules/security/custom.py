@@ -460,16 +460,16 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
 
 
 # --------------------------------------------------------------------------------------------
-# Allowed Connections
+# Adaptive Application Controls
 # --------------------------------------------------------------------------------------------
 
 
-def list_security_allowed_connections(client):
+def list_security_adaptive_application_controls(client):
 
     for loc in client.locations.list():
         client.config.asc_location = loc.name
 
-    return client.allowed_connections.list()
+    return client.adaptive_application_controls.list()
 
 
 def get_security_allowed_connections(client, resource_name, resource_group_name):

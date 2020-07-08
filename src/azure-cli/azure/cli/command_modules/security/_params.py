@@ -5,6 +5,8 @@
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
+
 
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 resource_group_name_type)
@@ -243,3 +245,9 @@ def load_arguments(self, _):
             c.argument(
                 'iot_solution_name',
                 arg_type=iot_solution_name_arg_type)
+
+    for scope in ['adaptive_application_controls']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'group_name',
+                arg_type=adaptive_application_controls_group_name)
