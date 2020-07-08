@@ -146,7 +146,12 @@ short-summary: Manage Private Link of an Application Gateway
 
 helps['network application-gateway private-link add'] = """
 type: command
-short-summary: Add a new private link with a default IP Configuration and associate it with an existing frontend IP
+short-summary: Add a new Private Link with a default IP Configuration and associate it with an existing Frontend IP
+"""
+
+helps['network application-gateway private-link remove'] = """
+type: command
+short-summary: Remove a Private Link and clear association with Frontend IP
 """
 
 helps['network application-gateway frontend-ip'] = """

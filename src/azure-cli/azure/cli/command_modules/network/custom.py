@@ -489,7 +489,7 @@ def add_ag_private_link(cmd,
 
     for fic in appgw.frontend_ip_configurations:
         if fic.private_link_configuration and fic.private_link_configuration.id == private_link_config_id:
-            raise CLIError('FrontEnd IP already reference an existing Private Link')
+            raise CLIError('Frontend IP already reference an existing Private Link')
         if fic.name == frontend_ip:
             break
     else:
@@ -555,7 +555,30 @@ def remove_ag_private_link(cmd,
                            resource_group_name,
                            application_gateway_name,
                            private_link_name):
-    pass
+    ncf = network_client_factory(cmd.cli_ctx)
+
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    removed_private_link = None
+
+    for pl in appgw.private_link_configurations:
+        if pl.name == private_link_name:
+            removed_private_link = pl
+            break
+    else:
+        raise CLIError("Priavte Link doesn't exit")
+
+    for fic in appgw.frontend_ip_configurations:
+        if fic.private_link_configuration and fic.private_link_configuration.id == removed_private_link.id:
+            fic.private_link_configuration = None
+
+    # the left vnet have to delete manually
+    # rs = parse_resource_id(removed_private_link.ip_configurations[0].subnet.id)
+    # vnet_resource_group, vnet_name, subnet = rs['resource_group'], rs['name'], rs['child_name_1']
+    # ncf.subnets.delete(vnet_resource_group, vnet_name, subnet)
+
+    appgw.private_link_configurations.remove(removed_private_link)
+    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,

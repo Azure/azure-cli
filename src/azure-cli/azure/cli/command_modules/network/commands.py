@@ -511,7 +511,7 @@ def load_command_table(self, _):
                             min_api='2020-05-01',
                             is_preview=True) as g:
         g.custom_command('add', 'add_ag_private_link')
-        g.custom_command('remove', 'remove_ag_private_link')
+        g.custom_command('remove', 'remove_ag_private_link', confirmation=True)
 
     with self.command_group('network application-gateway private-link ip-configuration',
                             command_type=network_ag_sdk,
