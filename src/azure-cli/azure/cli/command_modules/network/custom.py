@@ -566,7 +566,7 @@ def remove_ag_private_link(cmd,
             removed_private_link = pl
             break
     else:
-        raise CLIError("Priavte Link doesn't exit")
+        raise CLIError("Priavte Link doesn't exist")
 
     for fic in appgw.frontend_ip_configurations:
         if fic.private_link_configuration and fic.private_link_configuration.id == removed_private_link.id:
@@ -579,6 +579,66 @@ def remove_ag_private_link(cmd,
 
     appgw.private_link_configurations.remove(removed_private_link)
     return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+
+
+def add_ag_private_link_ip(cmd,
+                           resource_group_name,
+                           application_gateway_name,
+                           private_link_name,
+                           private_link_ip_name,
+                           private_link_primary=False,
+                           private_link_ip_address=None):
+    ncf = network_client_factory(cmd.cli_ctx)
+
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    updated_private_link = None
+    for pl in appgw.private_link_configurations:
+        if pl.name == private_link_name:
+            updated_private_link = pl
+            break
+    else:
+        raise CLIError("Priavte Link doesn't exist")
+
+    (SubResource, IPAllocationMethod,
+     ApplicationGatewayPrivateLinkIpConfiguration) = \
+        cmd.get_models('SubResource', 'IPAllocationMethod',
+                       'ApplicationGatewayPrivateLinkIpConfiguration')
+
+    private_link_subnet_id = updated_private_link.ip_configurations[0].subnet.id
+
+    private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
+        else IPAllocationMethod.dynamic.value
+    private_link_ip_config = ApplicationGatewayPrivateLinkIpConfiguration(
+        name=private_link_ip_name,
+        private_ip_address=private_link_ip_address,
+        private_ip_allocation_method=private_link_ip_allocation_method,
+        subnet=SubResource(id=private_link_subnet_id),
+        primary=private_link_primary
+    )
+
+    updated_private_link.ip_configurations.append(private_link_ip_config)
+
+    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+
+
+
+def remove_ag_private_link_ip(cmd,
+                              resource_group_name,
+                              application_gateway_name,
+                              private_link_name,
+                              private_link_ip_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    updated_private_link = None
+    for pl in appgw.private_link_configurations:
+        if pl.name == private_link_name:
+            updated_private_link = pl
+            break
+    else:
+        raise CLIError("Priavte Link doesn't exist")
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
