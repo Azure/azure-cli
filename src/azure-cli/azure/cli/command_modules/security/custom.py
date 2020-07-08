@@ -468,9 +468,9 @@ def get_security_adaptive_network_hardenings(client,
                                              resource_name,
                                              resource_type,
                                              resource_namespace,
-                                             resource_group):
+                                             resource_group_name):
 
-    return client.get(resource_group,
+    return client.get(resource_group_name,
                       resource_namespace,
                       resource_type,
                       resource_name,
@@ -480,9 +480,9 @@ def list_security_adaptive_network_hardenings(client,
                                               resource_name,
                                               resource_type,
                                               resource_namespace,
-                                              resource_group):
+                                              resource_group_name):
 
-    return client.list_by_extended_resource(resource_group,
+    return client.list_by_extended_resource(resource_group_name,
                                             resource_namespace,
                                             resource_type,
                                             resource_name)
