@@ -1903,7 +1903,7 @@ def process_private_endpoint_connection_id_argument(cmd, namespace):
                                             namespace.name,
                                             namespace.resource_provider,
                                             namespace.resource_name])):
-        raise CLIError("usage error: --connection-id / -g -n --type --service-name")
+        raise CLIError("usage error: --id / -g -n --type --resource-name")
 
     result = parse_proxy_resource_id(namespace.connection_id)
     cmd.cli_ctx.data['subscription_id'] = result['subscription']
