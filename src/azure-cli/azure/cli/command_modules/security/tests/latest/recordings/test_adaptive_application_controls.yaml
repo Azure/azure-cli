@@ -28,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Jul 2020 14:35:06 GMT
+      - Wed, 08 Jul 2020 17:08:01 GMT
       expires:
       - '-1'
       pragma:
@@ -44,6 +44,113 @@ interactions:
       - ''
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '99'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security adaptive_application_controls show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --group-name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-security/0.4.1
+        Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/locations/centralus/applicationWhitelistings/GROUP1?api-version=2020-01-01
+  response:
+    body:
+      string: "{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/locations/centralus/applicationWhitelistings/GROUP1\"\
+        ,\"name\":\"GROUP1\",\"type\":\"Microsoft.Security/applicationWhitelistings\"\
+        ,\"location\":\"centralus\",\"properties\":{\"recommendationStatus\":\"Recommended\"\
+        ,\"enforcementMode\":\"Audit\",\"vmRecommendations\":[{\"configurationStatus\"\
+        :\"Configured\",\"resourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/talk-va/providers/microsoft.compute/virtualmachines/tal-win-vm-jit\"\
+        ,\"recommendationAction\":\"Recommended\",\"recommendedDates\":[],\"enforcementSupport\"\
+        :\"Supported\"}],\"pathRecommendations\":[{\"path\":\"C:\\\\bla\\\\bl2a.exe\"\
+        ,\"type\":\"File\",\"common\":true,\"action\":\"Recommended\",\"usernames\"\
+        :[{\"username\":\"Everyone\",\"recommendationAction\":\"Recommended\"}],\"\
+        userSids\":[\"S-1-1-0\"],\"fileType\":\"exe\",\"configurationStatus\":\"Configured\"\
+        },{\"path\":\"C:\\\\bla\\\\bla.exe\",\"type\":\"File\",\"common\":true,\"\
+        action\":\"Add\",\"usernames\":[{\"username\":\"Everyone\",\"recommendationAction\"\
+        :\"Recommended\"}],\"userSids\":[\"S-1-1-0\"],\"fileType\":\"exe\",\"configurationStatus\"\
+        :\"Configured\"},{\"path\":\"[exe] O=MICROSOFT CORPORATION, L=REDMOND, S=WASHINGTON,\
+        \ C=US\\\\*\\\\*\\\\0.0.0.0\",\"type\":\"PublisherSignature\",\"publisherInfo\"\
+        :{\"publisherName\":\"O=MICROSOFT CORPORATION, L=REDMOND, S=WASHINGTON, C=US\"\
+        ,\"productName\":\"*\",\"binaryName\":\"*\",\"version\":\"0.0.0.0\"},\"common\"\
+        :true,\"action\":\"Recommended\",\"usernames\":[{\"username\":\"Everyone\"\
+        ,\"recommendationAction\":\"Recommended\"}],\"userSids\":[\"S-1-1-0\"],\"\
+        fileType\":\"exe\",\"configurationStatus\":\"Configured\"},{\"path\":\"[exe]\
+        \ CN=MICROSOFT AZURE DEPENDENCY CODE SIGN\\\\MICROSOFT\xAE COREXT\\\\*\\\\\
+        0.0.0.0\",\"type\":\"ProductSignature\",\"publisherInfo\":{\"publisherName\"\
+        :\"CN=MICROSOFT AZURE DEPENDENCY CODE SIGN\",\"productName\":\"MICROSOFT\xAE\
+        \ COREXT\",\"binaryName\":\"*\",\"version\":\"0.0.0.0\"},\"common\":true,\"\
+        action\":\"Recommended\",\"usernames\":[{\"username\":\"NT AUTHORITY\\\\SYSTEM\"\
+        ,\"recommendationAction\":\"Recommended\"}],\"userSids\":[\"S-1-1-0\"],\"\
+        fileType\":\"exe\",\"configurationStatus\":\"Configured\"},{\"path\":\"[exe]\
+        \ O=RAPID7 LLC, L=BOSTON, S=MASSACHUSETTS, C=US\\\\*\\\\*\\\\0.0.0.0\",\"\
+        type\":\"PublisherSignature\",\"publisherInfo\":{\"publisherName\":\"O=RAPID7\
+        \ LLC, L=BOSTON, S=MASSACHUSETTS, C=US\",\"productName\":\"*\",\"binaryName\"\
+        :\"*\",\"version\":\"0.0.0.0\"},\"common\":true,\"action\":\"Recommended\"\
+        ,\"usernames\":[{\"username\":\"NT AUTHORITY\\\\SYSTEM\",\"recommendationAction\"\
+        :\"Recommended\"}],\"userSids\":[\"S-1-1-0\"],\"fileType\":\"exe\",\"configurationStatus\"\
+        :\"Configured\"},{\"path\":\"[exe] O=GOOGLE LLC, L=MOUNTAIN VIEW, S=CA, C=US\\\
+        \\*\\\\*\\\\0.0.0.0\",\"type\":\"PublisherSignature\",\"publisherInfo\":{\"\
+        publisherName\":\"O=GOOGLE LLC, L=MOUNTAIN VIEW, S=CA, C=US\",\"productName\"\
+        :\"*\",\"binaryName\":\"*\",\"version\":\"0.0.0.0\"},\"common\":true,\"action\"\
+        :\"Recommended\",\"usernames\":[{\"username\":\"NT AUTHORITY\\\\SYSTEM\",\"\
+        recommendationAction\":\"Remove\"},{\"username\":\"Everyone\",\"recommendationAction\"\
+        :\"Recommended\"}],\"userSids\":[\"S-1-1-0\"],\"fileType\":\"exe\",\"configurationStatus\"\
+        :\"Configured\"},{\"path\":\"[msi] O=GOOGLE LLC, L=MOUNTAIN VIEW, S=CA, C=US\\\
+        \\*\\\\*\\\\0.0.0.0\",\"type\":\"PublisherSignature\",\"publisherInfo\":{\"\
+        publisherName\":\"O=GOOGLE LLC, L=MOUNTAIN VIEW, S=CA, C=US\",\"productName\"\
+        :\"*\",\"binaryName\":\"*\",\"version\":\"0.0.0.0\"},\"common\":true,\"action\"\
+        :\"Recommended\",\"usernames\":[{\"username\":\"NT AUTHORITY\\\\SYSTEM\",\"\
+        recommendationAction\":\"Remove\"},{\"username\":\"Everyone\",\"recommendationAction\"\
+        :\"Recommended\"}],\"userSids\":[\"S-1-1-0\"],\"fileType\":\"msi\",\"configurationStatus\"\
+        :\"Configured\"},{\"path\":\"[exe] O=GOOGLE INC, L=MOUNTAIN VIEW, S=CALIFORNIA,\
+        \ C=US\\\\GOOGLE UPDATE\\\\*\\\\0.0.0.0\",\"type\":\"ProductSignature\",\"\
+        publisherInfo\":{\"publisherName\":\"O=GOOGLE INC, L=MOUNTAIN VIEW, S=CALIFORNIA,\
+        \ C=US\",\"productName\":\"GOOGLE UPDATE\",\"binaryName\":\"*\",\"version\"\
+        :\"0.0.0.0\"},\"common\":true,\"action\":\"Recommended\",\"usernames\":[{\"\
+        username\":\"NT AUTHORITY\\\\SYSTEM\",\"recommendationAction\":\"Recommended\"\
+        }],\"userSids\":[\"S-1-1-0\"],\"fileType\":\"exe\",\"configurationStatus\"\
+        :\"Configured\"}],\"configurationStatus\":\"Configured\",\"issues\":[],\"\
+        location\":\"centralus\",\"sourceSystem\":\"Azure_AppLocker\",\"protectionMode\"\
+        :{\"exe\":\"Audit\",\"msi\":\"Audit\",\"script\":\"None\"}}}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4056'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 08 Jul 2020 17:08:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
     status:
       code: 200
       message: OK
