@@ -5936,13 +5936,12 @@ def list_security_partner_provider(cmd, resource_group_name=None):
 
 
 # region network virtual appliance
-def create_network_virtual_appliance(cmd, resource_group_name, network_virtual_appliance_name,
+def create_network_virtual_appliance(cmd, client, resource_group_name, network_virtual_appliance_name,
                                      vendor, bundled_scale_unit, market_place_version,
                                      virtual_hub, boot_strap_configuration_blobs=None,
                                      cloud_init_configuration_blobs=None,
                                      cloud_init_configuration=None, asn=None,
                                      location=None, tags=None, no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).network_virtual_appliances
     (NetworkVirtualAppliance,
      SubResource,
      VirtualApplianceSkuProperties) = cmd.get_models('NetworkVirtualAppliance',
@@ -5972,17 +5971,15 @@ def update_network_virtual_appliance(instance, cmd, cloud_init_configuration=Non
     return instance
 
 
-def list_network_virtual_appliance(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).network_virtual_appliances
+def list_network_virtual_appliance(cmd, client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()
 
 
-def create_network_virtual_appliance_site(cmd, resource_group_name, network_virtual_appliance_name,
+def create_network_virtual_appliance_site(cmd, client, resource_group_name, network_virtual_appliance_name,
                                           site_name, address_prefix, allow=None, optimize=None, default=None,
                                           no_wait=False):
-    client = network_client_factory(cmd.cli_ctx).virtual_appliance_sites
     (BreakOutCategoryPolicies,
      Office365PolicyProperties,
      VirtualApplianceSite) = cmd.get_models('BreakOutCategoryPolicies',

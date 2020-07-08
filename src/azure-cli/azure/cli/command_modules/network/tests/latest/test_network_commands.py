@@ -3857,7 +3857,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         self.cmd('network virtual-appliance site list -g {rg} --appliance-name {name}', checks=[
             self.check('length(@)', 1)
         ])
-        self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name}')
+        self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
 

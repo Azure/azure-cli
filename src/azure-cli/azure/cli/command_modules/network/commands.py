@@ -1253,7 +1253,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_network_virtual_appliance_site')
         g.generic_update_command('update', custom_func_name='update_network_virtual_appliance_site')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list')
 
     with self.command_group('network virtual-appliance sku', virtual_appliance_skus_sdk, is_preview=True) as g:

@@ -1847,22 +1847,23 @@ def load_arguments(self, _):
     # endregion
 
     # region Network Virtual Appliance
-    with self.argument_context('network virtual-appliance') as c:
-        c.argument('network_virtual_appliance_name', help='The name of Network Virtual Appliance', options_list=['--name', '-n'])
+    with self.argument_context('network virtual-appliance', arg_group='Sku') as c:
         c.argument('vendor', help='Virtual Appliance Vendor.')
         c.argument('bundled_scale_unit', options_list=['--scale-unit'], help='Virtual Appliance Scale Unit.')
         c.argument('market_place_version', options_list=['--version', '-v'], help='Virtual Appliance Version.')
+    with self.argument_context('network virtual-appliance') as c:
+        c.argument('network_virtual_appliance_name', help='The name of Network Virtual Appliance', options_list=['--name', '-n'])
         c.argument('boot_strap_configuration_blobs', options_list=['--boot-strap-config-blobs', '--boot-blobs'], nargs='+', help='Space-separated list of BootStrapConfigurationBlobs storage URLs.')
         c.argument('cloud_init_configuration_blobs', options_list=['--cloud-init-config-blobs', '--cloud-blobs'], nargs='+', help='Space-separated list of CloudInitConfigurationBlob storage URLs.')
         c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
-        c.argument('cloud_init_configuration', options_list=['--cloud-init-config', '--init-config'], help='CloudInitConfiguration string in plain text.')
+        c.argument('cloud_init_configuration', options_list=['--cloud-init-config', '--init-config'], help='CloudInitConfiguration scripts that will be run during cloud initialization')
         c.argument('asn', type=int, help='VirtualAppliance ASN. The valid value ranges from 1 to 4294967295. ')
 
     with self.argument_context('network virtual-appliance sku') as c:
         c.argument('sku_name', help='The name of Network Virtual Appliance SKU', options_list=['--name', '-n'])
 
     with self.argument_context('network virtual-appliance site') as c:
-        c.argument('network_virtual_appliance_name', help='The name of Network Virtual Appliance', options_list=['--appliance-name'])
+        c.argument('network_virtual_appliance_name', options_list=['--appliance-name'])
         c.argument('site_name', help='The name of Network Virtual Appliance Site', options_list=['--name', '-n'])
         c.argument('address_prefix', help='Address Prefix of Network Virtual Appliance Site')
     with self.argument_context('network virtual-appliance site', arg_group='Breakout of O365') as c:

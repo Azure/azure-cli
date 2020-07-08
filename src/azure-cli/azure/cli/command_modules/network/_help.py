@@ -6125,7 +6125,7 @@ short-summary: Create an Azure network virtual appliance.
 examples:
   - name: Create an Azure network virtual appliance.
     text: |
-        az network virtual-appliance create -n MyName -g MyRG --vhub {vhubID} --vendor "barracudasdwanrelease" --scale-unit 2 -v latest --asn 10000 --init-config "echo $hello" --boot-blobs {blobUrl} {blobUrl} --cloud-blobs {blobUrl} {blobUrl}
+        az network virtual-appliance create -n MyName -g MyRG --vhub {vhubID} --vendor "barracudasdwanrelease" --scale-unit 2 -v latest --asn 10000 --init-config "echo $hello" --boot-blobs {blobUrl1} {blobUrl2} --cloud-blobs {blobUrl3} {blobUrl4}
 """
 
 helps['network virtual-appliance update'] = """
