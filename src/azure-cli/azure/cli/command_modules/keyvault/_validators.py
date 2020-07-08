@@ -133,7 +133,7 @@ def process_storage_uri(ns):
 def process_sas_token_parameter(cmd, ns):
     from azure.cli.core.profiles import ResourceType
 
-    SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
+    SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
 
 

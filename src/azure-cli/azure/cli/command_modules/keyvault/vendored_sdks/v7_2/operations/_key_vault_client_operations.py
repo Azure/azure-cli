@@ -5364,7 +5364,6 @@ class KeyVaultClientOperationsMixin(object):
         if storage_resource_uri is not None or token is not None:
             azure_storage_blob_container_uri = models.SASTokenParameter(storage_resource_uri=storage_resource_uri,
                                                                         token=token)
-
         # Construct URL
         url = self._full_backup_initial.metadata['url']
         path_format_arguments = {
@@ -5485,6 +5484,7 @@ class KeyVaultClientOperationsMixin(object):
         self,
         vault_base_url,
         job_id,
+        cls=None,
         **kwargs
     ):
         """Returns the status of full backup operation.
@@ -5518,8 +5518,10 @@ class KeyVaultClientOperationsMixin(object):
         if self._config.generate_client_request_id:
             header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
 
+        body_content = {}
+
         # Construct and send request
-        request = self._client.get(url, query_parameters, header_parameters)
+        request = self._client.get(url, query_parameters, header_parameters, body_content)
         pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
@@ -5538,10 +5540,13 @@ class KeyVaultClientOperationsMixin(object):
     full_backup_status.metadata = {'url': '/backup/{jobId}/pending'}
 
     def _full_restore_operation_initial(
-        self, vault_base_url, sas_token_parameters, folder_to_restore, cls=None, **kwargs
+        self, vault_base_url, storage_resource_uri, token, folder_to_restore, cls=None, **kwargs
     ):
         error_map = kwargs.pop('error_map', None)
         restore_blob_details = None
+        sas_token_parameters = None
+        if storage_resource_uri is not None or token is not None:
+            sas_token_parameters = models.SASTokenParameter(storage_resource_uri=storage_resource_uri, token=token)
         if sas_token_parameters is not None or folder_to_restore is not None:
             restore_blob_details = models.RestoreOperationParameters(sas_token_parameters=sas_token_parameters,
                                                                      folder_to_restore=folder_to_restore)
@@ -5573,7 +5578,7 @@ class KeyVaultClientOperationsMixin(object):
         # Construct and send request
         request = self._client.put(url, query_parameters, header_parameters, body_content)
         pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
-        response = pipeline_response.internal_response
+        response = pipeline_response.http_response
 
         if response.status_code not in [202]:
             map_error(status_code=response.status_code, response=response, error_map=error_map)
@@ -5592,7 +5597,7 @@ class KeyVaultClientOperationsMixin(object):
     _full_restore_operation_initial.metadata = {'url': '/restore'}  # type: ignore
 
     def begin_full_restore_operation(
-        self, vault_base_url, sas_token_parameters, folder_to_restore, cls=None, **kwargs
+        self, vault_base_url, storage_resource_uri, token, folder_to_restore, cls=None, **kwargs
     ):
         """Restores all key materials using the SAS token pointing to a previously
         stored Azure Blob storage backup folder.
@@ -5600,9 +5605,11 @@ class KeyVaultClientOperationsMixin(object):
         :param vault_base_url: The vault name, for example
          https://myvault.vault.azure.net.
         :type vault_base_url: str
-        :param sas_token_parameters:
-        :type sas_token_parameters:
-         ~azure.keyvault.v7_2.models.SASTokenParameter
+        :param storage_resource_uri: Azure Blob storage container Uri
+        :type storage_resource_uri: str
+        :param token: The SAS token pointing to an Azure Blob storage
+         container
+        :type token: str
         :param folder_to_restore: The Folder name of the blob where the
          previous successful full backup was stored
         :type folder_to_restore: str
@@ -5613,17 +5620,18 @@ class KeyVaultClientOperationsMixin(object):
         :raises:
          :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
         """
-        polling = kwargs.pop('polling', False)  # type: Union[bool, PollingMethod]
-        cls = kwargs.pop('cls', None)  # type: ClsType["models.RestoreOperation"]
+        polling = kwargs.pop('polling', False)
+        cls = kwargs.pop('cls', None)
         lro_delay = kwargs.pop(
             'polling_interval',
             self._config.polling_interval
         )
-        cont_token = kwargs.pop('continuation_token', None)  # type: Optional[str]
+        cont_token = kwargs.pop('continuation_token', None)
         if cont_token is None:
             raw_result = self._full_restore_operation_initial(
                 vault_base_url=vault_base_url,
-                sas_token_parameters=sas_token_parameters,
+                storage_resource_uri=storage_resource_uri,
+                token=token,
                 folder_to_restore=folder_to_restore,
                 cls=lambda x,y,z: x,
                 **kwargs
@@ -5634,7 +5642,7 @@ class KeyVaultClientOperationsMixin(object):
 
         def get_long_running_output(pipeline_response):
             response_headers = {}
-            response = pipeline_response.internal_response
+            response = pipeline_response.http_response
             response_headers['Retry-After'] = self._deserialize('int', response.headers.get('Retry-After'))
             response_headers['Azure-AsyncOperation'] = self._deserialize('str',
                                                                          response.headers.get('Azure-AsyncOperation'))
@@ -5664,11 +5672,11 @@ class KeyVaultClientOperationsMixin(object):
 
     def restore_status(
         self,
-        vault_base_url,  # type: str
-        job_id,  # type: str
-        **kwargs  # type: Any
+        vault_base_url,
+        job_id,
+        cls=None,
+        **kwargs
     ):
-        # type: (...) -> "models.RestoreOperation"
         """Returns the status of restore operation.
 
         :param vault_base_url: The vault name, for example https://myvault.vault.azure.net.
@@ -5696,12 +5704,14 @@ class KeyVaultClientOperationsMixin(object):
         query_parameters = {}  # type: Dict[str, Any]
         query_parameters['api-version'] = self._serialize.query("api_version", self.api_version, 'str')
 
+        body_content = {}
+
         # Construct headers
         header_parameters = {}  # type: Dict[str, Any]
         header_parameters['Accept'] = 'application/json'
-        request = self._client.get(url, query_parameters, header_parameters)
+        request = self._client.get(url, query_parameters, header_parameters, body_content)
         pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
-        response = pipeline_response.internal_response
+        response = pipeline_response.http_response
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=error_map)

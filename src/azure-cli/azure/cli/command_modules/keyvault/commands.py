@@ -131,7 +131,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('keyvault restore', kv_private_data_v7_2_preview_sdk, is_preview=True) as g:
-        g.keyvault_command('start', 'begin_full_restore_operation', supports_no_wait=True)
+        g.keyvault_command('start', 'begin_full_restore_operation')
         g.keyvault_command('status', 'restore_status')
         g.wait_command('wait')
 
