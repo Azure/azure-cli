@@ -84,25 +84,25 @@ class TreeNode:
         return trace_str
 
     def get_select_string(self, select_item=None):
-        help_str = ""
-        if self._parent:
-            help_str = "{}.".format(self._get_trace_str())
+        ret = []
+        help_str = "{}.".format(self._get_trace_str())
 
         if select_item is None:
-            if len(self._keys) > 0:
-                help_str = help_str + self._keys[0]
+            for key in self._keys:
+                ret.append(help_str + key)
         else:
             raise Exception("Unfinished function!")
-        return help_str
+        return ret
 
     def select_specific_number_string(self, number=5):
-        help_str = ""
+        ret = []
         if not self._from_list:
-            return help_str
+            return ret
         number = min(self._list_length, number)
         number = random.choice(range(1, number + 1))
         help_str = self._get_trace_str(number)
-        return help_str
+        ret.append(help_str)
+        return ret
 
     def filter_with_condiction(self):
         help_str = ""
@@ -111,7 +111,8 @@ class TreeNode:
         for key in self._keys:
             if not (isinstance(self._data[key], list) or
                     isinstance(self._data[key], dict)):
-                help_str = "{}=={}".format(key, self._data[key])
+                help_str = "{}=='{}'".format(key, self._data[key])
+                break
         return help_str
 
     def get_function_recommend(self):
@@ -144,12 +145,21 @@ class TreeBuilder:
             self._root = self._parse_dict('root', data)
 
     def generate_recommend(self):
+        def printlist(my_list):
+            if isinstance(my_list, list):
+                for item in my_list:
+                    print(item)
+            else:
+                print(my_list)
+
         for node in self._all_nodes.values():
-            print(node.get_select_string())
+            print("Select some field:")
+            printlist(node.get_select_string())
+            print("Others:")
             if node._from_list:
-                print(node.select_specific_number_string())
-                print(node._get_trace_str(filter_rules=node.filter_with_condiction))
-                print(node.get_function_recommend())
+                printlist(node.select_specific_number_string())
+                printlist(node._get_trace_str(filter_rules=node.filter_with_condiction))
+                printlist(node.get_function_recommend())
 
     def _parse_dict(self, name, data, from_list=False):
         node = TreeNode(name)
