@@ -123,11 +123,11 @@ def process_storage_uri(ns):
                 ns.storage_account_name, ns.blob_container_name
             )
         else:
-            raise CLIError('Incorrect usage: [--storage-account-uri URI | '
+            raise CLIError('Incorrect usage: [--storage-resource-uri URI | '
                            '--storage-account-name NAME --blob-container-name NAME]')
     else:
         raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
-                       'if --storage-account-uri is specified.')
+                       'if --storage-resource-uri is specified.')
 
 
 def process_sas_token_parameter(cmd, ns):

@@ -5357,87 +5357,83 @@ class KeyVaultClientOperationsMixin(object):
     update_sas_definition.metadata = {'url': '/storage/{storage-account-name}/sas/{sas-definition-name}'}
 
     def _full_backup_initial(
-        self,
-        vault_base_url,  # type: str
-        azure_storage_blob_container_uri=None,  # type: Optional["models.SASTokenParameter"]
-        **kwargs  # type: Any
+        self, vault_base_url, storage_resource_uri, token, cls=None, **kwargs
     ):
-        # type: (...) -> "models.FullBackupOperation"
-        cls = kwargs.pop('cls', None)  # type: ClsType["models.FullBackupOperation"]
-        error_map = {404: ResourceNotFoundError, 409: ResourceExistsError}
-        error_map.update(kwargs.pop('error_map', {}))
-        content_type = kwargs.pop("content_type", "application/json")
+        error_map = kwargs.pop('error_map', None)
+        azure_storage_blob_container_uri = None
+        if storage_resource_uri is not None or token is not None:
+            azure_storage_blob_container_uri = models.SASTokenParameter(storage_resource_uri=storage_resource_uri,
+                                                                        token=token)
 
         # Construct URL
-        url = self._full_backup_initial.metadata['url']  # type: ignore
+        url = self._full_backup_initial.metadata['url']
         path_format_arguments = {
             'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True),
         }
         url = self._client.format_url(url, **path_format_arguments)
 
         # Construct parameters
-        query_parameters = {}  # type: Dict[str, Any]
-        query_parameters['api-version'] = self._serialize.query("api_version", self.api_version, 'str')
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
 
         # Construct headers
-        header_parameters = {}  # type: Dict[str, Any]
-        header_parameters['Content-Type'] = self._serialize.header("content_type", content_type, 'str')
+        header_parameters = {}
         header_parameters['Accept'] = 'application/json'
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self._config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
 
-        body_content_kwargs = {}  # type: Dict[str, Any]
         if azure_storage_blob_container_uri is not None:
             body_content = self._serialize.body(azure_storage_blob_container_uri, 'SASTokenParameter')
         else:
             body_content = None
-        body_content_kwargs['content'] = body_content
-        request = self._client.post(url, query_parameters, header_parameters, **body_content_kwargs)
+        request = self._client.post(url, query_parameters, header_parameters, body_content)
 
         pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [202]:
             map_error(status_code=response.status_code, response=response, error_map=error_map)
-            error = self._deserialize(models.KeyVaultError, response)
-            raise HttpResponseError(response=response, model=error)
+            raise models.KeyVaultErrorException(response, self._deserialize)
 
-        response_headers = {}
-        response_headers['Retry-After'] = self._deserialize('int', response.headers.get('Retry-After'))
-        response_headers['Azure-AsyncOperation'] = self._deserialize('str',
-                                                                     response.headers.get('Azure-AsyncOperation'))
-        deserialized = self._deserialize('FullBackupOperation', pipeline_response)
+        header_dict = {}
+        deserialized = None
+        if response.status_code == 202:
+            deserialized = self._deserialize('FullBackupOperation', response)
+            header_dict = {
+                'Retry-After': self._deserialize('int', response.headers.get('Retry-After')),
+                'Azure-AsyncOperation': self._deserialize('str', response.headers.get('Azure-AsyncOperation')),
+            }
 
         if cls:
-            return cls(pipeline_response, deserialized, response_headers)
+            return cls(response, deserialized, header_dict)
 
         return deserialized
-    _full_backup_initial.metadata = {'url': '/backup'}  # type: ignore
+    _full_backup_initial.metadata = {'url': '/backup'}
 
     def begin_full_backup(
-        self,
-        vault_base_url,  # type: str
-        azure_storage_blob_container_uri=None,  # type: Optional["models.SASTokenParameter"]
-        **kwargs  # type: Any
+        self, vault_base_url, storage_resource_uri, token, cls=None, **kwargs
     ):
-        """Creates a full backup using a user-provided SAS token to an Azure blob storage container.
+        """Creates a full backup using a user-provided SAS token to an Azure blob
+        storage container.
 
-        :param vault_base_url: The vault name, for example https://myvault.vault.azure.net.
+        :param vault_base_url: The vault name, for example
+         https://myvault.vault.azure.net.
         :type vault_base_url: str
-        :param azure_storage_blob_container_uri: Azure blob shared access signature token pointing to a
-         valid Azure blob container where full backup needs to be stored. This token needs to be valid
-         for at least next 24 hours from the time of making this call.
-        :type azure_storage_blob_container_uri: ~key_vault_client.models.SASTokenParameter
-        :keyword callable cls: A custom type or function that will be passed the direct response
-        :keyword str continuation_token: A continuation token to restart a poller from a saved state.
-        :keyword polling: True for ARMPolling, False for no polling, or a
-         polling object for personal polling strategy
-        :paramtype polling: bool or ~azure.core.polling.PollingMethod
-        :keyword int polling_interval: Default waiting time between two polls for LRO operations if no Retry-After header is present.
-        :return: An instance of LROPoller that returns either FullBackupOperation or the result of cls(response)
-        :rtype: ~azure.core.polling.LROPoller[~key_vault_client.models.FullBackupOperation]
-        :raises ~azure.core.exceptions.HttpResponseError:
+        :param storage_resource_uri: Azure Blob storage container Uri
+        :type storage_resource_uri: str
+        :param token: The SAS token pointing to an Azure Blob storage
+         container
+        :type token: str
+        :param callable cls: A custom type or function that will be passed the
+         direct response
+        :return: FullBackupOperation or the result of cls(response)
+        :rtype: ~azure.keyvault.v7_2.models.FullBackupOperation
+        :raises:
+         :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
         """
-        polling = kwargs.pop('polling', False)  # type: Union[bool, PollingMethod]
-        cls = kwargs.pop('cls', None)  # type: ClsType["models.FullBackupOperation"]
+        polling = kwargs.pop('polling', False)
+        cls = kwargs.pop('cls', None)
         lro_delay = kwargs.pop(
             'polling_interval',
             self._config.polling_interval
@@ -5446,7 +5442,8 @@ class KeyVaultClientOperationsMixin(object):
         if cont_token is None:
             raw_result = self._full_backup_initial(
                 vault_base_url=vault_base_url,
-                azure_storage_blob_container_uri=azure_storage_blob_container_uri,
+                storage_resource_uri=storage_resource_uri,
+                token=token,
                 cls=lambda x,y,z: x,
                 **kwargs
             )
@@ -5456,7 +5453,7 @@ class KeyVaultClientOperationsMixin(object):
 
         def get_long_running_output(pipeline_response):
             response_headers = {}
-            response = pipeline_response.http_response
+            response = pipeline_response.internal_response
             response_headers['Retry-After'] = self._deserialize('int', response.headers.get('Retry-After'))
             response_headers['Azure-AsyncOperation'] = self._deserialize('str',
                                                                          response.headers.get('Azure-AsyncOperation'))
@@ -5486,11 +5483,10 @@ class KeyVaultClientOperationsMixin(object):
 
     def full_backup_status(
         self,
-        vault_base_url,  # type: str
-        job_id,  # type: str
-        **kwargs  # type: Any
+        vault_base_url,
+        job_id,
+        **kwargs
     ):
-        # type: (...) -> "models.FullBackupOperation"
         """Returns the status of full backup operation.
 
         :param vault_base_url: The vault name, for example https://myvault.vault.azure.net.
@@ -5502,12 +5498,9 @@ class KeyVaultClientOperationsMixin(object):
         :rtype: ~key_vault_client.models.FullBackupOperation
         :raises: ~azure.core.exceptions.HttpResponseError
         """
-        cls = kwargs.pop('cls', None)  # type: ClsType["models.FullBackupOperation"]
-        error_map = {404: ResourceNotFoundError, 409: ResourceExistsError}
-        error_map.update(kwargs.pop('error_map', {}))
-
+        error_map = kwargs.pop('error_map', None)
         # Construct URL
-        url = self.full_backup_status.metadata['url']  # type: ignore
+        url = self.full_backup_status.metadata['url']
         path_format_arguments = {
             'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True),
             'jobId': self._serialize.url("job_id", job_id, 'str'),
@@ -5515,72 +5508,76 @@ class KeyVaultClientOperationsMixin(object):
         url = self._client.format_url(url, **path_format_arguments)
 
         # Construct parameters
-        query_parameters = {}  # type: Dict[str, Any]
-        query_parameters['api-version'] = self._serialize.query("api_version", self.api_version, 'str')
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
 
         # Construct headers
-        header_parameters = {}  # type: Dict[str, Any]
+        header_parameters = {}
         header_parameters['Accept'] = 'application/json'
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self._config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+
+        # Construct and send request
         request = self._client.get(url, query_parameters, header_parameters)
         pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=error_map)
-            error = self._deserialize(models.KeyVaultError, response)
-            raise HttpResponseError(response=response, model=error)
+            raise models.KeyVaultErrorException(response, self._deserialize)
 
-        deserialized = self._deserialize('FullBackupOperation', pipeline_response)
+        deserialized = None
+        if response.status_code == 200:
+            deserialized = self._deserialize('FullBackupOperation', response)
 
         if cls:
-            return cls(pipeline_response, deserialized, {})
+            return cls(response, deserialized, None)
 
         return deserialized
-    full_backup_status.metadata = {'url': '/backup/{jobId}/pending'}  # type: ignore
+    full_backup_status.metadata = {'url': '/backup/{jobId}/pending'}
 
     def _full_restore_operation_initial(
-        self,
-        vault_base_url,  # type: str
-        restore_blob_details=None,  # type: Optional["models.RestoreOperationParameters"]
-        **kwargs  # type: Any
+        self, vault_base_url, sas_token_parameters, folder_to_restore, cls=None, **kwargs
     ):
-        # type: (...) -> "models.RestoreOperation"
-        cls = kwargs.pop('cls', None)  # type: ClsType["models.RestoreOperation"]
-        error_map = {404: ResourceNotFoundError, 409: ResourceExistsError}
-        error_map.update(kwargs.pop('error_map', {}))
-        content_type = kwargs.pop("content_type", "application/json")
+        error_map = kwargs.pop('error_map', None)
+        restore_blob_details = None
+        if sas_token_parameters is not None or folder_to_restore is not None:
+            restore_blob_details = models.RestoreOperationParameters(sas_token_parameters=sas_token_parameters,
+                                                                     folder_to_restore=folder_to_restore)
 
         # Construct URL
-        url = self._full_restore_operation_initial.metadata['url']  # type: ignore
+        url = self._full_restore_operation_initial.metadata['url']
         path_format_arguments = {
             'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True),
         }
         url = self._client.format_url(url, **path_format_arguments)
 
         # Construct parameters
-        query_parameters = {}  # type: Dict[str, Any]
-        query_parameters['api-version'] = self._serialize.query("api_version", self.api_version, 'str')
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
 
         # Construct headers
-        header_parameters = {}  # type: Dict[str, Any]
-        header_parameters['Content-Type'] = self._serialize.header("content_type", content_type, 'str')
+        header_parameters = {}
         header_parameters['Accept'] = 'application/json'
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self._config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
 
-        body_content_kwargs = {}  # type: Dict[str, Any]
+        # Construct body
         if restore_blob_details is not None:
             body_content = self._serialize.body(restore_blob_details, 'RestoreOperationParameters')
         else:
             body_content = None
-        body_content_kwargs['content'] = body_content
-        request = self._client.put(url, query_parameters, header_parameters, **body_content_kwargs)
 
+        # Construct and send request
+        request = self._client.put(url, query_parameters, header_parameters, body_content)
         pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
-        response = pipeline_response.http_response
+        response = pipeline_response.internal_response
 
         if response.status_code not in [202]:
             map_error(status_code=response.status_code, response=response, error_map=error_map)
-            error = self._deserialize(models.KeyVaultError, response)
-            raise HttpResponseError(response=response, model=error)
+            raise models.KeyVaultErrorException(response, self._deserialize)
 
         response_headers = {}
         response_headers['Retry-After'] = self._deserialize('int', response.headers.get('Retry-After'))
@@ -5595,29 +5592,26 @@ class KeyVaultClientOperationsMixin(object):
     _full_restore_operation_initial.metadata = {'url': '/restore'}  # type: ignore
 
     def begin_full_restore_operation(
-        self,
-        vault_base_url,  # type: str
-        restore_blob_details=None,  # type: Optional["models.RestoreOperationParameters"]
-        **kwargs  # type: Any
+        self, vault_base_url, sas_token_parameters, folder_to_restore, cls=None, **kwargs
     ):
-        # type: (...) -> LROPoller["models.RestoreOperation"]
-        """Restores all key materials using the SAS token pointing to a previously stored Azure Blob
-        storage backup folder.
+        """Restores all key materials using the SAS token pointing to a previously
+        stored Azure Blob storage backup folder.
 
-        :param vault_base_url: The vault name, for example https://myvault.vault.azure.net.
+        :param vault_base_url: The vault name, for example
+         https://myvault.vault.azure.net.
         :type vault_base_url: str
-        :param restore_blob_details: The Azure blob SAS token pointing to a folder where the previous
-         successful full backup was stored.
-        :type restore_blob_details: ~key_vault_client.models.RestoreOperationParameters
-        :keyword callable cls: A custom type or function that will be passed the direct response
-        :keyword str continuation_token: A continuation token to restart a poller from a saved state.
-        :keyword polling: True for ARMPolling, False for no polling, or a
-         polling object for personal polling strategy
-        :paramtype polling: bool or ~azure.core.polling.PollingMethod
-        :keyword int polling_interval: Default waiting time between two polls for LRO operations if no Retry-After header is present.
-        :return: An instance of LROPoller that returns either RestoreOperation or the result of cls(response)
-        :rtype: ~azure.core.polling.LROPoller[~key_vault_client.models.RestoreOperation]
-        :raises ~azure.core.exceptions.HttpResponseError:
+        :param sas_token_parameters:
+        :type sas_token_parameters:
+         ~azure.keyvault.v7_2.models.SASTokenParameter
+        :param folder_to_restore: The Folder name of the blob where the
+         previous successful full backup was stored
+        :type folder_to_restore: str
+        :param callable cls: A custom type or function that will be passed the
+         direct response
+        :return: FullRestoreOperation or the result of cls(response)
+        :rtype: ~azure.keyvault.v7_2.models.FullRestoreOperation
+        :raises:
+         :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
         """
         polling = kwargs.pop('polling', False)  # type: Union[bool, PollingMethod]
         cls = kwargs.pop('cls', None)  # type: ClsType["models.RestoreOperation"]
@@ -5629,7 +5623,8 @@ class KeyVaultClientOperationsMixin(object):
         if cont_token is None:
             raw_result = self._full_restore_operation_initial(
                 vault_base_url=vault_base_url,
-                restore_blob_details=restore_blob_details,
+                sas_token_parameters=sas_token_parameters,
+                folder_to_restore=folder_to_restore,
                 cls=lambda x,y,z: x,
                 **kwargs
             )
@@ -5639,7 +5634,7 @@ class KeyVaultClientOperationsMixin(object):
 
         def get_long_running_output(pipeline_response):
             response_headers = {}
-            response = pipeline_response.http_response
+            response = pipeline_response.internal_response
             response_headers['Retry-After'] = self._deserialize('int', response.headers.get('Retry-After'))
             response_headers['Azure-AsyncOperation'] = self._deserialize('str',
                                                                          response.headers.get('Azure-AsyncOperation'))
@@ -5706,7 +5701,7 @@ class KeyVaultClientOperationsMixin(object):
         header_parameters['Accept'] = 'application/json'
         request = self._client.get(url, query_parameters, header_parameters)
         pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
-        response = pipeline_response.http_response
+        response = pipeline_response.internal_response
 
         if response.status_code not in [200]:
             map_error(status_code=response.status_code, response=response, error_map=error_map)
