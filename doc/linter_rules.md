@@ -10,7 +10,7 @@ This document lists the set of linter rules that would be applied to each PR in 
 ## Severity
 Linter rule has three kinds of severity: High, Medium and Low.
 
-Rule with **high** severity is mandatory and must be passed in a PR. If you want bypass this linter rule, please contact corresponding reviewer.
+Rule with **high** severity is mandatory and must be passed in a PR. If you want bypass this linter rule, please contact corresponding reviewer or contact [AzCLIDev](AzCLIDev@microsoft.com).
 
 Rule with **medium** severity is not mandatory for a PR. But we recommend author following the guidance since they are best practice for Azure CLI.
 
