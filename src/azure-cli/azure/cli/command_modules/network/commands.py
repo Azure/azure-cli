@@ -518,7 +518,7 @@ def load_command_table(self, _):
                             min_api='2020-05-01',
                             is_preview=True) as g:
         g.custom_command('add', 'add_ag_private_link_ip')
-        g.custom_command('remove', 'remove_ag_private_link_ip')
+        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True)
     # endregion
 
     # region ApplicationGatewayWAFPolicy

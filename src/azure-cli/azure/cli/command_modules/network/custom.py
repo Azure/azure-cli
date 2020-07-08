@@ -640,6 +640,16 @@ def remove_ag_private_link_ip(cmd,
     else:
         raise CLIError("Priavte Link doesn't exist")
 
+    updated_private_link_ip_config = updated_private_link.ip_configurations
+    for pic in updated_private_link.ip_configurations:
+        if pic.name == private_link_ip_name:
+            updated_private_link_ip_config.remove(pic)
+            break
+    else:
+        raise CLIError("IP Configuration doesn't exist")
+
+    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
                                                probe=None, protocol='http', cookie_based_affinity=None, timeout=None,
