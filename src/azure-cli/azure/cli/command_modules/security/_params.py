@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
 
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 resource_group_name_type)
