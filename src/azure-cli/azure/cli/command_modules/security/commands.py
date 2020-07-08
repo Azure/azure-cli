@@ -32,6 +32,8 @@ from ._client_factory import (cf_security_tasks,
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
+
 def load_command_table(self, _):
 
     security_regulatory_compliance_standards_sdk = CliCommandType(
