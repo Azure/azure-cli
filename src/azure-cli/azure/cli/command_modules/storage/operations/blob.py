@@ -89,7 +89,7 @@ def set_delete_policy(client, enable=None, days_retained=None):
 
 
 def set_blob_service_properties(client, parameters, delete_retention=None, delete_retention_period=None,
-                           static_website=None, index_document=None, error_document_404_path=None, timeout=None):
+                                static_website=None, index_document=None, error_document_404_path=None, timeout=None):
     # update
     kwargs = {}
     if 'delete_retention_policy' in parameters:
