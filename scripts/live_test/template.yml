@@ -64,13 +64,15 @@ jobs:
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
+      condition: succeededOrFailed()
       inputs:
-        PathtoPublish: '$(Target).report.json'
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.json'
         ArtifactName: '$(Target).report.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
+      condition: succeededOrFailed()
       inputs:
-        PathtoPublish: '$(Target).report.html'
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.html'
         ArtifactName: '$(Target).report.html'
         publishLocation: 'Container'
 
