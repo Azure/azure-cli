@@ -522,22 +522,22 @@ type: group
 short-summary: View all possible traffic between resources for the subscription and location, based on connection type.
 """
 
-helps['security allowed_connections list'] = """
+helps['security adaptive_application_controls list'] = """
 type: command
-short-summary: list of all possible traffic between resources for the subscription.
+short-summary: Adaptive Application Controls - List
 examples:
-  - name: Get possible traffic between resources at the subscription level.
+  - name: 
     text: >
-        az security allowed_connections list
+        az adaptive_application_controls list
 """
 
-helps['security allowed_connections show'] = """
+helps['security adaptive_application_controls show'] = """
 type: command
-short-summary: List all possible traffic between resources for the subscription and location, based on connection type.
+short-summary: Adaptive Application Controls - Get
 examples:
-  - name: Get all possible traffic between resources for the subscription and location, based on connection type.
+  - name: Gets an application control VM/server group.
     text: >
-        az security allowed_connections show --name Internal --resource-group mygroup
+        az security adaptive_application_controls show --group-name GROUP1
 """
 
 helps['security iot-solution'] = """
