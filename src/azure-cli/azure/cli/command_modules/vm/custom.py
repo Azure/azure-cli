@@ -3129,14 +3129,27 @@ def fix_gallery_image_date_info(date_info):
     return date_info
 
 
-def update_image_version(instance, target_regions=None, replica_count=None):
+def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
+                         target_regions=None, replica_count=None, no_wait=False, **kwargs):
+    gallery_image_version = kwargs['gallery_image_version']
+
     if target_regions:
-        instance.publishing_profile.target_regions = target_regions
+        gallery_image_version.publishing_profile.target_regions = target_regions
     if replica_count:
-        instance.publishing_profile.replica_count = replica_count
-    if instance.storage_profile.source is not None:
-        instance.storage_profile.os_disk_image = instance.storage_profile.data_disk_images = None
-    return instance
+        gallery_image_version.publishing_profile.replica_count = replica_count
+    if gallery_image_version.storage_profile.source is not None:
+        gallery_image_version.storage_profile.os_disk_image = gallery_image_version.storage_profile.data_disk_images = None
+
+    aux_subscriptions = None
+    if gallery_image_version.storage_profile and gallery_image_version.storage_profile.source and \
+            gallery_image_version.storage_profile.source.id:
+        from msrestazure.tools import is_valid_resource_id, parse_resource_id
+        if is_valid_resource_id(gallery_image_version.storage_profile.source.id):
+            res = parse_resource_id(gallery_image_version.storage_profile.source.id)
+            aux_subscriptions = [res['subscription']]
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+    return sdk_no_wait(no_wait, client.gallery_image_versions.create_or_update, resource_group_name, gallery_name,
+                       gallery_image_name, gallery_image_version_name, **kwargs)
 # endregion
 
 
