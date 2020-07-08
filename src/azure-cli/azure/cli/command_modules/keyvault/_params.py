@@ -26,7 +26,7 @@ from ._validators import (
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_and_hsm_id, validate_sas_definition_id, validate_storage_account_id,
-    validate_storage_disabled_attribute, validate_deleted_vault_name)
+    validate_storage_disabled_attribute, validate_deleted_vault_name, validate_encryption, validate_decryption)
 
 # CUSTOM CHOICE LISTS
 
@@ -37,9 +37,11 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
     (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
-     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes) = self.get_models(
+     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes,
+     JsonWebKeyEncryptionAlgorithm) = self.get_models(
          'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
+         'JsonWebKeyEncryptionAlgorithm',
          resource_type=ResourceType.DATA_KEYVAULT)
 
     class CLIJsonWebKeyOperation(str, Enum):
@@ -182,7 +184,7 @@ def load_arguments(self, _):
                        help='The {} version. If omitted, uses the latest version.'.format(item), default='',
                        required=False, completer=get_keyvault_version_completion_list(item))
 
-        for cmd in ['backup', 'delete', 'download', 'list-versions', 'set-attributes', 'show']:
+        for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 try:
                     c.extra('identifier', options_list=['--id'],
@@ -300,6 +302,16 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
+
+    for scope in ['encrypt', 'decrypt']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
+
+    with self.argument_context('keyvault key encrypt') as c:
+        c.argument('value', help='The value to be encrypted.', validator=validate_encryption)
+
+    with self.argument_context('keyvault key decrypt') as c:
+        c.argument('value', help='The value to be decrypted.', validator=validate_decryption)
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:

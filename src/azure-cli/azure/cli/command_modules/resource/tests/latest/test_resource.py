@@ -55,6 +55,32 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         self.assertEqual('"1.0.0.0"\n', result.output)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
+    def test_resource_group_export_skip_all_params(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+        self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
+        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-all-params --query "parameters"')
+
+        self.assertEqual('{}\n', result.output)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
+    def test_resource_group_export_skip_resource_name_params(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+        self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
+        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-params --query "parameters"')
+
+        self.assertEqual('{}\n', result.output)
+
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
 
@@ -1192,6 +1218,10 @@ class FeatureScenarioTest(ScenarioTest):
 
         # Once a feature goes GA , it will be removed from the feature list. Once that happens, use other ones to test
         self.cmd('feature show --namespace Microsoft.Network -n AllowLBPreview')
+
+    @AllowLargeResponse(8192)
+    def test_feature_unregister(self):
+        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=self.check('properties.state', 'Unregistered'))
 
 
 class PolicyScenarioTest(ScenarioTest):

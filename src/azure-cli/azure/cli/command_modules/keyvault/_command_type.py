@@ -61,6 +61,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
         self._check_stale()
 
         merged_kwargs = self._flatten_kwargs(kwargs, command_type_name)
+        self._apply_tags(merged_kwargs, kwargs, name)
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
 

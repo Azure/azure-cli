@@ -16,7 +16,8 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
+    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id,
+    process_subscription_id)
 
 from knack.arguments import CLIArgumentType
 
@@ -244,6 +245,17 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor diagnostic-settings categories show') as c:
         c.resource_parameter('resource_uri', required=True)
+
+    with self.argument_context('monitor diagnostic-settings subscription') as c:
+        import argparse
+        c.argument('subscription_id', validator=process_subscription_id, help=argparse.SUPPRESS, required=False)
+        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file.")
+        c.argument('name', help='The name of the diagnostic setting.', options_list=['--name', '-n'])
+        c.argument('event_hub_name', help='The name of the event hub. If none is specified, the default event hub will be selected.')
+        c.argument('event_hub_auth_rule', help='The resource Id for the event hub authorization rule.')
+        c.argument('workspace', help='The resource id of the log analytics workspace.')
+        c.argument('storage_account', help='The resource id of the storage account to which you would like to send the Activity Log.')
+        c.argument('service_bus_rule', help="The service bus rule ID of the service bus namespace in which you would like to have Event Hubs created for streaming the Activity Log. The rule ID is of the format '{service bus resource ID}/authorizationrules/{key name}'.")
     # endregion
 
     # region LogProfiles

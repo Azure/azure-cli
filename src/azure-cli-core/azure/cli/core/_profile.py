@@ -14,7 +14,6 @@ import re
 import string
 from copy import deepcopy
 from enum import Enum
-from six.moves import BaseHTTPServer
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
@@ -650,9 +649,11 @@ class Profile(object):
                                                                   tenant_dest, resource)
             else:
                 # Service Principal
+                use_cert_sn_issuer = bool(account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH))
                 creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
                                                                                resource,
-                                                                               tenant_dest)
+                                                                               tenant_dest,
+                                                                               use_cert_sn_issuer)
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
@@ -1132,22 +1133,25 @@ class ServicePrincipalAuth(object):
     def __init__(self, password_arg_value, use_cert_sn_issuer=None):
         if not password_arg_value:
             raise CLIError('missing secret or certificate in order to '
-                           'authnenticate through a service principal')
+                           'authenticate through a service principal')
         if os.path.isfile(password_arg_value):
             certificate_file = password_arg_value
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM
             self.certificate_file = certificate_file
             self.public_certificate = None
-            with open(certificate_file, 'r') as file_reader:
-                self.cert_file_string = file_reader.read()
-                cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
-                self.thumbprint = cert.digest("sha1").decode()
-                if use_cert_sn_issuer:
-                    # low-tech but safe parsing based on
-                    # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
-                    match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
-                                      self.cert_file_string, re.I)
-                    self.public_certificate = match.group('public').strip()
+            try:
+                with open(certificate_file, 'r') as file_reader:
+                    self.cert_file_string = file_reader.read()
+                    cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
+                    self.thumbprint = cert.digest("sha1").decode()
+                    if use_cert_sn_issuer:
+                        # low-tech but safe parsing based on
+                        # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
+                        match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
+                                          self.cert_file_string, re.I)
+                        self.public_certificate = match.group('public').strip()
+            except UnicodeDecodeError:
+                raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
             self.secret = password_arg_value
 
@@ -1171,43 +1175,43 @@ class ServicePrincipalAuth(object):
         return entry
 
 
-class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-few-public-methods
-    query_params = {}
-
-
-class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    # pylint: disable=line-too-long
-
-    def do_GET(self):
-        try:
-            from urllib.parse import parse_qs
-        except ImportError:
-            from urlparse import parse_qs  # pylint: disable=import-error
-
-        if self.path.endswith('/favicon.ico'):  # deal with legacy IE
-            self.send_response(204)
-            return
-
-        query = self.path.split('?', 1)[-1]
-        query = parse_qs(query, keep_blank_values=True)
-        self.server.query_params = query
-
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-        landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
-                                    'ok.html' if 'code' in query else 'fail.html')
-        with open(landing_file, 'rb') as html_file:
-            self.wfile.write(html_file.read())
-
-    def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
-        pass  # this prevent http server from dumping messages to stdout
-
-
 def _get_authorization_code_worker(authority_url, resource, results):
+    # pylint: disable=too-many-statements
     import socket
     import random
+    import http.server
+
+    class ClientRedirectServer(http.server.HTTPServer):  # pylint: disable=too-few-public-methods
+        query_params = {}
+
+    class ClientRedirectHandler(http.server.BaseHTTPRequestHandler):
+        # pylint: disable=line-too-long
+
+        def do_GET(self):
+            try:
+                from urllib.parse import parse_qs
+            except ImportError:
+                from urlparse import parse_qs  # pylint: disable=import-error
+
+            if self.path.endswith('/favicon.ico'):  # deal with legacy IE
+                self.send_response(204)
+                return
+
+            query = self.path.split('?', 1)[-1]
+            query = parse_qs(query, keep_blank_values=True)
+            self.server.query_params = query
+
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
+                                        'ok.html' if 'code' in query else 'fail.html')
+            with open(landing_file, 'rb') as html_file:
+                self.wfile.write(html_file.read())
+
+        def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
+            pass  # this prevent http server from dumping messages to stdout
 
     reply_url = None
 

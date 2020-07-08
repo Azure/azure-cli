@@ -154,6 +154,8 @@ def load_command_table(self, _):
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
         g.keyvault_custom('get-policy-template', 'get_policy_template')
+        g.keyvault_command('encrypt', 'encrypt', is_preview=True)
+        g.keyvault_command('decrypt', 'decrypt', is_preview=True)
 
     with self.command_group('keyvault secret', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_secrets',

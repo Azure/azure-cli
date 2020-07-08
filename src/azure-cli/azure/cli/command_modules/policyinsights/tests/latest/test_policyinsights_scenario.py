@@ -17,8 +17,8 @@ class PolicyInsightsTests(ScenarioTest):
         apply_clause = '--apply "groupby((policyAssignmentId, resourceId), aggregate($count as numRecords))"'
         select_clause = '--select "policyAssignmentId, resourceId, numRecords"'
         order_by_clause = '--order-by "numRecords desc"'
-        from_clause = '--from "2020-01-01T00:00:00Z"'
-        to_clause = '--to "2020-01-10T22:30:00Z"'
+        from_clause = '--from "2020-04-01T00:00:00Z"'
+        to_clause = '--to "2020-04-07T01:30:00Z"'
         scopes = [
             '-m "azgovtest5"',
             '',
@@ -75,6 +75,32 @@ class PolicyInsightsTests(ScenarioTest):
             top_clause
         ), checks=[
             self.check('length([?complianceState==`NonCompliant`].policyEvaluationDetails)', 2)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_triggerscan')
+    def test_policy_insights_triggerscan(self):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '96670d01-0a4d-4649-9c89-2d3abc0a5025'
+        })
+
+        # create a subscription policy assignment that we can get an updated compliance state for
+        self.cmd(
+            'policy assignment create --policy {bip} -n {pan} --resource-group {rg} -p \'{{ "tagName": {{ "value": "notThere" }} }}\'')
+
+        # trigger a subscription scan and do not wait for it to complete
+        self.cmd('policy state trigger-scan --no-wait', checks=[
+            self.is_empty()
+        ])
+
+        # trigger a resource group scan and wait for it to complete
+        self.cmd('policy state trigger-scan -g {rg}', checks=[
+            self.is_empty()
+        ])
+
+        # ensure the compliance state of the resource group was updated
+        self.cmd('policy state list -g {rg} -a {pan} --filter \"isCompliant eq false\"', checks=[
+            self.check("length([])", 1)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_remediation')

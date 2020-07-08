@@ -7,6 +7,7 @@ import shutil
 from azure.cli.testsdk import (StorageAccountPreparer, LiveScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                api_version_constraint)
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
+from knack.util import CLIError
 
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
@@ -104,6 +105,10 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         self.cmd('storage remove -c {} -n readme --account-name {}'.format(
             container, storage_account))
+
+        self.cmd('storage remove -c {} -n readme --account-name {}'.format(
+            container, storage_account), expect_failure=True)
+
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 40))
 
@@ -122,19 +127,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 10))
 
-        self.cmd('storage remove -c {} -n duff --account-name {}'.format(
-            container, storage_account))
-        self.cmd('storage blob list -c {} --account-name {}'.format(
-            container, storage_account), checks=JMESPathCheck('length(@)', 10))
-
         # sync directory
         self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             test_dir, container, storage_account))
-        self.cmd('storage blob list -c {} --account-name {}'.format(
-            container, storage_account), checks=JMESPathCheck('length(@)', 41))
-
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_*"'.format(
-            container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 

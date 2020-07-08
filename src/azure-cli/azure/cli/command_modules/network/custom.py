@@ -876,7 +876,7 @@ def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gat
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     root_cert = ApplicationGatewayTrustedRootCertificate(name=item_name, data=cert_data,
-                                                         keyvault_secret_id=keyvault_secret)
+                                                         key_vault_secret_id=keyvault_secret)
     upsert_to_collection(ag, 'trusted_root_certificates', root_cert, 'name')
     return sdk_no_wait(no_wait, ncf.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -886,7 +886,7 @@ def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=No
     if cert_data is not None:
         instance.data = cert_data
     if keyvault_secret is not None:
-        instance.keyvault_secret_id = keyvault_secret
+        instance.key_vault_secret_id = keyvault_secret
     return parent
 
 
@@ -2269,14 +2269,26 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # pylint: disable=unused-argument
 def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
                                     peering, circuit_name=None, authorization_key=None, routing_weight=None,
-                                    enable_internet_security=None):
-    ExpressRouteConnection, SubResource = cmd.get_models('ExpressRouteConnection', 'SubResource')
+                                    enable_internet_security=None, associated_route_table=None,
+                                    propagated_route_tables=None, labels=None):
+    ExpressRouteConnection, SubResource, RoutingConfiguration, PropagatedRouteTable\
+        = cmd.get_models('ExpressRouteConnection', 'SubResource', 'RoutingConfiguration', 'PropagatedRouteTable')
     client = network_client_factory(cmd.cli_ctx).express_route_connections
+
+    propagated_route_tables = PropagatedRouteTable(
+        labels=labels,
+        ids=[SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]
+    )
+    routing_configuration = RoutingConfiguration(
+        associated_route_table=SubResource(id=associated_route_table),
+        propagated_route_tables=propagated_route_tables
+    )
     connection = ExpressRouteConnection(
         name=connection_name,
         express_route_circuit_peering=SubResource(id=peering) if peering else None,
         authorization_key=authorization_key,
-        routing_weight=routing_weight
+        routing_weight=routing_weight,
+        routing_configuration=routing_configuration
     )
 
     if enable_internet_security and cmd.supported_api_version(min_api='2019-09-01'):
@@ -2287,7 +2299,8 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
 
 # pylint: disable=unused-argument
 def update_express_route_connection(instance, cmd, circuit_name=None, peering=None, authorization_key=None,
-                                    routing_weight=None, enable_internet_security=None):
+                                    routing_weight=None, enable_internet_security=None, associated_route_table=None,
+                                    propagated_route_tables=None, labels=None):
     SubResource = cmd.get_models('SubResource')
     if peering is not None:
         instance.express_route_connection_id = SubResource(id=peering)
@@ -2297,6 +2310,20 @@ def update_express_route_connection(instance, cmd, circuit_name=None, peering=No
         instance.routing_weight = routing_weight
     if enable_internet_security is not None and cmd.supported_api_version(min_api='2019-09-01'):
         instance.enable_internet_security = enable_internet_security
+    if associated_route_table is not None or propagated_route_tables is not None or labels is not None:
+        if instance.routing_configuration is None:
+            RoutingConfiguration = cmd.get_models('RoutingConfiguration')
+            instance.routing_configuration = RoutingConfiguration()
+        if associated_route_table is not None:
+            instance.routing_configuration.associated_route_table = SubResource(id=associated_route_table)
+        if propagated_route_tables is not None or labels is not None:
+            if instance.routing_configuration.propagated_route_tables is None:
+                PropagatedRouteTable = cmd.get_models('PropagatedRouteTable')
+                instance.routing_configuration.propagated_route_tables = PropagatedRouteTable()
+            if propagated_route_tables is not None:
+                instance.routing_configuration.propagated_route_tables.ids = [SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]  # pylint: disable=line-too-long
+            if labels is not None:
+                instance.routing_configuration.propagated_route_tables.labels = labels
 
     return instance
 # endregion
@@ -2895,14 +2922,115 @@ def set_lb_frontend_ip_configuration(
     return parent
 
 
-def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, item_name):
-    BackendAddressPool = cmd.get_models('BackendAddressPool')
+def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
+                                   vnet=None, backend_addresses=None, backend_addresses_config_file=None):
+    def _process_vnet_name_and_id(vnet):
+        if vnet and not is_valid_resource_id(vnet):
+            vnet = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='virtualNetworks',
+                name=vnet)
+        return vnet
+    if backend_addresses and backend_addresses_config_file:
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
+    if backend_addresses_config_file:
+        if not isinstance(backend_addresses_config_file, list):
+            raise CLIError('Config file must be a list. Please see example as a reference.')
+        for addr in backend_addresses_config_file:
+            if not isinstance(addr, dict):
+                raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
-    new_pool = BackendAddressPool(name=item_name)
-    upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
-    poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().backend_address_pools, item_name)
+    (BackendAddressPool,
+     LoadBalancerBackendAddress,
+     VirtualNetwork) = cmd.get_models('BackendAddressPool',
+                                      'LoadBalancerBackendAddress',
+                                      'VirtualNetwork')
+    # Before 2020-03-01, service doesn't support the other rest method.
+    # We have to use old one to keep backward compatibility.
+    # Same for basic sku. service refuses that basic sku lb call the other rest method.
+    if cmd.supported_api_version(max_api='2020-03-01') or lb.sku.name.lower() == 'basic':
+        new_pool = BackendAddressPool(name=backend_address_pool_name)
+        upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
+        poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+        return get_property(poller.result().backend_address_pools, backend_address_pool_name)
+
+    addresses_pool = []
+    if backend_addresses:
+        addresses_pool.extend(backend_addresses)
+    if backend_addresses_config_file:
+        addresses_pool.extend(backend_addresses_config_file)
+    for addr in addresses_pool:
+        if 'virtual_network' not in addr and vnet:
+            addr['virtual_network'] = vnet
+    # pylint: disable=line-too-long
+    try:
+        new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
+                                                    virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),
+                                                    ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
+    except KeyError:
+        raise CLIError('Each backend address must have name, vnet and ip-address information.')
+    new_pool = BackendAddressPool(name=backend_address_pool_name,
+                                  load_balancer_backend_addresses=new_addresses)
+    return ncf.load_balancer_backend_address_pools.create_or_update(resource_group_name,
+                                                                    load_balancer_name,
+                                                                    backend_address_pool_name,
+                                                                    new_pool)
+
+
+def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
+    from azure.cli.core.commands import LongRunningOperation
+    ncf = network_client_factory(cmd.cli_ctx)
+    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+
+    def delete_basic_lb_backend_address_pool():
+        new_be_pools = [pool for pool in lb.backend_address_pools
+                        if pool.name.lower() != backend_address_pool_name.lower()]
+        lb.backend_address_pools = new_be_pools
+        poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+        result = LongRunningOperation(cmd.cli_ctx)(poller).backend_address_pools
+        if next((x for x in result if x.name.lower() == backend_address_pool_name.lower()), None):
+            raise CLIError("Failed to delete '{}' on '{}'".format(backend_address_pool_name, load_balancer_name))
+
+    if lb.sku.name.lower() == 'basic':
+        delete_basic_lb_backend_address_pool()
+        return None
+
+    return ncf.load_balancer_backend_address_pools.delete(resource_group_name,
+                                                          load_balancer_name,
+                                                          backend_address_pool_name)
+
+
+def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
+                                        address_name, vnet, ip_address):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    (LoadBalancerBackendAddress,
+     VirtualNetwork) = cmd.get_models('LoadBalancerBackendAddress',
+                                      'VirtualNetwork')
+    new_address = LoadBalancerBackendAddress(name=address_name,
+                                             virtual_network=VirtualNetwork(id=vnet) if vnet else None,
+                                             ip_address=ip_address if ip_address else None)
+    address_pool.load_balancer_backend_addresses.append(new_address)
+    return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, address_pool)
+
+
+def remove_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
+                                           backend_address_pool_name, address_name):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    lb_addresses = [addr for addr in address_pool.load_balancer_backend_addresses if addr.name != address_name]
+    address_pool.load_balancer_backend_addresses = lb_addresses
+    return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, address_pool)
+
+
+def list_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
+                                         backend_address_pool_name):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    return address_pool.load_balancer_backend_addresses
 
 
 def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,

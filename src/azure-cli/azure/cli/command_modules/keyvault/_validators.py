@@ -448,3 +448,22 @@ def validate_storage_disabled_attribute(attr_arg_name, attr_type):
         attr_arg = attr_type(enabled=(not disabled))
         setattr(ns, attr_arg_name, attr_arg)
     return _validate
+
+
+def validate_encryption(ns):
+    ns.value = _convert_encrypted_value(ns.value)
+
+
+def validate_decryption(ns):
+    ns.value = _convert_decrypted_value(ns.value)
+
+
+def _convert_encrypted_value(value):
+    try:
+        return base64.b64decode(value.encode('utf-8'))
+    except:  # pylint: disable=bare-except
+        return value.encode('utf-8')
+
+
+def _convert_decrypted_value(value):
+    return base64.b64decode(value)

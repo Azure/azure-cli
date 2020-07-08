@@ -156,6 +156,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr replication create') as c:
         c.argument('replication_name', help='The name of the replication. Default to the location name.', completer=None)
 
+    for scope in ['acr replication create', 'acr replication update']:
+        help_str = "Allow routing to this replication. Requests will not be routed to a disabled replication." \
+                   " Data syncing will continue regardless of the region endpoint status."
+        help_str += ' Default: true.' if 'create' in scope else ''  # suffix help with default if command is for create
+
+        with self.argument_context(scope) as c:
+            c.argument('region_endpoint_enabled', arg_type=get_three_state_flag(), help=help_str, is_preview=True)
+
     with self.argument_context('acr run') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'). If '/dev/null' is specified, the value will be set to None and ignored.", completer=FilesCompleter())

@@ -14,7 +14,8 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
+    record_only)
 
 from knack.util import CLIError
 
@@ -536,6 +537,10 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
                  ' -g {rg} --gateway-name {gw} '
                  '--name MySSLCert '
                  '--key-vault-secret-id {secret_id}')
+
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gw} -n cert1 --keyvault-secret {secret_id}', checks=[
+            self.check('trustedRootCertificates[0].keyVaultSecretId', '{secret_id}')
+        ])
 
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
@@ -1765,6 +1770,49 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
 
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route')
+    def test_network_express_route_connection_routing_configuration(self, resource_group):
+        self.kwargs = {
+            'rg': 'dedharrtv3final',
+            'gw': '16297a6ff5314c0f8d0eb580aa7861b3-eastus-er-gw',
+            'connection': 'yuerconnection',
+            'peering': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/expressRouteCircuits/clicktfinal/peerings/AzurePrivatePeering',
+            'route_table1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/virtualHubs/blhub/hubRouteTables/routetable1',
+            'route_table2': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/virtualHubs/blhub/hubRouteTables/routetable2'
+        }
+
+        self.cmd('network express-route gateway connection update '
+                 '-n {connection} '
+                 '-g {rg} '
+                 '--gateway-name {gw} '
+                 '--peering {peering} '
+                 '--associated-route-table {route_table1} '
+                 '--propagated-route-tables {route_table1} {route_table2} '
+                 '--labels label1 label2',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('name', self.kwargs['connection']),
+                     self.check('routingConfiguration.associatedRouteTable.id', self.kwargs['route_table1']),
+                     self.check('length(routingConfiguration.propagatedRouteTables.ids)', 2),
+                     self.check('routingConfiguration.propagatedRouteTables.ids[0].id', self.kwargs['route_table1']),
+                     self.check('routingConfiguration.propagatedRouteTables.ids[1].id', self.kwargs['route_table2']),
+                     self.check('length(routingConfiguration.propagatedRouteTables.labels)', 2),
+                     self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label1'),
+                     self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')])
+
+        self.cmd('network express-route gateway connection show -n {connection} -g {rg} --gateway-name {gw}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['connection']),
+            self.check('routingConfiguration.associatedRouteTable.id', self.kwargs['route_table1']),
+            self.check('length(routingConfiguration.propagatedRouteTables.ids)', 2),
+            self.check('routingConfiguration.propagatedRouteTables.ids[0].id', self.kwargs['route_table1']),
+            self.check('routingConfiguration.propagatedRouteTables.ids[1].id', self.kwargs['route_table2']),
+            self.check('length(routingConfiguration.propagatedRouteTables.labels)', 2),
+            self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label1'),
+            self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')
+        ])
+
 
 class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
@@ -2082,6 +2130,53 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_addresses')
+    def test_network_lb_address_pool_addresses(self, resource_group):
+
+        self.kwargs.update({
+            'lb': 'lb1',
+            'vnet': 'clitestvnet',
+            'nic': 'clitestnic',
+            'rg': resource_group,
+            'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-address-pool-config.json')
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1')
+        self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet}')
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
+
+        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
+            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} --backend-address name=addr2')
+        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
+            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --backend-address name=addr2 ip-address=10.0.0.3')
+        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
+            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} --backend-address ip-address=10.0.0.3')
+
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} '
+                 '--backend-address name=addr1 ip-address=10.0.0.1 '
+                 '--backend-address name=addr2 ip-address=10.0.0.2 '
+                 '--backend-address name=addr3 ip-address=10.0.0.3',
+                 checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address remove -g {rg} --lb-name {lb} --pool-name bap1 --name addr2', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '3'))
+
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n bap1',
+                 checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap1',
+                 checks=self.is_empty())
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} '
+                 '--backend-addresses-config-file @"{lb_address_pool_file_path}"',
+                 checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '2'))
+
     @ResourceGroupPreparer(name_prefix='cli_test_lb_probes')
     def test_network_lb_probes(self, resource_group):
 
@@ -2279,6 +2374,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway')
     def test_network_nic_app_gateway(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
+        import json
 
         self.kwargs.update({
             'nic': 'nic1',
@@ -2299,6 +2395,22 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
+        self.kwargs['ipaddres'] = json.dumps(
+            {
+                "ip_address": "10.20.0.69"
+            }
+        )
+        self.cmd("network application-gateway address-pool update -g {rg} --gateway-name {ag} -n {pool1} --add backendAddresses \'{ipaddres}\'", checks=[
+            self.check('length(backendAddresses)', 1)
+        ])
+        self.kwargs['ipaddres'] = json.dumps(
+            {
+                "ip_address": "10.20.0.70"
+            }
+        )
+        self.cmd("network application-gateway address-pool update -g {rg} --gateway-name {ag} -n {pool1} --add backendAddresses \'{ipaddres}\'", checks=[
+            self.check('length(backendAddresses)', 2)
+        ])
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool2} --no-wait')
         self.cmd('network lb create -g {rg} -n {lb}')
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap}')
