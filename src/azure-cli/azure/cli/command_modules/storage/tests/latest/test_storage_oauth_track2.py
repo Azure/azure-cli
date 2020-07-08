@@ -74,8 +74,9 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                        ' --account-name {account}')
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind='StorageV2')
-    def test_storage_blob_update_service_properties_oauth(self):
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='blob')
+    def test_storage_blob_service_properties_oauth(self):
+        # service properties will need Owner role
         self.oauth_cmd('storage blob service-properties show --account-name {sa}') \
             .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False),
                                 JMESPathCheck('hourMetrics.enabled', True),

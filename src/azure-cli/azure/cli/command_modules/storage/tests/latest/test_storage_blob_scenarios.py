@@ -397,8 +397,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('minuteMetrics.includeApis', None),
                                 JMESPathCheck('logging.delete', False))
 
-        self.storage_cmd('storage blob service-properties update --static-website --index-document index.html '
-                         '--404-document error.html', account_info)
+        self.storage_cmd('storage blob service-properties update --static-website --index-document index.html --404-document error.html', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('minuteMetrics.enabled', False),
+                                JMESPathCheck('minuteMetrics.includeApis', None),
+                                JMESPathCheck('logging.delete', False))
 
         self.storage_cmd('storage blob service-properties update --delete-retention --delete-retention-period 1',
                          account_info)

@@ -108,7 +108,7 @@ def set_blob_service_properties(client, parameters, delete_retention=None, delet
     if index_document is not None:
         parameters['static_website'].index_document = index_document
     if error_document_404_path is not None:
-        parameters['static_website'].error_document_404_path = error_document_404_path
+        parameters['static_website'].error_document404_path = error_document_404_path
     if 'hour_metrics' in parameters:
         kwargs['hour_metrics'] = parameters['hour_metrics']
     if kwargs['hour_metrics'].enabled is False and kwargs['hour_metrics'].include_apis:

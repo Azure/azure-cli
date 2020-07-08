@@ -536,15 +536,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob service-properties update', min_api='2018-03-28') as c:
         from ._validators import process_logging_property
         c.argument('delete_retention', arg_type=get_three_state_flag(), arg_group='Soft Delete',
-                   help='Enables soft-delete.', validator=process_logging_property)
+                   help='Enable soft-delete.', validator=process_logging_property)
         c.argument('delete_retention_period', type=int, arg_group='Soft Delete',
                    help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
         c.argument('static_website', arg_group='Static Website', arg_type=get_three_state_flag(),
-                   help='Enables static-website.')
+                   help='Enable static-website.')
         c.argument('index_document', help='Represents the name of the index document. This is commonly "index.html".',
                    arg_group='Static Website')
         c.argument('error_document_404_path', options_list=['--404-document'], arg_group='Static Website',
-                   help='Represents the path to the error document that should be shown when an error 404 is issued,'
+                   help='Represent the path to the error document that should be shown when an error 404 is issued,'
                         ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob show') as c:

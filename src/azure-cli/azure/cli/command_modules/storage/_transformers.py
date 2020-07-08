@@ -247,8 +247,11 @@ def transform_cors(result):
 
 
 def transform_blob_service_properties(result):
-    from .track2_util import transform_dict_keys_to_hump
-    new_result = transform_dict_keys_to_hump(result)
-    new_result['logging'] = new_result.pop('analyticsLogging')
+    from azure.cli.core.commands.arm import make_camel_case
+    new_result = {}
+    for item in result:
+        new_result[make_camel_case(item)] = todict(result.get(item))
+    new_result['logging'] = result['analytics_logging']
     new_result['cors'] = transform_cors(result['cors'])
+    new_result['staticWebsite']['errorDocument_404Path'] = new_result['staticWebsite'].pop('errorDocument404Path', None)
     return new_result
