@@ -12,7 +12,7 @@ mod_list = [os.path.join(d, o) for o in sorted(os.listdir(d)) if os.path.isdir(o
 
 for mod in mod_list:
     mod_name = os.path.basename(os.path.normpath(mod))
-    if mod_name == 'botservice':
+    if mod_name in ['botservice', 'network']:
         exit_code = subprocess.call(['PYTHONPATH=/usr/lib64/az/lib/python3.6/site-packages python3 -m pytest -x -v --boxed -p no:warnings --log-level=WARN --junit-xml /result/{}.xml --pyargs azure.cli.command_modules.{}'.format(mod_name, mod_name)], shell=True)
     else:
         exit_code = subprocess.call(['PYTHONPATH=/usr/lib64/az/lib/python3.6/site-packages python3 -m pytest -x -v --boxed -p no:warnings --log-level=WARN --junit-xml /result/{}.xml -n auto --pyargs azure.cli.command_modules.{}'.format(mod_name, mod_name)], shell=True)
