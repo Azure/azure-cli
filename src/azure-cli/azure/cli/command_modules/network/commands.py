@@ -1242,14 +1242,14 @@ def load_command_table(self, _):
     # endregion
 
     # region Network Virtual Appliance
-    with self.command_group('network virtual-appliance', network_virtual_appliances_sdk, is_preview=True) as g:
+    with self.command_group('network virtual-appliance', network_virtual_appliances_sdk, client_factory=cf_network_virtual_appliances, is_preview=True) as g:
         g.custom_command('create', 'create_network_virtual_appliance')
         g.generic_update_command('update', custom_func_name='update_network_virtual_appliance')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_network_virtual_appliance')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('network virtual-appliance site', virtual_appliance_sites_sdk, is_preview=True) as g:
+    with self.command_group('network virtual-appliance site', virtual_appliance_sites_sdk, client_factory=cf_virtual_appliance_sites, is_preview=True) as g:
         g.custom_command('create', 'create_network_virtual_appliance_site')
         g.generic_update_command('update', custom_func_name='update_network_virtual_appliance_site')
         g.show_command('show', 'get')
