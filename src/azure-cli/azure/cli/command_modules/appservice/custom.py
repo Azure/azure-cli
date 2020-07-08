@@ -800,8 +800,8 @@ def list_runtimes(cmd, linux=False):
 
 def list_runtimes_hardcoded(linux=False):
     if linux:
-        return [s['displayName'] for s in RUNTIME_STACKS['linux']]
-    return [s['displayName'] for s in RUNTIME_STACKS['windows']]
+        return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['linux']]
+    return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['windows']]
 
 
 def _rename_server_farm_props(webapp):
@@ -2446,9 +2446,9 @@ class _StackRuntimeHelper(object):
         if self._stacks:
             return
         if self._linux:
-            self._stacks = RUNTIME_STACKS['linux']
+            self._stacks = get_file_json(RUNTIME_STACKS)['linux']
         else:  # Windows stacks
-            result = RUNTIME_STACKS['windows']
+            result = get_file_json(RUNTIME_STACKS)['windows']
             for r in result:
                 r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
                                r['displayName'] else _StackRuntimeHelper.update_site_config)
