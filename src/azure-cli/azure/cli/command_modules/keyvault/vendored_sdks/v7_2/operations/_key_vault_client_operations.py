@@ -5377,7 +5377,7 @@ class KeyVaultClientOperationsMixin(object):
 
         # Construct parameters
         query_parameters = {}  # type: Dict[str, Any]
-        query_parameters['api-version'] = self._serialize.query("api_version", api_version, 'str')
+        query_parameters['api-version'] = self._serialize.query("api_version", self.api_version, 'str')
 
         # Construct headers
         header_parameters = {}  # type: Dict[str, Any]
@@ -5516,7 +5516,7 @@ class KeyVaultClientOperationsMixin(object):
 
         # Construct parameters
         query_parameters = {}  # type: Dict[str, Any]
-        query_parameters['api-version'] = self._serialize.query("api_version", api_version, 'str')
+        query_parameters['api-version'] = self._serialize.query("api_version", self.api_version, 'str')
 
         # Construct headers
         header_parameters = {}  # type: Dict[str, Any]
@@ -5559,7 +5559,7 @@ class KeyVaultClientOperationsMixin(object):
 
         # Construct parameters
         query_parameters = {}  # type: Dict[str, Any]
-        query_parameters['api-version'] = self._serialize.query("api_version", api_version, 'str')
+        query_parameters['api-version'] = self._serialize.query("api_version", self.api_version, 'str')
 
         # Construct headers
         header_parameters = {}  # type: Dict[str, Any]
@@ -5699,7 +5699,7 @@ class KeyVaultClientOperationsMixin(object):
 
         # Construct parameters
         query_parameters = {}  # type: Dict[str, Any]
-        query_parameters['api-version'] = self._serialize.query("api_version", api_version, 'str')
+        query_parameters['api-version'] = self._serialize.query("api_version", self.api_version, 'str')
 
         # Construct headers
         header_parameters = {}  # type: Dict[str, Any]
