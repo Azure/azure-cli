@@ -57,12 +57,8 @@ def add_webapp_access_restriction(
         access_rules.append(rule_instance)
 
     elif ip_address:
-        is_exists = False
-        for rule in access_rules:
-            if rule.ip_address == ip_address:
-                is_exists = True
-                break
-        if not is_exists:
+        is_exists = [(lambda x: x.ip_address == ip_address)(x) for x in access_rules]       
+        if True not in is_exists:
             rule_instance = IpSecurityRestriction(
                 name=rule_name, ip_address=ip_address,
                 priority=priority, action=action, tag='Default', description=description)
