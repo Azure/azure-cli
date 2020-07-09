@@ -475,6 +475,37 @@ def get_security_adaptive_application_controls(client, group_name):
 
 
 # --------------------------------------------------------------------------------------------
+# Adaptive Network Hardenings
+# --------------------------------------------------------------------------------------------
+
+
+def get_security_adaptive_network_hardenings(client,
+                                             adaptive_network_hardenings_resource_name,
+                                             resource_name,
+                                             resource_type,
+                                             resource_namespace,
+                                             resource_group_name):
+
+    return client.get(resource_group_name,
+                      resource_namespace,
+                      resource_type,
+                      resource_name,
+                      adaptive_network_hardenings_resource_name)
+
+
+def list_security_adaptive_network_hardenings(client,
+                                              resource_name,
+                                              resource_type,
+                                              resource_namespace,
+                                              resource_group_name):
+
+    return client.list_by_extended_resource(resource_group_name,
+                                            resource_namespace,
+                                            resource_type,
+                                            resource_name)
+
+
+# --------------------------------------------------------------------------------------------
 # Allowed Connections
 # --------------------------------------------------------------------------------------------
 

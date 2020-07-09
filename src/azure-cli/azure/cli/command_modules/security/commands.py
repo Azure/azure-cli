@@ -21,6 +21,7 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_assessment_metadata,
                               cf_security_sub_assessment,
                               cf_security_adaptive_application_controls,
+                              cf_security_adaptive_network_hardenings,
                               cf_security_allowed_connections,
                               cf_security_iot_solution,
                               cf_security_iot_analytics,
@@ -147,6 +148,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#AdaptiveApplicationControlsOperations.{}',
         client_factory=cf_security_adaptive_application_controls,
         operation_group='cf_security_adaptive_application_controls'
+    )
+
+    security_adaptive_network_hardenings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AdaptiveNetworkhardeningsOperations.{}',
+        client_factory=cf_security_adaptive_network_hardenings,
+        operation_group='security_adaptive_network_hardenings'
     )
 
     security_allowed_connections_sdk = CliCommandType(
@@ -305,6 +312,12 @@ def load_command_table(self, _):
                             client_factory=cf_security_adaptive_application_controls) as g:
         g.custom_command('list', 'list_security_adaptive_application_controls')
         g.custom_command('show', 'get_security_adaptive_application_controls')
+ 
+    with self.command_group('security adaptive_network_hardenings',
+                            security_adaptive_network_hardenings_sdk,
+                            client_factory=cf_security_adaptive_network_hardenings) as g:
+        g.custom_command('show', 'get_security_adaptive_network_hardenings')
+        g.custom_command('list', 'list_security_adaptive_network_hardenings')
 
     with self.command_group('security allowed_connections',
                             security_allowed_connections_sdk,

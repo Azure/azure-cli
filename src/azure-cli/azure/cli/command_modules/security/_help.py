@@ -564,6 +564,29 @@ examples:
         az security allowed_connections show --name Internal --resource-group mygroup
 """
 
+helps['security adaptive_network_hardenings'] = """
+type: group
+short-summary: View all Adaptive Network Hardening resources
+"""
+
+helps['security adaptive_network_hardenings list'] = """
+type: command
+short-summary: Gets a list of Adaptive Network Hardenings resources in scope of an extended resource.
+examples:
+  - name: Adaptive Network Hardenings - List By Extended Resource
+    text: >
+        az security adaptive_network_hardenings list --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1'
+"""
+
+helps['security adaptive_network_hardenings show'] = """
+type: command
+short-summary: Gets a single Adaptive Network Hardening resource.
+examples:
+  - name: Adaptive Network Hardenings - Get.
+    text: >
+        az security adaptive_network_hardenings show --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1' --adaptive-network-hardenings-resource-name 'default'
+"""
+
 helps['security iot-solution'] = """
 type: group
 short-summary: Manage your IoT Security solution.
