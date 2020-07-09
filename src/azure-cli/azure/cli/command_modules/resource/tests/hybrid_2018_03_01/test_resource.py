@@ -183,9 +183,9 @@ class TagScenarioTest(ScenarioTest):
             'tag': 'cli_test_tag'
         })
 
-        tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
-        for tag in tags:
-            self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
+        tag_values = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
+        for tag_value in tag_values:
+            self.cmd('tag remove-value --value {} -n {{tag}}'.format(tag_value))
         self.cmd('tag delete -n {tag}')
 
         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
@@ -524,7 +524,7 @@ class InvokeActionTest(ScenarioTest):
             'pass': self.create_random_name('Longpassword#1', 30)
         })
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
         self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')
