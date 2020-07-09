@@ -8,7 +8,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
@@ -1205,6 +1205,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         self.cmd('network private-endpoint delete -g {rg} -n {appgw_pe}')
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_manage_appgw_private_endpoint')
     def test_manage_appgw_private_endpoint(self, resource_group):
         """
@@ -1311,6 +1312,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         # The rest of code is not working, service is 500 while creating another private endpoint
         # on the settings below. It's a bug.
+        # If want to use like below, currently have to create a request routing rule to use the private frontend
         # ------------------------------------------------------------------
         # # Prepare the second vnet to be connected to
         # self.cmd('network vnet subnet create -g {rg} '
