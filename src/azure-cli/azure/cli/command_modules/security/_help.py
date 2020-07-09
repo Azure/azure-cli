@@ -517,6 +517,30 @@ examples:
     text: >
         az security sub-assessment show --assessed-resource-id '/subscriptions/f8b197db-3b2b-4404-a3a3-0dfec293d0d0/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1' --assessment-name '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' -n 'd7c4d9ec-227c-4fb3-acf9-25fdd97c1bf1'
 """
+
+helps['security adaptive-application-controls'] = """
+type: group
+short-summary: Enable control which applications can run on your Azure and non-Azure machines (Windows and Linux)
+"""
+
+helps['security adaptive-application-controls list'] = """
+type: command
+short-summary: Adaptive Application Controls - List
+examples:
+  - name: list all application control VM/server groups.
+    text: >
+        az security adaptive-application-controls list
+"""
+
+helps['security adaptive-application-controls show'] = """
+type: command
+short-summary: Adaptive Application Controls - Get
+examples:
+  - name: Get a single application control VM/server group.
+    text: >
+        az security adaptive-application-controls show --group-name GROUP1
+"""
+
 helps['security allowed_connections'] = """
 type: group
 short-summary: View all possible traffic between resources for the subscription and location, based on connection type.
