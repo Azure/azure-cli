@@ -1895,10 +1895,10 @@ examples:
 
 helps['vm simulate-eviction'] = """
 type: command
-short-summary: Simulate the eviction of a spot VM.
+short-summary: Simulate the eviction of a Spot VM.
 examples:
-  - name: Simulate the eviction of a spot VM.
-    text: az vm simulate-eviction --resource-grou MyResourceGroup --name MyVm
+  - name: Simulate the eviction of a Spot VM.
+    text: az vm simulate-eviction --resource-group MyResourceGroup --name MyVm
 """
 
 helps['vm start'] = """
@@ -2536,9 +2536,9 @@ examples:
 
 helps['vmss simulate-eviction'] = """
 type: command
-short-summary: Simulate the eviction of a spot virtual machine in a VM scale set.
+short-summary: Simulate the eviction of a Spot virtual machine in a VM scale set.
 examples:
-  - name: Simulate the eviction of a spot virtual machine in a VM scale set.
+  - name: Simulate the eviction of a Spot virtual machine in a VM scale set.
     text: az vmss simulate-eviction --resource-group MyResourceGroup --name MyScaleSet --instance-id 0
 """
 
