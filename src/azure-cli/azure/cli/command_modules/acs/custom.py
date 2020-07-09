@@ -1054,16 +1054,19 @@ def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, 
                        subscription_id=None):
 
     from azure.cli.core.profiles import ResourceType, get_sdk
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
+    Deployment, DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment','DeploymentProperties', mod='models')
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    deployment = Deployment(properties=properties)
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                   subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
-        return smc.validate(resource_group_name, deployment_name, properties)
-    return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, properties)
+        validation_poller = smc.validate(resource_group_name, deployment_name, deployment)
+        return LongRunningOperation(cli_ctx)(validation_poller)
+    return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, deployment)
+
 
 
 def k8s_get_credentials(cmd, client, name, resource_group_name,

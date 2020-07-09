@@ -22,7 +22,7 @@ def _get_vm_version(vm_type):
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -143,7 +143,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
@@ -178,7 +178,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{vm1}'])", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
@@ -249,7 +249,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
@@ -334,7 +334,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -368,7 +368,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_name.lower(), rp2_json['id'].lower())
         self.assertIn(vm_name.lower(), rp2_json['id'].lower())
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -423,7 +423,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
         self.assertTrue(protection_check == '')
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer()
     @ResourceGroupPreparer(parameter_name="target_resource_group")
     @VaultPreparer()
@@ -487,7 +487,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -525,7 +525,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -567,7 +567,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.isScheduledForDeferredDelete", None)
         ])
 
-    @record_only()
+    @unittest.skip('skip')
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()

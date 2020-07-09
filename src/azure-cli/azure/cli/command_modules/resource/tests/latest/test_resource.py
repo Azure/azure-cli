@@ -304,9 +304,9 @@ class TagScenarioTest(ScenarioTest):
             'tag': 'cli_test_tag'
         })
 
-        tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
-        for tag in tags:
-            self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
+        tag_values = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
+        for tag_value in tag_values:
+            self.cmd('tag remove-value --value {} -n {{tag}}'.format(tag_value))
         self.cmd('tag delete -n {tag}')
 
         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
@@ -521,11 +521,11 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             'dn3': self.create_random_name('azure-cli-subscription_level_deployment', 60)
         })
 
-        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -558,7 +558,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
-        self.cmd('deployment sub create -n {dn2} --location WestUS --template-file {tf} --parameters @"{params}" --no-wait')
+        self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" --no-wait')
 
         self.cmd('deployment sub cancel -n {dn2}')
 
@@ -586,15 +586,15 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60)
         })
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -615,7 +615,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
-        self.cmd('deployment create -n {dn2} --location WestUS --template-file {tf} --parameters @"{params}" --no-wait')
+        self.cmd('deployment create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" --no-wait')
 
         self.cmd('deployment cancel -n {dn2}')
 
@@ -644,11 +644,11 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'ts_rg': 'TemplateSpecsCLI',
         })
 
-        self.cmd('deployment group validate --resource-group {rg} --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment group validate --resource-group {rg} --template-file {Japanese-characters-tf}', checks=[
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{Japanese-characters-tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -657,49 +657,49 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         ])
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt true')
+            self.cmd('deployment group validate --resource-group {rg} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt true')
             self.assertTrue("Deployment template validation failed" in str(err.exception))
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}"')
+            self.cmd('deployment group validate --resource-group {rg} --template-file "{extra_param_tf}" --parameters @"{params}"')
             self.assertTrue("Missing input parameters" in str(err.exception))
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt false')
+            self.cmd('deployment group validate --resource-group {rg} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt false')
             self.assertTrue("Missing input parameters" in str(err.exception))
 
-        self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt true')
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt true')
             self.assertTrue("Deployment template validation failed" in str(err.exception))
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}"')
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{extra_param_tf}" --parameters @"{params}"')
             self.assertTrue("Missing input parameters" in str(err.exception))
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt false')
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt false')
             self.assertTrue("Missing input parameters" in str(err.exception))
 
         json_invalid_info = "Failed to parse '{}', please check whether it is a valid JSON format"
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate -g {rg} -f {tf_invalid} -p @"{params}"')
+            self.cmd('deployment group validate -g {rg} -f "{tf_invalid}" -p @"{params}"')
             self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate -g {rg} -f {tf} -p @"{params_invalid}"')
+            self.cmd('deployment group validate -g {rg} -f "{tf}" -p @"{params_invalid}"')
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create -g {rg} -n {dn} -f {tf_invalid} -p @"{params}"')
+            self.cmd('deployment group create -g {rg} -n {dn} -f "{tf_invalid}" -p @"{params}"')
             self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create -g {rg} -n {dn} -f {tf} -p @"{params_invalid}"')
+            self.cmd('deployment group create -g {rg} -n {dn} -f "{tf}" -p @"{params_invalid}"')
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         self.cmd('deployment group list --resource-group {rg}', checks=[
@@ -721,7 +721,7 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.check('length([])', 2)
         ])
 
-        self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {tf} --parameters @"{params}" --no-wait')
+        self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --no-wait')
 
         self.cmd('deployment group cancel -n {dn2} -g {rg}')
 
@@ -754,7 +754,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file {tf} '
+        self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file "{tf}" '
                  '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
@@ -785,7 +785,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             self.check('length([])', 4)
         ])
 
-        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file {tf} '
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
                  '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" --no-wait')
 
         self.cmd('deployment mg cancel -n {dn2} --management-group-id {mg}')
@@ -821,7 +821,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('deployment tenant validate --location WestUS --template-file {tf} --parameters targetMG="{mg}"', checks=[
+        self.cmd('deployment tenant validate --location WestUS --template-file "{tf}" --parameters targetMG="{mg}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -852,7 +852,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
             self.check('length([])', 4)
         ])
 
-        self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file {tf} --parameters targetMG="{mg}" --no-wait')
+        self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file "{tf}" --parameters targetMG="{mg}" --no-wait')
 
         self.cmd('deployment tenant cancel -n {dn2}')
 
@@ -887,7 +887,7 @@ class DeploymentTest(ScenarioTest):
             'dn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -909,18 +909,18 @@ class DeploymentTest(ScenarioTest):
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
-        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
         with self.assertRaises(CLIError):
-            self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{error_params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
+            self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters @"{error_params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -947,22 +947,22 @@ class DeploymentTest(ScenarioTest):
         json_invalid_info = "Failed to parse '{}', please check whether it is a valid JSON format"
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('group deployment validate -g {rg} -f {tf_invalid} -p @"{params}"')
+            self.cmd('group deployment validate -g {rg} -f "{tf_invalid}" -p @"{params}"')
             self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('group deployment validate -g {rg} -f {tf} -p @"{params_invalid}"')
+            self.cmd('group deployment validate -g {rg} -f "{tf}" -p @"{params_invalid}"')
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('group deployment create -g {rg} -n {dn} -f {tf_invalid} -p @"{params}"')
+            self.cmd('group deployment create -g {rg} -n {dn} -f "{tf_invalid}" -p @"{params}"')
             self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('group deployment create -g {rg} -n {dn} -f {tf} -p @"{params_invalid}"')
+            self.cmd('group deployment create -g {rg} -n {dn} -f "{tf}" -p @"{params_invalid}"')
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
-        self.cmd('group deployment create -g {rg} -n {dn2} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}" --no-wait')
+        self.cmd('group deployment create -g {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}" --no-wait')
 
         self.cmd('group deployment cancel -n {dn2} -g {rg}')
 
@@ -980,20 +980,20 @@ class DeploymentTest(ScenarioTest):
             'app_name': self.create_random_name('cli', 30)
         })
 
-        self.cmd('group deployment validate -g {rg} --template-file {large_tf} --parameters @"{large_params}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{large_tf}" --parameters @"{large_params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment validate -g {rg} --template-file {large_tf} --parameters "{large_params}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{large_tf}" --parameters "{large_params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment create -g {rg} --template-file {large_tf} --parameters @"{large_params}" --parameters function-app-name="{app_name}"', checks=[
+        self.cmd('group deployment create -g {rg} --template-file "{large_tf}" --parameters @"{large_params}" --parameters function-app-name="{app_name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
 
-        self.cmd('group deployment create -g {rg} --template-file {large_tf} --parameters "{large_params}" --parameters function-app-name="{app_name}"', checks=[
+        self.cmd('group deployment create -g {rg} --template-file "{large_tf}" --parameters "{large_params}" --parameters function-app-name="{app_name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -1009,13 +1009,13 @@ class DeploymentTest(ScenarioTest):
             'sdn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment', None)
         ])
 
-        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --rollback-on-error', checks=[
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file "{tf}" --rollback-on-error', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
@@ -1033,13 +1033,13 @@ class DeploymentTest(ScenarioTest):
             'sdn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment', None)
         ])
 
-        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --rollback-on-error {dn}', checks=[
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file "{tf}" --rollback-on-error {dn}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
@@ -1063,7 +1063,7 @@ class DeploymentLiveTest(LiveScenarioTest):
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
         with force_progress_logging() as test_io:
-            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
+            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
         # very the progress
         lines = test_io.getvalue().splitlines()
@@ -1084,7 +1084,7 @@ class DeploymentNoWaitTest(ScenarioTest):
             'dn': 'azure-cli-deployment'
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @{params} --no-wait',
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --no-wait',
                  checks=self.is_empty())
 
         self.cmd('group deployment wait -g {rg} -n {dn} --created',
@@ -1105,7 +1105,7 @@ class DeploymentThruUriTest(ScenarioTest):
             'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
         })
-        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.templateLink.uri', '{tf}'),
@@ -1118,7 +1118,7 @@ class DeploymentThruUriTest(ScenarioTest):
         self.cmd('group deployment list -g {rg}',
                  checks=self.is_empty())
 
-        self.kwargs['dn'] = self.cmd('deployment group create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+        self.kwargs['dn'] = self.cmd('deployment group create -g {rg} --template-uri "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.templateLink.uri', '{tf}'),
@@ -1163,10 +1163,10 @@ class DeploymentWhatIfAtResourceGroupScopeTest(ScenarioTest):
             'params': os.path.join(curr_dir, 'storage_account_deploy_parameters.json').replace('\\', '\\\\'),
         })
 
-        deployment_output = self.cmd('deployment group create --resource-group {rg} --template-file {tf}').get_output_in_json()
+        deployment_output = self.cmd('deployment group create --resource-group {rg} --template-file "{tf}"').get_output_in_json()
         self.kwargs['storage_account_id'] = deployment_output['properties']['outputs']['storageAccountId']['value']
 
-        self.cmd('deployment group what-if --resource-group {rg} --template-file {tf} --parameters {params} --no-pretty-print', checks=[
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --parameters "{params}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("changes[?resourceId == '{storage_account_id}'].changeType | [0]", 'Modify'),
             self.check("changes[?resourceId == '{storage_account_id}'] | [0].delta[?path == 'sku.name'] | [0].propertyChangeType", 'Modify'),
@@ -1183,10 +1183,10 @@ class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
             'params': os.path.join(curr_dir, 'policy_definition_deploy_parameters.json').replace('\\', '\\\\'),
         })
 
-        deployment_output = self.cmd('deployment sub create --location westus --template-file {tf}').get_output_in_json()
+        deployment_output = self.cmd('deployment sub create --location westus --template-file "{tf}"').get_output_in_json()
         self.kwargs['policy_definition_id'] = deployment_output['properties']['outputs']['policyDefinitionId']['value']
 
-        self.cmd('deployment sub what-if --location westus --template-file {tf} --parameters {params} --no-pretty-print', checks=[
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("changes[?resourceId == '{policy_definition_id}'].changeType | [0]", 'Modify'),
             self.check("changes[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].propertyChangeType", 'Modify'),
@@ -1336,7 +1336,7 @@ class PolicyScenarioTest(ScenarioTest):
             'padn': self.create_random_name('test_assignment', 20)
         })
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params {params}', checks=[
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
@@ -1353,7 +1353,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
         self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks'.format(**self.kwargs)
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params {params} --sku standard', checks=[
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params "{params}" --sku standard', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A1'),
@@ -1396,7 +1396,7 @@ class PolicyScenarioTest(ScenarioTest):
             'em': enforcementMode
         })
 
-        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params {params} --scope {scope} --enforcement-mode {em}', checks=[
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
@@ -1432,7 +1432,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.kwargs.update({'sub': subscription})
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category={metadata}', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc} --mode {mode} --metadata category={metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}'),
@@ -1456,7 +1456,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
         self.kwargs['rf'] = os.path.join(curr_dir, 'sample_policy_rule_2.json').replace('\\', '\\\\')
 
-        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2 --params {pdf} --rules {rf}', management_group, subscription)
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2 --params "{pdf}" --rules "{rf}"', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{desc}'),
             self.check('displayName', '{pdn}'),
@@ -1523,11 +1523,11 @@ class PolicyScenarioTest(ScenarioTest):
         time.sleep(60)
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
         policy = self.cmd(cmd).get_output_in_json()
 
         # create a data policy
-        cmd = self.cmdstring('policy definition create -n {dpn} --rules {dprf} --mode {dp_mode} --display-name {dpdn} --description {dp_desc}', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {dpn} --rules "{dprf}" --mode {dp_mode} --display-name {dpdn} --description {dp_desc}', management_group, subscription)
         datapolicy = self.cmd(cmd).get_output_in_json()
 
         # create a policy set
@@ -1603,7 +1603,7 @@ class PolicyScenarioTest(ScenarioTest):
         with open(os.path.join(curr_dir, 'sample_policy_set_parameterized.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
-        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params {pdf} --metadata category={updated_metadata}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params "{pdf}" --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}'),
@@ -1616,7 +1616,7 @@ class PolicyScenarioTest(ScenarioTest):
         # update the parameters on the policy set
         self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
 
-        cmd = self.cmdstring('policy set-definition update -n {psn} --params {pdf} --metadata category={updated_metadata}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition update -n {psn} --params "{pdf}" --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
             self.check('metadata.category', '{updated_metadata}')
@@ -1818,7 +1818,7 @@ class PolicyScenarioTest(ScenarioTest):
         })
 
         # create a policy
-        policy = self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn}').get_output_in_json()
+        policy = self.cmd('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn}').get_output_in_json()
 
         # create a policy set
         policyset = get_file_json(self.kwargs['psf'])
@@ -1897,9 +1897,9 @@ class PolicyScenarioTest(ScenarioTest):
             'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\')
         })
 
-        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
+        self.cmd('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
 
-        self.kwargs['pan_random'] = self.cmd('policy assignment create --policy {pn} --display-name {padn} -g {rg} --params {params}', checks=[
+        self.kwargs['pan_random'] = self.cmd('policy assignment create --policy {pn} --display-name {padn} -g {rg} --params "{params}"', checks=[
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
             self.check('sku.tier', 'Free'),
@@ -2356,7 +2356,7 @@ class InvokeActionTest(ScenarioTest):
             'pass': self.create_random_name('Longpassword#1', 30)
         })
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
         self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')

@@ -127,8 +127,10 @@ helps['disk-encryption-set create'] = """
 type: command
 short-summary: Create a disk encryption set.
 examples:
-  - name: Create a disk encryption set
+  - name: Create a disk encryption set.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
+  - name: Create a disk encryption set that supports double encryption.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys
 """
 
 helps['disk-encryption-set delete'] = """
@@ -579,7 +581,9 @@ examples:
   - name: Replicate to one more region
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
-
+  - name: Update --exclude-from-latest. If it is set to true, people deploying VMs with version omitted will not use this version.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --set publishingProfile.excludeFromLatest=true
 """
 
 helps['sig image-version wait'] = """
