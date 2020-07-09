@@ -21,7 +21,7 @@ from ._completers import (
 from ._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, get_hsm_base_url_type,
-    process_hsm_base_url, process_vault_and_hsm_name, process_storage_uri, process_sas_token_parameter,
+    process_hsm_base_url, process_vault_and_hsm_name, process_storage_uri,
     validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
