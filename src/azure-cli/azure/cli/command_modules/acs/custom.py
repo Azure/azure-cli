@@ -88,7 +88,8 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 
-from ._helpers import _populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type
+from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
+                       _parse_comma_separated_list)
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
@@ -1692,6 +1693,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_private_cluster=False,
                enable_managed_identity=False,
                attach_acr=None,
+               enable_aad=False,
+               aad_admin_group_object_ids=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1852,17 +1855,27 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
 
     aad_profile = None
-    if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
-        if aad_tenant_id is None:
-            profile = Profile(cli_ctx=cmd.cli_ctx)
-            _, _, aad_tenant_id = profile.get_login_credentials()
-
+    if enable_aad:
+        if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret]):
+            raise CLIError('"--enable-aad" cannot be used together with '
+                           '"--aad-client-app-id/--aad-server-app-id/--aad-server-app-secret"')
         aad_profile = ManagedClusterAADProfile(
-            client_app_id=aad_client_app_id,
-            server_app_id=aad_server_app_id,
-            server_app_secret=aad_server_app_secret,
+            managed=True,
+            admin_group_object_ids=_parse_comma_separated_list(aad_admin_group_object_ids),
             tenant_id=aad_tenant_id
         )
+    else:
+        if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
+            if aad_tenant_id is None:
+                profile = Profile(cli_ctx=cmd.cli_ctx)
+                _, _, aad_tenant_id = profile.get_login_credentials()
+
+            aad_profile = ManagedClusterAADProfile(
+                client_app_id=aad_client_app_id,
+                server_app_id=aad_server_app_id,
+                server_app_secret=aad_server_app_secret,
+                tenant_id=aad_tenant_id
+            )
 
     api_server_access_profile = None
     if enable_private_cluster and load_balancer_sku.lower() != "standard":
@@ -2098,10 +2111,11 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
         raise CLIError('There are more than one node pool in the cluster. '
                        'Please specify nodepool name or use az aks nodepool command to scale node pool')
 
-    if node_count == 0:
-        raise CLIError("Can't scale down to 0 nodes.")
     for agent_profile in instance.agent_pool_profiles:
         if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
+            if agent_profile.enable_auto_scaling:
+                raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
+
             agent_profile.count = int(node_count)  # pylint: disable=no-member
             # null out the SP and AAD profile because otherwise validation complains
             instance.service_principal_profile = None
@@ -2116,6 +2130,7 @@ def aks_update(cmd, client, resource_group_name, name,
                disable_cluster_autoscaler=False,
                update_cluster_autoscaler=False,
                min_count=None, max_count=None,
+               uptime_sla=False,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
@@ -2124,6 +2139,9 @@ def aks_update(cmd, client, resource_group_name, name,
                attach_acr=None,
                detach_acr=None,
                api_server_authorized_ip_ranges=None,
+               enable_aad=False,
+               aad_tenant_id=None,
+               aad_admin_group_object_ids=None,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2131,11 +2149,15 @@ def aks_update(cmd, client, resource_group_name, name,
                                                           load_balancer_outbound_ip_prefixes,
                                                           load_balancer_outbound_ports,
                                                           load_balancer_idle_timeout)
-
+    update_aad_profile = not (aad_tenant_id is None and aad_admin_group_object_ids is None)
+    # pylint: disable=too-many-boolean-expressions
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
             not detach_acr and
-            api_server_authorized_ip_ranges is None):
+            not uptime_sla and
+            api_server_authorized_ip_ranges is None and
+            not enable_aad and
+            not update_aad_profile):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2144,8 +2166,12 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-outbound-ip-prefixes" or'
                        '"--load-balancer-outbound-ports" or'
                        '"--load-balancer-idle-timeout" or'
-                       '"--attach-acr" or "--dettach-acr" or'
-                       '"--"api-server-authorized-ip-ranges')
+                       '"--attach-acr" or "--detach-acr" or'
+                       '"--uptime-sla" or'
+                       '"--api-server-authorized-ip-ranges" or '
+                       '"--enable-aad" or '
+                       '"--aad-tenant-id" or '
+                       '"--aad-admin-group-object-ids"')
 
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
@@ -2210,6 +2236,12 @@ def aks_update(cmd, client, resource_group_name, name,
                         subscription_id=subscription_id,
                         detach=True)
 
+    if uptime_sla:
+        instance.sku = ManagedClusterSKU(
+            name="Basic",
+            tier="Paid"
+        )
+
     if update_lb_profile:
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(
             load_balancer_managed_outbound_ip_count,
@@ -2223,6 +2255,23 @@ def aks_update(cmd, client, resource_group_name, name,
     if api_server_authorized_ip_ranges is not None:
         instance.api_server_access_profile = \
             _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=instance)
+
+    if enable_aad:
+        if instance.aad_profile is None:
+            raise CLIError('Cannot specify "--enable-aad" for a non-AAD cluster')
+        if instance.aad_profile.managed:
+            raise CLIError('Cannot specify "--enable-aad" if managed AAD is already enabled')
+        instance.aad_profile = ManagedClusterAADProfile(
+            managed=True
+        )
+    if update_aad_profile:
+        if instance.aad_profile is None or not instance.aad_profile.managed:
+            raise CLIError('Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids"'
+                           ' if managed AAD is not enabled')
+        if aad_tenant_id is not None:
+            instance.aad_profile.tenant_id = aad_tenant_id
+        if aad_admin_group_object_ids is not None:
+            instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(aad_admin_group_object_ids)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -2616,7 +2665,8 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         workspace_region = AzureFairfaxRegionToOmsRegionMap.get(rg_location, "usgovvirginia")
         workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(workspace_region, "USGV")
     else:
-        logger.error("AKS Monitoring addon not supported in cloud : %s", cloud_name)
+        workspace_region = rg_location
+        workspace_region_code = rg_location.upper()
 
     default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
     default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_region_code)
@@ -2883,8 +2933,8 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
                         no_wait=False):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     new_node_count = int(node_count)
-    if new_node_count == 0:
-        raise CLIError("Can't scale down to 0 nodes.")
+    if instance.enable_auto_scaling:
+        raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
     if new_node_count == instance.count:
         raise CLIError("The new node count is the same as the current node count.")
     instance.count = new_node_count  # pylint: disable=no-member

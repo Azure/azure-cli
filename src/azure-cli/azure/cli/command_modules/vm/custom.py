@@ -332,12 +332,15 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
 
-    if disk_encryption_set is not None and encryption_type is None:
-        raise CLIError('usage error: Please specify --encryption-type.')
-    if encryption_type is not None:
+    # if disk_encryption_set is not None and encryption_type is None:
+    #     raise CLIError('usage error: Please specify --encryption-type.')
+    # if encryption_type is not None:
+    #     encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+    # else:
+    #     encryption = None
+    encryption = None
+    if disk_encryption_set:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
-    else:
-        encryption = None
 
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
@@ -2413,6 +2416,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         if computer_name_prefix is not None and isinstance(computer_name_prefix, str):
             naming_prefix = computer_name_prefix
 
+        if os_version and os_version != 'latest':
+            logger.warning('You are deploying VMSS pinned to a specific image version from Azure Marketplace. '
+                           'Consider using "latest" as the image version.')
+
         vmss_resource = build_vmss_resource(
             cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
             overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
@@ -3298,7 +3305,7 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 
 # disk encryption set
 def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption_set_name,
-                               key_url, source_vault, location=None, tags=None, no_wait=False):
+                               key_url, source_vault, encryption_type=None, location=None, tags=None, no_wait=False):
     from msrestazure.tools import resource_id, is_valid_resource_id
     DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
         'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyVaultAndKeyReference', 'SourceVault')
@@ -3309,7 +3316,7 @@ def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption
     source_vault = SourceVault(id=source_vault)
     keyVault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
-                                            active_key=keyVault_and_key_reference)
+                                            active_key=keyVault_and_key_reference, encryption_type=encryption_type)
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
 

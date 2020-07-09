@@ -21,7 +21,7 @@ import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
-    BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
+    BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
@@ -1014,6 +1014,13 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 def _load_command_loader(loader, args, name, prefix):
     module = import_module(prefix + name)
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
+    if not loader_cls:
+        try:
+            get_command_loader = getattr(module, 'get_command_loader', None)
+            loader_cls = get_command_loader(loader.cli_ctx)
+        except (ImportError, AttributeError, TypeError):
+            logger.debug("Module '%s' is missing `get_command_loader` entry.", name)
+
     command_table = {}
 
     if loader_cls:

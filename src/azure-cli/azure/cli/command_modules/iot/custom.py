@@ -43,8 +43,6 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
 from azure.mgmt.iotcentral.models import (AppSkuInfo,
                                           App)
 
-from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
-from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType
 from ._constants import PNP_ENDPOINT
 from ._client_factory import resource_service_factory, get_pnp_client
@@ -662,21 +660,6 @@ def _is_policy_existed(policies, policy_name):
     return policy_name.lower() in policy_set
 
 
-def iot_hub_job_list(client, hub_name, resource_group_name=None):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.list_jobs(resource_group_name, hub_name)
-
-
-def iot_hub_job_get(client, hub_name, job_id, resource_group_name=None):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.get_job(resource_group_name, hub_name, job_id)
-
-
-def iot_hub_job_cancel(client, hub_name, job_id, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, '')
-    return device_client.cancel_job(job_id)
-
-
 def iot_hub_get_quota_metrics(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     iotHubQuotaMetricCollection = []
@@ -1023,17 +1006,6 @@ def _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, 
                                                                     api_version=client.api_version,
                                                                     properties=repositoryKeyRequestProperties,
                                                                     custom_headers=headers)
-
-
-def _get_device_client(client, resource_group_name, hub_name, device_id):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    # Intermediate fix to support domains beyond azure-devices.net
-    hub = _get_iot_hub_by_name(client, hub_name)
-    base_url = hub.properties.host_name
-    uri = '{0}/devices/{1}'.format(base_url, device_id)
-    access_policy = iot_hub_policy_get(client, hub_name, 'iothubowner', resource_group_name)
-    creds = SasTokenAuthentication(uri, access_policy.key_name, access_policy.primary_key)
-    return IotHubDeviceClient(creds, client.iot_hub_resource.config.subscription_id, base_url='https://' + base_url).iot_hub_devices
 
 
 def _get_iot_hub_by_name(client, hub_name):
