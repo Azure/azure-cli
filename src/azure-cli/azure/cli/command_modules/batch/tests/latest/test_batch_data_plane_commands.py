@@ -320,7 +320,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create pool from JSON file
         self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
-        self.batch_cmd('batch pool create --json-file {json}')
+        self.batch_cmd('batch pool create --json-file "{json}"')
         self.batch_cmd('batch pool show --pool-id azure-cli-test-json').assert_with_checks([
             self.check('userAccounts[0].name', 'cliTestUser'),
             self.check('startTask.userIdentity.userName', 'cliTestUser')])
@@ -332,12 +332,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test create pool from invalid JSON file
         with self.assertRaises(CLIError):
             self.kwargs['json'] = self._get_test_data_file('batch-pool-create-invalid.json').replace('\\', '\\\\')
-            self.batch_cmd('batch pool create --json-file {json}')
+            self.batch_cmd('batch pool create --json-file "{json}"')
 
         # test create pool from JSON file with additional parameters
         with self.assertRaises(SystemExit):
             self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
-            self.batch_cmd('batch pool create --json-file {json} --vm-size small')
+            self.batch_cmd('batch pool create --json-file "{json}" --vm-size small')
 
         # test list pools
         pool_list = self.batch_cmd('batch pool list')
