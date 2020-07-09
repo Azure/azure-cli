@@ -1310,7 +1310,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         # })
 
         # The rest of code is not working, service is 500 while creating another private endpoint
-        # on the settings below.
+        # on the settings below. It's a bug.
         # ------------------------------------------------------------------
         # # Prepare the second vnet to be connected to
         # self.cmd('network vnet subnet create -g {rg} '
