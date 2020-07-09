@@ -247,6 +247,14 @@ def _show_missing_access_warning(resource_group, name, command):
     logger.warning(warn)
 
 
+def _parse_aux_subscriptions(resource_id):
+    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    if is_valid_resource_id(resource_id):
+        res = parse_resource_id(resource_id)
+        return [res['subscription']]
+    return None
+
+
 # Hide extension information from output as the info is not correct and unhelpful; also
 # commands using it mean to hide the extension concept from users.
 class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -2696,10 +2704,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.storage_profile and \
             vmss.virtual_machine_profile.storage_profile.image_reference and \
             vmss.virtual_machine_profile.storage_profile.image_reference.id:
-        from msrestazure.tools import is_valid_resource_id, parse_resource_id
-        if is_valid_resource_id(vmss.virtual_machine_profile.storage_profile.image_reference.id):
-            res = parse_resource_id(vmss.virtual_machine_profile.storage_profile.image_reference.id)
-            aux_subscriptions = [res['subscription']]
+        aux_subscriptions = _parse_aux_subscriptions(vmss.virtual_machine_profile.storage_profile.image_reference.id)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
     VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
@@ -3059,10 +3064,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         'TargetRegion')
     aux_subscriptions = None
     if managed_image:
-        from msrestazure.tools import parse_resource_id
-        if is_valid_resource_id(managed_image):
-            res = parse_resource_id(managed_image)
-            aux_subscriptions = [res['subscription']]
+        aux_subscriptions = _parse_aux_subscriptions(managed_image)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
@@ -3143,11 +3145,9 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     aux_subscriptions = None
     if image_version.storage_profile and image_version.storage_profile.source and \
             image_version.storage_profile.source.id:
-        from msrestazure.tools import is_valid_resource_id, parse_resource_id
-        if is_valid_resource_id(image_version.storage_profile.source.id):
-            res = parse_resource_id(image_version.storage_profile.source.id)
-            aux_subscriptions = [res['subscription']]
+        aux_subscriptions = _parse_aux_subscriptions(image_version.storage_profile.source.id)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+
     return sdk_no_wait(no_wait, client.gallery_image_versions.create_or_update, resource_group_name, gallery_name,
                        gallery_image_name, gallery_image_version_name, **kwargs)
 # endregion
