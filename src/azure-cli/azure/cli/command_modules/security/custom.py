@@ -471,7 +471,7 @@ def list_security_adaptive_application_controls(client):
 
 def get_security_adaptive_application_controls(client, group_name):
 
-    return client.get(group_name)
+    return client.get(group_name=group_name)
 
 
 # --------------------------------------------------------------------------------------------
