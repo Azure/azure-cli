@@ -515,7 +515,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_ag_private_link')
         g.custom_command('list', 'list_ag_private_link')
 
-    with self.command_group('network application-gateway private-link ip',
+    with self.command_group('network application-gateway private-link ip-config',
                             command_type=network_ag_sdk,
                             min_api='2020-05-01',
                             is_preview=True) as g:

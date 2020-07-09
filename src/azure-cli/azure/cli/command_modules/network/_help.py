@@ -164,27 +164,27 @@ type: command
 short-summary: List all the Private Link
 """
 
-helps['network application-gateway private-link ip'] = """
+helps['network application-gateway private-link ip-config'] = """
 type: group
 short-summary: Manage IP configuration of a Private Link to configure its capability
 """
 
-helps['network application-gateway private-link ip add'] = """
+helps['network application-gateway private-link ip-config add'] = """
 type: command
 short-summary: Add an IP configuration to a Private Link to scale up its capability
 """
 
-helps['network application-gateway private-link ip remove'] = """
+helps['network application-gateway private-link ip-config remove'] = """
 type: command
 short-summary: Remove an IP configuration from a Private Link to scale down its capability
 """
 
-helps['network application-gateway private-link ip show'] = """
+helps['network application-gateway private-link ip-config show'] = """
 type: command
 short-summary: Show an IP configuration of a Private Link
 """
 
-helps['network application-gateway private-link ip list'] = """
+helps['network application-gateway private-link ip-config list'] = """
 type: command
 short-summary: List all the IP configuration of a Private Link
 """
