@@ -3,16 +3,23 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# Invoke this script in Powershell with:
+# & 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' test_msi_package.py
+
 import os 
 import sys
 import subprocess 
 
-d = 'C:\\Program Files (x86)\\Microsoft SDKs\\Azure\\CLI2\\Lib\\site-packages\\azure\\cli\\command_modules'
+root_dir = 'C:\\Program Files (x86)\\Microsoft SDKs\\Azure\\CLI2\\Lib\\site-packages\\azure\\cli\\command_modules'
 
-mod_list = [os.path.join(d, o) for o in os.listdir(d) if os.path.isdir(os.path.join(d, o))]
-for mod in mod_list:
-    mod_name = os.path.basename(os.path.normpath(mod))
-    
-    # command = "python -m pytest -x -v -p no:warnings --log-level WARN --junit-xml '{}\\azure_cli_tests\\{}.xml' -n auto '{}'".format(os.path.expanduser('~'), mod_name, mod)
-    subprocess.call(['python', '-m', 'pytest', '-x', '-v', '-p', 'no:warnings', '--log-level', 'WARN', 
-        '--junit-xml', '{}\\azure_cli_tests\\{}.xml'.format(os.path.expanduser('~'), mod_name), '-n', 'auto', mod])
+mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
+
+for mod_name in mod_list:
+    exit_code = subprocess.call(['python', '-m', 'pytest', '-x', '-v', '-p', 'no:warnings', '--log-level', 'WARN', 
+        '--junit-xml', '{}\\azure_cli_test_result\\{}.xml'.format(os.path.expanduser('~'), mod_name), '-n', 'auto', '--pyargs', 'azure.cli.command_modules.{}'.format(mod_name)])
+    if exit_code != 0 and exit_code != 5:  # exit code is 5 when there is no tests collected in the module
+        sys.exit(exit_code)
+
+exit_code = subprocess.call(['python', '-m', 'pytest', '-x', '-v', '-p', 'no:warnings', '--log-level', 'WARN', 
+    '--junit-xml', '{}\\azure_cli_test_result\\azure-cli-core.xml'.format(os.path.expanduser('~')), '-n', 'auto', '--pyargs', 'azure.cli.core', '--import-mode=append'])
+sys.exit(exit_code)
