@@ -17,7 +17,6 @@ RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
 FROM fedora:${tag} AS execution-env
 
 RUN dnf install -y python3 python3-virtualenv
-RUN dnf install -y python3-gobject gtk3
 
 COPY --from=build-env /azure-cli-dev.rpm ./
 RUN rpm -i ./azure-cli-dev.rpm
