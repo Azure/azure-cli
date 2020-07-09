@@ -650,6 +650,53 @@ def add_ag_private_link_ip(cmd,
     return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
 
 
+def show_ag_private_link_ip(cmd,
+                            resource_group_name,
+                            application_gateway_name,
+                            private_link_name,
+                            private_link_ip_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    target_private_link = None
+    for pl in appgw.private_link_configurations:
+        if pl.name == private_link_name:
+            target_private_link = pl
+            break
+    else:
+        raise CLIError("Priavte Link doesn't exist")
+
+    target_private_link_ip_config = None
+    for pic in target_private_link.ip_configurations:
+        if pic.name == private_link_ip_name:
+            target_private_link_ip_config = pic
+            break
+    else:
+        raise CLIError("IP Configuration doesn't exist")
+
+    return target_private_link_ip_config
+
+
+def list_ag_private_link_ip(cmd,
+                            resource_group_name,
+                            application_gateway_name,
+                            private_link_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    target_private_link = None
+    for pl in appgw.private_link_configurations:
+        if pl.name == private_link_name:
+            target_private_link = pl
+            break
+    else:
+        raise CLIError("Priavte Link doesn't exist")
+
+    return target_private_link.ip_configurations
+
+
 def remove_ag_private_link_ip(cmd,
                               resource_group_name,
                               application_gateway_name,
@@ -667,7 +714,7 @@ def remove_ag_private_link_ip(cmd,
     else:
         raise CLIError("Priavte Link doesn't exist")
 
-    target_private_link_ip_config = target_private_link.ip_configurations
+    target_private_link_ip_config = None
     for pic in target_private_link.ip_configurations:
         if pic.name == private_link_ip_name:
             target_private_link_ip_config.remove(pic)

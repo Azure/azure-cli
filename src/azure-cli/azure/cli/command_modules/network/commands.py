@@ -521,6 +521,8 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('add', 'add_ag_private_link_ip')
         g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True)
+        g.custom_show_command('show', 'show_ag_private_link_ip')
+        g.custom_command('list', 'list_ag_private_link_ip')
     # endregion
 
     # region ApplicationGatewayWAFPolicy

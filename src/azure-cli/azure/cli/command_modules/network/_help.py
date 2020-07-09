@@ -151,12 +151,42 @@ short-summary: Add a new Private Link with a default IP Configuration and associ
 
 helps['network application-gateway private-link remove'] = """
 type: command
-short-summary: Remove a Private Link and clear association with Frontend IP. The subnet associate with a Private Link might needs to clear manually
+short-summary: Remove a Private Link and clear association with Frontend IP. The subnet associate with a Private Link might need to clear manually
+"""
+
+helps['network application-gateway private-link show'] = """
+type: command
+short-summary: Show a Private Link
+"""
+
+helps['network application-gateway private-link list'] = """
+type: command
+short-summary: List all the Private Link
 """
 
 helps['network application-gateway private-link ip'] = """
 type: group
 short-summary: Manage IP configuration of a Private Link to configure its capability
+"""
+
+helps['network application-gateway private-link ip add'] = """
+type: command
+short-summary: Add an IP configuration to a Private Link to scale up its capability
+"""
+
+helps['network application-gateway private-link ip remove'] = """
+type: command
+short-summary: Remove an IP configuration from a Private Link to scale down its capability
+"""
+
+helps['network application-gateway private-link ip show'] = """
+type: command
+short-summary: Show an IP configuration of a Private Link
+"""
+
+helps['network application-gateway private-link ip list'] = """
+type: command
+short-summary: List all the IP configuration of a Private Link
 """
 
 helps['network application-gateway frontend-ip'] = """
