@@ -178,7 +178,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertTrue(result['runtime_version'] == 'dotnetcore|2.1')
+        self.assertTrue(result['runtime_version'] == 'dotnetcore|3.1')
         self.assertTrue(result['os'].lower() == 'windows')
         self.assertNotEqual(result['location'], 'None')
 
