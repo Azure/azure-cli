@@ -1205,6 +1205,41 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         self.cmd('network private-endpoint delete -g {rg} -n {appgw_pe}')
 
+    @ResourceGroupPreparer(name_prefix='test_manage_appgw_private_endpoint')
+    def test_manage_appgw_private_endpoint(self, resource_group):
+        """
+        Add/Remove/Show/List Private Link
+        """
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_pl': 'appgw_private_link',
+            'appgw_pe_vnet': 'appgw_private_endpoint_vnet',
+            'appgw_pe_subnet': 'appgw_private_endpoint_subnet',
+            'appgw_ip': 'appgw_ip',
+            'appgw_pe': 'appgw_private_endpoint',
+            'appgw_pec': 'appgw_private_endpoint_connection'
+        })
+
+        # Enable private link feature on Application Gateway would require a public IP with Standard tier
+        self.cmd('network public-ip create -g {rg} -n {appgw_ip} --sku Standard')
+
+        # Create a application gateway without enable --enable-private-link
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--sku Standard_v2 '
+                 '--public-ip-address {appgw_ip}')
+
+        # Add one private link
+        self.cmd('network application-gateway private-link add -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_pl} '
+                 '--subnet {appgw_pe_subnet} '
+                 '--subnet-prefix 10.0.4.0/24')
+
+        self.cmd('network application-gateway private-link show -g {rg} --gateway-name {appgw} --name {appgw_pl}')
+
+        self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
+
+        self.cmd('network application-gateway ')
+
 
 if __name__ == '__main__':
     unittest.main()
