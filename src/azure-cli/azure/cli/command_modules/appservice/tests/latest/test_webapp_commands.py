@@ -2181,6 +2181,80 @@ class WebappImplictIdentityTest(ScenarioTest):
         self.cmd('webapp identity show -g {} -n {}'.format(resource_group,
                                                            webapp_name), checks=self.is_empty())
 
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer()
+    def test_webapp_assign_user_identity(self, resource_group):
+        scope = '/subscriptions/{}/resourcegroups/{}'.format(
+            self.get_subscription_id(), resource_group)
+        role = 'Reader'
+        plan_name = self.create_random_name('web-msi-plan', 20)
+        webapp_name = self.create_random_name('web-msi', 20)
+        identity_name = self.create_random_name('id1',8)
+        
+        msi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name), checks=[
+            self.check('name', identity_name)]).get_output_in_json()
+        self.cmd(
+            'appservice plan create -g {} -n {}'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        
+        self.cmd('webapp identity assign -g {} -n {}'.format(resource_group, webapp_name))
+        result = self.cmd('webapp identity assign -g {} -n {} --identities {}'.format(
+            resource_group, webapp_name, msi_result['id'])).get_output_in_json()
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('webapp identity remove -g {} -n {} --identities {}'.format(
+            resource_group, webapp_name, msi_result['id']))
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities', None),
+        ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer()
+    def test_webapp_remove_identity(self, resource_group):        
+        scope = '/subscriptions/{}/resourcegroups/{}'.format(
+            self.get_subscription_id(), resource_group)
+        role = 'Reader'
+        plan_name = self.create_random_name('web-msi-plan', 20)
+        webapp_name = self.create_random_name('web-msi', 20)
+        identity_name = self.create_random_name('id1',8)
+        identity2_name = self.create_random_name('id1',8)
+        
+        msi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name), checks=[
+            self.check('name', identity_name)]).get_output_in_json()
+        msi2_result = self.cmd('identity create -g {} -n {}'.format(
+            resource_group, identity2_name)).get_output_in_json()
+        self.cmd('identity create -g {} -n {}'.format(resource_group, identity2_name))
+        self.cmd(
+            'appservice plan create -g {} -n {}'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        self.cmd('webapp identity assign -g {} -n {} --identities [system] {} {}'.format(
+            resource_group, webapp_name, msi_result['id'], msi2_result['id']))
+
+        result = self.cmd('webapp identity remove -g {} -n {} --identities {}'.format(
+            resource_group, webapp_name, msi2_result['id'])).get_output_in_json()
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            self.check('principalId', result['principalId']),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('webapp identity remove -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            self.check('principalId', None),
+            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
+        ])
+
+        self.cmd('webapp identity remove -g {} -n {} --identities [system] {}'.format(
+            resource_group, webapp_name, msi_result['id']))
+        self.cmd('webapp identity show -g {} -n {}'.format(
+            resource_group, webapp_name), checks=self.is_empty())
+        
 
 class WebappListLocationsFreeSKUTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_list-locations-free-sku-test')
