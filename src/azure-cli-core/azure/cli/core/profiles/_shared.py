@@ -217,6 +217,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01',
             'policy_assignments': '2016-12-01',
@@ -251,6 +252,7 @@ AZURE_API_PROFILES = {
             'classic_administrators': '2015-06-01'
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-04-17',
@@ -273,6 +275,7 @@ AZURE_API_PROFILES = {
             'classic_administrators': '2015-06-01'
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.DATA_STORAGE: '2015-04-05',
         ResourceType.DATA_STORAGE_BLOB: '2015-04-05',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2015-04-05',
