@@ -96,7 +96,8 @@ def load_arguments(self, _):
                   'regulatory-compliance-standards',
                   'regulatory-compliance-controls',
                   'regulatory-compliance-assessments',
-                  'adaptive_network_hardenings']:
+                  'adaptive_network_hardenings'
+                  'allowed_connections']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',

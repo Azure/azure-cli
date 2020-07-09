@@ -491,6 +491,27 @@ def list_security_adaptive_network_hardenings(client,
 
 
 # --------------------------------------------------------------------------------------------
+# Allowed Connections
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_allowed_connections(client):
+
+    for loc in client.locations.list():
+        client.config.asc_location = loc.name
+
+    return client.allowed_connections.list()
+
+
+def get_security_allowed_connections(client, resource_name, resource_group_name):
+
+    for loc in client.locations.list():
+        client.config.asc_location = loc.name
+
+    return client.allowed_connections.get(resource_group_name, resource_name)
+
+
+# --------------------------------------------------------------------------------------------
 # Security IoT Solution
 # --------------------------------------------------------------------------------------------
 
