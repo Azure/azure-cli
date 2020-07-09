@@ -876,7 +876,7 @@ def create_ag_trusted_root_certificate(cmd, resource_group_name, application_gat
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     root_cert = ApplicationGatewayTrustedRootCertificate(name=item_name, data=cert_data,
-                                                         keyvault_secret_id=keyvault_secret)
+                                                         key_vault_secret_id=keyvault_secret)
     upsert_to_collection(ag, 'trusted_root_certificates', root_cert, 'name')
     return sdk_no_wait(no_wait, ncf.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -886,7 +886,7 @@ def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=No
     if cert_data is not None:
         instance.data = cert_data
     if keyvault_secret is not None:
-        instance.keyvault_secret_id = keyvault_secret
+        instance.key_vault_secret_id = keyvault_secret
     return parent
 
 
@@ -2269,14 +2269,26 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # pylint: disable=unused-argument
 def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
                                     peering, circuit_name=None, authorization_key=None, routing_weight=None,
-                                    enable_internet_security=None):
-    ExpressRouteConnection, SubResource = cmd.get_models('ExpressRouteConnection', 'SubResource')
+                                    enable_internet_security=None, associated_route_table=None,
+                                    propagated_route_tables=None, labels=None):
+    ExpressRouteConnection, SubResource, RoutingConfiguration, PropagatedRouteTable\
+        = cmd.get_models('ExpressRouteConnection', 'SubResource', 'RoutingConfiguration', 'PropagatedRouteTable')
     client = network_client_factory(cmd.cli_ctx).express_route_connections
+
+    propagated_route_tables = PropagatedRouteTable(
+        labels=labels,
+        ids=[SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]
+    )
+    routing_configuration = RoutingConfiguration(
+        associated_route_table=SubResource(id=associated_route_table),
+        propagated_route_tables=propagated_route_tables
+    )
     connection = ExpressRouteConnection(
         name=connection_name,
         express_route_circuit_peering=SubResource(id=peering) if peering else None,
         authorization_key=authorization_key,
-        routing_weight=routing_weight
+        routing_weight=routing_weight,
+        routing_configuration=routing_configuration
     )
 
     if enable_internet_security and cmd.supported_api_version(min_api='2019-09-01'):
@@ -2287,7 +2299,8 @@ def create_express_route_connection(cmd, resource_group_name, express_route_gate
 
 # pylint: disable=unused-argument
 def update_express_route_connection(instance, cmd, circuit_name=None, peering=None, authorization_key=None,
-                                    routing_weight=None, enable_internet_security=None):
+                                    routing_weight=None, enable_internet_security=None, associated_route_table=None,
+                                    propagated_route_tables=None, labels=None):
     SubResource = cmd.get_models('SubResource')
     if peering is not None:
         instance.express_route_connection_id = SubResource(id=peering)
@@ -2297,6 +2310,20 @@ def update_express_route_connection(instance, cmd, circuit_name=None, peering=No
         instance.routing_weight = routing_weight
     if enable_internet_security is not None and cmd.supported_api_version(min_api='2019-09-01'):
         instance.enable_internet_security = enable_internet_security
+    if associated_route_table is not None or propagated_route_tables is not None or labels is not None:
+        if instance.routing_configuration is None:
+            RoutingConfiguration = cmd.get_models('RoutingConfiguration')
+            instance.routing_configuration = RoutingConfiguration()
+        if associated_route_table is not None:
+            instance.routing_configuration.associated_route_table = SubResource(id=associated_route_table)
+        if propagated_route_tables is not None or labels is not None:
+            if instance.routing_configuration.propagated_route_tables is None:
+                PropagatedRouteTable = cmd.get_models('PropagatedRouteTable')
+                instance.routing_configuration.propagated_route_tables = PropagatedRouteTable()
+            if propagated_route_tables is not None:
+                instance.routing_configuration.propagated_route_tables.ids = [SubResource(id=propagated_route_table) for propagated_route_table in propagated_route_tables]  # pylint: disable=line-too-long
+            if labels is not None:
+                instance.routing_configuration.propagated_route_tables.labels = labels
 
     return instance
 # endregion
@@ -5932,4 +5959,78 @@ def list_security_partner_provider(cmd, resource_group_name=None):
     if resource_group_name is not None:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()
+# endregion
+
+
+# region network virtual appliance
+def create_network_virtual_appliance(cmd, client, resource_group_name, network_virtual_appliance_name,
+                                     vendor, bundled_scale_unit, market_place_version,
+                                     virtual_hub, boot_strap_configuration_blobs=None,
+                                     cloud_init_configuration_blobs=None,
+                                     cloud_init_configuration=None, asn=None,
+                                     location=None, tags=None, no_wait=False):
+    (NetworkVirtualAppliance,
+     SubResource,
+     VirtualApplianceSkuProperties) = cmd.get_models('NetworkVirtualAppliance',
+                                                     'SubResource',
+                                                     'VirtualApplianceSkuProperties')
+
+    virtual_appliance = NetworkVirtualAppliance(boot_strap_configuration_blobs=boot_strap_configuration_blobs,
+                                                cloud_init_configuration_blobs=cloud_init_configuration_blobs,
+                                                cloud_init_configuration=cloud_init_configuration,
+                                                virtual_appliance_asn=asn,
+                                                virtual_hub=SubResource(id=virtual_hub),
+                                                nva_sku=VirtualApplianceSkuProperties(
+                                                    vendor=vendor,
+                                                    bundled_scale_unit=bundled_scale_unit,
+                                                    market_place_version=market_place_version
+                                                ),
+                                                location=location,
+                                                tags=tags)
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, network_virtual_appliance_name, virtual_appliance)
+
+
+def update_network_virtual_appliance(instance, cmd, cloud_init_configuration=None, asn=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('virtual_appliance_asn', asn)
+        c.set_param('cloud_init_configuration', cloud_init_configuration)
+    return instance
+
+
+def list_network_virtual_appliance(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list()
+
+
+def create_network_virtual_appliance_site(cmd, client, resource_group_name, network_virtual_appliance_name,
+                                          site_name, address_prefix, allow=None, optimize=None, default=None,
+                                          no_wait=False):
+    (BreakOutCategoryPolicies,
+     Office365PolicyProperties,
+     VirtualApplianceSite) = cmd.get_models('BreakOutCategoryPolicies',
+                                            'Office365PolicyProperties',
+                                            'VirtualApplianceSite')
+
+    virtual_appliance_site = VirtualApplianceSite(address_prefix=address_prefix,
+                                                  o365_policy=Office365PolicyProperties(
+                                                      break_out_categories=BreakOutCategoryPolicies(
+                                                          allow=allow,
+                                                          optimize=optimize,
+                                                          default=default
+                                                      )
+                                                  ))
+
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, network_virtual_appliance_name, site_name, virtual_appliance_site)
+
+
+def update_network_virtual_appliance_site(instance, cmd, address_prefix, allow=None, optimize=None, default=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('address_prefix', address_prefix)
+        c.set_param('o365_policy.break_out_categories.allow', allow)
+        c.set_param('o365_policy.break_out_categories.optimize', optimize)
+        c.set_param('o365_policy.break_out_categories.default', default)
+    return instance
 # endregion
