@@ -714,10 +714,10 @@ def remove_ag_private_link_ip(cmd,
     else:
         raise CLIError("Priavte Link doesn't exist")
 
-    target_private_link_ip_config = None
+    updated_ip_configurations = target_private_link.ip_configurations
     for pic in target_private_link.ip_configurations:
         if pic.name == private_link_ip_name:
-            target_private_link_ip_config.remove(pic)
+            updated_ip_configurations.remove(pic)
             break
     else:
         raise CLIError("IP Configuration doesn't exist")
