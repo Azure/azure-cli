@@ -927,8 +927,9 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
 
 
 def _format_fx_version(custom_image_name, container_config_type=None):
-    custom_image_name = custom_image_name.lower()
-    custom_image_name = custom_image_name.replace("https://", "").replace("http://", "")
+    lower_custom_image_name = custom_image_name.lower()
+    if "https://" in lower_custom_image_name or "http://" in lower_custom_image_name:
+        custom_image_name = lower_custom_image_name.replace("https://", "").replace("http://", "")
     fx_version = custom_image_name.strip()
     fx_version_lower = fx_version.lower()
     # handles case of only spaces

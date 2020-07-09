@@ -21,6 +21,7 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_assessment_metadata,
                               cf_security_sub_assessment,
                               cf_security_adaptive_application_controls,
+                              cf_security_allowed_connections,
                               cf_security_iot_solution,
                               cf_security_iot_analytics,
                               cf_security_iot_alerts,
@@ -146,6 +147,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#AdaptiveApplicationControlsOperations.{}',
         client_factory=cf_security_adaptive_application_controls,
         operation_group='cf_security_adaptive_application_controls'
+    )
+
+    security_allowed_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AllowedConnectionsOperations.{}',
+        client_factory=cf_security_allowed_connections,
+        operation_group='security_allowed_connections'
     )
 
     security_iot_solution_sdk = CliCommandType(
@@ -292,12 +299,18 @@ def load_command_table(self, _):
                             client_factory=cf_security_sub_assessment) as g:
         g.custom_command('list', 'list_security_sub_assessments')
         g.custom_command('show', 'get_security_sub_assessment')
-
+    
     with self.command_group('security adaptive_application_controls',
                             security_adaptive_application_controls_sdk,
                             client_factory=cf_security_adaptive_application_controls) as g:
         g.custom_command('list', 'list_security_adaptive_application_controls')
         g.custom_command('show', 'get_security_adaptive_application_controls')
+    
+    with self.command_group('security allowed_connections',
+                            security_allowed_connections_sdk,
+                            client_factory=cf_security_allowed_connections) as g:
+        g.custom_command('list', 'list_security_allowed_connections')
+        g.custom_command('show', 'get_security_allowed_connections')
 
     with self.command_group('security iot-solution',
                             security_iot_solution_sdk,

@@ -28,7 +28,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools)
+    cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
+    cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -369,6 +370,24 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#SecurityPartnerProvidersOperations.{}',
         client_factory=cf_security_partner_providers,
         min_api='2020-03-01'
+    )
+
+    network_virtual_appliances_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#NetworkVirtualAppliancesOperations.{}',
+        client_factory=cf_network_virtual_appliances,
+        min_api='2020-05-01'
+    )
+
+    virtual_appliance_skus_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualApplianceSkusOperations.{}',
+        client_factory=cf_virtual_appliance_skus,
+        min_api='2020-05-01'
+    )
+
+    virtual_appliance_sites_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualApplianceSitesOperations.{}',
+        client_factory=cf_virtual_appliance_sites,
+        min_api='2020-05-01'
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
@@ -1208,6 +1227,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_security_partner_provider')
         g.command('delete', 'delete')
+    # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
     plr_and_pec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom#{}')
@@ -1219,4 +1239,24 @@ def load_command_table(self, _):
         g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
+    # endregion
+
+    # region Network Virtual Appliance
+    with self.command_group('network virtual-appliance', network_virtual_appliances_sdk, client_factory=cf_network_virtual_appliances, is_preview=True) as g:
+        g.custom_command('create', 'create_network_virtual_appliance')
+        g.generic_update_command('update', custom_func_name='update_network_virtual_appliance')
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_network_virtual_appliance')
+        g.command('delete', 'delete', confirmation=True)
+
+    with self.command_group('network virtual-appliance site', virtual_appliance_sites_sdk, client_factory=cf_virtual_appliance_sites, is_preview=True) as g:
+        g.custom_command('create', 'create_network_virtual_appliance_site')
+        g.generic_update_command('update', custom_func_name='update_network_virtual_appliance_site')
+        g.show_command('show', 'get')
+        g.command('delete', 'delete', confirmation=True)
+        g.command('list', 'list')
+
+    with self.command_group('network virtual-appliance sku', virtual_appliance_skus_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
     # endregion

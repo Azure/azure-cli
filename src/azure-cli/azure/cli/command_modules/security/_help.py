@@ -517,6 +517,7 @@ examples:
     text: >
         az security sub-assessment show --assessed-resource-id '/subscriptions/f8b197db-3b2b-4404-a3a3-0dfec293d0d0/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1' --assessment-name '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' -n 'd7c4d9ec-227c-4fb3-acf9-25fdd97c1bf1'
 """
+
 helps['security adaptive_application_controls'] = """
 type: group
 short-summary: Enable control which applications can run on your Azure and non-Azure machines (Windows and Linux)
