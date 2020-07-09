@@ -340,12 +340,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
 
-    # if disk_encryption_set is not None and encryption_type is None:
-    #     raise CLIError('usage error: Please specify --encryption-type.')
-    # if encryption_type is not None:
-    #     encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
-    # else:
-    #     encryption = None
     encryption = None
     if disk_encryption_set:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
