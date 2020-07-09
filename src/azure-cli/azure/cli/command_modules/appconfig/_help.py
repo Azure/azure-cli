@@ -187,6 +187,8 @@ examples:
     text: az appconfig kv set -n MyAppConfiguration --key color --value \\"red\\" --content-type application/json
   - name: Set a key with list value and JSON content type.
     text: az appconfig kv set -n MyAppConfiguration --key options --value [1,2,3] --content-type application/activity+json;charset=utf-8
+  - name: Set a key with null value and JSON content type.
+    text: az appconfig kv set -n MyAppConfiguration --key foo --value null --content-type application/json
 """
 
 helps['appconfig kv set-keyvault'] = """
