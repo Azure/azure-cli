@@ -5405,7 +5405,7 @@ class KeyVaultClientOperationsMixin(object):
             }
 
         if cls:
-            return cls(response, deserialized, header_dict)
+            return cls(pipeline_response, deserialized, header_dict)
 
         return deserialized
     _full_backup_initial.metadata = {'url': '/backup'}
@@ -5446,13 +5446,15 @@ class KeyVaultClientOperationsMixin(object):
                 cls=lambda x,y,z: x,
                 **kwargs
             )
+            raw_result.http_response.headers['operation-location'] = \
+                raw_result.http_response.headers.get('Azure-AsyncOperation')
 
         kwargs.pop('error_map', None)
         kwargs.pop('content_type', None)
 
         def get_long_running_output(pipeline_response):
             response_headers = {}
-            response = pipeline_response.internal_response
+            response = pipeline_response.http_response
             response_headers['Retry-After'] = self._deserialize('int', response.headers.get('Retry-After'))
             response_headers['Azure-AsyncOperation'] = self._deserialize('str',
                                                                          response.headers.get('Azure-AsyncOperation'))
@@ -5636,6 +5638,8 @@ class KeyVaultClientOperationsMixin(object):
                 cls=lambda x,y,z: x,
                 **kwargs
             )
+            raw_result.http_response.headers['operation-location'] = \
+                raw_result.http_response.headers.get('Azure-AsyncOperation')
 
         kwargs.pop('error_map', None)
         kwargs.pop('content_type', None)
