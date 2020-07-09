@@ -63,7 +63,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         _, token, full_token, _ = self._get_token()
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))
-        except KeyError:
+        except KeyError:  # needed to deal with differing unserialized MSI token payload
             return AccessToken(token, int(full_token['expires_on']))
 
     # This method is exposed for msrest.
