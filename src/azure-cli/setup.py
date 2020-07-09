@@ -165,7 +165,6 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     package_data={
-        'azure.cli': ['__main__.py'],
         'azure.cli.core': ['auth_landing_pages/*.html'],
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],

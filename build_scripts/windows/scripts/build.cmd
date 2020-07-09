@@ -88,7 +88,7 @@ robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 set CLI_SRC=%REPO_ROOT%\src
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
-for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg %CLI_SRC%\azure-cli-telemetry) do (
+for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
    %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir --no-deps .
    popd
@@ -97,7 +97,6 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nsp
 
 if %errorlevel% neq 0 goto ERROR
 
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall urllib3==1.24.2
 
 pushd %BUILDING_DIR%
