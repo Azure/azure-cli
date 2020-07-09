@@ -3375,21 +3375,23 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
         self.cmd('vm encryption disable -g {rg} -n {vm}')
 
-    # @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_at_host_', location='westus')
-    # def test_vm_encryption_at_host(self, resource_group):
-    #     self.kwargs.update({
-    #         'vm': 'vm1',
-    #         'vmss': 'vmss1'
-    #     })
-    #
-    #     self.cmd('vm create -g {rg} -n {vm} --image centos --generate-ssh-keys --nsg-rule NONE --encryption-at-host')
-    #     self.cmd('vm show -g {rg} -n {vm}', checks=[
-    #         self.check('securityProfile.encryptionAtHost', True)
-    #     ])
-    #     self.cmd('vmss create -g {rg} -n {vmss} --image centos --generate-ssh-keys --encryption-at-host')
-    #     self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-    #
-    #     ])
+    # Only subscription in Microsoft directory has this feature
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_at_host_', location='westus')
+    def test_vm_encryption_at_host(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image centos --generate-ssh-keys --nsg-rule NONE --encryption-at-host')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('securityProfile.encryptionAtHost', True)
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss} --image centos --generate-ssh-keys --encryption-at-host')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.securityProfile.encryptionAtHost', True)
+        ])
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
