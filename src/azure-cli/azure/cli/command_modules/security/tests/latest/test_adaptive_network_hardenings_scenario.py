@@ -15,7 +15,3 @@ class SecurityCenterAdaptiveNetworkHardeningsTests(ScenarioTest):
         adaptive_network_hardenings = self.cmd('az security adaptive_network_hardenings list --resource-group MSI-GLStandard_A1 --resource-type virtualMachines --resource-namespace Microsoft.Compute --resource-name MSI-22122').get_output_in_json()
 
         assert len(adaptive_network_hardenings) >= 0
-
-        adaptive_network_hardenings = self.cmd('az security adaptive_network_hardenings show --resource-group MSI-GLStandard_A1 --adaptive-network-hardenings-resource-name default --resource-type virtualMachines --resource-namespace Microsoft.Compute --resource-name MSI-22122').get_output_in_json()
-
-        assert len(adaptive_network_hardenings) >= 0
