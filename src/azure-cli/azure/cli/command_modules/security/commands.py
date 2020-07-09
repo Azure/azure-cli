@@ -299,13 +299,13 @@ def load_command_table(self, _):
                             client_factory=cf_security_sub_assessment) as g:
         g.custom_command('list', 'list_security_sub_assessments')
         g.custom_command('show', 'get_security_sub_assessment')
-    
+
     with self.command_group('security adaptive_application_controls',
                             security_adaptive_application_controls_sdk,
                             client_factory=cf_security_adaptive_application_controls) as g:
         g.custom_command('list', 'list_security_adaptive_application_controls')
         g.custom_command('show', 'get_security_adaptive_application_controls')
-    
+
     with self.command_group('security allowed_connections',
                             security_allowed_connections_sdk,
                             client_factory=cf_security_allowed_connections) as g:
