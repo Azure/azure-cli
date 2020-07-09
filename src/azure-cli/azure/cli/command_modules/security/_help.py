@@ -519,7 +519,7 @@ examples:
 """
 helps['security adaptive_application_controls'] = """
 type: group
-short-summary: Enables control which applications can run on your Azure and non-Azure machines (Windows and Linux)
+short-summary: Enable control which applications can run on your Azure and non-Azure machines (Windows and Linux)
 """
 
 helps['security adaptive_application_controls list'] = """
@@ -538,6 +538,29 @@ examples:
   - name: Gets a single application control VM/server group.
     text: >
         az security adaptive_application_controls show --group-name GROUP1
+"""
+
+helps['security allowed_connections'] = """
+type: group
+short-summary: View all possible traffic between resources for the subscription and location, based on connection type.
+"""
+
+helps['security allowed_connections list'] = """
+type: command
+short-summary: list of all possible traffic between resources for the subscription.
+examples:
+  - name: Get possible traffic between resources at the subscription level.
+    text: >
+        az security allowed_connections list
+"""
+
+helps['security allowed_connections show'] = """
+type: command
+short-summary: List all possible traffic between resources for the subscription and location, based on connection type.
+examples:
+  - name: Get all possible traffic between resources for the subscription and location, based on connection type.
+    text: >
+        az security allowed_connections show --name Internal --resource-group mygroup
 """
 
 helps['security iot-solution'] = """
