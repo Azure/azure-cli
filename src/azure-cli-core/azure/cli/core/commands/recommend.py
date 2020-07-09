@@ -69,7 +69,7 @@ class TreeNode:
             traces.append(self._name)
         return traces
 
-    def _get_trace_str(self, number=None, filter_rules=None):
+    def _get_trace_str(self, number=None, filter_rules=None, select_items=None):
         '''The correct JMESPath to get to current node'''
         trace_str = ""
         if self._parent:
@@ -79,7 +79,7 @@ class TreeNode:
             if number:
                 trace_str += "[:{}]".format(number)
             elif filter_rules:
-                trace_str += "[?{}]".format(self.filter_with_condiction())
+                trace_str += "[?{}]".format(filter_rules(select_items))
             else:
                 trace_str += "[]"
         return trace_str
@@ -113,15 +113,25 @@ class TreeNode:
         ret.append(help_str)
         return ret
 
-    def filter_with_condiction(self):
+    def filter_with_condition(self, select_items):
         help_str = ""
         if not self._from_list:
             return help_str
+        match_item = None
+        backup_item = None
+        similarity = self._similarity_threshold
         for key in self._keys:
             if not (isinstance(self._data[key], list) or
                     isinstance(self._data[key], dict)):
-                help_str = "{}=='{}'".format(key, self._data[key])
-                break
+                for item in select_items:
+                    if jellyfish.jaro_winkler_similarity(key, item) > similarity:
+                        match_item = key
+                        similarity = jellyfish.jaro_winkler_similarity(key, item)
+                backup_item = key
+        if match_item is not None:
+            help_str = "{}=='{}'".format(match_item, self._data[match_item])
+        elif backup_item is not None:
+            help_str = "{}=='{}'".format(backup_item, self._data[backup_item])
         return help_str
 
     def get_function_recommend(self):
@@ -165,7 +175,7 @@ class TreeBuilder:
             printlist(node.get_select_string(keywords_list))
             if node._from_list:
                 printlist(node.select_specific_number_string())
-                printlist(node._get_trace_str(filter_rules=node.filter_with_condiction))
+                printlist(node._get_trace_str(filter_rules=node.filter_with_condition, select_items=keywords_list))
                 printlist(node.get_function_recommend())
 
     def _parse_dict(self, name, data, from_list=False):
