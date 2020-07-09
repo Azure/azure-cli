@@ -247,7 +247,15 @@ def detect_dotnet_version_tocreate(detected_ver):
 def detect_node_version_tocreate(detected_ver):
     if detected_ver in NODE_VERSIONS:
         return detected_ver
-    return NODE_VERSION_DEFAULT
+    # get major version & get the closest version from supported list
+    major_ver = int(detected_ver.split('.')[0])
+    node_ver = NODE_VERSION_DEFAULT
+    # TODO: Handle checking for minor versions if node major version is 10
+    if major_ver <= 11:
+        node_ver = NODE_VERSION_DEFAULT
+    else:
+        node_ver = '12.9'
+    return node_ver
 
 
 def find_key_in_json(json_data, key):

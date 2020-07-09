@@ -46,6 +46,7 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.APPLICATION_INSIGHTS = 'applicationInsights'
         self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
 
+
 RUNTIME_STACKS = {
     'windows': [
         "aspnet|V4.7",
