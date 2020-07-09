@@ -537,7 +537,7 @@ short-summary: List all possible traffic between resources for the subscription 
 examples:
   - name: Get all possible traffic between resources for the subscription and location, based on connection type.
     text: >
-        az security allowed_connections show --name Internal --resource-group mygroup
+        az security allowed_connections show --resource-name Internal --resource-group mygroup
 """
 
 helps['security adaptive_network_hardenings'] = """
