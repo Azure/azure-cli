@@ -1279,7 +1279,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--private-connection-resource-id {appgw_id} '
                  '--group-id {private_link_group_id_for_public}')
 
-        list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
+        # list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
 
         # ------------------------------------------------------------------------------------------
 
