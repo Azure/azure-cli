@@ -846,7 +846,8 @@ def load_arguments(self, _):
 
     with self.argument_context('sig image-version') as c:
         deprecated_option = c.deprecate(target='--gallery-image-version-name', redirect='--gallery-image-version', hide=True, expiration="3.0.0")
-        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option], )
+        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option],
+                   help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
 
     with self.argument_context('sig image-version create') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],

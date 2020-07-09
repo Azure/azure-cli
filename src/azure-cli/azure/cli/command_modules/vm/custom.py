@@ -247,6 +247,14 @@ def _show_missing_access_warning(resource_group, name, command):
     logger.warning(warn)
 
 
+def _parse_aux_subscriptions(resource_id):
+    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    if is_valid_resource_id(resource_id):
+        res = parse_resource_id(resource_id)
+        return [res['subscription']]
+    return None
+
+
 # Hide extension information from output as the info is not correct and unhelpful; also
 # commands using it mean to hide the extension concept from users.
 class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -2690,7 +2698,14 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None,
                 enable_automatic_repairs=None, automatic_repairs_grace_period=None, **kwargs):
     vmss = kwargs['parameters']
-    client = _compute_client_factory(cmd.cli_ctx)
+    aux_subscriptions = None
+    # pylint: disable=too-many-boolean-expressions
+    if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
+            vmss.virtual_machine_profile.storage_profile and \
+            vmss.virtual_machine_profile.storage_profile.image_reference and \
+            vmss.virtual_machine_profile.storage_profile.image_reference.id:
+        aux_subscriptions = _parse_aux_subscriptions(vmss.virtual_machine_profile.storage_profile.image_reference.id)
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
     VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
 
@@ -3047,7 +3062,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
         'TargetRegion')
-    client = _compute_client_factory(cmd.cli_ctx)
+    aux_subscriptions = None
+    if managed_image:
+        aux_subscriptions = _parse_aux_subscriptions(managed_image)
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if managed_image and not is_valid_resource_id(managed_image):
@@ -3113,14 +3131,25 @@ def fix_gallery_image_date_info(date_info):
     return date_info
 
 
-def update_image_version(instance, target_regions=None, replica_count=None):
+def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
+                         target_regions=None, replica_count=None, no_wait=False, **kwargs):
+    image_version = kwargs['gallery_image_version']
+
     if target_regions:
-        instance.publishing_profile.target_regions = target_regions
+        image_version.publishing_profile.target_regions = target_regions
     if replica_count:
-        instance.publishing_profile.replica_count = replica_count
-    if instance.storage_profile.source is not None:
-        instance.storage_profile.os_disk_image = instance.storage_profile.data_disk_images = None
-    return instance
+        image_version.publishing_profile.replica_count = replica_count
+    if image_version.storage_profile.source is not None:
+        image_version.storage_profile.os_disk_image = image_version.storage_profile.data_disk_images = None
+
+    aux_subscriptions = None
+    if image_version.storage_profile and image_version.storage_profile.source and \
+            image_version.storage_profile.source.id:
+        aux_subscriptions = _parse_aux_subscriptions(image_version.storage_profile.source.id)
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+
+    return sdk_no_wait(no_wait, client.gallery_image_versions.create_or_update, resource_group_name, gallery_name,
+                       gallery_image_name, gallery_image_version_name, **kwargs)
 # endregion
 
 
