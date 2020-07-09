@@ -657,9 +657,8 @@ def __is_json_content_type(content_type):
     content_type = content_type.strip().lower()
     mime_type = content_type.split(';')[0].strip()
 
-    type_parts = mime_type.split('/') if '/' in mime_type else None
-
-    if not type_parts or len(type_parts) != 2:
+    type_parts = mime_type.split('/')
+    if len(type_parts) != 2:
         return False
 
     (main_type, sub_type) = type_parts
@@ -767,7 +766,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
     try:
         for kv in fetched_items:
             key = kv.key
-            if __is_json_content_type(kv.content_type):
+            if format_ != 'properties' and __is_json_content_type(kv.content_type):
                 try:
                     # Convert JSON string value to python object
                     kv.value = json.loads(kv.value)

@@ -964,7 +964,6 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         Test Scenario 1: Create settings with JSON Content Type
             - Create settings in Src AppConfig store with JSON Content type
             - Make sure that input value is in valid JSON format
-            - Create Feature Flags and KeyVault references in Src AppConfig store
         """
 
         entry_key = "Key01"
@@ -997,7 +996,6 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
         entry_key = "Key03"
         entry_value = 'true'
-        appconfig_value = entry_value.replace('\\', '')
         json_content_type_03 = 'application/boolean+json;'
         self.kwargs.update({
             'key': entry_key,
@@ -1006,12 +1004,11 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
-                         self.check('value', appconfig_value),
+                         self.check('value', entry_value),
                          self.check('contentType', json_content_type_03)])
 
         entry_key = "Key04"
         entry_value = '45.6'
-        appconfig_value = entry_value.replace('\\', '')
         json_content_type_04 = 'application/json+text+number;charset=utf-8;param1=value1'
         self.kwargs.update({
             'key': entry_key,
@@ -1020,7 +1017,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
-                         self.check('value', appconfig_value),
+                         self.check('value', entry_value),
                          self.check('contentType', json_content_type_04)])
 
         entry_key = "Key05"
@@ -1051,7 +1048,6 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
         entry_key = "Key07"
         entry_value = 'null'
-        appconfig_value = entry_value.replace('\\', '')
         json_content_type_07 = 'application/json+null;charset=utf-8;'
         self.kwargs.update({
             'key': entry_key,
@@ -1060,12 +1056,11 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
-                         self.check('value', appconfig_value),
+                         self.check('value', entry_value),
                          self.check('contentType', json_content_type_07)])
 
         entry_key = "Key08"
         entry_value = '[1,2,3,4]'
-        appconfig_value = entry_value.replace('\\', '')
         json_content_type_08 = 'application/vnd.numericarray+json'
         self.kwargs.update({
             'key': entry_key,
@@ -1074,7 +1069,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         })
         self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
-                         self.check('value', appconfig_value),
+                         self.check('value', entry_value),
                          self.check('contentType', json_content_type_08)])
 
         entry_key = "Key09"
@@ -1105,8 +1100,49 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
                          self.check('value', appconfig_value),
                          self.check('contentType', json_content_type_10)])
 
-        # Validate that input value is in JSON format
         entry_key = "Key11"
+        entry_value = '{\\"Name\\":\\"Value\\"}'
+        appconfig_value = entry_value.replace('\\', '')
+        json_content_type_11 = 'application/json'
+        self.kwargs.update({
+            'key': entry_key,
+            'value': entry_value,
+            'appconfig_value': appconfig_value,
+            'content_type': json_content_type_11
+        })
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', '{appconfig_value}'),
+                         self.check('contentType', json_content_type_11)])
+
+        entry_key = "Key12"
+        entry_value = '{\\"MyNullValue\\":null,\\"MyObject\\":{\\"Property\\":{\\"Name\\":{\\"Name1\\":\\"Value1\\",\\"Name2\\":[\\"qqq\\",\\"rrr\\"]}}},\\"MyArray\\":[1,2,3]}'
+        appconfig_value = entry_value.replace('\\', '')
+        self.kwargs.update({
+            'key': entry_key,
+            'value': entry_value,
+            'appconfig_value': appconfig_value
+        })
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', '{appconfig_value}'),
+                         self.check('contentType', json_content_type_11)])
+
+        # Treat missing value argument as null value
+        entry_key = "Key13"
+        appconfig_value = "null"
+        json_content_type_13 = 'application/null+json+empty'
+        self.kwargs.update({
+            'key': entry_key,
+            'content_type': json_content_type_13
+        })
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', appconfig_value),
+                         self.check('contentType', json_content_type_13)])
+
+        # Validate that input value is in JSON format
+        entry_key = "Key14"
         entry_value = 'Red'
         self.kwargs.update({
             'key': entry_key,
@@ -1139,6 +1175,21 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, "Set the value again in valid JSON format."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y')
 
+        """
+        Test Scenario 2: AppConfig <--> AppConfig Import/Export
+            - Add Feature Flag and Key vault Reference
+            - Import settings from Src to Dest AppConfig store with JSON content type
+            - Export to JSON file from src config store
+            - Export to JSON file from dest config store
+            - Compare both exported files
+            - Delete all settings from dest config store
+            - Export settings from Src to Dest AppConfig store
+            - Export to JSON file from src config store
+            - Export to JSON file from dest config store
+            - Compare both exported files
+            - Delete all settings from both stores
+        """
+
         # Add a new feature flag
         entry_feature = 'Beta'
         default_description = None
@@ -1167,20 +1218,6 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
                  checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('value', keyvault_value)])
-
-        """
-        Test Scenario 2: AppConfig <--> AppConfig Import/Export
-            - Import settings from Src to Dest AppConfig store with JSON content type
-            - Export to JSON file from src config store
-            - Export to JSON file from dest config store
-            - Compare both exported files
-            - Delete all settings from dest config store
-            - Export settings from Src to Dest AppConfig store
-            - Export to JSON file from src config store
-            - Export to JSON file from dest config store
-            - Compare both exported files
-            - Delete all settings from both stores
-        """
 
         # Test IMPORT function by importing all settings from src config store to dest config store
         self.kwargs.update({
@@ -1220,8 +1257,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'key': any_key_pattern,
             'label': any_label_pattern
         })
-        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y').get_output_in_json()
-        assert len(deleted_kvs) == 13
+        self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y')
 
         # Test EXPORT function by exporting all settings from src config store to dest config store
         self.cmd(

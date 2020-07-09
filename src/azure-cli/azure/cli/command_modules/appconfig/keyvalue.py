@@ -304,7 +304,7 @@ def set_key(cmd,
             if content_type and __is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
-                    value = '""' if value is None else value
+                    value = 'null' if value is None else value
                     json.loads(value)
                 except ValueError:
                     raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
@@ -315,6 +315,9 @@ def set_key(cmd,
             content_type = retrieved_kv.content_type if content_type is None else content_type
             if content_type and __is_json_content_type(content_type):
                 try:
+                    if value is None:
+                        # retrieved_kv.value must've been null object, which is invalid JSON
+                        raise CLIError('This setting already exists in your config store but the value is null. Set the value again in valid JSON format to match with the content type "{}".'.format(content_type))
                     # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
                     json.loads(value)
                 except ValueError:
