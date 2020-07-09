@@ -71,12 +71,12 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn==4.1.0rc1',
     'azure-mgmt-cognitiveservices~=6.2.0',
-    'azure-mgmt-compute~=12.0',
+    'azure-mgmt-compute~=13.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc14',
     'azure-mgmt-containerservice~=9.0.1',
-    'azure-mgmt-cosmosdb~=0.14.0',
+    'azure-mgmt-cosmosdb~=0.15.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
@@ -179,6 +179,10 @@ setup(
             'template/service/template.json',
             'template/service/parameter.json'
         ],
+        'azure.cli.command_modules.appservice': [
+            'resources/WindowsFunctionsStacks.json',
+            'resources/LinuxFunctionsStacks.json'
+        ]
     },
     cmdclass=cmdclass
 )
