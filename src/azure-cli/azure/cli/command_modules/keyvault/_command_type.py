@@ -100,7 +100,9 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 command_args.pop('cmd')
             try:
                 if command_type.settings.get('resource_type') == ResourceType.DATA_PRIVATE_KEYVAULT:
-                    abandoned_args = ['identifier', 'hsm_base_url', 'storage_account_name', 'blob_container_name']
+                    abandoned_args = [
+                        'identifier', 'hsm_base_url', 'storage_account_name', 'blob_container_name'
+                    ]
                     for arg in abandoned_args:
                         if arg in command_args:
                             command_args.pop(arg)
