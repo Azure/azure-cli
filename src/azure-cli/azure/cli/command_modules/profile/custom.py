@@ -214,6 +214,7 @@ def check_cli(cmd):
         print('Commands loaded OK.\n')
     except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_commands'] = ex
+        raise ex
         logger.error('Error occurred loading commands!\n')
 
     print('Retrieving all help...')
