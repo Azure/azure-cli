@@ -312,7 +312,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_security_allowed_connections')
         g.custom_command('show', 'get_security_allowed_connections')
 
-
     with self.command_group('security iot-solution',
                             security_iot_solution_sdk,
                             client_factory=cf_security_iot_solution) as g:
