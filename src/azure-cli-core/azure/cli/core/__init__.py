@@ -147,8 +147,8 @@ class AzCli(CLI):
             args_str = []
             for name, value in local_context_args:
                 args_str.append('{}: {}'.format(name, value))
-            logger.warning('Your preference of: %s now saved to local context. To learn more, type in az '
-                           'local-context --help', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
+            logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
+                           'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
 
 
 class MainCommandsLoader(CLICommandsLoader):
