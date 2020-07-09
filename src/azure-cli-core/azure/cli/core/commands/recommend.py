@@ -31,7 +31,7 @@ def register_global_query_recommend(cli_ctx):
     def add_query_recommend_parameter(_, **kwargs):
         arg_group = kwargs.get('arg_group')
         arg_group.add_argument('--query-recommend', dest='_query_recommend',
-            help="Recommend JMESPath string for you", nargs="*")
+                               help="Recommend JMESPath string for you", nargs="*")
 
     def handle_recommend_parameter(cli, **kwargs):
         args = kwargs['args']
@@ -39,16 +39,29 @@ def register_global_query_recommend(cli_ctx):
             def analyze_output(cli_ctx, **kwargs):
                 tree_builder = TreeBuilder()
                 tree_builder.build(kwargs['event_data']['result'])
-                kwargs['event_data']['result'] = tree_builder.generate_recommend(args._query_recommend)
-                cli_ctx.unregister_event(events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
+                kwargs['event_data']['result'] = tree_builder.generate_recommend(
+                    args._query_recommend)
+                cli_ctx.unregister_event(
+                    events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
 
-            cli_ctx.register_event(events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
+            cli_ctx.register_event(
+                events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
             cli_ctx.invocation.data['query_active'] = True
 
     cli_ctx.register_event(
         events.EVENT_PARSER_GLOBAL_CREATE, add_query_recommend_parameter)
     cli_ctx.register_event(
         events.EVENT_INVOKER_POST_PARSE_ARGS, handle_recommend_parameter)
+
+
+class Recommendation:
+    def __init__(self, query_str, help_str="", group_name="default"):
+        self._query_str = query_str
+        self._help_str = help_str
+        self._group = group_name
+
+    def __str__(self):
+        return "{}\t{}".format(self._query_str, self._help_str)
 
 
 class TreeNode:
@@ -90,17 +103,19 @@ class TreeNode:
         if self._parent:
             trace_str = "{}.".format(self._get_trace_str())
 
+        select_list = set()
         if len(select_items) == 0:
             for key in self._keys:
-                ret.append(trace_str + key)
+                select_list.add(key)
         else:
-            match_list = set()
             for item in select_items:
                 for key in self._keys:
                     if jellyfish.jaro_winkler_similarity(item, key) > self._similarity_threshold:
-                        match_list.add(key)
-            for item in match_list:
-                ret.append(trace_str + item)
+                        select_list.add(key)
+        for item in select_list:
+            ret.append(Recommendation(trace_str + item,
+                                      help_str="Get all {} from output".format(item),
+                                      group_name="select"))
         return ret
 
     def select_specific_number_string(self, number=5):
@@ -109,8 +124,9 @@ class TreeNode:
             return ret
         number = min(self._list_length, number)
         number = random.choice(range(1, number + 1))
-        help_str = self._get_trace_str(number)
-        ret.append(help_str)
+        query_str = self._get_trace_str(number)
+        ret.append(Recommendation(
+            query_str, help_str="Get first {} elements".format(number),group_name="limit_number"))
         return ret
 
     def filter_with_condition(self, select_items):
@@ -126,7 +142,8 @@ class TreeNode:
                 for item in select_items:
                     if jellyfish.jaro_winkler_similarity(key, item) > similarity:
                         match_item = key
-                        similarity = jellyfish.jaro_winkler_similarity(key, item)
+                        similarity = jellyfish.jaro_winkler_similarity(
+                            key, item)
                 backup_item = key
         if match_item is not None:
             help_str = "{}=='{}'".format(match_item, self._data[match_item])
@@ -140,7 +157,8 @@ class TreeNode:
             return None
         # currently contains and length
         query_str = "length({})".format(self._get_trace_str())
-        ret.append(query_str)
+        ret.append(Recommendation(
+            query_str, help_str="Get the number of the results", group_name="function"))
         return ret
 
 
@@ -148,6 +166,7 @@ class TreeBuilder:
     '''Parse entry. Generate parse tree from json. And
     then give recommendation
     '''
+
     def __init__(self):
         self._root = TreeNode('root')
         self._all_nodes = {}
@@ -171,12 +190,16 @@ class TreeBuilder:
             else:
                 print(my_list)
 
+        recommendations = []
         for node in self._all_nodes.values():
-            printlist(node.get_select_string(keywords_list))
+            recommendations.extend(node.get_select_string(keywords_list))
             if node._from_list:
-                printlist(node.select_specific_number_string())
-                printlist(node._get_trace_str(filter_rules=node.filter_with_condition, select_items=keywords_list))
-                printlist(node.get_function_recommend())
+                recommendations.extend(node.select_specific_number_string())
+                printlist(node._get_trace_str(
+                    filter_rules=node.filter_with_condition, select_items=keywords_list))
+                recommendations.extend(node.get_function_recommend())
+        recommendations.sort(key=lambda x: x._group)
+        printlist(recommendations)
 
     def _parse_dict(self, name, data, from_list=False):
         node = TreeNode(name)
@@ -187,7 +210,8 @@ class TreeBuilder:
             child_node = None
             if isinstance(data[key], list):
                 if len(data[key]) > 0 and isinstance(data[key][0], dict):
-                    child_node = self._parse_dict(key, data[key][0], from_list=True)
+                    child_node = self._parse_dict(
+                        key, data[key][0], from_list=True)
                     child_node._list_length = len(data[key])
             elif isinstance(data[key], dict) and not len(data[key]) == 0:
                 child_node = self._parse_dict(key, data[key])
