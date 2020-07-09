@@ -34,7 +34,7 @@ from azure.cli.command_modules.network._validators import (
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_application_gateway_identity, validate_virtul_network_gateway, validate_private_dns_zone,
+    validate_user_assigned_identity, validate_virtul_network_gateway, validate_private_dns_zone,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     process_vnet_name_or_id)
@@ -129,7 +129,7 @@ def load_arguments(self, _):
         c.argument('firewall_policy', options_list='--waf-policy', min_api='2018-12-01', help='Name or ID of a web application firewall (WAF) policy.', validator=validate_waf_policy)
 
     with self.argument_context('network application-gateway', arg_group='Identity') as c:
-        c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
+        c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_user_assigned_identity)
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
@@ -773,7 +773,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network express-route port identity assign', arg_group='Identity', min_api='2019-08-01') as c:
         c.argument('user_assigned_identity', options_list='--identity',
-                   help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
+                   help="Name or ID of the ManagedIdentity Resource", validator=validate_user_assigned_identity)
     # endregion
 
     # region PrivateEndpoint
@@ -1826,6 +1826,7 @@ def load_arguments(self, _):
         c.argument('security_provider_name', arg_type=get_enum_type(SecurityProviderName), help='The security provider name', options_list=['--provider'])
         c.argument('security_partner_provider_name', options_list=['--name', '-n'], help='Name of the Security Partner Provider.')
         c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
+    # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
     from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING, register_providers
@@ -1848,4 +1849,30 @@ def load_arguments(self, _):
                        arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
             c.argument('resource_group_name', required=False)
             c.argument('resource_name', required=False, help='Name of the resource')
+    # endregion
+
+    # region Network Virtual Appliance
+    with self.argument_context('network virtual-appliance', arg_group='Sku') as c:
+        c.argument('vendor', help='Virtual Appliance Vendor.')
+        c.argument('bundled_scale_unit', options_list=['--scale-unit'], help='Virtual Appliance Scale Unit.')
+        c.argument('market_place_version', options_list=['--version', '-v'], help='Virtual Appliance Version.')
+    with self.argument_context('network virtual-appliance') as c:
+        c.argument('network_virtual_appliance_name', help='The name of Network Virtual Appliance', options_list=['--name', '-n'])
+        c.argument('boot_strap_configuration_blobs', options_list=['--boot-strap-config-blobs', '--boot-blobs'], nargs='+', help='Space-separated list of BootStrapConfigurationBlobs storage URLs.')
+        c.argument('cloud_init_configuration_blobs', options_list=['--cloud-init-config-blobs', '--cloud-blobs'], nargs='+', help='Space-separated list of CloudInitConfigurationBlob storage URLs.')
+        c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
+        c.argument('cloud_init_configuration', options_list=['--cloud-init-config', '--init-config'], help='CloudInitConfiguration scripts that will be run during cloud initialization')
+        c.argument('asn', type=int, help='VirtualAppliance ASN. The valid value ranges from 1 to 4294967295. ')
+
+    with self.argument_context('network virtual-appliance sku') as c:
+        c.argument('sku_name', help='The name of Network Virtual Appliance SKU', options_list=['--name', '-n'])
+
+    with self.argument_context('network virtual-appliance site') as c:
+        c.argument('network_virtual_appliance_name', options_list=['--appliance-name'])
+        c.argument('site_name', help='The name of Network Virtual Appliance Site', options_list=['--name', '-n'])
+        c.argument('address_prefix', help='Address Prefix of Network Virtual Appliance Site')
+    with self.argument_context('network virtual-appliance site', arg_group='Breakout of O365') as c:
+        c.argument('allow', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 allow category.')
+        c.argument('optimize', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 optimize category.')
+        c.argument('default', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 default category.')
     # endregion
