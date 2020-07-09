@@ -527,7 +527,7 @@ helps['security adaptive_application_controls list'] = """
 type: command
 short-summary: Adaptive Application Controls - List
 examples:
-  - name: lists all application control VM/server groups.
+  - name: list all application control VM/server groups.
     text: >
         az security adaptive_application_controls list
 """
@@ -536,7 +536,7 @@ helps['security adaptive_application_controls show'] = """
 type: command
 short-summary: Adaptive Application Controls - Get
 examples:
-  - name: Gets a single application control VM/server group.
+  - name: Get a single application control VM/server group.
     text: >
         az security adaptive_application_controls show --group-name GROUP1
 """

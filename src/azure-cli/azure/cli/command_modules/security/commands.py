@@ -312,7 +312,7 @@ def load_command_table(self, _):
                             client_factory=cf_security_adaptive_application_controls) as g:
         g.custom_command('list', 'list_security_adaptive_application_controls')
         g.custom_command('show', 'get_security_adaptive_application_controls')
- 
+
     with self.command_group('security adaptive_network_hardenings',
                             security_adaptive_network_hardenings_sdk,
                             client_factory=cf_security_adaptive_network_hardenings) as g:
