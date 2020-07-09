@@ -5,22 +5,30 @@
 
 import unittest
 import time
+import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+
+TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class ResourceGroupScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_rest')
     def test_rest(self, resource_group):
+
         self.kwargs.update({
-            'sa': self.create_random_name("tmpst", length=10)
+            'sa': self.create_random_name("tmpst", length=10),
+            # Please remember to add double quote to the variable reference of the file path in tests,
+            # otherwise \\ will be parsed to \, which will lead to the wrong path
+            'storage_account_create_body': os.path.join(TEST_DIR, 'rest_storage_account_create_body.json'),
+            'storage_account_sas_body': os.path.join(TEST_DIR, 'rest_storage_account_sas_body.json')
         })
 
         # Create a storage account
         # https://docs.microsoft.com/en-us/rest/api/storagerp/storageaccounts/create
         self.cmd('az rest -m PUT -u /subscriptions/{{subscriptionId}}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/{sa}?api-version=2019-06-01 '
-                 '-b @rest_storage_account_create_body.json')
+                 '-b @"{storage_account_create_body}"')
 
         # Poll on the provisioning state
         state = None
@@ -34,7 +42,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         # Create an account SAS token https://docs.microsoft.com/en-us/rest/api/storageservices/create-account-sas
         # https://docs.microsoft.com/en-us/rest/api/storagerp/storageaccounts/listaccountsas
         sas_token = self.cmd('az rest -m POST -u "/subscriptions/{{subscriptionId}}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/{sa}/ListAccountSas?api-version=2019-06-01" '
-                             '-b @rest_storage_account_sas_body.json').get_output_in_json()["accountSasToken"]
+                             '-b @"{storage_account_sas_body}"').get_output_in_json()["accountSasToken"]
 
         # Create a container with the SAS token
         # https://docs.microsoft.com/en-us/rest/api/storageservices/create-container
