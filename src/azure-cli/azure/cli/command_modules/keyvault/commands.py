@@ -72,7 +72,7 @@ def load_command_table(self, _):
     )
 
     kv_private_data_v7_2_preview_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.keyvault.vendored_sdks._key_vault_client#KeyVaultClient.{}',
+        operations_tmpl='azure.cli.command_modules.keyvault.vendored_sdks.key_vault_client#KeyVaultClient.{}',
         client_factory=keyvault_private_data_plane_factory_v7_2_preview,
         resource_type=ResourceType.DATA_PRIVATE_KEYVAULT
     )
