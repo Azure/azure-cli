@@ -222,6 +222,7 @@ def check_cli(cmd):
         print('Help loaded OK.\n')
     except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_help'] = ex
+        raise ex
         logger.error('Error occurred loading help!\n')
 
     if not exceptions:
