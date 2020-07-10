@@ -260,9 +260,15 @@ def load_arguments(self, _):
         c.argument('private_link_subnet_name', options_list='--subnet', help='The name of a subnet within the same vnet of an application gateway')
         c.argument('private_link_primary', options_list='--primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
+    with self.argument_context('network application-gateway private-link list', arg_group=None) as c:
+        c.argument('application_gateway_name', id_part=None)
+
     with self.argument_context('network application-gateway private-link ip-config', arg_group=None) as c:
         c.argument('private_link_ip_name', options_list='--name', help='The name of the private IP for Private Link')
         c.argument('private_link_name', options_list='--private-link', help='The name of Private Link.')
+
+    with self.argument_context('network application-gateway private-link ip-config list', arg_group=None) as c:
+        c.argument('application_gateway_name', id_part=None)
 
     with self.argument_context('network application-gateway rewrite-rule') as c:
         rewrite_rule_set_name_type = CLIArgumentType(help='Name of the rewrite rule set.', options_list='--rule-set-name', id_part='child_name_1')
