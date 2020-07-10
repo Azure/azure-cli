@@ -3,6 +3,8 @@
 # This script should be run in a centos8 docker.
 set -exv
 
+export USERNAME=azureuser
+
 yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y
 
 yum install git -y
