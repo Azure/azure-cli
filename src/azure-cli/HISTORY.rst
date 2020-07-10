@@ -41,9 +41,6 @@ Release History
 * `az vmss update`: support specify cross tenant image. (#14206)
 * `az sig image-version create`: support specify cross tenant image. (#14206)
 * vm/vmss create: Encryption of cache & data-in-transit for OS/Data disks and temp disks for VM & VMSS (#13919)
-
-**compute**
-
 * Add simulate-eviction operation for VM and VMSS (#14133)
 
 **CosmosDB**
