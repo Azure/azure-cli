@@ -94,16 +94,13 @@ Release History
 
 * Support Minimum TLS version (#14166)
 
-**security**
-
-* Add regulatory compliance CLI (#14103)
-
 **Security**
 
 * Add allowed_connections commands (#14190)
 * Add Adaptive network hardeningss commands (#14260)
 * Add adaptive_application_controls commands (#14278)
 * Addition of az security iot-solution/ iot-alerts/iot-recommendations/iot-analytics REST to Azure CLI (#14124)
+* Add regulatory compliance CLI (#14103)
 
 **SignalR**
 
