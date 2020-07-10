@@ -18,7 +18,9 @@ for mod_name in mod_list:
         exit_code = subprocess.call(['{} --junit-xml /azure_cli_test_result/{}.xml --pyargs azure.cli.command_modules.{}'.format(pytest_base_cmd, mod_name, mod_name)], shell=True)
     else:
         exit_code = subprocess.call(['{} --junit-xml /azure_cli_test_result/{}.xml --pyargs azure.cli.command_modules.{}'.format(pytest_parallel_cmd, mod_name, mod_name)], shell=True)
-    if exit_code != 0 and exit_code != 5:  # exit code is 5 when there is no tests collected in the module
+    if exit_code == 5:
+        print('No tests found for {}'.format(mod_name))
+    elif exit_code != 0:
         sys.exit(exit_code)
 
 exit_code = subprocess.call(['{} --junit-xml /azure_cli_test_result/azure-cli-core.xml --pyargs azure.cli.core'.format(pytest_parallel_cmd)], shell=True)
