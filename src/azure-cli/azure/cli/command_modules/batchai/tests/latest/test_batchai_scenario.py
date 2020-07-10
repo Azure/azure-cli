@@ -49,7 +49,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                      checks=[JMESPathCheck('name', 'workspace')])
             self.cmd('az batchai workspace list -g {0}'.format(resource_group), checks=[JMESPathCheck("length(@)", 1)])
             # Create a cluster
-            self.cmd('az batchai cluster create -g {0} -w workspace -n cluster -f {1}'.format(
+            self.cmd('az batchai cluster create -g {0} -w workspace -n cluster -f "{1}"'.format(
                 resource_group, _data_file('cluster_with_azure_files.json')),
                 checks=[
                     JMESPathCheck('name', 'cluster'),
@@ -68,7 +68,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai experiment list -g {0} -w workspace'.format(resource_group),
                      checks=[JMESPathCheck("length(@)", 1)])
             # Create the first job
-            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job -f {1}'.format(
+            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job -f "{1}"'.format(
                 resource_group, _data_file('custom_toolkit_job.json')),
                 checks=[
                     JMESPathCheck('name', 'job'),
@@ -126,7 +126,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai cluster resize -g {0} -w workspace -n cluster -t 1'.format(resource_group))
 
             # Create another job
-            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job2 -f {1}'.format(
+            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job2 -f "{1}"'.format(
                 resource_group, _data_file('custom_toolkit_job.json')))
 
             # Wait for the cluster to finish resizing and job execution
@@ -167,7 +167,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai workspace create -g {0} -n workspace'.format(resource_group),
                      checks=[JMESPathCheck('name', 'workspace')])
             # Create a cluster
-            self.cmd('az batchai cluster create -g {0} -w workspace -n cluster -f {1}'.format(
+            self.cmd('az batchai cluster create -g {0} -w workspace -n cluster -f "{1}"'.format(
                 resource_group, _data_file('auto_scale_cluster_with_azure_files.json')),
                 checks=[
                     JMESPathCheck('name', 'cluster'),
@@ -184,7 +184,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai experiment create -g {0} -w workspace -n experiment'.format(resource_group),
                      checks=[JMESPathCheck('name', 'experiment')])
             # Create the job
-            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job -f {1}'.format(
+            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job -f "{1}"'.format(
                 resource_group, _data_file('custom_toolkit_job.json')),
                 checks=[
                     JMESPathCheck('name', 'job'),
@@ -226,9 +226,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai workspace create -g {0} -n workspace'.format(resource_group),
                      checks=[JMESPathCheck('name', 'workspace')])
             self.cmd(
-                'az batchai cluster create -g {0} -w workspace -n cluster -f {1} '
+                'az batchai cluster create -g {0} -w workspace -n cluster -f "{1}" '
                 '--afs-name share --bfs-name container '
-                '-u DemoUser -k {2}'.format(resource_group, _data_file('simple_cluster.json'), _data_file('key.txt')),
+                '-u DemoUser -k "{2}"'.format(resource_group, _data_file('simple_cluster.json'), _data_file('key.txt')),
                 checks=[
                     JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
                     JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
@@ -259,7 +259,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai workspace create -g {0} -n workspace'.format(resource_group))
             self.cmd(
                 'az batchai cluster create -g {0} -w workspace -n cluster '
-                '-i UbuntuLTS --vm-size STANDARD_D1 --min 1 --max 1 -u DemoUser -k {1} '
+                '-i UbuntuLTS --vm-size STANDARD_D1 --min 1 --max 1 -u DemoUser -k "{1}" '
                 '--afs-name share --bfs-name container'.format(
                     resource_group, _data_file('key.txt')),
                 checks=[
@@ -291,7 +291,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai workspace create -g {0} -n workspace'.format(resource_group))
             self.cmd(
                 'az batchai cluster create -g {0} -w workspace -n cluster '
-                '-i UbuntuLTS --vm-size STANDARD_D1 -t 0 -u DemoUser -k {1} '
+                '-i UbuntuLTS --vm-size STANDARD_D1 -t 0 -u DemoUser -k "{1}" '
                 '--use-auto-storage'.format(
                     resource_group, _data_file('key.txt')),
                 checks=[
@@ -311,7 +311,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             p.return_value = resource_group
             self.cmd('az batchai workspace create -g {0} -n workspace'.format(resource_group))
             self.cmd(
-                'az batchai cluster create -n cluster -g {0} -w workspace -s STANDARD_D1 -t 0 -u DemoUser -k {1} '
+                'az batchai cluster create -n cluster -g {0} -w workspace -s STANDARD_D1 -t 0 -u DemoUser -k "{1}" '
                 '--use-auto-storage --setup-task "echo hi" --setup-task-output "$AZ_BATCHAI_MOUNT_ROOT/autoafs"'.format(
                     resource_group, _data_file('key.txt')),
                 checks=[
@@ -341,12 +341,12 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             # Create a workspace
             self.cmd('az batchai workspace create -g {0} -n workspace'.format(resource_group))
             # Create a cluster
-            self.cmd('az batchai cluster create -g {0} -w workspace -n cluster -f {1} -u DemoUser -k {2}'.format(
+            self.cmd('az batchai cluster create -g {0} -w workspace -n cluster -f "{1}" -u DemoUser -k "{2}"'.format(
                 resource_group, _data_file('simple_cluster.json'), _data_file('key.txt')))
             # Create an experiment
             self.cmd('az batchai experiment create -g {0} -w workspace -n experiment'.format(resource_group))
             # Submit the job which has mount_volumes in the config file.
-            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job -f {1}'.format(
+            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job -f "{1}"'.format(
                 resource_group, _data_file('job_with_file_systems.json')))
             # Wait for the cluster to be allocated and job completed
             self.cmd('az batchai job wait -g {0} -w workspace -e experiment -n job'.format(resource_group))
@@ -378,7 +378,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                 JMESPathCheckExists("[0].downloadUrl")
             ])
             # Submit the job specifying Azure File Share and Azure Blob Container via command line args
-            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job2 -f {1} '
+            self.cmd('az batchai job create -c cluster -g {0} -w workspace -e experiment -n job2 -f "{1}" '
                      '--afs-name share --bfs-name container'.format(resource_group,
                                                                     _data_file('job_referencing_file_systems.json')))
             # Wait for the cluster to be allocated and job completed
