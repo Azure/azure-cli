@@ -317,7 +317,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
                                                                      extension['name'],
                                                                      'instanceView')
     logger.debug(extension_result)
-    if extension_result.instance_view.statuses:
+    if extension_result.instance_view and extension_result.instance_view.statuses:
         encryption_status['progressMessage'] = extension_result.instance_view.statuses[0].message
 
     substatus_message = None
