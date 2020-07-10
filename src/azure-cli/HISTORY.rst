@@ -83,13 +83,10 @@ Release History
 
 * `az account get-access-token`: Show expiresOn for Managed Identity (#14128)
 
-**Rdbms**
-
-* Add Infrastructure Encryption for Azure Postgres and MySQL (#14097)
-
 **RDBMS**
 
 * Support Minimum TLS version (#14166)
+* Add Infrastructure Encryption for Azure Postgres and MySQL (#14097)
 
 **Security**
 
