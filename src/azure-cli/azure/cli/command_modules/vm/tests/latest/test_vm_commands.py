@@ -877,7 +877,7 @@ class VMSimulateEvictionScenarioTest(ScenarioTest):
             'vm3': 'vm-simulate-eviction3'
         })
 
-        # simulate-eviction on a regular VM, expect failure
+        # simulate-eviction on a Regular VM, expect failure
         self.cmd('vm create --resource-group {rg} --name {vm1} --location {loc} --image Centos --priority Regular')
         self.cmd('vm simulate-eviction --resource-group {rg} --name {vm1}', expect_failure=True)
 
