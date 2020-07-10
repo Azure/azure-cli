@@ -80,6 +80,18 @@ class ProfileCommandTest(unittest.TestCase):
         }
         self.assertEqual(result, expected_result)
 
+        # test get token with Managed Identity
+        get_raw_token_mock.return_value = (['bearer', 'token123', {'expires_on': '1593497681'}], None, tenant_id)
+        result = get_access_token(cmd, tenant=tenant_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, tenant_id)
+        expected_result = {
+            'tokenType': 'bearer',
+            'accessToken': 'token123',
+            'expiresOn': '2020-06-30 06:14:41.000000',
+            'tenant': tenant_id
+        }
+        self.assertEqual(result, expected_result)
+
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
     def test_get_login(self, profile_mock):
         invoked = []

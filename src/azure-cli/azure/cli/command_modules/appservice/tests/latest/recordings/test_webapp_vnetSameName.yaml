@@ -1,0 +1,2170 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centralus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-06T18:06:03Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '431'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centralus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties": {"addressPrefix":
+      "10.0.0.0/24"}, "name": "swiftsubnet000005"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '225'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftname000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007\",\r\n
+        \ \"etag\": \"W/\\\"4cb7dde9-51d5-4672-ad0f-346223c1cd20\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centralus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"c3e4c2d9-1726-4803-8722-36fb35fe1403\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"swiftsubnet000005\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005\",\r\n
+        \       \"etag\": \"W/\\\"4cb7dde9-51d5-4672-ad0f-346223c1cd20\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/e37f0d04-54a1-4f64-bc70-69bd9c95b7f1?api-version=2020-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1531'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - aa8c0715-fade-4bb7-9fb2-466c56f1762b
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/e37f0d04-54a1-4f64-bc70-69bd9c95b7f1?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6e14a1a1-63dc-4a16-8558-fd112fc07ce2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftname000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007\",\r\n
+        \ \"etag\": \"W/\\\"a0c2862c-f095-404a-a542-e8071900daa2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centralus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"c3e4c2d9-1726-4803-8722-36fb35fe1403\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"swiftsubnet000005\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005\",\r\n
+        \       \"etag\": \"W/\\\"a0c2862c-f095-404a-a542-e8071900daa2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1533'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:10 GMT
+      etag:
+      - W/"a0c2862c-f095-404a-a542-e8071900daa2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 89a15275-57f3-46e9-9b23-80097e785269
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centralus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '25'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -l
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/swiftwebapp000002?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002","name":"swiftwebapp000002","type":"Microsoft.Resources/resourceGroups","location":"centralus","properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '248'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/swiftwebapp000002?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002","name":"swiftwebapp000002","type":"Microsoft.Resources/resourceGroups","location":"centralus","properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '248'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centralus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties": {"addressPrefix":
+      "10.0.0.0/24"}, "name": "swiftsubnet000006"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '225'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftname000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007\",\r\n
+        \ \"etag\": \"W/\\\"d68eac8a-71a5-4257-849d-ed8951206ffe\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centralus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"4738e43d-2703-4254-9d13-d2fe67d0ab21\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"swiftsubnet000006\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006\",\r\n
+        \       \"etag\": \"W/\\\"d68eac8a-71a5-4257-849d-ed8951206ffe\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/530bf4d9-6bbf-4c1d-bc1a-bddaf746960b?api-version=2020-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 094e97f5-c6b7-4c4c-9ce4-87afee4dba5d
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/530bf4d9-6bbf-4c1d-bc1a-bddaf746960b?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f92da47e-8e07-495a-a4f4-da2d9f3331bc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftname000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007\",\r\n
+        \ \"etag\": \"W/\\\"3cf7a315-442a-4786-bae9-b0691e2a33af\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"centralus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"4738e43d-2703-4254-9d13-d2fe67d0ab21\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"swiftsubnet000006\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006\",\r\n
+        \       \"etag\": \"W/\\\"3cf7a315-442a-4786-bae9-b0691e2a33af\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1431'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:17 GMT
+      etag:
+      - W/"3cf7a315-442a-4786-bae9-b0691e2a33af"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - db8ba830-de6e-4daf-aa47-c427972beead
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centralus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-06T18:06:03Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '431'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "swiftplan000004", "type": "Microsoft.Web/serverfarms", "location":
+      "centralus", "properties": {"skuName": "P1V2", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '148'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2019-08-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"centralus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-06T18:06:03Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '431'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centralus", "properties": {"perSiteScaling": false, "isXenon":
+      false}, "sku": {"name": "P1V2", "tier": "PREMIUMV2", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '145'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004?api-version=2019-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004","name":"swiftplan000004","type":"Microsoft.Web/serverfarms","kind":"app","location":"Central
+        US","properties":{"serverFarmId":39733,"name":"swiftplan000004","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-CentralUSwebspace","subscription":"5700fc96-77b4-4f8d-afce-c353d8c443bd","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Central
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-dm1-091_39733","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1534'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004?api-version=2019-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004","name":"swiftplan000004","type":"Microsoft.Web/serverfarms","kind":"app","location":"Central
+        US","properties":{"serverFarmId":39733,"name":"swiftplan000004","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-CentralUSwebspace","subscription":"5700fc96-77b4-4f8d-afce-c353d8c443bd","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Central
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-dm1-091_39733","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1534'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"name": "swiftwebapp000003", "type": "Microsoft.Web/sites", "location":
+      "Central US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004"}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '332'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2019-08-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004?api-version=2019-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004","name":"swiftplan000004","type":"Microsoft.Web/serverfarms","kind":"app","location":"Central
+        US","properties":{"serverFarmId":39733,"name":"swiftplan000004","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-CentralUSwebspace","subscription":"5700fc96-77b4-4f8d-afce-c353d8c443bd","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Central
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-dm1-091_39733","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1534'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "swiftwebapp000003", "type": "Site"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '52'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/checknameavailability?api-version=2019-08-01
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"","message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '47'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"location": "Central US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004",
+      "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
+      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "10.14"}],
+      "alwaysOn": true, "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
+      false, "httpsOnly": false}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '561'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003?api-version=2019-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003","name":"swiftwebapp000003","type":"Microsoft.Web/sites","kind":"app","location":"Central
+        US","properties":{"name":"swiftwebapp000003","state":"Running","hostNames":["swiftwebapp000003.azurewebsites.net"],"webSpace":"clitest.rg000001-CentralUSwebspace","selfLink":"https://waws-prod-dm1-091.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-CentralUSwebspace/sites/swiftwebapp000003","repositorySiteName":"swiftwebapp000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["swiftwebapp000003.azurewebsites.net","swiftwebapp000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"swiftwebapp000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"swiftwebapp000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2020-07-06T18:06:34.12","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":null,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":null,"windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":null,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":null,"minTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0},"deploymentId":"swiftwebapp000003","trafficManagerHostNames":null,"sku":"PremiumV2","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"A5B12E93C19D795D34DF79C449C2C3BAF58329ACBE54CAAF49EDCD93822ACCE8","kind":"app","inboundIpAddress":"52.173.139.125","possibleInboundIpAddresses":"52.173.139.125","ftpUsername":"swiftwebapp000003\\$swiftwebapp000003","ftpsHostName":"ftps://waws-prod-dm1-091.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"13.89.245.174,13.89.245.252,13.89.243.121","possibleOutboundIpAddresses":"52.173.139.125,52.176.95.223,52.165.172.142,52.165.168.238,13.89.242.20,13.89.245.174,13.89.245.252,13.89.243.121","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-dm1-091","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"swiftwebapp000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5719'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:49 GMT
+      etag:
+      - '"1D653C02F46BE80"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/publishxml?api-version=2019-08-01
+  response:
+    body:
+      string: <publishData><publishProfile profileName="swiftwebapp000003 - Web Deploy"
+        publishMethod="MSDeploy" publishUrl="swiftwebapp000003.scm.azurewebsites.net:443"
+        msdeploySite="swiftwebapp000003" userName="$swiftwebapp000003" userPWD="Ff6Mnhtun8pcHaxcfQXxMK9rNSjE7KsndYzyKKWzsH0pwneNRyapTPjgiH5Q"
+        destinationAppUrl="http://swiftwebapp000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="swiftwebapp000003
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-dm1-091.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="swiftwebapp000003\$swiftwebapp000003" userPWD="Ff6Mnhtun8pcHaxcfQXxMK9rNSjE7KsndYzyKKWzsH0pwneNRyapTPjgiH5Q"
+        destinationAppUrl="http://swiftwebapp000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="swiftwebapp000003
+        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-dm1-091dr.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="swiftwebapp000003\$swiftwebapp000003" userPWD="Ff6Mnhtun8pcHaxcfQXxMK9rNSjE7KsndYzyKKWzsH0pwneNRyapTPjgiH5Q"
+        destinationAppUrl="http://swiftwebapp000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile></publishData>
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1730'
+      content-type:
+      - application/xml
+      date:
+      - Mon, 06 Jul 2020 18:06:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/virtualNetworks?api-version=2020-05-01
+  response:
+    body:
+      string: '{"value":[{"name":"githubactions-vnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"e04e58d0-4102-49b5-87f5-f38b1042b918","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"subnets":[{"name":"githubactions-subnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet/subnets/githubactions-subnet","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.1.0/24","serviceEndpoints":[],"delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet/subnets/githubactions-subnet/delegations/delegation","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"},{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet/subnets/default","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet/subnets/default/delegations/delegation","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverfarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"testvnet-diffrg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg","etag":"W/\"af537eec-2fa5-480a-a27d-4dd71fa8aa91\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"f8889475-c312-4989-93ef-0288a0b555b2","addressSpace":{"addressPrefixes":["10.2.0.0/16"]},"subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default","etag":"W/\"af537eec-2fa5-480a-a27d-4dd71fa8aa91\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.2.0.0/24","serviceAssociationLinks":[{"name":"AppServiceLink","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default/serviceAssociationLinks/AppServiceLink","etag":"W/\"af537eec-2fa5-480a-a27d-4dd71fa8aa91\"","type":"Microsoft.Network/virtualNetworks/subnets/serviceAssociationLinks","properties":{"provisioningState":"Succeeded","linkedResourceType":"Microsoft.Web/serverfarms","link":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Web/serverfarms/calvin-windows-asp-f1","allowDelete":false,"locations":[]}}],"delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default/delegations/delegation","etag":"W/\"af537eec-2fa5-480a-a27d-4dd71fa8aa91\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname2il26x5o3ct2nm6","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjoiszqzgixbnf4jkqcaeoz4upd5w3lnclbecbsn2hjzvvsa5j4ctvlejcl3qlrqzz/providers/Microsoft.Network/virtualNetworks/swiftname2il26x5o3ct2nm6","etag":"W/\"5ae5ab56-be84-4ea8-bd11-12f0cbb6ab1c\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"d98bf69a-8e13-4252-8fea-123b99d1e92f","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet4kyy6l2rvqj3l","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjoiszqzgixbnf4jkqcaeoz4upd5w3lnclbecbsn2hjzvvsa5j4ctvlejcl3qlrqzz/providers/Microsoft.Network/virtualNetworks/swiftname2il26x5o3ct2nm6/subnets/swiftsubnet4kyy6l2rvqj3l","etag":"W/\"5ae5ab56-be84-4ea8-bd11-12f0cbb6ab1c\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjoiszqzgixbnf4jkqcaeoz4upd5w3lnclbecbsn2hjzvvsa5j4ctvlejcl3qlrqzz/providers/Microsoft.Network/virtualNetworks/swiftname2il26x5o3ct2nm6/subnets/swiftsubnet4kyy6l2rvqj3l/delegations/delegation","etag":"W/\"5ae5ab56-be84-4ea8-bd11-12f0cbb6ab1c\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname000007","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007","etag":"W/\"a0c2862c-f095-404a-a542-e8071900daa2\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"c3e4c2d9-1726-4803-8722-36fb35fe1403","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet000005","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005","etag":"W/\"a0c2862c-f095-404a-a542-e8071900daa2\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnameuotzrzzhjs7hui7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvm6qpbe4v4zxpkbmmxqwmbkxt5ykgnuis7m6b5hjngur4cpctcwgnh73r2jepz6zm/providers/Microsoft.Network/virtualNetworks/swiftnameuotzrzzhjs7hui7","etag":"W/\"b9cb71d6-9ebe-47fd-9dab-1cb8e69c4340\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"accf7cf7-0163-465f-8538-002cec1dac1a","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetqrceeu5w57sxj","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvm6qpbe4v4zxpkbmmxqwmbkxt5ykgnuis7m6b5hjngur4cpctcwgnh73r2jepz6zm/providers/Microsoft.Network/virtualNetworks/swiftnameuotzrzzhjs7hui7/subnets/swiftsubnetqrceeu5w57sxj","etag":"W/\"b9cb71d6-9ebe-47fd-9dab-1cb8e69c4340\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","serviceAssociationLinks":[{"name":"AppServiceLink","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvm6qpbe4v4zxpkbmmxqwmbkxt5ykgnuis7m6b5hjngur4cpctcwgnh73r2jepz6zm/providers/Microsoft.Network/virtualNetworks/swiftnameuotzrzzhjs7hui7/subnets/swiftsubnetqrceeu5w57sxj/serviceAssociationLinks/AppServiceLink","etag":"W/\"b9cb71d6-9ebe-47fd-9dab-1cb8e69c4340\"","type":"Microsoft.Network/virtualNetworks/subnets/serviceAssociationLinks","properties":{"provisioningState":"Succeeded","linkedResourceType":"Microsoft.Web/serverfarms","link":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvm6qpbe4v4zxpkbmmxqwmbkxt5ykgnuis7m6b5hjngur4cpctcwgnh73r2jepz6zm/providers/Microsoft.Web/serverfarms/swiftplanyz6uge6wzze3wvl","allowDelete":false,"locations":[]}}],"serviceEndpoints":[{"provisioningState":"Succeeded","service":"Microsoft.Storage","locations":["centralus","eastus2"]}],"delegations":[{"name":"0","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvm6qpbe4v4zxpkbmmxqwmbkxt5ykgnuis7m6b5hjngur4cpctcwgnh73r2jepz6zm/providers/Microsoft.Network/virtualNetworks/swiftnameuotzrzzhjs7hui7/subnets/swiftsubnetqrceeu5w57sxj/delegations/0","etag":"W/\"b9cb71d6-9ebe-47fd-9dab-1cb8e69c4340\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverfarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnameadmsoyykpzx4da2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappaip5iuqcmcy25/providers/Microsoft.Network/virtualNetworks/swiftnameadmsoyykpzx4da2","etag":"W/\"190e09a5-f5c0-4ed4-a699-29c68de76aa5\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"2a1b1f50-0958-4eef-819a-c9cebb83999b","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetze7opg7fo3azr","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappaip5iuqcmcy25/providers/Microsoft.Network/virtualNetworks/swiftnameadmsoyykpzx4da2/subnets/swiftsubnetze7opg7fo3azr","etag":"W/\"190e09a5-f5c0-4ed4-a699-29c68de76aa5\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappaip5iuqcmcy25/providers/Microsoft.Network/virtualNetworks/swiftnameadmsoyykpzx4da2/subnets/swiftsubnetze7opg7fo3azr/delegations/delegation","etag":"W/\"190e09a5-f5c0-4ed4-a699-29c68de76aa5\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnamexi7enkfi4p3puz7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappb6zhuqix5v47w/providers/Microsoft.Network/virtualNetworks/swiftnamexi7enkfi4p3puz7","etag":"W/\"8178f639-f797-4c2d-bdd2-bff68bd30bb0\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"d9b31a79-3da7-4dc4-9287-792b2a66e509","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet7fnsbjvx7baw4","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappb6zhuqix5v47w/providers/Microsoft.Network/virtualNetworks/swiftnamexi7enkfi4p3puz7/subnets/swiftsubnet7fnsbjvx7baw4","etag":"W/\"8178f639-f797-4c2d-bdd2-bff68bd30bb0\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappb6zhuqix5v47w/providers/Microsoft.Network/virtualNetworks/swiftnamexi7enkfi4p3puz7/subnets/swiftsubnet7fnsbjvx7baw4/delegations/delegation","etag":"W/\"8178f639-f797-4c2d-bdd2-bff68bd30bb0\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname66yds5w3ksegm3v","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappcqu3m3gbdjnom/providers/Microsoft.Network/virtualNetworks/swiftname66yds5w3ksegm3v","etag":"W/\"9c59859d-6bfc-4782-a091-c732a88749a2\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"27fe5b67-fdda-48ae-8c43-bddab3aec7db","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetx25kx7mnrr5hr","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappcqu3m3gbdjnom/providers/Microsoft.Network/virtualNetworks/swiftname66yds5w3ksegm3v/subnets/swiftsubnetx25kx7mnrr5hr","etag":"W/\"9c59859d-6bfc-4782-a091-c732a88749a2\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappcqu3m3gbdjnom/providers/Microsoft.Network/virtualNetworks/swiftname66yds5w3ksegm3v/subnets/swiftsubnetx25kx7mnrr5hr/delegations/delegation","etag":"W/\"9c59859d-6bfc-4782-a091-c732a88749a2\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname5oakjbn2u5yfiwk","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappeioz7qo44uonn/providers/Microsoft.Network/virtualNetworks/swiftname5oakjbn2u5yfiwk","etag":"W/\"8da71d74-cc53-4182-babb-084d13e4b4e4\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"3b506b07-ce7c-44b2-acca-cc748704c454","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet44coph4wjxhmk","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappeioz7qo44uonn/providers/Microsoft.Network/virtualNetworks/swiftname5oakjbn2u5yfiwk/subnets/swiftsubnet44coph4wjxhmk","etag":"W/\"8da71d74-cc53-4182-babb-084d13e4b4e4\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappeioz7qo44uonn/providers/Microsoft.Network/virtualNetworks/swiftname5oakjbn2u5yfiwk/subnets/swiftsubnet44coph4wjxhmk/delegations/delegation","etag":"W/\"8da71d74-cc53-4182-babb-084d13e4b4e4\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnamebvlcrlyjxk6t3yv","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappflrtxjt2r5nti/providers/Microsoft.Network/virtualNetworks/swiftnamebvlcrlyjxk6t3yv","etag":"W/\"f772faed-47c9-4d37-ae2e-89a4e3172711\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"c378bfcf-b0e1-458c-afef-40f4f1daec18","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetckxo3jpibxnx7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappflrtxjt2r5nti/providers/Microsoft.Network/virtualNetworks/swiftnamebvlcrlyjxk6t3yv/subnets/swiftsubnetckxo3jpibxnx7","etag":"W/\"f772faed-47c9-4d37-ae2e-89a4e3172711\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappflrtxjt2r5nti/providers/Microsoft.Network/virtualNetworks/swiftnamebvlcrlyjxk6t3yv/subnets/swiftsubnetckxo3jpibxnx7/delegations/delegation","etag":"W/\"f772faed-47c9-4d37-ae2e-89a4e3172711\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnameeadmenztvnyezap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappg2yjlx2xnxqlw/providers/Microsoft.Network/virtualNetworks/swiftnameeadmenztvnyezap","etag":"W/\"9ac945e6-8072-43b4-aa6a-df659a02163f\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"91b5c3af-e5eb-4cd4-8b95-e544bb43d492","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetwrnritibotnh3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappg2yjlx2xnxqlw/providers/Microsoft.Network/virtualNetworks/swiftnameeadmenztvnyezap/subnets/swiftsubnetwrnritibotnh3","etag":"W/\"9ac945e6-8072-43b4-aa6a-df659a02163f\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappg2yjlx2xnxqlw/providers/Microsoft.Network/virtualNetworks/swiftnameeadmenztvnyezap/subnets/swiftsubnetwrnritibotnh3/delegations/delegation","etag":"W/\"9ac945e6-8072-43b4-aa6a-df659a02163f\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnamebevpea2tsu2t7ut","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapphfvlhlraqgjgf/providers/Microsoft.Network/virtualNetworks/swiftnamebevpea2tsu2t7ut","etag":"W/\"861bd7ea-9d7d-43a2-a9d8-c62d21ea54cb\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"d06cc654-d220-4d56-9dd6-9a8c0cf66c8d","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetglpby4fep4zhg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapphfvlhlraqgjgf/providers/Microsoft.Network/virtualNetworks/swiftnamebevpea2tsu2t7ut/subnets/swiftsubnetglpby4fep4zhg","etag":"W/\"861bd7ea-9d7d-43a2-a9d8-c62d21ea54cb\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname57xmszy77v5iyjj","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappime4mbajgolma/providers/Microsoft.Network/virtualNetworks/swiftname57xmszy77v5iyjj","etag":"W/\"c3bc511a-7643-415d-8884-b8683c01e66a\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"6f7132f6-f35e-4fec-8da4-2a10e9806ac4","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetvzh4gp2bpak2v","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappime4mbajgolma/providers/Microsoft.Network/virtualNetworks/swiftname57xmszy77v5iyjj/subnets/swiftsubnetvzh4gp2bpak2v","etag":"W/\"c3bc511a-7643-415d-8884-b8683c01e66a\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappime4mbajgolma/providers/Microsoft.Network/virtualNetworks/swiftname57xmszy77v5iyjj/subnets/swiftsubnetvzh4gp2bpak2v/delegations/delegation","etag":"W/\"c3bc511a-7643-415d-8884-b8683c01e66a\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname000007","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007","etag":"W/\"3cf7a315-442a-4786-bae9-b0691e2a33af\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"4738e43d-2703-4254-9d13-d2fe67d0ab21","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet000006","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006","etag":"W/\"3cf7a315-442a-4786-bae9-b0691e2a33af\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnameykwb3hd3g5iqnnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappnirofivx5t5ky/providers/Microsoft.Network/virtualNetworks/swiftnameykwb3hd3g5iqnnd","etag":"W/\"d339af81-0e20-4e59-9dcc-8731819e42d7\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"00af2512-bae7-4bf4-aa9e-d4367cb0b4b9","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetxybaeuee5vxe7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappnirofivx5t5ky/providers/Microsoft.Network/virtualNetworks/swiftnameykwb3hd3g5iqnnd/subnets/swiftsubnetxybaeuee5vxe7","etag":"W/\"d339af81-0e20-4e59-9dcc-8731819e42d7\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname7djggdjd5rghvje","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappsigh5zu3grgic/providers/Microsoft.Network/virtualNetworks/swiftname7djggdjd5rghvje","etag":"W/\"513f04c8-8fa6-40b4-baa2-dab9fe49f80f\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"a977e489-0c9b-4a78-9437-040a1a40ba89","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetujmtqcz5t6ojo","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappsigh5zu3grgic/providers/Microsoft.Network/virtualNetworks/swiftname7djggdjd5rghvje/subnets/swiftsubnetujmtqcz5t6ojo","etag":"W/\"513f04c8-8fa6-40b4-baa2-dab9fe49f80f\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappsigh5zu3grgic/providers/Microsoft.Network/virtualNetworks/swiftname7djggdjd5rghvje/subnets/swiftsubnetujmtqcz5t6ojo/delegations/delegation","etag":"W/\"513f04c8-8fa6-40b4-baa2-dab9fe49f80f\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnamejpw4m2vxeperai2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappyx5cs7pdyiops/providers/Microsoft.Network/virtualNetworks/swiftnamejpw4m2vxeperai2","etag":"W/\"3d931638-0d9a-4dab-ada4-a62f9da76652\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"cfd48c43-fd87-4043-9b2d-50ecf8cec0ca","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetmjsnbswyrfalt","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappyx5cs7pdyiops/providers/Microsoft.Network/virtualNetworks/swiftnamejpw4m2vxeperai2/subnets/swiftsubnetmjsnbswyrfalt","etag":"W/\"3d931638-0d9a-4dab-ada4-a62f9da76652\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnametsbq4zofhxd4bi6","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappzgoj24y67m7k4/providers/Microsoft.Network/virtualNetworks/swiftnametsbq4zofhxd4bi6","etag":"W/\"7291524b-d539-4c0e-8250-2c503d7391cd\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"b9ed3756-40ef-4570-86a7-3ad1003a39c3","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetmt5itxyrdjtzc","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappzgoj24y67m7k4/providers/Microsoft.Network/virtualNetworks/swiftnametsbq4zofhxd4bi6/subnets/swiftsubnetmt5itxyrdjtzc","etag":"W/\"7291524b-d539-4c0e-8250-2c503d7391cd\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"testvnet-diffrg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-priv-endpoint-conn-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg","etag":"W/\"4fb391ba-f48b-4fb8-8721-c1d1487db4b0\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"6a127f10-9cc2-48e0-8c62-8d947dfdaa4d","addressSpace":{"addressPrefixes":["10.2.0.0/16"]},"subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-priv-endpoint-conn-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default","etag":"W/\"4fb391ba-f48b-4fb8-8721-c1d1487db4b0\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.2.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"},{"name":"lala","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-priv-endpoint-conn-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/lala","etag":"W/\"4fb391ba-f48b-4fb8-8721-c1d1487db4b0\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.2.1.0/24","serviceEndpoints":[],"delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-priv-endpoint-conn-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/lala/delegations/delegation","etag":"W/\"4fb391ba-f48b-4fb8-8721-c1d1487db4b0\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"testvnet-diffrg-2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg-2","etag":"W/\"9b3818f6-bc5d-432a-a17d-1e51c7f7b935\"","type":"Microsoft.Network/virtualNetworks","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"71d0449e-a56f-4616-8c3e-6498defe7487","addressSpace":{"addressPrefixes":["10.2.0.0/16"]},"subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg-2/subnets/default","etag":"W/\"9b3818f6-bc5d-432a-a17d-1e51c7f7b935\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.2.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg-2/subnets/default/delegations/delegation","etag":"W/\"9b3818f6-bc5d-432a-a17d-1e51c7f7b935\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"testvnet-diffrg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","type":"Microsoft.Network/virtualNetworks","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"11058f73-d57e-452f-b08a-8fee62a0fc39","addressSpace":{"addressPrefixes":["10.1.0.0/16"]},"subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.1.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default/delegations/delegation","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"},{"name":"testsubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/testsubnet","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.1.1.0/24","serviceEndpoints":[],"delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/testsubnet/delegations/delegation","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '35441'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - da9a0923-db97-45a9-84b5-ec4657345de8
+      - e44d3e65-8656-4a57-9db5-ccf264a44d2e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/networkConfig/virtualNetwork?api-version=2019-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/config/virtualNetwork","name":"virtualNetwork","type":"Microsoft.Web/sites/config","location":"Central
+        US","properties":{"subnetResourceId":null,"swiftSupported":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '373'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:50 GMT
+      etag:
+      - '"1D653C02F46BE80"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftsubnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005\",\r\n
+        \ \"etag\": \"W/\\\"a0c2862c-f095-404a-a542-e8071900daa2\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:50 GMT
+      etag:
+      - W/"a0c2862c-f095-404a-a542-e8071900daa2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4e375580-ce60-4414-86bc-e965c174d3a6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [{"properties":
+      {"serviceName": "Microsoft.Web/serverFarms"}, "name": "delegation"}], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "swiftsubnet000005"}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '532'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftsubnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005\",\r\n
+        \ \"etag\": \"W/\\\"6c221d4f-d8a3-4d61-b4fc-30ff155da31b\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005/delegations/delegation\",\r\n
+        \       \"etag\": \"W/\\\"6c221d4f-d8a3-4d61-b4fc-30ff155da31b\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/f3ec3c31-787a-4d80-b7e5-12d7c9ebc120?api-version=2020-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1353'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - df09c182-a90a-41fc-89fe-38669b21af76
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftsubnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005\",\r\n
+        \ \"etag\": \"W/\\\"3bc7138c-04d8-4e63-89b5-63186efbb5d9\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005/delegations/delegation\",\r\n
+        \       \"etag\": \"W/\\\"3bc7138c-04d8-4e63-89b5-63186efbb5d9\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:50 GMT
+      etag:
+      - W/"3bc7138c-04d8-4e63-89b5-63186efbb5d9"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c82c5cbc-5827-4460-963b-cc9ebb71b7bd
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"properties": {"subnetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005",
+      "swiftSupported": true}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '308'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/networkConfig/virtualNetwork?api-version=2019-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/config/virtualNetwork","name":"virtualNetwork","type":"Microsoft.Web/sites/config","location":"Central
+        US","properties":{"subnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005","swiftSupported":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '615'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:52 GMT
+      etag:
+      - '"1D653C02F46BE80"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/virtualNetworkConnections?api-version=2019-08-01
+  response:
+    body:
+      string: '[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/virtualNetworkConnections/c3e4c2d9-1726-4803-8722-36fb35fe1403_swiftsubnet000005","name":"c3e4c2d9-1726-4803-8722-36fb35fe1403_swiftsubnet000005","type":"Microsoft.Web/sites/virtualNetworkConnections","location":"Central
+        US","properties":{"vnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005","certThumbprint":null,"certBlob":null,"routes":null,"resyncRequired":false,"dnsServers":null,"isSwift":true}}]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '833'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/f3ec3c31-787a-4d80-b7e5-12d7c9ebc120?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7284f754-6270-46b7-abc3-3ba693c6fbde
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftsubnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005\",\r\n
+        \ \"etag\": \"W/\\\"d8396a4c-ad18-44dc-85cf-6949c27c705d\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"serviceAssociationLinks\": [\r\n      {\r\n        \"name\": \"AppServiceLink\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005/serviceAssociationLinks/AppServiceLink\",\r\n
+        \       \"etag\": \"W/\\\"d8396a4c-ad18-44dc-85cf-6949c27c705d\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/virtualNetworks/subnets/serviceAssociationLinks\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"linkedResourceType\": \"Microsoft.Web/serverfarms\",\r\n          \"link\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/swiftplan000004\",\r\n
+        \         \"allowDelete\": false,\r\n          \"locations\": []\r\n        }\r\n
+        \     }\r\n    ],\r\n    \"delegations\": [\r\n      {\r\n        \"name\":
+        \"delegation\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005/delegations/delegation\",\r\n
+        \       \"etag\": \"W/\\\"d8396a4c-ad18-44dc-85cf-6949c27c705d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:53 GMT
+      etag:
+      - W/"d8396a4c-ad18-44dc-85cf-6949c27c705d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 20e54e76-be7a-42c8-80b9-6938109b9717
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/networkConfig/virtualNetwork?api-version=2019-08-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 06 Jul 2020 18:06:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/virtualNetworkConnections?api-version=2019-08-01
+  response:
+    body:
+      string: '[]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/virtualNetworks?api-version=2020-05-01
+  response:
+    body:
+      string: '{"value":[{"name":"githubactions-vnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"e04e58d0-4102-49b5-87f5-f38b1042b918","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"subnets":[{"name":"githubactions-subnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet/subnets/githubactions-subnet","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.1.0/24","serviceEndpoints":[],"delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet/subnets/githubactions-subnet/delegations/delegation","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"},{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet/subnets/default","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/githubactions-vnet/subnets/default/delegations/delegation","etag":"W/\"f536a85f-4b2c-460d-b020-fd38aeff7e7d\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverfarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"testvnet-diffrg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg","etag":"W/\"af537eec-2fa5-480a-a27d-4dd71fa8aa91\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"f8889475-c312-4989-93ef-0288a0b555b2","addressSpace":{"addressPrefixes":["10.2.0.0/16"]},"subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default","etag":"W/\"af537eec-2fa5-480a-a27d-4dd71fa8aa91\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.2.0.0/24","serviceAssociationLinks":[{"name":"AppServiceLink","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default/serviceAssociationLinks/AppServiceLink","etag":"W/\"af537eec-2fa5-480a-a27d-4dd71fa8aa91\"","type":"Microsoft.Network/virtualNetworks/subnets/serviceAssociationLinks","properties":{"provisioningState":"Succeeded","linkedResourceType":"Microsoft.Web/serverfarms","link":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Web/serverfarms/calvin-windows-asp-f1","allowDelete":false,"locations":[]}}],"delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default/delegations/delegation","etag":"W/\"af537eec-2fa5-480a-a27d-4dd71fa8aa91\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname2il26x5o3ct2nm6","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjoiszqzgixbnf4jkqcaeoz4upd5w3lnclbecbsn2hjzvvsa5j4ctvlejcl3qlrqzz/providers/Microsoft.Network/virtualNetworks/swiftname2il26x5o3ct2nm6","etag":"W/\"5ae5ab56-be84-4ea8-bd11-12f0cbb6ab1c\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"d98bf69a-8e13-4252-8fea-123b99d1e92f","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet4kyy6l2rvqj3l","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjoiszqzgixbnf4jkqcaeoz4upd5w3lnclbecbsn2hjzvvsa5j4ctvlejcl3qlrqzz/providers/Microsoft.Network/virtualNetworks/swiftname2il26x5o3ct2nm6/subnets/swiftsubnet4kyy6l2rvqj3l","etag":"W/\"5ae5ab56-be84-4ea8-bd11-12f0cbb6ab1c\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjoiszqzgixbnf4jkqcaeoz4upd5w3lnclbecbsn2hjzvvsa5j4ctvlejcl3qlrqzz/providers/Microsoft.Network/virtualNetworks/swiftname2il26x5o3ct2nm6/subnets/swiftsubnet4kyy6l2rvqj3l/delegations/delegation","etag":"W/\"5ae5ab56-be84-4ea8-bd11-12f0cbb6ab1c\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname000007","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007","etag":"W/\"5d588c47-b86d-4b64-8930-a8cf70efed3f\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"c3e4c2d9-1726-4803-8722-36fb35fe1403","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet000005","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005","etag":"W/\"5d588c47-b86d-4b64-8930-a8cf70efed3f\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000005/delegations/delegation","etag":"W/\"5d588c47-b86d-4b64-8930-a8cf70efed3f\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnameuotzrzzhjs7hui7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvm6qpbe4v4zxpkbmmxqwmbkxt5ykgnuis7m6b5hjngur4cpctcwgnh73r2jepz6zm/providers/Microsoft.Network/virtualNetworks/swiftnameuotzrzzhjs7hui7","etag":"W/\"4c16c176-44ff-4137-9373-f39a18d83f90\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"accf7cf7-0163-465f-8538-002cec1dac1a","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetqrceeu5w57sxj","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvm6qpbe4v4zxpkbmmxqwmbkxt5ykgnuis7m6b5hjngur4cpctcwgnh73r2jepz6zm/providers/Microsoft.Network/virtualNetworks/swiftnameuotzrzzhjs7hui7/subnets/swiftsubnetqrceeu5w57sxj","etag":"W/\"4c16c176-44ff-4137-9373-f39a18d83f90\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","serviceEndpoints":[{"provisioningState":"Succeeded","service":"Microsoft.Storage","locations":["centralus","eastus2"]}],"delegations":[{"name":"0","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvm6qpbe4v4zxpkbmmxqwmbkxt5ykgnuis7m6b5hjngur4cpctcwgnh73r2jepz6zm/providers/Microsoft.Network/virtualNetworks/swiftnameuotzrzzhjs7hui7/subnets/swiftsubnetqrceeu5w57sxj/delegations/0","etag":"W/\"4c16c176-44ff-4137-9373-f39a18d83f90\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverfarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnameadmsoyykpzx4da2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappaip5iuqcmcy25/providers/Microsoft.Network/virtualNetworks/swiftnameadmsoyykpzx4da2","etag":"W/\"190e09a5-f5c0-4ed4-a699-29c68de76aa5\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"2a1b1f50-0958-4eef-819a-c9cebb83999b","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetze7opg7fo3azr","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappaip5iuqcmcy25/providers/Microsoft.Network/virtualNetworks/swiftnameadmsoyykpzx4da2/subnets/swiftsubnetze7opg7fo3azr","etag":"W/\"190e09a5-f5c0-4ed4-a699-29c68de76aa5\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappaip5iuqcmcy25/providers/Microsoft.Network/virtualNetworks/swiftnameadmsoyykpzx4da2/subnets/swiftsubnetze7opg7fo3azr/delegations/delegation","etag":"W/\"190e09a5-f5c0-4ed4-a699-29c68de76aa5\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnamexi7enkfi4p3puz7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappb6zhuqix5v47w/providers/Microsoft.Network/virtualNetworks/swiftnamexi7enkfi4p3puz7","etag":"W/\"8178f639-f797-4c2d-bdd2-bff68bd30bb0\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"d9b31a79-3da7-4dc4-9287-792b2a66e509","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet7fnsbjvx7baw4","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappb6zhuqix5v47w/providers/Microsoft.Network/virtualNetworks/swiftnamexi7enkfi4p3puz7/subnets/swiftsubnet7fnsbjvx7baw4","etag":"W/\"8178f639-f797-4c2d-bdd2-bff68bd30bb0\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappb6zhuqix5v47w/providers/Microsoft.Network/virtualNetworks/swiftnamexi7enkfi4p3puz7/subnets/swiftsubnet7fnsbjvx7baw4/delegations/delegation","etag":"W/\"8178f639-f797-4c2d-bdd2-bff68bd30bb0\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname66yds5w3ksegm3v","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappcqu3m3gbdjnom/providers/Microsoft.Network/virtualNetworks/swiftname66yds5w3ksegm3v","etag":"W/\"9c59859d-6bfc-4782-a091-c732a88749a2\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"27fe5b67-fdda-48ae-8c43-bddab3aec7db","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetx25kx7mnrr5hr","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappcqu3m3gbdjnom/providers/Microsoft.Network/virtualNetworks/swiftname66yds5w3ksegm3v/subnets/swiftsubnetx25kx7mnrr5hr","etag":"W/\"9c59859d-6bfc-4782-a091-c732a88749a2\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappcqu3m3gbdjnom/providers/Microsoft.Network/virtualNetworks/swiftname66yds5w3ksegm3v/subnets/swiftsubnetx25kx7mnrr5hr/delegations/delegation","etag":"W/\"9c59859d-6bfc-4782-a091-c732a88749a2\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname5oakjbn2u5yfiwk","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappeioz7qo44uonn/providers/Microsoft.Network/virtualNetworks/swiftname5oakjbn2u5yfiwk","etag":"W/\"8da71d74-cc53-4182-babb-084d13e4b4e4\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"3b506b07-ce7c-44b2-acca-cc748704c454","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet44coph4wjxhmk","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappeioz7qo44uonn/providers/Microsoft.Network/virtualNetworks/swiftname5oakjbn2u5yfiwk/subnets/swiftsubnet44coph4wjxhmk","etag":"W/\"8da71d74-cc53-4182-babb-084d13e4b4e4\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappeioz7qo44uonn/providers/Microsoft.Network/virtualNetworks/swiftname5oakjbn2u5yfiwk/subnets/swiftsubnet44coph4wjxhmk/delegations/delegation","etag":"W/\"8da71d74-cc53-4182-babb-084d13e4b4e4\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnamebvlcrlyjxk6t3yv","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappflrtxjt2r5nti/providers/Microsoft.Network/virtualNetworks/swiftnamebvlcrlyjxk6t3yv","etag":"W/\"f772faed-47c9-4d37-ae2e-89a4e3172711\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"c378bfcf-b0e1-458c-afef-40f4f1daec18","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetckxo3jpibxnx7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappflrtxjt2r5nti/providers/Microsoft.Network/virtualNetworks/swiftnamebvlcrlyjxk6t3yv/subnets/swiftsubnetckxo3jpibxnx7","etag":"W/\"f772faed-47c9-4d37-ae2e-89a4e3172711\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappflrtxjt2r5nti/providers/Microsoft.Network/virtualNetworks/swiftnamebvlcrlyjxk6t3yv/subnets/swiftsubnetckxo3jpibxnx7/delegations/delegation","etag":"W/\"f772faed-47c9-4d37-ae2e-89a4e3172711\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnameeadmenztvnyezap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappg2yjlx2xnxqlw/providers/Microsoft.Network/virtualNetworks/swiftnameeadmenztvnyezap","etag":"W/\"9ac945e6-8072-43b4-aa6a-df659a02163f\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"91b5c3af-e5eb-4cd4-8b95-e544bb43d492","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetwrnritibotnh3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappg2yjlx2xnxqlw/providers/Microsoft.Network/virtualNetworks/swiftnameeadmenztvnyezap/subnets/swiftsubnetwrnritibotnh3","etag":"W/\"9ac945e6-8072-43b4-aa6a-df659a02163f\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappg2yjlx2xnxqlw/providers/Microsoft.Network/virtualNetworks/swiftnameeadmenztvnyezap/subnets/swiftsubnetwrnritibotnh3/delegations/delegation","etag":"W/\"9ac945e6-8072-43b4-aa6a-df659a02163f\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnamebevpea2tsu2t7ut","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapphfvlhlraqgjgf/providers/Microsoft.Network/virtualNetworks/swiftnamebevpea2tsu2t7ut","etag":"W/\"861bd7ea-9d7d-43a2-a9d8-c62d21ea54cb\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"d06cc654-d220-4d56-9dd6-9a8c0cf66c8d","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetglpby4fep4zhg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapphfvlhlraqgjgf/providers/Microsoft.Network/virtualNetworks/swiftnamebevpea2tsu2t7ut/subnets/swiftsubnetglpby4fep4zhg","etag":"W/\"861bd7ea-9d7d-43a2-a9d8-c62d21ea54cb\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname57xmszy77v5iyjj","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappime4mbajgolma/providers/Microsoft.Network/virtualNetworks/swiftname57xmszy77v5iyjj","etag":"W/\"c3bc511a-7643-415d-8884-b8683c01e66a\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"6f7132f6-f35e-4fec-8da4-2a10e9806ac4","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetvzh4gp2bpak2v","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappime4mbajgolma/providers/Microsoft.Network/virtualNetworks/swiftname57xmszy77v5iyjj/subnets/swiftsubnetvzh4gp2bpak2v","etag":"W/\"c3bc511a-7643-415d-8884-b8683c01e66a\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappime4mbajgolma/providers/Microsoft.Network/virtualNetworks/swiftname57xmszy77v5iyjj/subnets/swiftsubnetvzh4gp2bpak2v/delegations/delegation","etag":"W/\"c3bc511a-7643-415d-8884-b8683c01e66a\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname000007","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007","etag":"W/\"3cf7a315-442a-4786-bae9-b0691e2a33af\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"4738e43d-2703-4254-9d13-d2fe67d0ab21","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnet000006","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006","etag":"W/\"3cf7a315-442a-4786-bae9-b0691e2a33af\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnameykwb3hd3g5iqnnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappnirofivx5t5ky/providers/Microsoft.Network/virtualNetworks/swiftnameykwb3hd3g5iqnnd","etag":"W/\"d339af81-0e20-4e59-9dcc-8731819e42d7\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"00af2512-bae7-4bf4-aa9e-d4367cb0b4b9","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetxybaeuee5vxe7","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappnirofivx5t5ky/providers/Microsoft.Network/virtualNetworks/swiftnameykwb3hd3g5iqnnd/subnets/swiftsubnetxybaeuee5vxe7","etag":"W/\"d339af81-0e20-4e59-9dcc-8731819e42d7\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftname7djggdjd5rghvje","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappsigh5zu3grgic/providers/Microsoft.Network/virtualNetworks/swiftname7djggdjd5rghvje","etag":"W/\"513f04c8-8fa6-40b4-baa2-dab9fe49f80f\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"a977e489-0c9b-4a78-9437-040a1a40ba89","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetujmtqcz5t6ojo","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappsigh5zu3grgic/providers/Microsoft.Network/virtualNetworks/swiftname7djggdjd5rghvje/subnets/swiftsubnetujmtqcz5t6ojo","etag":"W/\"513f04c8-8fa6-40b4-baa2-dab9fe49f80f\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappsigh5zu3grgic/providers/Microsoft.Network/virtualNetworks/swiftname7djggdjd5rghvje/subnets/swiftsubnetujmtqcz5t6ojo/delegations/delegation","etag":"W/\"513f04c8-8fa6-40b4-baa2-dab9fe49f80f\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnamejpw4m2vxeperai2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappyx5cs7pdyiops/providers/Microsoft.Network/virtualNetworks/swiftnamejpw4m2vxeperai2","etag":"W/\"3d931638-0d9a-4dab-ada4-a62f9da76652\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"cfd48c43-fd87-4043-9b2d-50ecf8cec0ca","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetmjsnbswyrfalt","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappyx5cs7pdyiops/providers/Microsoft.Network/virtualNetworks/swiftnamejpw4m2vxeperai2/subnets/swiftsubnetmjsnbswyrfalt","etag":"W/\"3d931638-0d9a-4dab-ada4-a62f9da76652\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"swiftnametsbq4zofhxd4bi6","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappzgoj24y67m7k4/providers/Microsoft.Network/virtualNetworks/swiftnametsbq4zofhxd4bi6","etag":"W/\"7291524b-d539-4c0e-8250-2c503d7391cd\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"b9ed3756-40ef-4570-86a7-3ad1003a39c3","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"dhcpOptions":{"dnsServers":[]},"subnets":[{"name":"swiftsubnetmt5itxyrdjtzc","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebappzgoj24y67m7k4/providers/Microsoft.Network/virtualNetworks/swiftnametsbq4zofhxd4bi6/subnets/swiftsubnetmt5itxyrdjtzc","etag":"W/\"7291524b-d539-4c0e-8250-2c503d7391cd\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"testvnet-diffrg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-priv-endpoint-conn-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg","etag":"W/\"4fb391ba-f48b-4fb8-8721-c1d1487db4b0\"","type":"Microsoft.Network/virtualNetworks","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"6a127f10-9cc2-48e0-8c62-8d947dfdaa4d","addressSpace":{"addressPrefixes":["10.2.0.0/16"]},"subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-priv-endpoint-conn-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default","etag":"W/\"4fb391ba-f48b-4fb8-8721-c1d1487db4b0\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.2.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"},{"name":"lala","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-priv-endpoint-conn-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/lala","etag":"W/\"4fb391ba-f48b-4fb8-8721-c1d1487db4b0\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.2.1.0/24","serviceEndpoints":[],"delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-priv-endpoint-conn-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/lala/delegations/delegation","etag":"W/\"4fb391ba-f48b-4fb8-8721-c1d1487db4b0\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"testvnet-diffrg-2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg-2","etag":"W/\"9b3818f6-bc5d-432a-a17d-1e51c7f7b935\"","type":"Microsoft.Network/virtualNetworks","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"71d0449e-a56f-4616-8c3e-6498defe7487","addressSpace":{"addressPrefixes":["10.2.0.0/16"]},"subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg-2/subnets/default","etag":"W/\"9b3818f6-bc5d-432a-a17d-1e51c7f7b935\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.2.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/calvin-github-actions/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg-2/subnets/default/delegations/delegation","etag":"W/\"9b3818f6-bc5d-432a-a17d-1e51c7f7b935\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}},{"name":"testvnet-diffrg","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","type":"Microsoft.Network/virtualNetworks","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"11058f73-d57e-452f-b08a-8fee62a0fc39","addressSpace":{"addressPrefixes":["10.1.0.0/16"]},"subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.1.0.0/24","delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/default/delegations/delegation","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"},{"name":"testsubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/testsubnet","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.1.1.0/24","serviceEndpoints":[],"delegations":[{"name":"delegation","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-deployment-log-rg/providers/Microsoft.Network/virtualNetworks/testvnet-diffrg/subnets/testsubnet/delegations/delegation","etag":"W/\"bfb8aa5a-2127-4868-b279-d72a6e3fe9e4\"","properties":{"provisioningState":"Succeeded","serviceName":"Microsoft.Web/serverFarms","actions":["Microsoft.Network/virtualNetworks/subnets/action"]},"type":"Microsoft.Network/virtualNetworks/subnets/delegations"}],"privateEndpointNetworkPolicies":"Enabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false,"enableVmProtection":false}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '35188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 9e5231d0-aaf9-4cb9-8d9d-04187329a267
+      - 81c9a659-dd65-47d2-b8d1-2da163c4cfc8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/networkConfig/virtualNetwork?api-version=2019-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/config/virtualNetwork","name":"virtualNetwork","type":"Microsoft.Web/sites/config","location":"Central
+        US","properties":{"subnetResourceId":null,"swiftSupported":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '373'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:57 GMT
+      etag:
+      - '"1D653C03AEFDF35"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftsubnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006\",\r\n
+        \ \"etag\": \"W/\\\"3cf7a315-442a-4786-bae9-b0691e2a33af\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '588'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:57 GMT
+      etag:
+      - W/"3cf7a315-442a-4786-bae9-b0691e2a33af"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b81cf55b-c60d-46c7-8e1b-da7845d8d0f1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [{"properties":
+      {"serviceName": "Microsoft.Web/serverFarms"}, "name": "delegation"}], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "swiftsubnet000006"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '481'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftsubnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006\",\r\n
+        \ \"etag\": \"W/\\\"c128ec9e-6634-4a97-9655-49900cf2324e\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006/delegations/delegation\",\r\n
+        \       \"etag\": \"W/\\\"c128ec9e-6634-4a97-9655-49900cf2324e\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/110a5711-c34d-4985-8728-f445eb6923a3?api-version=2020-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1251'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 25a882e3-f950-495f-8a44-f5702f538d54
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"swiftsubnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006\",\r\n
+        \ \"etag\": \"W/\\\"2235a57b-e477-4aca-b582-5483748c5619\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006/delegations/delegation\",\r\n
+        \       \"etag\": \"W/\\\"2235a57b-e477-4aca-b582-5483748c5619\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1252'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2020 18:06:57 GMT
+      etag:
+      - W/"2235a57b-e477-4aca-b582-5483748c5619"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7e27817d-773b-47de-a3d4-c0e6992f8aa4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"subnetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006",
+      "swiftSupported": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '257'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet --subnet
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/networkConfig/virtualNetwork?api-version=2019-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/config/virtualNetwork","name":"virtualNetwork","type":"Microsoft.Web/sites/config","location":"Central
+        US","properties":{"subnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006","swiftSupported":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '564'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:59 GMT
+      etag:
+      - '"1D653C03AEFDF35"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.2 (Darwin-16.7.0-x86_64-i386-64bit) msrest/0.6.16 msrest_azure/0.6.3
+        azure-mgmt-web/0.47.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/virtualNetworkConnections?api-version=2019-08-01
+  response:
+    body:
+      string: '[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/swiftwebapp000003/virtualNetworkConnections/4738e43d-2703-4254-9d13-d2fe67d0ab21_swiftsubnet000006","name":"4738e43d-2703-4254-9d13-d2fe67d0ab21_swiftsubnet000006","type":"Microsoft.Web/sites/virtualNetworkConnections","location":"Central
+        US","properties":{"vnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swiftwebapp000002/providers/Microsoft.Network/virtualNetworks/swiftname000007/subnets/swiftsubnet000006","certThumbprint":null,"certBlob":null,"routes":null,"resyncRequired":false,"dnsServers":null,"isSwift":true}}]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json
+      date:
+      - Mon, 06 Jul 2020 18:06:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -9,8 +9,9 @@
 import unittest
 import os
 
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, record_only)
+    ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -177,7 +178,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertTrue(result['runtime_version'] == 'dotnetcore|2.2')
+        self.assertTrue(result['runtime_version'] == 'dotnetcore|3.1')
         self.assertTrue(result['os'].lower() == 'windows')
         self.assertNotEqual(result['location'], 'None')
 
@@ -320,7 +321,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
-    @record_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_webapp_up_name_exists_not_in_subscription(self, resource_group):
         # Make sure webapp_name is the name of an existing web app and is not in your subscription

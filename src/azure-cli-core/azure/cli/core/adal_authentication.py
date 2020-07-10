@@ -8,6 +8,7 @@ import requests
 import adal
 
 from msrest.authentication import Authentication
+from msrestazure.azure_active_directory import MSIAuthentication
 from azure.core.credentials import AccessToken
 from azure.cli.core.util import in_cloud_console
 
@@ -60,8 +61,10 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
     # This method is exposed for Azure Core.
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         _, token, full_token, _ = self._get_token()
-
-        return AccessToken(token, int(full_token['expiresIn'] + time.time()))
+        try:
+            return AccessToken(token, int(full_token['expiresIn'] + time.time()))
+        except KeyError:  # needed to deal with differing unserialized MSI token payload
+            return AccessToken(token, int(full_token['expires_on']))
 
     # This method is exposed for msrest.
     def signed_session(self, session=None):  # pylint: disable=arguments-differ
@@ -83,3 +86,10 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         logger = get_logger(__name__)
         logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
                        "below, please mention the hostname '%s'", socket.gethostname())
+
+
+class MSIAuthenticationWrapper(MSIAuthentication):
+    # This method is exposed for Azure Core.
+    def get_token(self):
+        self.set_token()
+        return AccessToken(self.token['access_token'], int(self.token['expires_on']))
