@@ -138,17 +138,14 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
         source_file = self.create_temp_file(16, full_random=True)
         account_info = self.get_account_info(resource_group, storage_account)
 
-        with open(source_file, 'rb') as f:
-            expect_content = f.read()
-
         source_container = self.create_container(account_info)
         target_container = self.create_container(account_info)
 
         self.storage_cmd('storage blob upload -c {} -f "{}" -n src', account_info,
                          source_container, source_file)
         source_uri = self.storage_cmd('storage blob url -c {} -n src', account_info, source_container).output
-        self.storage_cmd('storage blob copy start -b dst -c {} --source-uri {}', account_info, target_container,
-                         source_uri)
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-uri {}', account_info,
+                         target_container, source_uri)
 
         self.storage_cmd('storage blob upload -c {} -f "{}" -n pagesrc --type page', account_info,
                          source_container, source_file)
