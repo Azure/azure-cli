@@ -82,7 +82,24 @@ class TreeNode:
             traces.append(self._name)
         return traces
 
-    def _get_trace_str(self, number=None, filter_rules=None, select_items=None):
+    def _get_match_items(self, select_items, similarity_threshold=0, keys=None):
+        '''Fuzzy match select items with self._keys
+        '''
+        if keys is None:
+            keys = self._keys
+        if len(select_items) == 0:
+            return keys
+        simi_dict = {}
+        for item in select_items:
+            for key in keys:
+                similarity = jellyfish.jaro_winkler_similarity(item, key)
+                simi_dict[key] = max(simi_dict.get(key, 0), similarity)
+        sorted_list = sorted(simi_dict, key=simi_dict.get)
+        sorted_list = list(filter(
+            lambda k: simi_dict[k] > similarity_threshold, sorted_list))
+        return sorted_list[::-1]
+
+    def _get_trace_str(self, number=None, filter_rules=False, select_items=None):
         '''The correct JMESPath to get to current node'''
         trace_str = ""
         if self._parent:
@@ -92,7 +109,8 @@ class TreeNode:
             if number:
                 trace_str += "[:{}]".format(number)
             elif filter_rules:
-                trace_str += "[?{}]".format(filter_rules(select_items))
+                # do nothing
+                pass
             else:
                 trace_str += "[]"
         return trace_str
@@ -108,13 +126,12 @@ class TreeNode:
             for key in self._keys:
                 select_list.add(key)
         else:
-            for item in select_items:
-                for key in self._keys:
-                    if jellyfish.jaro_winkler_similarity(item, key) > self._similarity_threshold:
-                        select_list.add(key)
+            select_list.update(self._get_match_items(
+                select_items, self._similarity_threshold))
         for item in select_list:
             ret.append(Recommendation(trace_str + item,
-                                      help_str="Get all {} from output".format(item),
+                                      help_str="Get all {} from output".format(
+                                          item),
                                       group_name="select"))
         return ret
 
@@ -126,30 +143,33 @@ class TreeNode:
         number = random.choice(range(1, number + 1))
         query_str = self._get_trace_str(number)
         ret.append(Recommendation(
-            query_str, help_str="Get first {} elements".format(number),group_name="limit_number"))
+            query_str, help_str="Get first {} elements".format(number), group_name="limit_number"))
         return ret
 
-    def filter_with_condition(self, select_items):
-        help_str = ""
+    def get_condition_recommend(self, select_items):
+        ret = []
         if not self._from_list:
-            return help_str
-        match_item = None
-        backup_item = None
-        similarity = self._similarity_threshold
+            return ret
+
+        viable_keys = []
         for key in self._keys:
             if not (isinstance(self._data[key], list) or
                     isinstance(self._data[key], dict)):
-                for item in select_items:
-                    if jellyfish.jaro_winkler_similarity(key, item) > similarity:
-                        match_item = key
-                        similarity = jellyfish.jaro_winkler_similarity(
-                            key, item)
-                backup_item = key
-        if match_item is not None:
-            help_str = "{}=='{}'".format(match_item, self._data[match_item])
-        elif backup_item is not None:
-            help_str = "{}=='{}'".format(backup_item, self._data[backup_item])
-        return help_str
+                viable_keys.append(key)
+        match_items = self._get_match_items(select_items, keys=viable_keys)
+        if match_items is not None:
+            query_str = "{}=='{}'".format(
+                match_items[0], self._data[match_items[0]])
+            ret.append(Recommendation("[?{}]".format(query_str),
+                                      help_str="Display results only when {} equals to {}".format(
+                                          match_items[0], self._data[match_items[0]]),
+                                      group_name="condition"))
+            for item in match_items[1:2]:
+                query_str += "|| {}=='{}'".format(item, self._data[item])
+                ret.append(Recommendation("[?{}]".format(query_str),
+                                          help_str="Display results only when satisfy one of the condition",
+                                          group_name="condition"))
+        return ret
 
     def get_function_recommend(self):
         ret = []
@@ -195,8 +215,8 @@ class TreeBuilder:
             recommendations.extend(node.get_select_string(keywords_list))
             if node._from_list:
                 recommendations.extend(node.select_specific_number_string())
-                printlist(node._get_trace_str(
-                    filter_rules=node.filter_with_condition, select_items=keywords_list))
+                recommendations.extend(
+                    node.get_condition_recommend(keywords_list))
                 recommendations.extend(node.get_function_recommend())
         recommendations.sort(key=lambda x: x._group)
         printlist(recommendations)
