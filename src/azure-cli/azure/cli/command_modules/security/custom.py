@@ -460,6 +460,21 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
 
 
 # --------------------------------------------------------------------------------------------
+# Adaptive Application Controls
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_adaptive_application_controls(client):
+
+    return client.list()
+
+
+def get_security_adaptive_application_controls(client, group_name):
+
+    return client.get(group_name=group_name)
+
+
+# --------------------------------------------------------------------------------------------
 # Adaptive Network Hardenings
 # --------------------------------------------------------------------------------------------
 
