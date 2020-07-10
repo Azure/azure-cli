@@ -7,9 +7,24 @@ import sys
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
+SENDGRID_KEY = sys.argv[1]
+BUILD_ID = sys.argv[2]
+USER_REPO = sys.argv[3]
+USER_BRANCH = sys.argv[4]
+USER_TARGET = sys.argv[5]
+USER_LIVE = sys.argv[6]
+ARTIFACT_DIR = sys.argv[7]
+
 
 def main():
     print(sys.argv)
+    print(SENDGRID_KEY)
+    print(BUILD_ID)
+    print(USER_REPO)
+    print(USER_BRANCH)
+    print(USER_TARGET)
+    print(USER_LIVE)
+    print(ARTIFACT_DIR)
     message = Mail(
         from_email='azclibot@microsoft.com',
         to_emails='AzPyCLI@microsoft.com',
