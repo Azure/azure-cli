@@ -504,7 +504,7 @@ def load_arguments(self, _):
         for dest in scaleset_name_aliases:
             c.argument(dest, vmss_name_type)
 
-    for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances']:
+    for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
         with self.argument_context(scope) as c:
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
@@ -705,6 +705,7 @@ def load_arguments(self, _):
             c.argument('data_disk_iops', min_api='2019-07-01', nargs='+', type=int, help='Specify the Read-Write IOPS (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
             c.argument('data_disk_mbps', min_api='2019-07-01', nargs='+', type=int, help='Specify the bandwidth in MB per second (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
             c.argument('specialized', arg_type=get_three_state_flag(), help='Indicate whether the source image is specialized.')
+            c.argument('encryption_at_host', arg_type=get_three_state_flag(), help='Enable Host Encryption for the VM or VMSS. This will enable the encryption for all the disks including Resource/Temp disk at host itself.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
