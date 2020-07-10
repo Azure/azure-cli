@@ -118,11 +118,6 @@ Release History
 * Remove check in token credential (#14134)
 * Fix the storage account name in examples (#14062)
 
-**Thoth**
-
-* : recommend_recovery_options: version: "2.8.0", command: "account", parameters: "['--debug']", extension: "None" (#14180)
-* : User must agree to telemetry before failure recovery recommendations can be presented. (#14180)
-
 **Webapp**
 
 * Bugfix: az webapp log deployment show - return deployment logs instead of log metadata (#14146)
