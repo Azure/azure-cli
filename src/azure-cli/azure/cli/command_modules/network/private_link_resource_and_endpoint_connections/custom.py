@@ -35,6 +35,7 @@ def register_providers():
     _register_one_provider('Microsoft.Relay/namespaces', '2018-01-01-preview', True)
     _register_one_provider('Microsoft.Search/searchServices', '2019-10-01-preview', True)
     _register_one_provider('Microsoft.Sql/servers', '2018-06-01-preview', True)
+    _register_one_provider('Microsoft.StorageSync/storageSyncServices', '2020-03-01', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None):
