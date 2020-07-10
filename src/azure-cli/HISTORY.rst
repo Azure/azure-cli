@@ -6,10 +6,6 @@ Release History
 2.9.0
 ++++++
 
-**1**
-
-* Addition of az security iot-solution/ iot-alerts/iot-recommendations/iot-analytics REST to Azure CLI (#14124)
-
 **ACR**
 
 * Handle log artifact link from Registry to stream logs (#14038)
@@ -107,6 +103,7 @@ Release History
 * Add allowed_connections commands (#14190)
 * Add Adaptive network hardeningss commands (#14260)
 * Add adaptive_application_controls commands (#14278)
+* Addition of az security iot-solution/ iot-alerts/iot-recommendations/iot-analytics REST to Azure CLI (#14124)
 
 **SignalR**
 
