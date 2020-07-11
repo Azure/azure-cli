@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 def add_extension_cmd(cmd, source=None, extension_name=None, index_url=None, yes=None,
                       pip_extra_index_urls=None, pip_proxy=None, system=None):
-    return add_extension(cmd=cmd, source=source, extension_name=extension_name, index_url=index_url, yes=yes,
+    return add_extension(cmd.cli_ctx, source=source, extension_name=extension_name, index_url=index_url, yes=yes,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
 
 
@@ -30,7 +30,7 @@ def show_extension_cmd(extension_name):
 
 
 def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
-    return update_extension(cmd, extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls,
+    return update_extension(cmd.cli_ctx, extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls,
                             pip_proxy=pip_proxy)
 
 

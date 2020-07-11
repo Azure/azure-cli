@@ -85,8 +85,8 @@ def _validate_whl_extension(ext_file):
     check_version_compatibility(azext_metadata)
 
 
-def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
-    cmd.cli_ctx.get_progress_controller().add(message='Analyzing')
+def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
+    cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
@@ -107,7 +107,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
         ext_file = os.path.join(tmp_dir, whl_filename)
         logger.debug('Downloading %s to %s', source, ext_file)
         try:
-            cmd.cli_ctx.get_progress_controller().add(message='Downloading')
+            cli_ctx.get_progress_controller().add(message='Downloading')
             _whl_download_from_url(url_parse_result, ext_file)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
             raise CLIError('Please ensure you have network connection. Error detail: {}'.format(str(err)))
@@ -129,7 +129,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
             raise CLIError("The checksum of the extension does not match the expected value. "
                            "Use --debug for more information.")
     try:
-        cmd.cli_ctx.get_progress_controller().add(message='Validating')
+        cli_ctx.get_progress_controller().add(message='Validating')
         _validate_whl_extension(ext_file)
     except AssertionError:
         logger.debug(traceback.format_exc())
@@ -139,7 +139,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
     logger.debug('Validation successful on %s', ext_file)
     # Check for distro consistency
     check_distro_consistency()
-    cmd.cli_ctx.get_progress_controller().add(message='Installing')
+    cli_ctx.get_progress_controller().add(message='Installing')
     # Install with pip
     extension_path = build_extension_path(extension_name, system)
     pip_args = ['install', '--target', extension_path, ext_file]
@@ -205,7 +205,7 @@ def check_version_compatibility(azext_metadata):
         raise CLIError(min_max_msg_fmt)
 
 
-def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+def add_extension(cli_ctx, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
                   version=None):
     ext_sha256 = None
@@ -213,7 +213,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
     version = None if version == 'latest' else version
 
     if extension_name:
-        cmd.cli_ctx.get_progress_controller().add(message='Searching')
+        cli_ctx.get_progress_controller().add(message='Searching')
         ext = None
         try:
             ext = get_extension(extension_name)
@@ -235,7 +235,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                 err = "No matching extensions for '{}'. Use --debug for more information.".format(extension_name)
             raise CLIError(err)
 
-    extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
+    extension_name = _add_whl_ext(cli_ctx=cli_ctx, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
         ext = get_extension(extension_name)
@@ -288,7 +288,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension(cli_ctx, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
     try:
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
@@ -306,7 +306,7 @@ def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=N
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(cmd=cmd, source=download_url, ext_sha256=ext_sha256,
+            _add_whl_ext(cli_ctx=cli_ctx, source=download_url, ext_sha256=ext_sha256,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)

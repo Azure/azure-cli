@@ -280,18 +280,41 @@ class AzCliCommandParser(CLICommandParser):
         self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
         return self._namespace, self._raw_arguments
 
+    def _search_in_extension_commands(self, cli_ctx, command_str):
+        from azure.cli.core._session import EXT_CMD_INDEX
+        import os
+        EXT_CMD_INDEX.load(os.path.join(cli_ctx.config.config_dir, 'extCmdIndex.json'))
+        cmd_chain = EXT_CMD_INDEX
+        for part in command_str.split('.'):
+            try:
+                if isinstance(cmd_chain[part], str):
+                    return cmd_chain[part]
+                cmd_chain = cmd_chain[part]
+            except KeyError:
+                return None
+
     def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
+        # cli_ctx = self.cli_ctx
         if action.choices is not None and value not in action.choices:
             if not self.command_source:
+                from azure.cli.core.util import roughly_parse_command
+                command_str = roughly_parse_command(self.prog.split()[1:] + self._raw_arguments, delimiter='.')
+                ext_name = self._search_in_extension_commands(cli_ctx, command_str)
+                if ext_name:
+                    from azure.cli.core.extension.operations import add_extension
+                    from knack.prompting import prompt_y_n
+                    go_on = prompt_y_n('You are running commands from the extension {}. Would you like to install it first?'.format(ext_name), default='y')
+                    if go_on:
+                        add_extension(self.cli_ctx, extension_name=ext_name)
+                        logger.warning('Please rerun your command.')
+                        self.exit(6)
+                    else:
+                        logger.error("Command failed due to corresponding extension not installed. Please run 'az extension add -n {}' first.".format(ext_name))
+                        self.exit(2)
                 # parser has no `command_source`, value is part of command itself
-                extensions_link = 'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'
-                error_msg = ("{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'. "
-                             "If the command is from an extension, "
-                             "please make sure the corresponding extension is installed. "
-                             "To learn more about extensions, please visit "
-                             "{extensions_link}").format(prog=self.prog, value=value, extensions_link=extensions_link)
+                error_msg = ("{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'. ")
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest
