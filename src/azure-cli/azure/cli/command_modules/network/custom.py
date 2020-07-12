@@ -2735,7 +2735,7 @@ def show_express_route_port_identity(cmd, resource_group_name, express_route_por
 
 def update_express_route_port_link(cmd, instance, express_route_port_name, link_name,
                                    macsec_cak_secret_identifier=None, macsec_ckn_secret_identifier=None,
-                                   macsec_cipher=None, admin_state=None):
+                                   macsec_cipher=None, macsec_sci_state=None, admin_state=None):
     """
     :param cmd:
     :param instance: an instance of ExpressRoutePort
@@ -2744,6 +2744,7 @@ def update_express_route_port_link(cmd, instance, express_route_port_name, link_
     :param macsec_cak_secret_identifier:
     :param macsec_ckn_secret_identifier:
     :param macsec_cipher:
+    :param macsec_sci_state:
     :param admin_state:
     :return:
     """
@@ -2763,9 +2764,12 @@ def update_express_route_port_link(cmd, instance, express_route_port_name, link_
         # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
         # need to remove this conversion when the issue is fixed.
         if macsec_cipher is not None:
-            macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
+            macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256', 'gcm-aes-xpn-128': 'GcmAesXpn128', 'gcm-aes-xpn-256': 'GcmAesXpn128' }
             macsec_cipher = macsec_ciphers_tmp[macsec_cipher]
         instance.links[link_index].mac_sec_config.cipher = macsec_cipher
+
+        if macsec_sci_state is not None:
+            instance.links[link_index].mac_sec_config.sci_state = macsec_sci_state
 
     if admin_state is not None:
         instance.links[link_index].admin_state = admin_state

@@ -2743,6 +2743,7 @@ examples:
         --macsec-ckn-secret-identifier MacSecCKNSecretID \\
         --macsec-cak-secret-identifier MacSecCAKSecretID \\
         --macsec-cipher gcm-aes-128
+        --macsec-sci-state Enabled
   - name: Enable administrative state of an ExpressRoute Link.
     text: |-
         az network express-route port link update \\
