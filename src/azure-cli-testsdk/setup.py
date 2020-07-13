@@ -51,8 +51,6 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure',
-        'azure.cli',
         'azure.cli.testsdk'
     ],
     install_requires=DEPENDENCIES,
