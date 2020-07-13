@@ -103,4 +103,3 @@ License
 =======
 
 `MIT <https://github.com/Azure/azure-cli/blob/master/LICENSE.txt>`__
-
