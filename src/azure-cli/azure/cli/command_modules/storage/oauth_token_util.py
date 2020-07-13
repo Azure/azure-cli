@@ -37,7 +37,7 @@ class TokenUpdater(object):
         except KeyError:  # needed to deal with differing unserialized MSI token payload
             self.token_credential.token = token['access_token']
             expire = datetime.fromtimestamp(int(token['expires_on']))
-            seconds_left = (expire - datetime.now()).seconds
+            seconds_left = (expire - datetime.now()).total_seconds()
 
         if seconds_left < 180:
             logger.warning("Acquired token will expire on %s. Current time is %s.", expire, datetime.now())
