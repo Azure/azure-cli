@@ -4,7 +4,7 @@ grammar AutoscaleCondition ;
 
 /* Main Rules */
 
-expression          : (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric WHITESPACE) operator threshold aggregation period (WHITESPACE dimensions)* NEWLINE* ;
+expression          : (QUOTE namespace QUOTE WHITESPACE)* (metric WHITESPACE) operator threshold aggregation period (WHITESPACE dimensions)* NEWLINE* ;
 
 aggregation         : WORD WHITESPACE ;
 

@@ -149,7 +149,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}')
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Mynamspace.Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
             checks=[
                 self.check('metricTrigger.metricName', 'Percentage CPU'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
@@ -162,12 +162,58 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
                 self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
-                self.check('metricTrigger.metricNamespace', 'Mynamspace'),
+                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
                 self.check('scaleAction.cooldown', 'PT5M'),
                 self.check('scaleAction.direction', 'None'),
                 self.check('scaleAction.type', 'ExactCount'),
                 self.check('scaleAction.value', '5')
             ])
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            checks=[
+                self.check('metricTrigger.metricName', 'Percentage CPU'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 75),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT5M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'None'),
+                self.check('scaleAction.type', 'ExactCount'),
+                self.check('scaleAction.value', '5')
+            ])
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            checks=[
+                self.check('metricTrigger.metricName', 'Percentage CPU'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 75),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT5M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'None'),
+                self.check('scaleAction.type', 'ExactCount'),
+                self.check('scaleAction.value', '5')
+            ])
+
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}', checks=[
+            self.check('length(@)', 3)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_fixed')
     def test_monitor_autoscale_fixed(self, resource_group):

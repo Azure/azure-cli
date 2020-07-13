@@ -235,7 +235,7 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
         from azure.cli.command_modules.monitor.grammar.autoscale import (
             AutoscaleConditionLexer, AutoscaleConditionParser, AutoscaleConditionValidator)
 
-        usage = 'usage error: --condition [NAMESPACE.]METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD\n' \
+        usage = 'usage error: --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD\n' \
                 '                         [where DIMENSION {==,!=} VALUE [or VALUE ...]\n' \
                 '                         [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]'
 

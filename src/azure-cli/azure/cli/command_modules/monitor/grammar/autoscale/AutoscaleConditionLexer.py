@@ -1,7 +1,3 @@
-# --------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
-# --------------------------------------------------------------------------------------------
 # Generated from AutoscaleCondition.g4 by ANTLR 4.7.2
 # encoding: utf-8
 from __future__ import print_function
@@ -55,7 +51,7 @@ def serializedATN():
         buf.write(u"\3\2\2\2?\u0093\3\2\2\2A\u0099\3\2\2\2C\u009d\3\2\2\2")
         buf.write(u"E\u00a6\3\2\2\2G\u00af\3\2\2\2I\u00bc\3\2\2\2K\u00bf")
         buf.write(u"\3\2\2\2M\u00cb\3\2\2\2O\u00ce\3\2\2\2Q\u00d7\3\2\2\2")
-        buf.write(u"S\u00df\3\2\2\2UV\7\60\2\2V\4\3\2\2\2WX\7\61\2\2X\6\3")
+        buf.write(u"S\u00df\3\2\2\2UV\7\61\2\2V\4\3\2\2\2WX\7\60\2\2X\6\3")
         buf.write(u"\2\2\2YZ\7a\2\2Z\b\3\2\2\2[\\\7^\2\2\\\n\3\2\2\2]^\7")
         buf.write(u"<\2\2^\f\3\2\2\2_`\7\'\2\2`\16\3\2\2\2ab\7/\2\2b\20\3")
         buf.write(u"\2\2\2cd\7.\2\2d\22\3\2\2\2ef\7~\2\2f\24\3\2\2\2gh\7")
@@ -146,7 +142,7 @@ class AutoscaleConditionLexer(Lexer):
     modeNames = [ u"DEFAULT_MODE" ]
 
     literalNames = [ u"<INVALID>",
-            u"'.'", u"'/'", u"'_'", u"'\\'", u"':'", u"'%'", u"'-'", u"','", 
+            u"'/'", u"'.'", u"'_'", u"'\\'", u"':'", u"'%'", u"'-'", u"','", 
             u"'|'", u"'=='", u"'!='", u"'*'", u"'~'" ]
 
     symbolicNames = [ u"<INVALID>",
