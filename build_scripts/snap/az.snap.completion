@@ -11,7 +11,7 @@ _python_argcomplete() {
                   _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
                   _ARGCOMPLETE=1 \
                   _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
-                  "$SNAP/usr/bin/python" -m azure.cli 8>&1 9>&2 1>/dev/null 2>/dev/null) )
+                  "$SNAP/usr/bin/python" -m azure.cli.command_modules 8>&1 9>&2 1>/dev/null 2>/dev/null) )
     if [[ $? != 0 ]]; then
         unset COMPREPLY
     elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then

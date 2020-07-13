@@ -15,9 +15,9 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 pip check
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-python -m azure.cli --version
+python -m azure.cli.command_modules --version
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-python -m azure.cli self-test
+python -m azure.cli.command_modules self-test
 if %errorlevel% neq 0 exit /b %errorlevel%
 popd

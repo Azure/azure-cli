@@ -16,6 +16,6 @@ ${REPO_ROOT}/scripts/install_full.sh
 
 pip check
 
-python -m azure.cli --version
+python -m azure.cli.command_modules --version
 
-python -m azure.cli self-test
+python -m azure.cli.command_modules self-test

@@ -28,8 +28,6 @@ class AzureCli < Formula
       buildpath/"src/azure-cli",
       buildpath/"src/azure-cli-telemetry",
       buildpath/"src/azure-cli-core",
-      buildpath/"src/azure-cli-nspkg",
-      buildpath/"src/azure-cli-command_modules-nspkg",
     ]
 
     # Install CLI
@@ -41,7 +39,7 @@ class AzureCli < Formula
 
     (bin/"az").write <<~EOS
       #!/usr/bin/env bash
-      AZ_INSTALLER=HOMEBREW #{libexec}/bin/python -m azure.cli \"$@\"
+      AZ_INSTALLER=HOMEBREW #{libexec}/bin/python -m azure.cli.command_modules \"$@\"
     EOS
 
     bash_completion.install "az.completion" => "az"
