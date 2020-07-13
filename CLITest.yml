@@ -208,34 +208,38 @@ jobs:
     vmImage: 'Ubuntu-16.04'
   steps:
     - task: UsePythonVersion@0
+      condition: succeededOrFailed()
       inputs:
         versionSpec: '3.8'
         addToPath: true
         architecture: 'x64'
-    - bash: |
-        if [[ "$(USER_TARGET)" =~ "$(Target)" || "$(USER_TARGET)" == "" ]]; then
-          echo "Match!"
-        else
-          echo "Not match!"
-          exit
-        fi
-        cd ..
-        pwd
-        ls
-        # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
-        git clone -b $(USER_BRANCH) $(USER_REPO)
-        #git clone https://github.com/Azure/azure-cli-extensions.git
-        python -m venv env
-        source env/bin/activate
-        pip install azdev
-        pip install pytest-json-report
-        pip install pytest-html
-        azdev setup -c azure-cli
-        # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
-        az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n 4 --json-report --json-report-summary --json-report-file=$(Target).report.json --html=$(Target).report.html --self-contained-html"
-        pwd
-        ls
+    - task: Bash@3
+      condition: succeededOrFailed()
+      inputs:
+        script: |
+          if [[ "$(USER_TARGET)" =~ "$(Target)" || "$(USER_TARGET)" == "" ]]; then
+            echo "Match!"
+          else
+            echo "Not match!"
+            exit
+          fi
+          cd ..
+          pwd
+          ls
+          # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+          git clone -b $(USER_BRANCH) $(USER_REPO)
+          #git clone https://github.com/Azure/azure-cli-extensions.git
+          python -m venv env
+          source env/bin/activate
+          pip install azdev
+          pip install pytest-json-report
+          pip install pytest-html
+          azdev setup -c azure-cli
+          # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
+          az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+          azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n 4 --json-report --json-report-summary --json-report-file=$(Target).report.json --html=$(Target).report.html --self-contained-html"
+          pwd
+          ls
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
