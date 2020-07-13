@@ -1637,26 +1637,31 @@ def delete_deployment_script(cmd, resource_group_name, name):
     rcf.deployment_scripts.delete(resource_group_name, name)
 
 
-def list_template_specs(cmd, resource_group_name=None):
-    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
-    if resource_group_name is not None:
-        return rcf.template_specs.list_by_resource_group(resource_group_name)
-    return rcf.template_specs.list_by_subscription()
-
-
 def get_template_spec(cmd, resource_group_name, name):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     return rcf.template_specs.get(resource_group_name, name)
 
 
-def get_template_spec_logs(cmd, resource_group_name, name):
+def create_or_update_template_spec(cmd, resource_group_name, name=None, template_spec=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
-    return rcf.template_specs.get_logs(resource_group_name, name)
+    return rcf.template_specs.create_or_update(resource_group_name, name, template_spec)
+
+
+def update_template_spec_tags(cmd, resource_group_name, name, tags):
+    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
+    return rcf.template_specs.update(resource_group_name, name, tags)
 
 
 def delete_template_spec(cmd, resource_group_name, name):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     rcf.template_specs.delete(resource_group_name, name)
+
+
+def list_template_specs(cmd, resource_group_name=None):
+    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
+    if resource_group_name is not None:
+        return rcf.template_specs.list_by_resource_group(resource_group_name)
+    return rcf.template_specs.list_by_subscription()
 
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):

@@ -474,3 +474,17 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
+
+    with self.argument_context('template-specs create') as c:
+        c.argument('name', options_list=['--name', '-n'])
+        c.argument('template_spec', options_list=['--template-spec', '-t'])
+
+    with self.argument_context('template-specs get') as c:
+        c.argument('name', options_list=['--name', '-n'])
+
+    with self.argument_context('template-specs update') as c:
+        c.argument('name', options_list=['--name', '-n'])
+        c.argument('tags', tags_type)
+
+    with self.argument_context('template-specs delete') as c:
+        c.argument('name', options_list=['--name', '-n'])

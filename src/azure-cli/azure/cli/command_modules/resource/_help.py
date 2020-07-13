@@ -2017,3 +2017,93 @@ examples:
     text: >
         az tag delete --name MyTag
 """
+
+helps['template-specs'] = """
+type: group
+short-summary: Manage template specs at subscription or resource group scope.
+"""
+
+helps['template-specs create'] = """
+type: command
+short-summary: Creates or updates a Template Spec.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of resource group.
+  - name: --name -n
+    type: string
+    short-summary: Name of the template spec.
+  - name: --template-spec -t
+    type: template_spec
+    short-summary: The template spec resource ID.
+examples:
+  - name: Update an existing template spec.
+    text: az template-specs create -g MyResourceGroup --template-spec resourceID
+  - name: Create a template spec.
+    text: az template-specs create -g MyResourceGroup --name MyTemplateSpecName
+"""
+
+helps['template-specs get'] = """
+type: command
+short-summary: Gets a Template Spec with a given name.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of resource group.
+  - name: --name -n
+    type: string
+    short-summary: Name of the template spec.
+examples:
+  - name: Get a template spec.
+    text: az template-specs get -g testrg --name MyTemplateSpecName
+"""
+
+helps['template-specs update'] = """
+type: command
+short-summary: Updates Template Spec tags with specified values.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of resource group.
+  - name: --name -n
+    type: string
+    short-summary: Name of the template spec.
+  - name: --tags
+    type: dict[str,str]
+    short-summary: Resource Tags.
+examples:
+  - name: Update or create tags for specified template spec.
+    text: az template-specs update -g MyResourceGroup --name MyTemplateSpec --tags {'MyTag'='MyValue'}
+"""
+
+
+helps['template-specs delete'] = """
+type: command
+short-summary: Deletes a Template Spec by name.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of resource group.
+  - name: --name -n
+    type: string
+    short-summary: Name of the template spec.
+examples:
+  - name: Delete a Template Spec by name.
+    text: az template-specs delete -g MyResourceGroup --name MyTemplateSpec
+"""
+
+helps['template-specs list'] = """
+type: command
+short-summary: List all the Template Specs within the specified subscription or resource group.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of resource group.
+examples:
+  - name: List all template specs in current default subscription.
+    text: az template-specs list
+  - name: List all template specs in specified subscription.
+    text: az template-specs list --subscription Subscription
+  - name: List all template specs in resource group.
+    text: az template-specs list -g MyResourceGroup
+"""

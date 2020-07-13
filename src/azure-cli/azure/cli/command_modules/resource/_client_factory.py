@@ -129,4 +129,4 @@ def cf_management_group_subscriptions(cli_ctx, _):
 
 
 def cf_resource_templatespecs(cli_ctx, _):
-    return _resource_templatespecs_client_factory(cli_ctx).templatespecs
+    return _resource_templatespecs_client_factory(cli_ctx).template_specs
