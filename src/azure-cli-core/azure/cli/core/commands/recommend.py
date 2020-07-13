@@ -151,6 +151,7 @@ class TreeNode:
         if not self._from_list:
             return ret
 
+        trace_str = self._get_trace_str(filter_rules=True)
         viable_keys = []
         for key in self._keys:
             if not (isinstance(self._data[key], list) or
@@ -160,13 +161,13 @@ class TreeNode:
         if match_items is not None:
             query_str = "{}=='{}'".format(
                 match_items[0], self._data[match_items[0]])
-            ret.append(Recommendation("[?{}]".format(query_str),
+            ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
                                       help_str="Display results only when {} equals to {}".format(
                                           match_items[0], self._data[match_items[0]]),
                                       group_name="condition"))
             for item in match_items[1:2]:
                 query_str += "|| {}=='{}'".format(item, self._data[item])
-                ret.append(Recommendation("[?{}]".format(query_str),
+                ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
                                           help_str="Display results only when satisfy one of the condition",
                                           group_name="condition"))
         return ret
