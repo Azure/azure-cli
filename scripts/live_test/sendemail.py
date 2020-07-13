@@ -35,11 +35,7 @@ def main():
     data = {
         "personalizations": [
             {
-                "to": [
-                    {
-                        "email": REQUESTED_FOR_EMAIL
-                    }
-                ],
+                "to": [],
                 "subject": "Test results of Azure CLI"
             }
         ],
@@ -53,8 +49,11 @@ def main():
             }
         ]
     }
+    if REQUESTED_FOR_EMAIL != '':
+        data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
     if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_LIVE == '--live':
         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
+    print(data)
     try:
         sendgrid_key = sys.argv[1]
         sg = SendGridAPIClient(sendgrid_key)
@@ -68,14 +67,11 @@ def main():
 
 def get_content():
     """
-    Write content of email
+    Compose content of email
     :return:
     """
-    build_id = sys.argv[2]
-    repo = sys.argv[3]
-    branch = sys.argv[4]
-    link = 'https://dev.azure.com/azure-sdk/internal/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(build_id)
-    content = 'Hi Azure CLI team,<br>Test results of Azure CLI.<br>Repository: {}<br>Branch: {}<br>{}'.format(repo, branch, link)
+    link = 'https://dev.azure.com/azure-sdk/internal/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(BUILD_ID)
+    content = 'Hi Azure CLI team,<br>Test results of Azure CLI.<br>Repository: {}<br>Branch: {}<br>Link: {}'.format(USER_REPO, USER_BRANCH, link)
     return content
 
 
