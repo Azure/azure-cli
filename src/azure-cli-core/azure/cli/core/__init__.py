@@ -296,6 +296,8 @@ class MainCommandsLoader(CLICommandsLoader):
 
                 for ext in allowed_extensions:
                     try:
+                        # Import in the `for` loop because `allowed_extensions` can be []. In such case we
+                        # don't need to import `check_version_compatibility` at all.
                         from azure.cli.core.extension.operations import check_version_compatibility
                         check_version_compatibility(ext.get_metadata())
                     except CLIError as ex:
