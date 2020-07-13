@@ -204,10 +204,11 @@ class TreeBuilder:
             self._root = self._parse_dict('root', data)
 
     def generate_recommend(self, keywords_list):
-        def printlist(my_list):
+        def printlist(my_list, group):
             if isinstance(my_list, list):
                 for item in my_list:
-                    print(item)
+                    if item._group == group:
+                        print(item)
             else:
                 print(my_list)
 
@@ -220,7 +221,11 @@ class TreeBuilder:
                     node.get_condition_recommend(keywords_list))
                 recommendations.extend(node.get_function_recommend())
         recommendations.sort(key=lambda x: x._group)
-        printlist(recommendations)
+        groups = ["default", "select", "condition", "function", "limit_number"]
+        for group in groups:
+            print("Group {}:".format(group))
+            printlist(recommendations, group)
+            print("")
 
     def _parse_dict(self, name, data, from_list=False):
         node = TreeNode(name)
