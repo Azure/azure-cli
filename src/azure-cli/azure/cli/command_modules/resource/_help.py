@@ -2033,14 +2033,16 @@ parameters:
   - name: --name -n
     type: string
     short-summary: Name of the template spec.
-  - name: --template-spec -t
+  - name: --template-file -f
     type: template_spec
-    short-summary: The template spec resource ID.
+    short-summary: The path to the template file.
+  - name: --location -l 
+    short-summary: The location to store the template-spec.
 examples:
   - name: Update an existing template spec.
-    text: az template-specs create -g MyResourceGroup --template-spec resourceID
+    text: az template-specs create -g MyResourceGroup --name MyTemplateSpecName -l WestUS --template-file templateSpec.json
   - name: Create a template spec.
-    text: az template-specs create -g MyResourceGroup --name MyTemplateSpecName
+    text: az template-specs create -g MyResourceGroup --name MyTemplateSpecName -l WestUS --template-file updatedFile.json
 """
 
 helps['template-specs get'] = """

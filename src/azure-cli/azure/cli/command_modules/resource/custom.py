@@ -1641,11 +1641,19 @@ def get_template_spec(cmd, resource_group_name, name):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     return rcf.template_specs.get(resource_group_name, name)
 
+def create_or_update_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None, 
+                                   description=None, tags=None, version=None):
 
-def create_or_update_template_spec(cmd, resource_group_name, name=None, template_spec=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
-    return rcf.template_specs.create_or_update(resource_group_name, name, template_spec)
+    if location is None : 
+        location = rcf.resource_groups.get(resource_group_name).location
+    if template_file is not None: 
+        template_content = read_file_content(template_file)
 
+    TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
+    template_spec = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
+    print(template_spec)
+    return rcf.template_specs.create_or_update(resource_group_name, name, template_spec)
 
 def update_template_spec_tags(cmd, resource_group_name, name, tags):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)

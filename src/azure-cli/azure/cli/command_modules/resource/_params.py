@@ -477,7 +477,12 @@ def load_arguments(self, _):
 
     with self.argument_context('template-specs create') as c:
         c.argument('name', options_list=['--name', '-n'])
-        c.argument('template_spec', options_list=['--template-spec', '-t'])
+        c.argument('template_file', options_list=['--template-file', '-f'])
+        c.argument('location', options_list=['--location', '-l'])
+        c.argument('display_name', options_list=['--display-name', '-d'], help='The display name of the template spec.')
+        c.argument('description', options_list=['--description'], help='The description of template spec.')
+        c.argument('version', options_list=['--version'], help='The version of the template spec.')
+        c.argument('tags', tags_type)
 
     with self.argument_context('template-specs get') as c:
         c.argument('name', options_list=['--name', '-n'])

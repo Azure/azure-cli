@@ -158,7 +158,7 @@ def load_command_table(self, _):
     )
 
     resource_templatespecs_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.templatespecs.operations#ResourceLinkOperations.{}',
+        operations_tmpl='azure.mgmt.resource.templatespecs.operations#ResourceLinksOperations.{}',
         client_factory=cf_resource_templatespecs,
         resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS
     )
