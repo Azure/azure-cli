@@ -52,9 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-batch~=9.0',
-    'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}.*'.format(VERSION),
-    'azure-cli-nspkg~=3.0,>=3.0.3',
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.48',
     'azure-functions-devops-build~=0.0.22',
@@ -122,7 +120,7 @@ DEPENDENCIES = [
     'azure-mgmt-storage~=11.1.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.47.0',
-    'azure-multiapi-storage~=0.3.2',
+    'azure-multiapi-storage~=0.3.5',
     'azure-loganalytics~=0.1.0',
     'azure-storage-common~=1.4',
     'cryptography>=2.3.1,<3.0.0',
@@ -164,7 +162,7 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure"]),
     install_requires=DEPENDENCIES,
     package_data={
         'azure.cli.core': ['auth_landing_pages/*.html'],

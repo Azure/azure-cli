@@ -92,8 +92,6 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure',
-        'azure.cli',
         'azure.cli.core',
         'azure.cli.core.commands',
         'azure.cli.core.extension',
