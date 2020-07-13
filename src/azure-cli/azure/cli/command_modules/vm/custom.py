@@ -1072,6 +1072,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     location = vm.location
     if not vm.network_profile:
         raise CLIError("Network profile not found for VM '{}'".format(vm_name))
+
     nic_ids = list(vm.network_profile.network_interfaces)
     if len(nic_ids) > 1:
         raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
