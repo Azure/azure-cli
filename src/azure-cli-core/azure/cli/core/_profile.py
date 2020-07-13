@@ -387,6 +387,7 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         auth = MSIAuthenticationWrapper(resource=resource)
         auth.set_token()
         token_entry = auth.token
