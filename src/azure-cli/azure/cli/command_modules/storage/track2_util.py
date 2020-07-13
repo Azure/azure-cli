@@ -46,15 +46,10 @@ def _encode_bytes(b):
 
 
 def transform_dict_keys_to_hump(data_dict):
+    from azure.cli.core.commands.arm import make_camel_case
     new_dict = {}
     if not data_dict:
         return new_dict
     for key in data_dict:
-        new_dict[underline_to_hump(key)] = data_dict.get(key)
+        new_dict[make_camel_case(key)] = data_dict.get(key)
     return new_dict
-
-
-def underline_to_hump(underline_str):
-    import re
-    sub = re.sub(r'(_\w)', lambda x: x.group(1)[1].upper(), underline_str)
-    return sub

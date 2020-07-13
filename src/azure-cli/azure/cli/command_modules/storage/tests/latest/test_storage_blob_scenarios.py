@@ -148,7 +148,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_storage_blob_socket_timeout(self, resource_group, storage_account):
+    def test_storage_blob_timeout(self, resource_group, storage_account):
         local_dir = self.create_temp_dir()
         local_file = self.create_temp_file(1)
         blob_name = self.create_random_name(prefix='blob', length=24)
@@ -156,15 +156,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         container = self.create_container(account_info)
 
-        from azure.common import AzureException
-        with self.assertRaises(AzureException):
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout -11',
-                             account_info, container, local_file, blob_name)
-
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout 10',
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --timeout 10',
                          account_info, container, local_file, blob_name)
         self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(JMESPathCheck('exists', True))
@@ -356,7 +351,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                               account_info, container).get_output_in_json()), 0)
 
         import time
-        time.sleep(10)
+        time.sleep(20)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {} --include d',
                                               account_info, container).get_output_in_json()), 1)
 
@@ -487,6 +482,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('skv=', container_sas)
         self.assertIn('skv=', container_sas)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @api_version_constraint(resource_type=ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
@@ -515,6 +511,10 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
         container_name = self.create_container(account_info)
         blob_name = self.create_random_name(prefix='blob', length=24)
 
+        with self.assertRaises(SystemExit):
+            self.storage_cmd('storage blob upload -c {} -n {} -f "{}" -t page --tier P1', account_info,
+                             container_name, blob_name, source_file)
+
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}" -t page --tier P10', account_info,
                          container_name, blob_name, source_file)
 
@@ -542,8 +542,15 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
         # test rehydrate from Archive to Cool by High priority
         blob_name = self.create_random_name(prefix='blob', length=24)
 
-        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info,
+        with self.assertRaises(SystemExit):
+            self.storage_cmd('storage blob upload -c {} -n {} -f "{}" --tier Middle', account_info,
+                             container_name, blob_name, source_file)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}" --tier Hot', account_info,
                          container_name, blob_name, source_file)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Hot'))
 
         with self.assertRaises(SystemExit):
             self.storage_cmd('storage blob set-tier -c {} -n {} --tier Cool -r Middle', account_info,

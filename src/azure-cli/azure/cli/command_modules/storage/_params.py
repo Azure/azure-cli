@@ -18,7 +18,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
-                          validate_fs_public_access, validate_logging_version)
+                          validate_fs_public_access, validate_logging_version, add_progress_callback_v2)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -69,6 +69,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
     progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
                                     action='store_true', validator=add_progress_callback)
+    progress_type_v2 = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
+                                       action='store_true', validator=add_progress_callback_v2)
     socket_timeout_type = CLIArgumentType(help='The socket timeout(secs), used by the service to regulate data flow.',
                                           type=int)
     num_results_type = CLIArgumentType(
@@ -554,25 +556,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                          "resource does not exist, and fail the operation if it does exist.")
 
     with self.argument_context('storage blob upload') as c:
-        from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
-        from .sdkutil import get_blob_types, get_blob_tier_names
+        from ._validators import blob_tier_validator, validate_encryption_scope_client_params
+        from .sdkutil import get_blob_types
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False)
 
-        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
-        c.argument('max_connections', type=int)
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
+                   help='Path of the file to upload as the blob content.')
+        c.argument('max_connections', type=int,
+                   help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
         c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
                    arg_type=get_enum_type(get_blob_types()))
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
-        # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
-        # register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',),
-        #                              help=argparse.SUPPRESS)
-        c.argument('tier', validator=page_blob_tier_validator,
-                   arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
-                   min_api='2017-04-17')
+        c.extra('no_progress', progress_type_v2)
+        c.argument('socket_timeout', deprecate_info=c.deprecate(hide=True),
+                   help='The socket timeout(secs), used by the service to regulate data flow.')
+        c.argument('tier', validator=blob_tier_validator,
+                   help='The tier to be set on blob. For page blobs, supported on a premium storage account, '
+                        'valid values are P10, P20, P30, P4, P40, P50, P6, P60. For block blobs, '
+                        'supported on blob storage or general purpose v2 accounts, valid values are Hot/Cool/Archive.')
         c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
                    help='A predefined encryption scope used to encrypt the data on the service.')
 

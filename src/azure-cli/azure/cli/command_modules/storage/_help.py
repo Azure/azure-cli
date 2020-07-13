@@ -788,8 +788,12 @@ parameters:
     short-summary: The max length in bytes permitted for an append blob.
   - name: --validate-content
     short-summary: Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.
-  - name: --tier
-    short-summary: A page blob tier value to set the blob to. The tier correlates to the size of the blob and number of allowed IOPS. This is only applicable to page blobs on premium storage accounts.
+  - name: --lease-id
+    short-summary: Required if the blob has an active lease.
+  - name: --if-match
+    short-summary: An ETag value, or the wildcard character (*). Specify this header to perform the operation only if the resource's ETag matches the value specified.
+  - name: --if-none-match
+    short-summary: An ETag value, or the wildcard character (*). Specify this header to perform the operation only if the resource's ETag does not match the value specified. Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
 examples:
   - name: Upload to a blob.
     text: az storage blob upload -f /path/to/file -c MyContainer -n MyBlob

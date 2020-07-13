@@ -6,7 +6,7 @@
 import base64
 from knack.log import get_logger
 from knack.util import todict
-from .track2_util import _encode_bytes
+from .track2_util import _encode_bytes, transform_dict_keys_to_hump
 from .url_quote_util import encode_url_path
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
@@ -229,3 +229,7 @@ def transform_immutability_policy(result):
     if result.immutability_period_since_creation_in_days:
         return result
     return None
+
+
+def transform_blob_upload(result):
+    return transform_dict_keys_to_hump(result)

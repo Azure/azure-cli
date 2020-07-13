@@ -537,7 +537,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         #                              help=argparse.SUPPRESS)
         c.argument('tier', validator=page_blob_tier_validator,
                    arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
-                   min_api='2017-04-17')
+                   min_api='2017-04-17', help='A page blob tier value to set the blob to. '
+                                              'The tier correlates to the size of the blob and number of allowed IOPS. '
+                                              'This is only applicable to page blobs on premium storage accounts.')
         c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
                    help='A predefined encryption scope used to encrypt the data on the service.')
 
