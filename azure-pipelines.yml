@@ -142,6 +142,8 @@ jobs:
       versionSpec: 3.7
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
+      set -ev
+      . env/bin/activate
       azdev verify history
 
     displayName: 'Verify History'
@@ -816,6 +818,8 @@ jobs:
       versionSpec: 3.7
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
+      set -ev
+      . env/bin/activate
       azdev style
 
 - job: CheckHeaders
@@ -830,6 +834,8 @@ jobs:
       versionSpec: 3.6
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
+      set -ev
+      . env/bin/activate
       azdev verify license
       azdev verify history
       azdev verify document-map
@@ -851,6 +857,8 @@ jobs:
       versionSpec: '$(python.version)'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
+      set -ev
+      . env/bin/activate
       azdev perf load-times
     displayName: "Load Performance"
   # - bash: |
@@ -872,6 +880,8 @@ jobs:
       versionSpec: 3.6
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
+      set -ev
+      . env/bin/activate
       azdev linter --ci-exclusions
 
 - job: VerifySphinxDocumentGenerator
