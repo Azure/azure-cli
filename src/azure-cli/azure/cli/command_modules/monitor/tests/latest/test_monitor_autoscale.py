@@ -314,3 +314,56 @@ class TestMonitorAutoscaleTimezones(LiveScenarioTest):
                  checks=self.check('length(@)', 6))
         self.cmd('monitor autoscale profile list-timezones -q pacific --offset -4',
                  checks=self.check('length(@)', 1))
+
+
+class TestMonitorAutoscaleComplexRules(ScenarioTest):
+    def setUp(self):
+        super(TestMonitorAutoscaleComplexRules, self).setUp()
+        self.cmd('extension add -n spring-cloud')
+
+    def tearDown(self):
+        self.cmd('extension remove -n spring-cloud')
+        super(TestMonitorAutoscaleComplexRules, self).tearDown()
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rule_for_spring_cloud', location='westus2')
+    def test_monitor_autoscale_rule_for_spring_cloud(self, resource_group):
+        self.kwargs.update({
+            'sc': self.create_random_name('clisc', 20),
+            'scapp': 'cliscapp'
+        })
+        self.cmd(
+            'spring-cloud create -g {rg} -n {sc}')
+        self.kwargs['app_id'] = self.cmd('spring-cloud app create -g {rg} -s {sc} -n {scapp}').get_output_in_json()['id']
+
+        self.cmd('monitor autoscale create --resource {app_id} --min-count 1 --count 3 --max-count 5')
+
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {scapp}')
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {scapp} --condition "process.cpu.usage > 0 avg 3m where AppName == app1 and Deployment == default and Pod == instance1" --scale to 5',
+            checks=[
+                self.check('metricTrigger.metricName', 'process.cpu.usage'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 0),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT3M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'AppName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', 'app1'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'Deployment'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', 'default'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'Pod'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', 'instance1'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'None'),
+                self.check('scaleAction.type', 'ExactCount'),
+                self.check('scaleAction.value', '5')
+            ])
+
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}', checks=[
+            self.check('length(@)', 1)
+        ])
