@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # Generated from AutoscaleCondition.g4 by ANTLR 4.7.2
+# pylint: disable=all
 from antlr4 import *
 
 # This class defines a complete listener for a parse tree produced by AutoscaleConditionParser.

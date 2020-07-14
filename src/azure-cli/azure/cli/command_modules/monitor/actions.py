@@ -7,8 +7,7 @@ import argparse
 import antlr4
 
 from azure.cli.command_modules.monitor.util import (
-    get_aggregation_map, get_operator_map, get_autoscale_operator_map,
-    get_autoscale_aggregation_map, get_autoscale_scale_direction_map)
+    get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
 
 from knack.util import CLIError
 
@@ -235,6 +234,7 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
         from azure.cli.command_modules.monitor.grammar.autoscale import (
             AutoscaleConditionLexer, AutoscaleConditionParser, AutoscaleConditionValidator)
 
+        # pylint: disable=line-too-long
         usage = 'usage error: --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD\n' \
                 '                         [where DIMENSION {==,!=} VALUE [or VALUE ...]\n' \
                 '                         [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]'
