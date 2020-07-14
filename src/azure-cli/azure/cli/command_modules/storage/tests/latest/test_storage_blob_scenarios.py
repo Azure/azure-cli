@@ -333,6 +333,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     def test_storage_blob_soft_delete(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info)
+        import time
 
         # create a blob
         local_file = self.create_temp_file(1)
@@ -349,14 +350,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob service-properties delete-policy show',
                          account_info).assert_with_checks(JMESPathCheck('enabled', True),
                                                           JMESPathCheck('days', 2))
-
+        time.sleep(10)
         # soft-delete and check
         self.storage_cmd('storage blob delete -c {} -n {}', account_info, container, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
                                               account_info, container).get_output_in_json()), 0)
 
-        import time
-        time.sleep(10)
+        time.sleep(30)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {} --include d',
                                               account_info, container).get_output_in_json()), 1)
 
