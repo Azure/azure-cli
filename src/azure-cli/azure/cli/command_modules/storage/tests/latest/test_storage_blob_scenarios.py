@@ -491,10 +491,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer()
     @api_version_constraint(resource_type=ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
     def test_storage_blob_suppress_400(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
         # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
         # test 404
         with self.assertRaises(SystemExit) as ex:
-            self.cmd('storage blob show --account-name {} -c foo -n bar.txt --auth-mode key'.format(storage_account))
+            self.storage_cmd('storage blob show -c foo -n bar.txt', account_info)
         self.assertEqual(ex.exception.code, 3)
 
         # test 403
