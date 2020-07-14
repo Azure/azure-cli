@@ -333,8 +333,7 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
             'scapp': 'app1',
             'deployment': 'default',
             'rg': 'clitest',
-            'deployment_id': '/subscriptions/6c933f90-8115-4392-90f2-7077c9fa5dbd/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default',
-            'sc_id': '/subscriptions/6c933f90-8115-4392-90f2-7077c9fa5dbd/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest'
+            'deployment_id': '/subscriptions/6c933f90-8115-4392-90f2-7077c9fa5dbd/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default'
         })
         # self.cmd(
         #     'spring-cloud create -g {rg} -n {sc}')
@@ -345,9 +344,10 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
         self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {sc}')
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --resource {sc_id} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
             checks=[
                 self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
+                self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
                 self.check('metricTrigger.threshold', 0),
                 self.check('metricTrigger.statistic', 'Average'),
@@ -367,9 +367,10 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
             ])
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --resource {sc_id} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
             checks=[
                 self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
+                self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
                 self.check('metricTrigger.threshold', 0),
                 self.check('metricTrigger.statistic', 'Average'),
@@ -389,9 +390,10 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
             ])
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --resource {sc_id} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
             checks=[
                 self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
+                self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
                 self.check('metricTrigger.operator', 'GreaterThan'),
                 self.check('metricTrigger.threshold', 0),
                 self.check('metricTrigger.statistic', 'Average'),

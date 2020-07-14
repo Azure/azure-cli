@@ -191,11 +191,11 @@ class MonitorAutoscaleActionTest(unittest.TestCase):
 
         ns = self._build_namespace()
         self.call_condition(ns, 'CPU Percent > 90 avg 1h5m')
-        self.check_condition(ns, "", 'CPU Percent', 'GreaterThan', '90', 'Average', 'PT5M1H')
+        self.check_condition(ns, None, 'CPU Percent', 'GreaterThan', '90', 'Average', 'PT5M1H')
 
         ns = self._build_namespace()
         self.call_condition(ns, 'process.cpu.usage > 0 avg 3m where App == app1 and Deployment == default and Instance == instance1')
-        self.check_condition(ns, "", 'process.cpu.usage', 'GreaterThan', '0', 'Average', 'PT3M')
+        self.check_condition(ns, None, 'process.cpu.usage', 'GreaterThan', '0', 'Average', 'PT3M')
         self.check_dimension(ns, 0, 'App', 'Equals', ['app1'])
         self.check_dimension(ns, 1, 'Deployment', 'Equals', ['default'])
         self.check_dimension(ns, 2, 'Instance', 'Equals', ['instance1'])
