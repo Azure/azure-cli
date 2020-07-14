@@ -137,7 +137,9 @@ DEPENDENCIES = [
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
-    'jsondiff==1.2.0'
+    'jsondiff==1.2.0',
+    'azure-mgmt-core~=1.2.0',
+    'azure-core~=1.7.0'
 ]
 
 TESTS_REQUIRE = [
