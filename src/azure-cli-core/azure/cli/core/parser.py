@@ -301,16 +301,28 @@ class AzCliCommandParser(CLICommandParser):
         if action.choices is not None and value not in action.choices:
             if not self.command_source:
                 from azure.cli.core.util import roughly_parse_command
-                command_str = roughly_parse_command(self.prog.split()[1:] + self._raw_arguments, delimiter='.')
+                cmd_list = self.prog.split() + self._raw_arguments
+                command_str = roughly_parse_command(cmd_list[1:], delimiter='.')
                 ext_name = self._search_in_extension_commands(command_str)
                 if ext_name:
-                    from azure.cli.core.extension.operations import add_extension
-                    from knack.prompting import prompt_y_n
-                    go_on = prompt_y_n('You are running commands from the extension {}. Would you like to install it first?'.format(ext_name), default='y')
+                    cli_ctx = self.cli_ctx or self.cli_help.cli_ctx
+                    ask_before_dynamic_extension_install = cli_ctx.config.getboolean('extension', 'ask_before_dynamic_extension_install', True)
+                    if ask_before_dynamic_extension_install:
+                        from knack.prompting import prompt_y_n
+                        go_on = prompt_y_n('You are running a command from the extension {}. Would you like to install it first?'.format(ext_name), default='y')
+                    else:
+                        go_on = True
                     if go_on:
-                        add_extension(self.cli_ctx or self.cli_help.cli_ctx, extension_name=ext_name)
-                        logger.warning('Please rerun your command.')
-                        self.exit(6)  # TODO define the right exit code
+                        from azure.cli.core.extension.operations import add_extension
+                        add_extension(cli_ctx, extension_name=ext_name)
+                        run_after_extension_installed = cli_ctx.config.getboolean('extension', 'run_after_extension_installed', True)  # TODO default ot False
+                        if run_after_extension_installed:
+                            import subprocess
+                            exit_code = subprocess.call(cmd_list)
+                            self.exit(exit_code)
+                        else:
+                            logger.warning('Please rerun your command.')
+                            self.exit(2)  # TODO define the right exit code
                     else:
                         logger.error("Command failed due to corresponding extension not installed. Please run 'az extension add -n %s' first.", ext_name)
                         self.exit(2)
