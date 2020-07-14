@@ -118,8 +118,7 @@ class TreeNode:
     def get_select_string(self, select_items):
         ret = []
         trace_str = ""
-        if self._parent:
-            trace_str = "{}.".format(self._get_trace_str())
+        trace_str = "{}.".format(self._get_trace_str())
 
         select_list = set()
         if len(select_items) == 0:
@@ -166,7 +165,7 @@ class TreeNode:
                                           match_items[0], self._data[match_items[0]]),
                                       group_name="condition"))
             for item in match_items[1:2]:
-                query_str += "|| {}=='{}'".format(item, self._data[item])
+                query_str += " || {}=='{}'".format(item, self._data[item])
                 ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
                                           help_str="Display results only when satisfy one of the condition",
                                           group_name="condition"))
