@@ -85,4 +85,6 @@ class AutoscaleConditionValidator(AutoscaleConditionListener):
         self.parameters['metric_resource_uri'] = None  # will be filled in later
         self.parameters['time_grain'] = None  # will be filled in later
         self.parameters['statistic'] = None  # will be filled in later
+        if 'metric_namespace' not in self.parameters:
+            self.parameters['metric_namespace'] = ""
         return MetricTrigger(**self.parameters)

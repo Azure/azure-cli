@@ -23,15 +23,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 13 Jul 2020 05:54:31 GMT
+      - Tue, 14 Jul 2020 05:05:58 GMT
       expires:
-      - Mon, 13 Jul 2020 05:54:31 GMT
+      - Tue, 14 Jul 2020 05:05:58 GMT
       location:
       - https://azurecliextensionsync.blob.core.windows.net/index1/index.json
       pragma:
       - no-cache
       request-context:
-      - appId=cid-v1:b47e5e27-bf85-45ba-a97c-0377ce0e5779
+      - appId=cid-v1:26ef1154-5995-4d24-ad78-ef0b04f11587
       server:
       - Kestrel
       strict-transport-security:
@@ -4879,11 +4879,11 @@ interactions:
       content-type:
       - application/octet-stream
       date:
-      - Mon, 13 Jul 2020 05:54:32 GMT
+      - Tue, 14 Jul 2020 05:05:59 GMT
       etag:
-      - '0x8D826EFE1F45140'
+      - '0x8D827B375F10DC6'
       last-modified:
-      - Mon, 13 Jul 2020 05:45:00 GMT
+      - Tue, 14 Jul 2020 05:05:00 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-blob-type:
@@ -4891,7 +4891,7 @@ interactions:
       x-ms-lease-status:
       - unlocked
       x-ms-meta-azurewebjobsparentid:
-      - 6cd697ab-16a7-4d00-b914-85f5938dce2c
+      - 7cbc5268-1c2b-43e3-8dae-a3e3b8cde3d5
       x-ms-version:
       - '2009-09-19'
     status:
@@ -6915,7 +6915,7 @@ interactions:
       content-type:
       - application/octet-stream
       date:
-      - Mon, 13 Jul 2020 05:54:34 GMT
+      - Tue, 14 Jul 2020 05:06:01 GMT
       etag:
       - '"0x8D824797625A82C"'
       last-modified:
@@ -6945,30 +6945,30 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud create
+      - monitor autoscale create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - --resource --min-count --count --max-count
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001","name":"cli_test_monitor_autoscale_rule_for_spring_cloud000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-07-13T05:54:37Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest","name":"clitest","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '472'
+      - '211'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Jul 2020 05:54:41 GMT
+      - Tue, 14 Jul 2020 05:06:07 GMT
       expires:
       - '-1'
       pragma:
@@ -6983,50 +6983,208 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus2", "kind": "web", "properties": {"Application_Type":
-      "web"}}'
+    body: '{"location": "eastus", "properties": {"profiles": [{"name": "default",
+      "capacity": {"minimum": "1", "maximum": "3", "default": "1"}, "rules": []}],
+      "notifications": [{"operation": "Scale", "email": {"customEmails": []}, "webhooks":
+      []}], "enabled": true, "name": "clitest", "targetResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud create
+      - monitor autoscale create
       Connection:
       - keep-alive
       Content-Length:
-      - '81'
+      - '450'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n
+      - --resource --min-count --count --max-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-applicationinsights/0.1.1
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/microsoft.insights/components/clisc000002?api-version=2015-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/microsoft.insights/components/clisc000002","name":"clisc000002","type":"microsoft.insights/components","location":"westus2","tags":{},"kind":"web","etag":"\"25009283-0000-0600-0000-5f0bf7280000\"","properties":{"Ver":"v2","ApplicationId":"clisc000002","AppId":"78af6f6c-d232-4806-a81f-73c58c4f6390","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"f1c9e236-8721-4446-b243-36854fe0af3c","ConnectionString":"InstrumentationKey=f1c9e236-8721-4446-b243-36854fe0af3c","Name":"clisc000002","CreationDate":"2020-07-13T05:54:48.7190777+00:00","TenantId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","provisioningState":"Succeeded","SamplingPercentage":null,"RetentionInDays":90,"IngestionMode":"ApplicationInsights","publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
     headers:
-      access-control-expose-headers:
-      - Request-Context
       cache-control:
       - no-cache
       content-length:
-      - '1020'
+      - '715'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Jul 2020 05:54:50 GMT
+      - Tue, 14 Jul 2020 05:06:17 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      request-context:
-      - appId=cid-v1:920e14b1-13f3-461a-a4bb-b4fe6f1a4525
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor autoscale rule list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --autoscale-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '715'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 05:06:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor autoscale rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource --autoscale-name --condition --scale
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '715'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 05:06:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {}, "properties": {"profiles": [{"name":
+      "default", "capacity": {"minimum": "1", "maximum": "3", "default": "1"}, "rules":
+      [{"metricTrigger": {"metricName": "tomcat.global.request.total.count", "metricNamespace":
+      "", "metricResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest",
+      "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT3M", "timeAggregation":
+      "Average", "operator": "GreaterThan", "threshold": 0.0, "dimensions": [{"DimensionName":
+      "AppName", "Operator": "Equals", "Values": ["app1"]}, {"DimensionName": "Deployment",
+      "Operator": "Equals", "Values": ["default"]}]}, "scaleAction": {"direction":
+      "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT5M"}}]}], "notifications":
+      [{"operation": "Scale", "email": {"sendToSubscriptionAdministrator": false,
+      "sendToSubscriptionCoAdministrators": false, "customEmails": []}, "webhooks":
+      []}], "enabled": true, "name": "clitest", "targetResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor autoscale rule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1195'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --resource --autoscale-name --condition --scale
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}}]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1347'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 05:06:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -7039,115 +7197,128 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus2", "properties": {"trace": {"enabled": true, "appInsightInstrumentationKey":
-      "f1c9e236-8721-4446-b243-36854fe0af3c"}}, "sku": {"name": "S0", "tier": "Standard"}}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud create
+      - monitor autoscale rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource --autoscale-name --condition --scale
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}}]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1347'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 05:06:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {}, "properties": {"profiles": [{"name":
+      "default", "capacity": {"minimum": "1", "maximum": "3", "default": "1"}, "rules":
+      [{"metricTrigger": {"metricName": "tomcat.global.request.total.count", "metricNamespace":
+      "", "metricResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest",
+      "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT3M", "timeAggregation":
+      "Average", "operator": "GreaterThan", "threshold": 0.0, "dimensions": [{"DimensionName":
+      "AppName", "Operator": "Equals", "Values": ["app1"]}, {"DimensionName": "Deployment",
+      "Operator": "Equals", "Values": ["default"]}]}, "scaleAction": {"direction":
+      "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT5M"}}, {"metricTrigger":
+      {"metricName": "tomcat.global.request.total.count", "metricNamespace": "", "metricResourceUri":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest",
+      "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT3M", "timeAggregation":
+      "Average", "operator": "GreaterThan", "threshold": 0.0, "dimensions": [{"DimensionName":
+      "AppName", "Operator": "Equals", "Values": ["app1"]}, {"DimensionName": "Deployment",
+      "Operator": "Equals", "Values": ["default"]}]}, "scaleAction": {"direction":
+      "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT5M"}}]}], "notifications":
+      [{"operation": "Scale", "email": {"sendToSubscriptionAdministrator": false,
+      "sendToSubscriptionCoAdministrators": false, "customEmails": []}, "webhooks":
+      []}], "enabled": true, "name": "clitest", "targetResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor autoscale rule create
       Connection:
       - keep-alive
       Content-Length:
-      - '182'
+      - '1843'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n
+      - -g --resource --autoscale-name --condition --scale
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/Spring/clisc000002?api-version=2019-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
   response:
     body:
-      string: '{"properties":{"provisioningState":"Creating","configServerProperties":{"state":"NotAvailable"},"trace":{"state":"NotAvailable","enabled":true,"appInsightInstrumentationKey":"f1c9e236-8721-4446-b243-36854fe0af3c"},"version":2,"serviceId":"becce4b22c964fc691834a3760526c78"},"type":"Microsoft.AppPlatform/Spring","identity":null,"sku":{"name":"S0","tier":"Standard"},"location":"westus2","tags":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/Spring/clisc000002","name":"clisc000002"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}},{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}}]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '639'
+      - '1980'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Jul 2020 05:55:02 GMT
+      - Tue, 14 Jul 2020 05:06:30 GMT
       expires:
       - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationResults/d35bf374-6bbb-4db1-9be4-e56a83d2f324/Spring/clisc000002?api-version=2019-05-01-preview
       pragma:
       - no-cache
       server:
-      - nginx/1.17.7
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
+      x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 05:55:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
     status:
       code: 200
       message: OK
@@ -7159,44 +7330,124 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud create
+      - monitor autoscale rule create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g --resource --autoscale-name --condition --scale
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
         Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}},{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}}]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '395'
+      - '1980'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Jul 2020 05:56:04 GMT
+      - Tue, 14 Jul 2020 05:06:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - nginx/1.17.7
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {}, "properties": {"profiles": [{"name":
+      "default", "capacity": {"minimum": "1", "maximum": "3", "default": "1"}, "rules":
+      [{"metricTrigger": {"metricName": "tomcat.global.request.total.count", "metricNamespace":
+      "", "metricResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest",
+      "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT3M", "timeAggregation":
+      "Average", "operator": "GreaterThan", "threshold": 0.0, "dimensions": [{"DimensionName":
+      "AppName", "Operator": "Equals", "Values": ["app1"]}, {"DimensionName": "Deployment",
+      "Operator": "Equals", "Values": ["default"]}]}, "scaleAction": {"direction":
+      "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT5M"}}, {"metricTrigger":
+      {"metricName": "tomcat.global.request.total.count", "metricNamespace": "", "metricResourceUri":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest",
+      "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT3M", "timeAggregation":
+      "Average", "operator": "GreaterThan", "threshold": 0.0, "dimensions": [{"DimensionName":
+      "AppName", "Operator": "Equals", "Values": ["app1"]}, {"DimensionName": "Deployment",
+      "Operator": "Equals", "Values": ["default"]}]}, "scaleAction": {"direction":
+      "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT5M"}}, {"metricTrigger":
+      {"metricName": "tomcat.global.request.total.count", "metricNamespace": "", "metricResourceUri":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest",
+      "timeGrain": "PT1M", "statistic": "Average", "timeWindow": "PT3M", "timeAggregation":
+      "Average", "operator": "GreaterThan", "threshold": 0.0, "dimensions": [{"DimensionName":
+      "AppName", "Operator": "Equals", "Values": ["app1"]}, {"DimensionName": "Deployment",
+      "Operator": "Equals", "Values": ["default"]}]}, "scaleAction": {"direction":
+      "Increase", "type": "ChangeCount", "value": "1", "cooldown": "PT5M"}}]}], "notifications":
+      [{"operation": "Scale", "email": {"sendToSubscriptionAdministrator": false,
+      "sendToSubscriptionCoAdministrators": false, "customEmails": []}, "webhooks":
+      []}], "enabled": true, "name": "clitest", "targetResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor autoscale rule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2491'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --resource --autoscale-name --condition --scale
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}},{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}},{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}}]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2613'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 05:06:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
     status:
       code: 200
       message: OK
@@ -7208,1515 +7459,44 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - spring-cloud create
+      - monitor autoscale rule list
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g --autoscale-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
         Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest/providers/microsoft.insights/autoscalesettings/clitest?api-version=2015-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/microsoft.insights/autoscalesettings/clitest","name":"clitest","type":"Microsoft.Insights/autoscaleSettings","location":"eastus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"3","default":"1"},"rules":[{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}},{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}},{"metricTrigger":{"metricName":"tomcat.global.request.total.count","metricNamespace":"","metricResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest","timeGrain":"PT1M","statistic":"Average","timeWindow":"PT3M","timeAggregation":"Average","operator":"GreaterThan","threshold":0.0,"dimensions":[{"DimensionName":"AppName","Operator":"Equals","Values":["app1"]},{"DimensionName":"Deployment","Operator":"Equals","Values":["default"]}],"dividePerInstance":false},"scaleAction":{"direction":"Increase","type":"ChangeCount","value":"1","cooldown":"PT5M"}}]}],"enabled":true,"name":"clitest","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '395'
+      - '2613'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Jul 2020 05:56:35 GMT
+      - Tue, 14 Jul 2020 05:06:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - nginx/1.17.7
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
       - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 05:57:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 05:57:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 05:58:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 05:58:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 05:59:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 05:59:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:00:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:00:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:01:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:01:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:02:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:02:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:03:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:03:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:04:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:04:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:05:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:05:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:06:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:06:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:07:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:07:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:08:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:08:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:09:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:09:43 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:10:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:10:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Running","startTime":"2020-07-13T05:55:00.3421186Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '395'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:11:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - spring-cloud create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-appplatform/0.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324?api-version=2019-05-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_rule_for_spring_cloud000001/providers/Microsoft.AppPlatform/locations/westus2/operationStatus/clisc000002/operationId/d35bf374-6bbb-4db1-9be4-e56a83d2f324","name":"d35bf374-6bbb-4db1-9be4-e56a83d2f324","status":"Failed","startTime":"2020-07-13T05:55:00.3421186Z","endTime":"2020-07-13T06:11:26.440657Z","error":{"code":"InternalServerError","message":"112018:
-        Failed to provision resource."}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '523'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 13 Jul 2020 06:11:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.7
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - 4d33c879-7ce2-41b2-9652-519a3725b33e
     status:
       code: 200
       message: OK
