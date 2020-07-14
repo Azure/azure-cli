@@ -596,9 +596,18 @@ def reload_module(module):
 
 def get_default_admin_username():
     try:
-        return getpass.getuser()
+        username = getpass.getuser()
     except KeyError:
-        return None
+        username = None
+    disallowed_user_names = [
+        "administrator", "admin", "user", "user1", "test", "user2",
+        "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm",
+        "admin2", "aspnet", "backup", "console", "guest",
+        "owner", "root", "server", "sql", "support", "support_388945a0",
+        "sys", "test2", "test3", "user4", "user5"]
+    if username.lower() in disallowed_user_names:
+        username = 'AzureUser'
+    return username
 
 
 def _find_child(parent, *args, **kwargs):
