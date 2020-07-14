@@ -4,11 +4,15 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
+import uuid
+
+from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
-                                             ApiContract, ApiType, Protocol,
-                                             VirtualNetworkType, SkuType)
+                                             ApiContract, ApiType, Protocol, ApiCreateOrUpdateParameter,
+                                             VirtualNetworkType, SkuType, ApiCreateOrUpdatePropertiesWsdlSelector,
+                                             SoapApiType, ContentFormat)
 
 # Service Operations
 
@@ -118,13 +122,14 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 
 # API Operations
 
-def create_apim_api(client, resource_group_name, service_name, api_id, description=None, subscription_key_parameter_names=None,
+def create_apim_api(client, resource_group_name, service_name, api_id, description=None, authentication_settings=None, subscription_key_parameter_names=None,
                     api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None,
                     api_type=ApiType.http.value, subscription_required=False, tags=None, no_wait=False):
     """Creates a new API. """
     resource = ApiContract(
         api_id=api_id,
         description=description,
+        authentication_settings=authentication_settings,
         subscription_key_parameter_names=subscription_key_parameter_names,
         api_revision=api_revision,
         api_version=api_version,
@@ -145,24 +150,24 @@ def create_apim_api(client, resource_group_name, service_name, api_id, descripti
                        service_name=service_name, api_id=api_id, parameters=resource)
 
 
-def get_apim_api(client, resource_group_name, service_name, api_id):
+def get_apim_api(client, resource_group_name, service_name, api_id, custom_headers=None, raw=False):
     """Shows details of an API. """
 
-    return client.api.get(resource_group_name, service_name, api_id)
+    return client.api.get(resource_group_name, service_name, api_id, custom_headers=custom_headers, raw=raw)
 
 
-def list_apim_api(client, resource_group_name, service_name):
+def list_apim_api(client, resource_group_name, service_name, apiFilter=None, top=None, skip=None, include_not_tagged_apis=None, custom_headers=None, raw=False):
     """List all APIs of an API Management instance. """
 
-    return client.api.list_by_service(resource_group_name, service_name)
+    return client.api.list_by_service(resource_group_name, service_name, filter=apiFilter, skip=skip, top=top, include_not_tagged_apis=include_not_tagged_apis, custom_headers=custom_headers, raw=raw)
 
 
-def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=True, no_wait=False):
+def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=True, if_match=None, custom_headers=None, raw=False, no_wait=False):
     """Deletes an existing API. """
 
     cms = client.api
 
-    return sdk_no_wait(no_wait, cms.delete, resource_group_name=resource_group_name, service_name=service_name, api_id=api_id, if_match='*', delete_revisions=delete_revisions)
+    return sdk_no_wait(no_wait, cms.delete, resource_group_name=resource_group_name, service_name=service_name, api_id=api_id, if_match="*" if if_match is None else if_match, delete_revisions=delete_revisions, custom_headers=custom_headers, raw=raw)
 
 
 def update_apim_api(instance, description=None, subscription_key_parameter_names=None,
@@ -207,3 +212,72 @@ def update_apim_api(instance, description=None, subscription_key_parameter_names
         instance.tags = tags
 
     return instance
+
+def import_apim_api(client, resource_group_name, service_name, api_path, description=None, subscription_key_parameter_names=None, api_revision=None,
+                    api_id=None, api_version=None, api_version_set_id=None, display_name=None, service_url=None, protocols=None, specificationPath=None,
+                    specificationUrl=None, specificationFormat=None, api_type=None, subscription_required=None,
+                    soap_api_type=None, wsdl_endpoint_name=None, wsdl_service_name=None, no_wait=False):
+    """Import a new API"""
+    cms = client.api
+
+    # api_type: Type of API. Possible values include: 'http', 'soap'
+    # possible format is 'wadl-xml', 'wadl-link-json', 'swagger-json', 'swagger-link-json', 'wsdl', 'wsdl-link', 'openapi', 'openapi+json', 'openapi-link'
+
+    resource = ApiCreateOrUpdateParameter(
+        format=specificationFormat,
+        path=api_path
+    )
+
+    if api_revision is not None and api_id is not None:
+        api_id = api_id+";rev="+api_revision
+    elif api_id is None:
+        api_id = uuid.uuid4().hex
+
+    if specificationPath is not None:
+        api_file = open(specificationPath, 'r')
+        contentValue = api_file.read()
+        resource.value = contentValue
+    elif specificationUrl is not None:
+        resource.value = specificationUrl
+    else:
+        raise CLIError("Can't specify specificationUrl and specificationPath")
+
+    if protocols is not None:
+        resource.protocols = protocols.split(',')
+
+    if service_url is not None:
+        resource.service_url = service_url
+
+    if specificationFormat == ContentFormat.wsdl.value:
+        if api_type == ApiType.http.value:
+            soap_api_type = SoapApiType.soap_to_rest.value
+        else:
+            soap_api_type = SoapApiType.soap_pass_through.value
+
+        resource.soap_api_type = soap_api_type
+
+        if wsdl_service_name is not None and wsdl_endpoint_name is not None:
+            resource.wsdl_selector = ApiCreateOrUpdatePropertiesWsdlSelector(
+                wsdl_service_name=wsdl_service_name,
+                wsdl_endpoint_name=wsdl_endpoint_name
+            )
+
+    if api_version is not None:
+        resource.api_version = api_version
+
+    if api_version_set_id is not None:
+        resource.api_version_set_id = api_version_set_id
+
+    if display_name is not None:
+        resource.display_name = display_name
+
+    if description is not None:
+        resource.description = description
+
+    if subscription_required is not None:
+        resource.subscription_required = subscription_required
+
+    if subscription_key_parameter_names is not None:
+        resource.subscription_key_parameter_names = subscription_key_parameter_names
+
+    return sdk_no_wait(no_wait, cms.create_or_update, resource_group_name=resource_group_name, service_name=service_name, api_id=api_id, parameters=resource)

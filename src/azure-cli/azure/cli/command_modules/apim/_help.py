@@ -148,3 +148,8 @@ examples:
         az apim api wait --created --api-id MyApi --name MyApim --resource-group MyResourceGroup
     crafted: true
 """
+
+helps['apim api import'] = """
+type: command
+short-summary: Import an API Management service instance.
+"""
