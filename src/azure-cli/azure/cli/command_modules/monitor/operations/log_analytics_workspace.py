@@ -91,7 +91,7 @@ def _format_tags(tags):
 
 def create_log_analytics_workspace_saved_search(client, workspace_name, resource_group_name, saved_search_id,
                                                 category, display_name, saved_query,
-                                                function_alias=None, function_parameters=None, version=None,
+                                                function_alias=None, function_parameters=None,
                                                 tags=None):
     from azure.mgmt.loganalytics.models import SavedSearch
     saved_search = SavedSearch(category=category,
@@ -99,7 +99,6 @@ def create_log_analytics_workspace_saved_search(client, workspace_name, resource
                                query=saved_query,
                                function_alias=function_alias,
                                function_parameters=function_parameters,
-                               version=version,
                                tags=_format_tags(tags))
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
@@ -117,6 +116,34 @@ def update_log_analytics_workspace_saved_search(cmd, instance, category=None, di
         c.set_param('function_alias', function_alias)
         c.set_param('function_parameters', function_parameters)
         c.set_param('tags', _format_tags(tags))
-        # workaround for server's issue. server would return etag instead of eTag.
-        c.set_param('e_tag', instance.additional_properties['etag'])
+    return instance
+
+
+def create_log_analytics_workspace_data_exports(client, workspace_name, resource_group_name, data_export_name,
+                                                destination, data_export_type, enable_all_tables=None, table_names=None,
+                                                event_hub_name=None, enable=None):
+    from azure.mgmt.loganalytics.models import DataExport
+    if enable_all_tables:
+        table_names = None
+    data_export = DataExport(all_tables=enable_all_tables,
+                             resource_id=destination,
+                             data_export_type=data_export_type,
+                             table_names=table_names,
+                             event_hub_name=event_hub_name,
+                             enable=enable)
+    return client.create_or_update(resource_group_name, workspace_name, data_export_name, data_export)
+
+
+def update_log_analytics_workspace_data_exports(cmd, instance, destination=None, data_export_type=None,
+                                                enable_all_tables=None, table_names=None,
+                                                event_hub_name=None, enable=None):
+    if enable_all_tables:
+        table_names = ''
+    with cmd.update_context(instance) as c:
+        c.set_param('resource_id', destination)
+        c.set_param('data_export_type', data_export_type)
+        c.set_param('all_tables', enable_all_tables)
+        c.set_param('table_names', table_names)
+        c.set_param('event_hub_name', event_hub_name)
+        c.set_param('enable', enable)
     return instance

@@ -402,10 +402,12 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                               template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None, no_prompt=False,
-                                              confirm_with_what_if=None, what_if_result_format=None):
+                                              confirm_with_what_if=None, what_if_result_format=None,
+                                              what_if_exclude_change_types=None):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_subscription_scope(cmd, template_file, template_uri, parameters,
-                                                          deployment_name, deployment_location, what_if_result_format)
+                                                          deployment_name, deployment_location, what_if_result_format,
+                                                          exclude_change_types=what_if_exclude_change_types)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -445,7 +447,8 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
     validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(todict(validation_result.error))
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
     if validate_only:
         return validation_result
 
@@ -460,10 +463,12 @@ def deploy_arm_template_at_resource_group(cmd,
                                           deployment_name=None, mode=None, rollback_on_error=None,
                                           no_wait=False, handle_extended_json_format=None,
                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False,
-                                          confirm_with_what_if=None, what_if_result_format=None):
+                                          confirm_with_what_if=None, what_if_result_format=None,
+                                          what_if_exclude_change_types=None):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name, template_file, template_uri, parameters,
-                                                      deployment_name, mode, aux_tenants, what_if_result_format)
+                                                      deployment_name, mode, aux_tenants, what_if_result_format,
+                                                      exclude_change_types=what_if_exclude_change_types)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -510,7 +515,8 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
     validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
     if validation_result and validation_result.error:
-        raise CLIError(todict(validation_result.error))
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
     if validate_only:
         return validation_result
 
@@ -562,7 +568,8 @@ def _deploy_arm_template_at_management_group(cli_ctx,
     validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(todict(validation_result.error))
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
     if validate_only:
         return validation_result
 
@@ -608,7 +615,8 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
     validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(todict(validation_result.error))
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
     if validate_only:
         return validation_result
 
@@ -620,37 +628,45 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   template_file=None, template_uri=None, parameters=None,
                                                   deployment_name=None, mode=DeploymentMode.incremental,
                                                   aux_tenants=None, result_format=None,
-                                                  no_pretty_print=None, no_prompt=False):
+                                                  no_pretty_print=None, no_prompt=False,
+                                                  exclude_change_types=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri,
                                                                 parameters, mode, result_format, no_prompt)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants,
                                                     plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
 
-    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
+    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
 
 def what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                       template_file=None, template_uri=None, parameters=None,
                                                       deployment_name=None, deployment_location=None,
-                                                      result_format=None, no_pretty_print=None, no_prompt=False):
+                                                      result_format=None, no_pretty_print=None, no_prompt=False,
+                                                      exclude_change_types=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
 
-    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
+    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
 
-def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
+def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, exclude_change_types):
     what_if_result = LongRunningOperation(cli_ctx)(what_if_poller)
 
     if what_if_result.error:
         # The status code is 200 even when there's an error, because
         # it is technically a successful What-If operation. The error
         # is on the ARM template but not the operation.
-        err_message = _build_what_if_error_message(what_if_result.error)
+        err_message = _build_preflight_error_message(what_if_result.error)
         raise CLIError(err_message)
+
+    if exclude_change_types:
+        exclude_change_types = set(map(lambda x: x.lower(), exclude_change_types))
+        what_if_result.changes = list(
+            filter(lambda x: x.change_type.lower() not in exclude_change_types, what_if_result.changes)
+        )
 
     if no_pretty_print:
         return what_if_result
@@ -676,10 +692,10 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
     return None
 
 
-def _build_what_if_error_message(what_if_error):
-    err_messages = [f'{what_if_error.code} - {what_if_error.message}']
-    for detail in what_if_error.details or []:
-        err_messages.append(_build_what_if_error_message(detail))
+def _build_preflight_error_message(preflight_error):
+    err_messages = [f'{preflight_error.code} - {preflight_error.message}']
+    for detail in preflight_error.details or []:
+        err_messages.append(_build_preflight_error_message(detail))
     return '\n'.join(err_messages)
 
 
@@ -1032,11 +1048,14 @@ def update_resource_group(instance, tags=None):
 
 
 def export_group_as_template(
-        cmd, resource_group_name, include_comments=False, include_parameter_default_value=False):
+        cmd, resource_group_name, include_comments=False, include_parameter_default_value=False, resource_ids=None, skip_resource_name_params=False, skip_all_params=False):
     """Captures a resource group as a template.
-    :param str resource_group_name:the name of the resoruce group.
-    :param bool include_comments:export template with comments.
+    :param str resource_group_name: the name of the resource group.
+    :param resource_ids: space-separated resource ids to filter the export by. To export all resources, do not specify this argument or supply "*".
+    :param bool include_comments: export template with comments.
     :param bool include_parameter_default_value: export template parameter with default value.
+    :param bool skip_resource_name_params: export template and skip resource name parameterization.
+    :param bool skip_all_params: export template parameter and skip all parameterization.
     """
     rcf = _resource_client_factory(cmd.cli_ctx)
 
@@ -1045,10 +1064,24 @@ def export_group_as_template(
         export_options.append('IncludeComments')
     if include_parameter_default_value:
         export_options.append('IncludeParameterDefaultValue')
+    if skip_resource_name_params:
+        export_options.append('SkipResourceNameParameterization')
+    if skip_all_params:
+        export_options.append('SkipAllParameterization')
+
+    resources = []
+    if resource_ids is None or resource_ids[0] == "*":
+        resources = ["*"]
+    else:
+        for i in resource_ids:
+            if is_valid_resource_id(i):
+                resources.append(i)
+            else:
+                raise CLIError('az resource: error: argument --resource-ids: invalid ResourceId value: \'%s\'' % i)
 
     options = ','.join(export_options) if export_options else None
 
-    result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
+    result = rcf.resource_groups.export_template(resource_group_name, resources, options=options)
 
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
@@ -1691,6 +1724,12 @@ def register_feature(client, resource_provider_namespace, feature_name):
     logger.warning("Once the feature '%s' is registered, invoking 'az provider register -n %s' is required "
                    "to get the change propagated", feature_name, resource_provider_namespace)
     return client.register(resource_provider_namespace, feature_name)
+
+
+def unregister_feature(client, resource_provider_namespace, feature_name):
+    logger.warning("Once the feature '%s' is unregistered, invoking 'az provider register -n %s' is required "
+                   "to get the change propagated", feature_name, resource_provider_namespace)
+    return client.unregister(resource_provider_namespace, feature_name)
 
 
 # pylint: disable=inconsistent-return-statements,too-many-locals
@@ -2450,26 +2489,6 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-def rest_call(cmd, uri, method=None, headers=None, uri_parameters=None,
-              body=None, skip_authorization_header=False, resource=None, output_file=None):
-    from azure.cli.core.util import send_raw_request
-    r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,
-                         skip_authorization_header, resource, output_file)
-    if not output_file and r.content:
-        try:
-            return r.json()
-        except ValueError:
-            logger.warning('Not a json response, outputting to stdout. For binary data '
-                           'suggest use "--output-file" to write to a file')
-            print(r.text)
-
-
-def show_version(cmd):
-    from azure.cli.core.util import get_az_version_json
-    versions = get_az_version_json()
-    return versions
-
-
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
@@ -2589,7 +2608,8 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
         # to properties will fail due to the lack of properties, so the PATCH type should be used
         need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
-                              'Microsoft.ContainerRegistry/registries/webhooks']
+                              'Microsoft.ContainerRegistry/registries/webhooks',
+                              'Microsoft.ContainerInstance/containerGroups']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)
