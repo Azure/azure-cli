@@ -248,9 +248,9 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck('shareDeleteRetentionPolicy.enabled', True)
                  })
 
-        self.kwargs.update(
-            'share', self.create_random_name('share', 24)
-        )
+        self.kwargs.update({
+            'share': self.create_random_name(prefix='share', length=24)
+        })
         self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share}', checks={
             JMESPathCheck('name', self.kwargs['share'])
         })
@@ -266,8 +266,10 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 1)
         })
 
-        self.cmd('storage share-rm restore --storage-account {sa} -g {rg} -n {share}', checks={
-            JMESPathCheck('name', self.kwargs['share'])
+        self.kwargs['version'] = \
+            self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --query [0].version -o tsv').output.strip('\n')
+        self.cmd('storage share-rm restore --storage-account {sa} -g {rg} -n {share} --deleted-version {version}',
+                 checks={JMESPathCheck('name', self.kwargs['share'])
         })
 
         self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
