@@ -269,8 +269,8 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.kwargs['version'] = \
             self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --query [0].version -o tsv').output.strip('\n')
         self.cmd('storage share-rm restore --storage-account {sa} -g {rg} -n {share} --deleted-version {version}',
-                 checks={JMESPathCheck('name', self.kwargs['share'])
-        })
+                 checks={
+                     JMESPathCheck('name', self.kwargs['share'])})
 
         self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
             JMESPathCheck('length(@)', 1)
