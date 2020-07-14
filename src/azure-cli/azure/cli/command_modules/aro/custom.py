@@ -8,10 +8,13 @@ import os
 
 import azure.mgmt.redhatopenshift.models as v2020_04_30
 from azure.cli.command_modules.aro._aad import AADManager
-from azure.cli.command_modules.aro._rbac import assign_contributor_to_vnet
+from azure.cli.command_modules.aro._rbac import assign_contributor_to_vnet, assign_contributor_to_routetable
 from azure.cli.command_modules.aro._validators import validate_subnets
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
+from knack.util import CLIError
 
 
 FP_CLIENT_ID = 'f1dd0a37-89c6-4e07-bcd1-ffd3d43d8875'
@@ -41,6 +44,12 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                ingress_visibility=None,
                tags=None,
                no_wait=False):
+    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    provider = resource_client.providers.get('Microsoft.RedHatOpenShift')
+    if provider.registration_state != 'Registered':
+        raise CLIError('Microsoft.RedHatOpenShift provider is not registered.  Run `az provider ' +
+                       'register -n Microsoft.RedHatOpenShift --wait`.')
+
     vnet = validate_subnets(master_subnet, worker_subnet)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -49,7 +58,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 
     aad = AADManager(cmd.cli_ctx)
     if client_id is None:
-        app, client_secret = aad.create_application('aro-%s' % random_id)
+        app, client_secret = aad.create_application(cluster_resource_group or 'aro-' + random_id)
         client_id = app.app_id
 
     client_sp = aad.get_service_principal(client_id)
@@ -60,8 +69,15 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 
     rp_client_sp = aad.get_service_principal(rp_client_id)
 
-    assign_contributor_to_vnet(cmd.cli_ctx, vnet, client_sp.object_id, 'client')
-    assign_contributor_to_vnet(cmd.cli_ctx, vnet, rp_client_sp.object_id, 'rp_client')
+    for sp_id in [client_sp.object_id, rp_client_sp.object_id]:
+        assign_contributor_to_vnet(cmd.cli_ctx, vnet, sp_id)
+        assign_contributor_to_routetable(cmd.cli_ctx, master_subnet, worker_subnet, sp_id)
+
+    if apiserver_visibility is not None:
+        apiserver_visibility = apiserver_visibility.capitalize()
+
+    if ingress_visibility is not None:
+        ingress_visibility = ingress_visibility.capitalize()
 
     oc = v2020_04_30.OpenShiftCluster(
         location=location,
@@ -146,7 +162,7 @@ def rp_mode_development():
 
 
 def generate_random_id():
-    random_id = (''.join(random.choice('abcdefghijklmnopqrstuvwxyz')) +
+    random_id = (random.choice('abcdefghijklmnopqrstuvwxyz') +
                  ''.join(random.choice('abcdefghijklmnopqrstuvwxyz1234567890')
                          for _ in range(7)))
     return random_id

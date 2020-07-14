@@ -64,9 +64,11 @@ def load_arguments(self, _):
         c.argument('worker_vm_size',
                    help='Size of worker VMs.')
         c.argument('worker_vm_disk_size_gb',
+                   type=int,
                    help='Disk size in GB of worker VMs.',
                    validator=validate_worker_vm_disk_size_gb)
         c.argument('worker_count',
+                   type=int,
                    help='Count of worker VMs.',
                    validator=validate_worker_count)
 
