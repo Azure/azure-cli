@@ -2176,7 +2176,8 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  '--backend-addresses-config-file @"{lb_address_pool_file_path}"',
                  checks=self.check('name', 'bap1'))
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '2'))
-
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap1', checks=self.is_empty())
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}', checks=self.check('length(@)', 1))
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet}', checks=self.check('name', 'bap1'))
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
