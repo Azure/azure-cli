@@ -108,6 +108,10 @@ def cf_load_balancers(cli_ctx, _):
     return network_client_factory(cli_ctx).load_balancers
 
 
+def cf_load_balancer_backend_pools(cli_ctx, _):
+    return network_client_factory(cli_ctx).load_balancer_backend_address_pools
+
+
 def cf_local_network_gateways(cli_ctx, _):
     return network_client_factory(cli_ctx).local_network_gateways
 
@@ -258,3 +262,15 @@ def cf_bastion_hosts(cli_ctx, _):
 
 def cf_security_partner_providers(cli_ctx, _):
     return network_client_factory(cli_ctx).security_partner_providers
+
+
+def cf_network_virtual_appliances(cli_ctx, _):
+    return network_client_factory(cli_ctx).network_virtual_appliances
+
+
+def cf_virtual_appliance_skus(cli_ctx, _):
+    return network_client_factory(cli_ctx).virtual_appliance_skus
+
+
+def cf_virtual_appliance_sites(cli_ctx, _):
+    return network_client_factory(cli_ctx).virtual_appliance_sites
