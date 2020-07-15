@@ -53,8 +53,8 @@ class ResourceGroupScenarioTest(ScenarioTest):
         with self.assertRaises(CLIError):
             while True:
                 time.sleep(5)
-                result = self.cmd('az rest -u https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{rg}?api-version=2019-10-01',
-                                  checks=[])
+                self.cmd('az rest -u https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{rg}?api-version=2019-10-01',
+                         checks=[])
 
     @ResourceGroupPreparer(name_prefix='cli_test_rest')
     def test_rest_storage(self, resource_group):
