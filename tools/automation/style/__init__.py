@@ -59,7 +59,7 @@ def define_arguments(parser):
                         help='Run pylint')
     parser.add_argument('--module', dest='modules', action='append',
                         help='The modules on which the style check should run. Accept short names, '
-                             'except azure-cli, azure-cli-core and azure-cli-nspkg')
+                             'except azure-cli and azure-cli-core')
 
 
 def main_style(args):
