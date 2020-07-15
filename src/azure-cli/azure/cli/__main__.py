@@ -12,6 +12,9 @@ from azure.cli.core import get_default_cli
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
+__author__ = "Microsoft Corporation <python@microsoft.com>"
+__version__ = "2.9.0"
+
 # Log the start time
 # TODO: Disable E402 "Module level import not at top of file" so that imports can also be timed
 start_time = timeit.default_timer()

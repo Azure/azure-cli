@@ -22,7 +22,7 @@ VERSION = "2.9.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
-    with open('azure/cli/__init__.py', 'r', encoding='utf-8') as f:
+    with open('azure/cli/__main__.py', 'r', encoding='utf-8') as f:
         content = f.read()
 except OSError:
     pass
@@ -31,7 +31,7 @@ else:
 
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
-        print('Could not find __version__ in azure/cli/__init__.py')
+        print('Could not find __version__ in azure/cli/__main__.py')
         sys.exit(1)
     if m.group(1) != VERSION:
         print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
@@ -165,7 +165,6 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure"]),
     install_requires=DEPENDENCIES,
     package_data={
-        'azure.cli.core': ['auth_landing_pages/*.html'],
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
