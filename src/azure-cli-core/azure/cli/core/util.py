@@ -739,12 +739,13 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if '{subscriptionId}' in url:
         url = url.replace('{subscriptionId}', cli_ctx.data['subscription_id'] or profile.get_subscription_id())
 
+    # Prepare the Bearer token for `Authorization` header
     if not skip_authorization_header and url.lower().startswith('https://'):
-        # Prepare `resource`
+        # Prepare `resource` for `get_raw_token`
         if not resource:
-            # If url starts with ARM endpoint, like https://management.azure.com/,
-            # use active_directory_resource_id for resource.
-            # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
+            # If url starts with ARM endpoint, like `https://management.azure.com/`,
+            # use `active_directory_resource_id` for resource, like `https://management.core.windows.net/`.
+            # This follows the same behavior as `azure.cli.core.commands.client_factory._get_mgmt_service_client`
             if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
                 resource = endpoints.active_directory_resource_id
             else:
@@ -758,6 +759,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                         resource = value
                         break
         if resource:
+            # Prepare `subscription` for `get_raw_token`
             # If this is an ARM request, try to extract subscription ID from the URL.
             # But there are APIs which don't require subscription ID, like /subscriptions, /tenants
             # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identity
