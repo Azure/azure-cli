@@ -735,7 +735,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
     from azure.cli.core._profile import Profile
-    profile = Profile()
+    profile = Profile(cli_ctx=cli_ctx)
     if '{subscriptionId}' in url:
         url = url.replace('{subscriptionId}', cli_ctx.data['subscription_id'] or profile.get_subscription_id())
 
@@ -758,11 +758,14 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                         resource = value
                         break
         if resource:
-            # If this is an ARM request, extract subscription ID from the URL.
-            # In the future when multi-tenant subscription is supported, we won't be able to uniquely identity the token
-            # from subscription anymore.
+            # If this is an ARM request, try to extract subscription ID from the URL.
+            # But there are APIs which don't require subscription ID, like /subscriptions, /tenants
+            # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identity
+            #   the token from subscription anymore.
+            token_subscription = None
             if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
                 token_subscription = _extract_subscription_id(url)
+            if token_subscription:
                 logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
                 token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
             else:
@@ -804,9 +807,12 @@ def _extract_subscription_id(url):
     """Extract the subscription ID from an ARM request URL."""
     subscription_regex = '/subscriptions/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
     match = re.search(subscription_regex, url, re.IGNORECASE)
-    if not match:
-        raise CLIError('No subscription ID specified in the URL')
-    return match.groups()[0]
+    if match:
+        subscription_id = match.groups()[0]
+        logger.debug('Found subscription ID %s in the URL %s', subscription_id, url)
+        return subscription_id
+    logger.debug('No subscription ID specified in the URL %s', url)
+    return None
 
 
 def _log_request(request):
