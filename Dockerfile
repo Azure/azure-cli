@@ -50,7 +50,6 @@ COPY . /azure-cli
 
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
-# 3. Temporary fix - install azure-nspkg to remove import of pkg_resources in azure/__init__.py (to improve performance)
 RUN ./scripts/install_full.sh \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
