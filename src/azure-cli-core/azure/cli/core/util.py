@@ -762,7 +762,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             # Prepare `subscription` for `get_raw_token`
             # If this is an ARM request, try to extract subscription ID from the URL.
             # But there are APIs which don't require subscription ID, like /subscriptions, /tenants
-            # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identity
+            # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identify
             #   the token from subscription anymore.
             token_subscription = None
             if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
