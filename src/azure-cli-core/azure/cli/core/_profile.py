@@ -21,8 +21,6 @@ from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_br
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
-from .adal_authentication import MSIAuthenticationWrapper
-
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -309,6 +307,7 @@ class Profile(object):
         import jwt
         from requests import HTTPError
         from msrestazure.tools import is_valid_resource_id
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
         if identity_id:
@@ -388,6 +387,7 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         auth = MSIAuthenticationWrapper(resource=resource)
         auth.set_token()
         token_entry = auth.token
@@ -773,6 +773,7 @@ class MsiAccountTypes(object):
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         if cli_account_name == MsiAccountTypes.system_assigned:
             return MSIAuthenticationWrapper(resource=resource)
         if cli_account_name == MsiAccountTypes.user_assigned_client_id:
