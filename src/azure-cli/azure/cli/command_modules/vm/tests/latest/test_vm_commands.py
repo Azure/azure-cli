@@ -4038,6 +4038,13 @@ class DedicatedHostScenarioTest(ScenarioTest):
                      self.check('tags.bar', 'baz')
                  ])
 
+        result = self.cmd('vm host get-instance-view --host-group {host-group} --name {host-name} -g {rg}', checks=[
+            self.check('name', '{host-name}'),
+        ]).get_output_in_json()
+        instance_view = result["instanceView"]
+        self.assertTrue(instance_view["assetId"])
+        self.assertTrue(instance_view["availableCapacity"])
+
         self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
                  ' --host-group {host-group} --host {host-name} --generate-ssh-keys --admin-username azureuser')
 
@@ -4063,41 +4070,6 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm delete --name {vm-name} -g {rg} --yes')
         self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
-
-    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
-    def test_dedicated_host_get_instance_view(self, resource_group, resource_group_location):
-        self.kwargs.update({
-            'loc': resource_group_location,
-            'host-group': 'my-host-group',
-            'host-name': 'my-host',
-            'vm-name': 'ded-host-vm'
-        })
-
-        # create resources
-        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
-            self.check('name', '{host-group}'),
-            self.check('location', '{loc}'),
-            self.check('platformFaultDomainCount', 3),
-            self.check('tags.foo', 'bar')
-        ])
-
-        self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
-                 '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
-                     self.check('name', '{host-name}'),
-                     self.check('location', '{loc}'),
-                     self.check('platformFaultDomain', 2),
-                     self.check('sku.name', 'DSv3-Type1'),
-                     self.check('autoReplaceOnFailure', False),
-                     self.check('tags.bar', 'baz')
-                 ])
-
-        result = self.cmd('vm host get-instance-view --host-group {host-group} --name {host-name} -g {rg}', checks=[
-            self.check('name', '{host-name}'),
-        ]).get_output_in_json()
-
-        instance_view = result["instanceView"]
-        self.assertTrue(instance_view["assetId"])
-        self.assertTrue(instance_view["availableCapacity"])
 # endregion
 
 
