@@ -29,19 +29,24 @@ class azure_bdist_wheel(bdist_wheel):
         if self.azure_namespace_package and not self.azure_namespace_package.endswith("-nspkg"):
             raise ValueError("azure_namespace_package must finish by -nspkg")
 
-    def write_record(self, bdist_dir, distinfo_dir):
+    def write_wheelfile(self, wheelfile_base, generator=None):
         if self.azure_namespace_package:
-            # Split and remove last part, assuming it's "nspkg"
             subparts = self.azure_namespace_package.split('-')[0:-1]
-            folder_with_init = [os.path.join(*subparts[0:i+1]) for i in range(len(subparts))]
+            folder_with_init = [os.path.join(*subparts[0:i + 1]) for i in range(len(subparts))]
             for azure_sub_package in folder_with_init:
+                bdist_dir = os.path.dirname(wheelfile_base)
                 init_file = os.path.join(bdist_dir, azure_sub_package, '__init__.py')
                 if os.path.isfile(init_file):
                     logger.info("manually remove {} while building the wheel".format(init_file))
                     os.remove(init_file)
                 else:
                     logger.info("skip {} as it is not include in the build target".format(init_file))
-        bdist_wheel.write_record(self, bdist_dir, distinfo_dir)
+
+        if generator is None:
+            bdist_wheel.write_wheelfile(self, wheelfile_base)
+        else:
+            bdist_wheel.write_wheelfile(self, wheelfile_base, generator)
+
 cmdclass = {
     'bdist_wheel': azure_bdist_wheel,
 }
