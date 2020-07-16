@@ -42,7 +42,7 @@ def transform_key_decryption_output(output, **command_args):
     if data_type == KeyEncryptionDataType.BASE64:
         return output
     raw_result = getattr(output, 'result')
-    if not raw_result or type(raw_result) != bytes:
+    if not raw_result or not isinstance(raw_result, bytes):
         return output
     setattr(output, 'result', raw_result.decode('utf-8'))
     return output
