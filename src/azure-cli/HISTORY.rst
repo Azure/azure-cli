@@ -20,7 +20,7 @@ Release History
 
 **Storage**
 
-Fix #14138: Make some permissions optional
+* Fix #14138: Make some permissions optional
 
 2.9.0
 ++++++
