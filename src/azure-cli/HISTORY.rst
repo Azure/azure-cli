@@ -10,10 +10,6 @@ Release History
 
 * Remove explicit setting of VMSS in Windows example command since it is now default (#14324)
 
-**Compute**
-
-* [BREAKING CHANGE] `az vmss create`: Make parameter single-placement-group default to false when creating a vmss (#14042)
-
 **IoT**
 
 * [BREAKING CHANGE] az iot pnp a: Preview `az iot pnp` commands will require the IoT CLI Extension (#14117)
