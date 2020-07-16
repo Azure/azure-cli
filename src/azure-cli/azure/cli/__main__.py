@@ -19,7 +19,7 @@ from knack.log import get_logger
 <<<<<<< HEAD
 =======
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2.9.0"
+__version__ = "2.9.1"
 
 # Log the start time
 # TODO: Disable E402 "Module level import not at top of file" so that imports can also be timed
