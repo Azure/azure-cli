@@ -354,7 +354,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="japaneast")
     def test_webapp_up_name_exists_in_subscription(self, resource_group):
         plan = self.create_random_name('up-name-exists-plan', 40)
         webapp_name = self.create_random_name('up-name-exists-app', 40)
