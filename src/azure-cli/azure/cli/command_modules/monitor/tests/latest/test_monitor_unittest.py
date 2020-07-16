@@ -157,6 +157,7 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         self.check_condition(ns, 'Average', None, 'SuccessE2ELatenc,|y', 'GreaterThan', '250')
         self.check_dimension(ns, 0, 'ApiName', 'Include', ['Get|,%_Blob', 'PutB,_lob'])
 
+
 class MonitorAutoscaleActionTest(unittest.TestCase):
 
     def _build_namespace(self, name_or_id=None, resource_group=None, provider_namespace=None, parent=None,
