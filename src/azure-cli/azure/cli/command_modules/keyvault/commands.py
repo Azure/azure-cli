@@ -11,7 +11,7 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_client_private_endpoint_connections_factory,
     keyvault_client_private_link_resources_factory, keyvault_data_plane_factory,
-    keyvault_private_data_plane_factory_v7_2_preview)
+    keyvault_private_data_plane_factory_v7_2_preview, keyvault_private_client_vaults_factory)
 
 from ._transformers import (
     extract_subresource_name, filter_out_managed_resources,
@@ -38,9 +38,12 @@ def load_command_table(self, _):
     mgmt_api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_KEYVAULT))
     mgmt_api_version = mgmt_api_version.replace('-', '_')
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT))
-    data_api_version = data_api_version.replace('.', '_')
-    data_api_version = data_api_version.replace('-', '_')
-    data_doc_string = 'azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.{}'
+    data_api_version = data_api_version.replace('.', '_').replace('-', '_')
+    private_mgmt_api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT))
+    private_mgmt_api_version = private_mgmt_api_version.replace('-', '_')
+    private_data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))
+    private_data_api_version = private_data_api_version.replace('.', '_').replace('-', '_')
+
     # region Command Types
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -49,6 +52,17 @@ def load_command_table(self, _):
 
     kv_vaults_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.keyvault.operations#VaultsOperations.{}',
+        client_factory=keyvault_client_vaults_factory,
+        resource_type=ResourceType.MGMT_KEYVAULT
+    )
+
+    kv_private_vaults_doc_tmpl = 'azure.cli.command_modules.keyvault.vendored_sdks.azure_mgmt_keyvault.v{}' \
+                                 '_key_vault_management_client#KeyVaultManagementClient.{{}}'.\
+        format(private_mgmt_api_version)
+    kv_private_vaults_operations_tmpl = 'azure.cli.command_modules.keyvault.vendored_sdks.azure_mgmt_keyvault.' \
+                                        '_key_vault_management_client#KeyVaultManagementClient.{}'
+    kv_private_vaults_sdk = CliCommandType(
+        operations_tmpl=kv_private_vaults_operations_tmpl,
         client_factory=keyvault_client_vaults_factory,
         resource_type=ResourceType.MGMT_KEYVAULT
     )
@@ -65,12 +79,16 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_KEYVAULT
     )
 
+    data_docs_tmpl = 'azure.keyvault.v{}.key_vault_client#KeyVaultClient.{{}}'.format(data_api_version)
+    data_operations_tmpl = 'azure.keyvault.key_vault_client#KeyVaultClient.{}'
     kv_data_sdk = CliCommandType(
-        operations_tmpl='azure.keyvault.key_vault_client#KeyVaultClient.{}',
+        operations_tmpl=data_operations_tmpl,
         client_factory=keyvault_data_plane_factory,
         resource_type=ResourceType.DATA_KEYVAULT
     )
 
+    private_data_docs_tmpl = 'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault.v{}.' \
+                             'key_vault_client#KeyVaultClient.{{}}'.format(private_data_api_version)
     private_data_operations_tmpl = 'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault.' \
                                    'key_vault_client#KeyVaultClient.{}'
     kv_private_data_v7_2_preview_sdk = CliCommandType(
@@ -86,7 +104,7 @@ def load_command_table(self, _):
                          doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
         g.custom_command('recover', 'recover_keyvault')
         g.custom_command('list', 'list_keyvault')
-        g.show_command('show', 'get')
+        g.show_command('show', 'get_vault_or_mhsm', doc_string_source=kv_private_vaults_doc_tmpl.format('get'))
         g.command('delete', 'delete')
         g.command('purge', 'purge_deleted')
         g.custom_command('set-policy', 'set_policy')
@@ -128,11 +146,13 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     with self.command_group('keyvault backup', kv_private_data_v7_2_preview_sdk, is_preview=True) as g:
-        g.keyvault_custom('start', 'full_backup', supports_no_wait=True)
+        g.keyvault_custom('start', 'full_backup', supports_no_wait=True,
+                          doc_string_source=private_data_docs_tmpl.format('begin_full_backup'))
         g.keyvault_command('status', 'full_backup_status')
 
     with self.command_group('keyvault restore', kv_private_data_v7_2_preview_sdk, is_preview=True) as g:
-        g.keyvault_custom('start', 'full_restore', supports_no_wait=True)
+        g.keyvault_custom('start', 'full_restore', supports_no_wait=True,
+                          doc_string_source=private_data_docs_tmpl.format('begin_full_restore_operation'))
         g.keyvault_command('status', 'restore_status')
 
     with self.command_group('keyvault key', kv_data_sdk) as g:
@@ -144,15 +164,15 @@ def load_command_table(self, _):
         g.keyvault_command('list-deleted', 'get_deleted_keys',
                            transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_custom('create', 'create_key',
-                          doc_string_source=data_doc_string.format('create_key'))
+                          doc_string_source=data_docs_tmpl.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
         g.keyvault_command('delete', 'delete_key')
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_command('recover', 'recover_deleted_key')
-        g.keyvault_custom('backup', 'backup_key', doc_string_source=data_doc_string.format('backup_key'))
-        g.keyvault_custom('restore', 'restore_key', doc_string_source=data_doc_string.format('restore_key'))
+        g.keyvault_custom('backup', 'backup_key', doc_string_source=data_docs_tmpl.format('backup_key'))
+        g.keyvault_custom('restore', 'restore_key', doc_string_source=data_docs_tmpl.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
         g.keyvault_custom('get-policy-template', 'get_policy_template')
@@ -173,14 +193,14 @@ def load_command_table(self, _):
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_secret')
-        g.keyvault_custom('backup', 'backup_secret', doc_string_source=data_doc_string.format('backup_secret'))
-        g.keyvault_custom('restore', 'restore_secret', doc_string_source=data_doc_string.format('restore_secret'),
+        g.keyvault_custom('backup', 'backup_secret', doc_string_source=data_docs_tmpl.format('backup_secret'))
+        g.keyvault_custom('restore', 'restore_secret', doc_string_source=data_docs_tmpl.format('restore_secret'),
                           transform=extract_subresource_name())
 
     with self.command_group('keyvault certificate', kv_data_sdk) as g:
         g.keyvault_custom('create',
                           'create_certificate',
-                          doc_string_source=data_doc_string.format('create_certificate'),
+                          doc_string_source=data_docs_tmpl.format('create_certificate'),
                           transform=extract_subresource_name())
         g.keyvault_command('list', 'get_certificates', transform=extract_subresource_name())
         g.keyvault_command('list-versions', 'get_certificate_versions', transform=extract_subresource_name())
@@ -232,9 +252,9 @@ def load_command_table(self, _):
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault certificate', kv_data_sdk) as g:
             g.keyvault_custom('backup', 'backup_certificate',
-                              doc_string_source=data_doc_string.format('backup_certificate'))
+                              doc_string_source=data_docs_tmpl.format('backup_certificate'))
             g.keyvault_custom('restore', 'restore_certificate',
-                              doc_string_source=data_doc_string.format('restore_certificate'))
+                              doc_string_source=data_docs_tmpl.format('restore_certificate'))
 
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault storage', kv_data_sdk) as g:
@@ -250,21 +270,21 @@ def load_command_table(self, _):
             g.keyvault_command('recover', 'recover_deleted_storage_account')
             g.keyvault_custom('backup',
                               'backup_storage_account',
-                              doc_string_source=data_doc_string.format('backup_storage_account'))
+                              doc_string_source=data_docs_tmpl.format('backup_storage_account'))
             g.keyvault_custom('restore',
                               'restore_storage_account',
-                              doc_string_source=data_doc_string.format('restore_storage_account'))
+                              doc_string_source=data_docs_tmpl.format('restore_storage_account'))
 
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault storage sas-definition', kv_data_sdk) as g:
             g.keyvault_command('create',
                                'set_sas_definition',
-                               doc_string_source=data_doc_string.format('set_sas_definition'))
+                               doc_string_source=data_docs_tmpl.format('set_sas_definition'))
             g.keyvault_command('list', 'get_sas_definitions')
             g.keyvault_command('show', 'get_sas_definition')
             g.keyvault_command('update',
                                'update_sas_definition',
-                               doc_string_source=data_doc_string.format('update_sas_definition'))
+                               doc_string_source=data_docs_tmpl.format('update_sas_definition'))
             g.keyvault_command('delete', 'delete_sas_definition')
             g.keyvault_command('list-deleted', 'get_deleted_sas_definitions')
             g.keyvault_command('show-deleted', 'get_deleted_sas_definition')

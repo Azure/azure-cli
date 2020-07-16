@@ -318,6 +318,10 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
     return network_acls
 
 
+def get_vault_or_mhsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
+    pass
+
+
 def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     resource_group_name, vault_name, location=None, sku=None,
                     enabled_for_deployment=None,
@@ -1612,7 +1616,6 @@ def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None
 
 # region full backup/restore
 def full_backup(client, storage_resource_uri, token, vault_base_url=None, hsm_base_url=None, no_wait=False):  # pylint: disable=unused-argument
-    """ Creates a full backup using a user-provided SAS token to an Azure blob storage container """
     return sdk_no_wait(
         no_wait,
         client.begin_full_backup,
@@ -1624,7 +1627,6 @@ def full_backup(client, storage_resource_uri, token, vault_base_url=None, hsm_ba
 
 def full_restore(client, storage_resource_uri, token, folder_to_restore,
                  vault_base_url=None, hsm_base_url=None, no_wait=False):  # pylint: disable=unused-argument
-    """ Restores all key materials using the SAS token pointing to a previously stored Azure Blob storage backup folder """
     return sdk_no_wait(
         no_wait,
         client.begin_full_restore_operation,

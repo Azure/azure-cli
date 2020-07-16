@@ -22,6 +22,16 @@ def keyvault_client_private_link_resources_factory(cli_ctx, _):
     return keyvault_client_factory(cli_ctx).private_link_resources
 
 
+def keyvault_private_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT)
+
+
+def keyvault_private_client_vaults_factory(cli_ctx, _):
+    return keyvault_private_client_factory(cli_ctx).vaults
+
+
 def keyvault_data_plane_factory(cli_ctx, _):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.profiles import ResourceType, get_api_version
