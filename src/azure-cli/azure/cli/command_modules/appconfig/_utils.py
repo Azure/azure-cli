@@ -95,9 +95,10 @@ def is_valid_connection_string(connection_string):
         segments = connection_string.split(';')
         if len(segments) != 3:
             return False
-        if segments[0][:9] != 'Endpoint=' or segments[1][:3] != 'Id=' or segments[2][:7] != 'Secret=':
-            return False
-        return True
+
+        segments.sort()
+        if segments[0].startwith('Endpoint=') and segments[1].startwith('Id=') and segments[2].startwith('Secret='):
+            return True
     return False
 
 
