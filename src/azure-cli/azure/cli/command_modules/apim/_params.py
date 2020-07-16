@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 
+from enum import Enum
 from azure.cli.core.commands.parameters import (get_enum_type,
                                                 get_location_type,
                                                 resource_group_name_type,
@@ -17,6 +18,12 @@ SKU_TYPES = SkuType
 VNET_TYPES = VirtualNetworkType
 API_PROTOCOLS = Protocol
 API_TYPES = ApiType
+class ImportFormat(Enum):
+    Wadl = "Wadl"
+    Swagger = "Swagger"
+    OpenApi = "OpenApi"
+    OpenApiJson = "OpenApiJson"
+    Wsdl = "Wsdl"
 
 
 def load_arguments(self, _):
@@ -59,17 +66,13 @@ def load_arguments(self, _):
     with self.argument_context('apim api show') as c:
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
         c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
-        c.argument('custom_headers', help='Headers that will be added to the request.')
-        c.argument('raw', help='Returns the direct response alongside the deserialized response.')
 
     with self.argument_context('apim api list') as c:
-        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
-        c.argument('apiFilter', help='Filter of APIs.')
-        c.argument('skip', help='Number of records to skip.')
-        c.argument('top', help='Number of records to return.')
+        c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
+        c.argument('filter_displayName', help='Filter of APIs by displayName.')
+        c.argument('skip', type=int, help='Number of records to skip.')
+        c.argument('top', type=int, help='Number of records to return.')
         c.argument('include_not_tagged_apis', help='Include not tagged APIs.')
-        c.argument('custom_headers', help='Headers that will be added to the request.')
-        c.argument('raw', help='Returns the direct response alongside the deserialized response.')
 
     with self.argument_context('apim api create') as c:
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
@@ -83,21 +86,19 @@ def load_arguments(self, _):
         c.argument('api_version', help='Indicates the Version identifier of the API if the API is versioned.')
         c.argument('is_current', help='Indicates if API revision is current api revision.')
         c.argument('service_url', help='Absolute URL of the backend service implementing this API. Cannot be more than 2000 characters long.')
-        c.argument('protocols', arg_type=get_enum_type(API_PROTOCOLS), help='Describes on which protocols the operations in this API can be invoked.')
+        c.argument('protocols', arg_type=get_enum_type(API_PROTOCOLS), nargs='+', help='Describes on which protocols the operations in this API can be invoked.')
         c.argument('api_type', arg_type=get_enum_type(API_TYPES), help='The type of the API.')
         c.argument('subscription_required', arg_type=get_three_state_flag(), help='If true, the API requires a subscription key on requests.')
         c.argument('tags', tags_type)
 
     with self.argument_context('apim api delete') as c:
-        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
+        c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
         c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
         c.argument('delete_revisions', help='Delete all revisions of the Api.')
         c.argument('if_match', help='ETag of the Entity.')
-        c.argument('custom_headers', help='Headers that will be added to the request.')
-        c.argument('raw', help='Returns the direct response alongside the deserialized response.')
 
     with self.argument_context('apim api update') as c:
-        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
+        c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
         c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.', required=True)
         c.argument('display_name', help='API name. Must be 1 to 300 characters long.')
         c.argument('path', help='Required. Relative URL uniquely identifying this API and all of its resource paths within the API Management service instance.')
@@ -107,7 +108,7 @@ def load_arguments(self, _):
         c.argument('api_version', help='Indicates the Version identifier of the API if the API is versioned.')
         c.argument('is_current', arg_type=get_three_state_flag(), help='Indicates if API revision is current api revision.')
         c.argument('service_url', help='Absolute URL of the backend service implementing this API. Cannot be more than 2000 characters long.')
-        c.argument('protocols', arg_type=get_enum_type(API_PROTOCOLS), help='Describes on which protocols the operations in this API can be invoked.')
+        c.argument('protocols', arg_type=get_enum_type(API_PROTOCOLS), nargs='+', help='Describes on which protocols the operations in this API can be invoked.')
         c.argument('api_type', arg_type=get_enum_type(API_TYPES), help='The type of the API.')
         c.argument('subscription_required', arg_type=get_three_state_flag(), help='If true, the API requires a subscription key on requests.')
         c.argument('tags', tags_type)
@@ -121,14 +122,14 @@ def load_arguments(self, _):
         c.argument('api_revision', help='Describes the Revision of the Api. If no value is provided, default revision 1 is created.')
         c.argument('api_version', help='Indicates the Version identifier of the API if the API is versioned.')
         c.argument('service_url', help='Absolute URL of the backend service implementing this API. Cannot be more than 2000 characters long.')
-        c.argument('protocols', arg_type=get_enum_type(API_PROTOCOLS), help='Describes on which protocols the operations in this API can be invoked.')
+        c.argument('protocols', arg_type=get_enum_type(API_PROTOCOLS), nargs='+', help='Describes on which protocols the operations in this API can be invoked.')
         c.argument('api_type', arg_type=get_enum_type(API_TYPES), help='The type of the API.')
         c.argument('subscription_required', arg_type=get_three_state_flag(), help='If true, the API requires a subscription key on requests.')
         c.argument('display_name', help='Display name of this API.')
         c.argument('api_version_set_id', help='The Id of the API version identifier.')
         c.argument('specificationPath', help='Specify the file path to import the API.')
         c.argument('specificationUrl', help='Specify the url to import the API.')
-        c.argument('specificationFormat', help='Specify the format of the imported API.')
+        c.argument('specificationFormat', arg_type=get_enum_type(ImportFormat), help='Specify the format of the imported API.')
         c.argument('soap_api_type', help='The type of API when file format is WSDL.')
         c.argument('wsdl_service_name', help='Local name of WSDL Service to be imported.')
         c.argument('wsdl_endpoint_name', help='Local name of WSDL Endpoint (port) to be imported.')

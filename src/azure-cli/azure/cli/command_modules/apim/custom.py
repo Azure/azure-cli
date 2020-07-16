@@ -5,12 +5,12 @@
 # pylint: disable=line-too-long
 
 import uuid
-
 from knack.util import CLIError
+from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
-                                             ApiContract, ApiType, Protocol, ApiCreateOrUpdateParameter,
+                                             ApiContract, ApiType, ApiCreateOrUpdateParameter, Protocol, 
                                              VirtualNetworkType, SkuType, ApiCreateOrUpdatePropertiesWsdlSelector,
                                              SoapApiType, ContentFormat)
 
@@ -123,8 +123,8 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 # API Operations
 
 def create_apim_api(client, resource_group_name, service_name, api_id, description=None, authentication_settings=None, subscription_key_parameter_names=None,
-                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None,
-                    api_type=ApiType.http.value, subscription_required=False, tags=None, no_wait=False):
+                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=None, path=None,
+                    api_type=None, subscription_required=False, no_wait=False):
     """Creates a new API. """
     resource = ApiContract(
         api_id=api_id,
@@ -136,11 +136,10 @@ def create_apim_api(client, resource_group_name, service_name, api_id, descripti
         is_current=is_current,
         display_name=display_name,
         service_url=service_url,
-        protocols=protocols.split(','),
+        protocols=protocols if protocols is not None else [Protocol.https.value],
         path=path,
-        api_type=api_type,
-        subscription_required=subscription_required,
-        tags=tags
+        api_type=api_type if api_type is not None else ApiType.http.value,
+        subscription_required=subscription_required
     )
 
     cms = client.api
@@ -150,24 +149,34 @@ def create_apim_api(client, resource_group_name, service_name, api_id, descripti
                        service_name=service_name, api_id=api_id, parameters=resource)
 
 
-def get_apim_api(client, resource_group_name, service_name, api_id, custom_headers=None, raw=False):
+def get_apim_api(client, resource_group_name, service_name, api_id):
     """Shows details of an API. """
 
-    return client.api.get(resource_group_name, service_name, api_id, custom_headers=custom_headers, raw=raw)
+    return client.api.get(resource_group_name, service_name, api_id)
 
 
-def list_apim_api(client, resource_group_name, service_name, apiFilter=None, top=None, skip=None, include_not_tagged_apis=None, custom_headers=None, raw=False):
+def list_apim_api(client, resource_group_name, service_name, filter_displayName=None, top=None, skip=None, include_not_tagged_apis=None):
     """List all APIs of an API Management instance. """
 
-    return client.api.list_by_service(resource_group_name, service_name, filter=apiFilter, skip=skip, top=top, include_not_tagged_apis=include_not_tagged_apis, custom_headers=custom_headers, raw=raw)
+    if filter_displayName is not None:
+        filter_displayName = "properties/displayName eq '%s'" % filter_displayName
+
+    return client.api.list_by_service(resource_group_name, service_name, filter=filter_displayName, skip=skip, top=top, include_not_tagged_apis=include_not_tagged_apis)
 
 
-def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=True, if_match=None, custom_headers=None, raw=False, no_wait=False):
+def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=None, if_match=None, no_wait=False):
     """Deletes an existing API. """
 
     cms = client.api
 
-    return sdk_no_wait(no_wait, cms.delete, resource_group_name=resource_group_name, service_name=service_name, api_id=api_id, if_match="*" if if_match is None else if_match, delete_revisions=delete_revisions, custom_headers=custom_headers, raw=raw)
+    return sdk_no_wait(
+        no_wait,
+        cms.delete,
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        if_match="*" if if_match is None else if_match,
+        delete_revisions=delete_revisions if delete_revisions is not None else False)
 
 
 def update_apim_api(instance, description=None, subscription_key_parameter_names=None,
@@ -221,10 +230,24 @@ def import_apim_api(client, resource_group_name, service_name, api_path, descrip
     cms = client.api
 
     # api_type: Type of API. Possible values include: 'http', 'soap'
-    # possible format is 'wadl-xml', 'wadl-link-json', 'swagger-json', 'swagger-link-json', 'wsdl', 'wsdl-link', 'openapi', 'openapi+json', 'openapi-link'
+    # possible parameter format is 'wadl-xml', 'wadl-link-json', 'swagger-json', 'swagger-link-json', 'wsdl', 'wsdl-link', 'openapi', 'openapi+json', 'openapi-link'
+    # possible parameter specificationFormat is 'Wadl', 'Swagger', 'OpenApi', 'OpenApiJson', 'Wsdl'
+
+    if specificationFormat == ImportFormat.Wadl.value:
+        sFormat = ContentFormat.wadl_xml.value if specificationPath is not None else ContentFormat.wadl_link_json.value
+    elif specificationFormat == ImportFormat.Swagger.value:
+        sFormat = ContentFormat.swagger_json.value if specificationPath is not None else ContentFormat.swagger_link_json.value
+    elif specificationFormat == ImportFormat.OpenApi.value:
+        sFormat = ContentFormat.openapi.value if specificationPath is not None else ContentFormat.openapi_link.value
+    elif specificationFormat == ImportFormat.OpenApiJson.value:
+        sFormat = ContentFormat.openapijson.value if specificationPath is not None else ContentFormat.openapi_link.value
+    elif specificationFormat == ImportFormat.Wsdl.value:
+        sFormat = ContentFormat.wsdl.value if specificationPath is not None else ContentFormat.wsdl_link.value
+    else:
+        raise CLIError("Please provide valid value for specificationFormat: " + specificationFormat)
 
     resource = ApiCreateOrUpdateParameter(
-        format=specificationFormat,
+        format=sFormat,
         path=api_path
     )
 
@@ -240,7 +263,7 @@ def import_apim_api(client, resource_group_name, service_name, api_path, descrip
     elif specificationUrl is not None:
         resource.value = specificationUrl
     else:
-        raise CLIError("Can't specify specificationUrl and specificationPath")
+        raise CLIError("Can't specify specificationUrl and specificationPath at the same time.")
 
     if protocols is not None:
         resource.protocols = protocols.split(',')
@@ -248,7 +271,7 @@ def import_apim_api(client, resource_group_name, service_name, api_path, descrip
     if service_url is not None:
         resource.service_url = service_url
 
-    if specificationFormat == ContentFormat.wsdl.value:
+    if specificationFormat == ImportFormat.Wsdl.value:
         if api_type == ApiType.http.value:
             soap_api_type = SoapApiType.soap_to_rest.value
         else:

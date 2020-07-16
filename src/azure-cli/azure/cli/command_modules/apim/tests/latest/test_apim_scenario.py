@@ -15,6 +15,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ApimScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
+    @AllowLargeResponse()
     def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
         service_name = self.create_random_name('cli-test-apim-', 50)
 
@@ -100,12 +101,11 @@ class ApimScenarioTest(ScenarioTest):
             'protocols': 'https',
             'service_url': 'https://contoso.com',
             'subscription_key_parameter_names': None,
-            'subscription_required': True,
-            'tags': "foo=baz"
+            'subscription_required': True
         })
 
         # create api
-        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}" --tags "{tags}"', checks=[
+        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}"', checks=[
             self.check('displayName', '{display_name}'),
             self.check('path', '{path}'),
             self.check('serviceUrl', '{service_url}')
