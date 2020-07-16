@@ -20,8 +20,7 @@ from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
                                                   EncodingFormat,
                                                   RenewKeyType,
-                                                  AuthenticationType,
-                                                  UserRole)
+                                                  AuthenticationType)
 from .custom import KeyType, SimpleAccessRights
 from ._validators import (validate_policy_permissions,
                           validate_retention_days,
@@ -272,24 +271,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('value', options_list=['--value', '-v'], help='The enrichment\'s value.')
         c.argument('endpoints', options_list=['--endpoints', '-e'], nargs='*',
                    help='Endpoint(s) to apply enrichments to. Use a space-separated list for multiple endpoints.')
-
-    # Arguments for IoT Digital Twin
-    with self.argument_context('iot pnp') as c:
-        c.argument('repo_endpoint', options_list=['--endpoint', '-e'], help='IoT Plug and Play endpoint.')
-        c.argument('repo_id', options_list=['--repo-id', '-r'], help='IoT Plug and Play repository Id.')
-
-    with self.argument_context('iot pnp repository') as c:
-        c.argument('repo_name', options_list=['--name', '-n'], help='IoT Plug and Play repository Name.')
-
-    with self.argument_context('iot pnp repository get-provision-status') as c:
-        c.argument('track_id', options_list=['--provisioning-State', '-s'],
-                   help='Provisioning state of an IoT Plug and Play repository.')
-
-    with self.argument_context('iot pnp key') as c:
-        c.argument('key_id', options_list=['--key-id', '-k'],
-                   help='Access key for the given IoT Plug and Play repository.')
-        c.argument('user_role', options_list=['--role'], arg_type=get_enum_type(UserRole),
-                   help='User role of the access key for the given IoT Plug and Play repository.')
 
     with self.argument_context('iot central app') as c:
         c.argument('app_name', app_name_type, options_list=['--name', '-n'])
