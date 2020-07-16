@@ -12,7 +12,7 @@ Release History
 
 **IoT**
 
-* [BREAKING CHANGE] az iot pnp a: Preview `az iot pnp` commands will require the IoT CLI Extension (#14117)
+* [BREAKING CHANGE] az iot pnp: Preview `az iot pnp` commands will require the IoT CLI Extension (#14117)
 
 **REST**
 
