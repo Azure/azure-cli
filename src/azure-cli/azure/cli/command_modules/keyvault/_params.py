@@ -365,9 +365,6 @@ def load_arguments(self, _):
     for item in ['backup', 'restore']:
         for scope in ['start', 'status']:
             with self.argument_context('keyvault {} {}'.format(item, scope), arg_group='HSM Id') as c:
-                c.ignore('cls')
-                c.ignore('sas_token_parameters')
-                c.ignore('vault_base_url')
                 c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
                         validator=process_vault_and_hsm_name, help='Name of the HSM')
                 c.extra('identifier', options_list=['--id'],
@@ -383,7 +380,8 @@ def load_arguments(self, _):
 
     for command_group in ['backup', 'restore']:
         with self.argument_context('keyvault {} start'.format(command_group)) as c:
-            c.argument('token', options_list=['--storage-blob-SAS-token'], required=True)
+            c.argument('token', options_list=['--storage-blob-SAS-token'], required=True,
+                       help='The SAS token pointing to an Azure Blob storage container')
 
     with self.argument_context('keyvault restore start') as c:
         c.argument('folder_to_restore', options_list=['--backup-folder'])

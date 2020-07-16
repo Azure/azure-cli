@@ -71,8 +71,10 @@ def load_command_table(self, _):
         resource_type=ResourceType.DATA_KEYVAULT
     )
 
+    private_data_operations_tmpl = 'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault.' \
+                                   'key_vault_client#KeyVaultClient.{}'
     kv_private_data_v7_2_preview_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.keyvault.vendored_sdks.key_vault_client#KeyVaultClient.{}',
+        operations_tmpl=private_data_operations_tmpl,
         client_factory=keyvault_private_data_plane_factory_v7_2_preview,
         resource_type=ResourceType.DATA_PRIVATE_KEYVAULT
     )
@@ -126,11 +128,11 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     with self.command_group('keyvault backup', kv_private_data_v7_2_preview_sdk, is_preview=True) as g:
-        g.keyvault_command('start', 'begin_full_backup')
+        g.keyvault_custom('start', 'full_backup', supports_no_wait=True)
         g.keyvault_command('status', 'full_backup_status')
 
     with self.command_group('keyvault restore', kv_private_data_v7_2_preview_sdk, is_preview=True) as g:
-        g.keyvault_command('start', 'begin_full_restore_operation')
+        g.keyvault_custom('start', 'full_restore', supports_no_wait=True)
         g.keyvault_command('status', 'restore_status')
 
     with self.command_group('keyvault key', kv_data_sdk) as g:

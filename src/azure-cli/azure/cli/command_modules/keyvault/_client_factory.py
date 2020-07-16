@@ -61,7 +61,7 @@ def keyvault_data_plane_factory(cli_ctx, _):
 
 
 def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
-    from .vendored_sdks import KeyVaultClient
+    from .vendored_sdks.azure_keyvault import KeyVaultClient
     from azure.cli.core.profiles import ResourceType, get_api_version
     from azure.cli.core._profile import Profile
 

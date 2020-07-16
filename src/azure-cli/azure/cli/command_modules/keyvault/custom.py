@@ -25,6 +25,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 
 from azure.cli.core import telemetry
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import sdk_no_wait
 from azure.graphrbac.models import GraphErrorException
 
 from msrestazure.azure_exceptions import CloudError
@@ -1606,4 +1607,30 @@ def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None
         _reconstruct_role_definition(i)
 
     return raw_definitions
+# endregion
+
+
+# region full backup/restore
+def full_backup(client, storage_resource_uri, token, vault_base_url=None, hsm_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+    """ Creates a full backup using a user-provided SAS token to an Azure blob storage container """
+    return sdk_no_wait(
+        no_wait,
+        client.begin_full_backup,
+        vault_base_url,
+        storage_resource_uri,
+        token
+    )
+
+
+def full_restore(client, storage_resource_uri, token, folder_to_restore,
+                 vault_base_url=None, hsm_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+    """ Restores all key materials using the SAS token pointing to a previously stored Azure Blob storage backup folder """
+    return sdk_no_wait(
+        no_wait,
+        client.begin_full_restore_operation,
+        vault_base_url,
+        storage_resource_uri,
+        token,
+        folder_to_restore
+    )
 # endregion
