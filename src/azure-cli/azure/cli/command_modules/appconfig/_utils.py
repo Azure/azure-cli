@@ -97,7 +97,7 @@ def is_valid_connection_string(connection_string):
             return False
 
         segments.sort()
-        if segments[0].startwith('Endpoint=') and segments[1].startwith('Id=') and segments[2].startwith('Secret='):
+        if segments[0].startswith('Endpoint=') and segments[1].startswith('Id=') and segments[2].startswith('Secret='):
             return True
     return False
 
