@@ -12,7 +12,7 @@ Release History
 
 **IoT**
 
-* [BREAKING CHANGE] az iot pnp: Remove IoT PNP preview commands from core CLI (#14117)
+* [BREAKING CHANGE] `az iot pnp`: Remove IoT PNP preview commands from core CLI (#14117)
 
 **REST**
 
