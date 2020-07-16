@@ -284,7 +284,18 @@ class AzCliCommandParser(CLICommandParser):
         from azure.cli.core._session import EXT_CMD_INDEX
         import os
         # self.cli_ctx is None when self.prog is not 'az', such as 'az iot', use cli_ctx from cli_help which is not lost.
-        EXT_CMD_INDEX.load(os.path.join((self.cli_ctx or self.cli_help.cli_ctx).config.config_dir, 'extCmdIndex.json'))
+        VALID_SECOND = 3600 * 24 * 10
+        EXT_CMD_INDEX.load(os.path.join((self.cli_ctx or self.cli_help.cli_ctx).config.config_dir, 'extCmdIndex.json'), VALID_SECOND)
+        if not EXT_CMD_INDEX.data:
+            import requests
+            from azure.cli.core.util import should_disable_connection_verify
+            response = requests.get('https://fengsa.blob.core.windows.net/index/extCmdIndex.json', verify=(not should_disable_connection_verify()))
+            if response.status_code == 200:
+                EXT_CMD_INDEX.data = response.json()
+                EXT_CMD_INDEX.save_with_retry()
+            else:
+                logger.info("Error when retrieveing extension command index. Response code:%s", response.status_code)
+                return None
         cmd_chain = EXT_CMD_INDEX
         for part in command_str.split():
             try:
@@ -300,6 +311,7 @@ class AzCliCommandParser(CLICommandParser):
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:
             if not self.command_source:
+                # Check if the command is from an extension
                 from azure.cli.core.util import roughly_parse_command
                 cmd_list = self.prog.split() + self._raw_arguments
                 command_str = roughly_parse_command(cmd_list[1:])
@@ -309,7 +321,7 @@ class AzCliCommandParser(CLICommandParser):
                         parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
                         extension_name=ext_name)  # TODO add extension_version
                     cli_ctx = self.cli_ctx or self.cli_help.cli_ctx
-                    ask_before_dynamic_extension_install = cli_ctx.config.getboolean('extension', 'ask_before_dynamic_extension_install', False)
+                    ask_before_dynamic_extension_install = cli_ctx.config.getboolean('extension', 'ask_before_dynamic_extension_install', True)
                     if ask_before_dynamic_extension_install:
                         from knack.prompting import prompt_y_n
                         go_on = prompt_y_n('You are running a command from the extension {}. Would you like to install it first?'.format(ext_name), default='y')
@@ -318,8 +330,8 @@ class AzCliCommandParser(CLICommandParser):
                         go_on = True
                     if go_on:
                         from azure.cli.core.extension.operations import add_extension
-                        add_extension(cli_ctx, extension_name=ext_name)
-                        run_after_extension_installed = cli_ctx.config.getboolean('extension', 'run_after_extension_installed', True)  # TODO default ot False
+                        add_extension(cli_ctx=cli_ctx, extension_name=ext_name)
+                        run_after_extension_installed = cli_ctx.config.getboolean('extension', 'run_after_extension_installed', True)
                         if run_after_extension_installed:
                             import subprocess
                             exit_code = subprocess.call(cmd_list, shell=True)

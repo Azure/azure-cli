@@ -205,15 +205,15 @@ def check_version_compatibility(azext_metadata):
         raise CLIError(min_max_msg_fmt)
 
 
-def add_extension(cli_ctx, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+def add_extension(cmd=None, cli_ctx=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
                   version=None):
     ext_sha256 = None
 
     version = None if version == 'latest' else version
-
+    cmd_cli_ctx = cli_ctx or cmd.cli_ctx
     if extension_name:
-        cli_ctx.get_progress_controller().add(message='Searching')
+        cmd_cli_ctx.get_progress_controller().add(message='Searching')
         ext = None
         try:
             ext = get_extension(extension_name)
@@ -235,7 +235,7 @@ def add_extension(cli_ctx, source=None, extension_name=None, index_url=None, yes
                 err = "No matching extensions for '{}'. Use --debug for more information.".format(extension_name)
             raise CLIError(err)
 
-    extension_name = _add_whl_ext(cli_ctx=cli_ctx, source=source, ext_sha256=ext_sha256,
+    extension_name = _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
         ext = get_extension(extension_name)
