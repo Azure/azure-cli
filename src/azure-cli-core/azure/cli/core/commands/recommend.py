@@ -75,6 +75,28 @@ class TreeNode:
         self._list_length = None  # valid only when from_list is true
         self._similarity_threshold = 0.75
 
+    def _get_data(self, key):
+        '''Return all key value'''
+        values = []
+        if isinstance(self._data, list):
+            for item in self._data:
+                if item.get(key, None) is not None:
+                    if isinstance(item[key], list):
+                        values.extend(item[key])
+                    else:
+                        values.append(item[key])
+        else:
+            values.append(self._data[key])
+        return values
+
+    def get_one_value(self, key):
+        '''Return only one value'''
+        values = self._get_data(key)
+        if len(values) > 0:
+            return values[0]  # TODO: check if null
+        else:
+            return None
+
     def _get_trace(self):
         traces = []
         if self._parent:  # only calculate non-root node
@@ -104,7 +126,8 @@ class TreeNode:
         trace_str = ""
         if self._parent:
             trace_str += self._parent._get_trace_str()
-            trace_str += "." + self._name
+            prefix = "" if trace_str == "" else "."
+            trace_str += prefix + self._name
         if self._from_list:
             if number:
                 trace_str += "[:{}]".format(number)
@@ -118,7 +141,8 @@ class TreeNode:
     def get_select_string(self, select_items):
         ret = []
         trace_str = ""
-        trace_str = "{}.".format(self._get_trace_str())
+        if self._parent or self._from_list:
+            trace_str = "{}.".format(self._get_trace_str())
 
         select_list = set()
         if len(select_items) == 0:
@@ -153,19 +177,19 @@ class TreeNode:
         trace_str = self._get_trace_str(filter_rules=True)
         viable_keys = []
         for key in self._keys:
-            if not (isinstance(self._data[key], list) or
-                    isinstance(self._data[key], dict)):
+            if not (isinstance(self.get_one_value(key), list) or
+                    isinstance(self.get_one_value(key), dict)):
                 viable_keys.append(key)
         match_items = self._get_match_items(select_items, keys=viable_keys)
         if match_items is not None:
             query_str = "{}=='{}'".format(
-                match_items[0], self._data[match_items[0]])
+                match_items[0], self.get_one_value(match_items[0]))
             ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
                                       help_str="Display results only when {} equals to {}".format(
-                                          match_items[0], self._data[match_items[0]]),
+                                          match_items[0], self.get_one_value(match_items[0])),
                                       group_name="condition"))
             for item in match_items[1:2]:
-                query_str += " || {}=='{}'".format(item, self._data[item])
+                query_str += " || {}=='{}'".format(item, self.get_one_value(item))
                 ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
                                           help_str="Display results only when satisfy one of the condition",
                                           group_name="condition"))
@@ -197,10 +221,10 @@ class TreeBuilder:
         '''
         if isinstance(data, list):
             if len(data) > 0:
-                self._root = self._parse_dict('root', data[0], from_list=True)
+                self._root = self._parse_dict('root', data, from_list=True)
                 self._root._list_length = len(data)
         elif isinstance(data, dict):
-            self._root = self._parse_dict('root', data)
+            self._root = self._parse_dict('root', [data])
 
     def generate_recommend(self, keywords_list):
         def printlist(my_list, group):
@@ -226,20 +250,45 @@ class TreeBuilder:
             printlist(recommendations, group)
             print("")
 
+    def _get_from_list(self, data):
+        '''Try to get not None item from input list
+
+        :param list data:
+            input list
+
+        :return:
+            An item from in this list. Return None if all items are None
+        '''
+        ret = None
+        for item in data:
+            if hasattr(item, '__len__'):
+                if len(item) > 0:
+                    ret = item
+                    break
+            elif item is not None:
+                ret = item
+                break
+        return ret
+
     def _parse_dict(self, name, data, from_list=False):
         node = TreeNode(name)
-        node._keys = list(data.keys())
+        node._keys = list(data[0].keys())
         node._data = data
         node._from_list = from_list
-        for key in data.keys():
+        for key in data[0].keys():
             child_node = None
-            if isinstance(data[key], list):
-                if len(data[key]) > 0 and isinstance(data[key][0], dict):
+            child_node_data = node._get_data(key)
+            child_item = self._get_from_list(child_node_data)
+            if child_item is None:
+                node._keys.remove(key)  # remove key which has only null value
+                continue
+            if isinstance(child_item, list):
+                if len(child_item) > 0 and isinstance(self._get_from_list(child_item), dict):
                     child_node = self._parse_dict(
-                        key, data[key][0], from_list=True)
-                    child_node._list_length = len(data[key])
-            elif isinstance(data[key], dict) and not len(data[key]) == 0:
-                child_node = self._parse_dict(key, data[key])
+                        key, child_node_data, from_list=True)
+                    child_node._list_length = len(data[0][key])
+            elif isinstance(child_item, dict):
+                child_node = self._parse_dict(key, child_node_data)
             if child_node:
                 node._child.append(child_node)
                 child_node._parent = node
