@@ -19,7 +19,8 @@ Release History
 * Fix #14152: `az rest`: Accept ARM URLs without subscription ID (#14370)
 
 **Storage**
-Fix issue #14138: make some permissions optional
+Fix #14138: Make some permissions optional
+
 2.9.0
 ++++++
 
