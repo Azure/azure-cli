@@ -58,8 +58,6 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim update -n {service_name} -g {rg} --publisher-name {publisher_name} --set publisherEmail={publisher_email}',
                  checks=[self.check('publisherName', '{publisher_name}'), self.check('publisherEmail', '{publisher_email}')])
 
-        count = len(self.cmd('apim list').get_output_in_json())
-
         self.cmd('apim show -g {rg} -n {service_name}', checks=[
             # recheck properties from create
             self.check('name', '{service_name}'),
@@ -130,6 +128,8 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {api_id} -y')
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
         self.assertEqual(api_count, 1)
+
+        count = len(self.cmd('apim list').get_output_in_json())
 
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
