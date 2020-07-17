@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-locals, too-many-arguments, too-many-statements, too-many-branches
 
 import uuid
 from knack.util import CLIError
@@ -10,7 +10,7 @@ from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
-                                             ApiContract, ApiType, ApiCreateOrUpdateParameter, Protocol, 
+                                             ApiContract, ApiType, ApiCreateOrUpdateParameter, Protocol,
                                              VirtualNetworkType, SkuType, ApiCreateOrUpdatePropertiesWsdlSelector,
                                              SoapApiType, ContentFormat)
 
@@ -222,6 +222,7 @@ def update_apim_api(instance, description=None, subscription_key_parameter_names
 
     return instance
 
+
 def import_apim_api(client, resource_group_name, service_name, api_path, description=None, subscription_key_parameter_names=None, api_revision=None,
                     api_id=None, api_version=None, api_version_set_id=None, display_name=None, service_url=None, protocols=None, specificationPath=None,
                     specificationUrl=None, specificationFormat=None, api_type=None, subscription_required=None,
@@ -252,7 +253,7 @@ def import_apim_api(client, resource_group_name, service_name, api_path, descrip
     )
 
     if api_revision is not None and api_id is not None:
-        api_id = api_id+";rev="+api_revision
+        api_id = api_id + ";rev=" + api_revision
     elif api_id is None:
         api_id = uuid.uuid4().hex
 

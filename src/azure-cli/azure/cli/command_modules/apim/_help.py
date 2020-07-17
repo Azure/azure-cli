@@ -101,9 +101,6 @@ helps['apim api create'] = """
 type: command
 short-summary: Create an API Management API.
 parameters:
-  - name: --service-name
-    type: string
-    short-summary: name of the service instance
   - name: --api-id
     type: string
     short-summary: unique name of the api to be created
@@ -125,9 +122,6 @@ helps['apim api update'] = """
 type: command
 short-summary: Update an API Management API.
 parameters:
-  - name: --service-name
-    type: string
-    short-summary: name of the service instance
   - name: --api-id
     type: string
     short-summary: unique name of the api to be created
