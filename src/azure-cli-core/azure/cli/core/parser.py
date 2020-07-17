@@ -330,7 +330,7 @@ class AzCliCommandParser(CLICommandParser):
                                                       extension_name=ext_name)  # TODO add extension_version
                         cli_ctx = self.cli_ctx or self.cli_help.cli_ctx
                         ask_before_dynamic_extension_install = cli_ctx.config.getboolean(
-                            'extension', 'ask_before_dynamic_extension_install', True)
+                            'extension', 'ask_before_dynamic_install', True)
                         if ask_before_dynamic_extension_install:
                             from knack.prompting import prompt_y_n
                             go_on = prompt_y_n(
@@ -344,7 +344,7 @@ class AzCliCommandParser(CLICommandParser):
                             from azure.cli.core.extension.operations import add_extension
                             add_extension(cli_ctx=cli_ctx, extension_name=ext_name)
                             run_after_extension_installed = cli_ctx.config.getboolean('extension',
-                                                                                      'run_after_extension_installed',
+                                                                                      'run_after_dynamic_install',
                                                                                       True)
                             if run_after_extension_installed:
                                 import subprocess
