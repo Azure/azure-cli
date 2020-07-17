@@ -475,21 +475,20 @@ def load_arguments(self, _):
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
 
-    with self.argument_context('template-specs create') as c:
+    with self.argument_context('template-specs') as c:
         c.argument('name', options_list=['--name', '-n'])
+        c.argument('version', options_list=['--version', '-v'])
+
+    with self.argument_context('template-specs create') as c:
         c.argument('template_file', options_list=['--template-file', '-f'])
         c.argument('location', options_list=['--location', '-l'])
-        c.argument('display_name', options_list=['--display-name', '-d'], help='The display name of the template spec.')
-        c.argument('description', options_list=['--description'], help='The description of template spec.')
-        c.argument('version', options_list=['--version'], help='The version of the template spec.')
+        c.argument('display_name', options_list=['--display-name', '-d'])
+        c.argument('description', options_list=['--description'])
         c.argument('tags', tags_type)
 
-    with self.argument_context('template-specs get') as c:
-        c.argument('name', options_list=['--name', '-n'])
-
-    with self.argument_context('template-specs update') as c:
-        c.argument('name', options_list=['--name', '-n'])
-        c.argument('tags', tags_type)
+    with self.argument_context('template-specs export') as c:
+        c.argument('output_folder', options_list=['--output-folder', '-o'])
+        c.argument('template_spec', options_list=['--template-spec', '-t'])
 
     with self.argument_context('template-specs delete') as c:
-        c.argument('name', options_list=['--name', '-n'])
+        c.argument('template_spec', options_list=['--template-spec', '-t'])

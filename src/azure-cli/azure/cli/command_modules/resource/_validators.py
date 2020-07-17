@@ -16,6 +16,22 @@ except ImportError:
 
 MSI_LOCAL_ID = '[system]'
 
+def _validate_template_input(namespace):
+    if namespace.template_file and not os.path.isfile(namespace.template_file):
+        raise CLIError('Please enter a valid file path')
+        #VERIFY if needed to check if Json file.
+
+def _validate_template_spec(namespace):
+    if namespace.template_spec is None:
+        if (namespace.name is None or namespace.resource_group_name is None):
+            raise CLIError('incorrect usage: Please enter'
+                           'a resource group and resource name or a --template-spec resource ID')
+    else:
+        from msrestazure.tools import  is_valid_resource_id
+        if not is_valid_resource_id(namespace.template_spec):
+            raise CLIError('--template-spec is not a valid resource ID.')
+    if namespace.output_folder and not os.path.isdir(namespace.output_folder):
+        raise CLIError('Please enter a valid output folder')
 
 def _validate_deployment_name_with_template_specs(namespace):
     # If missing,try come out with a name associated with the template name

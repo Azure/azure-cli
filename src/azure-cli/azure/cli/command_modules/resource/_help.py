@@ -2025,7 +2025,7 @@ short-summary: Manage template specs at subscription or resource group scope.
 
 helps['template-specs create'] = """
 type: command
-short-summary: Creates or updates a Template Spec.
+short-summary: Creates or updates a template spec and or template spec version.
 parameters:
   - name: --resource-group -g
     type: string
@@ -2033,55 +2033,84 @@ parameters:
   - name: --name -n
     type: string
     short-summary: Name of the template spec.
+  - name: --version -v
+    type: string
+    short-summary: The template spec version.
   - name: --template-file -f
     type: template_spec
     short-summary: The path to the template file.
   - name: --location -l 
     short-summary: The location to store the template-spec.
-examples:
-  - name: Update an existing template spec.
-    text: az template-specs create -g MyResourceGroup --name MyTemplateSpecName -l WestUS --template-file templateSpec.json
-  - name: Create a template spec.
-    text: az template-specs create -g MyResourceGroup --name MyTemplateSpecName -l WestUS --template-file updatedFile.json
-"""
-
-helps['template-specs get'] = """
-type: command
-short-summary: Gets a Template Spec with a given name.
-parameters:
-  - name: --resource-group -g
-    type: string
-    short-summary: Name of resource group.
-  - name: --name -n
-    type: string
-    short-summary: Name of the template spec.
-examples:
-  - name: Get a template spec.
-    text: az template-specs get -g testrg --name MyTemplateSpecName
-"""
-
-helps['template-specs update'] = """
-type: command
-short-summary: Updates Template Spec tags with specified values.
-parameters:
-  - name: --resource-group -g
-    type: string
-    short-summary: Name of resource group.
-  - name: --name -n
-    type: string
-    short-summary: Name of the template spec.
+  - name: --display-name -d
+    type: string 
+    short-summary: The display name of the template spec.
+  - name : --description
+    type: string 
+    short-summary: The description of template spec/template spec version.
   - name: --tags
     type: dict[str,str]
     short-summary: Resource Tags.
 examples:
-  - name: Update or create tags for specified template spec.
-    text: az template-specs update -g MyResourceGroup --name MyTemplateSpec --tags {'MyTag'='MyValue'}
+  - name: Create a template spec.
+    text: az template-specs create -g testRG --name TemplateSpecName -l WestUS --display-name "BasicTemplate" --description "Simple template spec" --tags {'MyTag'='MyValue'}
+  - name: Create a template spec version.
+    text: az template-specs create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --description "Less simple template spec"
+  - name: Create a template spec and a version of the template spec.
+    text: az template-specs create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "SimpleTemplate" --description "Basic template spec" --tags {'MyTag'='MyValue'}
+  - name: Update an existing template spec.
+    text: az template-specs create -g testrg -n MyTemplateSpecName -l WestUS -v 1.0 -f updatedFile.json --tags {'MyTag'='NewValue'}
+"""
+
+helps['template-specs get'] = """
+type: command
+short-summary: Gets the specified template spec or template spec version.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of the resource group.
+  - name: --name -n
+    type: string
+    short-summary: Name of the template spec.
+  - name: --version -v
+    type: string
+    short-summary: The template spec version.
+examples:
+  - name: Get the specified template spec with all versions. 
+    text: az template-specs get -g testrg --name TemplateSpecName
+  - name: Get the specified template spec version. 
+    text: az template-specs get -g testrg --name TemplateSpecName -version VersionName
+"""
+
+helps['template-specs export'] = """
+type: command
+short-summary: Exports the specified template spec and artifacts (if any) to the specified output folder.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of resource group.
+  - name: --name -n
+    type: string
+    short-summary: Name of the template spec.
+  - name: --version -v
+    type: string
+    short-summary: The template spec version.
+  - name: --template-spec -t
+    short-summary: The template spec resource ID.
+  - name: --output-folder -o
+    short-summary: Folder to output export(s). 
+examples:
+  - name: Export the specified template spec with all versions. 
+    text: az template-specs export -g testrg --name TemplateSpecName -output-folder {path}
+  - name: Export the specified template spec. 
+    text: az template-specs export -t resourceID -output-folder {path}
+  - name: Export the specified template spec version. 
+    text: az template-specs export -g testrg --name TemplateSpecName -version VersionName -output-folder {path}
 """
 
 
 helps['template-specs delete'] = """
 type: command
-short-summary: Deletes a Template Spec by name.
+short-summary: Deletes a specified template spec or template spec version by name or resource ID. 
 parameters:
   - name: --resource-group -g
     type: string
@@ -2089,14 +2118,23 @@ parameters:
   - name: --name -n
     type: string
     short-summary: Name of the template spec.
+  - name: --template-spec -t
+    short-summary: The template spec resource ID.
+  - name: --version -v
+    type: string
+    short-summary: The template spec version.
 examples:
-  - name: Delete a Template Spec by name.
-    text: az template-specs delete -g MyResourceGroup --name MyTemplateSpec
+  - name: Delete the specified template spec and all versions. 
+    text: az template-specs delete -g MyResourceGroup --name TemplateSpecName
+  - name: Delete the specified version from the template spec. 
+    text: az template-specs delete -g MyResourceGroup --name TemplateSpecName --version VersionName
+  - name: Delete the template spec or version based on resource ID. 
+    text: az template-specs delete --template-spec resourceID
 """
 
 helps['template-specs list'] = """
 type: command
-short-summary: List all the Template Specs within the specified subscription or resource group.
+short-summary: List all the template specs within the specified subscription or resource group.
 parameters:
   - name: --resource-group -g
     type: string
