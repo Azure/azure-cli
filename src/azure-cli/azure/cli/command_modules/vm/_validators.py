@@ -16,7 +16,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
-from azure.cli.core.util import hash_string
+from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES)
 from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api, get_storage_blob_uri
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
@@ -1006,13 +1006,7 @@ def _validate_admin_username(username, os_type):
         raise CLIError(linux_err)
     if not is_linux and username.endswith('.'):
         raise CLIError(win_err)
-    disallowed_user_names = [
-        "administrator", "admin", "user", "user1", "test", "user2",
-        "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm",
-        "admin2", "aspnet", "backup", "console", "guest",
-        "owner", "root", "server", "sql", "support", "support_388945a0",
-        "sys", "test2", "test3", "user4", "user5"]
-    if username.lower() in disallowed_user_names:
+    if username.lower() in DISALLOWED_USER_NAMES:
         raise CLIError("This user name '{}' meets the general requirements, but is specifically disallowed for this image. Please try a different value.".format(username))
     return username
 
