@@ -3191,6 +3191,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {vm} --admin-password PasswordPassword1! --authentication-type password --image debian')
 
         content = test_io.getvalue()
+        print(content)
         # check log has okay format
         lines = content.splitlines()
         for line in lines:
@@ -4068,7 +4069,10 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
         # delete resources (test vm host delete commands)
         self.cmd('vm delete --name {vm-name} -g {rg} --yes')
+        time.sleep(30)
         self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg} --yes')
+        # Service has problem. It is not deleted yet but it returns.
+        time.sleep(30)
         self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
 # endregion
 
