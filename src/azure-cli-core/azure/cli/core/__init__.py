@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.9.0"
+__version__ = "2.9.1"
 
 import os
 import sys
@@ -255,9 +255,6 @@ class MainCommandsLoader(CLICommandsLoader):
              Otherwise, the list will be extended using ALWAYS_LOADED_EXTENSIONS.
              If the extensions in the list are not installed, it will be skipped.
             """
-
-            from azure.cli.core.extension.operations import check_version_compatibility
-
             def _handle_extension_suppressions(extensions):
                 filtered_extensions = []
                 for ext in extensions:
@@ -299,6 +296,9 @@ class MainCommandsLoader(CLICommandsLoader):
 
                 for ext in allowed_extensions:
                     try:
+                        # Import in the `for` loop because `allowed_extensions` can be []. In such case we
+                        # don't need to import `check_version_compatibility` at all.
+                        from azure.cli.core.extension.operations import check_version_compatibility
                         check_version_compatibility(ext.get_metadata())
                     except CLIError as ex:
                         # issue warning and skip loading extensions that aren't compatible with the CLI core
