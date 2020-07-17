@@ -51,7 +51,7 @@ class ExtensionNotInstalledException(Exception):
         return "The extension {} is not installed.".format(self.extension_name)
 
 
-class Extension(object):
+class Extension:
 
     def __init__(self, name, ext_type, path=None):
         self.name = name

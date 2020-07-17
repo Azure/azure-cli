@@ -93,7 +93,7 @@ class BaseHelpLoader(ABC):
         help_obj.parameters = loaded_params
 
 
-class YamlLoaderMixin(object):  # pylint:disable=too-few-public-methods
+class YamlLoaderMixin:  # pylint:disable=too-few-public-methods
     """A class containing helper methods for Yaml Loaders."""
 
     # get the list of yaml help file names for the command or group

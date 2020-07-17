@@ -10,7 +10,7 @@ import humanfriendly
 BAR_LEN = 70
 
 
-class ProgressViewBase(object):
+class ProgressViewBase:
     """ a view base for progress reporting """
     def __init__(self, out):
         self.out = out
@@ -28,7 +28,7 @@ class ProgressViewBase(object):
         pass  # pylint: disable=unnecessary-pass
 
 
-class ProgressReporter(object):
+class ProgressReporter:
     """ generic progress reporter """
     def __init__(self, message='', value=None, total_value=None):
         self.message = message
@@ -57,7 +57,7 @@ class ProgressReporter(object):
         return {'message': self.message, 'percent': percent}
 
 
-class ProgressHook(object):
+class ProgressHook:
     """ sends the progress to the view """
     def __init__(self):
         self.reporter = ProgressReporter()

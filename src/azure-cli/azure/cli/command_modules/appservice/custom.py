@@ -2407,7 +2407,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
-class _StackRuntimeHelper(object):
+class _StackRuntimeHelper:
 
     def __init__(self, cmd, client, linux=False):
         self._cmd = cmd

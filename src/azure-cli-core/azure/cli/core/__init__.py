@@ -579,7 +579,7 @@ class CommandIndex:
         logger.debug("Command index has been invalidated.")
 
 
-class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
+class ModExtensionSuppress:  # pylint: disable=too-few-public-methods
 
     def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
                  recommend_update=False):

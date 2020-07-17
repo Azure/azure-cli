@@ -882,7 +882,7 @@ def _log_response(response, **kwargs):
         return response
 
 
-class ConfiguredDefaultSetter(object):
+class ConfiguredDefaultSetter:
 
     def __init__(self, cli_config, use_local_config=None):
         self.use_local_config = use_local_config
