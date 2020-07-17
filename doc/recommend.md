@@ -22,7 +22,7 @@ $ az vm list --query-recommend
 --query [].storageProfile.osDisk.osType: Get all available osType in you subscription
 ```
 
-* select specific number os results
+* select specific number of results
 
 This query allows you to only select a specific number of results.
 
@@ -43,7 +43,7 @@ $ az vm list --query-recommend
 --query [?tag=='MyTAG' && location='eastus']: Get all results whose tag is 'MyTAG' and location is 'eastus'
 ```
 
-* multi-select/multi-hash
+* multi-select/multi-hash (Not implement)
 
 This operation will help you to create a new json from current output.
 
