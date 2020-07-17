@@ -504,9 +504,7 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
                            "Please set --enable-delete-retention as true to enable Delete Retention Policy.")
 
     if enable_smb_multichannel is not None:
-        ProtocolSettings, SmbSetting, Multichannel = cmd.get_models('SmbSetting', 'ProtocolSettings', 'Multichannel')
-        instance.protocol_settings = ProtocolSettings(
-            smb=SmbSetting(Multichannel(enabled=enable_smb_multichannel)))
+        instance.protocol_settings.smb.multichannel.enabled = enable_smb_multichannel
 
     return instance
 
