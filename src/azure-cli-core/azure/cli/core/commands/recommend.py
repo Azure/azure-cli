@@ -70,9 +70,10 @@ class TreeNode:
         self._parent = None
         self._data = None
         self._keys = None
+        self._list_keys = set()  # child node which is list
         self._child = []  # list of child node
         self._from_list = False
-        self._list_length = None  # valid only when from_list is true
+        self._list_length = 5  # valid only when from_list is true
         self._similarity_threshold = 0.75
 
     def _get_data(self, key):
@@ -83,6 +84,7 @@ class TreeNode:
                 if item.get(key, None) is not None:
                     if isinstance(item[key], list):
                         values.extend(item[key])
+                        self._list_keys.add(key)
                     else:
                         values.append(item[key])
         else:
@@ -96,6 +98,10 @@ class TreeNode:
             return values[0]  # TODO: check if null
         else:
             return None
+
+    def is_list(self, key):
+        '''Determine whether the key refer to a list'''
+        return key in self._list_keys
 
     def _get_trace(self):
         traces = []
@@ -180,8 +186,9 @@ class TreeNode:
             if not (isinstance(self.get_one_value(key), list) or
                     isinstance(self.get_one_value(key), dict)):
                 viable_keys.append(key)
-        match_items = self._get_match_items(select_items, keys=viable_keys)
-        if match_items is not None:
+        match_items = self._get_match_items(
+            select_items, similarity_threshold=self._similarity_threshold, keys=viable_keys)
+        if match_items is not None and len(match_items) > 0:
             query_str = "{}=='{}'".format(
                 match_items[0], self.get_one_value(match_items[0]))
             ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
@@ -189,7 +196,8 @@ class TreeNode:
                                           match_items[0], self.get_one_value(match_items[0])),
                                       group_name="condition"))
             for item in match_items[1:2]:
-                query_str += " || {}=='{}'".format(item, self.get_one_value(item))
+                query_str += " || {}=='{}'".format(item,
+                                                   self.get_one_value(item))
                 ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
                                           help_str="Display results only when satisfy one of the condition",
                                           group_name="condition"))
@@ -282,11 +290,10 @@ class TreeBuilder:
             if child_item is None:
                 node._keys.remove(key)  # remove key which has only null value
                 continue
-            if isinstance(child_item, list):
-                if len(child_item) > 0 and isinstance(self._get_from_list(child_item), dict):
+            if node.is_list(key):
+                if isinstance(child_item, dict):
                     child_node = self._parse_dict(
                         key, child_node_data, from_list=True)
-                    child_node._list_length = len(data[0][key])
             elif isinstance(child_item, dict):
                 child_node = self._parse_dict(key, child_node_data)
             if child_node:
