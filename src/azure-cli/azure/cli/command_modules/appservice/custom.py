@@ -8,7 +8,6 @@ import threading
 import time
 import ast
 
-
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -20,11 +19,11 @@ import json
 import ssl
 import sys
 import uuid
+from functools import reduce
+
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
-from functools import reduce
-
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError

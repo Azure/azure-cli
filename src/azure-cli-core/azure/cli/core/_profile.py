@@ -15,14 +15,15 @@ import string
 from copy import deepcopy
 from enum import Enum
 
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
-from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 
