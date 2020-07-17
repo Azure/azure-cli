@@ -12,12 +12,12 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        from ._client_factory import keyvault_client_factory
+        from ._client_factory import keyvault_mgmt_client_factory
         from ._command_type import KeyVaultCommandGroup, KeyVaultArgumentContext
         from azure.cli.core import ModExtensionSuppress
         keyvault_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
-            client_factory=keyvault_client_factory
+            client_factory=keyvault_mgmt_client_factory
         )
 
         super(KeyVaultCommandsLoader, self).__init__(
