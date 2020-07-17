@@ -283,13 +283,16 @@ class AzCliCommandParser(CLICommandParser):
     def _search_in_extension_commands(self, command_str):
         from azure.cli.core._session import EXT_CMD_INDEX
         import os
-        # self.cli_ctx is None when self.prog is not 'az', such as 'az iot', use cli_ctx from cli_help which is not lost.
+        # self.cli_ctx is None when self.prog is not 'az', such as 'az iot'.
+        # use cli_ctx from cli_help which is not lost.
         VALID_SECOND = 3600 * 24 * 10
-        EXT_CMD_INDEX.load(os.path.join((self.cli_ctx or self.cli_help.cli_ctx).config.config_dir, 'extCmdIndex.json'), VALID_SECOND)
+        EXT_CMD_INDEX.load(os.path.join((self.cli_ctx or self.cli_help.cli_ctx).config.config_dir,
+                                        'extCmdIndex.json'), VALID_SECOND)
         if not EXT_CMD_INDEX.data:
             import requests
             from azure.cli.core.util import should_disable_connection_verify
-            response = requests.get('https://fengsa.blob.core.windows.net/index/extCmdIndex.json', verify=(not should_disable_connection_verify()))
+            response = requests.get('https://fengsa.blob.core.windows.net/index/extCmdIndex.json',
+                                    verify=(not should_disable_connection_verify()))
             if response.status_code == 200:
                 EXT_CMD_INDEX.data = response.json()
                 EXT_CMD_INDEX.save_with_retry()
@@ -306,62 +309,77 @@ class AzCliCommandParser(CLICommandParser):
                 return None
         return None
 
-    def _check_value(self, action, value):
+    def _check_value(self, action, value):  # pylint: disable=too-many-statements
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
-        if action.choices is not None and value not in action.choices:
+        if action.choices is not None and value not in action.choices:  # pylint: disable=too-many-nested-blocks
+            caused_by_extension_not_installed = False
             if not self.command_source:
-                # Check if the command is from an extension
-                from azure.cli.core.util import roughly_parse_command
-                cmd_list = self.prog.split() + self._raw_arguments
-                command_str = roughly_parse_command(cmd_list[1:])
-                ext_name = self._search_in_extension_commands(command_str)
-                if ext_name:
-                    telemetry.set_command_details(command_str,
-                        parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
-                        extension_name=ext_name)  # TODO add extension_version
-                    cli_ctx = self.cli_ctx or self.cli_help.cli_ctx
-                    ask_before_dynamic_extension_install = cli_ctx.config.getboolean('extension', 'ask_before_dynamic_extension_install', True)
-                    if ask_before_dynamic_extension_install:
-                        from knack.prompting import prompt_y_n
-                        go_on = prompt_y_n('You are running a command from the extension {}. Would you like to install it first?'.format(ext_name), default='y')
-                    else:
-                        logger.warning('You are running a command from the extension %s. It will be installed first.', ext_name)
-                        go_on = True
-                    if go_on:
-                        from azure.cli.core.extension.operations import add_extension
-                        add_extension(cli_ctx=cli_ctx, extension_name=ext_name)
-                        run_after_extension_installed = cli_ctx.config.getboolean('extension', 'run_after_extension_installed', True)
-                        if run_after_extension_installed:
-                            import subprocess
-                            exit_code = subprocess.call(cmd_list, shell=True)
-                            telemetry.set_user_fault("Extension {} dynamically installed and commands will be rerun automatically.".format(ext_name))
-                            self.exit(exit_code)
+                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                error_msg = None
+                if not candidates:
+                    # Check if the command is from an extension
+                    from azure.cli.core.util import roughly_parse_command
+                    cmd_list = self.prog.split() + self._raw_arguments
+                    command_str = roughly_parse_command(cmd_list[1:])
+                    ext_name = self._search_in_extension_commands(command_str)
+                    if ext_name:
+                        caused_by_extension_not_installed = True
+                        telemetry.set_command_details(command_str,
+                                                      parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
+                                                      extension_name=ext_name)  # TODO add extension_version
+                        cli_ctx = self.cli_ctx or self.cli_help.cli_ctx
+                        ask_before_dynamic_extension_install = cli_ctx.config.getboolean(
+                            'extension', 'ask_before_dynamic_extension_install', True)
+                        if ask_before_dynamic_extension_install:
+                            from knack.prompting import prompt_y_n
+                            go_on = prompt_y_n(
+                                'You are running a command from the extension {}. Would you like to install it first?'
+                                .format(ext_name), default='y')
                         else:
-                            error_msg = 'Extension installed. Please rerun your command.'
-                    else:
-                        error_msg = "Command failed due to corresponding extension not installed. Please run 'az extension add -n {}' first.".format(ext_name)
-                else:
+                            logger.warning('You are running a command from the extension %s. '
+                                           'It will be installed first.', ext_name)
+                            go_on = True
+                        if go_on:
+                            from azure.cli.core.extension.operations import add_extension
+                            add_extension(cli_ctx=cli_ctx, extension_name=ext_name)
+                            run_after_extension_installed = cli_ctx.config.getboolean('extension',
+                                                                                      'run_after_extension_installed',
+                                                                                      True)
+                            if run_after_extension_installed:
+                                import subprocess
+                                exit_code = subprocess.call(cmd_list, shell=True)
+                                telemetry.set_user_fault("Extension {} dynamically installed and commands will be "
+                                                         "rerun automatically.".format(ext_name))
+                                self.exit(exit_code)
+                            else:
+                                error_msg = 'Extension installed. Please rerun your command.'
+                        else:
+                            error_msg = "Command failed due to corresponding extension not installed. " \
+                                "Please run 'az extension add -n {}' first.".format(ext_name)
+                if not error_msg:
                     # parser has no `command_source`, value is part of command itself
-                    error_msg = ("{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'. ").format(
-                        prog=self.prog, value=value)
+                    error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'. " \
+                        .format(prog=self.prog, value=value)
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'. See '{prog} --help'.".format(
                     prog=self.prog, value=value, param=parameter)
+                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+
             telemetry.set_user_fault(error_msg)
             with CommandLoggerContext(logger):
                 logger.error(error_msg)
-            if not ext_name:
-                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+            if not caused_by_extension_not_installed:
                 if candidates:
                     print_args = {
                         's': 's' if len(candidates) > 1 else '',
                         'verb': 'are' if len(candidates) > 1 else 'is',
                         'value': value
                     }
-                    self._suggestion_msg.append("\nThe most similar choice{s} to '{value}' {verb}:".format(**print_args))
+                    self._suggestion_msg.append("\nThe most similar choice{s} to '{value}' {verb}:"
+                                                .format(**print_args))
                     self._suggestion_msg.append('\n'.join(['\t' + candidate for candidate in candidates]))
 
                 failure_recovery_recommendations = self._get_failure_recovery_recommendations(action)

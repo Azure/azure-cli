@@ -44,7 +44,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             g.command('list', 'list_extensions')
             g.show_command('show', 'show_extension')
             g.command('list-available', 'list_available_extensions', table_transformer=transform_extension_list_available)
-            g.command('update', 'update_extension')
+            g.command('update', 'update_extension_cmd')
 
         return self.command_table
 
