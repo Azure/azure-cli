@@ -283,9 +283,9 @@ class AzCliCommandParser(CLICommandParser):
     def _search_in_extension_commands(self, command_str):
         from azure.cli.core._session import EXT_CMD_INDEX
         import os
-        # self.cli_ctx is None when self.prog is not 'az', such as 'az iot'.
-        # use cli_ctx from cli_help which is not lost.
         VALID_SECOND = 3600 * 24 * 10
+        # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
+        # use cli_ctx from cli_help which is not lost.
         EXT_CMD_INDEX.load(os.path.join((self.cli_ctx or self.cli_help.cli_ctx).config.config_dir,
                                         'extCmdIndex.json'), VALID_SECOND)
         if not EXT_CMD_INDEX.data:
@@ -317,7 +317,12 @@ class AzCliCommandParser(CLICommandParser):
             if not self.command_source:
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 error_msg = None
-                if not candidates:
+                # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
+                # use cli_ctx from cli_help which is not lost.
+                cli_ctx = self.cli_ctx or self.cli_help.cli_ctx
+                use_dynamic_install = cli_ctx.config.get(
+                    'extension', 'use_dynamic_install', 'yes_prompt')
+                if use_dynamic_install.lower() != 'no' and not candidates:
                     # Check if the command is from an extension
                     from azure.cli.core.util import roughly_parse_command
                     cmd_list = self.prog.split() + self._raw_arguments
@@ -328,18 +333,15 @@ class AzCliCommandParser(CLICommandParser):
                         telemetry.set_command_details(command_str,
                                                       parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
                                                       extension_name=ext_name)  # TODO add extension_version
-                        cli_ctx = self.cli_ctx or self.cli_help.cli_ctx
-                        ask_before_dynamic_extension_install = cli_ctx.config.getboolean(
-                            'extension', 'ask_before_dynamic_install', True)
-                        if ask_before_dynamic_extension_install:
+                        if use_dynamic_install.lower() == 'yes_without_prompt':
+                            logger.warning('You are running a command from the extension %s. '
+                                           'It will be installed first.', ext_name)
+                            go_on = True
+                        else:
                             from knack.prompting import prompt_y_n
                             go_on = prompt_y_n(
                                 'You are running a command from the extension {}. Would you like to install it first?'
                                 .format(ext_name), default='y')
-                        else:
-                            logger.warning('You are running a command from the extension %s. '
-                                           'It will be installed first.', ext_name)
-                            go_on = True
                         if go_on:
                             from azure.cli.core.extension.operations import add_extension
                             add_extension(cli_ctx=cli_ctx, extension_name=ext_name)
@@ -359,8 +361,15 @@ class AzCliCommandParser(CLICommandParser):
                                 "Please run 'az extension add -n {}' first.".format(ext_name)
                 if not error_msg:
                     # parser has no `command_source`, value is part of command itself
-                    error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'. " \
+                    error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'." \
                         .format(prog=self.prog, value=value)
+                    if use_dynamic_install.lower() == 'no':
+                        extensions_link = 'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'
+                        error_msg = ("{msg} "
+                                     "If the command is from an extension, "
+                                     "please make sure the corresponding extension is installed. "
+                                     "To learn more about extensions, please visit "
+                                     "{extensions_link}").format(msg=error_msg, extensions_link=extensions_link)
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest
