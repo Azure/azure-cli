@@ -289,8 +289,9 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cli_ctx, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension(cmd=None, extension_name=None, cli_ctx=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
     try:
+        cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
@@ -307,7 +308,7 @@ def update_extension(cli_ctx, extension_name, index_url=None, pip_extra_index_ur
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(cli_ctx=cli_ctx, source=download_url, ext_sha256=ext_sha256,
+            _add_whl_ext(cli_ctx=cmd_cli_ctx, source=download_url, ext_sha256=ext_sha256,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)

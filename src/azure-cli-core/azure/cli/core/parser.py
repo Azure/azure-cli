@@ -286,18 +286,21 @@ class AzCliCommandParser(CLICommandParser):
         VALID_SECOND = 3600 * 24 * 10
         # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
         # use cli_ctx from cli_help which is not lost.
-        EXT_CMD_INDEX.load(os.path.join((self.cli_ctx or self.cli_help.cli_ctx).config.config_dir,
+        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        if not cli_ctx:
+            return None
+        EXT_CMD_INDEX.load(os.path.join(cli_ctx.config.config_dir,
                                         'extCmdIndex.json'), VALID_SECOND)
         if not EXT_CMD_INDEX.data:
             import requests
             from azure.cli.core.util import should_disable_connection_verify
-            response = requests.get('https://fengsa.blob.core.windows.net/index/extCmdIndex.json',
+            response = requests.get('https://fengsa.blob.core.windows.net/index/extCmdIndex.json',  # TODO use prod url
                                     verify=(not should_disable_connection_verify()))
             if response.status_code == 200:
                 EXT_CMD_INDEX.data = response.json()
                 EXT_CMD_INDEX.save_with_retry()
             else:
-                logger.info("Error when retrieveing extension command index. Response code:%s", response.status_code)
+                logger.info("Error when retrieveing extension command index. Response code: %s", response.status_code)
                 return None
         cmd_chain = EXT_CMD_INDEX
         for part in command_str.split():
@@ -319,9 +322,9 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = None
                 # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
                 # use cli_ctx from cli_help which is not lost.
-                cli_ctx = self.cli_ctx or self.cli_help.cli_ctx
+                cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
                 use_dynamic_install = cli_ctx.config.get(
-                    'extension', 'use_dynamic_install', 'yes_prompt')
+                    'extension', 'use_dynamic_install', 'yes_prompt') if cli_ctx else 'no'
                 if use_dynamic_install.lower() != 'no' and not candidates:
                     # Check if the command is from an extension
                     from azure.cli.core.util import roughly_parse_command
