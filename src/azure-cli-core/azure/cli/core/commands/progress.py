@@ -45,7 +45,7 @@ class ProgressReporter:
         total_val = kwargs.get('total_val', self.total_val)
         value = kwargs.get('value', self.value)
         if value and total_val:
-            assert 0<= value <= total_val
+            assert 0 <= value <= total_val
             self.closed = value == total_val
         self.total_val = total_val
         self.value = value
