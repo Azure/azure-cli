@@ -113,3 +113,11 @@ Please input workspace (The name or resource ID of the log analytics workspace w
 *For example, Recommended reason: 97% users create a new role assignment for a user, group, or service when this error is encountered*
 
 ### 6. The user's adoption of the recommended content is collected by Telemetry as the feedback data, and then continuously optimizes the recommendation scheme of the recommendation system.
+
+
+# Other questions
+1. Is there any other recommendation algorithm that is applicable and easy to implement?
+2. What is the more appropriate technology stack for part modules
+3. What is the development and maintenance costs that this system will bear 
+4. Future monitoring and maintenance plan of the system
+5. Support A/B test for recommendation effects in the future
