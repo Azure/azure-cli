@@ -114,6 +114,9 @@ Please input workspace (The name or resource ID of the log analytics workspace w
 
 ### 6. The user's adoption of the recommended content is collected by Telemetry as the feedback data, and then continuously optimizes the recommendation scheme of the recommendation system.
 
+# Technical architecture
+In this recommendation scene, the real-time requirement of the recommendation content is not high (the updating frequency of the recommendation content is low), but the response speed of obtaining the recommendation results is higher.
+Therefore, the architecture of offline computing can be considered to cache the calculated results into storage periodically and provide users with direct query recommendation results through the REST API of Web Service.
 
 # Other questions
 1. Is there any other recommendation algorithm that is applicable and easy to implement?
