@@ -103,15 +103,18 @@ Please input workspace (The name or resource ID of the log analytics workspace w
 2. After a customer performed some operations, the coordination filtering algorithm will be used to collect and count the usage data from other users who have done the similar operations.
 
 3. Based on the data collected from other users, the merges are calculated, and the hotspots are sorted according to some weighted values. 
+
 *For example, when recommending CDN-related usage, because the effect of CDN usage is affected by the region, so the data used by other users in the same region as the customer will be given higher weight.*
 
 4. The calculation of recommender system adds the configurability of using knowledge.
+
 *For example:*<br/>
 *(1) The correlation threshold of recommending content to users, time range of participating in calculation data can be configured*<br/>
 *(2) In some special business, the recommending content can be added with the interception, filtering or supplementation according to business knowledge*<br/>
 *(3) The recommendation preferences of some businesses can be set, such as aggressive recommendation and conservative recommendation*
 
 5. Produce the recommended content and give the reasons. Through the reasons for recommendation and the proportion of users to tell the customer the reasons why we recommend and the strength of the recommendation.
+
 *For example, Recommended reason: 97% users create a new role assignment for a user, group, or service when this error is encountered*
 
 6. The user's adoption of the recommended content is collected by Telemetry as the feedback data, and then continuously optimizes the recommendation scheme of the recommendation system.
