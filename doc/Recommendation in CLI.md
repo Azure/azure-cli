@@ -120,9 +120,17 @@ Please input workspace (The name or resource ID of the log analytics workspace w
 #### 6. The user's adoption of the recommended content is collected by Telemetry as the feedback data, and then continuously optimizes the recommendation scheme of the recommendation system.
 
 # Technical architecture
+### 1. Overall architecture
 In this recommendation scene, the real-time requirement of the recommendation content is not high (the updating frequency of the recommendation content is low), but the response speed of obtaining the recommendation results is higher.
 Therefore, the architecture of offline computing can be considered to cache the calculated results into storage periodically and provide users with direct query recommendation results through the REST API of Web Service.
 ![avatar](https://github.com/zhoxing-ms/image/blob/master/Annotation%202020-07-19%20153316.png)
+
+### 2. Technical selection of specific modules
+* Web Service: FaaS (such as Function App). Because it is a Serverless architecture, there is no need to deploy the complete server system, but only deploy the code of relevant functions. The cost of development and maintenance is small, the granularity of resource use is fine, and the charge is based on the usage of the API.
+
+* Cache/Storage: NoSQL (such as Redis). Because there is no need to store massive data for the time being, and there is no complex structured query and word segmentation query scenario, It is enough to support key-value query in the early stage. But it needs to support fast queries and data persistence.
+
+* Schedule Task: 
 
 # Other questions
 1. Is there any other recommendation algorithm that is applicable and easy to implement?
