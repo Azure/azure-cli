@@ -96,27 +96,30 @@ Please input workspace (The name or resource ID of the log analytics workspace w
 ```
 
 # Process design
-### 1. Use telemetry to collect and record the customer uasge of CLI. Since most of the required data already exists, the cold start problem of the algorithm is avoided.
+![avatar](https://github.com/zhoxing-ms/image/blob/master/Annotation%202020-07-19%20150631.png)
 
-### 2. After a customer performed some operations, the coordination filtering algorithm will be used to collect and count the usage data from other users who have done the similar operations.
+1. Use telemetry to collect and record the customer uasge of CLI. Since most of the required data already exists, the cold start problem of the algorithm is avoided.
 
-### 3. Based on the data collected from other users, the merges are calculated, and the hotspots are sorted according to some weighted values. 
+2. After a customer performed some operations, the coordination filtering algorithm will be used to collect and count the usage data from other users who have done the similar operations.
+
+3. Based on the data collected from other users, the merges are calculated, and the hotspots are sorted according to some weighted values. 
 *For example, when recommending CDN-related usage, because the effect of CDN usage is affected by the region, so the data used by other users in the same region as the customer will be given higher weight.*
 
-### 4. The calculation of recommender system adds the configurability of using knowledge.
+4. The calculation of recommender system adds the configurability of using knowledge.
 *For example:*<br/>
 *(1) The correlation threshold of recommending content to users, time range of participating in calculation data can be configured*<br/>
 *(2) In some special business, the recommending content can be added with the interception, filtering or supplementation according to business knowledge*<br/>
 *(3) The recommendation preferences of some businesses can be set, such as aggressive recommendation and conservative recommendation*
 
-### 5. Produce the recommended content and give the reasons. Through the reasons for recommendation and the proportion of users to tell the customer the reasons why we recommend and the strength of the recommendation.
+5. Produce the recommended content and give the reasons. Through the reasons for recommendation and the proportion of users to tell the customer the reasons why we recommend and the strength of the recommendation.
 *For example, Recommended reason: 97% users create a new role assignment for a user, group, or service when this error is encountered*
 
-### 6. The user's adoption of the recommended content is collected by Telemetry as the feedback data, and then continuously optimizes the recommendation scheme of the recommendation system.
+6. The user's adoption of the recommended content is collected by Telemetry as the feedback data, and then continuously optimizes the recommendation scheme of the recommendation system.
 
 # Technical architecture
 In this recommendation scene, the real-time requirement of the recommendation content is not high (the updating frequency of the recommendation content is low), but the response speed of obtaining the recommendation results is higher.
 Therefore, the architecture of offline computing can be considered to cache the calculated results into storage periodically and provide users with direct query recommendation results through the REST API of Web Service.
+![avatar](https://github.com/zhoxing-ms/image/blob/master/Annotation%202020-07-19%20153316.png)
 
 # Other questions
 1. Is there any other recommendation algorithm that is applicable and easy to implement?
