@@ -12,10 +12,10 @@ import base64
 import binascii
 import platform
 import ssl
-import six
 import re
 import logging
 
+import six
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
@@ -882,7 +882,7 @@ def _log_response(response, **kwargs):
         return response
 
 
-class ConfiguredDefaultSetter(object):
+class ConfiguredDefaultSetter:
 
     def __init__(self, cli_config, use_local_config=None):
         self.use_local_config = use_local_config

@@ -602,7 +602,7 @@ class RegistryException(CLIError):
         self.status_code = status_code
 
 
-class RegistryResponse(object):  # pylint: disable=too-few-public-methods
+class RegistryResponse:  # pylint: disable=too-few-public-methods
     def __init__(self, request, internal_response):
         self.request = request
         self.internal_response = internal_response

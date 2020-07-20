@@ -35,11 +35,11 @@ def timezone_offset_type(value):
     if hour > 14 or hour < -12:
         raise CLIError('Offset out of range: -12 to +14')
 
-    if hour >= 0 and hour < 10:
+    if 0 <= hour < 10:
         value = '+0{}'.format(hour)
     elif hour >= 10:
         value = '+{}'.format(hour)
-    elif hour < 0 and hour > -10:
+    elif -1 < hour < 0:
         value = '-0{}'.format(-1 * hour)
     else:
         value = str(hour)

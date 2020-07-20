@@ -14,7 +14,7 @@ from azure.graphrbac.models import PasswordCredential
 from azure.graphrbac.models import ServicePrincipalCreateParameters
 
 
-class AADManager(object):
+class AADManager:
     MANAGED_APP_PREFIX = 'https://az.aro.azure.com/'
 
     def __init__(self, cli_ctx):

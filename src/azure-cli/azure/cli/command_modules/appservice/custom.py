@@ -8,7 +8,6 @@ import threading
 import time
 import ast
 
-
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -20,11 +19,11 @@ import json
 import ssl
 import sys
 import uuid
+from functools import reduce
+
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
-from functools import reduce
-
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -2407,7 +2406,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
-class _StackRuntimeHelper(object):
+class _StackRuntimeHelper:
 
     def __init__(self, cmd, client, linux=False):
         self._cmd = cmd
