@@ -9,7 +9,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-class TokenUpdater(object):
+class TokenUpdater:
     """
     This class updates a given token_credential periodically using the provided callback function.
     It shows one way of making sure the credential does not become expired.

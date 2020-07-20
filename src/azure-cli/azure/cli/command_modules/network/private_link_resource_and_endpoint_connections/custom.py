@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 from .resource_providers import GeneralPrivateEndpointClient
 from .resource_providers.batch_provider import BatchPrivateEndpointClient
-from knack.util import CLIError
+
 
 TYPE_CLIENT_MAPPING = {
     # 'Microsoft.Keyvault/vaults': KeyVaultPrivateEndpointClient # vaults
