@@ -60,9 +60,9 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
         obj_name='{}')
 
 
-def get_client_factory(cli_ctx, resource_type, client_name=''):
-    if resource_type in [ResourceType.MGMT_KEYVAULT, ResourceType.MGMT_PRIVATE_KEYVAULT]:
-        return getattr(keyvault_mgmt_client_factory(resource_type)(cli_ctx), client_name)
+def get_client_factory(resource_type, client_name=''):
+    if is_mgmt_plane(resource_type):
+        return keyvault_mgmt_client_factory(resource_type, client_name)
     if resource_type == ResourceType.DATA_KEYVAULT:
         return keyvault_data_plane_factory
     if resource_type == ResourceType.DATA_PRIVATE_KEYVAULT:
@@ -78,7 +78,7 @@ class ClientEntity:
 
 
 def get_client(cli_ctx, resource_type, client_name=''):
-    client_factory = get_client_factory(cli_ctx, resource_type, client_name)
+    client_factory = get_client_factory(resource_type, client_name)
     command_type = CliCommandType(
         operations_tmpl=get_operations_tmpl(resource_type, client_name),
         client_factory=client_factory,
@@ -89,10 +89,10 @@ def get_client(cli_ctx, resource_type, client_name=''):
     return ClientEntity(client_factory, command_type, operations_docs_tmpl, models_docs_tmpl)
 
 
-def keyvault_mgmt_client_factory(resource_type):
-    def _keyvault_mgmt_client_factory(cli_ctx, **_):
+def keyvault_mgmt_client_factory(resource_type, client_name):
+    def _keyvault_mgmt_client_factory(cli_ctx, _):
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        return get_mgmt_service_client(cli_ctx, resource_type)
+        return getattr(get_mgmt_service_client(cli_ctx, resource_type), client_name)
     return _keyvault_mgmt_client_factory
 
 

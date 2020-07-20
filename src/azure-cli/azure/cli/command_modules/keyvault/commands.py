@@ -43,7 +43,7 @@ def load_command_table(self, _):
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
-        client_factory=get_client_factory(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.vaults)
+        client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.vaults)
     )
     # endregion
 
