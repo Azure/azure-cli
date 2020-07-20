@@ -15,7 +15,9 @@ When a customer executes a command with some kind of error, recommend the next c
 msrestazure.azure_exceptions.CloudError: Azure Error: AuthorizationFailed
 Message: The client 'xxx' with object id 'xxx' does not have authorization to perform action 'Microsoft.Resources/subscriptions/resourcegroups/write' over scope '/subscriptions/xxx' or the scope is invalid. If access was recently granted, please refresh your credentials.
 
-(env) PS C:\project> az next operation
+(env) PS C:\project> az next
+What kind of recommendation do you want? (1. operation 2. command 3. resource 4. service 5. mix): 1
+
 az role assignment create
 Recommended reason: 97% users create a new role assignment for a user, group, or service when this error is encountered
 Does it help for you? (y/n): y
@@ -37,7 +39,9 @@ When a customer executes a command, it is recommended that other groups of comma
 (env) PS C:\project> az policy definition create --name readOnlyStorage --rules "{...}"
 Policy definition created successfully...
 
-(env) PS C:\project> az next command
+(env) PS C:\project> az next
+What kind of recommendation do you want? (1. operation 2. command 3. resource 4. service 5. mix): 2
+
 az policy assignment create
 Recommended reason: 92% users create a policy assignment to assign policy after creating the policy
 Does it help for you? (y/n): y
@@ -59,7 +63,9 @@ After a customer has created a certain type of resource, it is recommended to th
 (env) PS C:\project> az vm create -n MyVm -g MyResourceGroup --image UbuntuLTS
 VM created successfully...
 
-(env) PS C:\project> az next resource
+(env) PS C:\project> az next
+What kind of recommendation do you want? (1. operation 2. command 3. resource 4. service 5. mix): 3
+
 az policy definition create
 Recommended reason: 78% users create a policy to set the security policy after creating the VM
 Does it help for you? (y/n): y
@@ -81,7 +87,9 @@ Dig into more E2E scenarios and recommend them to customers.
 (env) PS C:\project> az monitor log-analytics workspace create ...
 Log-analytics workspace created successfully...
 
-(env) PS C:\project> az next service
+(env) PS C:\project> az next
+What kind of recommendation do you want? (1. operation 2. command 3. resource 4. service 5. mix): 4
+
 az monitor log-analytics solution create
 Recommended reason: 72% users create a log-analytics solution to manage the workspace after creating the log-analytics workspace
 Does it help for you? (y/n): y
