@@ -100,12 +100,13 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         logger.warning("Webapp '%s' already exists. The command will use the existing app's settings.", name)
         app_details = get_app_details(cmd, name)
         if app_details is None:
-            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that the app is a part of "
-                           "the current subscription".format(name))
+            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that "
+                           "the app is a part of the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
-            raise CLIError("The webapp '{}' exists in resource group '{}' and does not match the value entered '{}'. Please "
-                           "re-run command with the correct parameters.". format(name, current_rg, resource_group_name))
+            raise CLIError("The webapp '{}' exists in resource group '{}' and does not "
+                           "match the value entered '{}'. Please re-run command with the "
+                           "correct parameters.". format(name, current_rg, resource_group_name))
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
                                                         name, 'list_application_settings')
         settings = []
@@ -3420,12 +3421,13 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         logger.warning("Webapp '%s' already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
         if app_details is None:
-            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that the app is a part of "
-                           "the current subscription".format(name))
+            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that the app "
+                           "is a part of the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
-            raise CLIError("The webapp '{}' exists in ResourceGroup '{}' and does not match the value entered '{}'. Please "
-                           "re-run command with the correct parameters.". format(name, current_rg, resource_group_name))
+            raise CLIError("The webapp '{}' exists in ResourceGroup '{}' and does not "
+                           "match the value entered '{}'. Please re-run command with the "
+                           "correct parameters.". format(name, current_rg, resource_group_name))
         rg_name = resource_group_name or current_rg
         if location is None:
             loc = app_details.location.replace(" ", "").lower()

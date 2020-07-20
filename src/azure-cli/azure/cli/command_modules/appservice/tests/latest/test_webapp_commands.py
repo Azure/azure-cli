@@ -21,10 +21,10 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # In the future, for any reasons the repository get removed, the source code is under "sample-repo-for-deployment-test"
 # you can use to rebuild the repository
 TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
-WINDOWS_ASP_LOCATION_WEBAPP='japanwest'
-WINDOWS_ASP_LOCATION_FUNCTIONAPP='francecentral'
-LINUX_ASP_LOCATION_WEBAPP='eastus2'
-LINUX_ASP_LOCATION_FUNCTIONAPP='ukwest'
+WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
+LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
+LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 
 
 class WebappBasicE2ETest(ScenarioTest):
@@ -299,8 +299,7 @@ class AppServiceLogTest(ScenarioTest):
         webapp_name = self.create_random_name(
             prefix='webapp-linux-log', length=24)
         plan = self.create_random_name(prefix='linux-log', length=24)
-        self.cmd(
-            'appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} -i patle/ruby-hello'.format(
             resource_group, webapp_name, plan))
         # load the site to produce a few traces
@@ -493,7 +492,6 @@ class WebappConfigureTest(ScenarioTest):
         # see deployment user; just make sure the command does return something
         self.assertTrue(
             self.cmd('webapp deployment user show').get_output_in_json()['type'])
-
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config_appsettings', location=WINDOWS_ASP_LOCATION_WEBAPP)

@@ -14,8 +14,9 @@ from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-WINDOWS_ASP_LOCATION_WEBAPP='japanwest'
-LINUX_ASP_LOCATION_WEBAPP='eastus2'
+WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
+
 
 class WebAppUpE2ETests(ScenarioTest):
     @live_only()
