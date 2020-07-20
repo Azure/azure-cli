@@ -140,23 +140,7 @@ jobs:
     displayName: 'Use Python 3.7'
     inputs:
       versionSpec: 3.7
-<<<<<<< HEAD
   - template: .azure-pipelines/templates/azdev_setup.yml
-=======
-
-  - bash: |
-      #!/usr/bin/env bash
-
-      set -ev
-
-      pip install virtualenv
-      python -m virtualenv venv/
-      . ./venv/bin/activate
-      pip install -q git+https://github.com/Azure/azure-cli-dev-tools.git@pep420
-      azdev setup -c $(pwd)
-    displayName: 'Install azdev'
-
->>>>>>> init pep420 change
   - bash: |
       set -ev
       . env/bin/activate
