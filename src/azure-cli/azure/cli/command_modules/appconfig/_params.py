@@ -31,7 +31,7 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     fields_arg_type = CLIArgumentType(
         nargs='+',
-        help='Customize output fields.',
+        help='Space-separated customized output fields.',
         validator=validate_query_fields,
         arg_type=get_enum_type(['key', 'value', 'label', 'content_type', 'etag', 'tags', 'locked', 'last_modified'])
     )
@@ -134,7 +134,7 @@ def load_arguments(self, _):
         c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='File format exporting to. Required for file arguments. Currently, feature flags are not supported in properties format.')
         c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not appicable for property files or feature flags.")
         # bypass cli allowed values limition
-        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
+        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
 
@@ -171,7 +171,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
-        c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference.")
+        c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
 
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')

@@ -5,6 +5,7 @@
 
 import time
 import os
+import unittest
 
 from azure_devtools.scenario_tests import AllowLargeResponse
 
@@ -234,6 +235,7 @@ class SqlVmScenarioTest(ScenarioTest):
         # test list sql vm should be empty
         self.cmd('sql vm list -g {}'.format(resource_group), checks=[NoneCheck()])
 
+    @unittest.skip('skip temporarily')
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_create')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm2')
@@ -515,6 +517,7 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
     """
     This is a very lengthy test, it may take more than 45 minutes to run.
     """
+    @unittest.skip('skip temporarily')
     @ResourceGroupPreparer()
     @DomainPreparer()
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')

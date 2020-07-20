@@ -58,7 +58,7 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        c.argument('api_permissions', nargs='+', help='space seperated list of <resource-access-id>=<type>')
+        c.argument('api_permissions', nargs='+', help='space separated list of `<resource-access-id>=<type>`')
         c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
         c.argument('scope', help='Specifies the value of the scope claim that the resource application should expect in the OAuth 2.0 access token, e.g. User.Read')
         c.argument('api', help='the target API to access')
@@ -81,7 +81,9 @@ def load_arguments(self, _):
         c.argument('scopes', nargs='+')
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('skip_assignment', arg_type=get_three_state_flag(),
-                   help='Skip creating the default assignment, which allows the service principal to access resources under the current subscription')
+                   help='Skip creating the default assignment, which allows the service principal to access resources under the current subscription. '
+                        'When specified, --scopes will be ignored. You may use `az role assignment create` to create '
+                        'role assignments for this service principal later.')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:

@@ -3,6 +3,47 @@
 Release History
 ===============
 
+2.9.1
+++++++
+* Minor fixes
+
+2.9.0
+++++++
+* Fix get_token() issue in msi login and `expiresIn` key error in cloud shell login credentials for track 2 SDK related commands (#14187)
+
+2.8.0
+++++++
+* Add get_command_loader() entry to support to load customized CommandLoader (#13763)
+
+2.7.0
+++++++
+* Enable local context for location (#13682)
+
+2.6.0
+++++++
+* Update local context on/off status to global user level (#13277)
+
+2.5.1
+++++++
+* Minor fixes
+
+2.5.0
+++++++
+* Fix logging file fd leaking (#13102)
+* Fix core tests failed under certain profiles (#13136)
+* Use pkginfo to query metadata for Python Package (#12782)
+
+2.4.0
+++++++
+* Upgrade msrestazure to 0.6.3 (#12839)
+* Output more error details of exceptions if possible (#12945)
+* Support track1 and track2 mgmt SDK side by side (#12952)
+* Fix generic remove property NoneType exception (#12950)
+* `az --version`: Show command instruction and detailed instruction link when updates available (#12981)
+* Fix bug in core test test_parser that will affect exception stack while existing if argument parse raise Exception
+* Make CLI respect file logging configuration option: enable_log_file and AZURE_LOGGING_ENABLE_LOG_FILE env variable
+* Fix the name of extension of dev type is None if it has incompatibility problem with core
+
 2.3.1
 ++++++
 * No changes

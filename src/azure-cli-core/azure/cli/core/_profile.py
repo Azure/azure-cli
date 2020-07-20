@@ -14,7 +14,6 @@ import re
 import string
 from copy import deepcopy
 from enum import Enum
-from six.moves import BaseHTTPServer
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
@@ -307,18 +306,18 @@ class Profile(object):
 
         import jwt
         from requests import HTTPError
-        from msrestazure.azure_active_directory import MSIAuthentication
         from msrestazure.tools import is_valid_resource_id
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
         if identity_id:
             if is_valid_resource_id(identity_id):
-                msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
+                msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
                 authenticated = False
                 try:
-                    msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
+                    msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
                     authenticated = True
                 except HTTPError as ex:
@@ -330,7 +329,7 @@ class Profile(object):
                 if not authenticated:
                     try:
                         identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
                         authenticated = True
                     except HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
@@ -343,7 +342,7 @@ class Profile(object):
 
         else:
             identity_type = MsiAccountTypes.system_assigned
-            msi_creds = MSIAuthentication(resource=resource)
+            msi_creds = MSIAuthenticationWrapper(resource=resource)
 
         token_entry = msi_creds.token
         token = token_entry['access_token']
@@ -388,8 +387,8 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        from msrestazure.azure_active_directory import MSIAuthentication
-        auth = MSIAuthentication(resource=resource)
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
+        auth = MSIAuthenticationWrapper(resource=resource)
         auth.set_token()
         token_entry = auth.token
         return (token_entry['token_type'], token_entry['access_token'], token_entry)
@@ -593,6 +592,18 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
+    def get_msal_token(self, scopes, data):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        account = self.get_subscription()
+        username = account[_USER_ENTITY][_USER_NAME]
+        tenant = account[_TENANT_ID] or 'common'
+        _, refresh_token, _, _ = self.get_refresh_token()
+        certificate = self._creds_cache.retrieve_msal_token(tenant, scopes, data, refresh_token)
+        return username, certificate
+
     def get_refresh_token(self, resource=None,
                           subscription=None):
         account = self.get_subscription(subscription)
@@ -638,9 +649,11 @@ class Profile(object):
                                                                   tenant_dest, resource)
             else:
                 # Service Principal
+                use_cert_sn_issuer = bool(account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH))
                 creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
                                                                                resource,
-                                                                               tenant_dest)
+                                                                               tenant_dest,
+                                                                               use_cert_sn_issuer)
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
@@ -760,15 +773,15 @@ class MsiAccountTypes(object):
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from msrestazure.azure_active_directory import MSIAuthentication
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthentication(resource=resource)
+            return MSIAuthenticationWrapper(resource=resource)
         if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthentication(resource=resource, client_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthentication(resource=resource, object_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthentication(resource=resource, msi_res_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
@@ -1008,6 +1021,19 @@ class CredsCache(object):
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
+    def retrieve_msal_token(self, tenant, scopes, data, refresh_token):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        from azure.cli.core._msal import AdalRefreshTokenBasedClientApplication
+        tenant = tenant or 'organizations'
+        authority = self._ctx.cloud.endpoints.active_directory + '/' + tenant
+        app = AdalRefreshTokenBasedClientApplication(_CLIENT_ID, authority=authority)
+        result = app.acquire_token_silent(scopes, None, data=data, refresh_token=refresh_token)
+
+        return result["access_token"]
+
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
@@ -1107,22 +1133,25 @@ class ServicePrincipalAuth(object):
     def __init__(self, password_arg_value, use_cert_sn_issuer=None):
         if not password_arg_value:
             raise CLIError('missing secret or certificate in order to '
-                           'authnenticate through a service principal')
+                           'authenticate through a service principal')
         if os.path.isfile(password_arg_value):
             certificate_file = password_arg_value
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM
             self.certificate_file = certificate_file
             self.public_certificate = None
-            with open(certificate_file, 'r') as file_reader:
-                self.cert_file_string = file_reader.read()
-                cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
-                self.thumbprint = cert.digest("sha1").decode()
-                if use_cert_sn_issuer:
-                    # low-tech but safe parsing based on
-                    # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
-                    match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
-                                      self.cert_file_string, re.I)
-                    self.public_certificate = match.group('public').strip()
+            try:
+                with open(certificate_file, 'r') as file_reader:
+                    self.cert_file_string = file_reader.read()
+                    cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
+                    self.thumbprint = cert.digest("sha1").decode()
+                    if use_cert_sn_issuer:
+                        # low-tech but safe parsing based on
+                        # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
+                        match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
+                                          self.cert_file_string, re.I)
+                        self.public_certificate = match.group('public').strip()
+            except UnicodeDecodeError:
+                raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
             self.secret = password_arg_value
 
@@ -1146,43 +1175,43 @@ class ServicePrincipalAuth(object):
         return entry
 
 
-class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-few-public-methods
-    query_params = {}
-
-
-class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    # pylint: disable=line-too-long
-
-    def do_GET(self):
-        try:
-            from urllib.parse import parse_qs
-        except ImportError:
-            from urlparse import parse_qs  # pylint: disable=import-error
-
-        if self.path.endswith('/favicon.ico'):  # deal with legacy IE
-            self.send_response(204)
-            return
-
-        query = self.path.split('?', 1)[-1]
-        query = parse_qs(query, keep_blank_values=True)
-        self.server.query_params = query
-
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-        landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
-                                    'ok.html' if 'code' in query else 'fail.html')
-        with open(landing_file, 'rb') as html_file:
-            self.wfile.write(html_file.read())
-
-    def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
-        pass  # this prevent http server from dumping messages to stdout
-
-
 def _get_authorization_code_worker(authority_url, resource, results):
+    # pylint: disable=too-many-statements
     import socket
     import random
+    import http.server
+
+    class ClientRedirectServer(http.server.HTTPServer):  # pylint: disable=too-few-public-methods
+        query_params = {}
+
+    class ClientRedirectHandler(http.server.BaseHTTPRequestHandler):
+        # pylint: disable=line-too-long
+
+        def do_GET(self):
+            try:
+                from urllib.parse import parse_qs
+            except ImportError:
+                from urlparse import parse_qs  # pylint: disable=import-error
+
+            if self.path.endswith('/favicon.ico'):  # deal with legacy IE
+                self.send_response(204)
+                return
+
+            query = self.path.split('?', 1)[-1]
+            query = parse_qs(query, keep_blank_values=True)
+            self.server.query_params = query
+
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
+                                        'ok.html' if 'code' in query else 'fail.html')
+            with open(landing_file, 'rb') as html_file:
+                self.wfile.write(html_file.read())
+
+        def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
+            pass  # this prevent http server from dumping messages to stdout
 
     reply_url = None
 
@@ -1202,6 +1231,11 @@ def _get_authorization_code_worker(authority_url, resource, results):
             break
         except socket.error as ex:
             logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
+        except UnicodeDecodeError:
+            logger.warning("Please make sure there is no international (Unicode) character in the computer name "
+                           r"or C:\Windows\System32\drivers\etc\hosts file's 127.0.0.1 entries. "
+                           "For more details, please see https://github.com/Azure/azure-cli/issues/12957")
+            break
 
     if reply_url is None:
         logger.warning("Error: can't reserve a port for authentication reply url")

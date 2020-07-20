@@ -76,7 +76,9 @@ class AzCopy(object):
         env_kwargs = {}
         if self.creds and self.creds.token_info:
             env_kwargs = {'AZCOPY_OAUTH_TOKEN_INFO': json.dumps(self.creds.token_info)}
-        subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        result = subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        if result > 0:
+            raise CLIError('Failed to perform {} operation.'.format(args[1]))
 
     def copy(self, source, destination, flags=None):
         flags = flags or []
@@ -178,12 +180,16 @@ def _get_default_install_location():
     if system == 'Windows':
         home_dir = os.environ.get('USERPROFILE')
         if not home_dir:
-            return None
+            raise CLIError('In the Windows platform, please specify the environment variable "USERPROFILE" '
+                           'as the installation location.')
         install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
     elif system in ('Linux', 'Darwin'):
         install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
     else:
-        install_location = None
+        raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
+                       'please refer to the document for supported platforms: '
+                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
+                       .format(system))
     return install_location
 
 

@@ -37,7 +37,7 @@ def process_query(cli_term):
         response = call_aladdin_service(cli_term)
 
         if response.status_code != 200:
-            logger.error('[?] Unexpected Error: [HTTP %s]: Content: %s', response.status_code, response.content)
+            logger.error('Unexpected Error: If it persists, please file a bug.')
         else:
             if (platform.system() == 'Windows' and should_enable_styling()):
                 colorama.init(convert=True)
@@ -59,6 +59,8 @@ def process_query(cli_term):
                 if has_pruned_answer:
                     print(style_message("More commands and examples are available in the latest version of the CLI. "
                                         "Please update for the best experience.\n"))
+    from azure.cli.core.util import show_updates_available
+    show_updates_available(new_line_after=True)
     print(SURVEY_PROMPT)
 
 
@@ -93,15 +95,20 @@ def should_enable_styling():
 
 
 def call_aladdin_service(query):
-    session_id = telemetry_core._session._get_base_properties()['Reserved.SessionId']  # pylint: disable=protected-access
-    subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
     version = str(parse_version(core_version))
+    correlation_id = telemetry_core._session.correlation_id   # pylint: disable=protected-access
+    subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
 
     context = {
-        "sessionId": session_id,
-        "subscriptionId": subscription_id,
-        "versionNumber": version
+        "versionNumber": version,
     }
+
+    # Only pull in the contextual values if we have consent
+    if telemetry_core.is_telemetry_enabled():
+        context['correlationId'] = correlation_id
+
+    if telemetry_core.is_telemetry_enabled() and subscription_id is not None:
+        context['subscriptionId'] = subscription_id
 
     api_url = 'https://app.aladdin.microsoft.com/api/v1.0/examples'
     headers = {'Content-Type': 'application/json'}

@@ -1511,7 +1511,55 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # delete
-        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_windows(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'windows_admin_username': 'azureuser1',
+            'windows_admin_password': 'replacePassword1234$',
+            'nodepool2_name': 'npwin',
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('windowsProfile.adminUsername', 'azureuser1')
+        ])
+
+        # nodepool add
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --os-type Windows --node-count=1',checks=[
+            self.check('provisioningState', 'Succeeded')
+            ])
+
+        # #nodepool delete
+        self.cmd('aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --no-wait', checks=[self.is_empty()])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
@@ -1603,6 +1651,107 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_managed_aad(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--aad-admin-group-object-ids 00000000-0000-0000-0000-000000000002 ' \
+                     '--aad-tenant-id 00000000-0000-0000-0000-000000000003 -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000002'),
+            self.check('aadProfile.tenantId', '00000000-0000-0000-0000-000000000003')
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_aadv1_and_update_with_managed_aad(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--aad-server-app-id 00000000-0000-0000-0000-000000000001 ' \
+                     '--aad-server-app-secret fake-secret ' \
+                     '--aad-client-app-id 00000000-0000-0000-0000-000000000002 ' \
+                     '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 ' \
+                     '-o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', None),
+            self.check('aadProfile.serverAppId', '00000000-0000-0000-0000-000000000001'),
+            self.check('aadProfile.clientAppId', '00000000-0000-0000-0000-000000000002'),
+            self.check('aadProfile.tenantId', 'd5b55040-0c14-48cc-a028-91457fc190d9')
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-aad ' \
+                     '--aad-admin-group-object-ids 00000000-0000-0000-0000-000000000003 ' \
+                     '--aad-tenant-id 00000000-0000-0000-0000-000000000004 -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000003'),
+            self.check('aadProfile.tenantId', '00000000-0000-0000-0000-000000000004')
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_nonaad_and_update_with_managed_aad(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '-o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile', None)
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-aad ' \
+                     '--aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 ' \
+                     '--aad-tenant-id 00000000-0000-0000-0000-000000000002 -o json'
+        self.cmd(update_cmd, expect_failure=True)
 
     @classmethod
     def generate_ssh_keys(cls):

@@ -31,6 +31,10 @@ def cf_diagnostics_category(cli_ctx, _):
     return cf_monitor(cli_ctx).diagnostic_settings_category
 
 
+def cf_subscription_diagnostics(cli_ctx, _):
+    return cf_monitor(cli_ctx).subscription_diagnostic_settings
+
+
 def cf_log_profiles(cli_ctx, _):
     return cf_monitor(cli_ctx).log_profiles
 
@@ -91,3 +95,51 @@ def cf_private_endpoint_connections(cli_ctx, _):
 
 def cf_log_analytics_workspace(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).workspaces
+
+
+def cf_log_analytics_deleted_workspaces(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).deleted_workspaces
+
+
+def cf_log_analytics_workspace_tables(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).tables
+
+
+def cf_log_analytics_workspace_data_exports(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).data_exports
+
+
+def cf_log_analytics_workspace_management_groups(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).management_groups
+
+
+def cf_log_analytics_workspace_usage(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).usages
+
+
+def cf_log_analytics_workspace_schema(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).schema
+
+
+def cf_log_analytics_workspace_shared_keys(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).shared_keys
+
+
+def cf_log_analytics_workspace_intelligence_packs(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).intelligence_packs
+
+
+def cf_log_analytics_workspace_saved_searches(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).saved_searches
+
+
+def cf_log_analytics_workspace_linked_service(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).linked_services
+
+
+def cf_log_analytics_cluster(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).clusters
+
+
+def cf_log_analytics_linked_storage(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).linked_storage_accounts

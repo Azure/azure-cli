@@ -104,3 +104,12 @@ CONFIG = Session()
 
 # SESSION provides read-write session variables
 SESSION = Session()
+
+# INDEX contains {top-level command: [command_modules and extensions]} mapping index
+INDEX = Session()
+
+# VERSIONS provides local versions and pypi versions.
+# DO NOT USE it to get the current version of azure-cli,
+# it could be lagged behind and can be used to check whether
+# an upgrade of azure-cli happens
+VERSIONS = Session()
