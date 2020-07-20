@@ -33,11 +33,11 @@ class TokenUpdater(object):
         try:
             self.token_credential.token = token['accessToken']
             expire = token['expiresOn']
-            seconds_left = (datetime.strptime(expire, "%Y-%m-%d %H:%M:%S.%f") - datetime.now()).seconds
+            seconds_left = (datetime.strptime(expire, "%Y-%m-%d %H:%M:%S.%f") - datetime.now()).total_seconds()
         except KeyError:  # needed to deal with differing unserialized MSI token payload
             self.token_credential.token = token['access_token']
             expire = datetime.fromtimestamp(int(token['expires_on']))
-            seconds_left = (expire - datetime.now()).seconds
+            seconds_left = (expire - datetime.now()).total_seconds()
 
         if seconds_left < 180:
             logger.warning("Acquired token will expire on %s. Current time is %s.", expire, datetime.now())
