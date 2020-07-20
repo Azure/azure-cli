@@ -128,7 +128,7 @@ Therefore, the architecture of offline computing can be considered to cache the 
 ### 2. Technical selection of specific modules
 * **Web Service**: FaaS (such as Function App). Because it is a Serverless architecture, there is no need to deploy the complete server system, but only deploy the code of relevant functions. The cost of development and maintenance is small, the granularity of resource use is fine, and the charge is based on the usage of the API.
 
-* **Cache/Storage**: NoSQL (such as Redis). Because there is no need to store massive data for the time being, and there is no complex structured query and word segmentation query scenario, It is enough to support key-value query in the early stage. But it needs to support fast queries and data persistence.
+* **Cache/Storage**: NoSQL (such as CosmosDB). Because there is no need to store massive data for the time being, and there is no complex structured query and word segmentation query scenario, It is enough to support key-value query in the early stage. But it needs to support fast queries and data persistence.
 
 * **Schedule Task**: Most scheduled tasks can be met, there are currently no complex distributed scheduling and task dependency scenarios. It is recommended to try Azure Scheduler, it can support advanced settings such as task status visualization and retry strategy, making tasks more robust and running with lower maintenance costs.
 
