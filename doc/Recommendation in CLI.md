@@ -20,6 +20,7 @@ What kind of recommendation do you want? (1.operation 2.command 3.resource 4.ser
 
 az role assignment create
 Recommended reason: 97% users create a new role assignment for a user, group, or service when this error is encountered
+
 Does it help for you? (y/n): y
 
 Do you want to do it immediately? (y/n): y
@@ -44,6 +45,7 @@ What kind of recommendation do you want? (1.operation 2.command 3.resource 4.ser
 
 az policy assignment create
 Recommended reason: 92% users create a policy assignment to assign policy after creating the policy
+
 Does it help for you? (y/n): y
 
 Do you want to do it immediately? (y/n): y
@@ -99,6 +101,7 @@ What kind of recommendation do you want? (1.operation 2.command 3.resource 4.ser
 
 az monitor log-analytics solution create
 Recommended reason: 72% users create a log-analytics solution to manage the workspace after creating the log-analytics workspace
+
 Does it help for you? (y/n): y
 
 Do you want to do it immediately? (y/n): y
