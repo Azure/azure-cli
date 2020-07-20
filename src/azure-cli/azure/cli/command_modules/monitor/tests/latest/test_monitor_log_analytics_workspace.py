@@ -383,6 +383,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.kwargs.update({
             'workspace_name': self.create_random_name('clitest', 20),
             'data_export_name': 'clitest',
+            'data_export_name_2': 'clitest2',
             'sa_1': account_1,
             'sa_id_1': resource_id(
                 resource_group=resource_group,
@@ -412,13 +413,28 @@ class TestLogProfileScenarios(ScenarioTest):
                  '--destination {sa_id_1} --enable -t {table_name}',
                  checks=[
                  ])
+        from azure.mgmt.loganalytics.models import DataExportErrorResponseException
+        with self.assertRaisesRegexp(DataExportErrorResponseException, 'You have exceeded the allowed export rules for the provided table'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t {table_name}',
+                     checks=[
+                     ])
+        with self.assertRaisesRegexp(DataExportErrorResponseException, 'Table ABC does not exist in the workspace'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t ABC',
+                     checks=[
+                     ])
+        with self.assertRaisesRegexp(DataExportErrorResponseException, 'You have exceeded the allowed export rules for the provided table'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t AppPerformanceCounters',
+                     checks=[
+                     ])
         self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}', checks=[
         ])
 
-        # comment this line because service is not globally fixed right now.
-        # self.cmd('monitor log-analytics workspace data-export list -g {rg} --workspace-name {workspace_name}', checks=[
-        #     self.check('length(@)', 1)
-        # ])
+        self.cmd('monitor log-analytics workspace data-export list -g {rg} --workspace-name {workspace_name}', checks=[
+            self.check('length(@)', 1)
+        ])
 
         self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename}').get_output_in_json()
         result = self.cmd('eventhubs eventhub create --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}').get_output_in_json()

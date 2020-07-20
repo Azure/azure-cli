@@ -401,7 +401,7 @@ def load_arguments(self, _):
                    help="All workspace's tables are exported when this is enabled.")
         c.argument('table_names', nargs='+', options_list=['--tables', '-t'],
                    help='An array of tables to export. if --export-all-tables is true, this argument should not be provided.')
-        c.argument('destination', help='The destination resource ID. It should be a storage account or an event hub namespace.',
+        c.argument('destination', help='The destination resource ID. It should be a storage account or an event hub(not event hub namespace).',
                    validator=process_workspace_data_export_destination)
         c.ignore('data_export_type')
         c.ignore('event_hub_name')
