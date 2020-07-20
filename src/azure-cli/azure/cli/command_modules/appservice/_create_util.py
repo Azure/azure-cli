@@ -44,13 +44,15 @@ def zip_contents_from_dir(dirPath, lang):
                 subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
             elif lang.lower() == PYTHON_RUNTIME_NAME:
                 subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
-            def filterFunc(f):
-                if f == '.env':
-                    logger.warning("Skipping file: {}/{}".format(dirname, f))
-                    return False
+
+            filtered_files = []
+            for filename in files:
+                if filename == '.env':
+                    logger.warning("Skipping file: %s/%s", dirname, filename)
                 else:
-                    return True
-            files = filter(filterFunc, files)
+                    filtered_files.append(filename)
+            files[:] = filtered_files
+
             for filename in files:
                 absname = os.path.abspath(os.path.join(dirname, filename))
                 arcname = absname[len(abs_src) + 1:]
