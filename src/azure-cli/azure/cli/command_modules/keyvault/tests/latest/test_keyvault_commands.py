@@ -539,9 +539,8 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault show -n {kv}', checks=self.check('properties.enableSoftDelete', True))
 
         max_timeout = 100
-        cnt_timeout = 0
-        data = {}
-        while cnt_timeout <= max_timeout:
+        time_counter = 0
+        while time_counter <= max_timeout:
             try:
                 # show deleted
                 self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
@@ -558,7 +557,7 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
                          checks=self.check('id', '{secret_id}'))
             except:  # pylint: disable=bare-except
                 time.sleep(10)
-                cnt_timeout += 10
+                time_counter += 10
             else:
                 break
 
@@ -1149,8 +1148,8 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
 
         max_timeout = 100
-        cnt_timeout = 0
-        while cnt_timeout <= max_timeout:
+        time_counter = 0
+        while time_counter <= max_timeout:
             try:
                 # recover secrets keys and certificates
                 self.cmd('keyvault secret recover --vault-name {kv} -n secret1')
@@ -1158,7 +1157,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
                 self.cmd('keyvault certificate recover --vault-name {kv} -n cert1')
             except:  # pylint: disable=bare-except
                 time.sleep(10)
-                cnt_timeout += 10
+                time_counter += 10
             else:
                 break
 
