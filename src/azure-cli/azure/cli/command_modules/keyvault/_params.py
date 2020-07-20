@@ -230,7 +230,7 @@ def load_arguments(self, _):
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
 
     with self.argument_context('keyvault key encrypt') as c:
-        c.argument('value', help='The value to be encrypted. Default data type is base64 encoded string.',
+        c.argument('value', help='The value to be encrypted. Default data type is Base64 encoded string.',
                    validator=validate_encryption)
         c.extra('data_type', help='The type of the original data.', arg_type=get_enum_type(KeyEncryptionDataType),
                 default='base64')
