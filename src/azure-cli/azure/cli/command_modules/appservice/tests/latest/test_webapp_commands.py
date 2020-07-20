@@ -767,23 +767,6 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
         time.sleep(30)
 
 
-# takes too long to make a ASE, use a premade one
-@record_only()
-class LinuxASESSHScenarioTest(ScenarioTest):
-    def test_linux_ASE_ssh(self):
-        sub = '"Ranjith Linux Test Sub"'
-        resource_group = 'cli-ase-ssh-test'
-        ase = 'cli-ase-ssh-test'
-        webapp = 'cli-ase-ssh-test'
-        time.sleep(30)
-        requests.get(
-            'http://{}.{}.p.azurewebsites.net/'.format(webapp, ase), timeout=240)
-        time.sleep(30)
-        self.cmd(
-            'webapp ssh -g {} -n {} --subscription {} --timeout 5'.format(resource_group, webapp, sub))
-        time.sleep(30)
-
-
 class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_remote_ssh(self, resource_group):
