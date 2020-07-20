@@ -638,7 +638,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('timeout', timeout_type)
         c.extra('blob_name', arg_type=blob_name_type, required=True)
         c.extra('container_name', arg_type=container_name_type, required=True)
-        c.argument('lease_break_period', help='This is the proposed duration of seconds that the lease should continue '                           
+        c.argument('lease_break_period', help='This is the proposed duration of seconds that the lease should continue '                
                    'before it is broken, between 0 and 60 seconds. This break period is only used if it is shorter '
                    'than the time remaining on the lease. If longer, the time remaining on the lease is used. A new '
                    'lease will not be available before the break period has expired, but the lease may be held for '

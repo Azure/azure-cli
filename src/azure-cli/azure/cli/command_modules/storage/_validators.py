@@ -1297,8 +1297,8 @@ def validate_logging_version(namespace):
 def validate_match_condition(namespace):
     from .track2_util import _if_match, _if_none_match
     if namespace.if_match:
-        namespace = _if_match(namespace.if_match, namespace)
+        namespace = _if_match(if_match=namespace.if_match, **namespace)
         del namespace.if_match
     if namespace.if_none_match:
-        namespace = _if_none_match(namespace.if_none_match, namespace)
+        namespace = _if_none_match(if_none_match=namespace.if_none_match, **namespace)
         del namespace.if_none_match
