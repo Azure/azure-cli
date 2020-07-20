@@ -133,21 +133,6 @@ examples:
         az netappfiles account update -g mygroup --name myname --tags testtag2=mytagb
 """
 
-helps['netappfiles list-mount-targets'] = """
-type: command
-short-summary: List the mount targets of an Azure NetApp Files (ANF) volume.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --volume-name -v
-    short-summary: The name of the ANF pool
-examples:
-  - name: list the mount targets of an ANF volume
-    text: >
-        az netappfiles list-mount-targets -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname
-"""
 
 helps['netappfiles pool'] = """
 type: group
