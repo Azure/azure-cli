@@ -2382,8 +2382,8 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck('alwaysOn', False)])
 
-    @AllowLargeResponse(8192)
-    @ResourceGroupPreparer(name_prefix='cli_test_webapp_create_with_msi')
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='rg', random_name_length=6)
     def test_webapp_create_with_msi(self, resource_group):
         scope = '/subscriptions/{}/resourcegroups/{}'.format(
             self.get_subscription_id(), resource_group)
@@ -2395,18 +2395,17 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
         msi_result = self.cmd('identity create -g {} -n {}'.format(
             resource_group, identity_name)).get_output_in_json()
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        result = self.cmd('webapp create -g {} -n {} --plan {} --assign-identity [system] {}'.format(
-            resource_group, webapp_name, plan, msi_result['id'])).get_output_in_json()
-        result = self.cmd('webapp create -g {} -n {} --plan {} --assign-identity [system] {} --role {} --scope {}'.format(
-            resource_group, webapp_name, plan, msi_result['id'], role, scope)).get_output_in_json()
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            result = self.cmd('webapp create -g {} -n {} --plan {} --assign-identity [system] {} --role {} --scope {}'.format(
+                resource_group, webapp_name, plan, msi_result['id'], role, scope)).get_output_in_json()
 
         self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             self.check('principalId', result['identity']['principalId']),
             self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
         ])
         self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['identity']['principalId']), checks=[
-            JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].roleDefinitionName', role)
+            self.check('length([])', 1),
+            self.check('[0].roleDefinitionName', role)
         ])
 
 
