@@ -7,7 +7,22 @@ steps:
     inputs:
       versionSpec: ${{ parameters.pythonVersion }}
       displayName: "Use Python ${{ parameters.pythonVersion }}"
+<<<<<<< HEAD
   - template: ./azdev_setup.yml
+=======
+  - bash: |
+      set -ev
+
+      python -m venv env
+      chmod +x env/bin/activate
+      source env/bin/activate
+
+      pip install -q git+https://github.com/Azure/azure-cli-dev-tools.git@pep420
+      azdev --version
+
+      azdev setup -c ./
+    displayName: Setup Env
+>>>>>>> fix generic update problem
   - bash: |
       set -ev
 
