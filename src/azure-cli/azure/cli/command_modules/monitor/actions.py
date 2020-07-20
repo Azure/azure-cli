@@ -39,7 +39,7 @@ def timezone_offset_type(value):
         value = '+0{}'.format(hour)
     elif hour >= 10:
         value = '+{}'.format(hour)
-    elif -1 < hour < 0:
+    elif -10 < hour < 0:
         value = '-0{}'.format(-1 * hour)
     else:
         value = str(hour)
