@@ -163,7 +163,7 @@ class StorageArgumentContext(AzArgumentContext):
         self.extra('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform the "
                    "operation only if the resource's ETag matches the value specified.")
         self.extra('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
-                   "the operation only if the resource's ETag does not match the value specified. Specify the wildcard "          
+                   "the operation only if the resource's ETag does not match the value specified. Specify the wildcard "
                    "character (*) to perform the operation only if the resource does not exist, and fail the operation "
                    "if it does exist.", validator=validate_match_condition)
 
