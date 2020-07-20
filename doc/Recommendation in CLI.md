@@ -16,7 +16,7 @@ msrestazure.azure_exceptions.CloudError: Azure Error: AuthorizationFailed
 Message: The client 'xxx' with object id 'xxx' does not have authorization to perform action 'Microsoft.Resources/subscriptions/resourcegroups/write' over scope '/subscriptions/xxx' or the scope is invalid. If access was recently granted, please refresh your credentials.
 
 (env) PS C:\project> az next
-What kind of recommendation do you want? (1. operation 2. command 3. resource 4. service 5. mix): 1
+What kind of recommendation do you want? (1.operation 2.command 3.resource 4.service 5.mix): 1
 
 az role assignment create
 Recommended reason: 97% users create a new role assignment for a user, group, or service when this error is encountered
@@ -40,7 +40,7 @@ When a customer executes a command, it is recommended that other groups of comma
 Policy definition created successfully...
 
 (env) PS C:\project> az next
-What kind of recommendation do you want? (1. operation 2. command 3. resource 4. service 5. mix): 2
+What kind of recommendation do you want? (1.operation 2.command 3.resource 4.service 5.mix): 2
 
 az policy assignment create
 Recommended reason: 92% users create a policy assignment to assign policy after creating the policy
@@ -64,7 +64,7 @@ After a customer has created a certain type of resource, it is recommended to th
 VM created successfully...
 
 (env) PS C:\project> az next
-What kind of recommendation do you want? (1. operation 2. command 3. resource 4. service 5. mix): 3
+What kind of recommendation do you want? (1.operation 2.command 3.resource 4.service 5.mix): 3
 
 az policy definition create
 Recommended reason: 78% users create a policy to set the security policy after creating the VM
@@ -88,7 +88,7 @@ Dig into more E2E scenarios and recommend them to customers.
 Log-analytics workspace created successfully...
 
 (env) PS C:\project> az next
-What kind of recommendation do you want? (1. operation 2. command 3. resource 4. service 5. mix): 4
+What kind of recommendation do you want? (1.operation 2.command 3.resource 4.service 5.mix): 4
 
 az monitor log-analytics solution create
 Recommended reason: 72% users create a log-analytics solution to manage the workspace after creating the log-analytics workspace
