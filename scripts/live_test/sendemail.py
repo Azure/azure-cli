@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
+import os
+import json
 from sendgrid import SendGridAPIClient
 
 SENDGRID_KEY = sys.argv[1]
@@ -71,7 +73,61 @@ def get_content():
     :return:
     """
     link = 'https://dev.azure.com/azure-sdk/internal/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(BUILD_ID)
-    content = 'Hi Azure CLI team,<br>Test results of Azure CLI.<br>Repository: {}<br>Branch: {}<br>Link: {}'.format(USER_REPO, USER_BRANCH, link)
+    content = 'Hi Azure CLI team,<br>Here are test results of Azure CLI.<br>Repository: {}<br>Branch: {}<br>Link: {}<br>'.format(USER_REPO, USER_BRANCH, link)
+
+    passed_sum = failed_sum = 0
+
+    table = """
+    <p>Test results summary</p>
+    <table>
+      <tr>
+        <th>Module</th>
+        <th>Passed</th>
+        <th>Failed</th>
+        <th>Pass rate</th>
+      </tr>
+    """
+
+    # summary
+    for root, dirs, files in os.walk(ARTIFACT_DIR):
+        for name in files:
+            if name.endswith('json'):
+                try:
+                    module = name.split('.')[0]
+                    with open(os.path.join(root, name)) as f:
+                        result = json.loads(f.read())
+                        passed = failed = 0
+                        if 'passed' in result['summary']:
+                            passed = result['summary']['passed']
+                        if 'failed' in result['summary']:
+                            failed = result['summary']['failed']
+                        total = passed + failed
+                        rate = 1 if total == 0 else passed / total
+                        passed_sum += passed
+                        failed_sum += failed
+                        table += """
+                          <tr>
+                            <td>{}</td>
+                            <td>{}</td>
+                            <td>{}</td>
+                            <td>{}</td>
+                          </tr>
+                        """.format(module, passed, failed, rate)
+                except Exception:
+                    pass
+
+    table += """
+      <tr>
+        <td>Total</td>
+        <td>{}</td>
+        <td>{}</td>
+        <td>{}</td>
+      </tr>
+    </table>
+    """.format(passed_sum, failed_sum, passed_sum / (passed_sum + failed_sum))
+
+    content += table
+
     return content
 
 
