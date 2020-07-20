@@ -414,7 +414,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=' Indicate the number of days that the deleted item should be retained. The minimum specified '
                    'value can be 1 and the maximum value can be 365.')
         c.argument('enable_smb_multichannel', arg_type=get_three_state_flag(), min_api='2019-06-01',
-                   help='Set Multichannel setting for file service. Applies to Premium FileStorage only.')
+                   help='Set SMB Multichannel setting for file service. Applies to Premium FileStorage only.')
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
