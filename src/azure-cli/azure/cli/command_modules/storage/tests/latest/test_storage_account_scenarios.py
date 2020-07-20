@@ -1007,7 +1007,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix='cli_file_smb')
-    @StorageAccountPreparer(name_prefix='filesmb', kind='StorageV2', location='eastus2euap')
+    @StorageAccountPreparer(name_prefix='filesmb', kind='FileStorage', sku='Premium_LRS', location='centraluseuap')
     def test_storage_account_file_smb_multichannel(self, resource_group, storage_account):
         self.kwargs.update({
             'sa': storage_account,
