@@ -28,7 +28,7 @@ class AmsLiveEventTests(ScenarioTest):
             'previewLocator': self.create_guid(),
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
-            'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
+            'accessToken': str(self.create_guid()).replace("-", ""),
             'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
             'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
         })
