@@ -66,9 +66,16 @@ VM created successfully...
 (env) PS C:\project> az next
 What kind of recommendation do you want? (1.operation 2.command 3.resource 4.service 5.mix): 3
 
-az policy definition create
+1. az policy definition create
 Recommended reason: 78% users create a policy to set the security policy after creating the VM
-Does it help for you? (y/n): y
+
+2. az network vnet create
+Recommended reason: 67% users create a vnet to manage virtual networks after creating the VM
+
+3. az group create 
+Recommended reason: 54% users create a resource group to manage resources after creating the VM
+
+Which one is helpful to you? (If none, please input 0) : 2
 
 Do you want to do it immediately? (y/n): y
 
