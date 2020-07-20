@@ -15,7 +15,6 @@ import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
-import requests
 from pkg_resources import parse_version
 
 from azure.cli.core import CommandIndex
@@ -64,6 +63,7 @@ def _run_pip(pip_exec_args, extension_path=None):
 
 
 def _whl_download_from_url(url_parse_result, ext_file):
+    import requests
     from azure.cli.core.util import should_disable_connection_verify
     url = url_parse_result.geturl()
     r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
@@ -106,6 +106,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         tmp_dir = tempfile.mkdtemp()
         ext_file = os.path.join(tmp_dir, whl_filename)
         logger.debug('Downloading %s to %s', source, ext_file)
+        import requests
         try:
             cli_ctx.get_progress_controller().add(message='Downloading')
             _whl_download_from_url(url_parse_result, ext_file)
@@ -288,8 +289,9 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cli_ctx, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension(cmd=None, extension_name=None, cli_ctx=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
     try:
+        cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
@@ -306,7 +308,7 @@ def update_extension(cli_ctx, extension_name, index_url=None, pip_extra_index_ur
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(cli_ctx=cli_ctx, source=download_url, ext_sha256=ext_sha256,
+            _add_whl_ext(cli_ctx=cmd_cli_ctx, source=download_url, ext_sha256=ext_sha256,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)
