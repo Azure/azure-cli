@@ -2058,7 +2058,7 @@ examples:
   - name: Create a template spec version.
     text: az template-specs create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --vdescription "Less simple template spec"
   - name: Create a template spec and a version of the template spec.
-    text: az template-specs create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "SimpleTemplate" --description "Basic template spec" -vdescription "Version of basic template spec"
+    text: az template-specs create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "SimpleTemplate" --description "Basic template spec" --vdescription "Version of basic template spec"
   - name: Update an existing template spec.
     text: az template-specs create -g testrg -n MyTemplateSpecName -l WestUS -v 1.0 -f updatedFile.json
 """
