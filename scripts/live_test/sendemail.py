@@ -72,8 +72,28 @@ def get_content():
     Compose content of email
     :return:
     """
+    content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    </style>
+    </head>
+    <body>
+    """
+
     link = 'https://dev.azure.com/azure-sdk/internal/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(BUILD_ID)
-    content = 'Hi Azure CLI team,<br>Here are test results of Azure CLI.<br>Repository: {}<br>Branch: {}<br>Link: {}<br>'.format(USER_REPO, USER_BRANCH, link)
+    content += """
+    <p>Hi Azure CLI team,</p>
+    Here are test results of Azure CLI.<br>
+    Repository: {}<br>
+    Branch: {}<br>
+    Link: {}<br>
+    """.format(USER_REPO, USER_BRANCH, link)
 
     passed_sum = failed_sum = 0
 
@@ -127,6 +147,11 @@ def get_content():
     """.format(passed_sum, failed_sum, passed_sum / (passed_sum + failed_sum))
 
     content += table
+
+    content += """
+    </body>
+    </html>
+    """
 
     return content
 
