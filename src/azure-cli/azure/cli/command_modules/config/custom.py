@@ -18,9 +18,7 @@ def _normalize_config_value(value):
 
 
 def config_set(cmd, key_value=None, local=False):
-    from azure.cli.core.cloud import cloud_forbid_telemetry, get_active_cloud_name
     if key_value:
-        defaults_section = cmd.cli_ctx.config.defaults_section_name
         with ScopedConfig(cmd.cli_ctx.config, local):
             for kv in key_value:
                 # core.no_color=true
@@ -67,12 +65,12 @@ def config_get(cmd, key=None, local=False):
     if not name:
         # Only section
         return items
-    else:
-        # section.option
-        try:
-            return next(x for x in items if x['name']==name)
-        except StopIteration:
-            raise CLIError("Configuration '{}' is not set.".format(key))
+
+    # section.option
+    try:
+        return next(x for x in items if x['name'] == name)
+    except StopIteration:
+        raise CLIError("Configuration '{}' is not set.".format(key))
 
 
 def config_unset(cmd, key=None, local=False):
@@ -82,9 +80,9 @@ def config_unset(cmd, key=None, local=False):
 
         if len(parts) == 1:
             raise CLIError("usage error: [section].[name]")
-        else:
-            section = parts[0]
-            name = parts[1]
+
+        section = parts[0]
+        name = parts[1]
 
         with ScopedConfig(cmd.cli_ctx.config, local):
             cmd.cli_ctx.config.remove_option(section, name)

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 
 
 def load_arguments(self, _):
