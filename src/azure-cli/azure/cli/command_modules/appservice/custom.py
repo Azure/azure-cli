@@ -87,13 +87,25 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:
         plan_info = client.app_service_plans.get(resource_group_name, plan)
     if not plan_info:
-        raise CLIError("The plan '{}' doesn't exist".format(plan))
+        raise CLIError("The plan '{}' doesn't exist in the resource group '{}".format(plan, resource_group_name))
     is_linux = plan_info.reserved
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     name_validation = client.check_name_availability(name, 'Site')
     if not name_validation.name_available:
+        if name_validation.reason == 'Invalid':
+            raise CLIError(name_validation.message)
+        logger.warning("Webapp '%s' already exists. The command will use the existing app's settings.", name)
+        app_details = get_app_details(cmd, name)
+        if app_details is None:
+            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that "
+                           "the app is a part of the current subscription".format(name))
+        current_rg = app_details.resource_group
+        if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
+            raise CLIError("The webapp '{}' exists in resource group '{}' and does not "
+                           "match the value entered '{}'. Please re-run command with the "
+                           "correct parameters.". format(name, current_rg, resource_group_name))
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
                                                         name, 'list_application_settings')
         settings = []
@@ -3405,15 +3417,16 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         if _site_availability.reason == 'Invalid':
             raise CLIError(_site_availability.message)
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
-        logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
+        logger.warning("Webapp '%s' already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
         if app_details is None:
-            raise CLIError("Unable to retrieve details of the existing app {}. Please check that the app is a part of "
-                           "the current subscription".format(name))
+            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that the app "
+                           "is a part of the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
-            raise CLIError("The webapp {} exists in ResourceGroup {} and does not match the value entered {}. Please "
-                           "re-run command with the correct parameters.". format(name, current_rg, resource_group_name))
+            raise CLIError("The webapp '{}' exists in ResourceGroup '{}' and does not "
+                           "match the value entered '{}'. Please re-run command with the "
+                           "correct parameters.". format(name, current_rg, resource_group_name))
         rg_name = resource_group_name or current_rg
         if location is None:
             loc = app_details.location.replace(" ", "").lower()
@@ -3422,7 +3435,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         plan_details = parse_resource_id(app_details.server_farm_id)
         current_plan = plan_details['name']
         if plan is not None and current_plan.lower() != plan.lower():
-            raise CLIError("The plan name entered {} does not match the plan name that the webapp is hosted in {}."
+            raise CLIError("The plan name entered '{}' does not match the plan name that the webapp is hosted in '{}'."
                            "Please check if you have configured defaults for plan name and re-run command."
                            .format(plan, current_plan))
         plan = plan or plan_details['name']
@@ -3431,7 +3444,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         current_os = 'Linux' if plan_info.reserved else 'Windows'
         # Raise error if current OS of the app is different from the current one
         if current_os.lower() != os_name.lower():
-            raise CLIError("The webapp {} is a {} app. The code detected at '{}' will default to "
+            raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                            "'{}'. "
                            "Please create a new app to continue this operation.".format(name, current_os, src_dir, os))
         _is_linux = plan_info.reserved
@@ -3439,7 +3452,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         # Get site config to check the runtime version
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
-        logger.warning("webapp %s doesn't exist", name)
+        logger.warning("The webapp '%s' doesn't exist", name)
         sku = get_sku_to_use(src_dir, html, sku)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
