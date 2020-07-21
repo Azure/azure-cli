@@ -502,18 +502,46 @@ class ProviderOperationTest(ScenarioTest):
 
 
 class TemplateSpecsTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
+    def test_list_template_spec(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
+        self.kwargs.update({
+            'resource_group_location': resource_group_location,   
+            'template_spec_name': template_spec_name,
+            'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
+        })
+
+        # ts_cnt = self.cmd("template-specs list --query \"length([])\"").get_output_in_json() or 0
+        # ts_rg_cnt = self.cmd(" template-specs list -g {rg} --query \"length([])\"").get_output_in_json() or 0
+        
+        ts_cnt = len(self.cmd('template-specs list').get_output_in_json())
+        ts_rg_cnt = len(self.cmd('template-specs list -g {rg}').get_output_in_json())
+
+
+        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0  -l {resource_group_location} -f {template_file}') 
+
+        self.cmd('template-specs list',
+                 checks=self.check("length([])", (ts_cnt+2)))
+        self.cmd('template-specs list -g {rg}',
+                 checks=self.check("length([])", (ts_rg_cnt+1)))
+        
+        self.cmd('template-specs delete -g {rg} -n {template_spec_name} --yes')   
+           
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
     def test_create_or_update_template_specs(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-create-template-spec', 20)
+        template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
         self.kwargs.update({
             'template_spec_name': template_spec_name,
             'template_spec_version': '1.0',
             'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
             'resource_group_location': resource_group_location,
-            'display_name': self.create_random_name('create-spec', 10),
+            'display_name': self.create_random_name('create-spec', 20),
             'description': '"AzCLI test root template spec"',
             'ver_description': '"AzCLI test version of root template spec"',
+            'template_spec_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name, 
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
         })
 
@@ -523,47 +551,27 @@ class TemplateSpecsTest(ScenarioTest):
             self.check('artifacts[0].path', 'artifacts\\createResourceGroup.json'),
             self.check('artifacts[1].path', 'artifacts\\createKeyVault.json'),
             self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json')
-        ])
+        ])  
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
-    def test_list_template_spec(self, resource_group, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-list-template-spec', 20)
-        self.kwargs.update({
-            'resource_group_location': resource_group_location,   
-            'template_spec_name': template_spec_name,
-            'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
-        })
-
-        ts_cnt = self.cmd("template-specs list --query \"length([])\"").get_output_in_json() or 0
-        ts_rg_cnt = self.cmd(" template-specs list -g {rg} --query \"length([])\"").get_output_in_json() or 0
-
-        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0  -l {resource_group_location} -f {template_file}') 
-       
-        ts_cnt += 2
-        ts_rg_cnt += 2
-
-        self.cmd('template-specs list',
-                 checks=self.check("length([])", ts_cnt))
-        self.cmd('template-specs list -g {rg}',
-                 checks=self.check("length([])", ts_rg_cnt))
-                 
+        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')    
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
     def test_get_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-get-template-spec', 20)
+        template_spec_name = self.create_random_name('cli-test-get-template-spec', 60)
         self.kwargs.update({
             'template_spec_name': template_spec_name,
             'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
             'resource_group_location': resource_group_location,
+            'template_spec_version': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name ,
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
         })
 
-        self.cmd('template-specs get --template-spec {template_spec_version_id} ',
-                                  checks=self.is_empty())
-        self.cmd('template-specs get -g {rg} --name {template_spec_name} --version {template_spec_version}',
-                                  checks=self.is_empty())
+        self.cmd('template-specs list -g {rg}',
+                 checks=self.check("length([?id=='{template_spec_version}'])", 0))
+
+        self.cmd('template-specs list -g {rg}',
+                 checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
 
         self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {template_file}') 
        
@@ -573,29 +581,27 @@ class TemplateSpecsTest(ScenarioTest):
         assert len(ts_cnt_by_id) > 0
         assert len(ts_cnt) == len(ts_cnt_by_id)
 
+        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
     def test_export_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-export-template-spec', 10)
+        dir_name = self.create_random_name('TemplateSpecExport', 30)
+        dir_name2 = self.create_random_name('TemplateSpecExport', 30)
+        template_spec_name = self.create_random_name('cli-test-export-template-spec', 60)
         self.kwargs.update({
             'template_spec_name': template_spec_name,
             'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
             'resource_group_location': resource_group_location,
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
+            'output_folder': os.path.join(curr_dir, dir_name).replace('\\', '\\\\'),
+            'output_folder2': os.path.join(curr_dir, dir_name2).replace('\\', '\\\\'),
         })
 
         self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {template_file}') 
-       
-        dir_name = self.create_random_name('TemplateSpecExport', 10)
-        dir_name2 = self.create_random_name('TemplateSpecExport', 10)
-        output_folder = os.path.join(curr_dir, dir_name).replace('\\', '\\\\')
-        output_folder2 = os.path.join(curr_dir, dir_name2).replace('\\', '\\\\')
-
     
-        os.makedirs(output_folder)
-        output_path = self.cmd('template-specs export -g {rg} --name {template_spec_name} --version {template_spec_version} --output_folder {output_folder}').get_output_in_json()
-        assert output_path == output_folder
+        os.makedirs(self.kwargs['output_folder'])
+        output_path = self.cmd('template-specs export -g {rg} --name {template_spec_name} --version 1.0 --output-folder {output_folder}').get_output_in_json()
 
         template_file = os.path.join(output_path, (self.kwargs['template_spec_name'] + '.json'))
         artifactFile = os.path.join(output_path, 'artifacts\\createResourceGroup.json')
@@ -607,9 +613,8 @@ class TemplateSpecsTest(ScenarioTest):
         self.assertTrue(os.path.isfile(artifactFile1))
         self.assertTrue(os.path.isfile(artifactFile2))
 
-        os.makedirs(output_folder2)
-        output_path2 = self.cmd('template-specs export --template-spec {template_spec_version_id} --output_folder {output_folder2}').get_output_in_json()
-        assert output_path2 == output_folder2
+        os.makedirs(self.kwargs['output_folder2'])
+        output_path2 = self.cmd('template-specs export --template-spec {template_spec_version_id} --output-folder {output_folder2}').get_output_in_json()
 
         _template_file = os.path.join(output_path2, (self.kwargs['template_spec_name'] + '.json'))
         _artifactFile = os.path.join(output_path2, 'artifacts\\createResourceGroup.json')
@@ -624,30 +629,28 @@ class TemplateSpecsTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
     def test_delete_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-list-template-spec', 20)
+        template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
         self.kwargs.update({
             'resource_group': resource_group,
             'resource_group_location': resource_group_location,   
             'template_spec_name': template_spec_name,
-            'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
+            'tf': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
             'template_spec_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name,
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
         })
 
-        self.cmd('template-specs get --template-spec {template_spec_version_id}',
-                 checks=self.is_empty())
-        self.cmd('template-specs get --template-spec {template_spec_id}',
-                 checks=self.is_empty())
+        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0  -l {resource_group_location} -f {tf}') 
+        self.cmd('template-specs get --template-spec {template_spec_version_id}')
+        self.cmd('template-specs get --template-spec {template_spec_id}')
 
-        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0  -l {resource_group_location} -f {template_file}') 
+        self.cmd('template-specs delete --template-spec {template_spec_version_id} --yes')
+        self.cmd('template-specs list -g {rg}',
+                 checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
 
-        self.cmd('template-specs delete --template-spec {template_spec_version_id}')
-        self.cmd('template-specs get --template-spec {template_spec_version_id}',
-                 checks=self.is_empty())
+        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
+        self.cmd('template-specs list -g {rg}',
+                 checks=self.check("length([?id=='{template_spec_id}'])", 0))
 
-        self.cmd('template-specs delete -g {rg} --name {template_spec_name}')
-        self.cmd('template-specs get --template-spec {template_spec_id}',
-                 checks=self.is_empty())
 
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
     def tearDown(self):
@@ -658,7 +661,6 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
     @AllowLargeResponse(4096)
     def test_subscription_level_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-sub-template-spec-deploy', 20)
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
@@ -675,8 +677,6 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
-
-        self.cmd('deployment sub validate --location WestUS')
 
         self.cmd('deployment sub create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
@@ -708,6 +708,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('deployment sub show -n {dn2}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
+
 
     @AllowLargeResponse(4096)
     def test_subscription_level_deployment_old_command(self):
@@ -1361,7 +1362,7 @@ class DeploymentAtSubscriptionScopeTemplateSpecs(ScenarioTest):
     @AllowLargeResponse(4096)
     def test_subscription_level_deployment_ts(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-sub-lvl-ts-deploy', 20)
+        template_spec_name = self.create_random_name('cli-test-sub-lvl-ts-deploy', 60)
         self.kwargs.update({
             'template_spec_name': template_spec_name,
             'resource_group_location': resource_group_location,
@@ -1421,7 +1422,7 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs_resource_group_deployment')
     def test_resource_group_deployment_ts(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-resource-group-ts-deploy', 20)
+        template_spec_name = self.create_random_name('cli-test-resource-group-ts-deploy', 60)
         self.kwargs.update({
             'template_spec_name': template_spec_name,
             'resource_group_location': resource_group_location,
@@ -1473,7 +1474,7 @@ class DeploymentTestAtManagementGroupTemplateSpecs(ScenarioTest):
       
     def test_management_group_deployment_ts(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-mg-ts-deploy', 20)
+        template_spec_name = self.create_random_name('cli-test-mg-ts-deploy', 60)
         self.kwargs.update({
             'template_spec_name': template_spec_name,
             'resource_group_location': resource_group_location,
@@ -1528,7 +1529,7 @@ class DeploymentTestAtManagementGroupTemplateSpecs(ScenarioTest):
 class DeploymentTestAtTenantScopeTemplateSpecs(ScenarioTest):
 
     def test_tenant_level_deployment_ts(self, resource_group, resource_group_location):
-        template_spec_name = self.create_random_name('template-spec-tenant-level', 40)
+        template_spec_name = self.create_random_name('template-spec-tenant-level', 60)
         resource_group = resource_group
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
