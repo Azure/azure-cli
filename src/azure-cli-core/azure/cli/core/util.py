@@ -609,7 +609,7 @@ def get_default_admin_username():
     except KeyError:
         username = None
     if username is None or username.lower() in DISALLOWED_USER_NAMES:
-        logger.warning('Default username {} is a reserved username. Use azureuser instead.'.format(username))
+        logger.warning('Default username %s is a reserved username. Use azureuser instead.', username)
         username = 'azureuser'
     return username
 
