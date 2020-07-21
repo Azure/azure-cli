@@ -6,6 +6,8 @@
 import sys
 import os
 import json
+import traceback
+
 from sendgrid import SendGridAPIClient
 
 SENDGRID_KEY = sys.argv[1]
@@ -64,7 +66,7 @@ def main():
         print(response.body)
         print(response.headers)
     except Exception as e:
-        print(e.message)
+        traceback.print_exc()
 
 
 def get_content():
@@ -153,6 +155,7 @@ def get_content():
     </html>
     """
 
+    print(content)
     return content
 
 
