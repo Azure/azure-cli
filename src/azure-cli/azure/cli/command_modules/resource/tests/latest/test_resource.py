@@ -130,56 +130,56 @@ class ResourceLinkScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', num_link - 1))
 
 
-# class ResourceScenarioTest(ScenarioTest):
+class ResourceScenarioTest(ScenarioTest):
 
-#     @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')
-#     @AllowLargeResponse()
-#     def test_resource_scenario(self, resource_group, resource_group_location):
-#         self.kwargs.update({
-#             'loc': resource_group_location,
-#             'vnet': self.create_random_name('vnet-', 30),
-#             'subnet': self.create_random_name('subnet-', 30),
-#             'rt': 'Microsoft.Network/virtualNetworks'
-#         })
-#         vnet_count = self.cmd("resource list --query \"length([?name=='{vnet}'])\"").get_output_in_json() or 0
-#         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet} --tags cli-test=test')
-#         vnet_count += 1
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')
+    @AllowLargeResponse()
+    def test_resource_scenario(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vnet': self.create_random_name('vnet-', 30),
+            'subnet': self.create_random_name('subnet-', 30),
+            'rt': 'Microsoft.Network/virtualNetworks'
+        })
+        vnet_count = self.cmd("resource list --query \"length([?name=='{vnet}'])\"").get_output_in_json() or 0
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet} --tags cli-test=test')
+        vnet_count += 1
 
-#         self.cmd('resource list',
-#                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-#         self.cmd('resource list -l {loc}',
-#                  checks=self.check("length([?location == '{loc}']) == length(@)", True))
-#         self.cmd('resource list --resource-type {rt}',
-#                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-#         self.cmd('resource list --name {vnet}',
-#                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-#         self.cmd('resource list --tag cli-test',
-#                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-#         self.cmd('resource list --tag cli-test=test',
-#                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list -l {loc}',
+                 checks=self.check("length([?location == '{loc}']) == length(@)", True))
+        self.cmd('resource list --resource-type {rt}',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --name {vnet}',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --tag cli-test',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --tag cli-test=test',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
 
-#         # check for simple resource with tag
-#         self.cmd('resource show -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks', checks=[
-#             self.check('name', '{vnet}'),
-#             self.check('location', '{loc}'),
-#             self.check('resourceGroup', '{rg}'),
-#             self.check('tags', {'cli-test': 'test'})
-#         ])
-#         # check for child resource
-#         self.cmd('resource show -n {subnet} -g {rg} --namespace Microsoft.Network --parent virtualNetworks/{vnet} --resource-type subnets', checks=[
-#             self.check('name', '{subnet}'),
-#             self.check('resourceGroup', '{rg}')
-#         ])
+        # check for simple resource with tag
+        self.cmd('resource show -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks', checks=[
+            self.check('name', '{vnet}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('tags', {'cli-test': 'test'})
+        ])
+        # check for child resource
+        self.cmd('resource show -n {subnet} -g {rg} --namespace Microsoft.Network --parent virtualNetworks/{vnet} --resource-type subnets', checks=[
+            self.check('name', '{subnet}'),
+            self.check('resourceGroup', '{rg}')
+        ])
 
-#         # clear tag and verify
-#         self.cmd('resource tag -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks --tags')
-#         self.cmd('resource show -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks',
-#                  checks=self.check('tags', {}))
+        # clear tag and verify
+        self.cmd('resource tag -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks --tags')
+        self.cmd('resource show -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks',
+                 checks=self.check('tags', {}))
 
-#         # delete and verify
-#         self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt}')
-#         time.sleep(10)
-#         self.cmd('resource list', checks=self.check("length([?name=='{vnet}'])", 0))
+        # delete and verify
+        self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt}')
+        time.sleep(10)
+        self.cmd('resource list', checks=self.check("length([?name=='{vnet}'])", 0))
 
 
 class ResourceIDScenarioTest(ScenarioTest):
