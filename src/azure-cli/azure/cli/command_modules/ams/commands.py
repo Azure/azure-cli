@@ -61,7 +61,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams account mru', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_show_command('show', 'get_mru',
-                         custom_command_type=get_custom_sdk('mru', None))
+                              custom_command_type=get_custom_sdk('mru', None))
         g.custom_command('set', 'set_mru',
                          custom_command_type=get_custom_sdk('mru', None))
 
@@ -222,7 +222,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_live_output',
                          custom_command_type=get_custom_sdk('live_output', get_live_outputs_client))
         g.custom_show_command('show', 'get_live_output',
-                         custom_command_type=get_custom_sdk('live_output', get_live_outputs_client))
+                              custom_command_type=get_custom_sdk('live_output', get_live_outputs_client))
         g.command('list', 'list')
         g.command('delete', 'delete')
 
