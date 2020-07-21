@@ -331,7 +331,7 @@ def _build_sp_result(subscription_id, location, resource_group_name, account_nam
                      tenant, app_id, sp_name, sp_password, management_endpoint,
                      active_directory_endpoint, resource_manager_endoint, role, xml):
     if not sp_password:
-        sp_password = "Cannot redisplay resecret. Please use reset-credentials to generate a new secret."
+        sp_password = "Cannot redisplay secret. Please use reset-credentials to generate a new secret."
 
     result = {
         'SubscriptionId': subscription_id,
