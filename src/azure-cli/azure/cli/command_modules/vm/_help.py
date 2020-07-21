@@ -1384,6 +1384,15 @@ examples:
     crafted: true
 """
 
+helps['vm host group get-instance-view'] = """
+type: command
+short-summary: Get instance view of a dedicated host group.
+examples:
+  - name: Get instance view of a dedicated host group
+    text: |
+        az vm host group get-instance-view --name MyDedicatedHostGroup --resource-group MyResourceGroup
+"""
+
 helps['vm host group update'] = """
 type: command
 short-summary: Update a dedicated host group.

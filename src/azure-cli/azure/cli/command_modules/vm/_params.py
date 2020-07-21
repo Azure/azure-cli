@@ -478,7 +478,7 @@ def load_arguments(self, _):
     with self.argument_context('vm host group') as c:
         c.argument('host_group_name', name_arg_type, id_part='name', help="Name of the Dedicated Host Group")
         c.argument('automatic_placement', arg_type=get_three_state_flag(), min_api='2020-06-01',
-                   help='Specifies whether virtual machines or virtual machine scale sets can be placed automatically '
+                   help='Specify whether virtual machines or virtual machine scale sets can be placed automatically '
                         'on the dedicated host group. Automatic placement means resources are allocated on dedicated '
                         'hosts, that are chosen by Azure, under the dedicated host group. The value is defaulted to '
                         'true when not provided.')
