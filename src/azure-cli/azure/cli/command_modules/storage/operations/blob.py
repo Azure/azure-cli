@@ -641,3 +641,43 @@ def set_blob_tier_v2(client, container_name, blob_name, tier, blob_type='block',
     if blob_type == 'page':
         return client.set_premium_page_blob_tier(premium_page_blob_tier=tier, timeout=timeout)
     raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def copy_blob(cmd, client, copy_source, container_name, blob_name, destination_lease_id=None, metadata=None,
+              requires_sync=None, timeout=None, source_lease_id=None, destination_if_match=None,
+              destination_if_modified_since=None, destination_if_none_match=None, destination_if_unmodified_since=None,
+              source_if_match=None, source_if_modified_since=None, source_if_none_match=None,
+              source_if_unmodified_since=None):
+
+    lease_access_conditions = cmd.get_models('_generated.models._models#LeaseAccessConditions',
+                                             resource_type=ResourceType.DATA_STORAGE_BLOB)
+    lease_access_conditions.lease_id = destination_lease_id
+
+    modified_access_conditions = cmd.get_models('_generated.models._models#ModifiedAccessConditions',
+                                                resource_type=ResourceType.DATA_STORAGE_BLOB)
+    modified_access_conditions.if_match = destination_if_match
+    modified_access_conditions.if_modified_since = destination_if_modified_since
+    modified_access_conditions.if_none_match = destination_if_none_match
+    modified_access_conditions.if_unmodified_since = destination_if_unmodified_since
+
+    source_modified_access_conditions = cmd.get_models('_generated.models._models#SourceModifiedAccessConditions',
+                                                       resource_type=ResourceType.DATA_STORAGE_BLOB)
+    source_modified_access_conditions.source_if_match = source_if_match
+    source_modified_access_conditions.source_if_modified_since = source_if_modified_since
+    source_modified_access_conditions.source_if_none_match = source_if_none_match
+    source_modified_access_conditions.source_if_unmodified_since = source_if_unmodified_since
+
+    kwargs = {
+        'modified_access_conditions': modified_access_conditions,
+        'lease_access_conditions': lease_access_conditions,
+        'source_modified_access_conditions': source_modified_access_conditions
+    }
+
+    if requires_sync is not None:
+        kwargs['requires_sync'] = requires_sync
+    if source_lease_id is not None:
+        kwargs['source_lease_id'] = source_lease_id
+    if timeout is not None:
+        kwargs['timeout'] = timeout
+
+    return client.start_copy_from_url(source_url=copy_source, metadata=metadata, **kwargs)

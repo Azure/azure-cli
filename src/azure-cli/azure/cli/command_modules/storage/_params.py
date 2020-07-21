@@ -685,6 +685,68 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from azure.cli.command_modules.storage._validators import validate_source_uri
 
         c.register_source_uri_arguments(validator=validate_source_uri)
+        c.argument('destination_lease_id', help='The lease ID specified for this header must match the '
+                                                'lease ID of the destination blob. If the request does not include '
+                                                'the lease ID or it is not valid, the operation fails with '
+                                                'status code 412 (Precondition Failed).')
+        c.argument('requires_sync', help='Enforces that the service will not return a response until '
+                                         'the copy is complete.')
+        c.argument('source_lease_id', arg_group='Copy Source', help='Specify this to perform the Copy Blob operation '
+                                                                    'only if the lease ID given matches the active '
+                                                                    'lease ID of the source blob.')
+        c.argument('destination_if_match', help='An ETag value, or the wildcard character (*). Specify an ETag value '
+                                                'for this conditional header to copy the blob only if the specified '
+                                                'ETag value matches the ETag value for an existing destination blob. '
+                                                'If the ETag for the destination blob does not match the ETag '
+                                                'specified for If-Match, the Blob service returns status code 412 '
+                                                '(Precondition Failed).')
+        c.argument('destination_if_modified_since', help='A DateTime value. Azure expects the date value passed in '
+                                                         'to be UTC. If timezone is included, any non-UTC datetimes '
+                                                         'will be converted to UTC. If a date is passed in without '
+                                                         'timezone info, it is assumed to be UTC. Specify this '
+                                                         'conditional header to copy the blob only if the destination '
+                                                         'blob has been modified since the specified date/time. '
+                                                         'If the destination blob has not been modified, '
+                                                         'the Blob service returns status code 412 '
+                                                         '(Precondition Failed).')
+        c.argument('destination_if_none_match', help='An ETag value, or the wildcard character (*). Specify an ETag '
+                                                     'value for this conditional header to copy the blob only if the '
+                                                     'specified ETag value does not match the ETag value for the '
+                                                     'destination blob. Specify the wildcard character (*) to perform '
+                                                     'the operation only if the destination blob does not exist. '
+                                                     'If the specified condition isn\'t met, the Blob service returns '
+                                                     'status code 412 (Precondition Failed).')
+        c.argument('destination_if_unmodified_since', help='A DateTime value. Azure expects the date value passed in '
+                                                           'to be UTC. If timezone is included, any non-UTC datetimes '
+                                                           'will be converted to UTC. If a date is passed in without '
+                                                           'timezone info, it is assumed to be UTC. Specify this '
+                                                           'conditional header to copy the blob only if the '
+                                                           'destination blob has not been modified since the '
+                                                           'specified date/time. If the destination blob has been '
+                                                           'modified, the Blob service returns status code 412 '
+                                                           '(Precondition Failed).')
+        c.argument('source_if_match', help='An ETag value, or the wildcard character (*). Specify this conditional '
+                                           'header to copy the source blob only if its ETag matches the value '
+                                           'specified. If the ETag values do not match, the Blob service returns '
+                                           'status code 412 (Precondition Failed). This header cannot be specified '
+                                           'if the source is an Azure File.')
+        c.argument('source_if_modified_since', help='A DateTime value. Azure expects the date value passed in to be '
+                                                    'UTC. If timezone is included, any non-UTC datetimes will be '
+                                                    'converted to UTC. If a date is passed in without timezone info, '
+                                                    'it is assumed to be UTC. Specify this conditional header to copy '
+                                                    'the blob only if the source blob has been modified since the '
+                                                    'specified date/time.')
+        c.argument('source_if_none_match', help='An ETag value, or the wildcard character (*). Specify this '
+                                                'conditional header to copy the blob only if its ETag does not match '
+                                                'the value specified. If the values are identical, the Blob service '
+                                                'returns status code 412 (Precondition Failed). This header cannot be '
+                                                'specified if the source is an Azure File.')
+        c.argument('source_if_unmodified_since', help='A DateTime value. Azure expects the date value passed in to '
+                                                      'be UTC. If timezone is included, any non-UTC datetimes will be '
+                                                      'converted to UTC. If a date is passed in without timezone '
+                                                      'info, it is assumed to be UTC. Specify this conditional header '
+                                                      'to copy the blob only if the source blob has not been modified '
+                                                      'since the specified date/time.')
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client

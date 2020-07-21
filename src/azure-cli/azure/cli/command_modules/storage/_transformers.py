@@ -229,3 +229,16 @@ def transform_immutability_policy(result):
     if result.immutability_period_since_creation_in_days:
         return result
     return None
+
+
+def transform_copy_blob(result):
+    result = todict(result)
+    new_result = {
+        "completionTime": result.pop('date', None),
+        "id": result.pop('copy_id', None),
+        "progress": None,
+        "source": None,
+        "status": result.pop('copy_status', None),
+        "statusDescription": None,
+    }
+    return new_result
