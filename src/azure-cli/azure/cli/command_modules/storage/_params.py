@@ -235,7 +235,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'platform managed keys for data at rest.')
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default interpretation is true for this property.')
+                   'The default value for this property is null, which is equivalent to true. When true, containers '
+                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'not enable anonymous access to any data in the account. The additional step of configuring the '
+                   'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
@@ -281,7 +284,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default interpretation is true for this property.')
+                   'The default value for this property is null, which is equivalent to true. When true, containers '
+                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'not enable anonymous access to any data in the account. The additional step of configuring the '
+                   'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
