@@ -50,11 +50,12 @@ def load_command_table(self, _):
     # Management Plane Commands
     with self.command_group('keyvault', mgmt_vaults_entity.command_type,
                             client_factory=mgmt_vaults_entity.client_factory) as g:
-        g.custom_command('create', 'create_keyvault',
+        g.custom_command('create', 'create_vault_or_hsm',
                          doc_string_source=mgmt_vaults_entity.models_docs_tmpl.format('VaultProperties'))
         g.custom_command('recover', 'recover_keyvault')
         g.custom_command('list', 'list_keyvault')
-        g.show_command('show', 'get', doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('get'))
+        g.custom_show_command('show', 'get_vault_or_hsm',
+                              doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('get'))
         g.command('delete', 'delete')
         g.command('purge', 'purge_deleted')
         g.custom_command('set-policy', 'set_policy')

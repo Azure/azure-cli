@@ -12,12 +12,14 @@ class Clients(str, Enum):
     vaults = 'vaults'
     private_endpoint_connections = 'private_endpoint_connections'
     private_link_resources = 'private_link_resources'
+    managed_hsms = 'managed_hsms'
 
 
 OPERATIONS_NAME = {
     Clients.vaults: 'VaultsOperations',
     Clients.private_endpoint_connections: 'PrivateEndpointConnectionsOperations',
-    Clients.private_link_resources: 'PrivateLinkResourcesOperations'
+    Clients.private_link_resources: 'PrivateLinkResourcesOperations',
+    Clients.managed_hsms: 'ManagedHsmsOperations'
 }
 
 KEYVAULT_TEMPLATE_STRINGS = {

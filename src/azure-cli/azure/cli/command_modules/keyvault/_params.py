@@ -75,7 +75,7 @@ def load_arguments(self, _):
         help='Name of the Key Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None,
         completer=get_resource_name_completion_list('Microsoft.KeyVault/vaults'))
 
-    hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --vault-name are mutually exclusive, '
+    hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --vault-name/--name are mutually exclusive, '
                                          'please specify just one of them)',
                                     options_list=['--hsm-name'], id_part=None, is_preview=True)
 
@@ -102,15 +102,25 @@ def load_arguments(self, _):
         c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction),
                    help='Default action to apply when no rule matches.')
 
+    with self.argument_context('keyvault show') as c:
+        c.argument('hsm_name', hsm_name_type)
+
     with self.argument_context('keyvault create') as c:
         c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
-        c.argument('vault_name', completer=None)
-        c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
+        c.argument('vault_name', options_list=['--name', '-n'])
+        c.argument('hsm_name', hsm_name_type)
+        c.argument('administrators', nargs='+',
+                   help='Administrator role for data plane operations for Managed HSM. It accepts a space separated '
+                        'list of OIDs that will be assigned. Only valid when --hsm-name is used.')
+        c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'
+                               ' Allowed values for Managed HSM: Standard_B1, Standard_B2, Standard_B32, Basic_B1.'
+                               ' Default: Standard_B1')
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
                    help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('enable_soft_delete', arg_type=get_three_state_flag())
-        c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
+        c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90. '
+                                          'Only valid when --name/-n is used', default='90')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,

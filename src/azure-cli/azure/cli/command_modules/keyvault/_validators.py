@@ -23,21 +23,37 @@ def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 
-def _get_resource_group_from_vault_name(cli_ctx, vault_name):
+def _get_resource_group_from_vault_name(cli_ctx, vault_name, hsm_name):
     """
     Fetch resource group from vault name
     :param str vault_name: name of the key vault
+    :param str hsm_name: name of the managed hsm
     :return: resource group name or None
     :rtype: str
     """
     from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-    for vault in client.list():
-        id_comps = parse_resource_id(vault.id)
-        if 'name' in id_comps and id_comps['name'].lower() == vault_name.lower():
-            return id_comps['resource_group']
+    if vault_name:
+        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+        print(client)
+        print(client.list())
+        for vault in client.list():
+            print(vault)
+            id_comps = parse_resource_id(vault.id)
+            if id_comps.get('name', None) and id_comps['name'].lower() == vault_name.lower():
+                return id_comps['resource_group']
+
+    if hsm_name:
+        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT).managed_hsms
+        print(client)
+        print(client.list_by_subscription())
+        for hsm in client.list_by_subscription():
+            print(hsm)
+            id_comps = parse_resource_id(hsm.id)
+            if id_comps.get('name', None) and id_comps['name'].lower() == hsm_name.lower():
+                return id_comps['resource_group']
+
     return None
 
 
@@ -249,11 +265,12 @@ def validate_resource_group_name(cmd, ns):
     """
     if not ns.resource_group_name:
         vault_name = ns.vault_name
-        group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
+        hsm_name = ns.hsm_name
+        group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name, hsm_name)
         if group_name:
             ns.resource_group_name = group_name
         else:
-            msg = "The Resource 'Microsoft.KeyVault/vaults/{}' not found within subscription."
+            msg = "The Vault or MHSM '{}' not found within subscription."
             raise CLIError(msg.format(vault_name))
 
 

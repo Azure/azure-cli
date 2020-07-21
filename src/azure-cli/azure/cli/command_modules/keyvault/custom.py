@@ -30,6 +30,7 @@ from azure.graphrbac.models import GraphErrorException
 
 from msrestazure.azure_exceptions import CloudError
 
+from ._client_factory import get_client_factory, Clients
 from ._sdk_extensions import patch_akv_client
 from ._validators import _construct_vnet, secret_text_encoding_values
 
@@ -318,26 +319,115 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
     return network_acls
 
 
-def get_vault_or_mhsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
-    pass
+def get_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
+    if vault_name:
+        return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+
+    hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return hsm_client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
-                    resource_group_name, vault_name, location=None, sku=None,
-                    enabled_for_deployment=None,
-                    enabled_for_disk_encryption=None,
-                    enabled_for_template_deployment=None,
-                    enable_rbac_authorization=None,
-                    enable_soft_delete=None,
-                    enable_purge_protection=None,
-                    retention_days=None,
-                    network_acls=None,
-                    network_acls_ips=None,
-                    network_acls_vnets=None,
-                    bypass=None,
-                    default_action=None,
-                    no_self_perms=None,
-                    tags=None):
+def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
+                        resource_group_name, vault_name=None, hsm_name=None,
+                        administrators=None,
+                        location=None, sku=None,
+                        enabled_for_deployment=None,
+                        enabled_for_disk_encryption=None,
+                        enabled_for_template_deployment=None,
+                        enable_rbac_authorization=None,
+                        enable_soft_delete=None,
+                        enable_purge_protection=None,
+                        retention_days=None,
+                        network_acls=None,
+                        network_acls_ips=None,
+                        network_acls_vnets=None,
+                        bypass=None,
+                        default_action=None,
+                        no_self_perms=None,
+                        tags=None):
+    if vault_name:
+        return create_vault(cmd=cmd,
+                            client=client,
+                            resource_group_name=resource_group_name,
+                            vault_name=vault_name,
+                            location=location,
+                            sku=sku,
+                            enabled_for_deployment=enabled_for_deployment,
+                            enabled_for_disk_encryption=enabled_for_disk_encryption,
+                            enabled_for_template_deployment=enabled_for_template_deployment,
+                            enable_rbac_authorization=enable_rbac_authorization,
+                            enable_soft_delete=enable_soft_delete,
+                            enable_purge_protection=enable_purge_protection,
+                            retention_days=retention_days,
+                            network_acls=network_acls,
+                            network_acls_ips=network_acls_ips,
+                            network_acls_vnets=network_acls_vnets,
+                            bypass=bypass,
+                            default_action=default_action,
+                            no_self_perms=no_self_perms,
+                            tags=tags)
+
+    if hsm_name:
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return create_hsm(cmd=cmd,
+                          client=hsm_client,
+                          resource_group_name=resource_group_name,
+                          hsm_name=hsm_name,
+                          administrators=administrators,
+                          location=location,
+                          sku=sku,
+                          enable_purge_protection=enable_purge_protection,
+                          bypass=bypass,
+                          default_action=default_action,
+                          tags=tags)
+
+
+def create_hsm(cmd, client,
+               resource_group_name, hsm_name, administrators, location=None, sku=None,
+               enable_purge_protection=None,
+               bypass=None,
+               default_action=None,
+               tags=None):
+
+    if not administrators:
+        raise CLIError('Please specify --administrators')
+
+    if not sku:
+        sku = 'Standard_B1'
+
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+
+    properties = ManagedHsmProperties(enable_purge_protection=enable_purge_protection,
+                                      initial_admin_object_ids=administrators,
+                                      network_acls=_create_network_rule_set(cmd, bypass, default_action))
+    parameters = ManagedHsm(location=location,
+                            tags=tags,
+                            sku=ManagedHsmSku(name=sku),
+                            properties=properties)
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   name=hsm_name,
+                                   parameters=parameters)
+
+
+def create_vault(cmd, client,  # pylint: disable=too-many-locals
+                 resource_group_name, vault_name, location=None, sku=None,
+                 enabled_for_deployment=None,
+                 enabled_for_disk_encryption=None,
+                 enabled_for_template_deployment=None,
+                 enable_rbac_authorization=None,
+                 enable_soft_delete=None,
+                 enable_purge_protection=None,
+                 retention_days=None,
+                 network_acls=None,
+                 network_acls_ips=None,
+                 network_acls_vnets=None,
+                 bypass=None,
+                 default_action=None,
+                 no_self_perms=None,
+                 tags=None):
 
     from azure.cli.core._profile import Profile
     from azure.graphrbac import GraphRbacManagementClient
@@ -426,6 +516,9 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
         access_policies = [AccessPolicyEntry(tenant_id=tenant_id,
                                              object_id=object_id,
                                              permissions=permissions)]
+
+    if not sku:
+        sku = 'standard'
 
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku),
