@@ -91,7 +91,7 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
                             sku='Standard_LRS')
     def test_storage_blob_restore(self, resource_group, storage_account):
         import time
-        self.cmd('storage account blob-service-properties update --enable-change-feed --enable-delete-retention --delete-retention-days 2 -n {sa}')\
+        self.cmd('storage account blob-service-properties update --enable-change-feed --enable-delete-retention --delete-retention-days 2 --enable-versioning -n {sa}')\
             .assert_with_checks(JMESPathCheck('changeFeed.enabled', True),
                                 JMESPathCheck('deleteRetentionPolicy.enabled', True),
                                 JMESPathCheck('deleteRetentionPolicy.days', 2))
