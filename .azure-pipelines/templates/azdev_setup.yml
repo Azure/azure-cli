@@ -22,6 +22,9 @@ steps:
       else
         azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH
       fi
+
+    # TODO: Remove this line once a new version of Knack is released with this change
+      pip install --force-reinstall git+https://github.com/jiasli/knack@config
     displayName: 'Azdev Setup'
     env:
       CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}
