@@ -107,7 +107,7 @@ def load_command_table(self, _):
     with self.command_group('webapp cors') as g:
         g.custom_command('add', 'add_cors')
         g.custom_command('remove', 'remove_cors')
-        g.custom_command('show', 'show_cors')
+        g.custom_show_command('show', 'show_cors')
 
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
@@ -319,7 +319,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp cors') as g:
         g.custom_command('add', 'add_cors')
         g.custom_command('remove', 'remove_cors')
-        g.custom_command('show', 'show_cors')
+        g.custom_show_command('show', 'show_cors')
 
     with self.command_group('functionapp plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_functionapp_app_service_plan', exception_handler=ex_handler_factory())
@@ -349,13 +349,13 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
-        g.custom_command('show', 'show_webapp_access_restrictions')
+        g.custom_show_command('show', 'show_webapp_access_restrictions')
         g.custom_command('add', 'add_webapp_access_restriction')
         g.custom_command('remove', 'remove_webapp_access_restriction')
         g.custom_command('set', 'set_webapp_access_restriction')
 
     with self.command_group('functionapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
-        g.custom_command('show', 'show_webapp_access_restrictions')
+        g.custom_show_command('show', 'show_webapp_access_restrictions')
         g.custom_command('add', 'add_webapp_access_restriction')
         g.custom_command('remove', 'remove_webapp_access_restriction')
         g.custom_command('set', 'set_webapp_access_restriction')
@@ -364,7 +364,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_appserviceenvironments')
         g.custom_command('list-addresses', 'list_appserviceenvironment_addresses')
         g.custom_command('list-plans', 'list_appserviceenvironment_plans')
-        g.custom_command('show', 'show_appserviceenvironment')
+        g.custom_show_command('show', 'show_appserviceenvironment')
         g.custom_command('create', 'create_appserviceenvironment_arm', supports_no_wait=True)
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)

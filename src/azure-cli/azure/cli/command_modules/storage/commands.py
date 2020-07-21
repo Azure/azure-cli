@@ -195,7 +195,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
         from ._validators import validate_private_endpoint_connection_id
         g.command('delete', 'delete', confirmation=True, validator=validate_private_endpoint_connection_id)
-        g.command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
         g.custom_command('approve', 'approve_private_endpoint_connection',
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection',
