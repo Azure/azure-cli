@@ -501,34 +501,8 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
-class TemplateSpecsTest(ScenarioTest):
+class TemplateSpecsTest(LiveScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
-    def test_list_template_spec(self, resource_group, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
-        self.kwargs.update({
-            'resource_group_location': resource_group_location,   
-            'template_spec_name': template_spec_name,
-            'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
-        })
-
-        # ts_cnt = self.cmd("template-specs list --query \"length([])\"").get_output_in_json() or 0
-        # ts_rg_cnt = self.cmd(" template-specs list -g {rg} --query \"length([])\"").get_output_in_json() or 0
-        
-        ts_cnt = len(self.cmd('template-specs list').get_output_in_json())
-        ts_rg_cnt = len(self.cmd('template-specs list -g {rg}').get_output_in_json())
-
-
-        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0  -l {resource_group_location} -f {template_file}') 
-
-        self.cmd('template-specs list',
-                 checks=self.check("length([])", (ts_cnt+2)))
-        self.cmd('template-specs list -g {rg}',
-                 checks=self.check("length([])", (ts_rg_cnt+1)))
-        
-        self.cmd('template-specs delete -g {rg} -n {template_spec_name} --yes')   
-           
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
     def test_create_or_update_template_specs(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -563,12 +537,12 @@ class TemplateSpecsTest(ScenarioTest):
             'template_spec_name': template_spec_name,
             'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
             'resource_group_location': resource_group_location,
-            'template_spec_version': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name ,
+            'template_spec_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name ,
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
         })
 
         self.cmd('template-specs list -g {rg}',
-                 checks=self.check("length([?id=='{template_spec_version}'])", 0))
+                 checks=self.check("length([?id=='{template_spec_id}'])", 0))
 
         self.cmd('template-specs list -g {rg}',
                  checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
@@ -1353,13 +1327,14 @@ class DeploymentScriptsTest(ScenarioTest):
                  checks=self.check("length([?name=='{deployment_script_name}'])", 0))
 
 
-class DeploymentAtSubscriptionScopeTemplateSpecs(ScenarioTest):
+class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
     def tearDown(self):
         self.cmd('policy assignment delete -n location-lock')
         self.cmd('policy definition delete -n policy2')
         self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
     @AllowLargeResponse(4096)
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_tenant_deploy', location='eastus')
     def test_subscription_level_deployment_ts(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-sub-lvl-ts-deploy', 60)

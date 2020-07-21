@@ -13,10 +13,10 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - --name --display-name
+      - --name
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.8.0
+        Azure-SDK-For-Python AZURECLI/2.9.1
       accept-language:
       - en-US
     method: POST
@@ -32,7 +32,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Jul 2020 18:21:17 GMT
+      - Tue, 21 Jul 2020 15:39:41 GMT
       expires:
       - '-1'
       pragma:
@@ -62,10 +62,10 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --display-name
+      - --name
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.8.0
+        Azure-SDK-For-Python AZURECLI/2.9.1
       accept-language:
       - en-US
     method: GET
@@ -81,7 +81,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Jul 2020 18:21:27 GMT
+      - Tue, 21 Jul 2020 15:39:51 GMT
       expires:
       - '-1'
       pragma:
@@ -96,8 +96,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "testcligroup", "properties": {"displayName": "TestCliDisplayName",
-      "details": {"parent": {}}}}'
+    body: '{"name": "azure-cli-management-group000002", "properties": {"details":
+      {"parent": {}}}}'
     headers:
       Accept:
       - application/json
@@ -110,46 +110,140 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '104'
+      - '95'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - --name --display-name
+      - --name
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-managementgroups/0.2.0
-        Azure-SDK-For-Python AZURECLI/2.8.0
+        Azure-SDK-For-Python AZURECLI/2.9.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroup?api-version=2018-03-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/azure-cli-management-group000002?api-version=2018-03-01-preview
   response:
     body:
-      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"NotStarted"}'
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/azure-cli-management-group000002","type":"/providers/Microsoft.Management/managementGroups","name":"azure-cli-management-group000002","status":"NotStarted"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '172'
+      - '228'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Jul 2020 18:21:28 GMT
+      - Tue, 21 Jul 2020 15:39:52 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2018-03-01-preview
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/azure-cli-management-group000002?api-version=2018-03-01-preview
       pragma:
       - no-cache
       request-id:
-      - 3cf0c0c4-1caa-4ffb-95e6-6112ade6bdc7
+      - 242e36a5-3f6d-4306-9555-27ad05829e23
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-ba-restapi:
-      - 1.0.3.1578
+      - 1.0.3.1580
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-writes:
       - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-managementgroups/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.1
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/azure-cli-management-group000002?api-version=2018-03-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/azure-cli-management-group000002","type":"/providers/Microsoft.Management/managementGroups","name":"azure-cli-management-group000002","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '225'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Jul 2020 15:40:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/azure-cli-management-group000002?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - 56d23d2c-f516-463e-844f-26d5280d5267
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1580
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-managementgroups/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.1
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/azure-cli-management-group000002?api-version=2018-03-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/azure-cli-management-group000002","type":"/providers/Microsoft.Management/managementGroups","name":"azure-cli-management-group000002","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '225'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Jul 2020 15:40:13 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/azure-cli-management-group000002?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - 91297ca8-2f02-4cfc-a049-944bb66f8206
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1580
+      x-content-type-options:
+      - nosniff
     status:
       code: 202
       message: Accepted
