@@ -119,6 +119,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         site_config.always_on = True
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=using_webapp_up)
+    helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
 
     if is_linux:
         if not validate_container_app_create_options(runtime, deployment_container_image_name,
@@ -130,7 +131,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
         if runtime:
             site_config.linux_fx_version = runtime
-            match = runtime.lower() in [s.lower() for s in RUNTIME_STACKS['linux']]
+            match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
                                "Please invoke 'list-runtimes' to cross check".format(runtime))
@@ -159,13 +160,16 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             raise CLIError("usage error: --startup-file or --deployment-container-image-name or "
                            "--multicontainer-config-type and --multicontainer-config-file is "
                            "only appliable on linux webapp")
-        match = runtime.lower() in [s.lower() for s in RUNTIME_STACKS['windows']]
+        match = helper.resolve(runtime)
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+        match['setter'](cmd=cmd, stack=match, site_config=site_config)
+
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
-        if name_validation.name_available:
-            site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
-                                                          value=node_default_version))
+        if not match['displayName'].startswith('node'):
+            if name_validation.name_available:
+                site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
+                                                              value=node_default_version))
     else:  # windows webapp without runtime specified
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
@@ -808,8 +812,8 @@ def list_runtimes(cmd, linux=False):
 
 def list_runtimes_hardcoded(linux=False):
     if linux:
-        return [s for s in RUNTIME_STACKS['linux']]
-    return [s for s in RUNTIME_STACKS['windows']]
+        return [s['displayName'] for s in RUNTIME_STACKS['linux']]
+    return [s['displayName'] for s in RUNTIME_STACKS['windows']]
 
 
 def _rename_server_farm_props(webapp):
@@ -2427,13 +2431,13 @@ class _StackRuntimeHelper:
         self._stacks = []
 
     def resolve(self, display_name):
-        self._load_stacks()
+        self._load_stacks_hardcoded()
         return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
                     None)
 
     @property
     def stacks(self):
-        self._load_stacks()
+        self._load_stacks_hardcoded()
         return self._stacks
 
     @staticmethod
@@ -2450,6 +2454,22 @@ class _StackRuntimeHelper:
         site_config.app_settings += [NameValuePair(name=k, value=v) for k, v in stack['configs'].items()]
         return site_config
 
+    def _load_stacks_hardcoded(self):
+        if self._stacks:
+            return
+        result = []
+        if self._linux:
+            result = RUNTIME_STACKS['linux']
+        else:  # Windows stacks
+            result = RUNTIME_STACKS['windows']
+            for r in result:
+                r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
+                               r['displayName'] else _StackRuntimeHelper.update_site_config)
+        self._stacks = result
+
+    # Currently using hardcoded values instead of this function. This function calls the stacks API;
+    # Stacks API is updated with Antares deployments,
+    # which are infrequent and don't line up with stacks EOL schedule.
     def _load_stacks(self):
         if self._stacks:
             return
