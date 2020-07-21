@@ -1637,17 +1637,24 @@ def delete_deployment_script(cmd, resource_group_name, name):
     rcf.deployment_scripts.delete(resource_group_name, name)
 
 
-def get_template_spec(cmd, resource_group_name, name, version=None):
+def get_template_spec(cmd, resource_group_name=None, name=None, version=None, template_spec=None):
+    if template_spec:
+        id_parts = parse_resource_id(template_spec)
+        resource_group_name = id_parts.get('resource_group')
+        name = id_parts.get('name')
+        version = id_parts.get('resource_name')
+        if version == name:
+            version = None
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if version:
-        return rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+        return rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
     return rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
 
 
-def create_or_update_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None, 
-                                   description=None, tags=None, version=None):
+def create_or_update_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
+                                   description=None, vdescription=None, tags=None, version=None):
     artifacts = None
-    template_spec = None 
+    template_spec = None
     template = None
     if location is None:
         rcf = _resource_client_factory(cmd.cli_ctx)
@@ -1660,40 +1667,41 @@ def create_or_update_template_spec(cmd, resource_group_name, name, template_file
         template = getattr(packed_template, 'RootTemplate')
         artifacts = getattr(packed_template, 'Artifacts')
 
-    TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecTemplateVersion', mod='models')
-    if rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name):  #Check if root template already exists
-        if version:
-            template_spec = TemplateSpecVersion (location, artifacts, description, template)
-            return rcf.template_specs.create_or_update(resource_group_name, name, template_spec)
-        return rcf.template_specs.create_or_update(resource_group_name, name)
+    TemplateSpec, TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', 'TemplateSpecVersion', mod='models')
 
+    # TODO: Check if root template already exists
+    # Tags needs to work
+    template_root = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     if version:
-        rcf.template_specs.create_or_update(resource_group_name, name)
-        template_spec = TemplateSpecVersion (location, artifacts, description, template)
-        return rcf.template_specs.create_or_update(resource_group_name, name, template_spec)
-    return rcf.template_specs.create_or_update(resource_group_name, name)
+        rcf.template_specs.create_or_update(resource_group_name, name, template_root)
+        template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=vdescription, template=template, tags=tags)
+        return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec)
+    return rcf.template_specs.create_or_update(resource_group_name, name, template_root)
 
 
-def export_template_spec(cmd, resource_group_name, name, output_folder, version=None, template_spec=None):
-    #rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
+def export_template_spec(cmd, output_folder, resource_group_name=None, name=None, version=None, template_spec=None):
+    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if template_spec:
         id_parts = parse_resource_id(template_spec)
-        resource_group_name = id_parts.get('resourceGroups')
-        name = id_parts.get('TemplateSpecs')
-        version = id_parts.get('versions')
-    # if version:
-    #     exported_template = rcf.template_specs.get(resource_group_name, name, version)
-    # exported_template= rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
-    return None
+        resource_group_name = id_parts.get('resource_group')
+        name = id_parts.get('name')
+        version = id_parts.get('resource_name')
+        if version == name:
+            version = None
+    exported_template = rcf.template_spec_versions.get(resource_group_name, name, version) if version else rcf.template_specs.get(resource_group_name, name)
+    from azure.cli.command_modules.resource._packing_engine import (Unpack)
+    return Unpack(cmd, exported_template, output_folder, (str(name) + '.JSON'))
 
 
 def delete_template_spec(cmd, resource_group_name=None, name=None, version=None, template_spec=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if template_spec:
         id_parts = parse_resource_id(template_spec)
-        resource_group_name = id_parts.get('resourceGroups')
-        name = id_parts.get('TemplateSpecs')
-        version = id_parts.get('versions')
+        resource_group_name = id_parts.get('resource_group')
+        name = id_parts.get('name')
+        version = id_parts.get('resource_name')
+        if version == name:
+            version = None
     if version:
         return rcf.template_specs.delete(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
     return rcf.template_specs.delete(resource_group_name=resource_group_name, template_spec_name=name)

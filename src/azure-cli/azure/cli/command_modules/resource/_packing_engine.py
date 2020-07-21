@@ -3,18 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
+import json
 from knack.util import CLIError
 from azure.cli.core.util import get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 
-class PackagedTemplate():
+class PackagedTemplate():  # pylint: disable=too-few-public-methods
     def __init__(self, template, artifacts):
         self.RootTemplate = template
         self.Artifacts = artifacts
 
 
-class PackingContext():
+class PackingContext():  # pylint: disable=too-few-public-methods
     def __init__(self, root_template_directory):
         self.RootTemplateDirectory = os.path.abspath(root_template_directory)
         self.CurrentDirectory = os.path.abspath(root_template_directory)
@@ -29,7 +30,7 @@ def Pack(cmd, template_file):
     root_template_file_path = os.path.abspath(template_file)
     context = PackingContext(os.path.dirname(root_template_file_path))
     templateObj = get_file_json(template_file)
-    PackArtifacts(cmd, root_template_file_path, context, templateObj)
+    PackArtifacts(cmd, root_template_file_path, context)
     return PackagedTemplate(templateObj, getattr(context, 'Artifact'))
 
 #  Recursively packs the specified template and its referenced artifacts and
@@ -43,10 +44,11 @@ def Pack(cmd, template_file):
 # :type artifactableTemplateObj : JSON
 
 
-def PackArtifacts(cmd, template_abs_file_path, context, artifactableTemplateObj):
+def PackArtifacts(cmd, template_abs_file_path, context):
     originalDirectory = getattr(context, 'CurrentDirectory')
     try:
         context.CurrentDirectory = os.path.dirname(template_abs_file_path)
+        artifactableTemplateObj = get_file_json(template_abs_file_path)
         templateLinktoArtifactObjs = GetTemplateLinksToArtifacts(cmd, artifactableTemplateObj, includeNested=True)
 
         for templateLinkObj in templateLinktoArtifactObjs:
@@ -67,67 +69,112 @@ def PackArtifacts(cmd, template_abs_file_path, context, artifactableTemplateObj)
             if(not os.path.commonpath([getattr(context, 'RootTemplateDirectory')]) ==
                os.path.commonpath([getattr(context, 'RootTemplateDirectory'), absoluteLocalPath])):
                 # TODO: Localize
-                raise CLIError('Unable to handle the reference to file ' + absoluteLocalPath + 'from '
-                               + template_abs_file_path + 'because it exists outside of the root template directory of '
-                               + getattr(context, 'RootTemplateDirectory'))
+                raise CLIError('Unable to handle the reference to file ' + absoluteLocalPath + 'from ' +
+                               template_abs_file_path + 'because it exists outside of the root template directory of ' +
+                               getattr(context, 'RootTemplateDirectory'))
 
             # Convert the template relative path to one that is relative to our root
             # directory path, and then if we haven't already processed that template into
             # an artifact elsewhere, we'll do so here...
 
             asRelativePath = AbsoluteToRelativePath(getattr(context, 'RootTemplateDirectory'), absoluteLocalPath)
-            for prevAddedArtifact in getattr(context, 'Artifacts'):
-                if os.path.samefile(getattr(prevAddedArtifact, 'path'), asRelativePath):
+            for prevAddedArtifact in getattr(context, 'Artifact'):
+                prevAddedArtifact = os.path.join(getattr(context, 'RootTemplateDirectory'),
+                                                 getattr(prevAddedArtifact, 'path'))
+                if os.path.samefile(prevAddedArtifact, absoluteLocalPath):
                     continue
-            PackArtifacts(cmd, absoluteLocalPath, context, templateLinkObj)
+            PackArtifacts(cmd, absoluteLocalPath, context)
             TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
                                                    'TemplateSpecTemplateArtifact', mod='models')
-            artifact = TemplateSpecTemplateArtifact(path=asRelativePath, template=templateLinkObj)
-            context.Artifacts.append(artifact)
+            templateObj = get_file_json(absoluteLocalPath)
+            artifact = TemplateSpecTemplateArtifact(path=asRelativePath, template=templateObj)
+            context.Artifact.append(artifact)
     finally:
         context.CurrentDirectory = originalDirectory
 
 
 def GetDeploymentResourceObjects(cmd, templateObj, includeNested=False):
     immediateDeploymentResources = []
-    for resource in templateObj['resources']:
-        if str(resource['type']) is 'Microsoft.Resources/deployments':
-            immediateDeploymentResources.append(resource)
+
+    if 'resources' in templateObj:
+        resources = templateObj['resources']
+        for resource in resources:
+            if (str(resource['type']) == 'Microsoft.Resources/deployments') is True:
+                immediateDeploymentResources.append(resource)
     results = []
     for deploymentResourceObj in immediateDeploymentResources:
         results.append(deploymentResourceObj)
-        DeploymentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                       'DeploymentProperties', mod='models')
-        if(includeNested and 'properties' in deploymentResourceObj
-           and isinstance(deploymentResourceObj['properties'], DeploymentProperties)):
+        if(includeNested and 'properties' in deploymentResourceObj):
             deploymentResourcePropsObj = deploymentResourceObj['properties']
             if 'template' in deploymentResourcePropsObj:
-                results.extend(GetDeploymentResourceObjects(cmd, deploymentResourcePropsObj['template']))
+                results.extend(GetDeploymentResourceObjects(cmd,
+                                                            deploymentResourcePropsObj['template'], includeNested=True))
     return results
 
 
 def GetTemplateLinksToArtifacts(cmd, templateObj, includeNested=False):
-    deploymentResourceObjs = GetDeploymentResourceObjects(templateObj, includeNested)
+    deploymentResourceObjs = GetDeploymentResourceObjects(cmd, templateObj, includeNested)
     templateLinkObjs = []
-    DeploymentProperties, TemplateLink = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                 'DeploymentProperties', 'TemplateLink', mod='models')
+    # TODO: Verify JSON Objects
     for obj in deploymentResourceObjs:
-        if('properties' in obj and isinstance(obj['properties'], DeploymentProperties)):
+        if 'properties' in obj:
             propsObj = obj['properties']
-            if('templateLink' in propsObj and isinstance(propsObj['templateLink'], TemplateLink)):
+            if 'templateLink' in propsObj:
                 templateLinkObj = propsObj['templateLink']
-                if('relativePath' in templateLinkObj and isinstance(templateLinkObj, str)):
+                if 'relativePath' in templateLinkObj:
                     templateLinkObjs.append(templateLinkObj)
     return templateLinkObjs
 
 
 def AbsoluteToRelativePath(rootDirectoryPath, absoluteFilePath):
     rootDirectoryPath = rootDirectoryPath.rstrip(os.sep)
-    #Ensure we have a trailing seperator
+    # Ensure we have a trailing seperator
     rootDirectoryPath += os.sep
+    # AbsolutePath ensures paths are normalized
 
-    #AbsolutePath ensures paths are normalized
     filePath = os.path.abspath(absoluteFilePath)
     rootPath = os.path.abspath(rootDirectoryPath)
     relative_path = str(os.path.relpath(filePath, rootPath)).replace('/', os.sep)
     return relative_path
+
+
+def Unpack(cmd, exported_template, targetDirectory, templateFileName):
+
+    packagedTemplate = PackagedTemplate(exported_template.template, exported_template.artifacts)
+    # Ensure paths are normalized:
+    templateFileName = os.path.basename(templateFileName)
+    targetDirectory = os.path.abspath(targetDirectory).rstrip(os.sep)
+    rootTemplateFilePath = os.path.join(targetDirectory, templateFileName)
+
+    # TODO: Directory/file existence checks..
+    # Go through each artifact and make sure it's not going to place artifacts
+    # outside of the target directory:
+
+    for artifact in getattr(packagedTemplate, 'Artifacts'):
+        localPath = os.path.join(targetDirectory, getattr(artifact, 'path'))
+        absLocalPath = os.path.abspath(localPath)
+        if os.path.commonpath([targetDirectory]) != os.path.commonpath([targetDirectory, absLocalPath]):
+            raise CLIError('Unable to unpack artifact ' + getattr(artifact, 'path') + 'because it would create a file' +
+                           'outside of the target directory hierarchy of' + targetDirectory)
+
+    # Now that the artifact paths checkout...let's begin by writing our main template
+    # file and then processing each artifact:
+
+    if not os.path.exists(targetDirectory):
+        os.makedirs(os.path.dirname(targetDirectory))
+    with open(rootTemplateFilePath, 'w') as rootFile:
+        json.dump(getattr(packagedTemplate, 'RootTemplate'), rootFile, indent=2)
+
+    TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
+                                           'TemplateSpecTemplateArtifact', mod='models')
+    for artifact in getattr(packagedTemplate, 'Artifacts'):
+        if not isinstance(artifact, TemplateSpecTemplateArtifact):
+            # TODO: Localize
+
+            raise CLIError('Unknown artifact type encountered...')
+        absoluteLocalPath = os.path.abspath(os.path.join(targetDirectory, getattr(artifact, 'path')))
+        if not os.path.exists(os.path.dirname(absoluteLocalPath)):
+            os.makedirs(os.path.dirname(absoluteLocalPath))
+        with open(absoluteLocalPath, 'w') as artifactFile:
+            json.dump(getattr(artifact, 'template'), artifactFile, indent=2)
+    return targetDirectory

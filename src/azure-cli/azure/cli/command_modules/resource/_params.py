@@ -484,10 +484,14 @@ def load_arguments(self, _):
         c.argument('location', options_list=['--location', '-l'])
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('description', options_list=['--description'])
-        c.argument('tags', tags_type)
+        c.argument('vdescription', options_list=['--vdescription'])
+        c.argument('tags')
+
+    with self.argument_context('template-specs get') as c:
+        c.argument('template_spec', options_list=['--template-spec', '-t'])
 
     with self.argument_context('template-specs export') as c:
-        c.argument('output_folder', options_list=['--output-folder', '-o'])
+        c.argument('output_folder', options_list=['--output-folder'])
         c.argument('template_spec', options_list=['--template-spec', '-t'])
 
     with self.argument_context('template-specs delete') as c:

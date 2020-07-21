@@ -2039,16 +2039,18 @@ parameters:
   - name: --template-file -f
     type: template_spec
     short-summary: The path to the template file.
-  - name: --location -l 
+  - name: --location -l
     short-summary: The location to store the template-spec.
   - name: --display-name -d
-    type: string 
+    type: string
     short-summary: The display name of the template spec.
   - name : --description
-    type: string 
-    short-summary: The description of template spec/template spec version.
+    type: string
+    short-summary: The description of the root template spec.
+  - name : --vdescription
+    type: string
+    short-summary: The description of template spec version.
   - name: --tags
-    type: dict[str,str]
     short-summary: Resource Tags.
 examples:
   - name: Create a template spec.
@@ -2074,11 +2076,15 @@ parameters:
   - name: --version -v
     type: string
     short-summary: The template spec version.
+  - name: --template-spec -t
+    short-summary: The template spec resource ID.
 examples:
-  - name: Get the specified template spec with all versions. 
+  - name: Get the specified template spec with all versions.
     text: az template-specs get -g testrg --name TemplateSpecName
-  - name: Get the specified template spec version. 
-    text: az template-specs get -g testrg --name TemplateSpecName -version VersionName
+  - name: Get the specified template spec version.
+    text: az template-specs get -g testrg --name TemplateSpecName --version VersionName
+  - name: Get specified template spec based on the resource ID.
+    text: az template-specs get --template-spec resourceID
 """
 
 helps['template-specs export'] = """
@@ -2096,21 +2102,21 @@ parameters:
     short-summary: The template spec version.
   - name: --template-spec -t
     short-summary: The template spec resource ID.
-  - name: --output-folder -o
-    short-summary: Folder to output export(s). 
+  - name: --output-folder
+    short-summary: Existing folder to output export(s).
 examples:
-  - name: Export the specified template spec with all versions. 
-    text: az template-specs export -g testrg --name TemplateSpecName -output-folder {path}
-  - name: Export the specified template spec. 
-    text: az template-specs export -t resourceID -output-folder {path}
-  - name: Export the specified template spec version. 
-    text: az template-specs export -g testrg --name TemplateSpecName -version VersionName -output-folder {path}
+  - name: Export the specified template spec with all versions.
+    text: az template-specs export -g testrg --name TemplateSpecName --output-folder C:/path/
+  - name: Export the specified template spec.
+    text: az template-specs export -t resourceID --output-folder C:/path/
+  - name: Export the specified template spec version.
+    text: az template-specs export -g testrg --name TemplateSpecName --version VersionName --output-folder C:/path/
 """
 
 
 helps['template-specs delete'] = """
 type: command
-short-summary: Deletes a specified template spec or template spec version by name or resource ID. 
+short-summary: Deletes a specified template spec or template spec version by name or resource ID.
 parameters:
   - name: --resource-group -g
     type: string
@@ -2124,11 +2130,11 @@ parameters:
     type: string
     short-summary: The template spec version.
 examples:
-  - name: Delete the specified template spec and all versions. 
+  - name: Delete the specified template spec and all versions.
     text: az template-specs delete -g MyResourceGroup --name TemplateSpecName
-  - name: Delete the specified version from the template spec. 
+  - name: Delete the specified version from the template spec.
     text: az template-specs delete -g MyResourceGroup --name TemplateSpecName --version VersionName
-  - name: Delete the template spec or version based on resource ID. 
+  - name: Delete the template spec or version based on resource ID.
     text: az template-specs delete --template-spec resourceID
 """
 
