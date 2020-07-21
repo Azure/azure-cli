@@ -6,6 +6,11 @@
 from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
+helps['config'] = """
+type: group
+short-summary: Manage Azure CLI configuration. 
+"""
+
 helps['config set'] = """
 type: command
 short-summary: Set a configuration.
