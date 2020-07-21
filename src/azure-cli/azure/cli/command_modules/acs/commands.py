@@ -48,7 +48,7 @@ def load_command_table(self, _):
     )
 
     openshift_managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2018_09_30_preview.operations.'
+        operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
         operation_group='open_shift_managed_clusters',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
