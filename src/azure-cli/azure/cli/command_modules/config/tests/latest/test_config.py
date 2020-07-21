@@ -28,8 +28,8 @@ class ConfigTest(ScenarioTest):
         os.chdir(tempdir)
         print("Using temp dir: {}".format(tempdir))
 
-        global_test_args = {"source": os.path.expanduser('~\\.azure\\config'), "flag": ""}
-        local_test_args = {"source": os.path.join(tempdir, '.azure\\config'), "flag": " --local"}
+        global_test_args = {"source": os.path.expanduser(os.path.join('~', '.azure', 'config')), "flag": ""}
+        local_test_args = {"source": os.path.join(tempdir, '.azure', 'config'), "flag": " --local"}
 
         for args in (global_test_args, local_test_args):
             test_option1_expected = {'name': 'test_option1', 'source': args["source"], 'value': 'test_value1'}

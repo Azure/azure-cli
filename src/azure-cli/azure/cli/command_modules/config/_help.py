@@ -8,7 +8,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['config'] = """
 type: group
-short-summary: Manage Azure CLI configuration. 
+short-summary: Manage Azure CLI configuration.
 """
 
 helps['config set'] = """
@@ -40,7 +40,7 @@ examples:
     text: az config get
   - name: Get configurations in `core` section.
     text: az config get core
-  - name: Get configuration of key `core.no_color`.
+  - name: Get the configuration of key `core.no_color`.
     text: az config get core.no_color
 """
 
@@ -48,6 +48,6 @@ helps['config unset'] = """
 type: command
 short-summary: Unset a configuration.
 examples:
-  - name: Unset configuration of key `core.no_color`.
+  - name: Unset the configuration of key `core.no_color`.
     text: az config unset core.no_color
 """
