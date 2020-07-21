@@ -342,6 +342,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --ppg
+    type: string
+    short-summary: The ID of a PPG.
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
@@ -631,6 +634,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+	- name: --ppg
+    type: string
+    short-summary: The ID of a PPG.
   - name: --os-type
     type: string
     short-summary: The OS Type. Linux or Windows.

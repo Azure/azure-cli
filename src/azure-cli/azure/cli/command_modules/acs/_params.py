@@ -198,6 +198,7 @@ def load_arguments(self, _):
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
         c.argument('service_cidr')
+        c.argument('ppg')
         c.argument('vnet_subnet_id', type=str, validator=validate_vnet_subnet_id)
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
@@ -295,6 +296,7 @@ def load_arguments(self, _):
             c.argument('labels', nargs='*', validator=validate_nodepool_labels)
             c.argument('mode', get_enum_type(nodepool_mode_type))
             c.argument('enable_node_public_ip', action='store_true', is_preview=True)
+            c.argument('ppg')
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
