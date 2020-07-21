@@ -436,13 +436,26 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename}').get_output_in_json()
+        result = self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename}').get_output_in_json()
+        self.kwargs.update({
+            'namespace_id': result['id']
+        })
         result = self.cmd('eventhubs eventhub create --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}').get_output_in_json()
         self.kwargs.update({
             'eventhub_id': result['id']
         })
         self.cmd(
             'monitor log-analytics workspace data-export update -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
+            '--destination {namespace_id} --all --enable true',
+            checks=[
+            ])
+
+        self.cmd('eventhubs eventhub list -g {rg} --namespace-name {namespacename}')
+
+        self.cmd('monitor log-analytics workspace data-export delete -g {rg} --workspace-name {workspace_name} -n {data_export_name} -y')
+
+        self.cmd(
+            'monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
             '--destination {eventhub_id} --all --enable false',
             checks=[
             ])
