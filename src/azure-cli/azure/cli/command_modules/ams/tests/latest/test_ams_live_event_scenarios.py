@@ -16,7 +16,7 @@ class AmsLiveEventTests(ScenarioTest):
     def test_live_event_create(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         live_event_name = self.create_random_name(prefix='le', length=12)
-
+        access_token = self.create_guid()
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
@@ -28,17 +28,19 @@ class AmsLiveEventTests(ScenarioTest):
             'previewLocator': self.create_guid(),
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
-            'accessToken': str(self.create_guid()).replace("-", ""),
+            'accessToken': access_token,
             'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
             'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
         })
+
+        print(self.kwargs)
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'Central US')
         ])
 
-        live_event = self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --auto-start --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.2.3.4 5.6.7.8 192.168.0.0/28 --preview-ips 192.168.0.0/28 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url', checks=[
+        live_event = self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --auto-start --streaming-protocol {streamingProtocol} --access-token {accessToken} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.2.3.4 5.6.7.8 192.168.0.0/28 --preview-ips 192.168.0.0/28 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url', checks=[
             self.check('name', '{liveEventName}'),
             self.check('location', 'Central US'),
             self.check('input.streamingProtocol', '{streamingProtocol}'),
@@ -49,7 +51,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('input.keyFrameIntervalDuration', '{keyFrameIntervalDuration}'),
             self.check('length(streamOptions)', 2),
             self.check('description', '{description}'),
-            self.check('input.accessToken', '{accessToken}'),
+            self.check('input.accessToken', str(access_token).replace("-", "")),
             self.check('vanityUrl', True),
             self.check('input.accessControl.ip.allow[2].address', '192.168.0.0'),
             self.check('input.accessControl.ip.allow[2].subnetPrefixLength', '28'),
