@@ -90,6 +90,15 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 0))
 
+        # sync with guessing content-type
+        cur = os.path.split(os.path.realpath(__file__))[0]
+        source = os.path.join(cur, "testdir")
+        self.storage_cmd('storage blob sync -s "{}" -c {} ', storage_account_info, source, container)
+
+        self.storage_cmd('storage blob show -n "sample.js" -c {} ', storage_account_info, container)\
+            .assert_with_checks(JMESPathCheck("name", "sample.js"),
+                                JMESPathCheck("properties.contentSettings.contentType", "application/javascript"))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
@@ -107,7 +116,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account))
 
         self.cmd('storage remove -c {} -n readme --account-name {}'.format(
-            container, storage_account), expect_failure=True)
+            container, storage_account))
 
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 40))
