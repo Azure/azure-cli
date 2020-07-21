@@ -3179,12 +3179,12 @@ def list_proximity_placement_groups(client, resource_group_name=None):
 
 # region dedicated host
 def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count=None,
-                                location=None, zones=None, tags=None):
+                                automatic_placement=None, location=None, zones=None, tags=None):
     DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     host_group_params = DedicatedHostGroup(location=location, platform_fault_domain_count=platform_fault_domain_count,
-                                           zones=zones, tags=tags)
+                                           support_automatic_placement=automatic_placement, zones=zones, tags=tags)
 
     return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
 
@@ -3193,6 +3193,10 @@ def list_dedicated_host_groups(cmd, client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list_by_subscription()
+
+
+def get_dedicated_host_group_instance_view(client, host_group_name, resource_group_name):
+    return client.get(resource_group_name, host_group_name, expand="instanceView")
 
 
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
