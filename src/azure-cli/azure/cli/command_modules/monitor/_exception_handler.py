@@ -53,7 +53,6 @@ def missing_resource_handler(exception):
 
 def data_export_handler(ex):
     from azure.mgmt.loganalytics.models import DataExportErrorResponseException
-    from knack.util import CLIError
     if isinstance(ex, (DataExportErrorResponseException)):
         ex.message = ex.response.text
         raise ex
