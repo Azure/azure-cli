@@ -485,7 +485,7 @@ jobs:
   displayName: Build Homebrew Formula
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -576,7 +576,7 @@ jobs:
   displayName: Build Yum Package
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -597,7 +597,7 @@ jobs:
   displayName: Test Yum Package
 
   dependsOn: BuildYumPackage
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -633,7 +633,7 @@ jobs:
   displayName: Build Ubuntu Packages
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -674,7 +674,7 @@ jobs:
   displayName: Build Debian Packages
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -714,7 +714,7 @@ jobs:
   dependsOn:
    - BuildUbuntuPackages
    - BuildDebianPackages
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
