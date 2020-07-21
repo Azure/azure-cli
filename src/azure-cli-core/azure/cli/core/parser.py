@@ -309,13 +309,19 @@ class AzCliCommandParser(CLICommandParser):
         if not EXT_CMD_INDEX.data:
             import requests
             from azure.cli.core.util import should_disable_connection_verify
-            response = requests.get('https://fengsa.blob.core.windows.net/index/extCmdIndex.json',  # TODO use prod url
-                                    verify=(not should_disable_connection_verify()))
+            try:
+                response = requests.get(
+                    'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extCmdIndex.json',
+                    verify=(not should_disable_connection_verify()),
+                    timeout=300)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info("Request failed for extension command index: %s", str(ex))
+                return None
             if response.status_code == 200:
                 EXT_CMD_INDEX.data = response.json()
                 EXT_CMD_INDEX.save_with_retry()
             else:
-                logger.info("Error when retrieveing extension command index. Response code: %s", response.status_code)
+                logger.info("Error when retrieving extension command index. Response code: %s", response.status_code)
                 return None
         cmd_chain = EXT_CMD_INDEX
         for part in command_str.split():
@@ -356,10 +362,21 @@ class AzCliCommandParser(CLICommandParser):
                                            'It will be installed first.', ext_name)
                             go_on = True
                         else:
-                            from knack.prompting import prompt_y_n
-                            go_on = prompt_y_n(
-                                'You are running a command from the extension {}. Would you like to install it first?'
-                                .format(ext_name), default='y')
+                            from knack.prompting import prompt_y_n, NoTTYException
+                            NO_PROMPT_CONFIG_MSG = "Run 'az config set extension.use_dynamic_install=" \
+                                "yes_without_prompt' to allow installing extensions with no prompt."
+                            try:
+                                go_on = prompt_y_n(
+                                    'You are running a command from the extension {}. '
+                                    'Would you like to install it first?'
+                                    .format(ext_name), default='y')
+                                if go_on:
+                                    logger.warning(NO_PROMPT_CONFIG_MSG)
+                            except NoTTYException:
+                                logger.warning("You are running a command from the extension %s.\n "
+                                               "Unable to prompt for extension install confirmation as no tty "
+                                               "available. %s", ext_name, NO_PROMPT_CONFIG_MSG)
+                                go_on = False
                         if go_on:
                             from azure.cli.core.extension.operations import add_extension
                             add_extension(cli_ctx=cli_ctx, extension_name=ext_name)
