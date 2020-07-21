@@ -357,6 +357,15 @@ class AzCliCommandParser(CLICommandParser):
                         telemetry.set_command_details(command_str,
                                                       parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
                                                       extension_name=ext_name)
+                        run_after_extension_installed = cli_ctx.config.getboolean('extension',
+                                                                                  'run_after_dynamic_install',
+                                                                                  True)
+                        prompt_msg = 'You are running a command from the extension {}. ' \
+                                     'Would you like to install it first?'.format(ext_name)
+                        if run_after_extension_installed:
+                            prompt_msg = '{} The command will continue to run after the extension is installed.' \
+                                .format(prompt_msg)
+
                         if use_dynamic_install.lower() == 'yes_without_prompt':
                             logger.warning('You are running a command from the extension %s. '
                                            'It will be installed first.', ext_name)
@@ -364,12 +373,9 @@ class AzCliCommandParser(CLICommandParser):
                         else:
                             from knack.prompting import prompt_y_n, NoTTYException
                             NO_PROMPT_CONFIG_MSG = "Run 'az config set extension.use_dynamic_install=" \
-                                "yes_without_prompt' to allow installing extensions with no prompt."
+                                "yes_without_prompt' to allow installing extensions without prompt."
                             try:
-                                go_on = prompt_y_n(
-                                    'You are running a command from the extension {}. '
-                                    'Would you like to install it first?'
-                                    .format(ext_name), default='y')
+                                go_on = prompt_y_n(prompt_msg, default='y')
                                 if go_on:
                                     logger.warning(NO_PROMPT_CONFIG_MSG)
                             except NoTTYException:
@@ -380,9 +386,6 @@ class AzCliCommandParser(CLICommandParser):
                         if go_on:
                             from azure.cli.core.extension.operations import add_extension
                             add_extension(cli_ctx=cli_ctx, extension_name=ext_name)
-                            run_after_extension_installed = cli_ctx.config.getboolean('extension',
-                                                                                      'run_after_dynamic_install',
-                                                                                      True)
                             if run_after_extension_installed:
                                 import subprocess
                                 exit_code = subprocess.call(cmd_list, shell=True)
