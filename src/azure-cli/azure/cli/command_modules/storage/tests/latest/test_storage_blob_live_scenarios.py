@@ -129,7 +129,7 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
                 container, storage_account, account_key)) \
                 .assert_with_checks(JMESPathCheck('deleted', True))
 
-        time.sleep(10)
+        time.sleep(30)
 
         # Restore blobs, with specific ranges
         time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
