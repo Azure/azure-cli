@@ -515,19 +515,19 @@ class TemplateSpecsTest(LiveScenarioTest):
             'display_name': self.create_random_name('create-spec', 20),
             'description': '"AzCLI test root template spec"',
             'ver_description': '"AzCLI test version of root template spec"',
-            'template_spec_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name, 
+            'template_spec_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name,
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
         })
 
         self.cmd('template-specs create -g {rg} -n {template_spec_name} -v {template_spec_version} -l {resource_group_location} -f {template_file} -d {display_name} --description {description} --vdescription {ver_description}', checks=[
-            self.check('id',('/subscriptions/' +  self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/' + self.kwargs['template_spec_version'])),
+            self.check('id', ('/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/' + self.kwargs['template_spec_version'])),
             self.check('artifacts.length([])', 3),
             self.check('artifacts[0].path', 'artifacts\\createResourceGroup.json'),
             self.check('artifacts[1].path', 'artifacts\\createKeyVault.json'),
             self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json')
-        ])  
+        ])
 
-        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')    
+        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
     def test_get_template_spec(self, resource_group, resource_group_location):
@@ -537,7 +537,7 @@ class TemplateSpecsTest(LiveScenarioTest):
             'template_spec_name': template_spec_name,
             'template_file': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
             'resource_group_location': resource_group_location,
-            'template_spec_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name ,
+            'template_spec_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name,
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
         })
 
@@ -547,8 +547,8 @@ class TemplateSpecsTest(LiveScenarioTest):
         self.cmd('template-specs list -g {rg}',
                  checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
 
-        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {template_file}') 
-       
+        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {template_file}')
+
         ts_cnt = self.cmd('template-specs get -g {rg} --name {template_spec_name}').get_output_in_json()
         assert len(ts_cnt) > 0
         ts_cnt_by_id = self.cmd('template-specs get --template-spec {template_spec_id}').get_output_in_json()
@@ -572,15 +572,15 @@ class TemplateSpecsTest(LiveScenarioTest):
             'output_folder2': os.path.join(curr_dir, dir_name2).replace('\\', '\\\\'),
         })
 
-        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {template_file}') 
-    
+        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {template_file}')
+
         os.makedirs(self.kwargs['output_folder'])
         output_path = self.cmd('template-specs export -g {rg} --name {template_spec_name} --version 1.0 --output-folder {output_folder}').get_output_in_json()
 
         template_file = os.path.join(output_path, (self.kwargs['template_spec_name'] + '.json'))
         artifactFile = os.path.join(output_path, 'artifacts\\createResourceGroup.json')
         artifactFile1 = os.path.join(output_path, 'artifacts\\createKeyVault.json')
-        artifactFile2=  os.path.join(output_path, 'artifacts\\createKeyVaultWithSecret.json')
+        artifactFile2 = os.path.join(output_path, 'artifacts\\createKeyVaultWithSecret.json')
 
         self.assertTrue(os.path.isfile(template_file))
         self.assertTrue(os.path.isfile(artifactFile))
@@ -593,27 +593,28 @@ class TemplateSpecsTest(LiveScenarioTest):
         _template_file = os.path.join(output_path2, (self.kwargs['template_spec_name'] + '.json'))
         _artifactFile = os.path.join(output_path2, 'artifacts\\createResourceGroup.json')
         _artifactFile1 = os.path.join(output_path2, 'artifacts\\createKeyVault.json')
-        _artifactFile2=  os.path.join(output_path2, 'artifacts\\createKeyVaultWithSecret.json')
+        _artifactFile2 = os.path.join(output_path2, 'artifacts\\createKeyVaultWithSecret.json')
 
         self.assertTrue(os.path.isfile(_template_file))
         self.assertTrue(os.path.isfile(_artifactFile))
         self.assertTrue(os.path.isfile(_artifactFile1))
-        self.assertTrue(os.path.isfile(_artifactFile2))
-    
+        self.assertTrue(os.path.isfile(_artifactFile2))\
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
     def test_delete_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
         self.kwargs.update({
             'resource_group': resource_group,
-            'resource_group_location': resource_group_location,   
+            'resource_group_location': resource_group_location,
             'template_spec_name': template_spec_name,
             'tf': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
             'template_spec_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name,
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
         })
 
-        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0  -l {resource_group_location} -f {tf}') 
+        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0  -l {resource_group_location} -f {tf}')
         self.cmd('template-specs get --template-spec {template_spec_version_id}')
         self.cmd('template-specs get --template-spec {template_spec_id}')
 
@@ -682,7 +683,6 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('deployment sub show -n {dn2}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
-
 
     @AllowLargeResponse(4096)
     def test_subscription_level_deployment_old_command(self):
@@ -846,7 +846,6 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
         })
 
-
         self.cmd('account management-group create --name {mg}', checks=[])
 
         self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file "{tf}" '
@@ -899,7 +898,6 @@ class DeploymentTestAtTenantScope(ScenarioTest):
             'mg': self.create_random_name('azure-cli-management-group', 40),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
         })
-
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
@@ -1199,6 +1197,7 @@ class DeploymentThruUriTest(ScenarioTest):
         self.cmd('deployment group list -g {rg}',
                  checks=self.is_empty())
 
+
 class DeploymentWhatIfAtResourceGroupScopeTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_what_if')
     def test_resource_group_level_what_if(self):
@@ -1347,10 +1346,10 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
-        }) 
+        })
 
         self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {tf}')
-        
+
         self.cmd('deployment sub validate --location WestUS --template-file "{template_spec_version_id}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
@@ -1392,6 +1391,7 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
+
 class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs_resource_group_deployment')
@@ -1407,9 +1407,9 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
         })
-        
+
         self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {tf}')
-        
+
         self.cmd('deployment group validate --resource-group {rg} --template-spec "{template_spec_version_id}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
@@ -1445,8 +1445,9 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
+
 class DeploymentTestAtManagementGroupTemplateSpecs(ScenarioTest):
-      
+
     def test_management_group_deployment_ts(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-mg-ts-deploy', 60)
@@ -1463,7 +1464,7 @@ class DeploymentTestAtManagementGroupTemplateSpecs(ScenarioTest):
         })
 
         self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {tf}')
-        
+
         self.cmd('account management-group create --name {mg}', checks=[])
 
         self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-spec "{template_spec_version_id}" '
