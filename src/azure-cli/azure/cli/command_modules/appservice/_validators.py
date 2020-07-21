@@ -117,7 +117,7 @@ def validate_add_vnet(cmd, namespace):
 
     vnet_loc = ''
     for v in list_all_vnets:
-        if v.name == vnet:
+        if vnet in (v.name, v.id):
             vnet_loc = v.location
             break
 

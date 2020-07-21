@@ -213,10 +213,16 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway root-cert') as c:
         c.argument('keyvault_secret', help='KeyVault secret ID.')
 
-    with self.argument_context('network application-gateway frontend-ip') as c:
-        c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
+    with self.argument_context('network application-gateway frontend-ip create') as c:
         c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-        c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
+
+    for item in ['create', 'update']:
+        with self.argument_context('network application-gateway frontend-ip {}'.format(item)) as c:
+            c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
+            c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
+
+    with self.argument_context('network application-gateway frontend-ip update') as c:
+        c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), deprecate_info=c.deprecate(hide=True))
 
     for item in ['frontend-port', 'http-settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -726,6 +732,11 @@ def load_arguments(self, _):
     with self.argument_context('network express-route gateway connection', arg_group='Peering', min_api='2018-08-01') as c:
         c.argument('peering', help='Name or ID of an ExpressRoute peering.', validator=validate_express_route_peering)
         c.argument('circuit_name', er_circuit_name_type, id_part=None)
+
+    with self.argument_context('network express-route gateway connection', arg_group='Routing Configuration', min_api='2020-04-01', is_preview=True) as c:
+        c.argument('associated_route_table', options_list=['--associated', '--associated-route-table'], help='The resource id of route table associated with this routing configuration.')
+        c.argument('propagated_route_tables', options_list=['--propagated', '--propagated-route-tables'], nargs='+', help='Space-separated list of resource id of propagated route tables.')
+        c.argument('labels', nargs='+', help='Space-separated list of labels for propagated route tables.')
 
     with self.argument_context('network express-route gateway connection list', min_api='2018-08-01') as c:
         c.argument('express_route_gateway_name', er_gateway_name_type, id_part=None)
