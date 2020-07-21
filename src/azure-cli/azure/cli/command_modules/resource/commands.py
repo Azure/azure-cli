@@ -7,11 +7,12 @@
 
 from collections import OrderedDict
 
+from knack.log import get_logger
+
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
-
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_resource_links,
@@ -19,7 +20,8 @@ from azure.cli.command_modules.resource._client_factory import (
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace, _validate_template_input, _validate_template_spec, _validate_template_spec_out
 
 from ._exception_handler import managementgroups_exception_handler
-from knack.log import get_logger
+
+
 logger = get_logger(__name__)
 
 

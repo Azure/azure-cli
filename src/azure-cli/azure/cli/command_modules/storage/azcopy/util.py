@@ -26,7 +26,7 @@ SERVICES = {'blob', 'file'}
 AZCOPY_VERSION = '10.3.3'
 
 
-class AzCopy(object):
+class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
         install_location = _get_default_install_location()
@@ -93,7 +93,7 @@ class AzCopy(object):
         self.run_command(['sync', source, destination] + flags)
 
 
-class AzCopyCredentials(object):  # pylint: disable=too-few-public-methods
+class AzCopyCredentials:  # pylint: disable=too-few-public-methods
     def __init__(self, sas_token=None, token_info=None):
         self.sas_token = sas_token
         self.token_info = token_info

@@ -47,7 +47,7 @@ class BatchAccountPreparer(AbstractPreparer, SingleValueReplacer):
                                                self.resource_group_parameter_name))
 
 
-class BatchScenarioMixin(object):
+class BatchScenarioMixin:
     def set_account_info(self, account_name, group_name):
         """Returns the batch account name, key, and endpoint in a tuple."""
         key = self.get_account_key(account_name, group_name)

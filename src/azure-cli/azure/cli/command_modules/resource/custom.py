@@ -367,7 +367,7 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     return sdk_no_wait(no_wait, deployment_client.create_or_update, resource_group_name, deployment_name, deployment_obj)
 
 
-class JsonCTemplate(object):
+class JsonCTemplate:
     def __init__(self, template_as_bytes):
         self.template_as_bytes = template_as_bytes
 
@@ -2592,7 +2592,7 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
+class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,

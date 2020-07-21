@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 from azure.cli.command_modules.storage._client_factory import blob_data_service_factory, file_data_service_factory
+
+from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 
 # pylint: disable=too-many-statements, too-many-locals
 
