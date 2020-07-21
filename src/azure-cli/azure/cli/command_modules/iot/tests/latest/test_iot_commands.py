@@ -20,7 +20,7 @@ class IoTHubTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
-        hub = 'iot-hub-for-test-11'
+        hub = 'iot-hub-for-test-20200720'
         rg = resource_group
         location = resource_group_location
         containerName = 'iothubcontainer1'
@@ -399,13 +399,13 @@ class IoTHubTest(ScenarioTest):
         location = resource_group_location
 
         private_endpoint_type = 'Microsoft.Devices/IoTHubs'
-        identity_hub = 'identity-test-hub-cli'
+        identity_hub = 'identity-test-hub-cli20200720'
         identity_based_auth = 'identityBased'
-        event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
+        event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint20200720'
 
-        containerName = 'iothubcontainer1'
+        containerName = 'iothubcontainer20200720'
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
-        endpoint_name = 'Event1'
+        endpoint_name = 'Event20200720'
         endpoint_type = 'EventHub'
         eventhub_endpoint_uri = 'eh://test'
         storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
@@ -442,10 +442,10 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(serviceBusTopics[*])', 0),
                          self.check('length(storageContainers[*])', 0)])
 
-        vnet = 'test-iot-vnet'
+        vnet = 'test-iot-vnet20200720'
         subnet = 'subnet1'
-        endpoint_name = 'iot-private-endpoint'
-        connection_name = 'iot-private-endpoint-connection'
+        endpoint_name = 'iot-private-endpoint20200720'
+        connection_name = 'iot-private-endpoint-connection20200720'
 
         # Test private endpoints
         # Prepare network
