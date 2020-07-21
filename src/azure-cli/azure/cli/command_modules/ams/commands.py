@@ -32,7 +32,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams account', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_show_command('show', 'get_mediaservice',
-                         custom_command_type=get_custom_sdk('account', get_mediaservices_client))
+                              custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.command('delete', 'delete')
         g.generic_update_command('update',
                                  getter_name='mediaservice_update_getter',
@@ -67,7 +67,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams transform', get_sdk('Transforms', get_transforms_client)) as g:
         g.custom_show_command('show', 'get_transform',
-                         custom_command_type=get_custom_sdk('transform', get_transforms_client))
+                              custom_command_type=get_custom_sdk('transform', get_transforms_client))
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.custom_command('create', 'create_transform',
@@ -102,7 +102,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('ams asset-filter', get_sdk('AssetFilters', get_asset_filters_client)) as g:
         g.command('list', 'list')
         g.custom_show_command('show', 'get_asset_filter',
-                         custom_command_type=get_custom_sdk('asset_filter', get_asset_filters_client))
+                              custom_command_type=get_custom_sdk('asset_filter', get_asset_filters_client))
         g.command('delete', 'delete')
         g.custom_command('create', 'create_asset_filter',
                          custom_command_type=get_custom_sdk('asset_filter', get_asset_filters_client))
@@ -112,7 +112,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('ams job', get_sdk('Jobs', get_jobs_client)) as g:
         g.custom_show_command('show', 'get_job',
-                         custom_command_type=get_custom_sdk('job', get_jobs_client))
+                              custom_command_type=get_custom_sdk('job', get_jobs_client))
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.custom_command('cancel', 'cancel_job',
@@ -128,7 +128,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_content_key_policy',
                          custom_command_type=get_custom_sdk('content_key_policy', get_content_key_policies_client))
         g.custom_show_command('show', 'show_content_key_policy',
-                         custom_command_type=get_custom_sdk('content_key_policy', get_content_key_policies_client))
+                              custom_command_type=get_custom_sdk('content_key_policy', get_content_key_policies_client))
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.generic_update_command('update',
@@ -151,7 +151,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('streaming_locator', get_streaming_locators_client))
         g.command('list', 'list')
         g.custom_show_command('show', 'get_streaming_locator',
-                         custom_command_type=get_custom_sdk('streaming_locator', get_streaming_locators_client))
+                              custom_command_type=get_custom_sdk('streaming_locator', get_streaming_locators_client))
         g.command('delete', 'delete')
         g.command('get-paths', 'list_paths')
         g.custom_command('list-content-keys', 'list_content_keys',
@@ -162,7 +162,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('streaming_policy', get_streaming_policies_client))
         g.command('list', 'list')
         g.custom_show_command('show', 'get_streaming_policy',
-                         custom_command_type=get_custom_sdk('streaming_policy', get_streaming_policies_client))
+                              custom_command_type=get_custom_sdk('streaming_policy', get_streaming_policies_client))
         g.command('delete', 'delete')
 
     with self.command_group('ams streaming-endpoint', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
@@ -183,7 +183,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  custom_func_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client),
                                  supports_no_wait=True)
         g.custom_show_command('show', 'get_streaming_endpoint',
-                         custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
+                              custom_command_type=get_custom_sdk('streaming_endpoint', get_streaming_endpoints_client))
         g.command('delete', 'delete')
         g.command('scale', 'scale')
         g.wait_command('wait')
@@ -208,7 +208,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('live_event', get_live_events_client),
                          supports_no_wait=True)
         g.custom_show_command('show', 'get_live_event',
-                         custom_command_type=get_custom_sdk('live_event', get_live_events_client))
+                              custom_command_type=get_custom_sdk('live_event', get_live_events_client))
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.generic_update_command('update',
@@ -230,7 +230,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_account_filter',
                          custom_command_type=get_custom_sdk('account_filter', get_account_filters_client))
         g.custom_show_command('show', 'get_account_filter',
-                         custom_command_type=get_custom_sdk('account_filter', get_account_filters_client))
+                              custom_command_type=get_custom_sdk('account_filter', get_account_filters_client))
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.generic_update_command('update',
