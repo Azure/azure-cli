@@ -164,21 +164,38 @@ def validate_asp_sku(cmd, namespace):
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
 
 
-def validate_ip_address(namespace):
+def validate_ip_address(cmd, namespace):
     if namespace.ip_address is not None:
-        # IPv6
-        if ':' in namespace.ip_address:
-            if namespace.ip_address.count(':') > 1:
-                if '/' not in namespace.ip_address:
-                    namespace.ip_address = namespace.ip_address + '/128'
-                    return
-                return
-        # IPv4
-        elif '.' in namespace.ip_address:
-            if namespace.ip_address.count('.') == 3:
-                if '/' not in namespace.ip_address:
-                    namespace.ip_address = namespace.ip_address + '/32'
-                    return
-                return
+        validate_ip_address_format(namespace)
+        validate_ip_address_existance(cmd, namespace)
 
-        raise CLIError('Invalid IP address')
+
+def validate_ip_address_format(namespace):
+    # IPv6
+    if ':' in namespace.ip_address:
+        if namespace.ip_address.count(':') > 1:
+            if '/' not in namespace.ip_address:
+                namespace.ip_address = namespace.ip_address + '/128'
+                return
+            return
+    # IPv4
+    elif '.' in namespace.ip_address:
+        if namespace.ip_address.count('.') == 3:
+            if '/' not in namespace.ip_address:
+                namespace.ip_address = namespace.ip_address + '/32'
+                return
+            return
+
+    raise CLIError('Invalid IP address')
+
+
+def validate_ip_address_existance(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    from ._appservice_utils import _generic_site_operation
+    configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    access_rules = configs.ip_security_restrictions
+    is_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
+    if True in is_exists:
+        raise CLIError('Rule is already exists with the specified criteria')
