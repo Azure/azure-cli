@@ -4022,10 +4022,11 @@ class DedicatedHostScenarioTest(ScenarioTest):
         })
 
         # create resources
-        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --automatic-placement --tags "foo=bar"', checks=[
             self.check('name', '{host-group}'),
             self.check('location', '{loc}'),
             self.check('platformFaultDomainCount', 3),
+            self.check('supportAutomaticPlacement', True),
             self.check('tags.foo', 'bar')
         ])
 
@@ -4045,6 +4046,8 @@ class DedicatedHostScenarioTest(ScenarioTest):
         instance_view = result["instanceView"]
         self.assertTrue(instance_view["assetId"])
         self.assertTrue(instance_view["availableCapacity"])
+
+        self.cmd('vm host group get-instance-view -g {rg} -n {host-group}')
 
         self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
                  ' --host-group {host-group} --host {host-name} --generate-ssh-keys --admin-username azureuser')
