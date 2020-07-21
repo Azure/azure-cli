@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 from azure.cli.command_modules.storage._client_factory import blob_data_service_factory, file_data_service_factory
+
+from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 
 # pylint: disable=too-many-statements, too-many-locals
 
@@ -29,7 +30,8 @@ def storage_copy(cmd, source=None,
                  destination_share=None,
                  destination_file_path=None,
                  destination_local_path=None,
-                 exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None):
+                 exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None,
+                 follow_symlinks=None):
     def get_url_with_sas(source, account_name, container, blob, share, file_path, local_path):
         import re
         import os
@@ -106,6 +108,8 @@ def storage_copy(cmd, source=None,
         flags.append('--exclude-path=' + exclude_path)
     if content_type is not None:
         flags.append('--content-type=' + content_type)
+    if follow_symlinks is not None:
+        flags.append('--follow-symlinks=true')
     azcopy.copy(full_source, full_destination, flags=flags)
 
 

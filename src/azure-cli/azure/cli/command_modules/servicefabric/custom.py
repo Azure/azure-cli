@@ -1298,13 +1298,13 @@ def _get_target_instance(reliability_level):
 # pylint: disable=inconsistent-return-statements
 def _get_reliability_level(cluster_size):
     size = int(cluster_size)
-    if size > 0 and size < 3:
+    if 0 < size < 3:
         return 'None'
-    if size >= 3 and size < 5:
+    if 3 <= size < 5:
         return 'Bronze'
-    if size >= 5 and size < 7:
+    if 5 <= size < 7:
         return 'Silver'
-    if size >= 7 and size < 9:
+    if 7 <= size < 9:
         return 'Gold'
     if size >= 9:
         return 'Platinum'

@@ -7,8 +7,8 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-RG_LOCATION = "westus2"
-ANF_LOCATION = "westus2stage"
+RG_LOCATION = "eastus"
+ANF_LOCATION = "eastus"
 
 # No tidy up of tests required. The resource group is automatically removed
 

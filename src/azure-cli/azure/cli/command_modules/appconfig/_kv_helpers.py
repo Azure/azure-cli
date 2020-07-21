@@ -32,7 +32,7 @@ FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "featur
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
 
 
-class FeatureManagementReservedKeywords(object):
+class FeatureManagementReservedKeywords:
     '''
     Feature management keywords used in files in different naming conventions.
 
@@ -898,7 +898,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError(str(exception))
 
 
-class Undef(object):  # pylint: disable=too-few-public-methods
+class Undef:  # pylint: disable=too-few-public-methods
     '''
     Dummy undef class used to preallocate space for kv exporting.
 

@@ -31,7 +31,7 @@ EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client'])
 
 
 # pylint:disable=too-many-lines
-class ArmTemplateBuilder(object):
+class ArmTemplateBuilder:
 
     def __init__(self):
         template = OrderedDict()
@@ -179,7 +179,6 @@ def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pyl
 def register_ids_argument(cli_ctx):
 
     from knack import events
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
     ids_metadata = {}
 
@@ -220,7 +219,7 @@ def register_ids_argument(cli_ctx):
                 'metavar': 'ID',
                 'help': "One or more resource IDs (space-delimited). "
                         "It should be a complete resource ID containing all information of '{gname}' arguments. "
-                        "If provided, no other '{gname}' arguments should be specified.".format(gname=group_name),
+                        "You should provide either --ids or other '{gname}' arguments.".format(gname=group_name),
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
                 'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
@@ -305,6 +304,7 @@ def register_ids_argument(cli_ctx):
         if full_id_list:
             setattr(namespace, '_ids', full_id_list)
 
+        from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
         for val in full_id_list:
             if not is_valid_resource_id(val):
                 raise CLIError('invalid resource ID: {}'.format(val))
