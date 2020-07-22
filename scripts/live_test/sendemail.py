@@ -7,6 +7,7 @@ import sys
 import os
 import json
 import traceback
+import datetime
 
 from sendgrid import SendGridAPIClient
 
@@ -18,6 +19,7 @@ USER_TARGET = sys.argv[5]
 USER_LIVE = sys.argv[6]
 ARTIFACT_DIR = sys.argv[7]
 REQUESTED_FOR_EMAIL = sys.argv[8]
+ACCOUNT_KEY = sys.argv[9]
 
 
 def main():
@@ -30,6 +32,14 @@ def main():
     print(USER_LIVE)
     print(ARTIFACT_DIR)
     print(REQUESTED_FOR_EMAIL)
+    print(ACCOUNT_KEY)
+
+    container = ''
+    try:
+        container = get_container_name()
+        upload_files(container)
+    except Exception:
+        pass
 
     # message = Mail(
     #     from_email='azclibot@microsoft.com',
@@ -69,7 +79,32 @@ def main():
         traceback.print_exc()
 
 
-def get_content():
+def get_container_name():
+    date = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    if USER_LIVE == '--live':
+        mode = 'live'
+    elif USER_LIVE == '':
+        mode = 'replay'
+    else:
+        mode = ''
+    return date + mode
+
+
+def upload_files(container):
+    # Create container
+    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {}'
+    os.popen(cmd.format(container, ACCOUNT_KEY))
+
+    # Upload files
+    for root, dirs, files in os.walk(ARTIFACT_DIR):
+        for name in files:
+            if name.endswith('html') or name.endswith('json'):
+                fullpath = os.path.join(root, name)
+                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac'
+                os.popen(cmd.format(fullpath, container, name))
+
+
+def get_content(container):
     """
     Compose content of email
     :return:
@@ -96,6 +131,13 @@ def get_content():
     Branch: {}<br>
     Link: {}<br>
     """.format(USER_REPO, USER_BRANCH, link)
+
+    if container != '':
+        content += """
+        <p>
+        Test results are saved to https://clitestresultstac.blob.core.windows.net/{}
+        </p>
+        """.format(container)
 
     passed_sum = failed_sum = 0
 
