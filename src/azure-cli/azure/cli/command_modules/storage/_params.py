@@ -147,6 +147,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Request timeout in seconds. Applies to each call to the service.', type=int
     )
 
+    snapshot_type = CLIArgumentType(
+        help='The snapshot parameter is an opaque DateTime value that, when present, specifies the blob snapshot '
+        'to retrieve.'
+    )
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -552,6 +557,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                          "the operation only if the resource's ETag does not match the value specified."
                                          " Specify the wildcard character (*) to perform the operation only if the "
                                          "resource does not exist, and fail the operation if it does exist.")
+
+    with self.argument_context('storage blob tag list') as c:
+        c.extra('blob_name', required=True)
+        c.extra('container_name', required=True)
+        c.extra('snapshot', arg_type=snapshot_type)
+        c.extra('version_id', options_list='--version',
+                help='The version id parameter is an opaque DateTime value that, when present, specifies '
+                     'the version of the blob to add tags to.')
 
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
