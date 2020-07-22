@@ -173,7 +173,7 @@ def validate_client_parameters(cmd, namespace):
         logger.warning('There is no credential provided in your command and environment, we will query account key '
                        'for your storage account. \nPlease provide --connection-string, --account-key or --sas-token '
                        'as credential, or use `--auth-mode login` if you have required RBAC roles in your command. '
-                       'For more information about RBAC roles in stoarge, you can see '
+                       'For more information about RBAC roles in storage, you can see '
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
                        'Setting corresponding environment variable can avoid inputting credential in your command. '
                        'Please use --help to get more information.')
