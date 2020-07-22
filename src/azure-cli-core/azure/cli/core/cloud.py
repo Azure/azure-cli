@@ -53,7 +53,7 @@ class CloudSuffixNotSetException(CLIError):
     pass
 
 
-class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
+class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
     def __init__(self,
                  management=None,
@@ -110,7 +110,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         return val
 
 
-class CloudSuffixes(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
+class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
     def __init__(self,
                  storage_endpoint=None,
@@ -212,7 +212,7 @@ def _arm_to_cli_mapper(arm_dict):
             acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))  # pylint: disable=line-too-long
 
 
-class Cloud(object):  # pylint: disable=too-few-public-methods
+class Cloud:  # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
 
     def __init__(self,

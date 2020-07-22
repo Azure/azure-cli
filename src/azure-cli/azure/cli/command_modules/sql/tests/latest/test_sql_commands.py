@@ -3002,14 +3002,14 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         if is_playback:
             subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CLean'
         else:
-            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+            subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
 
         license_type = 'LicenseIncluded'
-        loc = 'eastus2euap'
-        v_cores = 4
+        loc = 'westcentralus'
+        v_cores = 8
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
-        resource_group_1 = "DejanDuVnetRG"
+        resource_group_1 = "autobot-managed-instance-v12"
         collation = "Serbian_Cyrillic_100_CS_AS"
         proxy_override = "Proxy"
         proxy_override_update = "Redirect"
@@ -3017,13 +3017,15 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         timezone_id = "Central European Standard Time"
         tls1_2 = "1.2"
         tls1_1 = "1.1"
+        tag1 = "tagName1=tagValue1"
+        tag2 = "tagName2=tagValue2"
 
         user = admin_login
 
         # test create sql managed_instance
         managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
-                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --minimal-tls-version {}'
-                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, tls1_2),
+                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --minimal-tls-version {} --tags {} {}'
+                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, tls1_2, tag1, tag2),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
                                           JMESPathCheck('resourceGroup', resource_group_1),
@@ -3039,7 +3041,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('proxyOverride', proxy_override),
                                           JMESPathCheck('publicDataEndpointEnabled', 'True'),
                                           JMESPathCheck('timezoneId', timezone_id),
-                                          JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
+                                          JMESPathCheck('minimalTlsVersion', tls1_2),
+                                          JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}")]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
@@ -3092,6 +3095,39 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
+
+        # test update managed instance tags
+        tag3 = "tagName3=tagValue3"
+        self.cmd('sql mi update -g {} -n {} --set tags.{}'
+                 .format(resource_group_1, managed_instance_name_1, tag3),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2', 'tagName3': 'tagValue3'}")])
+
+        # test remove managed instance tags
+        self.cmd('sql mi update -g {} -n {} --remove tags.tagName1'
+                 .format(resource_group_1, managed_instance_name_1),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('tags', "{'tagName2': 'tagValue2', 'tagName3': 'tagValue3'}")])
+
+        # test override managed instance tags
+        self.cmd('sql mi update -g {} -n {} --tags {}'
+                 .format(resource_group_1, managed_instance_name_1, tag1),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('tags', "{'tagName1': 'tagValue1'}")])
+
+        # test clear managed instance tags by passing ""
+        self.cmd('sql mi update -g {} -n {} --tags ""'
+                 .format(resource_group_1, managed_instance_name_1),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('tags', {})])
 
         # test delete sql managed instance
         self.cmd('sql mi delete --id {} --yes'
@@ -4531,3 +4567,75 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
+
+
+class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
+
+    def test_sql_mi_failover_mgmt(self):
+
+        managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+
+        license_type = 'LicenseIncluded'
+        loc = 'westus'
+        v_cores = 8
+        storage_size_in_gb = '128'
+        edition = 'GeneralPurpose'
+        family = 'Gen5'
+        resource_group = "DejanDuVnetRG"
+        user = admin_login
+
+        self.kwargs.update({
+            'loc': loc,
+            'resource_group': resource_group,
+            'vnet_name': 'vcCliTestFailoverVnet',
+            'subnet_name': 'vcCliTestFailoverSubnet',
+            'route_table_name': 'vcCliTestFailoverRouteTable',
+            'route_name_default': 'default',
+            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'managed_instance_name': managed_instance_name,
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'edition': 'GeneralPurpose',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
+        })
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
+        self.cmd('network route-table show -g {resource_group} -n {route_table_name}')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {resource_group} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name} --delegations Microsoft.Sql/managedInstances',
+                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
+
+        subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi create -g {} -n {} -l {} '
+                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
+                 .format(resource_group, managed_instance_name, loc, user, admin_password, subnet['id'], license_type, v_cores, storage_size_in_gb, edition, family),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('vCores', v_cores),
+                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                     JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family),
+                     JMESPathCheck('sku.capacity', v_cores),
+                     JMESPathCheck('identity', None)]).get_output_in_json()
+
+        # Failover managed instance primary replica
+        self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())

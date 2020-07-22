@@ -14,6 +14,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
 from ..storage_test_util import StorageScenarioMixin
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -328,10 +329,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('exists', False))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_storage_blob_soft_delete(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info)
+        import time
 
         # create a blob
         local_file = self.create_temp_file(1)
@@ -348,12 +350,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob service-properties delete-policy show',
                          account_info).assert_with_checks(JMESPathCheck('enabled', True),
                                                           JMESPathCheck('days', 2))
-
+        time.sleep(10)
         # soft-delete and check
         self.storage_cmd('storage blob delete -c {} -n {}', account_info, container, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
                                               account_info, container).get_output_in_json()), 0)
 
+        time.sleep(30)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {} --include d',
                                               account_info, container).get_output_in_json()), 1)
 
@@ -488,10 +491,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer()
     @api_version_constraint(resource_type=ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
     def test_storage_blob_suppress_400(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
         # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
         # test 404
         with self.assertRaises(SystemExit) as ex:
-            self.cmd('storage blob show --account-name {} -c foo -n bar.txt --auth-mode key'.format(storage_account))
+            self.storage_cmd('storage blob show -c foo -n bar.txt', account_info)
         self.assertEqual(ex.exception.code, 3)
 
         # test 403

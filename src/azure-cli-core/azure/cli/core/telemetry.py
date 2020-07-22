@@ -24,7 +24,7 @@ DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
 
 
-class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
+class TelemetrySession:  # pylint: disable=too-many-instance-attributes
     def __init__(self, correlation_id=None, application=None):
         self.start_time = None
         self.end_time = None
