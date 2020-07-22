@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 from .resource_providers import GeneralPrivateEndpointClient
 from .resource_providers.batch_provider import BatchPrivateEndpointClient
-from knack.util import CLIError
+
 
 TYPE_CLIENT_MAPPING = {
     # 'Microsoft.Keyvault/vaults': KeyVaultPrivateEndpointClient # vaults
@@ -27,6 +29,7 @@ def register_providers():
     _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
+    _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None):

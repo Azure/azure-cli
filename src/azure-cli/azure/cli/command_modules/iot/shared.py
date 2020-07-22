@@ -45,16 +45,6 @@ class EncodingFormat(Enum):
 
 
 # pylint: disable=too-few-public-methods
-class UserRole(Enum):
-    """
-    Type of the user role for the repository key.
-    """
-    Admin = 'admin'
-    Reader = 'reader'
-    Contributer = 'contributer'
-
-
-# pylint: disable=too-few-public-methods
 class RenewKeyType(Enum):
     """
     Type of the RegenerateKey for the authorization policy.

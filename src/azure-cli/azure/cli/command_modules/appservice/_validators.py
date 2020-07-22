@@ -30,6 +30,8 @@ def validate_site_create(cmd, namespace):
             plan_info = client.app_service_plans.get(parsed_result['resource_group'], parsed_result['name'])
         else:
             plan_info = client.app_service_plans.get(resource_group_name, plan)
+        if not plan_info:
+            raise CLIError("The plan '{}' doesn't exist in the resource group '{}'".format(plan, resource_group_name))
         # verify that the name is available for create
         validation_payload = {
             "name": namespace.name,
@@ -117,7 +119,7 @@ def validate_add_vnet(cmd, namespace):
 
     vnet_loc = ''
     for v in list_all_vnets:
-        if v.name == vnet:
+        if vnet in (v.name, v.id):
             vnet_loc = v.location
             break
 
