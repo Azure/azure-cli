@@ -1717,5 +1717,13 @@ def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-
     if namespace.automatic_repairs_grace_period is not None:
         namespace.automatic_repairs_grace_period = 'PT' + namespace.automatic_repairs_grace_period + 'M'
 
+
 def _validate_vm_vmss_create_host_group(cmd, namespace):
-    pass
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if namespace.host_group:
+        if not is_valid_resource_id(namespace.host_group):
+            namespace.host_group = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute', type='hostGroups', name=namespace.host_group
+            )
