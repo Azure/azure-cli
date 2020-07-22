@@ -36,11 +36,13 @@ def main():
 
     container = ''
     try:
+        print('Uploading test results to storage account...')
         container = get_container_name()
         upload_files(container)
     except Exception:
         pass
 
+    print('Sending email...')
     # message = Mail(
     #     from_email='azclibot@microsoft.com',
     #     to_emails='AzPyCLI@microsoft.com',
@@ -59,7 +61,7 @@ def main():
         "content": [
             {
                 "type": "text/html",
-                "value": get_content()
+                "value": get_content(container)
             }
         ]
     }
@@ -101,7 +103,9 @@ def upload_files(container):
             if name.endswith('html') or name.endswith('json'):
                 fullpath = os.path.join(root, name)
                 cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac'
-                os.popen(cmd.format(fullpath, container, name))
+                cmd = cmd.format(fullpath, container, name)
+                print('Running: ' + cmd)
+                os.popen(cmd)
 
 
 def get_content(container):
