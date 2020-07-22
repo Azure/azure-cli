@@ -778,7 +778,7 @@ def load_arguments(self, _):
                    help="The name of the slot. Defaults to the productions slot if not specified")
     with self.argument_context('functionapp keys set', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
-        c.argument('key_value', help="Value of the new key.")
+        c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
         c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
     with self.argument_context('functionapp keys delete', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
@@ -795,7 +795,7 @@ def load_arguments(self, _):
                    help="The name of the slot. Defaults to the productions slot if not specified")
     with self.argument_context('functionapp function keys set', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
-        c.argument('key_value', help="Value of the new key.")
+        c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
     with self.argument_context('functionapp function keys delete', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
 
