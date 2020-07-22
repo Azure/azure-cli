@@ -24,7 +24,7 @@ class APIVersionException(Exception):
 PROFILE_TYPE = object()
 
 
-class CustomResourceType(object):  # pylint: disable=too-few-public-methods
+class CustomResourceType:  # pylint: disable=too-few-public-methods
     def __init__(self, import_prefix, client_name):
         self.import_prefix = import_prefix
         self.client_name = client_name
@@ -111,7 +111,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
         self.client_name = client_name
 
 
-class SDKProfile(object):  # pylint: disable=too-few-public-methods
+class SDKProfile:  # pylint: disable=too-few-public-methods
 
     def __init__(self, default_api_version, profile=None):
         """Constructor.
@@ -282,7 +282,7 @@ AZURE_API_PROFILES = {
 }
 
 
-class _ApiVersions(object):  # pylint: disable=too-few-public-methods
+class _ApiVersions:  # pylint: disable=too-few-public-methods
     def __init__(self, client_type, sdk_profile, post_process):
         self._client_type = client_type
         self._sdk_profile = sdk_profile
@@ -343,7 +343,7 @@ def get_api_version(api_profile, resource_type, as_sdk_profile=False):
 
 
 @total_ordering
-class _SemVerAPIFormat(object):
+class _SemVerAPIFormat:
     """Basic semver x.y.z API format.
     Supports x, or x.y, or x.y.z
     """
@@ -367,7 +367,7 @@ class _SemVerAPIFormat(object):
 
 
 @total_ordering  # pylint: disable=too-few-public-methods
-class _DateAPIFormat(object):
+class _DateAPIFormat:
     """ Class to support comparisons for API versions in
         YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile, YYYY-MM-DD-profile-preview
         or any string that starts with YYYY-MM-DD format. A special case is made for 'latest'.

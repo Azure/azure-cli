@@ -3,6 +3,25 @@
 Release History
 ===============
 
+2.9.1
+++++++
+
+**AKS**
+
+* Remove explicit setting of VMSS in Windows example command since it is now default (#14324)
+
+**IoT**
+
+* [BREAKING CHANGE] `az iot pnp`: Remove IoT PNP preview commands from core CLI (#14117)
+
+**REST**
+
+* Fix #14152: `az rest`: Accept ARM URLs without subscription ID (#14370)
+
+**Storage**
+
+* Fix #14138: Make some permissions optional (#14385)
+
 2.9.0
 ++++++
 

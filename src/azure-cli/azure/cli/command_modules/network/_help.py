@@ -3750,7 +3750,7 @@ examples:
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags \\
             --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage \\
-            --destination-port-ranges * --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
+            --destination-port-ranges '*' --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
   - name: Create a security rule using application security groups. https://aka.ms/applicationsecuritygroups
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg \\
