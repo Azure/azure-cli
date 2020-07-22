@@ -147,7 +147,7 @@ for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
 
 set AZURE_CLI_INIT_FILE=%BUILDING_DIR%\Lib\site-packages\azure\cli\__int__.pyc
 if exist %AZURE_CLI_INIT_FILE% (
-    echo Deleting extra __int__.pyc
+    echo Deleting __int__.pyc
     del %AZURE_CLI_INIT_FILE%
 )
 
