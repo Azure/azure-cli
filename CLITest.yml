@@ -283,13 +283,15 @@ jobs:
         pip install sendgrid
         # Send notification
         python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)"
+        az -v
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
         python /home/vsts/work/1/s/scripts/live_test/clean.py
-    - task: AzureCLI@2
-      inputs:
-        azureSubscription: 'AzureSDKTest(0b1f6471-1bf0-4dda-aec3-cb9272f09590)'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az storage container create -n `date +%Y%m%d%H%M%S` --account-name clitestresultstac --account-key $(ACCOUNT_KEY)
-          #az storage blob upload -f -c -n
+#    - task: AzureCLI@2
+#      inputs:
+#        azureSubscription: 'AzureSDKTest(0b1f6471-1bf0-4dda-aec3-cb9272f09590)'
+#        scriptType: 'bash'
+#        scriptLocation: 'inlineScript'
+#        inlineScript: |
+#          az storage container create -n `date +%Y%m%d%H%M%S` --account-name clitestresultstac --account-key $(ACCOUNT_KEY)
+#          #az storage blob upload -f -c -n
