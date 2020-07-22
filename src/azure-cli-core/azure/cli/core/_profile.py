@@ -397,8 +397,8 @@ class Profile:
             return (token_entry['token_type'], token_entry['access_token'], token_entry)
         except requests.exceptions.HTTPError:
             import traceback
-            msg = "Failed to retrieve a token in Cloud Shell for resource {}. Please run `az login` and try again.\n\n" \
-                  "{}".format(resource, traceback.format_exc())
+            msg = "Failed to retrieve a token in Cloud Shell for resource {}. Please run `az login` and try " \
+                  "again.\n\n{}".format(resource, traceback.format_exc())
             raise CLIError(msg)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
