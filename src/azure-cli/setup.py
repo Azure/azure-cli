@@ -181,7 +181,8 @@ setup(
         ],
         'azure.cli.command_modules.appservice': [
             'resources/WindowsFunctionsStacks.json',
-            'resources/LinuxFunctionsStacks.json'
+            'resources/LinuxFunctionsStacks.json',
+            'resources/WebappRuntimeStacks.json'
         ]
     },
     cmdclass=cmdclass
