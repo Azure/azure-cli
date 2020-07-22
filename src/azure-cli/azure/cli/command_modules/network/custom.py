@@ -513,7 +513,6 @@ def add_ag_private_link(cmd,
             raise CLIError('Subnet prefix duplicates')
 
     if is_valid_resource_id(private_link_subnet_name_or_id):
-        private_link_subnet = Subnet(id=private_link_subnet_name_or_id)
         private_link_subnet_id = private_link_subnet_name_or_id
     else:
         private_link_subnet = Subnet(name=private_link_subnet_name_or_id,
