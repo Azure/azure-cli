@@ -233,11 +233,12 @@ jobs:
         pip install azdev
         pip install pytest-json-report
         pip install pytest-html
+        pip install pytest-rerunfailures
         azdev setup -c azure-cli
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-        azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.json --html=$(Target).report.html --self-contained-html -s"
+        azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.json --html=$(Target).report.html --self-contained-html --reruns 3 -s"
         pwd
         ls
     - task: PublishTestResults@2
