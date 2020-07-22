@@ -4521,30 +4521,27 @@ class DiskEncryptionSetTest(ScenarioTest):
 class DiskAccessTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_access_', location='centraluseuap')
-    def test_disk_access_e2e(self, resource_group):
+    def test_disk_access(self, resource_group):
         self.kwargs.update({
-            'rg_caps': resource_group.upper(),
             'loc': 'centraluseuap',
             'name': 'mydiskaccess'
         })
 
-        self.cmd('disk-access create -g {rg_caps} -l {loc} -n {name}')
-        self.cmd('disk-access list -g {rg_caps}', checks=[
+        self.cmd('disk-access create -g {rg} -l {loc} -n {name}')
+        self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 1),
-            self.check('[0].resourceGroup', '{rg_caps}'),
             self.check('[0].name', '{name}'),
             self.check('[0].location', '{loc}')
         ])
-        self.cmd('disk-access update -g {rg_caps} -l {loc} -n {name} --tags tag1=val1')
-        self.cmd('disk-access show -g {rg_caps} -n {name}', checks=[
-            self.check('resourceGroup', '{rg_caps}'),
+        self.cmd('disk-access update -g {rg} -l {loc} -n {name} --tags tag1=val1')
+        self.cmd('disk-access show -g {rg} -n {name}', checks=[
             self.check('name', '{name}'),
             self.check('location', '{loc}'),
             self.check('tags.tag1', 'val1')
         ])
 
-        self.cmd('disk-access delete -g {rg_caps} -n {name}')
-        self.cmd('disk-access list -g {rg_caps}', checks=[
+        self.cmd('disk-access delete -g {rg} -n {name}')
+        self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 0)
         ])
 
