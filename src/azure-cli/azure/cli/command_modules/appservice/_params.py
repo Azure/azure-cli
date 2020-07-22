@@ -774,7 +774,6 @@ def load_arguments(self, _):
         c.argument('name', arg_type=functionapp_name_arg_type,
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the function app')
-        c.argument('function_name', help="Name of the Function")
         c.argument('slot', options_list=['--slot', '-s'],
                    help="The name of the slot. Defaults to the productions slot if not specified")
     with self.argument_context('functionapp keys set', id_part=None) as c:
