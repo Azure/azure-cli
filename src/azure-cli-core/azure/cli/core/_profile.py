@@ -389,10 +389,17 @@ class Profile:
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
         from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
-        auth = MSIAuthenticationWrapper(resource=resource)
-        auth.set_token()
-        token_entry = auth.token
-        return (token_entry['token_type'], token_entry['access_token'], token_entry)
+        import requests
+        try:
+            auth = MSIAuthenticationWrapper(resource=resource)
+            auth.set_token()
+            token_entry = auth.token
+            return (token_entry['token_type'], token_entry['access_token'], token_entry)
+        except requests.exceptions.HTTPError:
+            import traceback
+            msg = "Failed to retrieve a token in Cloud Shell for resource {}. Please run `az login` and try again.\n\n" \
+                  "{}".format(resource, traceback.format_exc())
+            raise CLIError(msg)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
 
