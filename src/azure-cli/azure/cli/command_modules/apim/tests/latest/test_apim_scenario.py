@@ -96,10 +96,13 @@ class ApimScenarioTest(ScenarioTest):
             'display_name': 'Contoso API',
             'is_current': True,
             'path': 'test',
+            'path2': 'test2',
             'protocols': 'https',
             'service_url': 'https://contoso.com',
             'subscription_key_parameter_names': None,
-            'subscription_required': True
+            'subscription_required': True,
+            'specification_path': 'src\\azure-cli\\azure\\cli\\command_modules\\apim\\tests\\latest\\swagger.json',
+            'specification_format': 'Swagger'
         })
 
         # create api
@@ -107,6 +110,12 @@ class ApimScenarioTest(ScenarioTest):
             self.check('displayName', '{display_name}'),
             self.check('path', '{path}'),
             self.check('serviceUrl', '{service_url}')
+        ])
+
+        # import api
+        self.cmd('apim api import -g "{rg}" --service-name "{service_name}" --api-path "{path2}" --specification-path "{specification_path}", --specification-format "{specification_format}"', checks=[
+            self.check('displayName', 'FoodTrucks'),
+            self.check('path', '{path2}')
         ])
 
         # get api
