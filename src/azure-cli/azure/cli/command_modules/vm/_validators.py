@@ -1415,6 +1415,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
+    _validate_vm_vmss_create_host_group(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1715,3 +1716,6 @@ def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-
     """
     if namespace.automatic_repairs_grace_period is not None:
         namespace.automatic_repairs_grace_period = 'PT' + namespace.automatic_repairs_grace_period + 'M'
+
+def _validate_vm_vmss_create_host_group(cmd, namespace):
+    pass

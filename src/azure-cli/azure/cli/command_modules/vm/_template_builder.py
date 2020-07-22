@@ -679,7 +679,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
                         data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None,
-                        specialized=None, os_disk_size_gb=None, encryption_at_host=None):
+                        specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -904,6 +904,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if encryption_at_host:
         vmss_properties['virtualMachineProfile']['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+
+    if host_group:
+        vmss_properties['hostGroup'] = {'id': host_group}
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
