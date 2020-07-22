@@ -52,19 +52,29 @@ def load_command_table(self, _):
                             client_factory=mgmt_vaults_entity.client_factory) as g:
         g.custom_command('create', 'create_vault_or_hsm',
                          doc_string_source=mgmt_vaults_entity.models_docs_tmpl.format('VaultProperties'))
-        g.custom_command('recover', 'recover_keyvault')
-        g.custom_command('list', 'list_keyvault')
+        g.custom_command('recover', 'recover_vault_or_hsm')
+        g.custom_command('list', 'list_vault_or_hsm')
         g.custom_show_command('show', 'get_vault_or_hsm',
                               doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('get'))
-        g.command('delete', 'delete')
-        g.command('purge', 'purge_deleted')
+        g.custom_command('delete', 'delete_vault_or_hsm',
+                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('delete'))
+        g.custom_command('purge', 'purge_vault_or_hsm',
+                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('purge_deleted'))
         g.custom_command('set-policy', 'set_policy')
         g.custom_command('delete-policy', 'delete_policy')
-        g.command('list-deleted', 'list_deleted')
+        g.custom_command('list-deleted', 'list_deleted_vault_or_hsm',
+                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('list_deleted'))
         g.generic_update_command(
-            'update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
-            custom_func_name='update_keyvault',
+            'update', setter_name='update_vault_setter', setter_type=kv_vaults_custom,
+            custom_func_name='update_vault',
             doc_string_source=mgmt_vaults_entity.models_docs_tmpl.format('VaultProperties'))
+
+    with self.command_group('keyvault', private_mgmt_vaults_entity.command_type,
+                            client_factory=private_mgmt_vaults_entity.client_factory) as g:
+        g.generic_update_command(
+            'update-hsm', setter_name='update_hsm_setter', setter_type=kv_vaults_custom,
+            custom_func_name='update_hsm',
+            doc_string_source=private_mgmt_vaults_entity.models_docs_tmpl.format('ManagedHsmProperties'))
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,

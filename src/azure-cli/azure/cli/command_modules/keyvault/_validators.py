@@ -23,7 +23,7 @@ def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 
-def _get_resource_group_from_vault_name(cli_ctx, vault_name, hsm_name):
+def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     """
     Fetch resource group from vault name
     :param str vault_name: name of the key vault
@@ -36,20 +36,14 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name, hsm_name):
 
     if vault_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-        print(client)
-        print(client.list())
         for vault in client.list():
-            print(vault)
             id_comps = parse_resource_id(vault.id)
             if id_comps.get('name', None) and id_comps['name'].lower() == vault_name.lower():
                 return id_comps['resource_group']
 
     if hsm_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT).managed_hsms
-        print(client)
-        print(client.list_by_subscription())
         for hsm in client.list_by_subscription():
-            print(hsm)
             id_comps = parse_resource_id(hsm.id)
             if id_comps.get('name', None) and id_comps['name'].lower() == hsm_name.lower():
                 return id_comps['resource_group']
@@ -244,7 +238,7 @@ def validate_private_endpoint_connection_id(cmd, ns):
         ns.private_endpoint_connection_name = result['child_name_1']
 
     if ns.vault_name and not ns.resource_group_name:
-        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, ns.vault_name)
+        ns.resource_group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, ns.vault_name)
 
     if not all([ns.vault_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
         raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME]')
@@ -259,58 +253,88 @@ def validate_principal(ns):
             None, 'specify exactly one: --object-id, --spn, --upn')
 
 
+def validate_vault_and_hsm_name(ns):
+    if getattr(ns, 'vault_name', None) and getattr(ns, 'hsm_name', None):
+        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+
+    if not getattr(ns, 'vault_name', None) and not getattr(ns, 'hsm_name', None):
+        raise CLIError('Please specify --vault-name or --hsm-name.')
+
+
 def validate_resource_group_name(cmd, ns):
     """
     Populate resource_group_name, if not provided
     """
+    if 'keyvault purge' in cmd.name or 'keyvault recover' in cmd.name:  # Do not add resource group name for these commands
+        return
+
     if not ns.resource_group_name:
-        vault_name = ns.vault_name
-        hsm_name = ns.hsm_name
-        group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name, hsm_name)
+        vault_name = getattr(ns, 'vault_name', None)
+        hsm_name = getattr(ns, 'hsm_name', None)
+        group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, vault_name, hsm_name)
         if group_name:
             ns.resource_group_name = group_name
         else:
-            msg = "The Vault or MHSM '{}' not found within subscription."
-            raise CLIError(msg.format(vault_name))
+            msg = "The Vault or HSM '{}' not found within subscription."
+            raise CLIError(msg.format(vault_name if vault_name else hsm_name))
 
 
-def validate_deleted_vault_name(cmd, ns):
+def validate_deleted_vault_or_hsm_name(cmd, ns):
     """
     Validate a deleted vault name; populate or validate location and resource_group_name
     """
     from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
-    vault_name = ns.vault_name
-    vault = None
+    vault_name = getattr(ns, 'vault_name', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
 
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+    if not vault_name and not hsm_name:
+        raise CLIError('Please specify --vault-name or --hsm-name.')
+
+    if vault_name:
+        resource_name = vault_name
+    else:
+        resource_name = hsm_name
+    resource = None
+
+    if vault_name:
+        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+    else:
+        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT).managed_hsms
 
     # if the location is specified, use get_deleted rather than list_deleted
     if ns.location:
-        vault = client.get_deleted(vault_name, ns.location)
-        id_comps = parse_resource_id(vault.properties.vault_id)
+        resource = client.get_deleted(resource_name, ns.location)
+        if vault_name:
+            id_comps = parse_resource_id(resource.properties.vault_id)
+        else:
+            id_comps = parse_resource_id(resource.properties.id)
 
     # otherwise, iterate through deleted vaults to find one with a matching name
     else:
         for v in client.list_deleted():
-            id_comps = parse_resource_id(v.properties.vault_id)
-            if id_comps['name'].lower() == vault_name.lower():
-                vault = v
-                ns.location = vault.properties.location
+            if vault_name:
+                id_comps = parse_resource_id(v.properties.vault_id)
+            else:
+                id_comps = parse_resource_id(v.properties.id)
+            if id_comps['name'].lower() == resource_name.lower():
+                resource = v
+                ns.location = resource.properties.location
                 break
 
     # if the vault was not found, throw an error
-    if not vault:
-        raise CLIError('No deleted vault was found with name ' + ns.vault_name)
+    if not resource:
+        raise CLIError('No deleted Vault or HSM was found with name ' + resource_name)
 
-    setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
+    if 'keyvault purge' not in cmd.name:
+        setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
 
-    # resource_group_name must match the resource group of the deleted vault
-    if id_comps['resource_group'] != ns.resource_group_name:
-        raise CLIError("The specified resource group does not match that of the deleted vault %s. The vault "
-                       "must be recovered to the original resource group %s."
-                       % (vault_name, id_comps['resource_group']))
+        # resource_group_name must match the resource group of the deleted vault
+        if id_comps['resource_group'] != ns.resource_group_name:
+            raise CLIError("The specified resource group does not match that of the deleted vault or hsm %s. The vault "
+                           "or hsm must be recovered to the original resource group %s."
+                           % (vault_name, id_comps['resource_group']))
 
 
 def validate_x509_certificate_chain(ns):

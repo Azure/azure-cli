@@ -160,7 +160,71 @@ def _scaffold_certificate_profile(cmd):
     return template
 
 
-def list_keyvault(client, resource_group_name=None):
+def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, hsm_name=None):
+    if vault_name:
+        return client.delete(resource_group_name=resource_group_name, vault_name=vault_name)
+
+    if hsm_name:
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return hsm_client.delete(resource_group_name=resource_group_name, name=hsm_name)
+
+
+def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None):
+    if vault_name:
+        return client.purge_deleted(location=location, vault_name=vault_name)
+
+    if hsm_name:
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return hsm_client.purge_deleted(rlocation=location, name=hsm_name)
+
+
+def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
+    if resource_type is None:
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        deleted_resources = []
+        try:
+            deleted_resources.extend(client.list_deleted())
+            deleted_resources.extend(hsm_client.list_deleted())
+        finally:
+            return deleted_resources
+
+    if resource_type == 'hsm':
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return hsm_client.list_deleted()
+
+    if resource_type == 'vault':
+        return client.list_deleted()
+
+    raise CLIError('Unsupported resource type: {}'.format(resource_type))
+
+
+def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None):
+    if resource_type is None:
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        resources = []
+        try:
+            resources.extend(list_vault(client, resource_group_name))
+            resources.extend(list_hsm(hsm_client, resource_group_name))
+        finally:
+            return resources
+
+    if resource_type == 'hsm':
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return list_hsm(hsm_client, resource_group_name)
+
+    if resource_type == 'vault':
+        return list_vault(client, resource_group_name)
+
+    raise CLIError('Unsupported resource type: {}'.format(resource_type))
+
+
+def list_hsm(client, resource_group_name=None):
+    hsm_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list_by_subscription()
+    return list(hsm_list)
+
+
+def list_vault(client, resource_group_name=None):
     vault_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(vault_list)
@@ -246,7 +310,45 @@ def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-a
     return _scaffold_certificate_profile(cmd) if scaffold else _default_certificate_profile(cmd)
 
 
-def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
+def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, vault_name=None, hsm_name=None):
+    if vault_name:
+        return recover_vault(cmd=cmd,
+                             client=client,
+                             resource_group_name=resource_group_name,
+                             location=location,
+                             vault_name=vault_name)
+
+    if hsm_name:
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return recover_hsm(cmd=cmd,
+                           client=hsm_client,
+                           resource_group_name=resource_group_name,
+                           location=location,
+                           hsm_name=hsm_name)
+
+
+def recover_hsm(cmd, client, hsm_name, resource_group_name, location):
+    from azure.cli.core._profile import Profile
+
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+
+    # tenantId and sku shouldn't be required
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    _, _, tenant_id = profile.get_login_credentials(
+        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+
+    parameters = ManagedHsm(location=location,
+                            sku=ManagedHsmSku(name='Standard_B1'),
+                            properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value})
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   name=hsm_name,
+                                   parameters=parameters)
+
+
+def recover_vault(cmd, client, vault_name, resource_group_name, location):
     from azure.cli.core._profile import Profile
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -541,7 +643,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                                    parameters=parameters)
 
 
-def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name):
+def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name):
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
     return client.create_or_update(resource_group_name=resource_group_name,
@@ -551,15 +653,25 @@ def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_n
                                        properties=parameters.properties))
 
 
-def update_keyvault(cmd, instance, enabled_for_deployment=None,
-                    enabled_for_disk_encryption=None,
-                    enabled_for_template_deployment=None,
-                    enable_rbac_authorization=None,
-                    enable_soft_delete=None,
-                    enable_purge_protection=None,
-                    retention_days=None,
-                    bypass=None,
-                    default_action=None,):
+def update_hsm_setter(cmd, client, parameters, resource_group_name, hsm_name):
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   name=hsm_name,
+                                   parameters=ManagedHsm(
+                                       location=parameters.location,
+                                       properties=parameters.properties))
+
+
+def update_vault(cmd, instance,
+                 enabled_for_deployment=None,
+                 enabled_for_disk_encryption=None,
+                 enabled_for_template_deployment=None,
+                 enable_rbac_authorization=None,
+                 enable_soft_delete=None,
+                 enable_purge_protection=None,
+                 retention_days=None,
+                 bypass=None,
+                 default_action=None):
     if enabled_for_deployment is not None:
         instance.properties.enabled_for_deployment = enabled_for_deployment
 
@@ -580,6 +692,28 @@ def update_keyvault(cmd, instance, enabled_for_deployment=None,
 
     if retention_days is not None:
         instance.properties.soft_delete_retention_in_days = int(retention_days)
+
+    if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
+        if instance.properties.network_acls is None:
+            instance.properties.network_acls = _create_network_rule_set(cmd, bypass, default_action)
+        else:
+            if bypass:
+                instance.properties.network_acls.bypass = bypass
+            if default_action:
+                instance.properties.network_acls.default_action = default_action
+    return instance
+
+
+def update_hsm(cmd, instance,
+               enable_purge_protection=None,
+               bypass=None,
+               default_action=None,
+               secondary_locations=None):
+    if enable_purge_protection is not None:
+        instance.properties.enable_purge_protection = enable_purge_protection
+
+    if secondary_locations is not None:
+        instance.properties.secondary_locations = secondary_locations
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:

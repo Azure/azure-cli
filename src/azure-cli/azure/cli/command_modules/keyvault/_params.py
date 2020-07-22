@@ -26,7 +26,8 @@ from ._validators import (
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_and_hsm_id, validate_sas_definition_id, validate_storage_account_id,
-    validate_storage_disabled_attribute, validate_deleted_vault_name, validate_encryption, validate_decryption)
+    validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
+    validate_vault_and_hsm_name)
 
 # CUSTOM CHOICE LISTS
 
@@ -72,12 +73,19 @@ def load_arguments(self, _):
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
-        help='Name of the Key Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None,
+        help='Name of the Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None,
         completer=get_resource_name_completion_list('Microsoft.KeyVault/vaults'))
 
-    hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --vault-name/--name are mutually exclusive, '
-                                         'please specify just one of them)',
+    deleted_vault_name_type = CLIArgumentType(
+        help='Name of the deleted Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None)
+
+    hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --vault-name/--name/-n are mutually '
+                                         'exclusive, please specify just one of them)',
                                     options_list=['--hsm-name'], id_part=None, is_preview=True)
+
+    deleted_hsm_name_type = CLIArgumentType(help='Name of the deleted HSM. (--hsm-name and --vault-name/--name/-n are '
+                                                 'mutually exclusive, please specify just one of them)',
+                                            options_list=['--hsm-name'], id_part=None, is_preview=True)
 
     # region vault (management)
     with self.argument_context('keyvault') as c:
@@ -102,13 +110,13 @@ def load_arguments(self, _):
         c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction),
                    help='Default action to apply when no rule matches.')
 
-    with self.argument_context('keyvault show') as c:
-        c.argument('hsm_name', hsm_name_type)
+    for item in ['show', 'delete', 'create']:
+        with self.argument_context('keyvault {}'.format(item)) as c:
+            c.argument('hsm_name', hsm_name_type, validator=validate_vault_and_hsm_name)
 
     with self.argument_context('keyvault create') as c:
         c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
-        c.argument('vault_name', options_list=['--name', '-n'])
-        c.argument('hsm_name', hsm_name_type)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
         c.argument('administrators', nargs='+',
                    help='Administrator role for data plane operations for Managed HSM. It accepts a space separated '
                         'list of OIDs that will be assigned. Only valid when --hsm-name is used.')
@@ -131,23 +139,40 @@ def load_arguments(self, _):
                                                          'Vnet/subnet pairs or subnet resource ids.')
 
     with self.argument_context('keyvault update') as c:
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
         c.argument('enable_soft_delete', arg_type=get_three_state_flag())
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
+    with self.argument_context('keyvault update-hsm') as c:
+        c.ignore('vault_name')
+        c.argument('hsm_name', options_list=['--name', '-n'], help='Name of the HSM.',
+                   validator=validate_vault_and_hsm_name)
+        c.argument('secondary_locations', nargs='+',
+                   help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
+                        'where the resource was originally created CANNOT be removed.')
+
     with self.argument_context('keyvault recover') as c:
-        c.argument('vault_name', help='Name of the deleted vault', required=True, completer=None,
-                   validator=validate_deleted_vault_name)
+        c.argument('vault_name', deleted_vault_name_type, options_list=['--name', '-n'],
+                   validator=validate_deleted_vault_or_hsm_name)
+        c.argument('hsm_name', deleted_hsm_name_type, validator=validate_vault_and_hsm_name)
         c.argument('resource_group_name', resource_group_name_type, id_part=None, required=False,
-                   help='Resource group of the deleted vault')
-        c.argument('location', help='Location of the deleted vault', required=False)
+                   help='Resource group of the deleted Vault or HSM')
+        c.argument('location', help='Location of the deleted Vault or HSM', required=False)
 
     with self.argument_context('keyvault purge') as c:
-        c.argument('vault_name', help='Name of the deleted vault', required=True, completer=None,
-                   validator=validate_deleted_vault_name)
-        c.argument('location', help='Location of the deleted vault', required=False)
+        c.argument('vault_name', deleted_vault_name_type, options_list=['--name', '-n'],
+                   validator=validate_deleted_vault_or_hsm_name)
+        c.argument('hsm_name', deleted_hsm_name_type, validator=validate_vault_and_hsm_name)
+        c.argument('location', help='Location of the deleted Vault or HSM', required=False)
 
     with self.argument_context('keyvault list') as c:
         c.argument('resource_group_name', resource_group_name_type, validator=None)
+        c.argument('resource_type', help='When --resource-type is not present the command will list all vaults and HSMs.'
+                                         ' Possible values for --resource-type are vault and hsm.')
+
+    with self.argument_context('keyvault list-deleted') as c:
+        c.argument('resource_type', help='When --resource-type is not present the command will list all deleted vaults '
+                                         'and HSMs. Possible values for --resource-type are vault and hsm.')
 
     with self.argument_context('keyvault delete-policy') as c:
         c.argument('object_id', validator=validate_principal)
@@ -181,7 +206,7 @@ def load_arguments(self, _):
                        help='Name of the Key Vault. Required if --id is not specified')
 
     with self.argument_context('keyvault private-link-resource', min_api='2018-02-14') as c:
-        c.argument('vault_name', vault_name_type, help='Name of the Key Vault.')
+        c.argument('vault_name', vault_name_type)
     # endregion
 
     # region Shared
