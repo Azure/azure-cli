@@ -29,6 +29,9 @@ title 'Install private packages (optional)'
 title 'Install products'
 pip install -qqq $ALL_MODULES
 
+# TODO: Remove this line once a new version of Knack is released with this change
+pip install --force-reinstall git+https://github.com/jiasli/knack@config
+
 title 'Installed packages'
 pip freeze
 
