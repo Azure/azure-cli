@@ -165,7 +165,7 @@ short-summary: Delete a disk access resource.
 examples:
   - name: Delete a disk access reosurce.
     text: |
-        az disk-access list -g MyResourceGroup -n MyDiskAccess
+        az disk-access delete -g MyResourceGroup -n MyDiskAccess
 """
 
 helps['disk-encryption-set'] = """
