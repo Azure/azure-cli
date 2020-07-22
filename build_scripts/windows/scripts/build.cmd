@@ -145,6 +145,12 @@ for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
     if exist %%d rmdir /s /q "%%d"
 )
 
+set AZURE_CLI_INIT_FILE=%BUILDING_DIR%\Lib\site-packages\azure\cli\__int__.pyc
+if exist %AZURE_CLI_INIT_FILE% (
+    echo Deleting extra __int__.pyc
+    del %AZURE_CLI_INIT_FILE%
+)
+
 if %errorlevel% neq 0 goto ERROR
 
 ::ensure propagate_env_change.exe is available
