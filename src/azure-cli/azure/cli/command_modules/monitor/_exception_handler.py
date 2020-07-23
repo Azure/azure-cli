@@ -49,3 +49,14 @@ def missing_resource_handler(exception):
     if isinstance(exception, HttpOperationError) and exception.response.status_code == 404:
         raise CLIError('Can\'t find the resource.')
     raise CLIError(exception.message)
+
+
+def data_export_handler(ex):
+    from azure.mgmt.loganalytics.models import DataExportErrorResponseException
+    from knack.util import CLIError
+    if isinstance(ex, (DataExportErrorResponseException)):
+        ex.message = ex.response.text
+        raise CLIError(ex)
+    import sys
+    from six import reraise
+    reraise(*sys.exc_info())
