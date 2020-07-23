@@ -21,9 +21,9 @@ from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 
-
 from azure.cli.core import telemetry
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import sdk_no_wait
 
 from ._validators import _construct_vnet, secret_text_encoding_values
 
@@ -33,6 +33,9 @@ logger = get_logger(__name__)
 def _azure_stack_wrapper(cmd, client, function_name, *args, **kwargs):
     if cmd.cli_ctx.cloud.profile == 'latest':
         function_name = 'begin_' + function_name
+        no_wait = kwargs.get('no_wait', False)
+        kwargs.pop('no_wait')
+        return sdk_no_wait(no_wait, getattr(client, function_name), *args, **kwargs)
     return getattr(client, function_name)(*args, **kwargs)
 
 
@@ -335,7 +338,8 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     bypass=None,
                     default_action=None,
                     no_self_perms=None,
-                    tags=None):
+                    tags=None,
+                    no_wait=False):
 
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
@@ -446,10 +450,11 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
-                                parameters=parameters)
+                                parameters=parameters,
+                                no_wait=no_wait)
 
 
-def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name):
+def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name, no_wait=False):
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
@@ -457,7 +462,8 @@ def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_n
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=parameters.location,
-                                    properties=parameters.properties))
+                                    properties=parameters.properties),
+                                no_wait=no_wait)
 
 
 def update_keyvault(cmd, instance, enabled_for_deployment=None,

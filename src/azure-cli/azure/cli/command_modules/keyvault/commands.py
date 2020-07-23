@@ -77,6 +77,7 @@ def load_command_table(self, _):
             custom_func_name='update_keyvault',
             doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties',
             supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('keyvault network-rule',
                             kv_vaults_sdk,

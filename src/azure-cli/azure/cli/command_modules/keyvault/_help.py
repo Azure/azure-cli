@@ -388,3 +388,12 @@ examples:
         az keyvault update --enabled-for-disk-encryption true --name MyKeyVault --resource-group MyResourceGroup
     crafted: true
 """
+
+helps['keyvault wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vault is met.
+examples:
+  - name: Pause CLI until the vault is created.
+    text: |
+        az keyvault wait --name MyVault --created
+"""
