@@ -1909,6 +1909,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
 
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_load_balancer')
     def test_network_lb(self, resource_group):
 
@@ -2286,6 +2287,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
 
 class NetworkNicScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_nic_scenario')
     def test_network_nic(self, resource_group):
 
@@ -2725,6 +2727,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
 
 class NetworkVNetScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_vnet_test')
     def test_network_vnet(self, resource_group):
 
