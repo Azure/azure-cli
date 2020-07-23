@@ -90,7 +90,7 @@ def _prepare_test_loader():
             try:
                 setattr(sys.modules[test_module], my_get.__name__, my_get)
                 setattr(sys.modules[test_module], my_set.__name__, my_set)
-            except KeyError as ex:
+            except KeyError:
                 import importlib
                 loaded_module = importlib.import_module(test_module)
                 setattr(loaded_module, my_get.__name__, my_get)
