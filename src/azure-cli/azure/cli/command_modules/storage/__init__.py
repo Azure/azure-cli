@@ -167,6 +167,11 @@ class StorageArgumentContext(AzArgumentContext):
                    "character (*) to perform the operation only if the resource does not exist, and fail the operation "
                    "if it does exist.", validator=validate_match_condition)
 
+    def register_blob_arguments(self):
+        self.extra('blob_name', required=True)
+        self.extra('container_name', required=True)
+        self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
 
 class StorageCommandGroup(AzCommandGroup):
     def storage_command(self, name, method_name=None, command_type=None, oauth=False, generic_update=None, **kwargs):
