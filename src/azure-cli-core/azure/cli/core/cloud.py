@@ -71,7 +71,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  ossrdbms_resource_id=None,
                  log_analytics_resource_id=None,
                  app_insights_resource_id=None,
-                 app_insights_telemetry_channel_resource_id=None):
+                 app_insights_telemetry_channel_resource_id=None,
+                 synapse_analytics_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -89,6 +90,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.log_analytics_resource_id = log_analytics_resource_id
         self.app_insights_resource_id = app_insights_resource_id
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
+        self.synapse_analytics_resource_id = synapse_analytics_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -122,7 +124,8 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods,too-many-
                  acr_login_server_endpoint=None,
                  mysql_server_endpoint=None,
                  postgresql_server_endpoint=None,
-                 mariadb_server_endpoint=None):
+                 mariadb_server_endpoint=None,
+                 azure_synapse_analytics_endpoint=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.storage_sync_endpoint = storage_sync_endpoint
@@ -134,6 +137,7 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods,too-many-
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
         self.acr_login_server_endpoint = acr_login_server_endpoint
+        self.azure_synapse_analytics_endpoint = azure_synapse_analytics_endpoint
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -198,7 +202,8 @@ def _arm_to_cli_mapper(arm_dict):
             ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
             active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,  # pylint: disable=line-too-long
             app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else None,
-            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None),  # pylint: disable=line-too-long
+            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None,  # pylint: disable=line-too-long
+            synapse_analytics_resource_id=arm_dict['synapseAnalyticsResourceId'] if 'synapseAnalyticsResourceId' in arm_dict else None),
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             storage_sync_endpoint=arm_dict['suffix']['storageSyncEndpointSuffix'] if 'storageSyncEndpointSuffix' in arm_dict['suffixes'] else _get_storage_sync_endpoint(arm_dict['name']),  # pylint: disable=line-too-long
@@ -209,7 +214,8 @@ def _arm_to_cli_mapper(arm_dict):
             mariadb_server_endpoint=arm_dict['suffixes']['mariadbServerEndpoint'],
             azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
-            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))  # pylint: disable=line-too-long
+            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None,
+            azure_synapse_analytics_endpoint=arm_dict['suffixes']['synapseAnalytics'] if 'synapseAnalytics' in arm_dict['suffixes'] else None)) # pylint: disable=line-too-long
 
 
 class Cloud(object):  # pylint: disable=too-few-public-methods
@@ -256,7 +262,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net',
         app_insights_resource_id='https://api.applicationinsights.io',
         log_analytics_resource_id='https://api.loganalytics.io',
-        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track'),
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track',
+        synapse_analytics_resource_id='https://dev.azuresynapse.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         storage_sync_endpoint='afs.azure.net',
@@ -267,7 +274,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         mariadb_server_endpoint='.mariadb.database.azure.com',
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
         azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net',
-        acr_login_server_endpoint='.azurecr.io'))
+        acr_login_server_endpoint='.azurecr.io',
+        azure_synapse_analytics_endpoint='.dev.azuresynapse.net'))
 
 AZURE_CHINA_CLOUD = Cloud(
     'AzureChinaCloud',
@@ -286,7 +294,8 @@ AZURE_CHINA_CLOUD = Cloud(
         ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn',
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
-        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track'),
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
+        synapse_analytics_resource_id='https://dev.azuresynapse.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -294,7 +303,8 @@ AZURE_CHINA_CLOUD = Cloud(
         mysql_server_endpoint='.mysql.database.chinacloudapi.cn',
         postgresql_server_endpoint='.postgres.database.chinacloudapi.cn',
         mariadb_server_endpoint='.mariadb.database.chinacloudapi.cn',
-        acr_login_server_endpoint='.azurecr.cn'))
+        acr_login_server_endpoint='.azurecr.cn',
+        azure_synapse_analytics_endpoint='.dev.azuresynapse.azure.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
     'AzureUSGovernment',
