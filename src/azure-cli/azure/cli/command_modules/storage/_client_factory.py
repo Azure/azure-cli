@@ -215,8 +215,8 @@ def cf_blob_service(cli_ctx, kwargs):
 
 
 def cf_blob_client(cli_ctx, kwargs):
-    return cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs['container_name'],
-                                                            blob=kwargs['blob_name'],
+    return cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs.pop('container_name'),
+                                                            blob=kwargs.pop('blob_name'),
                                                             snapshot=kwargs.pop('snapshot', None))
 
 

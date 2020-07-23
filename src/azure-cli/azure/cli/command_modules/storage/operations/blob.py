@@ -604,8 +604,7 @@ def _get_datetime_from_string(dt_str):
     raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))
 
 
-# ------------------Track2 Support-----------------------
-def show_blob_v2(cmd, client, container_name, blob_name, snapshot=None, lease_id=None,
+def show_blob_v2(cmd, client, lease_id=None,
                  if_modified_since=None, if_unmodified_since=None, if_match=None,
                  if_none_match=None, timeout=None):
     property_kwargs = {
@@ -634,7 +633,7 @@ def show_blob_v2(cmd, client, container_name, blob_name, snapshot=None, lease_id
     return blob
 
 
-def set_blob_tier_v2(client, container_name, blob_name, tier, blob_type='block', rehydrate_priority=None, timeout=None):
+def set_blob_tier_v2(client, tier, blob_type='block', rehydrate_priority=None, timeout=None):
     if blob_type == 'block':
         return client.set_standard_blob_tier(standard_blob_tier=tier, rehydrate_priority=rehydrate_priority,
                                              timeout=timeout)
