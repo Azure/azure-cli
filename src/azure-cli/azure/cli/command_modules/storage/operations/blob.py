@@ -610,7 +610,7 @@ def show_blob_v2(cmd, client, lease_id=None, **kwargs):
 
     page_ranges = None
     if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
-        page_ranges = client.get_page_ranges(**kwargs)
+        page_ranges = client.get_page_ranges(lease=lease_id, **kwargs)
 
     blob.page_ranges = page_ranges
 
