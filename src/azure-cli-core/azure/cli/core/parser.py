@@ -362,18 +362,17 @@ class AzCliCommandParser(CLICommandParser):
                         run_after_extension_installed = cli_ctx.config.getboolean('extension',
                                                                                   'run_after_dynamic_install',
                                                                                   True)
-                        prompt_msg = 'You are running a command from the extension {}. ' \
-                                     'Would you like to install it first?'.format(ext_name)
-                        if run_after_extension_installed:
-                            prompt_msg = '{} The command will continue to run after the extension is installed.' \
-                                .format(prompt_msg)
-
                         if use_dynamic_install.lower() == 'yes_without_prompt':
                             logger.warning('You are running a command from the extension %s. '
                                            'It will be installed first.', ext_name)
                             go_on = True
                         else:
                             from knack.prompting import prompt_y_n, NoTTYException
+                            prompt_msg = 'You are running a command from the extension {}. ' \
+                                     'Would you like to install it first?'.format(ext_name)
+                            if run_after_extension_installed:
+                                prompt_msg = '{} The command will continue to run after the extension is installed.' \
+                                    .format(prompt_msg)
                             NO_PROMPT_CONFIG_MSG = "Run 'az config set extension.use_dynamic_install=" \
                                 "yes_without_prompt' to allow installing extensions without prompt."
                             try:
@@ -395,7 +394,7 @@ class AzCliCommandParser(CLICommandParser):
                                                          "rerun automatically.".format(ext_name))
                                 self.exit(exit_code)
                             else:
-                                error_msg = 'Extension installed. Please rerun your command.'
+                                error_msg = 'Extension {} installed. Please rerun your command.'.format(ext_name)
                         else:
                             error_msg = "Command failed due to corresponding extension not installed. " \
                                 "Please run 'az extension add -n {}' first.".format(ext_name)
