@@ -428,6 +428,6 @@ short-summary: Update the properties of a HSM.
 examples:
   - name: Update the properties of a HSM.
     text: |
-        az keyvault update-hsm --enabled-for-purge-protection true --name MyHSM --resource-group MyResourceGroup
+        az keyvault update-hsm --enable-purge-protection true --name MyHSM --resource-group MyResourceGroup
     crafted: true
 """
