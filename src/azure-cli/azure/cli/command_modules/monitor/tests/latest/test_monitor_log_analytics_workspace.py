@@ -413,18 +413,18 @@ class TestLogProfileScenarios(ScenarioTest):
                  '--destination {sa_id_1} --enable -t {table_name}',
                  checks=[
                  ])
-        from azure.mgmt.loganalytics.models import DataExportErrorResponseException
-        with self.assertRaisesRegexp(DataExportErrorResponseException, 'You have exceeded the allowed export rules for the provided table'):
+        from knack.util import CLIError
+        with self.assertRaisesRegexp(CLIError, 'You have exceeded the allowed export rules for the provided table'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(DataExportErrorResponseException, 'Table ABC does not exist in the workspace'):
+        with self.assertRaisesRegexp(CLIError, 'Table ABC does not exist in the workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(DataExportErrorResponseException, 'You have exceeded the allowed export rules for the provided table'):
+        with self.assertRaisesRegexp(CLIError, 'You have exceeded the allowed export rules for the provided table'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t AppPerformanceCounters',
                      checks=[
