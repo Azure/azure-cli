@@ -369,7 +369,7 @@ class AzCliCommandParser(CLICommandParser):
                         else:
                             from knack.prompting import prompt_y_n, NoTTYException
                             prompt_msg = 'You are running a command from the extension {}. ' \
-                                     'Would you like to install it first?'.format(ext_name)
+                                'Would you like to install it first?'.format(ext_name)
                             if run_after_extension_installed:
                                 prompt_msg = '{} The command will continue to run after the extension is installed.' \
                                     .format(prompt_msg)
