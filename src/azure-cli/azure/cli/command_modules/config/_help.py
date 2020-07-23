@@ -14,7 +14,9 @@ short-summary: Manage Azure CLI configuration.
 helps['config set'] = """
 type: command
 short-summary: Set a configuration.
-long-summary: For available configuration options, see https://docs.microsoft.com/en-us/cli/azure/azure-cli-configuration
+long-summary: |
+    For available configuration options, see https://docs.microsoft.com/en-us/cli/azure/azure-cli-configuration.
+    By default without specifying --local, the configuration will be saved to `~/.azure/config`.
 examples:
   - name: Disable color with `core.no_color`.
     text: az config set core.no_color=true
@@ -26,10 +28,10 @@ examples:
     text: |-
         az config set logging.enable_log_file=true
         az config set logging.log_dir=~/az-logs
-  - name: Set the default resource group to `myRG`.
-    text: az config set default.group=myRG
+  - name: Set the default location to `westus2` and default resource group to `myRG`.
+    text: az config set defaults.location=westus2 defaults.group=MyResourceGroup
   - name: Set the default resource group to `myRG` on a local scope.
-    text: az config set default.group=myRG --local
+    text: az config set defaults.group=myRG --local
 """
 
 helps['config get'] = """
