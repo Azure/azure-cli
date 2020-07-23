@@ -90,6 +90,15 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 0))
 
+        # sync with guessing content-type
+        cur = os.path.split(os.path.realpath(__file__))[0]
+        source = os.path.join(cur, "testdir")
+        self.storage_cmd('storage blob sync -s "{}" -c {} ', storage_account_info, source, container)
+
+        self.storage_cmd('storage blob show -n "sample.js" -c {} ', storage_account_info, container)\
+            .assert_with_checks(JMESPathCheck("name", "sample.js"),
+                                JMESPathCheck("properties.contentSettings.contentType", "application/javascript"))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
@@ -107,7 +116,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account))
 
         self.cmd('storage remove -c {} -n readme --account-name {}'.format(
-            container, storage_account), expect_failure=True)
+            container, storage_account))
 
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 40))
@@ -210,7 +219,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src2_file, s2) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
-        self.storage_cmd('storage remove --share-name {}',
+        self.storage_cmd('storage remove --share-name {} --recursive',
                          account_info, s2)
         self.storage_cmd('storage file list -s {}', account_info, s2) \
             .assert_with_checks(JMESPathCheck('length(@)', 1)) \
@@ -239,8 +248,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         content_type = "application/json"
         self.cmd('storage copy -s "{}" -d "{}" --content-type {}'.format(
             os.path.join(test_dir, 'readme'), first_container_url, content_type))
-        self.cmd('storage blob list -c {} --account-name {}'
-                 .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
+        self.storage_cmd('storage blob list -c {}', first_account_info, first_container)\
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
         self.cmd('storage blob show -n {} -c {} --account-name {}'
                  .format('readme', first_container, first_account),
                  checks=[JMESPathCheck('properties.contentSettings.contentType', content_type)])
@@ -301,12 +310,12 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # Upload to managed disk
         diskname = self.create_random_name(prefix='disk', length=12)
-        local_file = self.create_temp_file(20480)
+        local_file = self.create_temp_file(20480.5)
         self.cmd('disk create -n {} -g {} --for-upload --upload-size-bytes 20972032'
                  .format(diskname, resource_group))
         sasURL = self.cmd(
-            'disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query accessSas'
-            .format(diskname, resource_group))
+            'disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query accessSas -o tsv'
+            .format(diskname, resource_group)).output.strip('\n')
         self.cmd('storage copy -s "{}" -d "{}" --blob-type PageBlob'
                  .format(local_file, sasURL))
 
