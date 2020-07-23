@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=line-too-long, too-many-locals, too-many-arguments, too-many-statements, too-many-branches
+# pylint: disable=line-too-long, too-many-locals, too-many-arguments, too-many-statements, too-many-branches, no-else-return
 
 import uuid
 from knack.util import CLIError
@@ -124,10 +124,11 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 
 # API Operations
 
-def create_apim_api(client, resource_group_name, service_name, api_id, description=None, subscription_key_header_name=None, subscription_key_query_param_name=None,
-                    open_id_provider_id=None, bearer_token_sending_methods=None, authorization_server_id=None, authorization_scope=None, api_revision=None,
-                    api_version=None, is_current=True, display_name=None, service_url=None, protocols=None, path=None,
-                    api_type=None, subscription_required=False, subscription_key_required=False, no_wait=False):
+def create_apim_api(client, resource_group_name, service_name, api_id, description=None, subscription_key_header_name=None,
+                    subscription_key_query_param_name=None, open_id_provider_id=None, bearer_token_sending_methods=None,
+                    authorization_server_id=None, authorization_scope=None, display_name=None, service_url=None, protocols=None,
+                    path=None, subscription_key_required=None, api_type=None,
+                    subscription_required=False, no_wait=False):
     """Creates a new API. """
 
     if authorization_server_id is not None and authorization_scope is not None:
@@ -148,15 +149,14 @@ def create_apim_api(client, resource_group_name, service_name, api_id, descripti
             openid=openid,
             subscription_key_required=subscription_key_required
         )
+    else:
+        authentication_settings = None
 
     resource = ApiContract(
         api_id=api_id,
         description=description,
         authentication_settings=authentication_settings,
         subscription_key_parameter_names=get_subscription_key_parameter_names(subscription_key_query_param_name, subscription_key_header_name),
-        api_revision=api_revision,
-        api_version=api_version,
-        is_current=is_current,
         display_name=display_name,
         service_url=service_url,
         protocols=protocols if protocols is not None else [Protocol.https.value],
@@ -203,7 +203,7 @@ def delete_apim_api(client, resource_group_name, service_name, api_id, delete_re
 
 
 def update_apim_api(instance, description=None, subscription_key_header_name=None, subscription_key_query_param_name=None,
-                    api_revision=None, api_version=None, is_current=None, display_name=None, service_url=None, protocols=None, path=None,
+                    display_name=None, service_url=None, protocols=None, path=None,
                     api_type=None, subscription_required=None, tags=None):
     """Updates an existing API. """
 
@@ -212,15 +212,6 @@ def update_apim_api(instance, description=None, subscription_key_header_name=Non
 
     if subscription_key_header_name is not None:
         instance.subscription_key_parameter_names = get_subscription_key_parameter_names(subscription_key_query_param_name, subscription_key_header_name)
-
-    if api_revision is not None:
-        instance.authentication_settings = api_revision
-
-    if api_version is not None:
-        instance.api_version = api_version
-
-    if is_current is not None:
-        instance.is_current = is_current
 
     if display_name is not None:
         instance.display_name = display_name
@@ -246,10 +237,11 @@ def update_apim_api(instance, description=None, subscription_key_header_name=Non
     return instance
 
 
-def import_apim_api(client, resource_group_name, service_name, path, description=None, subscription_key_header_name=None, subscription_key_query_param_name=None,
-                    api_revision=None, api_id=None, api_version=None, api_version_set_id=None, display_name=None, service_url=None, protocols=None, specification_path=None,
-                    specification_url=None, specification_format=None, api_type=None, subscription_required=None,
-                    soap_api_type=None, wsdl_endpoint_name=None, wsdl_service_name=None, no_wait=False):
+def import_apim_api(client, resource_group_name, service_name, path, description=None, subscription_key_header_name=None,
+                    subscription_key_query_param_name=None, api_id=None, api_revision=None, display_name=None, service_url=None,
+                    protocols=None, specification_path=None, specification_url=None, specification_format=None,
+                    api_type=None, subscription_required=None, soap_api_type=None, wsdl_endpoint_name=None,
+                    wsdl_service_name=None, no_wait=False):
     """Import a new API"""
     cms = client.api
 
@@ -282,8 +274,8 @@ def import_apim_api(client, resource_group_name, service_name, path, description
 
     if specification_path is not None and specification_url is None:
         api_file = open(specification_path, 'r')
-        contentValue = api_file.read()
-        resource.value = contentValue
+        content_value = api_file.read()
+        resource.value = content_value
     elif specification_url is not None and specification_path is None:
         resource.value = specification_url
     elif specification_path is not None and specification_url is not None:
@@ -293,8 +285,6 @@ def import_apim_api(client, resource_group_name, service_name, path, description
 
     resource.protocols = protocols
     resource.service_url = service_url
-    resource.api_version = api_version
-    resource.api_version_set_id = api_version_set_id
     resource.display_name = display_name
     resource.description = description
     resource.subscription_required = subscription_required
@@ -319,11 +309,11 @@ def import_apim_api(client, resource_group_name, service_name, path, description
 
 def get_subscription_key_parameter_names(subscription_key_header_name=None, subscription_key_query_param_name=None):
     if subscription_key_query_param_name is not None and subscription_key_header_name is not None:
-        subscription_key_parameter_names = SubscriptionKeyParameterNamesContract(
+        return SubscriptionKeyParameterNamesContract(
             header=subscription_key_header_name,
             query=subscription_key_query_param_name
         )
     elif subscription_key_query_param_name is not None or subscription_key_header_name is not None:
         raise CLIError("Please specify 'subscription_key_query_param_name' and 'subscription_key_header_name' at the same time.")
 
-    return subscription_key_parameter_names
+    return None

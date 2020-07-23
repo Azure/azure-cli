@@ -86,35 +86,35 @@ class ApimScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
+        # TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
         # api operations
         self.kwargs.update({
             'api_id': self.create_random_name('az-cli', 10),
-            'api_revision': None,
             'api_type': 'http',
-            'api_version': None,
             'description': 'Contoso API Description',
             'display_name': 'Contoso API',
-            'is_current': True,
             'path': 'test',
             'path2': 'test2',
             'protocols': 'https',
             'service_url': 'https://contoso.com',
-            'subscription_key_parameter_names': None,
+            'subscription_key_header_name': 'header',
+            'subscription_key_query_param_name': 'query',
+            'api_id2': '48242ec7f53745de9cbb800757a4204a',
             'subscription_required': True,
-            'specification_path': 'src\\azure-cli\\azure\\cli\\command_modules\\apim\\tests\\latest\\swagger.json',
-            'specification_format': 'Swagger'
+            'specification_url': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.json',
+            'specification_format': 'OpenApi'
         })
 
         # create api
-        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}"', checks=[
+        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}" --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"', checks=[
             self.check('displayName', '{display_name}'),
             self.check('path', '{path}'),
             self.check('serviceUrl', '{service_url}')
         ])
 
         # import api
-        self.cmd('apim api import -g "{rg}" --service-name "{service_name}" --api-path "{path2}" --specification-path "{specification_path}", --specification-format "{specification_format}"', checks=[
-            self.check('displayName', 'FoodTrucks'),
+        self.cmd('apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}"', checks=[
+            self.check('displayName', 'Swagger Petstore'),
             self.check('path', '{path2}')
         ])
 
@@ -131,12 +131,12 @@ class ApimScenarioTest(ScenarioTest):
 
         # list apis
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
-        self.assertEqual(api_count, 2)
+        self.assertEqual(api_count, 3)
 
         # api delete command
         self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {api_id} -y')
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
-        self.assertEqual(api_count, 1)
+        self.assertEqual(api_count, 2)
 
         count = len(self.cmd('apim list').get_output_in_json())
 
