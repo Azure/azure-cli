@@ -715,19 +715,22 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
-            'mg': 'azure-cli-management-group3bxh',
+            'mg': self.create_random_name('azure-cli-management', 30),
             'sub-rg': self.create_random_name('azure-cli-sub-resource-group', 60),
-            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
+            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
         self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
         self.cmd('deployment mg list --management-group-id {mg}', checks=[
@@ -750,7 +753,8 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         ])
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" --no-wait')
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment mg cancel -n {dn2} --management-group-id {mg}')
 
@@ -1719,7 +1723,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
