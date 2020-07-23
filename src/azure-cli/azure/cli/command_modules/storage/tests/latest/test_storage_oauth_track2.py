@@ -137,7 +137,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
                                 JMESPathCheck('properties.blobType', 'BlockBlob'),
-                                JMESPathCheck('properties.contentLength', 128*1024),
+                                JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
                                 JMESPathCheck('properties.pageRanges', None),
                                 JMESPathCheckExists('properties.etag'))
