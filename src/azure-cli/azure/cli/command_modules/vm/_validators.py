@@ -599,8 +599,44 @@ def _validate_vm_create_vmss(cmd, namespace):
 
 
 def _validate_vm_create_dedicated_host(cmd, namespace):
+    """
+    If --host is name
+      If --host-group is a name, then it's an existing usage: host-group + host is used to specific host.
+      If --host-group is an ID, error.
+      If --host-group is None, error.
+
+    If --host is an ID
+      If --host-group is a name, error. host is enough to specific host, no need of host-group.
+      If --host-group is an ID, error. same as above.
+      If --host-group is None, OK.
+
+    If --host is None
+      If --host-group is name, OK.
+      If --host-group is id, OK.
+      If --host-group is None, OK.
+
+    :param cmd:
+    :param namespace:
+    :return:
+    """
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
+
+    if is_valid_resource_id(namespace.dedicated_host):  # ID
+        if namespace.dedicated_host_group:  # name
+            raise CLIError('usage error: --host-group cannot be used together with --host')
+    elif namespace.dedicated_host:  # name
+        if is_valid_resource_id(namespace.dedicated_host_group):  # ID
+            raise CLIError('usage error: --host-group cannot be used together with --host')
+        if namespace.dedicated_host_group:  # name
+
+        else:  # None
+            raise CLIError('usage error: Information of --host is not complete')
+    else:  # None
+        if namespace.dedicated_host_group:
+
+
+
 
     # handle incorrect usage
     if namespace.dedicated_host_group and namespace.dedicated_host is None:
@@ -1415,7 +1451,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
-    _validate_vm_vmss_create_host_group(cmd, namespace)
+    _validate_vmss_create_host_group(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1718,7 +1754,7 @@ def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-
         namespace.automatic_repairs_grace_period = 'PT' + namespace.automatic_repairs_grace_period + 'M'
 
 
-def _validate_vm_vmss_create_host_group(cmd, namespace):
+def _validate_vmss_create_host_group(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.host_group:
