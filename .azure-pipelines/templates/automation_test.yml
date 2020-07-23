@@ -13,6 +13,8 @@ steps:
 
       source env/bin/activate
 
+      pip install git+https://github.com/haroldrandom/azure-python-devtools.git@fix-python-3.8.3
+
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
         azdev test --series --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }}
       else
