@@ -77,7 +77,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  log_analytics_resource_id=None,
                  app_insights_resource_id=None,
                  app_insights_telemetry_channel_resource_id=None,
-                 **entries):
+                 **entries):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -129,7 +129,7 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods,too-many-
                  mysql_server_endpoint=None,
                  postgresql_server_endpoint=None,
                  mariadb_server_endpoint=None,
-                 **entries):
+                 **entries):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.keyvault_dns = keyvault_dns
@@ -184,8 +184,7 @@ def _get_app_insights_telemetry_channel_resource_id(cloud_name):
     app_insights_telemetry_channel_resource_id_mapper = {
         'AzureCloud': 'https://dc.applicationinsights.azure.com/v2/track',
         'AzureChinaCloud': 'https://dc.applicationinsights.azure.cn/v2/track',
-        'AzureUSGovernment': 'https://dc.applicationinsights.us/v2/track',
-        'AzureGermanCloud': 'https://dc.applicationinsights.azure.com/v2/track'
+        'AzureUSGovernment': 'https://dc.applicationinsights.us/v2/track'
     }
     return app_insights_telemetry_channel_resource_id_mapper.get(cloud_name, None)
 
@@ -412,8 +411,13 @@ def get_known_clouds():
     # read from file
     from azure.cli.core._session import CLOUD_ENDPOINTS
     if CLOUD_ENDPOINTS['clouds']:
-        KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in CLOUD_ENDPOINTS['clouds']]
-        return KNOWN_CLOUDS
+        try:
+            KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in CLOUD_ENDPOINTS['clouds']]
+            return KNOWN_CLOUDS
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info("Failed to load cloud endpoints from local file. %s", str(ex))
+            CLOUD_ENDPOINTS['clouds'] = {}
+
     url = ''
     if CLOUD_ENDPOINTS['metadata_url']:
         try:
@@ -422,34 +426,35 @@ def get_known_clouds():
             KNOWN_CLOUDS = list(cli_cloud_dict.values())
             url = CLOUD_ENDPOINTS['metadata_url']
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warning("Failed to load cloud metadata from the URL: %s.", CLOUD_ENDPOINTS['metadata_url'])
+            logger.info("Failed to load cloud metadata from the URL stored in local file: %s. %s",
+                        CLOUD_ENDPOINTS['metadata_url'], str(ex))
             CLOUD_ENDPOINTS['metadata_url'] = ''
-            raise ex
-    # get metadata url from environment variable
-    elif 'ARM_CLOUD_METADATA_URL' in os.environ:
-        try:
-            arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
-            cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
-            KNOWN_CLOUDS = list(cli_cloud_dict.values())
-            url = os.getenv('ARM_CLOUD_METADATA_URL')
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.warning("Failed to load cloud metadata from the URL: %s, please check your 'ARM_CLOUD_METADATA_URL' environment variable or '--endpoint' value if you're running 'az cloud import' command.",
-                           os.getenv('ARM_CLOUD_METADATA_URL'))
-            raise ex
-    else:
-        # TODO uncomment when DNS is ready
-        # try:
-        #     # resolve metadata url from DNS
-        #     arm_cloud_dict = json.loads(urlretrieve(CLOUD_ENDPOINTS_DNS_ADDRESS))
-        #     cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
-        #     KNOWN_CLOUDS = list(cli_cloud_dict.values())
-        #     url = CLOUD_ENDPOINTS_DNS_ADDRESS
-        # except Exception:  # pylint: disable=broad-except
-        #     logger.info('Failed to load cloud metadata from %s', CLOUD_ENDPOINTS_DNS_ADDRESS)
-        from azure.cli.core.util import check_connectivity
-        if not check_connectivity():
-            raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import --endpoint <metadata url>' first.")
-        KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+    if not url:
+        # get metadata url from environment variable
+        if 'ARM_CLOUD_METADATA_URL' in os.environ:
+            try:
+                arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
+                cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
+                KNOWN_CLOUDS = list(cli_cloud_dict.values())
+                url = os.getenv('ARM_CLOUD_METADATA_URL')
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Failed to load cloud metadata from the URL: %s, please check your 'ARM_CLOUD_METADATA_URL' environment variable or '--endpoint' value if you're running 'az cloud import' command.",
+                               os.getenv('ARM_CLOUD_METADATA_URL'))
+                raise ex
+        else:
+            # TODO uncomment when DNS is ready
+            # try:
+            #     # resolve metadata url from DNS
+            #     arm_cloud_dict = json.loads(urlretrieve(CLOUD_ENDPOINTS_DNS_ADDRESS))
+            #     cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
+            #     KNOWN_CLOUDS = list(cli_cloud_dict.values())
+            #     url = CLOUD_ENDPOINTS_DNS_ADDRESS
+            # except Exception:  # pylint: disable=broad-except
+            #     logger.info('Failed to load cloud metadata from %s', CLOUD_ENDPOINTS_DNS_ADDRESS)
+            from azure.cli.core.util import check_connectivity
+            if not check_connectivity():
+                raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import --endpoint <metadata url>' first.")
+            KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
     CLOUD_ENDPOINTS['clouds'] = [c.toJSON() for c in KNOWN_CLOUDS]
     CLOUD_ENDPOINTS['metadata_url'] = url

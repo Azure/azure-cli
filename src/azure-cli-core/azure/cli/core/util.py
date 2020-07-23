@@ -987,6 +987,9 @@ def get_linux_distro():
 
 
 def handle_version_update():
+    """Clean up information in local file that may be invalidated
+    because of a version update of Azure CLI
+    """
     try:
         from azure.cli.core._session import VERSIONS, CLOUD_ENDPOINTS
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
