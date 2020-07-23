@@ -35,7 +35,10 @@ Step 2-4. Follow the same steps of tutorial for commit.
 
 When a feature is in private preview stage, the corresponding Azure Python SDK cannot be released. But you can still try the new feature.
 
-Click pypi and download all `.whl` files in artifact page. Install it along with the Azure Python SDK. The SDK can be retrieved from Azure SDK team. You can request a release of SDK in https://portal.azure-devex-tools.com/. Since it's in private preview, it cannot be released. You can get a private build instead.
+Follow the same steps in previous sessions and find artifact page. Click `pypi` and download all `.whl` files in artifact page. Install it along with the Azure Python SDK. The SDK can be retrieved from Azure SDK team. You can request a release of SDK in https://portal.azure-devex-tools.com/. Since it's in private preview, it cannot be released. You can get a private build instead.
+
+![](assets/6.PNG)
+
 ```
 pip install azure_cli-2.6.0-py3-none-any.whl azure_cli_command_modules_nspkg-2.0.3-py3-none-any.whl azure_cli_core-2.6.0-py3-none-any.whl azure_cli_nspkg-3.0.4-py3-none-any.whl azure_cli_telemetry-1.0.4-py3-none-any.whl azure_mgmt_imagebuilder-1.0.0-py2.py3-none-any.whl
 ```
