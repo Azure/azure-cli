@@ -170,7 +170,7 @@ def _get_storage_sync_endpoint(cloud_name):
         'AzureCloud': 'afs.azure.net',
         'AzureUSGovernment': 'afs.azure.us',
     }
-    return storage_sync_endpoint_mapper.get(cloud_name, 'afs.azure.net')
+    return storage_sync_endpoint_mapper.get(cloud_name, None)
 
 
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
@@ -178,6 +178,10 @@ def _convert_arm_to_cli(arm_cloud_metadata_dict):
     for cloud in arm_cloud_metadata_dict:
         cli_cloud_metadata_dict[cloud['name']] = _arm_to_cli_mapper(cloud)
     return cli_cloud_metadata_dict
+
+
+def _add_dot_in_suffix(suffix):
+    return suffix if not suffix or suffix.startswith('.') else '.' + suffix
 
 
 def _arm_to_cli_mapper(arm_dict):
@@ -202,14 +206,14 @@ def _arm_to_cli_mapper(arm_dict):
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             storage_sync_endpoint=arm_dict['suffix']['storageSyncEndpointSuffix'] if 'storageSyncEndpointSuffix' in arm_dict['suffixes'] else _get_storage_sync_endpoint(arm_dict['name']),  # pylint: disable=line-too-long
-            keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
-            sql_server_hostname=arm_dict['suffixes']['sqlServerHostname'],
-            mysql_server_endpoint=arm_dict['suffixes']['mysqlServerEndpoint'],
-            postgresql_server_endpoint=arm_dict['suffixes']['postgresqlServerEndpoint'],
-            mariadb_server_endpoint=arm_dict['suffixes']['mariadbServerEndpoint'],
+            keyvault_dns=_add_dot_in_suffix(arm_dict['suffixes']['keyVaultDns']),
+            sql_server_hostname=_add_dot_in_suffix(arm_dict['suffixes']['sqlServerHostname']),
+            mysql_server_endpoint=_add_dot_in_suffix(arm_dict['suffixes']['mysqlServerEndpoint'] if 'mysqlServerEndpoint' in arm_dict['suffixes'] else None),
+            postgresql_server_endpoint=_add_dot_in_suffix(arm_dict['suffixes']['postgresqlServerEndpoint'] if 'postgresqlServerEndpoint' in arm_dict['suffixes'] else None),
+            mariadb_server_endpoint=_add_dot_in_suffix(arm_dict['suffixes']['mariadbServerEndpoint'] if 'mariadbServerEndpoint' in arm_dict['suffixes'] else None),
             azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
-            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))  # pylint: disable=line-too-long
+            acr_login_server_endpoint=_add_dot_in_suffix(arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None)))  # pylint: disable=line-too-long
 
 
 class Cloud:  # pylint: disable=too-few-public-methods
