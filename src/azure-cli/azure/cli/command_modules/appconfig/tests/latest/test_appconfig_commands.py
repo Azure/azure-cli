@@ -16,6 +16,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
@@ -107,6 +108,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_credential(self, resource_group, location):
 
@@ -179,6 +181,7 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
 
 class AppConfigKVScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_kv(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='KVTest', length=24)
@@ -322,6 +325,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @KeyVaultPreparer()
     @live_only()
@@ -375,6 +379,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='ImportTest', length=24)
@@ -538,6 +543,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appservice_import_export(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='ImportExportTest', length=24)
@@ -633,6 +639,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
 class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_naming_conventions(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='NamingConventionTest', length=24)
@@ -735,6 +742,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
 
 class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appconfig_import_export(self, resource_group, location):
         src_config_store_name = self.create_random_name(prefix='Source', length=24)
@@ -929,6 +937,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
 class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_json_content_type(self, resource_group, location):
         src_config_store_name = self.create_random_name(prefix='Source', length=24)
@@ -1349,6 +1358,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
 
 class AppConfigFeatureScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='FeatureTest', length=24)
@@ -1635,6 +1646,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_filter(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='FeatureFilterTest', length=24)
@@ -1779,6 +1792,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
 class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_key_validation(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='KVTest', length=24)

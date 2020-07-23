@@ -841,19 +841,22 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
-            'mg': 'azure-cli-management-group3bxh',
+            'mg': self.create_random_name('azure-cli-management', 30),
             'sub-rg': self.create_random_name('azure-cli-sub-resource-group', 60),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
         self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
-        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file {tf} '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file "{tf}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
         self.cmd('deployment mg list --management-group-id {mg}', checks=[
@@ -876,7 +879,8 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         ])
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" --no-wait')
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment mg cancel -n {dn2} --management-group-id {mg}')
 
@@ -2081,7 +2085,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -2196,8 +2200,26 @@ class PolicyScenarioTest(ScenarioTest):
 
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_managedappdef(self, resource_group):
+
+        self.kwargs.update({
+            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'sub': self.get_subscription_id()
+        })
+
+        user_principal = self.cmd(
+            'ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+        principal_id = user_principal['objectId']
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd(
+                'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
+        from msrestazure.tools import parse_resource_id
+        role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
             'loc': 'eastus',
@@ -2205,7 +2227,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
             'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
-            'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'auth': principal_id + ':' + role_definition_id,
             'lock': 'None'
         })
 
@@ -2214,8 +2236,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
             self.check('description', '{ad_desc}'),
-            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
@@ -2229,8 +2251,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
             self.check('description', '{ad_desc}'),
-            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
@@ -2240,16 +2262,36 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition delete -g {rg} -n {adn}')
         self.cmd('managedapp definition list -g {rg}', checks=self.is_empty())
 
+        self.cmd('role assignment delete --assignee {upn} --role contributor ')
+        self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_managedappdef_inline(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'sub': self.get_subscription_id()
+        })
+
+        user_principal = self.cmd(
+            'ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+        principal_id = user_principal['objectId']
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd(
+                'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
+        from msrestazure.tools import parse_resource_id
+        role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
             'loc': 'eastus',
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
-            'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'auth': principal_id + ':' + role_definition_id,
             'lock': 'None',
             'ui_file': os.path.join(curr_dir, 'sample_create_ui_definition.json').replace('\\', '\\\\'),
             'main_file': os.path.join(curr_dir, 'sample_main_template.json').replace('\\', '\\\\')
@@ -2260,8 +2302,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
             self.check('description', '{ad_desc}'),
-            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
@@ -2275,8 +2317,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
             self.check('description', '{ad_desc}'),
-            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
@@ -2286,10 +2328,28 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition delete -g {rg} -n {adn}')
         self.cmd('managedapp definition list -g {rg}', checks=self.is_empty())
 
+        self.cmd('role assignment delete --assignee {upn} --role contributor ')
+        self.cmd('ad user delete --upn-or-object-id {upn}')
+
 
 class ManagedAppScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
+
+        self.kwargs.update({
+            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'sub': self.get_subscription_id()
+        })
+
+        user_principal = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd('role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
+        from msrestazure.tools import parse_resource_id
+        role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
             'loc': 'westcentralus',
@@ -2297,9 +2357,8 @@ class ManagedAppScenarioTest(ScenarioTest):
             'addn': 'test_appdef_123',
             'ad_desc': 'test_appdef_123',
             'uri': 'https://github.com/Azure/azure-managedapp-samples/raw/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
-            'auth': '872b463c-9606-4c8c-92a2-571a4d018650:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'auth': user_principal['objectId'] + ':' + role_definition_id,
             'lock': 'None',
-            'sub': self.get_subscription_id(),
             'rg': resource_group
         })
 
@@ -2315,11 +2374,12 @@ class ManagedAppScenarioTest(ScenarioTest):
         })
         self.kwargs['ma_rg_id'] = '/subscriptions/{sub}/resourceGroups/{ma_rg}'.format(**self.kwargs)
 
-        self.kwargs['ma_id'] = self.cmd('managedapp create -n {man} -g {rg} -l {ma_loc} --kind {ma_kind} -m {ma_rg_id} -d {ad_id} --parameters {param}', checks=[
+        self.kwargs['ma_id'] = self.cmd('managedapp create -n {man} -g {rg} -l {ma_loc} --kind {ma_kind} -m {ma_rg_id} -d {ad_id} --parameters {param} --tags "key=val" ', checks=[
             self.check('name', '{man}'),
             self.check('type', 'Microsoft.Solutions/applications'),
             self.check('kind', 'servicecatalog'),
-            self.check('managedResourceGroupId', '{ma_rg_id}')
+            self.check('managedResourceGroupId', '{ma_rg_id}'),
+            self.check('tags', {'key': 'val'})
         ]).get_output_in_json()['id']
 
         self.cmd('managedapp list -g {rg}', checks=self.check('[0].name', '{man}'))
@@ -2333,6 +2393,9 @@ class ManagedAppScenarioTest(ScenarioTest):
 
         self.cmd('managedapp delete -g {rg} -n {man}')
         self.cmd('managedapp list -g {rg}', checks=self.is_empty())
+
+        self.cmd('role assignment delete --assignee {upn} --role contributor ')
+        self.cmd('ad user delete --upn-or-object-id {upn}')
 
 
 class CrossRGDeploymentScenarioTest(ScenarioTest):
