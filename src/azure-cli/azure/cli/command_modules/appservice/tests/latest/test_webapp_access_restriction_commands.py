@@ -101,7 +101,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location',location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_ip_address_validation(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
