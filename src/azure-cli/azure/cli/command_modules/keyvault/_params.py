@@ -27,7 +27,7 @@ from ._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_and_hsm_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
-    validate_vault_and_hsm_name)
+    validate_vault_and_hsm_name, KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
 
@@ -121,8 +121,7 @@ def load_arguments(self, _):
                    help='Administrator role for data plane operations for Managed HSM. It accepts a space separated '
                         'list of OIDs that will be assigned. Only valid when --hsm-name is used.')
         c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'
-                               ' Allowed values for Managed HSM: Standard_B1, Standard_B2, Standard_B32, Basic_B1.'
-                               ' Default: Standard_B1')
+                               ' Allowed values for Managed HSM: Standard_B1, Custom_B32. Default: Standard_B1')
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
                    help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
@@ -343,10 +342,16 @@ def load_arguments(self, _):
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
 
     with self.argument_context('keyvault key encrypt') as c:
-        c.argument('value', help='The value to be encrypted.', validator=validate_encryption)
+        c.argument('value', help='The value to be encrypted. Default data type is Base64 encoded string.',
+                   validator=validate_encryption)
+        c.extra('data_type', help='The type of the original data.', arg_type=get_enum_type(KeyEncryptionDataType),
+                default='base64')
 
     with self.argument_context('keyvault key decrypt') as c:
-        c.argument('value', help='The value to be decrypted.', validator=validate_decryption)
+        c.argument('value', help='The value to be decrypted, which should be the result of "az keyvault encrypt"',
+                   validator=validate_decryption)
+        c.extra('data_type', help='The type of the original data.', arg_type=get_enum_type(KeyEncryptionDataType),
+                default='base64')
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:

@@ -504,7 +504,7 @@ def load_arguments(self, _):
         for dest in scaleset_name_aliases:
             c.argument(dest, vmss_name_type)
 
-    for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances']:
+    for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
         with self.argument_context(scope) as c:
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
@@ -514,7 +514,7 @@ def load_arguments(self, _):
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules. Defaults to 22 on Linux and 3389 on Windows.')
         c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Limit the scale set to a single placement group."
-                   " See https://docs.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-placement-groups for details")
+                   " See https://docs.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-placement-groups for details.")
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count for each placement group in the availability zone', min_api='2017-12-01')
         c.argument('vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.')
         c.argument('instance_count', help='Number of VMs in the scale set.', type=int)
@@ -705,6 +705,7 @@ def load_arguments(self, _):
             c.argument('data_disk_iops', min_api='2019-07-01', nargs='+', type=int, help='Specify the Read-Write IOPS (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
             c.argument('data_disk_mbps', min_api='2019-07-01', nargs='+', type=int, help='Specify the bandwidth in MB per second (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
             c.argument('specialized', arg_type=get_three_state_flag(), help='Indicate whether the source image is specialized.')
+            c.argument('encryption_at_host', arg_type=get_three_state_flag(), help='Enable Host Encryption for the VM or VMSS. This will enable the encryption for all the disks including Resource/Temp disk at host itself.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -846,7 +847,8 @@ def load_arguments(self, _):
 
     with self.argument_context('sig image-version') as c:
         deprecated_option = c.deprecate(target='--gallery-image-version-name', redirect='--gallery-image-version', hide=True, expiration="3.0.0")
-        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option], )
+        c.argument('gallery_image_version_name', options_list=['--gallery-image-version', '-e', deprecated_option],
+                   help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
 
     with self.argument_context('sig image-version create') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
@@ -934,6 +936,8 @@ def load_arguments(self, _):
         c.argument('disk_encryption_set_name', disk_encryption_set_name)
         c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
         c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
+        c.argument('encryption_type', arg_type=get_enum_type(['EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey', 'EncryptionAtRestWithPlatformAndCustomerKeys']),
+                   help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
     # endregion

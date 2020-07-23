@@ -12,7 +12,7 @@ from ._client_factory import get_client, get_client_factory, Clients
 
 from ._transformers import (
     extract_subresource_name, filter_out_managed_resources,
-    multi_transformers)
+    multi_transformers, transform_key_decryption_output)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -141,7 +141,7 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_key')
         g.keyvault_custom('get-policy-template', 'get_policy_template')
         g.keyvault_command('encrypt', 'encrypt', is_preview=True)
-        g.keyvault_command('decrypt', 'decrypt', is_preview=True)
+        g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',

@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.8.0"
+__version__ = "2.9.1"
 
 import os
 import sys
@@ -151,7 +151,8 @@ class AzCli(CLI):
             args_str = []
             for name, value in local_context_args:
                 args_str.append('{}: {}'.format(name, value))
-            logger.warning('Command argument values saved to local context: %s', ', '.join(args_str))
+            logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
+                           'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -254,9 +255,6 @@ class MainCommandsLoader(CLICommandsLoader):
              Otherwise, the list will be extended using ALWAYS_LOADED_EXTENSIONS.
              If the extensions in the list are not installed, it will be skipped.
             """
-
-            from azure.cli.core.extension.operations import check_version_compatibility
-
             def _handle_extension_suppressions(extensions):
                 filtered_extensions = []
                 for ext in extensions:
@@ -298,6 +296,9 @@ class MainCommandsLoader(CLICommandsLoader):
 
                 for ext in allowed_extensions:
                     try:
+                        # Import in the `for` loop because `allowed_extensions` can be []. In such case we
+                        # don't need to import `check_version_compatibility` at all.
+                        from azure.cli.core.extension.operations import check_version_compatibility
                         check_version_compatibility(ext.get_metadata())
                     except CLIError as ex:
                         # issue warning and skip loading extensions that aren't compatible with the CLI core
@@ -578,7 +579,7 @@ class CommandIndex:
         logger.debug("Command index has been invalidated.")
 
 
-class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
+class ModExtensionSuppress:  # pylint: disable=too-few-public-methods
 
     def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
                  recommend_update=False):

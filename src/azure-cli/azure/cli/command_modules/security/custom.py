@@ -291,7 +291,7 @@ def get_security_topology(client, resource_name, resource_group_name):
 
 
 # --------------------------------------------------------------------------------------------
-# Security Topology
+# Security Workspace
 # --------------------------------------------------------------------------------------------
 
 
@@ -457,6 +457,73 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
     return client.get(sub_assessment_name=resource_name,
                       assessment_name=assessment_name,
                       scope=assessed_resource_id)
+
+
+# --------------------------------------------------------------------------------------------
+# Adaptive Application Controls
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_adaptive_application_controls(client):
+
+    return client.list()
+
+
+def get_security_adaptive_application_controls(client, group_name):
+
+    return client.get(group_name=group_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Adaptive Network Hardenings
+# --------------------------------------------------------------------------------------------
+
+
+def get_security_adaptive_network_hardenings(client,
+                                             adaptive_network_hardenings_resource_name,
+                                             resource_name,
+                                             resource_type,
+                                             resource_namespace,
+                                             resource_group_name):
+
+    return client.get(resource_group_name,
+                      resource_namespace,
+                      resource_type,
+                      resource_name,
+                      adaptive_network_hardenings_resource_name)
+
+
+def list_security_adaptive_network_hardenings(client,
+                                              resource_name,
+                                              resource_type,
+                                              resource_namespace,
+                                              resource_group_name):
+
+    return client.list_by_extended_resource(resource_group_name,
+                                            resource_namespace,
+                                            resource_type,
+                                            resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Allowed Connections
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_allowed_connections(client):
+
+    for loc in client.locations.list():
+        client.config.asc_location = loc.name
+
+    return client.allowed_connections.list()
+
+
+def get_security_allowed_connections(client, resource_name, resource_group_name):
+
+    for loc in client.locations.list():
+        client.config.asc_location = loc.name
+
+    return client.allowed_connections.get(resource_group_name, resource_name)
 
 
 # --------------------------------------------------------------------------------------------

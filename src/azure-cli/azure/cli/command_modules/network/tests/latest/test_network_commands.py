@@ -1909,6 +1909,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
 
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_load_balancer')
     def test_network_lb(self, resource_group):
 
@@ -2176,6 +2177,13 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  '--backend-addresses-config-file @"{lb_address_pool_file_path}"',
                  checks=self.check('name', 'bap1'))
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '2'))
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap1', checks=self.is_empty())
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}', checks=self.check('length(@)', 1))
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet}', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '1'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_probes')
     def test_network_lb_probes(self, resource_group):
@@ -2279,6 +2287,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
 
 class NetworkNicScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_nic_scenario')
     def test_network_nic(self, resource_group):
 
@@ -2718,6 +2727,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
 
 class NetworkVNetScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_vnet_test')
     def test_network_vnet(self, resource_group):
 
@@ -3821,6 +3831,92 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
             self.check('length(@)', 1)
         ])
         self.cmd('network security-partner-provider delete -n {name} -g {rg}')
+
+
+class NetworkVirtualApplianceScenarioTest(ScenarioTest):
+    def setUp(self):
+        super(NetworkVirtualApplianceScenarioTest, self).setUp()
+        self.cmd('extension add -n virtual-wan')
+
+    def tearDown(self):
+        self.cmd('extension remove -n virtual-wan')
+        super(NetworkVirtualApplianceScenarioTest, self).tearDown()
+
+    @ResourceGroupPreparer(location='westcentralus')
+    def test_network_virtual_appliance(self, resource_group):
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clitestvhub',
+            'name': 'cli-virtual-appliance',
+            'site': 'cli-site',
+            'blob': 'https://azurecliprod.blob.core.windows.net/cli-extensions/account-0.1.0-py2.py3-none-any.whl',
+            'rg': resource_group
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 --sku Standard')
+
+        self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "barracudasdwanrelease" '
+                 '--scale-unit 2 -v latest --asn 10000 --init-config "echo $abc" '
+                 '--boot-blobs {blob} {blob} --cloud-blobs {blob} {blob}',
+                 checks=[
+                     self.check('name', '{name}'),
+                     self.check('length(bootStrapConfigurationBlobs)', 2),
+                     self.check('length(cloudInitConfigurationBlobs)', 2),
+                     self.check('virtualApplianceAsn', 10000),
+                     self.check('cloudInitConfiguration', "echo $abc")
+                 ])
+        self.cmd('network virtual-appliance update -n {name} -g {rg} --asn 20000 --init-config "echo $abcd"', checks=[
+            self.check('virtualApplianceAsn', 20000),
+            self.check('cloudInitConfiguration', "echo $abcd")
+        ])
+        self.cmd('network virtual-appliance show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('length(bootStrapConfigurationBlobs)', 2),
+            self.check('length(cloudInitConfigurationBlobs)', 2),
+            self.check('virtualApplianceAsn', 20000),
+            self.check('cloudInitConfiguration', "echo $abcd")
+        ])
+        self.cmd('network virtual-appliance list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network virtual-appliance list', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        self.cmd('network virtual-appliance sku list', checks=[
+            self.check('length(@)', 4)
+        ])
+        self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"', checks=[
+            self.check('name', 'barracudasdwanrelease')
+        ])
+
+        self.cmd('network virtual-appliance site create -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.0/24 --allow --default --optimize', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', True),
+            self.check('o365Policy.breakOutCategories.default', True),
+            self.check('o365Policy.breakOutCategories.optimize', True),
+            self.check('addressPrefix', '10.0.0.0/24')
+        ])
+        self.cmd('network virtual-appliance site update -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.1/24 --allow false --default false --optimize false', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', False),
+            self.check('o365Policy.breakOutCategories.default', False),
+            self.check('o365Policy.breakOutCategories.optimize', False),
+            self.check('addressPrefix', '10.0.0.1/24')
+        ])
+        self.cmd('network virtual-appliance site show -n {site} -g {rg} --appliance-name {name}', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', False),
+            self.check('o365Policy.breakOutCategories.default', False),
+            self.check('o365Policy.breakOutCategories.optimize', False),
+            self.check('addressPrefix', '10.0.0.1/24')
+        ])
+        self.cmd('network virtual-appliance site list -g {rg} --appliance-name {name}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
+        self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
 
 if __name__ == '__main__':

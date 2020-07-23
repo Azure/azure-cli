@@ -8,7 +8,7 @@ import azure.cli.command_modules.appconfig._azconfig.execution_context as execut
 # pylint: disable=too-few-public-methods
 
 
-class KeyValueIterable(object):
+class KeyValueIterable:
     """Represents an iterable object of the query results."""
 
     def __init__(self, client, query_options, fetch_function):
@@ -32,7 +32,7 @@ class KeyValueIterable(object):
         """
         return self.Iterator(self)
 
-    class Iterator(object):
+    class Iterator:
         def __init__(self, iterable):
             self._iterable = iterable
             self._finished = False
