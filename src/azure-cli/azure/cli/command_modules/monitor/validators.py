@@ -358,9 +358,7 @@ def process_workspace_data_export_destination(namespace):
         result = parse_resource_id(namespace.destination)
         if result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
             namespace.data_export_type = 'StorageAccount'
-        elif result['namespace'].lower() == 'microsoft.eventhub' \
-                and 'child_type_1' in result \
-                and result['child_type_1'].lower() == 'eventhubs':
+        elif result['namespace'].lower() == 'microsoft.eventhub' and result['type'].lower() == 'namespaces':
             namespace.data_export_type = 'EventHub'
             namespace.destination = resource_id(
                 subscription=result['subscription'],
@@ -369,6 +367,7 @@ def process_workspace_data_export_destination(namespace):
                 type=result['type'],
                 name=result['name']
             )
-            namespace.event_hub_name = result['child_name_1']
+            if 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
+                namespace.event_hub_name = result['child_name_1']
         else:
             raise CLIError('usage error: --destination should be a storage account or an event hub resource id.')
