@@ -234,7 +234,7 @@ def transform_immutability_policy(result):
 def transform_copy_blob(result):
     result = todict(result)
     new_result = {
-        "completionTime": result.pop('date', None),
+        "completionTime": None,
         "id": result.pop('copy_id', None),
         "progress": None,
         "source": None,
