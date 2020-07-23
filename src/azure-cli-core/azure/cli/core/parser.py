@@ -345,7 +345,9 @@ class AzCliCommandParser(CLICommandParser):
                 # use cli_ctx from cli_help which is not lost.
                 cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
                 use_dynamic_install = cli_ctx.config.get(
-                    'extension', 'use_dynamic_install', 'yes_prompt') if cli_ctx else 'no'
+                    'extension', 'use_dynamic_install', 'no') if cli_ctx else 'no'
+                if use_dynamic_install.lower() not in ['no', 'yes_prompt', 'yes_without_prompt']:
+                    use_dynamic_install = 'no'
                 if use_dynamic_install.lower() != 'no' and not candidates:
                     # Check if the command is from an extension
                     from azure.cli.core.util import roughly_parse_command
