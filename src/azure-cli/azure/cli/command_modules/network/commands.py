@@ -539,10 +539,11 @@ def load_command_table(self, _):
                             command_type=network_ag_sdk,
                             min_api='2020-05-01',
                             is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link_ip')
-        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True)
+        g.custom_command('add', 'add_ag_private_link_ip', supports_no_wait=True)
+        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True, supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_private_link_ip')
         g.custom_command('list', 'list_ag_private_link_ip')
+        g.wait_command('wait')
     # endregion
 
     # region ApplicationGatewayWAFPolicy

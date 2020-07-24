@@ -627,7 +627,8 @@ def add_ag_private_link_ip(cmd,
                            private_link_name,
                            private_link_ip_name,
                            private_link_primary=False,
-                           private_link_ip_address=None):
+                           private_link_ip_address=None,
+                           no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -659,7 +660,11 @@ def add_ag_private_link_ip(cmd,
 
     target_private_link.ip_configurations.append(private_link_ip_config)
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def show_ag_private_link_ip(cmd,
@@ -713,7 +718,8 @@ def remove_ag_private_link_ip(cmd,
                               resource_group_name,
                               application_gateway_name,
                               private_link_name,
-                              private_link_ip_name):
+                              private_link_ip_name,
+                              no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -734,7 +740,11 @@ def remove_ag_private_link_ip(cmd,
     else:
         raise CLIError("IP Configuration doesn't exist")
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
