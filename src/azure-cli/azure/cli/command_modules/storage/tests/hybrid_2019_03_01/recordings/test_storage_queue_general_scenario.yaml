@@ -1,156 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-03-19T16:37:22Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-19T16:37:22Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 19 Mar 2019 16:37:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"sku": {"name": "Standard_RAGRS"}, "kind": "Storage", "location": "westus",
-      "properties": {"supportsHttpsTrafficOnly": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '127'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Tue, 19 Mar 2019 16:37:25 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/4b2d4832-df05-4ca5-8d50-2a103f7a1fb0?monitor=true&api-version=2017-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.60
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/4b2d4832-df05-4ca5-8d50-2a103f7a1fb0?monitor=true&api-version=2017-10-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-03-19T16:37:25.0051743Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-03-19T16:37:25.0051743Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-03-19T16:37:24.8489421Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"blob":"https://clitest000002-secondary.blob.core.windows.net/","queue":"https://clitest000002-secondary.queue.core.windows.net/","table":"https://clitest000002-secondary.table.core.windows.net/"}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1484'
-      content-type:
-      - application/json
-      date:
-      - Tue, 19 Mar 2019 16:37:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
     body: null
     headers:
       Accept:
@@ -166,8 +15,8 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-storage/11.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: POST
@@ -183,7 +32,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 19 Mar 2019 16:37:43 GMT
+      - Thu, 18 Jun 2020 14:21:22 GMT
       expires:
       - '-1'
       pragma:
@@ -198,61 +47,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account keys list
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g --query -o
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
-  response:
-    body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '288'
-      content-type:
-      - application/json
-      date:
-      - Tue, 19 Mar 2019 16:37:43 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
     status:
       code: 200
       message: OK
@@ -264,9 +60,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:44 GMT
+      - Thu, 18 Jun 2020 14:21:23 GMT
       x-ms-meta-a:
       - b
       x-ms-meta-c:
@@ -282,7 +78,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:44 GMT
+      - Thu, 18 Jun 2020 14:21:23 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -296,9 +92,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:45 GMT
+      - Thu, 18 Jun 2020 14:21:24 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -312,7 +108,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:44 GMT
+      - Thu, 18 Jun 2020 14:21:24 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-approximate-messages-count:
@@ -332,9 +128,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:45 GMT
+      - Thu, 18 Jun 2020 14:21:25 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -350,7 +146,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:45 GMT
+      - Thu, 18 Jun 2020 14:21:26 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -366,9 +162,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:46 GMT
+      - Thu, 18 Jun 2020 14:21:27 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -382,7 +178,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:45 GMT
+      - Thu, 18 Jun 2020 14:21:27 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-approximate-messages-count:
@@ -404,9 +200,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:46 GMT
+      - Thu, 18 Jun 2020 14:21:28 GMT
       x-ms-meta-e:
       - f
       x-ms-meta-g:
@@ -422,7 +218,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:46 GMT
+      - Thu, 18 Jun 2020 14:21:28 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -436,9 +232,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:46 GMT
+      - Thu, 18 Jun 2020 14:21:29 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -452,7 +248,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:46 GMT
+      - Thu, 18 Jun 2020 14:21:30 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-approximate-messages-count:
@@ -472,9 +268,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:47 GMT
+      - Thu, 18 Jun 2020 14:21:30 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -489,7 +285,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:46 GMT
+      - Thu, 18 Jun 2020 14:21:31 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -505,9 +301,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:47 GMT
+      - Thu, 18 Jun 2020 14:21:32 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -522,7 +318,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:47 GMT
+      - Thu, 18 Jun 2020 14:21:33 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -533,16 +329,18 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: b"<?xml version='1.0' encoding='utf-8'?>\n<SignedIdentifiers><SignedIdentifier><Id>policy000004</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start><Expiry>2016-05-01T00:00Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>policy000004</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start><Expiry>2016-05-01T00:00Z</Expiry><Permission>raup</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection:
       - keep-alive
       Content-Length:
       - '264'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:47 GMT
+      - Thu, 18 Jun 2020 14:21:33 GMT
       x-ms-version:
       - '2017-11-09'
     method: PUT
@@ -554,7 +352,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:47 GMT
+      - Thu, 18 Jun 2020 14:21:33 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -568,9 +366,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:48 GMT
+      - Thu, 18 Jun 2020 14:21:33 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -584,7 +382,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:47 GMT
+      - Thu, 18 Jun 2020 14:21:34 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -600,9 +398,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:48 GMT
+      - Thu, 18 Jun 2020 14:21:35 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -616,7 +414,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:47 GMT
+      - Thu, 18 Jun 2020 14:21:35 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -632,9 +430,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:48 GMT
+      - Thu, 18 Jun 2020 14:21:36 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -648,7 +446,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:48 GMT
+      - Thu, 18 Jun 2020 14:21:36 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -659,16 +457,18 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: b"<?xml version='1.0' encoding='utf-8'?>\n<SignedIdentifiers><SignedIdentifier><Id>policy000004</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>ra</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers><SignedIdentifier><Id>policy000004</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>ra</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection:
       - keep-alive
       Content-Length:
       - '268'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:48 GMT
+      - Thu, 18 Jun 2020 14:21:37 GMT
       x-ms-version:
       - '2017-11-09'
     method: PUT
@@ -680,7 +480,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:49 GMT
+      - Thu, 18 Jun 2020 14:21:37 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -694,9 +494,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:50 GMT
+      - Thu, 18 Jun 2020 14:21:38 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -710,7 +510,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:50 GMT
+      - Thu, 18 Jun 2020 14:21:38 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -726,9 +526,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:50 GMT
+      - Thu, 18 Jun 2020 14:21:39 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -742,7 +542,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:50 GMT
+      - Thu, 18 Jun 2020 14:21:39 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -762,9 +562,9 @@ interactions:
       Content-Length:
       - '60'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:50 GMT
+      - Thu, 18 Jun 2020 14:21:40 GMT
       x-ms-version:
       - '2017-11-09'
     method: PUT
@@ -776,7 +576,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:50 GMT
+      - Thu, 18 Jun 2020 14:21:40 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -790,9 +590,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:51 GMT
+      - Thu, 18 Jun 2020 14:21:41 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -807,7 +607,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:50 GMT
+      - Thu, 18 Jun 2020 14:21:40 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -827,24 +627,24 @@ interactions:
       Content-Length:
       - '107'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:51 GMT
+      - Thu, 18 Jun 2020 14:21:42 GMT
       x-ms-version:
       - '2017-11-09'
     method: POST
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>59a8de6a-c2d0-4d7b-bcd5-e4e7fcc68d19</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:51 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:51
-        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAiktUGHLe1AE=</PopReceipt><TimeNextVisible>Tue,
-        19 Mar 2019 16:37:51 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>8d006238-fe09-423c-bd8d-d44c3517c0a9</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:43 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:43
+        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAABeVgyntF1gE=</PopReceipt><TimeNextVisible>Thu,
+        18 Jun 2020 14:21:43 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"
     headers:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:51 GMT
+      - Thu, 18 Jun 2020 14:21:42 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -860,17 +660,17 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:51 GMT
+      - Thu, 18 Jun 2020 14:21:43 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages?peekonly=true
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>59a8de6a-c2d0-4d7b-bcd5-e4e7fcc68d19</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:51 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:51
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>8d006238-fe09-423c-bd8d-d44c3517c0a9</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:43 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:43
         GMT</ExpirationTime><DequeueCount>0</DequeueCount><MessageText>test message</MessageText></QueueMessage></QueueMessagesList>"
     headers:
       cache-control:
@@ -878,7 +678,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:51 GMT
+      - Thu, 18 Jun 2020 14:21:43 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -894,19 +694,19 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:52 GMT
+      - Thu, 18 Jun 2020 14:21:45 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>59a8de6a-c2d0-4d7b-bcd5-e4e7fcc68d19</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:51 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:51
-        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAASYKrKnLe1AE=</PopReceipt><TimeNextVisible>Tue,
-        19 Mar 2019 16:38:22 GMT</TimeNextVisible><DequeueCount>1</DequeueCount><MessageText>test
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>8d006238-fe09-423c-bd8d-d44c3517c0a9</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:43 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:43
+        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAbTfR3XtF1gE=</PopReceipt><TimeNextVisible>Thu,
+        18 Jun 2020 14:22:15 GMT</TimeNextVisible><DequeueCount>1</DequeueCount><MessageText>test
         message</MessageText></QueueMessage></QueueMessagesList>"
     headers:
       cache-control:
@@ -914,7 +714,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:51 GMT
+      - Thu, 18 Jun 2020 14:21:45 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -934,13 +734,13 @@ interactions:
       Content-Length:
       - '107'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:52 GMT
+      - Thu, 18 Jun 2020 14:21:46 GMT
       x-ms-version:
       - '2017-11-09'
     method: PUT
-    uri: https://clitest000002.queue.core.windows.net/queue000003/messages/59a8de6a-c2d0-4d7b-bcd5-e4e7fcc68d19?popreceipt=AgAAAAMAAAAAAAAASYKrKnLe1AE%3D&visibilitytimeout=1
+    uri: https://clitest000002.queue.core.windows.net/queue000003/messages/8d006238-fe09-423c-bd8d-d44c3517c0a9?popreceipt=AgAAAAMAAAAAAAAAbTfR3XtF1gE%3D&visibilitytimeout=1
   response:
     body:
       string: ''
@@ -948,13 +748,13 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:52 GMT
+      - Thu, 18 Jun 2020 14:21:47 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-popreceipt:
-      - AwAAAAMAAAAAAAAAk2qbGXLe1AEBAAAA
+      - AwAAAAMAAAAAAAAA+XJNzXtF1gEBAAAA
       x-ms-time-next-visible:
-      - Tue, 19 Mar 2019 16:37:53 GMT
+      - Thu, 18 Jun 2020 14:21:48 GMT
       x-ms-version:
       - '2017-11-09'
     status:
@@ -966,17 +766,17 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:54 GMT
+      - Thu, 18 Jun 2020 14:21:49 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages?peekonly=true
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>59a8de6a-c2d0-4d7b-bcd5-e4e7fcc68d19</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:51 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:51
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>8d006238-fe09-423c-bd8d-d44c3517c0a9</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:43 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:43
         GMT</ExpirationTime><DequeueCount>1</DequeueCount><MessageText>new message!</MessageText></QueueMessage></QueueMessagesList>"
     headers:
       cache-control:
@@ -984,7 +784,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:55 GMT
+      - Thu, 18 Jun 2020 14:21:50 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1004,24 +804,24 @@ interactions:
       Content-Length:
       - '109'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:55 GMT
+      - Thu, 18 Jun 2020 14:21:50 GMT
       x-ms-version:
       - '2017-11-09'
     method: POST
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>844fcb45-21e1-464f-8cb5-3d475f889226</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:55 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:55
-        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAA7AagGnLe1AE=</PopReceipt><TimeNextVisible>Tue,
-        19 Mar 2019 16:37:55 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>c6bc5743-18cf-40f4-9d22-d7366ebffc2e</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:51 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:51
+        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAflF/z3tF1gE=</PopReceipt><TimeNextVisible>Thu,
+        18 Jun 2020 14:21:51 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"
     headers:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:55 GMT
+      - Thu, 18 Jun 2020 14:21:51 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1041,24 +841,24 @@ interactions:
       Content-Length:
       - '108'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:55 GMT
+      - Thu, 18 Jun 2020 14:21:52 GMT
       x-ms-version:
       - '2017-11-09'
     method: POST
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>815b959a-b36b-4c3b-8484-0120f626a173</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:55 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:55
-        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAL2PWGnLe1AE=</PopReceipt><TimeNextVisible>Tue,
-        19 Mar 2019 16:37:55 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>27f9f421-25d5-4366-af44-5cf0b4b34d32</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:53 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:53
+        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAL5RR0HtF1gE=</PopReceipt><TimeNextVisible>Thu,
+        18 Jun 2020 14:21:53 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"
     headers:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:54 GMT
+      - Thu, 18 Jun 2020 14:21:52 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1074,21 +874,21 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:56 GMT
+      - Thu, 18 Jun 2020 14:21:53 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages?peekonly=true&numofmessages=32
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>59a8de6a-c2d0-4d7b-bcd5-e4e7fcc68d19</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:51 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:51
-        GMT</ExpirationTime><DequeueCount>1</DequeueCount><MessageText>new message!</MessageText></QueueMessage><QueueMessage><MessageId>844fcb45-21e1-464f-8cb5-3d475f889226</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:55 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:55
-        GMT</ExpirationTime><DequeueCount>0</DequeueCount><MessageText>second message</MessageText></QueueMessage><QueueMessage><MessageId>815b959a-b36b-4c3b-8484-0120f626a173</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:55 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:55
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>8d006238-fe09-423c-bd8d-d44c3517c0a9</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:43 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:43
+        GMT</ExpirationTime><DequeueCount>1</DequeueCount><MessageText>new message!</MessageText></QueueMessage><QueueMessage><MessageId>c6bc5743-18cf-40f4-9d22-d7366ebffc2e</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:51 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:51
+        GMT</ExpirationTime><DequeueCount>0</DequeueCount><MessageText>second message</MessageText></QueueMessage><QueueMessage><MessageId>27f9f421-25d5-4366-af44-5cf0b4b34d32</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:53 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:53
         GMT</ExpirationTime><DequeueCount>0</DequeueCount><MessageText>third message</MessageText></QueueMessage></QueueMessagesList>"
     headers:
       cache-control:
@@ -1096,7 +896,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:55 GMT
+      - Thu, 18 Jun 2020 14:21:53 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1112,19 +912,19 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:56 GMT
+      - Thu, 18 Jun 2020 14:21:55 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>59a8de6a-c2d0-4d7b-bcd5-e4e7fcc68d19</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:51 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:51
-        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAlkUmLXLe1AE=</PopReceipt><TimeNextVisible>Tue,
-        19 Mar 2019 16:38:26 GMT</TimeNextVisible><DequeueCount>2</DequeueCount><MessageText>new
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>8d006238-fe09-423c-bd8d-d44c3517c0a9</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:43 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:43
+        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAdFbP43tF1gE=</PopReceipt><TimeNextVisible>Thu,
+        18 Jun 2020 14:22:25 GMT</TimeNextVisible><DequeueCount>2</DequeueCount><MessageText>new
         message!</MessageText></QueueMessage></QueueMessagesList>"
     headers:
       cache-control:
@@ -1132,7 +932,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:56 GMT
+      - Thu, 18 Jun 2020 14:21:55 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1150,13 +950,13 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:56 GMT
+      - Thu, 18 Jun 2020 14:21:56 GMT
       x-ms-version:
       - '2017-11-09'
     method: DELETE
-    uri: https://clitest000002.queue.core.windows.net/queue000003/messages/59a8de6a-c2d0-4d7b-bcd5-e4e7fcc68d19?popreceipt=AgAAAAMAAAAAAAAAlkUmLXLe1AE%3D
+    uri: https://clitest000002.queue.core.windows.net/queue000003/messages/8d006238-fe09-423c-bd8d-d44c3517c0a9?popreceipt=AgAAAAMAAAAAAAAAdFbP43tF1gE%3D
   response:
     body:
       string: ''
@@ -1164,7 +964,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:56 GMT
+      - Thu, 18 Jun 2020 14:21:56 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1178,19 +978,19 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:57 GMT
+      - Thu, 18 Jun 2020 14:21:57 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
     uri: https://clitest000002.queue.core.windows.net/queue000003/messages?peekonly=true&numofmessages=32
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>844fcb45-21e1-464f-8cb5-3d475f889226</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:55 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:55
-        GMT</ExpirationTime><DequeueCount>0</DequeueCount><MessageText>second message</MessageText></QueueMessage><QueueMessage><MessageId>815b959a-b36b-4c3b-8484-0120f626a173</MessageId><InsertionTime>Tue,
-        19 Mar 2019 16:37:55 GMT</InsertionTime><ExpirationTime>Tue, 26 Mar 2019 16:37:55
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>c6bc5743-18cf-40f4-9d22-d7366ebffc2e</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:51 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:51
+        GMT</ExpirationTime><DequeueCount>0</DequeueCount><MessageText>second message</MessageText></QueueMessage><QueueMessage><MessageId>27f9f421-25d5-4366-af44-5cf0b4b34d32</MessageId><InsertionTime>Thu,
+        18 Jun 2020 14:21:53 GMT</InsertionTime><ExpirationTime>Thu, 25 Jun 2020 14:21:53
         GMT</ExpirationTime><DequeueCount>0</DequeueCount><MessageText>third message</MessageText></QueueMessage></QueueMessagesList>"
     headers:
       cache-control:
@@ -1198,7 +998,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:56 GMT
+      - Thu, 18 Jun 2020 14:21:58 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1216,9 +1016,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:57 GMT
+      - Thu, 18 Jun 2020 14:21:59 GMT
       x-ms-version:
       - '2017-11-09'
     method: DELETE
@@ -1230,7 +1030,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:56 GMT
+      - Thu, 18 Jun 2020 14:21:59 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1244,9 +1044,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:58 GMT
+      - Thu, 18 Jun 2020 14:22:00 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -1261,7 +1061,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:57 GMT
+      - Thu, 18 Jun 2020 14:22:01 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1279,9 +1079,9 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:58 GMT
+      - Thu, 18 Jun 2020 14:22:01 GMT
       x-ms-version:
       - '2017-11-09'
     method: DELETE
@@ -1293,7 +1093,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:37:58 GMT
+      - Thu, 18 Jun 2020 14:22:02 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1307,9 +1107,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:58 GMT
+      - Thu, 18 Jun 2020 14:22:03 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -1317,14 +1117,14 @@ interactions:
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>QueueNotFound</Code><Message>The
-        specified queue does not exist.\nRequestId:b9ffd731-d003-007a-3172-de3e99000000\nTime:2019-03-19T16:37:58.9099163Z</Message></Error>"
+        specified queue does not exist.\nRequestId:15a2c342-d003-0075-177b-4559da000000\nTime:2020-06-18T14:22:04.1076800Z</Message></Error>"
     headers:
       content-length:
       - '217'
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:57 GMT
+      - Thu, 18 Jun 2020 14:22:03 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-error-code:
@@ -1340,9 +1140,9 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.7.4; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Tue, 19 Mar 2019 16:37:59 GMT
+      - Thu, 18 Jun 2020 14:22:04 GMT
       x-ms-version:
       - '2017-11-09'
     method: GET
@@ -1356,7 +1156,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:37:59 GMT
+      - Thu, 18 Jun 2020 14:22:05 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1366,51 +1166,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 19 Mar 2019 16:38:00 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdDVFFENDNFQ0JTN0JPSUdIT0xHVU9YUktQQ0dLM0VIUFBBVHwyQzUwREY3RDkwNDYyNUU3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1

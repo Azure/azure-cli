@@ -50,6 +50,19 @@ class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
                                               execution_result.output)
 
 
+class JMESPathCheckNotExists(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, query):
+        self._query = query
+
+    def __call__(self, execution_result):
+        json_value = execution_result.get_output_in_json()
+        actual_result = jmespath.search(self._query, json_value,
+                                        jmespath.Options(collections.OrderedDict))
+        if actual_result:
+            raise JMESPathCheckAssertionError(self._query, 'some value', actual_result,
+                                              execution_result.output)
+
+
 class JMESPathCheckGreaterThan(object):  # pylint: disable=too-few-public-methods
     def __init__(self, query, expected_result):
         self._query = query

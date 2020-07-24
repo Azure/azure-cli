@@ -9,6 +9,7 @@ import binascii
 from datetime import datetime
 import re
 
+from enum import Enum
 from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -17,6 +18,11 @@ from azure.cli.core.commands.validators import validate_tags
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
+
+
+class KeyEncryptionDataType(str, Enum):
+    BASE64 = 'base64'
+    PLAINTEXT = 'plaintext'
 
 
 def _extract_version(item_id):
@@ -127,14 +133,16 @@ def get_attribute_validator(name, attribute_class, create=False):
 
 def validate_key_import_source(ns):
     byok_file = ns.byok_file
+    byok_string = ns.byok_string
     pem_file = ns.pem_file
+    pem_string = ns.pem_string
     pem_password = ns.pem_password
-    if (not byok_file and not pem_file) or (byok_file and pem_file):
-        raise ValueError('supply exactly one: --byok-file, --pem-file')
-    if byok_file and pem_password:
-        raise ValueError('--byok-file cannot be used with --pem-password')
-    if pem_password and not pem_file:
-        raise ValueError('--pem-password must be used with --pem-file')
+    if len([arg for arg in [byok_file, byok_string, pem_file, pem_string] if arg]) != 1:
+        raise ValueError('supply exactly one: --byok-file, --byok-string, --pem-file, --pem-string')
+    if (byok_file or byok_string) and pem_password:
+        raise ValueError('--byok-file or --byok-string cannot be used with --pem-password')
+    if pem_password and not pem_file and not pem_string:
+        raise ValueError('--pem-password must be used with --pem-file or --pem-string')
 
 
 def validate_key_type(ns):
@@ -293,9 +301,22 @@ def get_vault_base_url_type(cli_ctx):
     return vault_base_url_type
 
 
-def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
+    from msrestazure.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
+
+    return resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Network',
+        type='virtualNetworks',
+        name=vnet_name,
+        child_type_1='subnets',
+        child_name_1=subnet_name)
+
+
+def validate_subnet(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id
 
     subnet = namespace.subnet
     subnet_is_id = is_valid_resource_id(subnet)
@@ -305,14 +326,7 @@ def validate_subnet(cmd, namespace):
         return
 
     if subnet and not subnet_is_id and vnet:
-        namespace.subnet = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=vnet,
-            child_type_1='subnets',
-            child_name_1=subnet)
+        namespace.subnet = _construct_vnet(cmd, namespace.resource_group_name, vnet, subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
@@ -374,3 +388,15 @@ def validate_storage_disabled_attribute(attr_arg_name, attr_type):
         attr_arg = attr_type(enabled=(not disabled))
         setattr(ns, attr_arg_name, attr_arg)
     return _validate
+
+
+def validate_encryption(ns):
+    if ns.data_type == KeyEncryptionDataType.BASE64:
+        ns.value = base64.b64decode(ns.value.encode('utf-8'))
+    else:
+        ns.value = ns.value.encode('utf-8')
+    del ns.data_type
+
+
+def validate_decryption(ns):
+    ns.value = base64.b64decode(ns.value)

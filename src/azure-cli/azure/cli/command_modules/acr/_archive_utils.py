@@ -12,14 +12,14 @@ import requests
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.storage.blob import BlockBlobService
+from azure.cli.core.profiles import ResourceType, get_sdk
 from ._azure_utils import get_blob_info
 from ._constants import TASK_VALID_VSTS_URLS
 
 logger = get_logger(__name__)
 
 
-def upload_source_code(client,
+def upload_source_code(cmd, client,
                        registry_name,
                        resource_group_name,
                        source_location,
@@ -54,6 +54,7 @@ def upload_source_code(client,
         raise CLIError("Failed to get a SAS URL to upload context.")
 
     account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(upload_url)
+    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
     BlockBlobService(account_name=account_name,
                      sas_token=sas_token,
                      endpoint_suffix=endpoint_suffix).create_blob_from_path(
@@ -115,7 +116,7 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
                 tar.addfile(docker_file_tarinfo, f)
 
 
-class IgnoreRule(object):  # pylint: disable=too-few-public-methods
+class IgnoreRule:  # pylint: disable=too-few-public-methods
     def __init__(self, rule):
 
         self.rule = rule

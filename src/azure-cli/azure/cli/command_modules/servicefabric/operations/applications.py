@@ -87,7 +87,7 @@ def update_app(client,
         if application_type_version:
             appResource.type_version = application_type_version
         if application_parameters:
-            appResource.parameters = application_parameters
+            appResource.parameters.update(application_parameters)
         if minimum_nodes is not None:
             appResource.minimum_nodes = minimum_nodes
         if maximum_nodes is not None:

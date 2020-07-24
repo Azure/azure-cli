@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer
+import unittest
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
+from knack.util import CLIError
 
 
 class MonitorTests(ScenarioTest):
@@ -78,6 +80,30 @@ class MonitorTests(ScenarioTest):
             self.check('criteria.allOf[0].dimensions[0].values[0]', '*')
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_metrics_alert_metric_name_with_special_characters')
+    @StorageAccountPreparer()
+    def test_metrics_alert_metric_name_with_special_characters(self, resource_group):
+        self.kwargs.update({
+            'alert_name': 'MS-ERRORCODE-SU001',
+            'rg': resource_group
+        })
+
+        storage_account = self.cmd('storage account show -n {sa}').get_output_in_json()
+        storage_account_id = storage_account['id']
+        self.kwargs.update({
+            'storage_account_id': storage_account_id
+        })
+
+        with self.assertRaisesRegexp(CLIError, 'were not found: MS-ERRORCODE-SU001'):
+            self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
+                     ' --scopes {storage_account_id}'
+                     ' --condition "count account.MS-ERRORCODE-SU001 > 4" --description "Cloud_lumico"')
+
+        with self.assertRaisesRegexp(CLIError, 'were not found: MS-ERRORCODE|,-SU001'):
+            self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
+                     ' --scopes {storage_account_id}'
+                     ' --condition "count account.MS-ERRORCODE|,-SU001 > 4" --description "Cloud_lumico"')
+
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_special_char')
     def test_metric_alert_special_char_scenario(self, resource_group):
         self.kwargs.update({
@@ -102,6 +128,7 @@ class MonitorTests(ScenarioTest):
                      self.check('criteria.allOf[0].dimensions[0].values[0]', 'address-pool-dcc-blue~backendHttpSettings')
                  ])
 
+    @unittest.skip('skip')
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
         vm = 'vm1'

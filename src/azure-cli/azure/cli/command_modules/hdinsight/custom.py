@@ -30,15 +30,18 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    cluster_admin_account=None, cluster_admin_password=None,
                    cluster_users_group_dns=None,
                    assign_identity=None,
+                   minimal_tls_version=None,
                    encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
-                   encryption_algorithm='RSA-OAEP', esp=False, no_validation_timeout=False):
+                   encryption_algorithm='RSA-OAEP', public_network_access_type=None,
+                   outbound_public_network_access_type=None, encryption_in_transit=None,
+                   esp=False, no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
         DirectoryType, DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
-        KafkaRestProperties, ClientGroupInfo
+        KafkaRestProperties, ClientGroupInfo, NetworkSettings, EncryptionInTransitProperties
 
     validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
                                        subnet, domain, cluster_admin_account, assign_identity,
@@ -280,6 +283,15 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         )
     )
 
+    network_settings = (public_network_access_type or outbound_public_network_access_type) and NetworkSettings(
+        public_network_access=public_network_access_type,
+        outbound_only_public_network_access_type=outbound_public_network_access_type
+    )
+
+    encryption_in_transit_properties = encryption_in_transit and EncryptionInTransitProperties(
+        is_encryption_in_transit_enabled=encryption_in_transit
+    )
+
     create_params = ClusterCreateParametersExtended(
         location=location,
         tags=tags,
@@ -300,7 +312,10 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             ),
             security_profile=security_profile,
             disk_encryption_properties=disk_encryption_properties,
-            kafka_rest_properties=kafka_rest_properties
+            kafka_rest_properties=kafka_rest_properties,
+            min_supported_tls_version=minimal_tls_version,
+            network_settings=network_settings,
+            encryption_in_transit_properties=encryption_in_transit_properties
         ),
         identity=cluster_identity
     )
@@ -443,7 +458,8 @@ def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, worksp
 
         # Only retrieve primary key when not provided
         if not primary_key:
-            shared_keys = log_analytics_client.workspaces.get_shared_keys(workspace_resource_group_name, workspace_name)
+            shared_keys = log_analytics_client.shared_keys.get_shared_keys(workspace_resource_group_name,
+                                                                           workspace_name)
             if not shared_keys:
                 raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
 

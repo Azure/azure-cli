@@ -29,6 +29,7 @@ import datetime
 
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
+from knack.events import EVENT_CLI_POST_EXECUTE
 from knack.log import CLILogging, get_logger
 from knack.util import ensure_dir
 
@@ -46,6 +47,7 @@ class AzCliLogging(CLILogging):
         self.command_logger_handler = None
         self.command_metadata_logger = None
         self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
+        self.cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, AzCliLogging.deinit_cmd_metadata_logging)
 
     def get_command_log_dir(self):
         return self.command_log_dir
@@ -77,10 +79,15 @@ class AzCliLogging(CLILogging):
 
             cmd_logger = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)
 
-            self._init_command_logfile_handlers(cmd_logger, args)  # pylint: disable=protected-access
-            get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", self.command_log_dir)
+            # overwrite CLILogging._is_file_log_enabled() from knack
+            self.file_log_enabled = cli_ctx.config.getboolean('logging', 'enable_log_file', fallback=True)
 
-            _delete_old_logs(self.command_log_dir)
+            if self.file_log_enabled:
+                self._init_command_logfile_handlers(cmd_logger, args)  # pylint: disable=protected-access
+                get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.",
+                                           self.command_log_dir)
+
+                _delete_old_logs(self.command_log_dir)
 
     def _init_command_logfile_handlers(self, command_metadata_logger, args):
 
@@ -168,18 +175,23 @@ class AzCliLogging(CLILogging):
             self.command_metadata_logger.info("extension name: %s", extension_name)
             self.command_metadata_logger.info("extension version: %s", extension_version)
 
-    def end_cmd_metadata_logging(self, exit_code):
+    @staticmethod
+    def deinit_cmd_metadata_logging(cli_ctx):
+        cli_ctx.logging.end_cmd_metadata_logging(cli_ctx.result.exit_code if cli_ctx.result else 128)
+
+    def end_cmd_metadata_logging(self, exit_code):  # leave it non '-' prefix to not to break user
         if self.command_metadata_logger:
             self.command_metadata_logger.info("exit code: %s", exit_code)
 
             # We have finished metadata logging, remove handler and set command_metadata_handler to None.
             # crucial to remove handler as in python logger objects are shared which can affect testing of this logger
             # we do not want duplicate handlers to be added in subsequent calls of _init_command_logfile_handlers
+            self.command_logger_handler.close()
             self.command_metadata_logger.removeHandler(self.command_logger_handler)
             self.command_metadata_logger = None
 
 
-class CommandLoggerContext(object):
+class CommandLoggerContext:
     def __init__(self, module_logger):
         self.logger = module_logger
         self.hdlr = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)  # pylint: disable=protected-access

@@ -7,9 +7,6 @@
 
 import argparse
 
-from knack.util import CLIError
-from knack.log import get_logger
-
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -21,6 +18,9 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
+
+from knack.log import get_logger
+from knack.util import CLIError
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -76,7 +76,8 @@ def parse_storage_account(cmd, namespace):
     if namespace.account_name and is_valid_resource_id(namespace.account_name):
         namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
         namespace.account_name = parse_resource_id(namespace.account_name)['name']
-    elif namespace.account_name and not namespace.resource_group_name:
+    elif namespace.account_name and not is_valid_resource_id(namespace.account_name) and \
+            not namespace.resource_group_name:
         namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
 
 
@@ -102,21 +103,36 @@ def validate_bypass(namespace):
         namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
 
+def get_config_value(cmd, section, key, default):
+    return cmd.cli_ctx.config.get(section, key, default)
+
+
+def is_storagev2(import_prefix):
+    return import_prefix.startswith('azure.multiapi.storagev2.')
+
+
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
     n = namespace
 
-    def get_config_value(section, key, default):
-        return cmd.cli_ctx.config.get(section, key, default)
-
     if hasattr(n, 'auth_mode'):
-        auth_mode = n.auth_mode or get_config_value('storage', 'auth_mode', None)
+        auth_mode = n.auth_mode or get_config_value(cmd, 'storage', 'auth_mode', None)
         del n.auth_mode
         if not n.account_name:
-            n.account_name = get_config_value('storage', 'account', None)
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
-            n.token_credential = _create_token_credential(cmd.cli_ctx)
+            prefix = cmd.command_kwargs['resource_type'].value[0]
+            # is_storagv2() is used to distinguish if the command is in track2 SDK
+            # If yes, we will use get_login_credentials() as token credential
+            if is_storagev2(prefix):
+                from azure.cli.core._profile import Profile
+                profile = Profile(cli_ctx=cmd.cli_ctx)
+                n.token_credential, _, _ = profile.get_login_credentials(
+                    resource="https://storage.azure.com", subscription_id=n._subscription)
+            # Otherwise, we will assume it is in track1 and keep previous token updater
+            else:
+                n.token_credential = _create_token_credential(cmd.cli_ctx)
 
     if hasattr(n, 'token_credential') and n.token_credential:
         # give warning if there are account key args being ignored
@@ -130,7 +146,7 @@ def validate_client_parameters(cmd, namespace):
         return
 
     if not n.connection_string:
-        n.connection_string = get_config_value('storage', 'connection_string', None)
+        n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
     if n.connection_string:
@@ -141,11 +157,11 @@ def validate_client_parameters(cmd, namespace):
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
-        n.account_name = get_config_value('storage', 'account', None)
+        n.account_name = get_config_value(cmd, 'storage', 'account', None)
     if not n.account_key:
-        n.account_key = get_config_value('storage', 'key', None)
+        n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
-        n.sas_token = get_config_value('storage', 'sas_token', None)
+        n.sas_token = get_config_value(cmd, 'storage', 'sas_token', None)
 
     # strip the '?' from sas token. the portal and command line are returns sas token in different
     # forms
@@ -154,10 +170,25 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('No connection string, account key or sas token found, we will query account keys for your '
-                       'storage account. Please try to use --auth-mode login or provide one of the following parameters'
-                       ': connection string, account key or sas token for your storage account.')
+        logger.warning('There is no credential provided in your command and environment, we will query account key '
+                       'for your storage account. \nPlease provide --connection-string, --account-key or --sas-token '
+                       'as credential, or use `--auth-mode login` if you have required RBAC roles in your command. '
+                       'For more information about RBAC roles in storage, you can see '
+                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
+                       'Setting corresponding environment variable can avoid inputting credential in your command. '
+                       'Please use --help to get more information.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+
+
+def validate_encryption_key(cmd, namespace):
+    encryption_key_source = cmd.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
+    if namespace.key_source == encryption_key_source.microsoft_key_vault and \
+            not namespace.key_uri:
+        raise CLIError("usage error: Please specify --key-uri when using {} as key source."
+                       .format(encryption_key_source.microsoft_key_vault))
+    if namespace.key_source != encryption_key_source.microsoft_key_vault and namespace.key_uri:
+        raise CLIError("usage error: Specify `--key-source={}` and --key-uri to configure key vault properties."
+                       .format(encryption_key_source.microsoft_key_vault))
 
 
 def process_blob_source_uri(cmd, namespace):
@@ -440,28 +471,16 @@ def validate_encryption_services(cmd, namespace):
         namespace.encryption_services = t_encryption_services(**services)
 
 
-def validate_encryption_source(cmd, namespace):
-    ns = vars(namespace)
-
-    key_name = ns.pop('encryption_key_name', None)
-    key_version = ns.pop('encryption_key_version', None)
-    key_vault_uri = ns.pop('encryption_key_vault', None)
-
-    if namespace.encryption_key_source == 'Microsoft.Keyvault' and not (key_name and key_version and key_vault_uri):
-        raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are required '
+def validate_encryption_source(namespace):
+    if namespace.encryption_key_source == 'Microsoft.Keyvault' and \
+            not (namespace.encryption_key_name and namespace.encryption_key_vault):
+        raise ValueError('--encryption-key-name and --encryption-key-vault are required '
                          'when --encryption-key-source=Microsoft.Keyvault is specified.')
 
-    if key_name or key_version or key_vault_uri:
+    if namespace.encryption_key_name or namespace.encryption_key_version is not None or namespace.encryption_key_vault:
         if namespace.encryption_key_source and namespace.encryption_key_source != 'Microsoft.Keyvault':
             raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are not '
                              'applicable without Microsoft.Keyvault key-source.')
-        KeyVaultProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE, 'KeyVaultProperties',
-                                     mod='models')
-        if not KeyVaultProperties:
-            return
-
-        kv_prop = KeyVaultProperties(key_name=key_name, key_version=key_version, key_vault_uri=key_vault_uri)
-        namespace.encryption_key_vault_properties = kv_prop
 
 
 def validate_entity(namespace):
@@ -623,6 +642,13 @@ def validate_container_public_access(cmd, namespace):
             container = ns.get('container_name')
             lease_id = ns.get('lease_id')
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
+
+
+def validate_fs_public_access(cmd, namespace):
+    from .sdkutil import get_fs_access_type
+
+    if namespace.public_access:
+        namespace.public_access = get_fs_access_type(cmd.cli_ctx, namespace.public_access.lower())
 
 
 def validate_select(namespace):
@@ -1056,9 +1082,18 @@ def blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def blob_rehydrate_priority_validator(namespace):
+    if namespace.blob_type == 'page' and namespace.rehydrate_priority:
+        raise ValueError('--rehydrate-priority is only applicable to block blob.')
+    if namespace.tier == 'Archive' and namespace.rehydrate_priority:
+        raise ValueError('--rehydrate-priority is only applicable to rehydrate blob data from the archive tier.')
+    if namespace.rehydrate_priority is None:
+        namespace.rehydrate_priority = 'Standard'
+
+
 def validate_azcopy_upload_destination_url(cmd, namespace):
     client = blob_data_service_factory(cmd.cli_ctx, {
-        'account_name': namespace.account_name})
+        'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
     destination_path = namespace.destination_path
     if not destination_path:
         destination_path = ''
@@ -1115,6 +1150,8 @@ def validate_azcopy_remove_arguments(cmd, namespace):
 
 
 def as_user_validator(namespace):
+    if hasattr(namespace, 'token_credential') and not namespace.as_user:
+        raise CLIError('incorrect usage: specify --as-user when --auth-mode login is used to get user delegation key.')
     if namespace.as_user:
         if namespace.expiry is None:
             raise argparse.ArgumentError(
@@ -1157,6 +1194,17 @@ def validator_delete_retention_days(namespace):
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
 
 
+def validate_delete_retention_days(namespace):
+    if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
+        raise ValueError(
+            "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
+            "is set to true")
+
+    if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
+        raise ValueError(
+            "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
+
+
 # pylint: disable=too-few-public-methods
 class BlobRangeAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -1190,3 +1238,67 @@ def validate_private_endpoint_connection_id(cmd, namespace):
         raise CLIError('incorrect usage: [--id ID | --name NAME --account-name NAME]')
 
     del namespace.connection_id
+
+
+def pop_data_client_auth(ns):
+    del ns.auth_mode
+    del ns.account_key
+    del ns.connection_string
+    del ns.sas_token
+
+
+def validate_client_auth_parameter(cmd, ns):
+    from .sdkutil import get_container_access_type
+    if ns.public_access:
+        ns.public_access = get_container_access_type(cmd.cli_ctx, ns.public_access.lower())
+    if ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None:
+        # simply try to retrieve the remaining variables from environment variables
+        if not ns.account_name:
+            ns.account_name = get_config_value(cmd, 'storage', 'account', None)
+        if ns.account_name and not ns.resource_group_name:
+            ns.resource_group_name = _query_account_rg(cmd.cli_ctx, account_name=ns.account_name)[0]
+        pop_data_client_auth(ns)
+    elif (ns.default_encryption_scope and ns.prevent_encryption_scope_override is None) or \
+         (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
+        raise CLIError("usage error: You need to specify both --default-encryption-scope and "
+                       "--prevent-encryption-scope-override to set encryption scope information "
+                       "when creating container.")
+    else:
+        validate_client_parameters(cmd, ns)
+
+
+def validate_encryption_scope_client_params(ns):
+    if ns.encryption_scope:
+        # will use track2 client and socket_timeout is unused
+        del ns.socket_timeout
+
+
+def validate_access_control(namespace):
+    if namespace.acl and namespace.permissions:
+        raise CLIError('usage error: invalid when specifying both --acl and --permissions.')
+
+
+def validate_service_type(services, service_type):
+    if service_type == 'table':
+        return 't' in services
+    if service_type == 'blob':
+        return 'b' in services
+    if service_type == 'queue':
+        return 'q' in services
+
+
+def validate_logging_version(namespace):
+    if validate_service_type(namespace.services, 'table') and namespace.version != 1.0:
+        raise CLIError(
+            'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
+            'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
+
+
+def validate_match_condition(namespace):
+    from .track2_util import _if_match, _if_none_match
+    if namespace.if_match:
+        namespace = _if_match(if_match=namespace.if_match, **namespace)
+        del namespace.if_match
+    if namespace.if_none_match:
+        namespace = _if_none_match(if_none_match=namespace.if_none_match, **namespace)
+        del namespace.if_none_match

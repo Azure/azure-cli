@@ -126,6 +126,7 @@ def validate_filter_parameters(namespace):
         for item in namespace.filter_parameters:
             param_tuple = validate_filter_parameter(item)
             if param_tuple:
+                # pylint: disable=unbalanced-tuple-unpacking
                 param_name, param_value = param_tuple
                 # If param_name already exists, convert the values to a list
                 if param_name in filter_parameters_dict:
@@ -191,6 +192,13 @@ def validate_key(namespace):
             raise CLIError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
     else:
         raise CLIError("Key cannot be empty.")
+
+
+def validate_resolve_keyvault(namespace):
+    if namespace.resolve_keyvault:
+        identifier = getattr(namespace, 'destination', None)
+        if identifier and identifier != "file":
+            raise CLIError("--resolve-keyvault is only applicable for exporting to file.")
 
 
 def validate_feature(namespace):

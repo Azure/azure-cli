@@ -645,7 +645,7 @@ class TestProfile(unittest.TestCase):
                                                                      aux_tenants=[test_tenant_id2])
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -676,7 +676,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.token_read_count)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_user_assigned_with_client_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -707,7 +707,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.client_id, test_client_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_user_assigned_with_object_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -738,7 +738,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.object_id, test_object_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_user_assigned_with_res_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -832,7 +832,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds[1], self.raw_token1)
         # the last in the tuple is the whole token entry which has several fields
         self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
-        mock_get_token.assert_called_once_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id)
+        mock_get_token.assert_called_once_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id, False)
         self.assertEqual(mock_get_token.call_count, 1)
         self.assertEqual(sub, '1')
         self.assertEqual(tenant, self.tenant_id)
@@ -843,13 +843,13 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds[0], self.token_entry1['tokenType'])
         self.assertEqual(creds[1], self.raw_token1)
         self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
-        mock_get_token.assert_called_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id)
+        mock_get_token.assert_called_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id, False)
         self.assertEqual(mock_get_token.call_count, 2)
         self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_raw_token_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -884,7 +884,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_raw_token_in_cloud_console(self, mock_msi_auth, mock_read_cred_file, mock_in_cloud_console):
         mock_read_cred_file.return_value = []
         mock_in_cloud_console.return_value = True
@@ -1037,7 +1037,7 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual([], subs)
 
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
     @mock.patch('azure.cli.core._profile._get_cloud_console_token_endpoint', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
@@ -1186,7 +1186,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
-    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, mock_subscription_finder, mock_get_client_class,
@@ -1849,6 +1849,48 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
+    def test_find_using_common_tenant_mfa_warning(self, _get_authorization_code_mock, mock_auth_context):
+        # Assume 2 tenants. Home tenant tenant1 doesn't require MFA, but tenant2 does
+        import adal
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        tenant2_mfa_id = 'tenant2-0000-0000-0000-000000000000'
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id), TenantStub(tenant2_mfa_id)]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        token_cache = adal.TokenCache()
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
+
+        adal_error_mfa = adal.AdalError(error_msg="", error_response={
+            'error': 'interaction_required',
+            'error_description': "AADSTS50076: Due to a configuration change made by your administrator, "
+                                 "or because you moved to a new location, you must use multi-factor "
+                                 "authentication to access '797f4846-ba00-4fd7-ba43-dac1f8f63013'.\n"
+                                 "Trace ID: 00000000-0000-0000-0000-000000000000\n"
+                                 "Correlation ID: 00000000-0000-0000-0000-000000000000\n"
+                                 "Timestamp: 2020-03-10 04:42:59Z",
+            'error_codes': [50076],
+            'timestamp': '2020-03-10 04:42:59Z',
+            'trace_id': '00000000-0000-0000-0000-000000000000',
+            'correlation_id': '00000000-0000-0000-0000-000000000000',
+            'error_uri': 'https://login.microsoftonline.com/error?code=50076',
+            'suberror': 'basic_action'})
+
+        # adal_error_mfa are raised on the second call
+        mock_auth_context.acquire_token.side_effect = [self.token_entry1, adal_error_mfa]
+
+        # action
+        all_subscriptions = finder._find_using_common_tenant(access_token="token1",
+                                                             resource='https://management.core.windows.net/')
+
+        # assert
+        # subscriptions are correctly returned
+        self.assertEqual(all_subscriptions, [self.subscription1])
+        self.assertEqual(mock_auth_context.acquire_token.call_count, 2)
+
+        # With pytest, use -o log_cli=True to manually check the log
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
     def test_find_using_specific_tenant(self, _get_authorization_code_mock, mock_auth_context):
         """ Test tenant_id -> home_tenant_id mapping and token tenant attachment
         """
@@ -1868,6 +1910,35 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(len(all_subscriptions), 1)
         self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
         self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
+
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    @mock.patch('azure.cli.core._msal.AdalRefreshTokenBasedClientApplication._acquire_token_silent_by_finding_specific_refresh_token', autospec=True)
+    def test_get_msal_token(self, mock_acquire_token, mock_retrieve_token_for_user):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        cli = DummyCli()
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+
+        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
+        profile._set_subscriptions(consolidated)
+
+        some_token_type = 'Bearer'
+        mock_retrieve_token_for_user.return_value = (some_token_type, TestProfile.raw_token1, TestProfile.token_entry1)
+        mock_acquire_token.return_value = {
+            'access_token': 'fake_access_token'
+        }
+        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]
+        data = {
+            "token_type": "ssh-cert",
+            "req_cnf": "fake_jwk",
+            "key_id": "fake_id"
+        }
+        username, access_token = profile.get_msal_token(scopes, data)
+        self.assertEqual(username, self.user1)
+        self.assertEqual(access_token, 'fake_access_token')
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
@@ -1910,8 +1981,10 @@ class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-me
 
 class TenantStub(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, tenant_id):
+    def __init__(self, tenant_id, display_name="DISPLAY_NAME"):
         self.tenant_id = tenant_id
+        self.display_name = display_name
+        self.additional_properties = {'displayName': display_name}
 
 
 class MSRestAzureAuthStub:

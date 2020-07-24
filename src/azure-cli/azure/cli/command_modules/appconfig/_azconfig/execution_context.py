@@ -9,7 +9,7 @@
 from collections import deque
 
 
-class QueryExecutionContext(object):
+class QueryExecutionContext:
     """
     This is the execution context class.
     """
@@ -60,7 +60,7 @@ class QueryExecutionContext(object):
         """Returns itself as an iterator"""
         return self
 
-    def next(self):
+    def __next__(self):
         """Returns the next query result.
 
         :return:
@@ -75,10 +75,6 @@ class QueryExecutionContext(object):
             self._buffer.extend(results)
 
         return self._buffer.popleft()
-
-    def __next__(self):
-        # supports python 3 iterator
-        return self.next()
 
     def _fetch_items(self, fetch_function):
         """Fetches more items
@@ -99,3 +95,5 @@ class QueryExecutionContext(object):
                 self._options, self._continuation)
 
         return fetched_items
+
+    next = __next__  # Python 2 compatibility.

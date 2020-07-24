@@ -77,3 +77,7 @@ def cf_hdinsight_extensions(cli_ctx, *_, **__):
 
 def cf_hdinsight_locations(cli_ctx, *_, **__):
     return cf_hdinsight(cli_ctx).locations
+
+
+def cf_hdinsight_virtual_machines(cli_ctx, *_, **__):
+    return cf_hdinsight(cli_ctx).virtual_machines

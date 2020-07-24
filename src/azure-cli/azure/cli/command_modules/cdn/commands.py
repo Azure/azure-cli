@@ -5,7 +5,6 @@
 
 from knack.util import CLIError
 
-from azure.mgmt.cdn.models import ErrorResponseException
 from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profiles, cf_origins, cf_resource_usage,
@@ -14,6 +13,7 @@ from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profile
 
 def _not_found(message):
     def _inner_not_found(ex):
+        from azure.mgmt.cdn.models import ErrorResponseException
         if isinstance(ex, ErrorResponseException) \
                 and ex.response is not None \
                 and ex.response.status_code == 404:
@@ -140,9 +140,8 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('list', 'list_by_endpoint')
-        g.custom_command('create', 'create_custom_domain',
-                         client_factory=cf_cdn)
-        g.command('enable-https', 'enable_custom_https')
+        g.custom_command('create', 'create_custom_domain', client_factory=cf_cdn)
+        g.custom_command('enable-https', 'enable_custom_https', client_factory=cf_cdn)
         g.command('disable-https', 'disable_custom_https')
 
     with self.command_group('cdn origin', cdn_origin_sdk) as g:
