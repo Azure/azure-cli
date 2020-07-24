@@ -229,10 +229,10 @@ class TreeBuilder:
         '''
         if isinstance(data, list):
             if len(data) > 0:
-                self._root = self._parse_dict('root', data, from_list=True)
+                self._root = self._do_parse('root', data, from_list=True)
                 self._root._list_length = len(data)
         elif isinstance(data, dict):
-            self._root = self._parse_dict('root', [data])
+            self._root = self._do_parse('root', [data])
 
     def generate_recommend(self, keywords_list):
         def printlist(my_list, group):
@@ -278,7 +278,16 @@ class TreeBuilder:
                 break
         return ret
 
-    def _parse_dict(self, name, data, from_list=False):
+    def _do_parse(self, name, data, from_list=False):
+        '''do parse for a single node
+
+        :param str name:
+            name of the node
+        :param list data:
+            all data in the json with same depth and same name
+        :param boolean from_list:
+            a list node or a dict node
+        '''
         node = TreeNode(name)
         node._keys = list(data[0].keys())
         node._data = data
@@ -292,10 +301,10 @@ class TreeBuilder:
                 continue
             if node.is_list(key):
                 if isinstance(child_item, dict):
-                    child_node = self._parse_dict(
+                    child_node = self._do_parse(
                         key, child_node_data, from_list=True)
             elif isinstance(child_item, dict):
-                child_node = self._parse_dict(key, child_node_data)
+                child_node = self._do_parse(key, child_node_data)
             if child_node:
                 node._child.append(child_node)
                 child_node._parent = node
