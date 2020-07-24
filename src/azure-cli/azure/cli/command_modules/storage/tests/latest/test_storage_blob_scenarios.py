@@ -587,5 +587,19 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-hot'))
 
 
+@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-12-12')
+class StorageBlobTagsTests(StorageScenarioMixin, ScenarioTest):
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_tags(self, storage_account, resource_group):
+        account_info = self.get_account_info(group=resource_group, name=storage_account)
+        container = self.create_container(account_info, prefix='')
+        self.kwargs = {
+            '': self.create_random_name()
+        }
+        self.storage_cmd('storage blob tag set ')
+
+
 if __name__ == '__main__':
     unittest.main()
