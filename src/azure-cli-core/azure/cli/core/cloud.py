@@ -203,7 +203,7 @@ def _arm_to_cli_mapper(arm_dict):
             active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,  # pylint: disable=line-too-long
             app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else None,
             log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None,  # pylint: disable=line-too-long
-            synapse_analytics_resource_id=arm_dict['synapseAnalyticsResourceId'] if 'synapseAnalyticsResourceId' in arm_dict else None),
+            synapse_analytics_resource_id=arm_dict['synapseAnalyticsResourceId'] if 'synapseAnalyticsResourceId' in arm_dict else None),  # pylint: disable=line-too-long
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             storage_sync_endpoint=arm_dict['suffix']['storageSyncEndpointSuffix'] if 'storageSyncEndpointSuffix' in arm_dict['suffixes'] else _get_storage_sync_endpoint(arm_dict['name']),  # pylint: disable=line-too-long
@@ -214,8 +214,8 @@ def _arm_to_cli_mapper(arm_dict):
             mariadb_server_endpoint=arm_dict['suffixes']['mariadbServerEndpoint'],
             azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
-            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None,
-            azure_synapse_analytics_endpoint=arm_dict['suffixes']['synapseAnalytics'] if 'synapseAnalytics' in arm_dict['suffixes'] else None))
+            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
+            azure_synapse_analytics_endpoint=arm_dict['suffixes']['synapseAnalytics'] if 'synapseAnalytics' in arm_dict['suffixes'] else None))  # pylint: disable=line-too-long
 
 
 class Cloud(object):  # pylint: disable=too-few-public-methods
