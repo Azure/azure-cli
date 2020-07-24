@@ -42,18 +42,18 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
             # refresh containers in the vault
             protection_containers_client = protection_containers_cf(cmd.cli_ctx)
             filter_string = helper.get_filter_string({'backupManagementType': "AzureStorage"})
-            
-            refresh_result = protection_containers_client.refresh(vault_name, resource_group_name, fabric_name, 
+
+            refresh_result = protection_containers_client.refresh(vault_name, resource_group_name, fabric_name,
                                                                   filter=filter_string, raw=True)
             helper.track_refresh_operation(cmd.cli_ctx, refresh_result, vault_name, resource_group_name)
-            
+
             # refetch the protectable containers after refresh
             unregistered_containers = list_protectable_containers(cmd.cli_ctx, resource_group_name, vault_name)
             storage_account = _get_storage_account_from_list(unregistered_containers, storage_account_name)
-            
+
             if storage_account is None:
                 raise CLIError("Storage account not found or not supported.")
-            
+
         # register storage account
         protection_containers_client = protection_containers_cf(cmd.cli_ctx)
         properties = AzureStorageContainer(backup_management_type="AzureStorage",
@@ -104,18 +104,19 @@ def _get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_
 
     protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name,
                                                          afs_name, storage_account_name)
-    
+
     if protectable_item is None:
-        
+
         filter_string = helper.get_filter_string({'workloadType': "AzureFileShare"})
         result = protection_containers_client.inquire(vault_name, resource_group_name, fabric_name,
                                                       storage_account.name, filter=filter_string, raw=True)
-        
+
         helper.track_inquiry_operation(cli_ctx, result, vault_name, resource_group_name, storage_account.name)
-        
+
         protectable_item = _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name,
                                                              storage_account_name)
     return protectable_item
+
 
 def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, afs_name, storage_account_name):
     backup_protectable_items_client = backup_protectable_items_cf(cli_ctx)
