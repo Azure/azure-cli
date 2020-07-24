@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import uuid
-
 from azure.cli.core.util import should_disable_connection_verify
 from knack.log import get_logger
 
