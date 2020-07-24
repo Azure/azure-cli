@@ -215,7 +215,7 @@ def _arm_to_cli_mapper(arm_dict):
             azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None,
-            azure_synapse_analytics_endpoint=arm_dict['suffixes']['synapseAnalytics'] if 'synapseAnalytics' in arm_dict['suffixes'] else None)) # pylint: disable=line-too-long
+            azure_synapse_analytics_endpoint=arm_dict['suffixes']['synapseAnalytics'] if 'synapseAnalytics' in arm_dict['suffixes'] else None))
 
 
 class Cloud(object):  # pylint: disable=too-few-public-methods
