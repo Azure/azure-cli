@@ -768,6 +768,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('include_pattern', include_pattern_type)
         c.argument('exclude_path', exclude_path_type)
 
+    with self.argument_context('storage blob tag set') as c:
+        from azure.cli.core.commands.validators import validate_tags
+        c.argument('tags', nargs='*', validator=validate_tags)
+        c.extra('version_id', options_list='--version', help='The version id parameter is an opaque DateTime '
+                'value that, when present, specifies the version of the blob to add tags to.')
+        c.extra('validate_content', arg_type=get_three_state_flag(),
+                help='If true, calculates an MD5 hash of the tags content. The storage service checks the hash of '
+                'the content that has arrived with the hash that was sent. This is primarily valuable for detecting '
+                'bitflips on the wire if using http instead of https, as https (the default), will already validate. '
+                'Note that this MD5 hash is not stored with the blob.')
+
+
     with self.argument_context('storage container') as c:
         from .sdkutil import get_container_access_type_names
         c.argument('container_name', container_name_type, options_list=('--name', '-n'))
