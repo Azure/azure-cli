@@ -555,6 +555,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False)
+        c.register_blob_arguments()
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
         c.argument('max_connections', type=int)
