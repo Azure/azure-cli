@@ -1260,9 +1260,9 @@ def _get_authorization_code_worker(authority_url, resource, results):
 
     # Emit a warning to inform that a browser is opened.
     # Only show the path part of the URL and hide the query string.
-    logger.warning("The default web browser has been opened at {}. Please continue the login in the web browser.\n"
+    logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser.\n"
                    "If no web browser is available or if the web browser fails to open, use device code flow "
-                   "with `az login --use-device-code`.".format(url.split('?')[0]))
+                   "with `az login --use-device-code`.", url.split('?')[0])
 
     # wait for callback from browser.
     while True:
