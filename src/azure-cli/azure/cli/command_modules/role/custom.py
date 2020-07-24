@@ -1714,14 +1714,6 @@ def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
         raise
 
 
-def is_guid(guid):
-    try:
-        uuid.UUID(guid)
-        return True
-    except ValueError:
-        return False
-
-
 def _get_object_stubs(graph_client, assignees):
     from azure.graphrbac.models import GetObjectsParameters
     result = []
