@@ -79,3 +79,11 @@ def _set_outbound_type(outbound_type, vnet_subnet_id, load_balancer_sku, load_ba
             raise CLIError("userDefinedRouting doesn't support customizing a standard load balancer with IP addresses")
 
     return CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+
+
+def _parse_comma_separated_list(text):
+    if text is None:
+        return None
+    if text == "":
+        return []
+    return text.split(",")

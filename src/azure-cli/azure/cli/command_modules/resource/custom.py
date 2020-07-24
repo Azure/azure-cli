@@ -360,7 +360,7 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     return sdk_no_wait(no_wait, deployment_client.create_or_update, resource_group_name, deployment_name, properties)
 
 
-class JsonCTemplate(object):
+class JsonCTemplate:
     def __init__(self, template_as_bytes):
         self.template_as_bytes = template_as_bytes
 
@@ -2489,7 +2489,7 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
+class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
@@ -2608,7 +2608,8 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
         # to properties will fail due to the lack of properties, so the PATCH type should be used
         need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
-                              'Microsoft.ContainerRegistry/registries/webhooks']
+                              'Microsoft.ContainerRegistry/registries/webhooks',
+                              'Microsoft.ContainerInstance/containerGroups']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)

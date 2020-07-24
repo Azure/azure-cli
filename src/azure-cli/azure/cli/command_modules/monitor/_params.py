@@ -16,7 +16,8 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
+    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id,
+    process_subscription_id, process_workspace_data_export_destination)
 
 from knack.arguments import CLIArgumentType
 
@@ -244,6 +245,17 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor diagnostic-settings categories show') as c:
         c.resource_parameter('resource_uri', required=True)
+
+    with self.argument_context('monitor diagnostic-settings subscription') as c:
+        import argparse
+        c.argument('subscription_id', validator=process_subscription_id, help=argparse.SUPPRESS, required=False)
+        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file.")
+        c.argument('name', help='The name of the diagnostic setting.', options_list=['--name', '-n'])
+        c.argument('event_hub_name', help='The name of the event hub. If none is specified, the default event hub will be selected.')
+        c.argument('event_hub_auth_rule', help='The resource Id for the event hub authorization rule.')
+        c.argument('workspace', help='The resource id of the log analytics workspace.')
+        c.argument('storage_account', help='The resource id of the storage account to which you would like to send the Activity Log.')
+        c.argument('service_bus_rule', help="The service bus rule ID of the service bus namespace in which you would like to have Event Hubs created for streaming the Activity Log. The rule ID is of the format '{service bus resource ID}/authorizationrules/{key name}'.")
     # endregion
 
     # region LogProfiles
@@ -379,6 +391,22 @@ def load_arguments(self, _):
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
         c.argument('retention_in_days', options_list='--retention-time', type=int, required=True)
+    # endregion
+
+    # region Log Analytics Workspace Data Export
+    with self.argument_context('monitor log-analytics workspace data-export') as c:
+        c.argument('data_export_name', options_list=['--name', '-n'], help="Name of the data export rule")
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('enable_all_tables', options_list=['--all', '--export-all-tables'], arg_type=get_three_state_flag(),
+                   help="All workspace's tables are exported when this is enabled.")
+        c.argument('table_names', nargs='+', options_list=['--tables', '-t'],
+                   help='An array of tables to export. if --export-all-tables is true, this argument should not be provided.')
+        c.argument('destination', validator=process_workspace_data_export_destination,
+                   help='The destination resource ID. It should be a storage account, an event hub namespace or an event hub. '
+                        'If event hub namespace is provided, event hub would be created for each table automatically.')
+        c.ignore('data_export_type')
+        c.ignore('event_hub_name')
+        c.argument('enable', arg_type=get_three_state_flag(), help='Enable this data export rule.')
     # endregion
 
     # region Log Analytics Workspace Linked Service

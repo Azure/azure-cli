@@ -116,6 +116,47 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.clusterState', 'Running')
         ])
 
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_cluster_with_encryption_in_transit(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._with_encryption_in_transit()
+        )
+
+        self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
+            self.check('properties.encryptionInTransitProperties.isEncryptionInTransitEnabled', True),
+            self.check('properties.clusterState', 'Running')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_cluster_with_private_link(self, storage_account_info):
+        self.kwargs.update({
+            'vnet_name': self.create_random_name(prefix='hdicli-vnet', length=16),
+            'subnet_name': 'default'
+        })
+        vnet = self.cmd(
+            'az network vnet create -g {rg} --name {vnet_name} --subnet-name {subnet_name}').get_output_in_json()
+
+        # disable subnet's private link service policy
+        self.cmd(
+            'az network vnet subnet update --name {subnet_name} -g {rg} --vnet-name {vnet_name} '
+            '--disable-private-link-service-network-policies true')
+        subnet_id = vnet['newVNet']['subnets'][0]['id']
+
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._with_private_link(),
+            HDInsightClusterTests._with_virtual_netowrk_profile(subnet_id)
+        )
+
+        self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
+            self.check('properties.networkSettings.publicNetworkAccess', 'OutboundOnly'),
+            self.check('properties.networkSettings.outboundOnlyPublicNetworkAccessType', 'PublicLoadBalancer'),
+            self.check('properties.clusterState', 'Running')
+        ])
+
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -248,14 +289,15 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
         # list script action history and validate script appears there.
-        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 1),
-            self.check('[0].name', '{script_action}'),
-            self.check('[0].uri', '{script_uri}'),
-            self.check('[0].roles', roles),
-            self.check('[0].status', 'Succeeded')
-        ]).get_output_in_json()
+        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}',
+                                  checks=[
+                                      self.check('type(@)', 'array'),
+                                      self.check('length(@)', 1),
+                                      self.check('[0].name', '{script_action}'),
+                                      self.check('[0].uri', '{script_uri}'),
+                                      self.check('[0].roles', roles),
+                                      self.check('[0].status', 'Succeeded')
+                                  ]).get_output_in_json()
 
         # get the script action by ID and validate it's the same action.
         self.kwargs['script_execution_id'] = str(script_actions[0]['scriptExecutionId'])
@@ -270,13 +312,14 @@ class HDInsightClusterTests(ScenarioTest):
                  '--name {script_action_1} --script-uri {script_uri} --roles {head_node} {worker_node}')
 
         # list script action history and validate the new script also appears.
-        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 2),
-            self.check('[0].name', '{script_action_1}'),
-            self.check("[0].uri", '{script_uri}'),
-            self.check("[0].status", 'Succeeded')
-        ]).get_output_in_json()
+        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}',
+                                  checks=[
+                                      self.check('type(@)', 'array'),
+                                      self.check('length(@)', 2),
+                                      self.check('[0].name', '{script_action_1}'),
+                                      self.check("[0].uri", '{script_uri}'),
+                                      self.check("[0].status", 'Succeeded')
+                                  ]).get_output_in_json()
 
         # promote non-persisted script.
         self.kwargs['script_execution_id'] = str(script_actions[0]['scriptExecutionId'])
@@ -294,18 +337,42 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
         # list script action history and validate both scripts are there.
-        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}', checks=[
+        script_actions = self.cmd('az hdinsight script-action list-execution-history -g {rg} --cluster-name {cluster}',
+                                  checks=[
+                                      self.check('type(@)', 'array'),
+                                      self.check('length(@)', 2),
+                                      self.check('[0].name', '{script_action_1}'),
+                                      self.check("[0].uri", '{script_uri}'),
+                                      self.check("[0].roles", roles),
+                                      self.check("[0].status", 'Succeeded'),
+                                      self.check('[1].name', '{script_action}'),
+                                      self.check("[1].uri", '{script_uri}'),
+                                      self.check("[1].roles", roles),
+                                      self.check("[1].status", 'Succeeded')
+                                  ])
+
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_virtual_machine(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info)
+        )
+
+        # list hosts of the cluster
+        host_list = self.cmd('az hdinsight host list --resource-group {rg} --cluster-name {cluster}', checks=[
             self.check('type(@)', 'array'),
-            self.check('length(@)', 2),
-            self.check('[0].name', '{script_action_1}'),
-            self.check("[0].uri", '{script_uri}'),
-            self.check("[0].roles", roles),
-            self.check("[0].status", 'Succeeded'),
-            self.check('[1].name', '{script_action}'),
-            self.check("[1].uri", '{script_uri}'),
-            self.check("[1].roles", roles),
-            self.check("[1].status", 'Succeeded')
-        ])
+            self.exists('[0].name')
+        ]).get_output_in_json()
+
+        target_host = host_list[0]['name']
+        for host in host_list:
+            if host['name'].startswith('wn'):
+                target_host = host['name']
+                break
+        self.kwargs['target_host'] = target_host
+        # restart host of the cluster
+        self.cmd(
+            'az hdinsight host restart --resource-group {rg} --cluster-name {cluster} --host-names {target_host} --yes')
 
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
@@ -344,7 +411,7 @@ class HDInsightClusterTests(ScenarioTest):
         key_args = ' --storage-account-key "{}"'.format(storage_account_key) if specify_key else ""
         container_args = ' --storage-container {}'.format('default') if specify_container else ""
 
-        return '--storage-account {}{}{}'\
+        return '--storage-account {}{}{}' \
             .format(storage_account_name, key_args, container_args)
 
     @staticmethod
@@ -354,13 +421,13 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _rest_proxy_arguments():
         return '--kafka-management-node-size {} --kafka-client-group-id {} --kafka-client-group-name {} -v 4.0 ' \
-               '--component-version {} --location {}'\
+               '--component-version {} --location {}' \
             .format('Standard_D4_v2', '7bef90fa-0aa3-4bb4-b4d2-2ae7c14cfe41', 'KafakaRestProperties', 'kafka=2.1',
                     '"South Central US"')
 
     @staticmethod
     def _optional_data_disk_arguments():
-        return '--workernode-data-disk-storage-account-type {} --workernode-data-disk-size {}'\
+        return '--workernode-data-disk-storage-account-type {} --workernode-data-disk-size {}' \
             .format('Standard_LRS', '1023')
 
     @staticmethod
@@ -382,3 +449,15 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _with_minimal_tls_version(tls_version):
         return '--minimal-tls-version {}'.format(tls_version)
+
+    @staticmethod
+    def _with_encryption_in_transit():
+        return '--encryption-in-transit true'
+
+    @staticmethod
+    def _with_virtual_netowrk_profile(subnet_name):
+        return '--subnet {}'.format(subnet_name)
+
+    @staticmethod
+    def _with_private_link():
+        return '--public-network-access-type OutboundOnly --outbound-public-network-access-type PublicLoadBalancer'

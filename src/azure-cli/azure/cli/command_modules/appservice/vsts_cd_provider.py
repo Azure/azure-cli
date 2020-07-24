@@ -9,7 +9,7 @@ from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryManage
 from azure.cli.core._profile import Profile
 
 
-class VstsContinuousDeliveryProvider(object):
+class VstsContinuousDeliveryProvider:
     def __init__(self):
         self._progress_last_message = ''
 

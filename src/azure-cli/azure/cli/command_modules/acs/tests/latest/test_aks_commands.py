@@ -1652,6 +1652,112 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_managed_aad(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001')
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--aad-admin-group-object-ids 00000000-0000-0000-0000-000000000002 ' \
+                     '--aad-tenant-id 00000000-0000-0000-0000-000000000003 -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000002'),
+            self.check('aadProfile.tenantId', '00000000-0000-0000-0000-000000000003')
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_aadv1_and_update_with_managed_aad(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--aad-server-app-id 00000000-0000-0000-0000-000000000001 ' \
+                     '--aad-server-app-secret fake-secret ' \
+                     '--aad-client-app-id 00000000-0000-0000-0000-000000000002 ' \
+                     '--aad-tenant-id d5b55040-0c14-48cc-a028-91457fc190d9 ' \
+                     '-o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', None),
+            self.check('aadProfile.serverAppId', '00000000-0000-0000-0000-000000000001'),
+            self.check('aadProfile.clientAppId', '00000000-0000-0000-0000-000000000002'),
+            self.check('aadProfile.tenantId', 'd5b55040-0c14-48cc-a028-91457fc190d9')
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-aad ' \
+                     '--aad-admin-group-object-ids 00000000-0000-0000-0000-000000000003 ' \
+                     '--aad-tenant-id 00000000-0000-0000-0000-000000000004 -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000003'),
+            self.check('aadProfile.tenantId', '00000000-0000-0000-0000-000000000004')
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='canadacentral')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_nonaad_and_update_with_managed_aad(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '-o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile', None)
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-aad ' \
+                     '--aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 ' \
+                     '--aad-tenant-id 00000000-0000-0000-0000-000000000002 -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001'),
+            self.check('aadProfile.tenantId', '00000000-0000-0000-0000-000000000002')
+        ])
+
     @classmethod
     def generate_ssh_keys(cls):
         TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"  # pylint: disable=line-too-long

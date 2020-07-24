@@ -518,6 +518,203 @@ examples:
         az security sub-assessment show --assessed-resource-id '/subscriptions/f8b197db-3b2b-4404-a3a3-0dfec293d0d0/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1' --assessment-name '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' -n 'd7c4d9ec-227c-4fb3-acf9-25fdd97c1bf1'
 """
 
+helps['security adaptive-application-controls'] = """
+type: group
+short-summary: Enable control which applications can run on your Azure and non-Azure machines (Windows and Linux)
+"""
+
+helps['security adaptive-application-controls list'] = """
+type: command
+short-summary: Adaptive Application Controls - List
+examples:
+  - name: list all application control VM/server groups.
+    text: >
+        az security adaptive-application-controls list
+"""
+
+helps['security adaptive-application-controls show'] = """
+type: command
+short-summary: Adaptive Application Controls - Get
+examples:
+  - name: Get a single application control VM/server group.
+    text: >
+        az security adaptive-application-controls show --group-name GROUP1
+"""
+
+helps['security allowed_connections'] = """
+type: group
+short-summary: View all possible traffic between resources for the subscription and location, based on connection type.
+"""
+
+helps['security allowed_connections list'] = """
+type: command
+short-summary: list of all possible traffic between resources for the subscription.
+examples:
+  - name: Get possible traffic between resources at the subscription level.
+    text: >
+        az security allowed_connections list
+"""
+
+helps['security allowed_connections show'] = """
+type: command
+short-summary: List all possible traffic between resources for the subscription and location, based on connection type.
+examples:
+  - name: Get all possible traffic between resources for the subscription and location, based on connection type.
+    text: >
+        az security allowed_connections show --name Internal --resource-group mygroup
+"""
+
+helps['security adaptive_network_hardenings'] = """
+type: group
+short-summary: View all Adaptive Network Hardening resources
+"""
+
+helps['security adaptive_network_hardenings list'] = """
+type: command
+short-summary: Gets a list of Adaptive Network Hardenings resources in scope of an extended resource.
+examples:
+  - name: Adaptive Network Hardenings - List By Extended Resource
+    text: >
+        az security adaptive_network_hardenings list --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1'
+"""
+
+helps['security adaptive_network_hardenings show'] = """
+type: command
+short-summary: Gets a single Adaptive Network Hardening resource.
+examples:
+  - name: Adaptive Network Hardenings - Get.
+    text: >
+        az security adaptive_network_hardenings show --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1' --adaptive-network-hardenings-resource-name 'default'
+"""
+
+helps['security iot-solution'] = """
+type: group
+short-summary: Manage your IoT Security solution.
+"""
+
+helps['security iot-solution create'] = """
+type: command
+short-summary: Create your IoT Security solution.
+examples:
+  - name: create an IoT Security solution on existing IoT Hub.
+    text: >
+        az security iot-solution create --solution-name 'IoT-Hub1' --resource-group 'rg1' --iot-hubs /subscriptions/subscriptionId/resourcegroups/rg1/providers/Microsoft.Devices/IotHubs/IoT-Hub1 --display-name "Solution Default" --location "eastus"
+"""
+
+helps['security iot-solution update'] = """
+type: command
+short-summary: Update your IoT Security solution.
+examples:
+  - name: Update your IoT Security solution.
+    text: >
+        az security iot-solution update --solution-name 'IoT-Hub1' --resource-group 'rg1' --iot-hubs /subscriptions/subscriptionId/resourcegroups/rg1/providers/Microsoft.Devices/IotHubs/IoT-Hub1 --display-name "Solution Default"
+"""
+
+helps['security iot-solution delete'] = """
+type: command
+short-summary: Delete your IoT Security solution.
+examples:
+  - name: Delete an IoT Security solutions.
+    text: >
+        az security iot-solution delete --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-solution show'] = """
+type: command
+short-summary: Shows a IoT Security solution.
+examples:
+  - name: Get an IoT Security solutions.
+    text: >
+        az security iot-solution show --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-solution list'] = """
+type: command
+short-summary: List all IoT Security solutions.
+examples:
+  - name: Get List of all IoT Security solutions in subscription.
+    text: >
+        az security iot-solution list
+"""
+
+helps['security iot-analytics'] = """
+type: group
+short-summary:  View IoT Security Analytics metrics.
+"""
+
+helps['security iot-analytics show'] = """
+type: command
+short-summary: Shows IoT Security Analytics metrics.
+examples:
+  - name: Get an IoT Security Analytics metrics.
+    text: >
+        az security iot-analytics show --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-analytics list'] = """
+type: command
+short-summary: List all IoT security Analytics metrics.
+examples:
+  - name: Get List of all IoT security Analytics metrics.
+    text: >
+        az security iot-analytics list --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-alerts'] = """
+type: group
+short-summary: View IoT Security aggregated alerts.
+"""
+
+helps['security iot-alerts delete'] = """
+type: command
+short-summary: Dismiss an aggregated IoT Security Alert.
+examples:
+  - name: Dismiss an aggregated IoT Security Alert.
+    text: >
+       az security iot-alerts delete --solution-name 'IoT-Hub1' --resource-group 'rg1' --name 'IoT_CryptoMiner/2020-06-24'
+"""
+
+helps['security iot-alerts show'] = """
+type: command
+short-summary: Shows a single aggregated alert of yours IoT Security solution.
+examples:
+  - name:  Get an IoT Security solution aggregated alert.
+    text: >
+        az security iot-alerts show --solution-name 'IoT-Hub1' --resource-group 'rg1' --name 'IoT_CryptoMiner/2020-06-24'
+"""
+
+helps['security iot-alerts list'] = """
+type: command
+short-summary: List all yours IoT Security solution aggregated alerts.
+examples:
+  - name: Get list of all IoT Security solution aggregated alerts.
+    text: >
+        az security iot-alerts list --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-recommendations'] = """
+type: group
+short-summary: View IoT Security aggregated recommendations.
+"""
+
+helps['security iot-recommendations show'] = """
+type: command
+short-summary: Shows a single aggregated recommendation of yours IoT Security solution.
+examples:
+  - name: Get an IoT Security solution aggregated recommendation.
+    text: >
+        az security iot-recommendations show --solution-name 'IoT-Hub1' --resource-group 'rg1' --name 'IoT_PermissiveFirewallPolicy'
+"""
+
+helps['security iot-recommendations list'] = """
+type: command
+short-summary: List all yours IoT Security solution aggregated recommendations.
+examples:
+  - name: Get list of all IoT Security solution aggregated recommendations.
+    text: >
+        az security iot-recommendations list --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
 helps['security regulatory-compliance-standards'] = """
 type: group
 short-summary: regulatory compliance standards.
