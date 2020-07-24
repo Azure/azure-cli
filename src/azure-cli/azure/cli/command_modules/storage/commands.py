@@ -15,7 +15,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
                                                                cf_adls_file_system, cf_adls_directory,
                                                                cf_adls_file, cf_adls_service,
-                                                               cf_blob_client)
+                                                               cf_blob_client, cf_blob_lease_client)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -244,7 +244,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE)
 
     blob_client_sdk = CliCommandType(
-        operation_tmpl='azure.multiapi.storagev2.blob._blob_client#BlobClient.{}',
+        operations_tmpl='azure.multiapi.storagev2.blob._blob_client#BlobClient.{}',
         client_factory=cf_blob_client,
         resource_type=ResourceType.DATA_STORAGE_BLOB
     )
@@ -258,6 +258,22 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
                                        exception_handler=show_exception_handler)
+
+    blob_lease_client_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
+        client_factory=cf_blob_lease_client,
+        resource_type=ResourceType.DATA_STORAGE_BLOB
+    )
+
+    with self.command_group('storage blob lease', blob_lease_client_sdk, resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            min_api='2019-02-02',
+                            custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_lease_client,
+                                                               resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
+        g.storage_custom_command_oauth('acquire', 'acquire_blob_lease')
+        g.storage_command_oauth('break', 'break_lease')
+        g.storage_command_oauth('change', 'change')
+        g.storage_custom_command_oauth('renew', 'renew_blob_lease')
+        g.storage_command_oauth('release', 'release')
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
@@ -283,7 +299,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=create_boolean_result_output_transformer(
                                     'undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
-
         g.storage_custom_command_oauth('upload', 'upload_blob',
                                        doc_string_source='blob#BlockBlobService.create_blob_from_path')
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
@@ -295,13 +310,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth(
             'metadata show', 'get_blob_metadata', exception_handler=show_exception_handler)
         g.storage_command_oauth('metadata update', 'set_blob_metadata')
-
-        g.storage_command_oauth('lease acquire', 'acquire_blob_lease')
-        g.storage_command_oauth('lease renew', 'renew_blob_lease')
-        g.storage_command_oauth('lease release', 'release_blob_lease')
-        g.storage_command_oauth('lease change', 'change_blob_lease')
-        g.storage_command_oauth('lease break', 'break_blob_lease')
-
         g.storage_command_oauth('copy start', 'copy_blob')
         g.storage_command_oauth('copy cancel', 'abort_copy_blob')
         g.storage_custom_command_oauth(

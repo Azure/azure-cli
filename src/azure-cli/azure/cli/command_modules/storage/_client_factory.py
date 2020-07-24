@@ -220,6 +220,13 @@ def cf_blob_client(cli_ctx, kwargs):
                                                             snapshot=kwargs.pop('snapshot', None))
 
 
+def cf_blob_lease_client(cli_ctx, kwargs):
+    t_lease_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_lease#BlobLeaseClient')
+    blob_client = cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs.pop('container_name', None),
+                                                                   blob=kwargs.pop('blob_name', None))
+    return t_lease_service(client=blob_client, lease_id=kwargs.pop('lease_id', None))
+
+
 def cf_adls_service(cli_ctx, kwargs):
     t_adls_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                              '_data_lake_service_client#DataLakeServiceClient')
