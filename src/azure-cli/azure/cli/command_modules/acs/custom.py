@@ -3027,6 +3027,10 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
     return sdk_no_wait(no_wait, client.delete, resource_group_name, cluster_name, nodepool_name)
 
 
+def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_name, nodepool_name):
+    return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
+
+
 def _ensure_aks_acr_role_assignment(cli_ctx,
                                     client_id,
                                     registry_id,
