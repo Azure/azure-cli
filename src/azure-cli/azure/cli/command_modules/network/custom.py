@@ -464,7 +464,8 @@ def add_ag_private_link(cmd,
                         private_link_subnet_name_or_id,
                         private_link_subnet_prefix=None,
                         private_link_primary=None,
-                        private_link_ip_address=None):
+                        private_link_ip_address=None,
+                        no_wait=False):
     (SubResource, IPAllocationMethod, Subnet,
      ApplicationGatewayPrivateLinkConfiguration,
      ApplicationGatewayPrivateLinkIpConfiguration) = cmd.get_models(
@@ -551,7 +552,10 @@ def add_ag_private_link(cmd,
 
     appgw.private_link_configurations.append(private_link_config)
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name, appgw)
 
 
 def show_ag_private_link(cmd,
@@ -585,7 +589,8 @@ def list_ag_private_link(cmd,
 def remove_ag_private_link(cmd,
                            resource_group_name,
                            application_gateway_name,
-                           private_link_name):
+                           private_link_name,
+                           no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -609,7 +614,11 @@ def remove_ag_private_link(cmd,
     # ncf.subnets.delete(vnet_resource_group, vnet_name, subnet)
 
     appgw.private_link_configurations.remove(removed_private_link)
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def add_ag_private_link_ip(cmd,
