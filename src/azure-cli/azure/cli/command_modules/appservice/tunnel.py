@@ -6,6 +6,7 @@
 # pylint: disable=import-error,unused-import
 import sys
 import ssl
+import json
 import socket
 import time
 import traceback
@@ -35,7 +36,7 @@ class TunnelWebSocket(WebSocket):
 
 
 # pylint: disable=no-member,too-many-instance-attributes,bare-except,no-self-use
-class TunnelServer(object):
+class TunnelServer:
     def __init__(self, local_addr, local_port, remote_addr, remote_user_name, remote_password):
         self.local_addr = local_addr
         self.local_port = local_port
@@ -91,23 +92,41 @@ class TunnelServer(object):
         if should_disable_connection_verify():
             http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
-        url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus')
+        url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
         r = http.request(
             'GET',
             url,
             headers=headers,
             preload_content=False
         )
+
+        logger.warning('Verifying if app is running....')
+
         if r.status != 200:
             raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
                 url, r.status, r.reason))
-        msg = r.read().decode('utf-8')
-        logger.info('Status response message: %s', msg)
-        if 'FAIL' in msg.upper():
-            logger.info('WARNING - Remote debugging may not be setup properly. Reponse content: %s', msg)
+        resp_msg = r.read().decode('utf-8')
+        json_data = json.loads(resp_msg)
+
+        if json_data.get('state', None) is None:
             return False
-        if 'SUCCESS' in msg.upper():
-            return True
+
+        if 'STARTED' in json_data["state"].upper():
+            if json_data["canReachPort"] is False:
+                raise CLIError(
+                    'SSH is not enabled for this app. '
+                    'To enable SSH follow this instructions: '
+                    'https://go.microsoft.com/fwlink/?linkid=2132395')
+            if json_data["canReachPort"] is True:
+                logger.warning("App is running. Trying to establish tunnel connection...")
+                return True
+        elif 'STOPPED' in json_data["state"].upper():
+            raise CLIError(
+                'SSH endpoint unreachable, your app must be '
+                'running before it can accept SSH connections.'
+                'Use `az webapp log tail` to review the app startup logs.')
+        elif 'STARTING' in json_data["state"].upper():
+            logger.warning('Waiting for app to start up... ')
         return False
 
     def _listen(self):

@@ -21,7 +21,7 @@ import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
-    BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
+    BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
@@ -118,7 +118,7 @@ def _pre_command_table_create(cli_ctx, args):
 
 
 # pylint: disable=too-many-instance-attributes
-class CacheObject(object):
+class CacheObject:
 
     def path(self, args, kwargs):
         from azure.cli.core._environment import get_config_dir
@@ -349,7 +349,7 @@ class AzCliCommand(CLICommand):
                                    operation_group=operation_group)
 
     def update_context(self, obj_inst):
-        class UpdateContext(object):
+        class UpdateContext:
             def __init__(self, instance):
                 self.instance = instance
 
@@ -860,7 +860,7 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
 
-class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
+class LongRunningOperation:  # pylint: disable=too-few-public-methods
     def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
 
         self.cli_ctx = cli_ctx
@@ -1014,6 +1014,13 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 def _load_command_loader(loader, args, name, prefix):
     module = import_module(prefix + name)
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
+    if not loader_cls:
+        try:
+            get_command_loader = getattr(module, 'get_command_loader', None)
+            loader_cls = get_command_loader(loader.cli_ctx)
+        except (ImportError, AttributeError, TypeError):
+            logger.debug("Module '%s' is missing `get_command_loader` entry.", name)
+
     command_table = {}
 
     if loader_cls:
@@ -1041,7 +1048,7 @@ def _load_module_command_loader(loader, args, mod):
     return _load_command_loader(loader, args, mod, 'azure.cli.command_modules.')
 
 
-class ExtensionCommandSource(object):
+class ExtensionCommandSource:
     """ Class for commands contributed by an extension """
 
     def __init__(self, overrides_command=False, extension_name=None, preview=False, experimental=False):
@@ -1122,7 +1129,7 @@ def _merge_kwargs(patch_kwargs, base_kwargs, supported_kwargs=None):
 
 
 # pylint: disable=too-few-public-methods
-class CliCommandType(object):
+class CliCommandType:
 
     def __init__(self, overrides=None, **kwargs):
         if isinstance(overrides, str):

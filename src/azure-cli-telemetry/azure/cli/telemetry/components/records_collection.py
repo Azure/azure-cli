@@ -10,7 +10,7 @@ import stat
 import tempfile
 
 
-class RecordsCollection(object):
+class RecordsCollection:
     def __init__(self, last_sent, config_dir):
         from azure.cli.telemetry.components.telemetry_logging import get_logger
 
@@ -52,7 +52,7 @@ class RecordsCollection(object):
             if stat.S_ISREG(each[1].st_mode):
                 try:
                     # Platform question: if this op is atom
-                    os.rename(os.path.join(folder, each[0]), os.path.join(tmp, each[0]))
+                    shutil.move(os.path.join(folder, each[0]), os.path.join(tmp, each[0]))
                     self._logger.info('Move file %s to %s', os.path.join(folder, each[0]), os.path.join(tmp, each[0]))
                 except IOError as err:
                     self._logger.warning('Fail to move file from %s to %s. Reason: %s.',

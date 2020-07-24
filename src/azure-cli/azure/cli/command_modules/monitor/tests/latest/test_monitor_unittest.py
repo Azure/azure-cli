@@ -151,3 +151,8 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         ns = self._build_namespace()
         with self.assertRaisesRegexp(CLIError, 'usage error: --condition'):
             self.call_condition(ns, 'avg Wra!!ga * woo')
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'avg SuccessE2ELatenc,|y > 250 where ApiName includes Get|,%_Blob or PutB,_lob')
+        self.check_condition(ns, 'Average', None, 'SuccessE2ELatenc,|y', 'GreaterThan', '250')
+        self.check_dimension(ns, 0, 'ApiName', 'Include', ['Get|,%_Blob', 'PutB,_lob'])

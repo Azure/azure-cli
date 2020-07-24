@@ -31,6 +31,7 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         self.kwargs['sp'] = 'http://{}'.format(sp_name)
         self.kwargs['display_name'] = sp_name
         self.kwargs['display_name_new'] = self.create_random_name('cli-test-sp', 15)
+        self.kwargs['display_name_special'] = 'Test SP Name/DisplayName'
 
         try:
             sp_info = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()
@@ -40,9 +41,18 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
             sp_info2 = self.cmd('ad app create --display-name {display_name_new} --password {gen_password}')\
                 .get_output_in_json()
             self.kwargs['sp_new'] = sp_info2['appId']
+
+            special_sp_name = 'http://{}'.format(
+                self.kwargs['display_name_special'].replace(' ', '-').replace('/', '-').replace('\\', '-')
+            )
+            sp_special = self.cmd('ad sp create-for-rbac -n "{display_name_special}" --skip-assignment', checks=[
+                self.check('name', special_sp_name)
+            ]).get_output_in_json()
+            self.kwargs['sp_special'] = sp_special['appId']
         finally:
             self.cmd('ad app delete --id {sp}')
             self.cmd('ad app delete --id {sp_new}')
+            self.cmd('ad app delete --id {sp_special}')
 
         # verify we can extrat out disply name from name which starts with protocol
         sp_name2 = self.create_random_name('cli-test-sp', 15)
@@ -259,8 +269,22 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 'nsg': 'nsg1'
             })
 
-            result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            result = self.cmd('ad user create --display-name tester123 --password Test123456789'
+                              ' --user-principal-name {upn}').get_output_in_json()
+            self.kwargs.update({
+                'user_id': result['objectId']})
             time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+            group = self.create_random_name('testgroup', 15)
+            self.kwargs.update({
+                'group': group})
+
+            group_result = self.cmd(
+                'ad group create --display-name group123 --mail-nickname {group}').get_output_in_json()
+            self.kwargs.update({
+                'group_id': group_result['objectId']})
+            self.cmd(
+                'ad group member add --group {group_id} --member-id {user_id}')
 
             try:
                 self.cmd('network nsg create -n {nsg} -g {rg}')
@@ -279,6 +303,13 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     self.check("[0].principalName", self.kwargs["upn"])
                 ])
 
+                self.cmd('role assignment create --assignee {group_id} --role contributor -g {rg}')
+
+                # test include-groups
+                self.cmd('role assignment list --assignee {upn} --all --include-groups', checks=[
+                    self.check("length([])", 2)
+                ])
+
                 # test couple of more general filters
                 result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()
                 self.assertTrue(len(result) >= 1)
@@ -286,6 +317,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 result = self.cmd('role assignment list --all').get_output_in_json()
                 self.assertTrue(len(result) >= 1)
 
+                self.cmd('role assignment delete --assignee {group_id} --role contributor -g {rg}')
                 self.cmd('role assignment delete --assignee {upn} --role contributor -g {rg}')
                 self.cmd('role assignment list -g {rg}',
                          checks=self.is_empty())

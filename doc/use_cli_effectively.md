@@ -122,12 +122,15 @@ az rest --method PATCH
         --body '{"web":{"redirectUris":["https://myapp.com"]}}'
 ```
 
+When using `--url-parameters` for requests in the form of OData, please make sure to escape `$` in different environments: in `Bash`, escape `$` as `\$` and in `PowerShell`, escape `$` as `` `$``
+
 ## Quoting issues
 
 This becomes an issue because when the command shell (Bash, Zsh, Windows Command Prompt, PowerShell, etc) parses the CLI command, it will interpret the quotes and spaces. Always refer to the documents when you are uncertain about the usage of a shell:
 
 - Bash: [Quoting](https://www.gnu.org/software/bash/manual/html_node/Quoting.html)
 - PowerShell: [About Quoting Rules](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_quoting_rules)
+    - Due to a known issue [#1995](https://github.com/PowerShell/PowerShell/issues/1995) of PowerShell, some extra escaping rules apply. See [Quoting issues with PowerShell](quoting-issues-with-powershell.md) for more information.
 - Windows Command Prompt: [How-to: Escape Characters, Delimiters and Quotes at the Windows command line](https://ss64.com/nt/syntax-esc.html)
 
 To avoid unanticipated results, here are a few suggestions:
@@ -180,7 +183,7 @@ To avoid unanticipated results, here are a few suggestions:
     "2.5.1"
     ```
 
-    In PowerShell (see item 12 for why extra escaping is needed):
+    In PowerShell (extra escaping is needed):
     ```powershell
     > az version --query '\"azure-cli\"'
     "2.5.1"
@@ -217,7 +220,6 @@ To avoid unanticipated results, here are a few suggestions:
     $ az "{\"key\":\"value\"}" --debug
     Command arguments: ['{"key":"value"}', '--debug']
     ```
-12. Due to a known issue of PowerShell, some extra escaping rules apply, see [Quoting issues with PowerShell](quoting-issues-with-powershell.md) for more information
 
 ## Work behind a proxy
 
