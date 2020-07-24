@@ -11,20 +11,13 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def _is_guid(guid):
-    try:
-        uuid.UUID(guid)
-        return True
-    except ValueError:
-        return False
-
-
 def validate_tenant(cmd, namespace):
     """
     Make sure tenant is a GUID. If domain name is provided, resolve to GUID.
     https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
     """
-    if namespace.tenant is not None and not _is_guid(namespace.tenant):
+    from azure.cli.core.util import is_guid
+    if namespace.tenant is not None and not is_guid(namespace.tenant):
         import requests
         active_directory_endpoint = cmd.cli_ctx.cloud.endpoints.active_directory
         url = '{}/{}/.well-known/openid-configuration'.format(active_directory_endpoint, namespace.tenant)
