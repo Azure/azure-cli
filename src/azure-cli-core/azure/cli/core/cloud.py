@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 import os
 import json
@@ -173,14 +174,51 @@ def _get_storage_sync_endpoint(cloud_name):
     return storage_sync_endpoint_mapper.get(cloud_name, None)
 
 
+def _get_database_server_endpoint(db_prefix, sql_server_hostname, cloud_name):
+    if cloud_name == 'AzureCloud':
+        return db_prefix + '.database.azure.com'
+    if not sql_server_hostname:
+        return None
+    return db_prefix + sql_server_hostname
+
+
+def _get_app_insights_telemetry_channel_resource_id(cloud_name):
+    app_insights_telemetry_channel_resource_id_mapper = {
+        'AzureCloud': 'https://dc.applicationinsights.azure.com/v2/track',
+        'AzureChinaCloud': 'https://dc.applicationinsights.azure.cn/v2/track',
+        'AzureUSGovernment': 'https://dc.applicationinsights.us/v2/track'
+    }
+    return app_insights_telemetry_channel_resource_id_mapper.get(cloud_name, None)
+
+
+def _get_log_analytics_resource_id(cloud_name):
+    log_analytics_resource_id_mapper = {
+        'AzureCloud': 'https://api.loganalytics.io',
+        'AzureChinaCloud': 'https://api.loganalytics.azure.cn',
+        'AzureUSGovernment': 'https://api.loganalytics.us'
+    }
+    return log_analytics_resource_id_mapper.get(cloud_name, None)
+
+
+def _get_app_insights_resource_id(cloud_name):
+    app_insights_resource_id_mapper = {
+        'AzureCloud': 'https://api.applicationinsights.io',
+        'AzureChinaCloud': 'https://api.applicationinsights.azure.cn',
+        'AzureUSGovernment': 'https://api.applicationinsights.us'
+    }
+    return app_insights_resource_id_mapper.get(cloud_name, None)
+
+
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
     for cloud in arm_cloud_metadata_dict:
         cli_cloud_metadata_dict[cloud['name']] = _arm_to_cli_mapper(cloud)
+    if 'AzureCloud' in cli_cloud_metadata_dict:
+        cli_cloud_metadata_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
     return cli_cloud_metadata_dict
 
 
-def _add_dot_in_suffix(suffix):
+def _add_starting_dot(suffix):
     return suffix if not suffix or suffix.startswith('.') else '.' + suffix
 
 
@@ -196,24 +234,25 @@ def _arm_to_cli_mapper(arm_dict):
             active_directory=arm_dict['authentication']['loginEndpoint'],
             active_directory_resource_id=arm_dict['authentication']['audiences'][0],
             active_directory_graph_resource_id=arm_dict['graphAudience'],
-            microsoft_graph_resource_id=_get_microsoft_graph_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once microsoft_graph_resource_id is fixed in ARM
-            vm_image_alias_doc=arm_dict['vmImageAliasDoc'],  # pylint: disable=line-too-long
+            microsoft_graph_resource_id=_get_microsoft_graph_resource_id(arm_dict['name']),  # change once microsoft_graph_resource_id is fixed in ARM
+            vm_image_alias_doc=arm_dict['vmImageAliasDoc'],
             media_resource_id=arm_dict['media'],
-            ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
-            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,  # pylint: disable=line-too-long
-            app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else None,
-            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None),  # pylint: disable=line-too-long
+            ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # change once ossrdbms_resource_id is available via ARM
+            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,
+            app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else _get_app_insights_resource_id(arm_dict['name']),
+            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else _get_log_analytics_resource_id(arm_dict['name']),
+            app_insights_telemetry_channel_resource_id=arm_dict['appInsightsTelemetryChannelResourceId'] if 'appInsightsTelemetryChannelResourceId' in arm_dict else _get_app_insights_telemetry_channel_resource_id(arm_dict['name'])),
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
-            storage_sync_endpoint=arm_dict['suffix']['storageSyncEndpointSuffix'] if 'storageSyncEndpointSuffix' in arm_dict['suffixes'] else _get_storage_sync_endpoint(arm_dict['name']),  # pylint: disable=line-too-long
-            keyvault_dns=_add_dot_in_suffix(arm_dict['suffixes']['keyVaultDns']),
-            sql_server_hostname=_add_dot_in_suffix(arm_dict['suffixes']['sqlServerHostname']),
-            mysql_server_endpoint=_add_dot_in_suffix(arm_dict['suffixes']['mysqlServerEndpoint'] if 'mysqlServerEndpoint' in arm_dict['suffixes'] else None),
-            postgresql_server_endpoint=_add_dot_in_suffix(arm_dict['suffixes']['postgresqlServerEndpoint'] if 'postgresqlServerEndpoint' in arm_dict['suffixes'] else None),
-            mariadb_server_endpoint=_add_dot_in_suffix(arm_dict['suffixes']['mariadbServerEndpoint'] if 'mariadbServerEndpoint' in arm_dict['suffixes'] else None),
-            azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
-            azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
-            acr_login_server_endpoint=_add_dot_in_suffix(arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None)))  # pylint: disable=line-too-long
+            storage_sync_endpoint=arm_dict['suffix']['storageSyncEndpointSuffix'] if 'storageSyncEndpointSuffix' in arm_dict['suffixes'] else _get_storage_sync_endpoint(arm_dict['name']),
+            keyvault_dns=_add_starting_dot(arm_dict['suffixes']['keyVaultDns']),
+            sql_server_hostname=_add_starting_dot(arm_dict['suffixes']['sqlServerHostname']),
+            mysql_server_endpoint=_add_starting_dot(arm_dict['suffixes']['mysqlServerEndpoint']) if 'mysqlServerEndpoint' in arm_dict['suffixes'] else _get_database_server_endpoint('.mysql', _add_starting_dot(arm_dict['suffixes']['sqlServerHostname']), arm_dict['name']),
+            postgresql_server_endpoint=_add_starting_dot(arm_dict['suffixes']['postgresqlServerEndpoint']) if 'postgresqlServerEndpoint' in arm_dict['suffixes'] else _get_database_server_endpoint('.postgres', _add_starting_dot(arm_dict['suffixes']['sqlServerHostname']), arm_dict['name']),
+            mariadb_server_endpoint=_add_starting_dot(arm_dict['suffixes']['mariadbServerEndpoint']) if 'mariadbServerEndpoint' in arm_dict['suffixes'] else _get_database_server_endpoint('.mariadb', _add_starting_dot(arm_dict['suffixes']['sqlServerHostname']), arm_dict['name']),
+            azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,
+            azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,
+            acr_login_server_endpoint=_add_starting_dot(arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None)))
 
 
 class Cloud:  # pylint: disable=too-few-public-methods
@@ -255,7 +294,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory_graph_resource_id='https://graph.windows.net/',
         microsoft_graph_resource_id='https://graph.microsoft.com/',
         active_directory_data_lake_resource_id='https://datalake.azure.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.azure.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net',
         app_insights_resource_id='https://api.applicationinsights.io',
@@ -285,7 +324,7 @@ AZURE_CHINA_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
         active_directory_graph_resource_id='https://graph.chinacloudapi.cn/',
         microsoft_graph_resource_id='https://microsoftgraph.chinacloudapi.cn',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.chinacloudapi.cn',
         ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn',
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
@@ -312,7 +351,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
         microsoft_graph_resource_id='https://graph.microsoft.us/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.usgovcloudapi.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net',
         app_insights_resource_id='https://api.applicationinsights.us',
@@ -340,7 +379,7 @@ AZURE_GERMAN_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.cloudapi.de/',
         active_directory_graph_resource_id='https://graph.cloudapi.de/',
         microsoft_graph_resource_id='https://graph.microsoft.de',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.cloudapi.de',
         ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de'),
     suffixes=CloudSuffixes(
@@ -358,7 +397,7 @@ if 'ARM_CLOUD_METADATA_URL' in os.environ:
         arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
         cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
         if 'AzureCloud' in cli_cloud_dict:
-            cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
+            cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
         KNOWN_CLOUDS = list(cli_cloud_dict.values())
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
