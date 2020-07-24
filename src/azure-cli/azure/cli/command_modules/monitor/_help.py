@@ -667,7 +667,11 @@ parameters:
   - name: --condition
     short-summary: The condition which triggers the scaling action.
     long-summary: >
-        The form of a condition is "METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD".
+        Usage:  --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD
+                            [where DIMENSION {==,!=} VALUE [or VALUE ...]
+                            [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]
+
+        Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
         Values for METRIC and appropriate THRESHOLD values can be obtained from the `az monitor metric` command.
         Format of PERIOD is "##h##m##s".
   - name: --scale
