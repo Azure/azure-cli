@@ -28,10 +28,13 @@ def validate_tenant(cmd, namespace):
         import requests
         active_directory_endpoint = cmd.cli_ctx.cloud.endpoints.active_directory
         url = '{}/{}/.well-known/openid-configuration'.format(active_directory_endpoint, namespace.tenant)
-        metadata = requests.get(url, verify=not should_disable_connection_verify()).json()
+        response = requests.get(url, verify=not should_disable_connection_verify())
+
+        if response.status_code != 200:
+            from knack.util import CLIError
+            raise CLIError("Failed to resolve tenant '{}'.\n\nError detail: {}".format(namespace.tenant, response.text))
 
         # Example issuer: https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/
-        tenant_id = metadata['issuer'].split("/")[3]
-
-        logger.debug('Resolve tenant domain name %s to GUID %s', namespace.tenant, tenant_id)
+        tenant_id = response.json()['issuer'].split("/")[3]
+        logger.debug('Resolved tenant domain name %s to GUID %s', namespace.tenant, tenant_id)
         namespace.tenant = tenant_id
