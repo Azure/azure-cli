@@ -822,7 +822,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         dedicated_host=dedicated_host, priority=priority, max_price=max_price, eviction_policy=eviction_policy,
         enable_agent=enable_agent, vmss=vmss, os_disk_encryption_set=os_disk_encryption_set,
         data_disk_encryption_sets=data_disk_encryption_sets, specialized=specialized,
-        encryption_at_host=encryption_at_host)
+        encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group)
 
     vm_resource['dependsOn'] = vm_dependencies
 
