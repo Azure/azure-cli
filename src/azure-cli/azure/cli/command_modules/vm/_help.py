@@ -2631,7 +2631,7 @@ short-summary: Executes a query against the Log Analytics workspace linked with 
 examples:
   - name: Get performance log for a vm linked with a workspace
     text: >
-        az vm monitor log show --name myVM -g myRG --query "Perf | limit 10"
+        az vm monitor log show --name myVM -g myRG -q "Perf | limit 10"
 """
 
 helps['vm monitor metrics'] = """
