@@ -16,7 +16,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
-from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES)
+from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
 from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api, get_storage_blob_uri
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
@@ -931,6 +931,8 @@ def _validate_vm_vmss_create_auth(namespace):
                                      StorageProfile.SASpecializedOSDisk]:
         return
 
+    if namespace.admin_username is None:
+        namespace.admin_username = get_default_admin_username()
     namespace.admin_username = _validate_admin_username(namespace.admin_username, namespace.os_type)
 
     if not namespace.os_type:
