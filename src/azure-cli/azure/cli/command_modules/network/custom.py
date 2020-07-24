@@ -464,10 +464,11 @@ def add_ag_private_link(cmd,
                         application_gateway_name,
                         frontend_ip,
                         private_link_name,
-                        private_link_subnet_name,
-                        private_link_subnet_prefix,
+                        private_link_subnet_name_or_id,
+                        private_link_subnet_prefix=None,
                         private_link_primary=None,
-                        private_link_ip_address=None):
+                        private_link_ip_address=None,
+                        no_wait=False):
     (SubResource, IPAllocationMethod, Subnet,
      ApplicationGatewayPrivateLinkConfiguration,
      ApplicationGatewayPrivateLinkIpConfiguration) = cmd.get_models(
@@ -508,28 +509,31 @@ def add_ag_private_link(cmd,
 
     # prepare the subnet for new private link
     for subnet in vnet.subnets:
-        if subnet.name == private_link_subnet_name:
-            raise CLIError('Subnet name duplicates')
+        if subnet.name == private_link_subnet_name_or_id:
+            raise CLIError('Subnet duplicates')
         if subnet.address_prefix == private_link_subnet_prefix:
             raise CLIError('Subnet prefix duplicates')
         if subnet.address_prefixes and private_link_subnet_prefix in subnet.address_prefixes:
             raise CLIError('Subnet prefix duplicates')
 
-    private_link_subnet = Subnet(name=private_link_subnet_name,
-                                 address_prefix=private_link_subnet_prefix,
-                                 private_link_service_network_policies='Disabled')
-    vnet.subnets.append(private_link_subnet)
-    ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
+    if is_valid_resource_id(private_link_subnet_name_or_id):
+        private_link_subnet_id = private_link_subnet_name_or_id
+    else:
+        private_link_subnet = Subnet(name=private_link_subnet_name_or_id,
+                                     address_prefix=private_link_subnet_prefix,
+                                     private_link_service_network_policies='Disabled')
+        private_link_subnet_id = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet_name,
+            child_type_1='subnets',
+            child_name_1=private_link_subnet_name_or_id
+        )
+        vnet.subnets.append(private_link_subnet)
+        ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
 
-    private_link_subnet_id = resource_id(
-        subscription=get_subscription_id(cmd.cli_ctx),
-        resource_group=resource_group_name,
-        namespace='Microsoft.Network',
-        type='virtualNetworks',
-        name=vnet_name,
-        child_type_1='subnets',
-        child_name_1=private_link_subnet_name
-    )
     private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
         else IPAllocationMethod.dynamic.value
     private_link_ip_config = ApplicationGatewayPrivateLinkIpConfiguration(
@@ -551,7 +555,10 @@ def add_ag_private_link(cmd,
 
     appgw.private_link_configurations.append(private_link_config)
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name, appgw)
 
 
 def show_ag_private_link(cmd,
@@ -585,7 +592,8 @@ def list_ag_private_link(cmd,
 def remove_ag_private_link(cmd,
                            resource_group_name,
                            application_gateway_name,
-                           private_link_name):
+                           private_link_name,
+                           no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -609,7 +617,11 @@ def remove_ag_private_link(cmd,
     # ncf.subnets.delete(vnet_resource_group, vnet_name, subnet)
 
     appgw.private_link_configurations.remove(removed_private_link)
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def add_ag_private_link_ip(cmd,
@@ -618,7 +630,8 @@ def add_ag_private_link_ip(cmd,
                            private_link_name,
                            private_link_ip_name,
                            private_link_primary=False,
-                           private_link_ip_address=None):
+                           private_link_ip_address=None,
+                           no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -650,7 +663,11 @@ def add_ag_private_link_ip(cmd,
 
     target_private_link.ip_configurations.append(private_link_ip_config)
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def show_ag_private_link_ip(cmd,
@@ -704,7 +721,8 @@ def remove_ag_private_link_ip(cmd,
                               resource_group_name,
                               application_gateway_name,
                               private_link_name,
-                              private_link_ip_name):
+                              private_link_ip_name,
+                              no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -725,7 +743,11 @@ def remove_ag_private_link_ip(cmd,
     else:
         raise CLIError("IP Configuration doesn't exist")
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,

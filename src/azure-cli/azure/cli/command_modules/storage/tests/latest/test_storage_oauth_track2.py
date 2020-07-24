@@ -72,6 +72,20 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs['download_path'] = os.path.join(self.kwargs.get('local_dir'), 'test.file')
         self.oauth_cmd('storage fs file download -p {file} -f {filesystem} -d "{download_path}"'
                        ' --account-name {account}')
+        # move file
+        self.kwargs['new_file'] = 'newfile'
+        self.oauth_cmd('storage fs file move -f {filesystem} -p {file} --new-path {filesystem}/{new_file} '
+                       '--account-name {account}')
+
+        # delete file
+        self.oauth_cmd('storage fs file delete -f {filesystem} -p {new_file} --account-name {account} -y')
+
+        # set access control, which need "Storage Blob Data Owner" role
+        self.oauth_cmd('storage fs access set --acl "user::rwx,group::r--,other::---,mask::rwx" '
+                       '-f {filesystem} -p {directory} --account-name {account} ')
+
+        self.oauth_cmd('storage fs access show -f {filesystem} -p {directory} --account-name {account}', checks=[
+            JMESPathCheck('acl', "user::rwx,group::r--,mask::rwx,other::---")])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
