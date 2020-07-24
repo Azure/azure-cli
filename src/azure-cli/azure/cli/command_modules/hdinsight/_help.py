@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
+
 # pylint: disable=line-too-long, too-many-lines
 
 helps['hdinsight'] = """
@@ -61,6 +62,11 @@ examples:
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount
+  - name: Create a cluster with minimal tls version.
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount --minimal-tls-version 1.2
   - name: Create a cluster with the Enterprise Security Package (ESP).
     text: |-
         az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
@@ -155,6 +161,29 @@ examples:
         --script-uri https://hdiconfigactions.blob.core.windows.net/linuxgiraphconfigactionv01/giraph-installer-v01.sh \\
         --roles headnode workernode \\
         --persist-on-success
+"""
+
+helps['hdinsight host'] = """
+type: group
+short-summary: Manage HDInsight cluster's virtual hosts.
+"""
+
+helps['hdinsight host list'] = """
+type: command
+short-summary: List the hosts of the specified HDInsight cluster.
+examples:
+  - name: List the hosts of the specified HDInsight cluster.
+    text: |-
+        az hdinsight host list --resource-group MyResourceGroup --cluster-name MyCluster
+"""
+
+helps['hdinsight host restart'] = """
+type: command
+short-summary: Restart the specific hosts of the specified HDInsight cluster.
+examples:
+  - name: Restart the specific hosts of the specified HDInsight cluster.
+    text: |-
+        az hdinsight host restart --resource-group MyResourceGroup --cluster-name MyCluster --host-names hostname1 hostname2
 """
 
 helps['hdinsight wait'] = """

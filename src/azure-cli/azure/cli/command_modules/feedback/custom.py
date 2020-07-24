@@ -92,6 +92,7 @@ Steps to reproduce the behavior. Note that argument values have been redacted, a
 ```
 {platform}
 {python_info}
+{installer}
 
 {cli_version}
 ```
@@ -512,8 +513,11 @@ def _build_issue_info_tup(command_log_file=None):
     # Get other system information
     format_dict["cli_version"] = _get_az_version_summary()
     format_dict["python_info"] = "Python {}".format(platform.python_version())
-    format_dict["platform"] = "{}".format(platform.platform())
+    platform_info = "{} (Cloud Shell)".format(platform.platform()) if in_cloud_console() else platform.platform()
+    format_dict["platform"] = platform_info
     format_dict["auto_gen_comment"] = _AUTO_GEN_COMMENT
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+    format_dict["installer"] = "Installer: {}".format(os.getenv(_ENV_AZ_INSTALLER) or '')
 
     pretty_url_name = _get_extension_repo_url(ext_name) if is_ext else _CLI_ISSUES_URL
 
@@ -756,6 +760,8 @@ def handle_feedback(cmd):
 
         if res:
             print(_MSG_THNK)
+            from azure.cli.core.util import show_updates_available
+            show_updates_available(new_line_before=True)
         return
     except NoTTYException:
         raise CLIError('This command is interactive, however no tty is available.')

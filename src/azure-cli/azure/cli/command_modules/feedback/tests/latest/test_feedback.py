@@ -9,6 +9,8 @@ import os
 import time
 import unittest
 
+from knack.events import EVENT_CLI_POST_EXECUTE
+
 from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension.operations import get_extensions, add_extension, remove_extension, WheelExtension
 from azure.cli.command_modules.feedback.custom import (_get_command_log_files, _build_issue_info_tup,
@@ -190,14 +192,20 @@ class TestCommandLogFile(ScenarioTest):
         cli_ctx = get_dummy_cli()
         cli_ctx.logging.command_log_dir = self.temp_command_log_dir
 
-        result = execute(cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+        # hotfix here for untouch feedback's code to avoid introducing possible break change.
+        # unregister the event for auto closing CLI's file logging after execute() is done
+        cli_ctx.unregister_event(EVENT_CLI_POST_EXECUTE, cli_ctx.logging.deinit_cmd_metadata_logging)
 
         # manually handle error logging as azure.cli.core.util's handle_exception function is mocked out in testsdk / patches
         # this logged error tests that we can properly parse errors from command log file.
         with CommandLoggerContext(logger):
+            result = execute(cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+
             if result.exit_code != 0:
                 logger.error("There was an error during execution.")
 
+        # close it manually because we unregister the deinit_cmd_metadata_logging
+        # callback from EVENT_CLI_POST_EXECUTE event
         cli_ctx.logging.end_cmd_metadata_logging(result.exit_code)
 
         return result

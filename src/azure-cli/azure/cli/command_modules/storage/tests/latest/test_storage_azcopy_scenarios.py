@@ -7,6 +7,7 @@ import shutil
 from azure.cli.testsdk import (StorageAccountPreparer, LiveScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                api_version_constraint)
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
+from knack.util import CLIError
 
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
@@ -19,8 +20,10 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         container = self.create_container(storage_account_info)
 
         # sync directory
-        self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
-            test_dir, container, storage_account))
+        connection_string = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
+                                     .format(storage_account, resource_group)).output
+        self.cmd('storage blob sync -s "{}" -c {} --connection-string {}'.format(
+            test_dir, container, connection_string))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
@@ -102,6 +105,10 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         self.cmd('storage remove -c {} -n readme --account-name {}'.format(
             container, storage_account))
+
+        self.cmd('storage remove -c {} -n readme --account-name {}'.format(
+            container, storage_account), expect_failure=True)
+
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 40))
 
@@ -120,19 +127,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 10))
 
-        self.cmd('storage remove -c {} -n duff --account-name {}'.format(
-            container, storage_account))
-        self.cmd('storage blob list -c {} --account-name {}'.format(
-            container, storage_account), checks=JMESPathCheck('length(@)', 10))
-
         # sync directory
         self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             test_dir, container, storage_account))
-        self.cmd('storage blob list -c {} --account-name {}'.format(
-            container, storage_account), checks=JMESPathCheck('length(@)', 41))
-
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_*"'.format(
-            container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
@@ -239,10 +236,14 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         import os
         # Upload a single file
-        self.cmd('storage copy -s "{}" -d "{}"'.format(
-            os.path.join(test_dir, 'readme'), first_container_url))
+        content_type = "application/json"
+        self.cmd('storage copy -s "{}" -d "{}" --content-type {}'.format(
+            os.path.join(test_dir, 'readme'), first_container_url, content_type))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
+        self.cmd('storage blob show -n {} -c {} --account-name {}'
+                 .format('readme', first_container, first_account),
+                 checks=[JMESPathCheck('properties.contentSettings.contentType', content_type)])
 
         # Upload entire directory
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
@@ -340,6 +341,20 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, first_account), checks=JMESPathCheck('length(@)', 21))
 
+        # Upload a single file with a symlink
+        source_path = os.path.join(test_dir, 'symlink_source')
+        with open(source_path, 'w') as f:
+            f.write('This is a data source for symlink.')
+        symlink = os.path.join(test_dir, 'symlink')
+        # If the error of "WinError[1314]" occurred during execution in Windows environment,
+        # please try to execute azdev with administrator privileges
+        os.symlink(source_path, symlink)
+
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {} '
+                 '--follow-symlinks'.format(symlink, first_account, first_container))
+        self.cmd('storage blob list -c {} --account-name {}'
+                 .format(first_container, first_account), checks=JMESPathCheck('length(@)', 22))
+
         local_folder = self.create_temp_dir()
         # Download a single file
         self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path "{}"'
@@ -378,7 +393,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage container list --account-name {}'
                  .format(second_account), checks=JMESPathCheck('length(@)', 2))
         self.cmd('storage blob list -c {} --account-name {}'
-                 .format(first_container, second_account), checks=JMESPathCheck('length(@)', 21))
+                 .format(first_container, second_account), checks=JMESPathCheck('length(@)', 22))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

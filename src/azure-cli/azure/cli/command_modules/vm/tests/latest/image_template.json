@@ -1,20 +1,25 @@
 {
     "type": "Microsoft.VirtualMachineImages/imageTemplates",
-    "apiVersion": "2019-05-01-preview",
+    "apiVersion": "2020-02-14",
     "location": "westus",
     "dependsOn": [],
     "tags": {
         "imagebuilderTemplate": "ubuntu1804"
-            },
+    },
+    "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/1c638cf4-608f-4ee6-b680-c329e824c3a8/resourceGroups/fy/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1": {}
+        }
+    },
     "properties": {
 
         "buildTimeoutInMinutes" : 80,
         
-        "vmProfile": 
-            {
+        "vmProfile": {
             "vmSize": "Standard_D1_v2",
             "osDiskSizeGB": 30
-            },
+        },
 
         "source": {
             "type": "PlatformImage",
@@ -22,7 +27,6 @@
                 "offer": "UbuntuServer",
                 "sku": "18.04-LTS",
                 "version": "18.04.201903060"
-            
         },
         "customize": [
             {
@@ -66,7 +70,7 @@
         "distribute": 
             [
                 {   "type":"ManagedImage",
-                    "imageId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/fytest2/providers/Microsoft.Compute/images/image",
+                    "imageId": "/subscriptions/1c638cf4-608f-4ee6-b680-c329e824c3a8/resourceGroups/fy/providers/Microsoft.Compute/images/image",
                     "location": "westus",
                     "runOutputName": "runOutputName",
                     "artifactTags": {

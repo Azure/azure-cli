@@ -222,7 +222,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             exported_features = __export_features(features, naming_convention)
             exported_keyvalues.update(exported_features)
 
-        with open(file_path, 'w') as fp:
+        with open(file_path, 'w', encoding='utf-8') as fp:
             if format_ == 'json':
                 json.dump(exported_keyvalues, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
@@ -235,31 +235,76 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
 
 # Config Store <-> List of KeyValue object
 
+def __read_kv_from_config_store(cmd,
+                                name=None,
+                                connection_string=None,
+                                key=None,
+                                label=None,
+                                datetime=None,
+                                fields=None,
+                                top=None,
+                                all_=True,
+                                resolve_keyvault=False,
+                                prefix_to_remove="",
+                                prefix_to_add=""):
+    connection_string = resolve_connection_string(cmd, name, connection_string)
+    azconfig_client = AzconfigClient(connection_string)
 
-def __read_kv_from_config_store(cmd, name=None, connection_string=None, key=None, label=None, prefix_to_remove="", prefix_to_add=""):
-    from .keyvalue import list_key
+    query_option = QueryKeyValueCollectionOptions(key_filter=key,
+                                                  label_filter=label if label else QueryKeyValueCollectionOptions.empty_label,
+                                                  query_datetime=datetime,
+                                                  fields=fields)
     try:
-        # fetch complete keyvalue list
-        key_values = list_key(cmd,
-                              key=key,
-                              label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
-                              name=name,
-                              connection_string=connection_string,
-                              all_=True)
-        # add prefix, remove label, remove non-user-info attributes
-        for kv in key_values:
-            # remove prefix if specified
-            if not kv.key.startswith(prefix_to_remove):
-                continue
-            kv.key = kv.key[len(prefix_to_remove):]
-            # add prefix if specified
-            kv.key = prefix_to_add + kv.key
+        keyvalue_iterable = azconfig_client.get_keyvalues(query_option)
+        retrieved_kvs = []
+        count = 0
+
+        if all_:
+            top = float('inf')
+        elif top is None:
+            top = 100
+
+        keyvault_client = __get_keyvault_client(cmd.cli_ctx) if resolve_keyvault else None
+
+        for kv in keyvalue_iterable:
+            if kv.key:
+                # remove prefix if specified
+                if kv.key.startswith(prefix_to_remove):
+                    kv.key = kv.key[len(prefix_to_remove):]
+
+                # add prefix if specified
+                kv.key = prefix_to_add + kv.key
+
+                if kv.content_type and kv.value:
+                    # resolve key vault reference
+                    if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+                        __resolve_secret(keyvault_client, kv)
+
+            # trim unwanted fields from kv object instead of leaving them as null.
+            if fields:
+                partial_kv = {}
+                for field in fields:
+                    partial_kv[field.name.lower()] = kv.__dict__[
+                        field.name.lower()]
+                retrieved_kvs.append(partial_kv)
+            else:
+                retrieved_kvs.append(kv)
+            count += 1
+            if count >= top:
+                return retrieved_kvs
+        return retrieved_kvs
     except Exception as exception:
         raise CLIError(str(exception))
-    return key_values
 
 
-def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name=None, connection_string=None, label=None, preserve_labels=False):
+def __write_kv_and_features_to_config_store(cmd,
+                                            key_values,
+                                            features=None,
+                                            name=None,
+                                            connection_string=None,
+                                            label=None,
+                                            preserve_labels=False,
+                                            content_type=None):
     if not key_values and not features:
         return
     try:
@@ -270,13 +315,13 @@ def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name
         if features:
             key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
 
-        if not preserve_labels:
-            for kv in key_values:
+        for kv in key_values:
+            if not preserve_labels:
                 kv.label = label
-                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
-        else:
-            for kv in key_values:
-                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+            if content_type:
+                kv.content_type = content_type
+
+            azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
 
     except Exception as exception:
         raise CLIError(str(exception))
@@ -822,6 +867,35 @@ def __compact_key_values(key_values):
             else:
                 compacted.update({key: value})
     return compacted
+
+
+def __get_keyvault_client(cli_ctx):
+    from azure.cli.core._profile import Profile
+    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+    from azure.cli.core.profiles import ResourceType, get_api_version
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
+
+    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+
+    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
+
+
+def __resolve_secret(keyvault_client, keyvault_reference):
+    from azure.keyvault.key_vault_id import SecretId
+    try:
+        secret_id = json.loads(keyvault_reference.value)["uri"]
+        kv_identifier = SecretId(uri=secret_id)
+
+        secret = keyvault_client.get_secret(vault_base_url=kv_identifier.vault,
+                                            secret_name=kv_identifier.name,
+                                            secret_version=kv_identifier.version)
+        keyvault_reference.value = secret.value
+        return keyvault_reference
+    except (TypeError, ValueError):
+        raise CLIError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
+    except Exception as exception:
+        raise CLIError(str(exception))
 
 
 class Undef(object):  # pylint: disable=too-few-public-methods

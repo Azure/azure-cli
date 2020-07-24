@@ -204,3 +204,19 @@ def cf_postgres_private_endpoint_connections_operations(cli_ctx, _):
 
 def cf_postgres_private_link_resources_operations(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).private_link_resources
+
+
+def cf_mysql_server_keys_operations(cli_ctx, _):
+    return get_mysql_management_client(cli_ctx).server_keys
+
+
+def cf_postgres_server_keys_operations(cli_ctx, _):
+    return get_postgresql_management_client(cli_ctx).server_keys
+
+
+def cf_mysql_server_ad_administrators_operations(cli_ctx, _):
+    return get_mysql_management_client(cli_ctx).server_administrators
+
+
+def cf_postgres_server_ad_administrators_operations(cli_ctx, _):
+    return get_postgresql_management_client(cli_ctx).server_administrators

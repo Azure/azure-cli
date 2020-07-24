@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_type, \
     get_generic_completion_list, get_three_state_flag, get_resource_name_completion_list
-from azure.cli.core.util import get_json_object
+from azure.cli.core.util import shell_safe_json_parse
 from ._validators import (validate_component_version,
                           validate_storage_account,
                           validate_msi,
@@ -34,7 +34,6 @@ def load_arguments(self, _):
 
     # cluster
     with self.argument_context('hdinsight') as c:
-
         # Cluster
         c.argument('cluster_name', arg_type=name_type,
                    completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
@@ -58,7 +57,7 @@ def load_arguments(self, _):
                         'See also: https://docs.microsoft.com/azure/hdinsight/hdinsight'
                         '-component-versioning#hadoop-components-available-with-different-'
                         'hdinsight-versions')
-        c.argument('cluster_configurations', arg_group='Cluster', type=get_json_object,
+        c.argument('cluster_configurations', arg_group='Cluster', type=shell_safe_json_parse,
                    completer=FilesCompleter(),
                    help='Extra configurations of various components. '
                         'Configurations may be supplied from a file using the `@{path}` syntax or a JSON string. '
@@ -69,6 +68,8 @@ def load_arguments(self, _):
         c.argument('esp', arg_group='Cluster', action='store_true',
                    help='Specify to create cluster with Enterprise Security Package. If omitted, '
                         'creating cluster with Enterprise Security Package will not not allowed.')
+        c.argument('minimal_tls_version', arg_type=get_enum_type(['1.0', '1.1', '1.2']),
+                   arg_group='Cluster', help='The minimal supported TLS version.')
 
         # HTTP
         c.argument('http_username', options_list=['--http-user', '-u'], arg_group='HTTP',
@@ -235,3 +236,10 @@ def load_arguments(self, _):
         c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
                                        'Required when workspace ID is provided.')
         c.ignore('workspace_type')
+
+    with self.argument_context('hdinsight host') as c:
+        c.argument('cluster_name', options_list=['--cluster-name'],
+                   completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                   help='The name of the cluster.')
+        c.argument('hosts', options_list=['--host-names'], nargs='+',
+                   help='A space-delimited list of host names that need to be restarted.')

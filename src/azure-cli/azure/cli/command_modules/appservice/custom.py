@@ -23,6 +23,7 @@ import uuid
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
+from functools import reduce
 
 
 from knack.prompting import prompt_pass, NoTTYException
@@ -36,29 +37,29 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
-from azure.storage.blob import BlockBlobService, BlobPermissions
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter, sdk_no_wait
-from azure.cli.core.commands.client_factory import UA_AGENT
-from azure.cli.core.profiles import ResourceType
+    ConfiguredDefaultSetter, sdk_no_wait, get_file_json
+from azure.cli.core.util import get_az_user_agent
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
-from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
-from ._client_factory import web_client_factory, ex_handler_factory
+from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
+from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
-                           should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
+                           should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
-from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
-                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT)
+from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
+                         FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
+                         NODE_VERSION_DEFAULT, RUNTIME_STACKS)
 
 logger = get_logger(__name__)
 
@@ -91,13 +92,22 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     is_linux = plan_info.reserved
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
-    site_config = SiteConfig(app_settings=[])
+    # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
+    name_validation = client.check_name_availability(name, 'Site')
+    if not name_validation.name_available:
+        existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
+                                                        name, 'list_application_settings')
+        settings = []
+        for k, v in existing_app_settings.properties.items():
+            settings.append(NameValuePair(name=k, value=v))
+        site_config = SiteConfig(app_settings=settings)
+    else:
+        site_config = SiteConfig(app_settings=[])
     if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
                                                                                         'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=using_webapp_up)
-    helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
 
     if is_linux:
         if not validate_container_app_create_options(runtime, deployment_container_image_name,
@@ -109,47 +119,59 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
         if runtime:
             site_config.linux_fx_version = runtime
-            match = helper.resolve(runtime)
+            match = runtime.lower() in [s.lower() for s in RUNTIME_STACKS['linux']]
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
                                "Please invoke 'list-runtimes' to cross check".format(runtime))
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
-            site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
-                                                          value="false"))
+            if name_validation.name_available:
+                site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+                                                              value="false"))
         elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
 
     elif plan_info.is_xenon:  # windows container webapp
         site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
+        # set the needed app settings for container image validation
+        if name_validation.name_available:
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
+                                                          value=docker_registry_server_user))
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_PASSWORD",
+                                                          value=docker_registry_server_password))
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_URL",
+                                                          value=docker_registry_server_url))
 
     elif runtime:  # windows webapp with runtime specified
         if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
             raise CLIError("usage error: --startup-file or --deployment-container-image-name or "
                            "--multicontainer-config-type and --multicontainer-config-file is "
                            "only appliable on linux webapp")
-        match = helper.resolve(runtime)
+        match = runtime.lower() in [s.lower() for s in RUNTIME_STACKS['windows']]
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
-        match['setter'](cmd=cmd, stack=match, site_config=site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
-        if not match['displayName'].startswith('node'):
+        if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                           value=node_default_version))
     else:  # windows webapp without runtime specified
-        site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
-                                                      value=node_default_version))
+        if name_validation.name_available:
+            site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
+                                                          value=node_default_version))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:
             logger.info('Will set appsetting %s', setting)
     if using_webapp_up:  # when the routine is invoked as a help method for webapp up
-        logger.info("will set appsetting for enabling build")
-        site_config.app_settings.append(NameValuePair(name="SCM_DO_BUILD_DURING_DEPLOYMENT", value=True))
+        if name_validation.name_available:
+            logger.info("will set appsetting for enabling build")
+            site_config.app_settings.append(NameValuePair(name="SCM_DO_BUILD_DURING_DEPLOYMENT", value=True))
     if language is not None and language.lower() == 'dotnetcore':
-        site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
-                                                      value='https://{}.scm.azurewebsites.net/detectors'.format(name)))
+        if name_validation.name_available:
+            site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
+                                                          value='https://{}.scm.azurewebsites.net/detectors'
+                                                          .format(name)))
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -358,7 +380,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     headers = authorization
     headers['Content-Type'] = 'application/octet-stream'
     headers['Cache-Control'] = 'no-cache'
-    headers['User-Agent'] = UA_AGENT
+    headers['User-Agent'] = get_az_user_agent()
 
     import requests
     import os
@@ -485,7 +507,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     container_name = "function-releases"
     blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
-
+    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
     block_blob_service = BlockBlobService(connection_string=storage_connection)
     if not block_blob_service.exists(container_name):
         block_blob_service.create_container(container_name)
@@ -505,6 +527,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
     now = datetime.datetime.now()
     blob_start = now - datetime.timedelta(minutes=10)
     blob_end = now + datetime.timedelta(weeks=520)
+    BlobPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
     blob_token = block_blob_service.generate_blob_shared_access_signature(container_name,
                                                                           blob_name,
                                                                           permission=BlobPermissions(read=True),
@@ -706,8 +729,28 @@ def get_auth_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)
 
 
+def is_auth_runtime_version_valid(runtime_version=None):
+    if runtime_version is None:
+        return True
+    if runtime_version.startswith("~") and len(runtime_version) > 1:
+        try:
+            int(runtime_version[1:])
+        except ValueError:
+            return False
+        return True
+    split_versions = runtime_version.split('.')
+    if len(split_versions) != 3:
+        return False
+    for version in split_versions:
+        try:
+            int(version)
+        except ValueError:
+            return False
+    return True
+
+
 def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
-                         client_id=None, token_store_enabled=None,  # pylint: disable=unused-argument
+                         client_id=None, token_store_enabled=None, runtime_version=None,  # pylint: disable=unused-argument
                          token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
@@ -724,6 +767,9 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     elif action:
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.redirect_to_login_page
         auth_settings.default_provider = AUTH_TYPES[action]
+    # validate runtime version
+    if not is_auth_runtime_version_valid(runtime_version):
+        raise CLIError('Usage Error: --runtime-version set to invalid value')
 
     import inspect
     frame = inspect.currentframe()
@@ -739,11 +785,20 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_auth_settings', slot, auth_settings)
 
 
+# Currently using hardcoded values instead of this function. This function calls the stacks API;
+# Stacks API is updated with Antares deployments,
+# which are infrequent and don't line up with stacks EOL schedule.
 def list_runtimes(cmd, linux=False):
     client = web_client_factory(cmd.cli_ctx)
     runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
 
     return [s['displayName'] for s in runtime_helper.stacks]
+
+
+def list_runtimes_hardcoded(linux=False):
+    if linux:
+        return [s for s in RUNTIME_STACKS['linux']]
+    return [s for s in RUNTIME_STACKS['windows']]
 
 
 def _rename_server_farm_props(webapp):
@@ -827,7 +882,7 @@ def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     headers = {
         'Content-Type': 'application/octet-stream',
         'Cache-Control': 'no-cache',
-        'User-Agent': UA_AGENT
+        'User-Agent': get_az_user_agent()
     }
 
     import requests
@@ -842,7 +897,8 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
     slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
                               .connection_string_names or []
     result = [{'name': p,
-               'value': result.properties[p],
+               'value': result.properties[p].value,
+               'type':result.properties[p].type,
                'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
@@ -868,6 +924,9 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
 
 
 def _format_fx_version(custom_image_name, container_config_type=None):
+    lower_custom_image_name = custom_image_name.lower()
+    if "https://" in lower_custom_image_name or "http://" in lower_custom_image_name:
+        custom_image_name = lower_custom_image_name.replace("https://", "").replace("http://", "")
     fx_version = custom_image_name.strip()
     fx_version_lower = fx_version.lower()
     # handles case of only spaces
@@ -1129,14 +1188,14 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
-    if docker_custom_image_name is not None:
-        _add_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
     if websites_enable_app_service_storage:
         settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
 
     if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
         update_app_settings(cmd, resource_group_name, name, settings, slot)
     settings = get_app_settings(cmd, resource_group_name, name, slot)
+    if docker_custom_image_name is not None:
+        _add_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
 
     if multicontainer_config_file and multicontainer_config_type:
         encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
@@ -1274,9 +1333,10 @@ def _resolve_hostname_through_dns(hostname):
 
 
 def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None):
-    Site, SiteConfig = cmd.get_models('Site', 'SiteConfig')
+    Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, webapp)
+    site_config = get_site_configs(cmd, resource_group_name, webapp, None)
     if not site:
         raise CLIError("'{}' app doesn't exist".format(webapp))
     if 'functionapp' in site.kind:
@@ -1284,6 +1344,21 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
+
+    # if it is a Windows Container site, at least pass the necessary
+    # app settings to perform the container image validation:
+    if configuration_source and site_config.windows_fx_version:
+        # get settings from the source
+        clone_from_prod = configuration_source.lower() == webapp.lower()
+        src_slot = None if clone_from_prod else configuration_source
+        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                               'list_application_settings', src_slot)
+        settings = []
+        for k, v in app_settings.properties.items():
+            if k in ("DOCKER_REGISTRY_SERVER_USERNAME", "DOCKER_REGISTRY_SERVER_PASSWORD",
+                     "DOCKER_REGISTRY_SERVER_URL"):
+                settings.append(NameValuePair(name=k, value=v))
+        slot_def.site_config = SiteConfig(app_settings=settings)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -1897,6 +1972,60 @@ def show_diagnostic_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
 
 
+def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None):
+    import urllib3
+    import requests
+
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    deployment_log_url = ''
+    if deployment_id:
+        deployment_log_url = '{}/api/deployments/{}/log'.format(scm_url, deployment_id)
+    else:
+        deployments_url = '{}/api/deployments/'.format(scm_url)
+        response = requests.get(deployments_url, headers=headers)
+
+        if response.status_code != 200:
+            raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+                deployments_url, response.status_code, response.reason))
+
+        sorted_logs = sorted(
+            response.json(),
+            key=lambda x: x['start_time'],
+            reverse=True
+        )
+        if sorted_logs and sorted_logs[0]:
+            deployment_log_url = sorted_logs[0].get('log_url', '')
+
+    if deployment_log_url:
+        response = requests.get(deployment_log_url, headers=headers)
+        if response.status_code != 200:
+            raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+                deployment_log_url, response.status_code, response.reason))
+        return response.json()
+    return []
+
+
+def list_deployment_logs(cmd, resource_group, name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    return response.json() or []
+
+
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
@@ -2118,14 +2247,34 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     server_farm_id = webapp.server_farm_id
     location = webapp.location
-    kv_id = _format_key_vault_id(cmd.cli_ctx, key_vault, resource_group_name)
+    kv_id = None
+    if not is_valid_resource_id(key_vault):
+        kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
+        key_vaults = kv_client.vaults.list_by_subscription()
+        for kv in key_vaults:
+            if key_vault == kv.name:
+                kv_id = kv.id
+                break
+    else:
+        kv_id = key_vault
+
+    if kv_id is None:
+        kv_msg = 'The Key Vault {0} was not found in the subscription in context. ' \
+                 'If your Key Vault is in a different subscription, please specify the full Resource ID: ' \
+                 '\naz .. ssl import -n {1} -g {2} --key-vault-certificate-name {3} ' \
+                 '--key-vault /subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/' \
+                 'vaults/{0}'.format(key_vault, name, resource_group_name, key_vault_certificate_name)
+        logger.warning(kv_msg)
+        return
+
     kv_id_parts = parse_resource_id(kv_id)
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
+    kv_subscription = kv_id_parts['subscription']
     cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
-    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name):
+    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
         logger.warning('Unable to verify Key Vault permissions.')
         logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
         logger.warning(lnk_msg)
@@ -2166,10 +2315,15 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
                                                 certificate_envelope=easy_cert_def)
 
 
-def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name):
+def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
     from azure.graphrbac.models import GraphErrorException
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription = get_subscription_id(cmd.cli_ctx)
+    # Cannot check if key vault is in another subscription
+    if subscription != key_vault_subscription:
+        return False
     kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
     vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
     # Check for Microsoft.Azure.WebSites app registration
@@ -2433,6 +2587,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
 
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
     client = web_client_factory(cmd.cli_ctx)
     plan_info = None
     if runtime is not None:
@@ -2440,7 +2595,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
-        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)
+        location = next((loc for loc in locations if loc['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
@@ -2465,23 +2620,52 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         raise CLIError(
             "usage error: --runtime RUNTIME required for linux functions apps without custom image.")
 
-    if runtime:
-        if is_linux and runtime not in LINUX_RUNTIMES:
-            raise CLIError("usage error: Currently supported runtimes (--runtime) in linux function apps are: {}."
-                           .format(', '.join(LINUX_RUNTIMES)))
-        if not is_linux and runtime not in WINDOWS_RUNTIMES:
-            raise CLIError("usage error: Currently supported runtimes (--runtime) in windows function apps are: {}."
-                           .format(', '.join(WINDOWS_RUNTIMES)))
-        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
+    runtime_stacks_json = _load_runtime_stacks_json_functionapp(is_linux)
 
-    if runtime_version is not None:
-        if runtime is None:
-            raise CLIError('Must specify --runtime to use --runtime-version')
-        allowed_versions = FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version][runtime]
-        if runtime_version not in allowed_versions:
+    if runtime is None and runtime_version is not None:
+        raise CLIError('Must specify --runtime to use --runtime-version')
+
+    # get the matching runtime stack object
+    runtime_json = _get_matching_runtime_json_functionapp(runtime_stacks_json, runtime if runtime else 'dotnet')
+    if not runtime_json:
+        # no matching runtime for os
+        os_string = "linux" if is_linux else "windows"
+        supported_runtimes = list(map(lambda x: x[KEYS.NAME], runtime_stacks_json))
+        raise CLIError("usage error: Currently supported runtimes (--runtime) in {} function apps are: {}."
+                       .format(os_string, ', '.join(supported_runtimes)))
+
+    runtime_version_json = _get_matching_runtime_version_json_functionapp(runtime_json,
+                                                                          functions_version,
+                                                                          runtime_version,
+                                                                          is_linux)
+    if not runtime_version_json:
+        supported_runtime_versions = list(map(lambda x: x[KEYS.DISPLAY_VERSION],
+                                              _get_supported_runtime_versions_functionapp(runtime_json,
+                                                                                          functions_version)))
+        if runtime_version:
+            if runtime == 'dotnet':
+                raise CLIError('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined '
+                               'by --functions-version. Dotnet version {} is not supported by Functions version {}.'
+                               .format(runtime_version, functions_version))
             raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
-                           '--functions_version {}. Supported versions are: {}'
-                           .format(runtime_version, runtime, functions_version, ', '.join(allowed_versions)))
+                           '--functions-version {}. Supported versions are: {}.'
+                           .format(runtime_version,
+                                   runtime,
+                                   functions_version,
+                                   ', '.join(supported_runtime_versions)))
+
+        # if runtime_version was not specified, then that runtime is not supported for that functions version
+        raise CLIError('no supported --runtime-version found for the selected --runtime {} and '
+                       '--functions-version {}'
+                       .format(runtime, functions_version))
+
+    if runtime == 'dotnet':
+        logger.warning('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined by '
+                       '--functions-version. Dotnet version will be %s for this function app.',
+                       runtime_version_json[KEYS.DISPLAY_VERSION])
+
+    site_config_json = runtime_version_json[KEYS.SITE_CONFIG_DICT]
+    app_settings_json = runtime_version_json[KEYS.APP_SETTINGS_DICT]
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -2503,22 +2687,26 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                if runtime not in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version]:
-                    raise CLIError("An appropriate linux image for runtime:'{}', "
-                                   "functions_version: '{}' was not found".format(runtime, functions_version))
         if deployment_container_image_name is None:
-            site_config.linux_fx_version = _get_linux_fx_functionapp(functions_version, runtime, runtime_version)
+            site_config.linux_fx_version = site_config_json[KEYS.LINUX_FX_VERSION]
     else:
         functionapp_def.kind = 'functionapp'
+
+    # set site configs
+    for prop, value in site_config_json.items():
+        snake_case_prop = _convert_camel_to_snake_case(prop)
+        setattr(site_config, snake_case_prop, value)
+
     # adding appsetting to site to make it a function
+    for app_setting, value in app_settings_json.items():
+        site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
+
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION',
-                                                  value=_get_website_node_version_functionapp(functions_version,
-                                                                                              runtime,
-                                                                                              runtime_version)))
+
+    if disable_app_insights or not runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
 
     # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and not is_plan_elastic_premium(cmd, plan_info):
@@ -2540,7 +2728,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=instrumentation_key))
-    elif not disable_app_insights:
+    elif not disable_app_insights and runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
         create_app_insights = True
 
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
@@ -2560,6 +2748,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
+            update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                ['AzureWebJobsDashboard={}'.format(con_string)])
 
     if deployment_container_image_name:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
@@ -2569,26 +2759,81 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     return functionapp
 
 
+def _load_runtime_stacks_json_functionapp(is_linux):
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
+    if is_linux:
+        return get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['linux'])[KEYS.VALUE]
+    return get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['windows'])[KEYS.VALUE]
+
+
+def _get_matching_runtime_json_functionapp(stacks_json, runtime):
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
+    matching_runtime_json = list(filter(lambda x: x[KEYS.NAME] == runtime, stacks_json))
+    if matching_runtime_json:
+        return matching_runtime_json[0]
+    return None
+
+
+def _get_supported_runtime_versions_functionapp(runtime_json, functions_version):
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
+    extension_version = _get_extension_version_functionapp(functions_version)
+    supported_versions_list = []
+
+    for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
+        if extension_version in runtime_version_json[KEYS.SUPPORTED_EXTENSION_VERSIONS]:
+            supported_versions_list.append(runtime_version_json)
+    return supported_versions_list
+
+
+def _get_matching_runtime_version_json_functionapp(runtime_json, functions_version, runtime_version, is_linux):
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
+    extension_version = _get_extension_version_functionapp(functions_version)
+    if runtime_version:
+        for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
+            if (runtime_version_json[KEYS.DISPLAY_VERSION] == runtime_version and
+                    extension_version in runtime_version_json[KEYS.SUPPORTED_EXTENSION_VERSIONS]):
+                return runtime_version_json
+        return None
+
+    # find the matching default runtime version
+    supported_versions_list = _get_supported_runtime_versions_functionapp(runtime_json, functions_version)
+    default_version_json = {}
+    default_version = 0.0
+    for current_runtime_version_json in supported_versions_list:
+        if current_runtime_version_json[KEYS.IS_DEFAULT]:
+            current_version = _get_runtime_version_functionapp(current_runtime_version_json[KEYS.RUNTIME_VERSION],
+                                                               is_linux)
+            if not default_version_json or default_version < current_version:
+                default_version_json = current_runtime_version_json
+                default_version = current_version
+    return default_version_json
+
+
 def _get_extension_version_functionapp(functions_version):
     if functions_version is not None:
         return '~{}'.format(functions_version)
     return '~2'
 
 
-def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
-    if runtime == 'dotnet':
-        return runtime.upper()
-    if runtime_version is None:
-        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
-    return '{}|{}'.format(runtime.upper(), runtime_version)
+def _get_app_setting_set_functionapp(site_config, app_setting):
+    return list(filter(lambda x: x.name == app_setting, site_config.app_settings))
 
 
-def _get_website_node_version_functionapp(functions_version, runtime, runtime_version):
-    if runtime is None or runtime != 'node':
-        return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
-    if runtime_version is not None:
-        return '~{}'.format(runtime_version)
-    return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
+def _convert_camel_to_snake_case(text):
+    return reduce(lambda x, y: x + ('_' if y.isupper() else '') + y, text).lower()
+
+
+def _get_runtime_version_functionapp(version_string, is_linux):
+    import re
+    windows_match = re.fullmatch(FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, version_string)
+    if windows_match:
+        return float(windows_match.group(1))
+
+    linux_match = re.fullmatch(FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, version_string)
+    if linux_match:
+        return float(linux_match.group(1))
+
+    return float(version_string)
 
 
 def try_create_application_insights(cmd, functionapp):
@@ -2686,9 +2931,18 @@ def list_consumption_locations(cmd):
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
-    client = web_client_factory(cmd.cli_ctx)
+    web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_name(sku)
-    return client.list_geo_regions(full_sku, linux_workers_enabled)
+    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
+
+    providers_client = providers_client_factory(cmd.cli_ctx)
+    providers_client_locations_list = getattr(providers_client.get('Microsoft.Web'), 'resource_types', [])
+    for resource_type in providers_client_locations_list:
+        if resource_type.resource_type == 'sites':
+            providers_client_locations_list = resource_type.locations
+            break
+
+    return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
 def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
@@ -2700,7 +2954,6 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization,
                                 verify=not should_disable_connection_verify())
-        time.sleep(2)
         try:
             res_dict = response.json()
         except json.decoder.JSONDecodeError:
@@ -2711,7 +2964,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
 
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
-            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
+            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log deployment show
                            -n {} -g {}""".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
             break
@@ -3041,21 +3294,26 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
 
     list_all_vnets = vnet_client.virtual_networks.list_all()
 
-    vnet_id = ''
+    vnets = []
     for v in list_all_vnets:
-        if v.name == vnet:
-            vnet_id = v.id
+        if vnet in (v.name, v.id):
+            vnet_details = parse_resource_id(v.id)
+            vnet_resource_group = vnet_details['resource_group']
+            vnets.append((v.id, v.name, vnet_resource_group))
 
-    # parsing the arm uri in order to extract vnet_name and vnet_resource_group
-    vnet_id_strings = vnet_id.split('/')
+    if not vnets:
+        return logger.warning("The virtual network %s was not found in the subscription.", vnet)
 
-    vnet_resource_group = ''
-    i = 0
-    for z in vnet_id_strings:
-        if z.lower() == "resourcegroups":
-            vnet_resource_group = vnet_id_strings[i + 1]
-        i = i + 1
+    # If more than one vnet, try to use one from same resource group. Otherwise, use first and log the vnet resource id
+    found_vnet = [v for v in vnets if v[2].lower() == resource_group_name.lower()]
+    if not found_vnet:
+        found_vnet = [vnets[0]]
 
+    (vnet_id, vnet, vnet_resource_group) = found_vnet[0]
+    if len(vnets) > 1:
+        logger.warning("Multiple virtual networks of name %s were found. Using virtual network with resource ID: %s. "
+                       "To use a different virtual network, specify the virtual network resource ID using --vnet.",
+                       vnet, vnet_id)
     if slot is None:
         swift_connection_info = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
     else:
@@ -3131,7 +3389,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     client = web_client_factory(cmd.cli_ctx)
     user = get_profile_username()
     _create_new_rg = False
-    _create_new_app = does_app_already_exist(cmd, name)
+    _site_availability = get_site_availability(cmd, name)
+    _create_new_app = _site_availability.name_available
     os_name = detect_os_form_src(src_dir, html)
     lang_details = get_lang_from_content(src_dir, html)
     language = lang_details.get('language')
@@ -3143,7 +3402,9 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     runtime_version = "{}|{}".format(language, version_used_create) if \
         version_used_create != "-" else version_used_create
     site_config = None
-    if not _create_new_app:  # App exists
+    if not _create_new_app:  # App exists, or App name unavailable
+        if _site_availability.reason == 'Invalid':
+            raise CLIError(_site_availability.message)
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
         logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
@@ -3208,18 +3469,18 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
 
     if _create_new_rg:
         logger.warning("Creating Resource group '%s' ...", rg_name)
-        create_resource_group(cmd, rg_name, location)
+        create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
         # create ASP
         logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
     create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                            number_of_workers=1 if _is_linux else None, location=location)
+                            number_of_workers=1 if _is_linux else None, location=loc)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
-        create_webapp(cmd, rg_name, name, plan, runtime_version if _is_linux else None, tags={"cli": 'webapp_up'},
+        create_webapp(cmd, rg_name, name, plan, runtime_version if _is_linux else None,
                       using_webapp_up=True, language=language)
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings
@@ -3357,7 +3618,9 @@ def _wait_for_webapp(tunnel_server):
         if tries == 0:
             logger.warning('Connection is not ready yet, please wait')
         if tries == 60:
-            raise CLIError("Timeout Error, Unable to establish a connection")
+            raise CLIError('SSH timeout, your app must be running before'
+                           ' it can accept SSH connections. '
+                           'Use `az webapp log tail` to review the app startup logs.')
         tries = tries + 1
         logger.warning('.')
         time.sleep(1)

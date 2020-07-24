@@ -28,6 +28,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               source_location,
               image_names=None,
               resource_group_name=None,
+              agent_pool_name=None,
               timeout=None,
               arg=None,
               secret_arg=None,
@@ -68,7 +69,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
                 uuid.uuid4().hex, original_docker_file_name)
 
             source_location = upload_source_code(
-                client_registries, registry_name, resource_group_name,
+                cmd, client_registries, registry_name, resource_group_name,
                 source_location, tar_file_path,
                 docker_file_path, docker_file_in_tar)
             # For local source, the docker file is added separately into tar as the new file name (docker_file_in_tar)
@@ -97,6 +98,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
     DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties')
     docker_build_request = DockerBuildRequest(
+        agent_pool_name=agent_pool_name,
         image_names=image_names,
         is_push_enabled=is_push_enabled,
         source_location=source_location,
@@ -132,7 +134,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, no_format, True)
 
 
 def _warn_unsupported_image_name(image_names):

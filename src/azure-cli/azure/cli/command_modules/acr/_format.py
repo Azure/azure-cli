@@ -78,6 +78,21 @@ def token_credential_output_format(result):
     return _output_format(result, _token_password_format_group)
 
 
+def endpoints_output_format(result):
+    info = []
+    for e in result['dataEndpoints']:
+        info.append(OrderedDict([
+            ('loginServer', _get_value(result, 'loginServer')),
+            ('region', _get_value(e, 'region')),
+            ('endpoint', _get_value(e, 'endpoint'))
+        ]))
+    return info
+
+
+def agentpool_output_format(result):
+    return _output_format(result, _agentpool_format_group)
+
+
 def helm_list_output_format(result):
     if isinstance(result, dict):
         obj_list = []
@@ -217,6 +232,17 @@ def _taskrun_format_group(item):
     ])
 
 
+def _agentpool_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('COUNT', _get_value(item, 'count')),
+        ('TIER', _get_value(item, 'tier')),
+        ('STATE', _get_value(item, 'provisioningState')),
+        ('VNET', _get_value(item, 'virtualNetworkSubnetResourceId')),
+        ('OS', _get_value(item, 'os'))
+    ])
+
+
 def _build_format_group(item):
     return OrderedDict([
         ('BUILD ID', _get_value(item, 'buildId')),
@@ -335,7 +361,7 @@ def _get_value(item, *args):
     try:
         for arg in args:
             item = item[arg]
-        return str(item) if item else ' '
+        return str(item) if item or item == 0 else ' '
     except (KeyError, TypeError, IndexError):
         return ' '
 

@@ -6,12 +6,10 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-few-public-methods
 
-import json
 import unittest
-import jmespath
-import tempfile
 import os
 
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only)
 
@@ -64,7 +62,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         self.cmd('webapp config show', checks=[
             JMESPathCheck('linuxFxVersion', result['runtime_version']),
-            JMESPathCheck('tags.cli', 'webapp_up'),
+            JMESPathCheck('tags.cli', 'None'),
         ])
 
         self.cmd('webapp config appsettings list', checks=[
@@ -131,7 +129,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         self.cmd('webapp config show', checks=[
             JMESPathCheck('linuxFxVersion', result['runtime_version']),
-            JMESPathCheck('tags.cli', 'webapp_up'),
+            JMESPathCheck('tags.cli', 'None'),
         ])
 
         self.cmd('webapp config appsettings list', checks=[
@@ -180,13 +178,15 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertTrue(result['runtime_version'] == 'dotnetcore|2.2')
+        self.assertTrue(result['runtime_version'] == 'dotnetcore|3.1')
         self.assertTrue(result['os'].lower() == 'windows')
+        self.assertNotEqual(result['location'], 'None')
 
         # test the full E2E operation works
         full_result = self.cmd(
             'webapp up -n {} -g {} --plan {}'.format(webapp_name, resource_group, plan)).get_output_in_json()
-        self.assertTrue(result['name'] == full_result['name'])
+        self.assertEqual(result['name'], full_result['name'])
+        self.assertEqual(result['location'], full_result['location'])
 
         # Verify app is created
         # since we set local context, -n and -g are no longer required
@@ -198,7 +198,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('tags.cli', 'webapp_up'),
+            JMESPathCheck('tags.cli', 'None'),
             JMESPathCheck('windowsFxVersion', None)
         ])
 
@@ -267,7 +267,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('tags.cli', 'webapp_up'),
+            JMESPathCheck('tags.cli', 'None'),
             JMESPathCheck('windowsFxVersion', None)
         ])
 
@@ -283,6 +283,121 @@ class WebAppUpE2ETests(ScenarioTest):
             JMESPathCheck('sku.tier', 'Free'),
             JMESPathCheck('sku.name', 'F1')
         ])
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @ResourceGroupPreparer()
+    def test_webapp_up_invalid_name(self, resource_group):
+        webapp_name = self.create_random_name('invalid_name', 40)
+        zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'python-docs-hello-world')
+        os.chdir(up_working_dir)
+
+        from azure.cli.core.util import CLIError
+        with self.assertRaises(CLIError):
+            self.cmd('webapp up -n {} --dryrun'.format(webapp_name))
+        with self.assertRaises(CLIError):
+            self.cmd('webapp up -n {}'.format(webapp_name))
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_webapp_up_name_exists_not_in_subscription(self, resource_group):
+        # Make sure webapp_name is the name of an existing web app and is not in your subscription
+        webapp_name = 'helloworld'
+        zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'python-docs-hello-world')
+        os.chdir(up_working_dir)
+
+        from azure.cli.core.util import CLIError
+        with self.assertRaises(CLIError):
+            self.cmd('webapp up -n {} --dryrun'.format(webapp_name))
+        with self.assertRaises(CLIError):
+            self.cmd('webapp up -n {}'.format(webapp_name))
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_webapp_up_name_exists_in_subscription(self, resource_group):
+        plan = self.create_random_name('up-name-exists-plan', 40)
+        webapp_name = self.create_random_name('up-name-exists-app', 40)
+        zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'python-docs-hello-world')
+        os.chdir(up_working_dir)
+
+        # create a webapp with the same name
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "python|3.7"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].hostNames[0]', webapp_name +
+                          '.azurewebsites.net')
+        ])
+
+        # test dryrun operation
+        result = self.cmd('webapp up -n {} --sku S1 --dryrun'
+                          .format(webapp_name)).get_output_in_json()
+        self.assertTrue(result['sku'].lower() == 'standard')
+        self.assertTrue(result['name'].startswith(webapp_name))
+        self.assertTrue(result['src_path'].replace(
+            os.sep + os.sep, os.sep), up_working_dir)
+        self.assertTrue(result['runtime_version'] == 'python|3.7')
+        self.assertTrue(result['os'].lower() == 'linux')
+
+        # test the full E2E operation works
+        full_result = self.cmd(
+            'webapp up -n {} --sku S1 -g {} --plan {}'.format(webapp_name, resource_group, plan)).get_output_in_json()
+        self.assertTrue(result['name'] == full_result['name'])
 
         # cleanup
         # switch back the working dir
