@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from .AutoscaleConditionListener import AutoscaleConditionListener
+
 from azure.cli.command_modules.monitor.util import (
     get_autoscale_operator_map, get_autoscale_aggregation_map)
 from azure.cli.command_modules.monitor.actions import get_period_type
+from .AutoscaleConditionListener import AutoscaleConditionListener
 
 
 
