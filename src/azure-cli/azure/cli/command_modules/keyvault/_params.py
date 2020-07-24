@@ -588,7 +588,8 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault role', arg_group='Id') as c:
         c.argument('hsm_name', hsm_name_type)
-        c.argument('hsm_url', hsm_url_type)
+        c.argument('hsm_base_url', hsm_url_type)
+        c.ignore('vault_base_url')
 
     with self.argument_context('keyvault role assignment') as c:
         c.argument('role_assignment_name', options_list=['--name', '-n'], help='Name of the role assignment.')

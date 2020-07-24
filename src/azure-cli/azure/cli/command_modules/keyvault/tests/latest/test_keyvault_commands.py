@@ -43,26 +43,26 @@ def _create_keyvault(test, kwargs, additional_args=None):
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
-def _clear_hsm_role_assignments(test, hsm_name, assignees):
+def _clear_hsm_role_assignments(test, hsm_url, assignees):
     for assignee in assignees:
-        test.cmd('keyvault role assignment delete --hsm-name {hsm_name} --assignee {assignee}'
-                 .format(hsm_name=hsm_name, assignee=assignee))
+        test.cmd('keyvault role assignment delete --hsm-url {hsm_url} --assignee {assignee}'
+                 .format(hsm_url=hsm_url, assignee=assignee))
 
     if test.is_live:
         time.sleep(10)
 
 
-def _clear_hsm(test, hsm_name):
-    all_keys = test.cmd('keyvault key list --hsm-name {hsm_name} --query "[].kid"'
-                        .format(hsm_name=hsm_name)).get_output_in_json()
+def _clear_hsm(test, hsm_url):
+    all_keys = test.cmd('keyvault key list --hsm-url {hsm_url} --query "[].kid"'
+                        .format(hsm_url=hsm_url)).get_output_in_json()
     for key_id in all_keys:
         test.cmd('keyvault key delete --id {key_id}'.format(key_id=key_id))
 
     if test.is_live:
         time.sleep(10)
 
-    all_keys = test.cmd('keyvault key list-deleted --hsm-name {hsm_name} --query "[].kid"'
-                        .format(hsm_name=hsm_name)).get_output_in_json()
+    all_keys = test.cmd('keyvault key list-deleted --hsm-url {hsm_url} --query "[].kid"'
+                        .format(hsm_url=hsm_url)).get_output_in_json()
     for key_id in all_keys:
         test.cmd('keyvault key purge --id {key_id}'.format(key_id=key_id)
                  .replace('/keys/', '/deletedkeys/'))
@@ -362,8 +362,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
 class KeyVaultHSMRoleScenarioTest(ScenarioTest):
     def test_keyvault_hsm_role(self):
         self.kwargs.update({
-            'hsm': 'clitest',
-            'hsm_id': 'https://eastus.clitest.managedhsm-preview.azure.net',
+            'hsm_url': 'https://eastus.clitest.managedhsm-preview.azure.net',
             'key1': self.create_random_name('key-role-', 24),
             'key2': self.create_random_name('key-role-', 24),
             'role_name1': 'Azure Key Vault Managed HSM Crypto Officer',
@@ -374,15 +373,27 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
             'user3_principal_id': 'ade81686-dde7-4bb0-9062-8f5250ff95eb'
         })
 
-        for i in range(6):
+        for i in range(10):
             self.kwargs['role_assignment_name{}'.format(i + 1)] = self.create_guid()
 
-        _clear_hsm_role_assignments(self, hsm_name=self.kwargs['hsm'],
+        _clear_hsm_role_assignments(self, hsm_url=self.kwargs['hsm_url'],
                                     assignees=[self.kwargs['user1'], self.kwargs['user2'], self.kwargs['user3']])
 
-        role_definitions = self.cmd('keyvault role definition list --hsm-name {hsm}').get_output_in_json()
-        role_definitions2 = self.cmd('keyvault role definition list --id {hsm_id}').get_output_in_json()
-        assert len(role_definitions) == len(role_definitions2)
+        # add assignments
+        try:
+            self.cmd('keyvault role assignment create --hsm-url {hsm_url} --assignee "vicolina@microsoft.com" '
+                     '--name {role_assignment_name7} --role "Azure Key Vault Managed HSM Administrator" --scope "/"')
+            self.cmd('keyvault role assignment create --hsm-url {hsm_url} --assignee "chriss@microsoft.com" '
+                     '--name {role_assignment_name8} --role "Azure Key Vault Managed HSM Administrator" --scope "/"')
+            self.cmd('keyvault role assignment create --hsm-url {hsm_url} --assignee "chlowe@microsoft.com" '
+                     '--name {role_assignment_name9} --role "Azure Key Vault Managed HSM Administrator" --scope "/"')
+            self.cmd('keyvault role assignment create --hsm-url {hsm_url} --assignee "c05859b4-8776-4b6e-961b-f65980af83ec" '
+                     '--name {role_assignment_name10} --role "Azure Key Vault Managed HSM Crypto Officer" --scope "/keys" '
+                     '--assignee-principal-type ServicePrincipal')
+        except:
+            pass
+
+        role_definitions = self.cmd('keyvault role definition list --hsm-url {hsm_url}').get_output_in_json()
 
         role_def1 = [r for r in role_definitions if r['roleName'] == self.kwargs['role_name1']][0]
         role_def2 = [r for r in role_definitions if r['roleName'] == self.kwargs['role_name2']][0]
@@ -395,7 +406,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
         })
 
         # user1 + role1/role2
-        role_assignment1 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
+        role_assignment1 = self.cmd('keyvault role assignment create --hsm-url {hsm_url} --role "{role_name1}" '
                                     '--assignee {user1} --scope keys --name {role_assignment_name1}',
                                     checks=[
                                         self.check('name', '{role_assignment_name1}'),
@@ -406,7 +417,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                                     ]).get_output_in_json()
         self.kwargs['role_assignment_id1'] = role_assignment1['id']
 
-        role_assignment2 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
+        role_assignment2 = self.cmd('keyvault role assignment create --hsm-url {hsm_url} --role "{role_name2}" '
                                     '--assignee {user1} --name {role_assignment_name2}',
                                     checks=[
                                         self.check('name', '{role_assignment_name2}'),
@@ -418,7 +429,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
         self.kwargs['role_assignment_id2'] = role_assignment2['id']
 
         # user2 + role1/role2
-        self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
+        self.cmd('keyvault role assignment create --hsm-url {hsm_url} --role "{role_name1}" '
                  '--assignee {user2} --scope keys --name {role_assignment_name3}',
                  checks=[
                      self.check('name', '{role_assignment_name3}'),
@@ -428,7 +439,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                      self.check('scope', '/keys')
                  ]).get_output_in_json()
 
-        self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
+        self.cmd('keyvault role assignment create --hsm-url {hsm_url} --role "{role_name2}" '
                  '--assignee {user2} --name {role_assignment_name4}',
                  checks=[
                      self.check('name', '{role_assignment_name4}'),
@@ -439,7 +450,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                  ]).get_output_in_json()
 
         # user3 + role1/role2
-        self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
+        self.cmd('keyvault role assignment create --hsm-url {hsm_url} --role "{role_name1}" '
                  '--assignee {user3_principal_id} --scope keys --name {role_assignment_name5}',
                  checks=[
                      self.check('name', '{role_assignment_name5}'),
@@ -450,7 +461,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                      self.check('scope', '/keys')
                  ]).get_output_in_json()
 
-        self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
+        self.cmd('keyvault role assignment create --hsm-url {hsm_url} --role "{role_name2}" '
                  '--assignee-object-id {user3_principal_id} --name {role_assignment_name6}',
                  checks=[
                      self.check('name', '{role_assignment_name6}'),
@@ -465,65 +476,79 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
             time.sleep(10)
 
         # list all (including this one: assignee=bim@microsoft.com,role=Administrator, scope=/)
-        self.cmd('keyvault role assignment list --hsm-name {hsm}', checks=self.check('length(@)', 7))
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url}', checks=self.check('length(@)', 10))
 
         # list by scope
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --scope keys', checks=self.check('length(@)', 3))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --scope /keys', checks=self.check('length(@)', 3))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --scope ""', checks=self.check('length(@)', 4))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --scope "/"', checks=self.check('length(@)', 4))
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --scope keys', checks=self.check('length(@)', 3))
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --scope /keys', checks=self.check('length(@)', 3))
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --scope ""', checks=self.check('length(@)', 7))
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --scope "/"', checks=self.check('length(@)', 7))
 
         # list by role
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --role "{role_name1}"',
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --role "{role_name1}"',
                  checks=self.check('length(@)', 3))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --role "{role_name2}"',
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --role "{role_name2}"',
                  checks=self.check('length(@)', 3))
 
         # list by assignee
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user1}',
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --assignee {user1}',
                  checks=self.check('length(@)', 2))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user2}',
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --assignee {user2}',
                  checks=self.check('length(@)', 2))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user3_principal_id}',
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --assignee {user3_principal_id}',
                  checks=self.check('length(@)', 2))
 
         # list by multiple conditions
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user1} --scope keys',
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --assignee {user1} --scope keys',
                  checks=self.check('length(@)', 1))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user1} --role "{role_name1}"',
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --assignee {user1} --role "{role_name1}"',
                  checks=self.check('length(@)', 1))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user3_principal_id} --role "{role_name1}" '
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --assignee {user3_principal_id} --role "{role_name1}" '
                  '--scope keys',
                  checks=self.check('length(@)', 1))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user3_principal_id} --role "{role_name2}" '
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --assignee {user3_principal_id} --role "{role_name2}" '
                  '--scope ""',
                  checks=self.check('length(@)', 1))
-        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user3_principal_id} --role "{role_name2}" '
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url} --assignee {user3_principal_id} --role "{role_name2}" '
                  '--scope keys',
                  checks=self.check('length(@)', 0))
 
         # delete by ids
-        self.cmd('keyvault role assignment delete --hsm-name {hsm} --ids {role_assignment_id1} {role_assignment_id2}',
+        self.cmd('keyvault role assignment delete --hsm-url {hsm_url} --ids {role_assignment_id1} {role_assignment_id2}',
                  checks=self.check('length(@)', 2))
 
         # delete by name
-        self.cmd('keyvault role assignment delete --hsm-name {hsm} --name {role_assignment_name3}',
+        self.cmd('keyvault role assignment delete --hsm-url {hsm_url} --name {role_assignment_name3}',
                  checks=self.check('length(@)', 1))
 
         # delete by assignee
-        self.cmd('keyvault role assignment delete --hsm-name {hsm} --assignee {user2}',
+        self.cmd('keyvault role assignment delete --hsm-url {hsm_url} --assignee {user2}',
                  checks=self.check('length(@)', 1))
 
         # delete by role
-        self.cmd('keyvault role assignment delete --hsm-name {hsm} --role "{role_name2}"',
+        self.cmd('keyvault role assignment delete --hsm-url {hsm_url} --role "{role_name2}"',
                  checks=self.check('length(@)', 1))
 
         # delete by scope
-        self.cmd('keyvault role assignment delete --hsm-name {hsm} --scope keys',
+        self.cmd('keyvault role assignment delete --hsm-url {hsm_url} --scope keys',
                  checks=self.check('length(@)', 1))
 
         # check final result
-        self.cmd('keyvault role assignment list --hsm-name {hsm}', checks=self.check('length(@)', 1))
+        self.cmd('keyvault role assignment list --hsm-url {hsm_url}', checks=self.check('length(@)', 4))
+
+        # add assignments again
+        try:
+            self.cmd('keyvault role assignment create --hsm-url {hsm_url} --assignee "vicolina@microsoft.com" '
+                     '--name {role_assignment_name7} --role "Azure Key Vault Managed HSM Administrator" --scope "/"')
+            self.cmd('keyvault role assignment create --hsm-url {hsm_url} --assignee "chriss@microsoft.com" '
+                     '--name {role_assignment_name8} --role "Azure Key Vault Managed HSM Administrator" --scope "/"')
+            self.cmd('keyvault role assignment create --hsm-url {hsm_url} --assignee "chlowe@microsoft.com" '
+                     '--name {role_assignment_name9} --role "Azure Key Vault Managed HSM Administrator" --scope "/"')
+            self.cmd('keyvault role assignment create --hsm-url {hsm_url} --assignee "c05859b4-8776-4b6e-961b-f65980af83ec" '
+                     '--name {role_assignment_name10} --role "Azure Key Vault Managed HSM Crypto Officer" --scope "/keys" '
+                     '--assignee-principal-type ServicePrincipal')
+        except:
+            pass
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
@@ -692,35 +717,35 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
         self.kwargs.update({
             'kv': 'clitest',
             'key': self.create_random_name('key-', 24),
-            'hsm': 'clitest'
+            'hsm_url': 'https://eastus.clitest.managedhsm-preview.azure.net'
         })
 
-        _clear_hsm(self, hsm_name=self.kwargs['hsm'])
+        _clear_hsm(self, hsm_url=self.kwargs['hsm_url'])
 
         # test exception
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key create --vault-name {kv} --hsm-name {hsm} -n {key}')
+            self.cmd('keyvault key create --vault-name {kv} --hsm-url {hsm_url} -n {key}')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key delete --vault-name {kv} --hsm-name {hsm} -n {key}')
+            self.cmd('keyvault key delete --vault-name {kv} --hsm-url {hsm_url} -n {key}')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key download --vault-name {kv} --hsm-name {hsm} -n {key} -f test.key')
+            self.cmd('keyvault key download --vault-name {kv} --hsm-url {hsm_url} -n {key} -f test.key')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key list --vault-name {kv} --hsm-name {hsm}')
+            self.cmd('keyvault key list --vault-name {kv} --hsm-url {hsm_url}')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key list-deleted --vault-name {kv} --hsm-name {hsm}')
+            self.cmd('keyvault key list-deleted --vault-name {kv} --hsm-url {hsm_url}')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key list-versions --vault-name {kv} --hsm-name {hsm} -n {key}')
+            self.cmd('keyvault key list-versions --vault-name {kv} --hsm-url {hsm_url} -n {key}')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key purge --vault-name {kv} --hsm-name {hsm} -n {key}')
+            self.cmd('keyvault key purge --vault-name {kv} --hsm-url {hsm_url} -n {key}')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key set-attributes --vault-name {kv} --hsm-name {hsm} -n {key}')
+            self.cmd('keyvault key set-attributes --vault-name {kv} --hsm-url {hsm_url} -n {key}')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key show --vault-name {kv} --hsm-name {hsm} -n {key}')
+            self.cmd('keyvault key show --vault-name {kv} --hsm-url {hsm_url} -n {key}')
         with self.assertRaises(CLIError):
-            self.cmd('keyvault key show-deleted --vault-name {kv} --hsm-name {hsm} -n {key}')
+            self.cmd('keyvault key show-deleted --vault-name {kv} --hsm-url {hsm_url} -n {key}')
 
         # create a key
-        hsm_key = self.cmd('keyvault key create --hsm-name {hsm} -n {key} -p hsm',
+        hsm_key = self.cmd('keyvault key create --hsm-url {hsm_url} -n {key} -p hsm',
                            checks=self.check('attributes.enabled', True)).get_output_in_json()
         self.kwargs['hsm_kid1'] = hsm_key['key']['kid']
         self.kwargs['hsm_version1'] = self.kwargs['hsm_kid1'].rsplit('/', 1)[1]
@@ -729,22 +754,22 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
         deleted_key = self.cmd('keyvault key delete --id {hsm_kid1}',
                                checks=self.check('key.kid', '{hsm_kid1}')).get_output_in_json()
         self.kwargs['hsm_recovery_id'] = deleted_key['recoveryId']
-        self.cmd('keyvault key list-deleted --hsm-name {hsm}', checks=self.check('length(@)', 1))
+        self.cmd('keyvault key list-deleted --hsm-url {hsm_url}', checks=self.check('length(@)', 1))
         self.cmd('keyvault key recover --id {hsm_recovery_id}',
                  checks=self.check('key.kid', '{hsm_kid1}'))
 
         # backup and then delete key
         key_file = 'backup-hsm.key'
         self.kwargs['key_file'] = key_file
-        self.cmd('keyvault key backup --hsm-name {hsm} -n {key} --file {key_file}')
-        self.cmd('keyvault key delete --hsm-name {hsm} -n {key}')
-        self.cmd('keyvault key purge --hsm-name {hsm} -n {key}')
-        self.cmd('keyvault key list --hsm-name {hsm}', checks=self.is_empty())
-        self.cmd('keyvault key list --hsm-name {hsm} --maxresults 10', checks=self.is_empty())
+        self.cmd('keyvault key backup --hsm-url {hsm_url} -n {key} --file {key_file}')
+        self.cmd('keyvault key delete --hsm-url {hsm_url} -n {key}')
+        self.cmd('keyvault key purge --hsm-url {hsm_url} -n {key}')
+        self.cmd('keyvault key list --hsm-url {hsm_url}', checks=self.is_empty())
+        self.cmd('keyvault key list --hsm-url {hsm_url} --maxresults 10', checks=self.is_empty())
 
         # restore key from backup
-        self.cmd('keyvault key restore --hsm-name {hsm} --file {key_file}')
-        self.cmd('keyvault key list --hsm-name {hsm}',
+        self.cmd('keyvault key restore --hsm-url {hsm_url} --file {key_file}')
+        self.cmd('keyvault key list --hsm-url {hsm_url}',
                  checks=[
                      self.check('length(@)', 1),
                      self.check('[0].name', '{key}')
@@ -754,13 +779,13 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
             os.remove(key_file)
 
         # list keys
-        self.cmd('keyvault key list --hsm-name {hsm}',
+        self.cmd('keyvault key list --hsm-url {hsm_url}',
                  checks=self.check('length(@)', 1))
-        self.cmd('keyvault key list --hsm-name {hsm} --maxresults 10',
+        self.cmd('keyvault key list --hsm-url {hsm_url} --maxresults 10',
                  checks=self.check('length(@)', 1))
 
         # create a new key version
-        hsm_key = self.cmd('keyvault key create --hsm-name {hsm} -n {key} -p hsm --disabled --ops encrypt decrypt '
+        hsm_key = self.cmd('keyvault key create --hsm-url {hsm_url} -n {key} -p hsm --disabled --ops encrypt decrypt '
                            '--kty RSA-HSM',
                            checks=[
                                self.check('attributes.enabled', False),
@@ -772,27 +797,27 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
         self.kwargs['hsm_pkid'] = hsm_pure_kid
 
         # list key versions
-        self.cmd('keyvault key list-versions --hsm-name {hsm} -n {key}',
+        self.cmd('keyvault key list-versions --hsm-url {hsm_url} -n {key}',
                  checks=self.check('length(@)', 2))
-        self.cmd('keyvault key list-versions --hsm-name {hsm} -n {key} --maxresults 10',
+        self.cmd('keyvault key list-versions --hsm-url {hsm_url} -n {key} --maxresults 10',
                  checks=self.check('length(@)', 2))
         self.cmd('keyvault key list-versions --id {hsm_kid}', checks=self.check('length(@)', 2))
         self.cmd('keyvault key list-versions --id {hsm_pkid}', checks=self.check('length(@)', 2))
 
         # show key (latest)
-        self.cmd('keyvault key show --hsm-name {hsm} -n {key}',
+        self.cmd('keyvault key show --hsm-url {hsm_url} -n {key}',
                  checks=self.check('key.kid', hsm_second_kid))
 
         # show key (specific version)
         self.kwargs['hsm_kid2'] = hsm_second_kid
-        self.cmd('keyvault key show --hsm-name {hsm} -n {key} -v {hsm_version1}',
+        self.cmd('keyvault key show --hsm-url {hsm_url} -n {key} -v {hsm_version1}',
                  checks=self.check('key.kid', '{hsm_kid1}'))
 
         # show key (by id)
         self.cmd('keyvault key show --id {hsm_kid1}', checks=self.check('key.kid', '{hsm_kid1}'))
 
         # set key attributes
-        self.cmd('keyvault key set-attributes --hsm-name {hsm} -n {key} --enabled true', checks=[
+        self.cmd('keyvault key set-attributes --hsm-url {hsm_url} -n {key} --enabled true', checks=[
             self.check('key.kid', '{hsm_kid2}'),
             self.check('attributes.enabled', True)
         ])
@@ -803,9 +828,9 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
             'key_enc_password': 'password',
             'key_plain_file': os.path.join(TEST_DIR, 'mydomain.test.pem')
         })
-        self.cmd('keyvault key import --hsm-name {hsm} -n import-key-plain --pem-file "{key_plain_file}" -p hsm',
+        self.cmd('keyvault key import --hsm-url {hsm_url} -n import-key-plain --pem-file "{key_plain_file}" -p hsm',
                  checks=self.check('key.kty', 'RSA-HSM'))
-        self.cmd('keyvault key import --hsm-name {hsm} -n import-key-encrypted --pem-file "{key_enc_file}" '
+        self.cmd('keyvault key import --hsm-url {hsm_url} -n import-key-encrypted --pem-file "{key_enc_file}" '
                  '--pem-password {key_enc_password} -p hsm', checks=self.check('key.kty', 'RSA-HSM'))
 
         # import ec PEM
@@ -814,27 +839,27 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
             'key_enc_password': 'pass1234',
             'key_plain_file': os.path.join(TEST_DIR, 'ec256.pem')
         })
-        self.cmd('keyvault key import --hsm-name {hsm} -n import-eckey-plain --pem-file "{key_plain_file}" '
+        self.cmd('keyvault key import --hsm-url {hsm_url} -n import-eckey-plain --pem-file "{key_plain_file}" '
                  '-p hsm', checks=[self.check('key.kty', 'EC-HSM'), self.check('key.crv', 'P-256')])
         """ Enable this when service is ready
-        self.cmd('keyvault key import --hsm-name {hsm} -n import-eckey-encrypted --pem-file "{key_enc_file}" '
+        self.cmd('keyvault key import --hsm-url {hsm_url} -n import-eckey-encrypted --pem-file "{key_enc_file}" '
                  '--pem-password {key_enc_password}',
                  checks=[self.check('key.kty', 'EC-HSM'), self.check('key.crv', 'P-521')])
         """
 
         # create ec keys
-        self.cmd('keyvault key create --hsm-name {hsm} -n eckey1 --kty EC-HSM',
+        self.cmd('keyvault key create --hsm-url {hsm_url} -n eckey1 --kty EC-HSM',
                  checks=self.check('key.kty', 'EC-HSM'))
-        self.cmd('keyvault key create --hsm-name {hsm} -n eckey1 --kty EC-HSM --curve P-256',
+        self.cmd('keyvault key create --hsm-url {hsm_url} -n eckey1 --kty EC-HSM --curve P-256',
                  checks=[self.check('key.kty', 'EC-HSM'), self.check('key.crv', 'P-256')])
-        self.cmd('keyvault key delete --hsm-name {hsm} -n eckey1')
+        self.cmd('keyvault key delete --hsm-url {hsm_url} -n eckey1')
 
         # create KEK
-        self.cmd('keyvault key create --hsm-name {hsm} --name key1 --kty RSA-HSM --size 2048 --ops import',
+        self.cmd('keyvault key create --hsm-url {hsm_url} --name key1 --kty RSA-HSM --size 2048 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
-        self.cmd('keyvault key create --hsm-name {hsm} --name key2 --kty RSA-HSM --size 3072 --ops import',
+        self.cmd('keyvault key create --hsm-url {hsm_url} --name key2 --kty RSA-HSM --size 3072 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
-        self.cmd('keyvault key create --hsm-name {hsm} --name key2 --kty RSA-HSM --size 4096 --ops import',
+        self.cmd('keyvault key create --hsm-url {hsm_url} --name key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
 
@@ -910,7 +935,7 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
 class KeyVaultHSMKeyDownloadScenarioTest(ScenarioTest):
     def test_keyvault_hsm_key_download(self):
         self.kwargs.update({
-            'hsm': 'clitest'
+            'hsm_url': 'https://eastus.clitest.managedhsm-preview.azure.net'
         })
 
         key_names = [
@@ -921,13 +946,13 @@ class KeyVaultHSMKeyDownloadScenarioTest(ScenarioTest):
             'rsa-4096-hsm.pem'
         ]
 
-        _clear_hsm(self, hsm_name=self.kwargs['hsm'])
+        _clear_hsm(self, hsm_url=self.kwargs['hsm_url'])
 
         for key_name in key_names:
             var_name = key_name.split('.')[0] + '-file'
             if key_name.startswith('rsa'):
                 rsa_size = key_name.split('-')[1]
-                self.cmd('keyvault key create --hsm-name {{hsm}} -n {var_name}'
+                self.cmd('keyvault key create --hsm-url {{hsm_url}} -n {var_name}'
                          ' -p hsm --kty RSA-HSM --size {rsa_size}'.format(var_name=var_name, rsa_size=rsa_size))
             elif key_name.startswith('ec'):
                 ec_curve = key_name.split('-')[1]
@@ -935,7 +960,7 @@ class KeyVaultHSMKeyDownloadScenarioTest(ScenarioTest):
                     'p256': 'P-256',
                     'p384': 'P-384'
                 }
-                self.cmd('keyvault key create --hsm-name {{hsm}} -n {var_name}'
+                self.cmd('keyvault key create --hsm-url {{hsm_url}} -n {var_name}'
                          ' -p hsm --kty EC-HSM --curve {curve_name}'
                          .format(var_name=var_name, curve_name=curve_names[ec_curve]))
 
@@ -943,9 +968,9 @@ class KeyVaultHSMKeyDownloadScenarioTest(ScenarioTest):
             pem_downloaded_filename = var_name + '.pem'
 
             try:
-                self.cmd('keyvault key download --hsm-name {{hsm}} -n {var_name} -f "{filename}" -e DER'
+                self.cmd('keyvault key download --hsm-url {{hsm_url}} -n {var_name} -f "{filename}" -e DER'
                          .format(var_name=var_name, filename=der_downloaded_filename))
-                self.cmd('keyvault key download --hsm-name {{hsm}} -n {var_name} -f "{filename}" -e PEM'
+                self.cmd('keyvault key download --hsm-url {{hsm_url}} -n {var_name} -f "{filename}" -e PEM'
                          .format(var_name=var_name, filename=pem_downloaded_filename))
             finally:
                 if os.path.exists(der_downloaded_filename):

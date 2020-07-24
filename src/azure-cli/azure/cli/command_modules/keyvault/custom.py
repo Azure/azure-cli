@@ -943,14 +943,14 @@ def create_key(cmd, client, key_name, vault_base_url=None,
 
 
 def backup_key(client, file_path, vault_base_url=None,
-               key_name=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
+               key_name=None, hsm_name=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
 def restore_key(client, file_path, vault_base_url=None,
-                hsm_base_url=None):  # pylint: disable=unused-argument
+                hsm_name=None, hsm_base_url=None):  # pylint: disable=unused-argument
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_key(vault_base_url, data)
@@ -998,7 +998,7 @@ def _private_ec_key_to_jwk(ec_key, jwk):
 
 
 def import_key(cmd, client, key_name, vault_base_url=None,
-               hsm_base_url=None,  # pylint: disable=unused-argument
+               hsm_name=None, hsm_base_url=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None):
@@ -1126,7 +1126,7 @@ def _extract_ec_public_key_from_jwk(jwk_dict):
     return public.public_key(default_backend())
 
 
-def download_key(client, file_path, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
+def download_key(client, file_path, hsm_name=None, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
                  vault_base_url=None, key_name=None, key_version='', encoding=None):
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
@@ -1691,7 +1691,7 @@ def _reconstruct_role_definition(role_definition):
 
 def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=None,
                            role_assignment_name=None, hsm_base_url=None, assignee=None,
-                           assignee_principal_type=None, identifier=None):  # pylint: disable=unused-argument
+                           assignee_principal_type=None, vault_base_url=None, hsm_name=None):  # pylint: disable=unused-argument
     """ Create a new role assignment for a user, group, or service principal. """
     patch_akv_client(client)
 
@@ -1727,7 +1727,7 @@ def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=Non
 
 
 def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=None, scope=None, assignee=None,
-                           role=None, assignee_object_id=None, identifier=None, ids=None):
+                           role=None, assignee_object_id=None, ids=None, vault_base_url=None, hsm_name=None):  # pylint: disable=unused-argument
     """ Delete a role assignment. """
     patch_akv_client(client)
 
@@ -1751,7 +1751,7 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
 
         matched_role_assignments = list_role_assignments(
             cmd, client, hsm_base_url=hsm_base_url, scope=scope,
-            role=role, assignee_object_id=assignee_object_id, assignee=assignee, identifier=identifier
+            role=role, assignee_object_id=assignee_object_id, assignee=assignee
         )
 
         for role_assignment in matched_role_assignments:
@@ -1776,7 +1776,7 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
 
 
 def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=None, role=None,
-                          assignee_object_id=None, identifier=None):  # pylint: disable=unused-argument
+                          assignee_object_id=None, hsm_name=None, vault_base_url=None):  # pylint: disable=unused-argument
     """ List role assignments. """
     patch_akv_client(client)
 
@@ -1823,7 +1823,7 @@ def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=N
     return matched_role_assignments
 
 
-def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
+def list_role_definitions(client, scope=None, vault_base_url=None, hsm_base_url=None, hsm_name=None):  # pylint: disable=unused-argument
     """ List role definitions. """
     patch_akv_client(client)
 

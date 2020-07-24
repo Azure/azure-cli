@@ -150,22 +150,20 @@ def validate_hsm_name_and_hsm_url(ns):
     if getattr(ns, 'hsm_name', None) and getattr(ns, 'hsm_base_url', None):
         raise CLIError('--hsm-name and --hsm-url are mutually exclusive.')
 
-    if not getattr(ns, 'hsm_name', None) and not getattr(ns, 'hsm_base_url', None):
-        raise CLIError('Please specify --hsm-name or --hsm-url.')
-
     hsm_url = getattr(ns, 'hsm_base_url', None)
     if not hsm_url:
         hsm_url = getattr(ns, 'hsm_name', None)
 
     del ns.hsm_name
-    setattr(ns, 'vault_base_url', hsm_url)
+    if hsm_url:
+        setattr(ns, 'vault_base_url', hsm_url)
 
 
 def validate_vault_name_and_hsm_name(ns):
-    if getattr(ns, 'vault_base_url', None) and getattr(ns, 'hsm_name', None):
+    if getattr(ns, 'vault_name', None) and getattr(ns, 'hsm_name', None):
         raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
 
-    if not getattr(ns, 'vault_base_url', None) and not getattr(ns, 'hsm_name', None):
+    if not getattr(ns, 'vault_name', None) and not getattr(ns, 'hsm_name', None):
         raise CLIError('Please specify --vault-name or --hsm-name.')
 
 
@@ -180,7 +178,7 @@ def validate_vault_name_and_hsm_name_and_hsm_url(ns):
         raise CLIError('--hsm-name and --hsm-url are mutually exclusive.')
 
     if not getattr(ns, 'vault_base_url', None) and \
-            not (getattr(ns, 'hsm_name', None) and getattr(ns, 'hsm_base_url', None)):
+            not (getattr(ns, 'hsm_name', None) or getattr(ns, 'hsm_base_url', None)):
         raise CLIError('Please specify --vault-name or --hsm-name/--hsm-url.')
 
 
