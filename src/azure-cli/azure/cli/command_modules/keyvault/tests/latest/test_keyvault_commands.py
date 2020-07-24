@@ -299,6 +299,66 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         """
 
 
+class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
+    def test_keyvault_hsm_full_backup_restore(self):
+        self.kwargs.update({
+            'hsm_url': 'https://eastus.clitest.managedhsm-preview.azure.net',
+            'storage_account': 'bimsa1',
+            'blob': 'bimblob',
+            'sas_start': (datetime.utcnow() - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'sas_expiry': (datetime.utcnow() + timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        })
+        self.kwargs['sas'] = '?' + self.cmd('az storage account generate-sas --start {sas_start} --expiry {sas_expiry} '
+                                            '--https-only '
+                                            '--permissions rwd --resource-types o --services b '
+                                            '--account-name {storage_account}').get_output_in_json().replace('%3A', ':')
+
+        backup_data = self.cmd('az keyvault backup start --hsm-url {hsm_url} --blob-container-name {blob} '
+                               '--storage-account-name {storage_account} '
+                               '--storage-blob-SAS-token "{sas}"',
+                               checks=[
+                                   self.check('status', 'InProgress'),
+                                   self.exists('startTime'),
+                                   self.exists('jobId')
+                               ]).get_output_in_json()
+
+        self.kwargs['backup_job_id'] = backup_data['jobId']
+        max_retries = 10
+        counter = 0
+        while counter < max_retries:
+            backup_status = self.cmd('az keyvault backup status --hsm-url {hsm_url} --job-id {backup_job_id}',
+                                     checks=[
+                                         self.exists('status'),
+                                         self.exists('startTime'),
+                                         self.check('jobId', '{backup_job_id}')
+                                     ]).get_output_in_json()
+            if backup_status['status'] == 'Succeeded':
+                self.kwargs['backup_folder'] = backup_status['azureStorageBlobContainerUri'].split('/')[-1]
+                break
+            if backup_status['status'] == 'Failed':
+                raise CLIError('Backup failed')
+            counter += 1
+            time.sleep(10)
+
+        restore_data = self.cmd('az keyvault restore start --hsm-url {hsm_url} --blob-container-name {blob} '
+                                '--storage-account-name {storage_account} '
+                                '--storage-blob-SAS-token "{sas}" '
+                                '--backup-folder {backup_folder}',
+                                checks=[
+                                    self.check('status', 'InProgress'),
+                                    self.exists('startTime'),
+                                    self.exists('jobId')
+                                ]).get_output_in_json()
+
+        self.kwargs['restore_job_id'] = restore_data['jobId']
+        self.cmd('az keyvault restore status --hsm-url {hsm_url} --job-id {restore_job_id}',
+                 checks=[
+                     self.exists('status'),
+                     self.exists('startTime'),
+                     self.check('jobId', '{restore_job_id}')
+                 ])
+
+
 class KeyVaultHSMRoleScenarioTest(ScenarioTest):
     def test_keyvault_hsm_role(self):
         self.kwargs.update({

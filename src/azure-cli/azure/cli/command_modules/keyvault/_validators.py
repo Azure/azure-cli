@@ -125,13 +125,6 @@ def process_secret_set_namespace(cmd, namespace):
     namespace.value = content
 
 
-def process_hsm_base_url(ns):
-    if not ns.identifier and not ns.hsm_base_url:
-        raise CLIError('Please specify --hsm-name or --id.')
-    if ns.identifier:
-        ns.hsm_base_url = ns.identifier
-
-
 def process_storage_uri(ns):
     if not ns.storage_resource_uri:
         if ns.storage_account_name and ns.blob_container_name:
@@ -153,28 +146,58 @@ def process_sas_token_parameter(cmd, ns):
     return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
 
 
-def process_vault_and_hsm_name(ns):
+def validate_hsm_name_and_hsm_url(ns):
+    if getattr(ns, 'hsm_name', None) and getattr(ns, 'hsm_base_url', None):
+        raise CLIError('--hsm-name and --hsm-url are mutually exclusive.')
+
+    if not getattr(ns, 'hsm_name', None) and not getattr(ns, 'hsm_base_url', None):
+        raise CLIError('Please specify --hsm-name or --hsm-url.')
+
+    hsm_url = getattr(ns, 'hsm_base_url', None)
+    if not hsm_url:
+        hsm_url = getattr(ns, 'hsm_name', None)
+
+    del ns.hsm_name
+    setattr(ns, 'vault_base_url', hsm_url)
+
+
+def validate_vault_name_and_hsm_name(ns):
+    if getattr(ns, 'vault_base_url', None) and getattr(ns, 'hsm_name', None):
+        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+
+    if not getattr(ns, 'vault_base_url', None) and not getattr(ns, 'hsm_name', None):
+        raise CLIError('Please specify --vault-name or --hsm-name.')
+
+
+def validate_vault_name_and_hsm_name_and_hsm_url(ns):
+    if getattr(ns, 'vault_base_url', None) and getattr(ns, 'hsm_name', None):
+        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+
+    if getattr(ns, 'vault_base_url', None) and getattr(ns, 'hsm_base_url', None):
+        raise CLIError('--vault-name and --hsm-url are mutually exclusive.')
+
+    if getattr(ns, 'hsm_name', None) and getattr(ns, 'hsm_base_url', None):
+        raise CLIError('--hsm-name and --hsm-url are mutually exclusive.')
+
+    if not getattr(ns, 'vault_base_url', None) and \
+            not (getattr(ns, 'hsm_name', None) and getattr(ns, 'hsm_base_url', None)):
+        raise CLIError('Please specify --vault-name or --hsm-name/--hsm-url.')
+
+
+def validate_vault_and_hsm_name_and_key_id(ns):
     try:
-        if ns.identifier:
+        if getattr(ns, 'identifier', None):
             items = ns.identifier.split('/')
             ns.vault_base_url = '/'.join(items[:3])
             ns.key_name = items[4]
             if len(items) == 6:
                 ns.key_version = items[-1]
-    except:  # pylint: disable=bare-except
-        pass
     finally:
-        vault_base_url = ns.vault_base_url
-        hsm_base_url = ns.hsm_base_url
-        if vault_base_url and hsm_base_url:
-            raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
-
-        if not vault_base_url and not hsm_base_url:
-            raise CLIError('Please specify --vault-name or --hsm-name.')
-
+        validate_vault_name_and_hsm_name_and_hsm_url(ns)
+        vault_base_url = getattr(ns, 'vault_base_url', None)
+        hsm_base_url = getattr(ns, 'hsm_base_url', None)
         if not vault_base_url:
             ns.vault_base_url = hsm_base_url
-
 
 # PARAMETER NAMESPACE VALIDATORS
 
@@ -257,14 +280,6 @@ def validate_principal(ns):
     if num_set != 1:
         raise argparse.ArgumentError(
             None, 'specify exactly one: --object-id, --spn, --upn')
-
-
-def validate_vault_and_hsm_name(ns):
-    if getattr(ns, 'vault_name', None) and getattr(ns, 'hsm_name', None):
-        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
-
-    if not getattr(ns, 'vault_name', None) and not getattr(ns, 'hsm_name', None):
-        raise CLIError('Please specify --vault-name or --hsm-name.')
 
 
 def validate_resource_group_name(cmd, ns):
@@ -384,16 +399,14 @@ def datetime_type(string):
 
 
 def _get_base_url_type(cli_ctx, service):
-    prefix = ''
     suffix = ''
     if service == 'vault':
         suffix = cli_ctx.cloud.suffixes.keyvault_dns
     elif service == 'hsm':
-        prefix = 'eastus.'
-        suffix = '.managedhsm-preview.azure.net'
+        suffix = cli_ctx.cloud.suffixes.mhsm_dns
 
     def base_url_type(name):
-        return 'https://{}{}{}'.format(prefix, name, suffix)
+        return 'https://{}{}'.format(name, suffix)
 
     return base_url_type
 

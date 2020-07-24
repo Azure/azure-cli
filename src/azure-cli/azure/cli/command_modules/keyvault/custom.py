@@ -926,7 +926,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 # region KeyVault Key
 def create_key(cmd, client, key_name, vault_base_url=None,
-               hsm_base_url=None, protection=None,  # pylint: disable=unused-argument
+               hsm_name=None, hsm_base_url=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None, release_policy=None):
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
