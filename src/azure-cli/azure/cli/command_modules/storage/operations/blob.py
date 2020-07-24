@@ -330,10 +330,10 @@ def transform_blob_type(cmd, blob_type):
 
 
 # pylint: disable=too-many-locals
-def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blob_type=None, content_settings=None, metadata=None,
-                validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
-                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
-                progress_callback=None, encryption_scope=None):
+def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blob_type=None, content_settings=None,
+                metadata=None, validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None,
+                tier=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None,
+                timeout=None, progress_callback=None, encryption_scope=None):
     """Upload a blob to a container."""
 
     if encryption_scope:
