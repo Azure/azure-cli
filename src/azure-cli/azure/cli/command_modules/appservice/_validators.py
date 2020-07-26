@@ -201,4 +201,4 @@ def _validate_ip_address_existance(cmd, namespace):
     access_rules = configs.ip_security_restrictions
     is_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
     if True in is_exists:
-        raise CLIError('Rule is already exists with the specified criteria')
+        raise CLIError('IP address '+namespace.ip_address+' already exists. Cannot add duplicate IP address values.')
