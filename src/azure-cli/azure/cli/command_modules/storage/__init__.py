@@ -157,7 +157,6 @@ class StorageArgumentContext(AzArgumentContext):
                           validator=validate_encryption_services, help='Specifies which service(s) to encrypt.')
 
     def register_precondition_options(self):
-        from ._validators import validate_match_condition
         self.extra('if_modified_since')
         self.extra('if_unmodified_since')
         self.extra('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform the "
@@ -165,7 +164,7 @@ class StorageArgumentContext(AzArgumentContext):
         self.extra('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
                    "the operation only if the resource's ETag does not match the value specified. Specify the wildcard "
                    "character (*) to perform the operation only if the resource does not exist, and fail the operation "
-                   "if it does exist.", validator=validate_match_condition)
+                   "if it does exist.")
 
     def register_blob_arguments(self):
         self.extra('blob_name', required=True)

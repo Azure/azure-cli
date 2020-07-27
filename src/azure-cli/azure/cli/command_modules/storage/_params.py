@@ -515,7 +515,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_tier_validator,
                                                                    blob_rehydrate_priority_validator)
-
+        c.register_blob_arguments()
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
         c.argument('tier', validator=blob_tier_validator)
         c.argument('timeout', type=int)
@@ -543,15 +543,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob show') as c:
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the blob snapshot to retrieve.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
-        c.argument('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
-                                    'specifies the blob snapshot to retrieve.')
-        c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
-                                    "the operation only if the resource's ETag matches the value specified.")
-        c.argument('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
-                                         "the operation only if the resource's ETag does not match the value specified."
-                                         " Specify the wildcard character (*) to perform the operation only if the "
-                                         "resource does not exist, and fail the operation if it does exist.")
 
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
@@ -559,6 +555,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False)
+        c.register_blob_arguments()
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
         c.argument('max_connections', type=int)
