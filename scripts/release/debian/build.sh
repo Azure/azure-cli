@@ -38,7 +38,6 @@ export PATH=$PATH:$WORKDIR/python_env/bin
 find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
 
-if -f ${WORKDIR}/src/azure/cli/__init__.py; then
 if [ -f "${WORKDIR}/src/azure/cli/__init__.py" ]; then
     echo "Deleting __int__.py"
     rm -f ${WORKDIR}/src/azure/cli/__init__.py
