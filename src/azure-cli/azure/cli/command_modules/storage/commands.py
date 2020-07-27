@@ -294,7 +294,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        transform=transform_blob_list_output,
                                        table_transformer=transform_blob_output)
         g.storage_command_oauth('query', 'query_blob', is_preview=True, min_api='2019-12-12')
-        g.custom_command('config-query-format', 'config_query_format', is_preview=True, min_api='2019-12-12')
+        g.custom_command('config-query-format', 'config_query_format', client_factory=None,
+                         is_preview=True, min_api='2019-12-12')
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
