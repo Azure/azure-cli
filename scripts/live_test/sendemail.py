@@ -157,6 +157,7 @@ def get_content(container):
     """
 
     # summary
+    items = []
     for root, dirs, files in os.walk(ARTIFACT_DIR):
         for name in files:
             if name.endswith('json'):
@@ -171,19 +172,28 @@ def get_content(container):
                             failed = result['summary']['failed']
                         total = passed + failed
                         rate = 1 if total == 0 else passed / total
+                        rate = '{:.2%}'.format(rate)
+                        items.append(module, passed, failed, rate)
                         passed_sum += passed
                         failed_sum += failed
-                        table += """
-                          <tr>
-                            <td>{}</td>
-                            <td>{}</td>
-                            <td>{}</td>
-                            <td>{}</td>
-                          </tr>
-                        """.format(module, passed, failed, rate)
                 except Exception:
                     pass
 
+    sorted(items, key=lambda x: x[0])
+
+    for module, passed, failed, rate in items:
+        table += """
+          <tr>
+            <td>{}</td>
+            <td>{}</td>
+            <td>{}</td>
+            <td>{}</td>
+          </tr>
+        """.format(module, passed, failed, rate)
+
+    total_sum = passed_sum + failed_sum
+    rate_sum = 1 if total_sum == 0 else passed_sum / total_sum
+    rate_sum = '{:.2%}'.format(rate_sum)
     table += """
       <tr>
         <td>Total</td>
@@ -192,7 +202,7 @@ def get_content(container):
         <td>{}</td>
       </tr>
     </table>
-    """.format(passed_sum, failed_sum, passed_sum / (passed_sum + failed_sum))
+    """.format(passed_sum, failed_sum, rate_sum)
 
     content += table
 
