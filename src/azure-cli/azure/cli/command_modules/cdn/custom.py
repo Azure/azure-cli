@@ -596,7 +596,7 @@ def update_origin(client: OriginsOperations,
                   resource_group_name: str,
                   profile_name: str,
                   endpoint_name: str,
-                  name: str,
+                  origin_name: str,
                   http_port: Optional[int] = None,
                   https_port: Optional[int] = None,
                   private_link_resource_id: Optional[str] = None,
@@ -604,7 +604,7 @@ def update_origin(client: OriginsOperations,
                   private_link_approval_message: Optional[str] = None):
     from azure.mgmt.cdn.models import OriginUpdateParameters
 
-    existing = client.get(resource_group_name, profile_name, endpoint_name, name)
+    existing = client.get(resource_group_name, profile_name, endpoint_name, origin_name)
 
     if http_port is None:
         http_port = existing.http_port
@@ -620,7 +620,7 @@ def update_origin(client: OriginsOperations,
     return client.update(resource_group_name,
                          profile_name,
                          endpoint_name,
-                         name,
+                         origin_name,
                          OriginUpdateParameters(
                              http_port=http_port,
                              https_port=https_port,

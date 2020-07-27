@@ -174,6 +174,10 @@ def load_arguments(self, _):
     with self.argument_context('cdn origin update') as c:
         c.argument('http_port', type=int)
         c.argument('https_port', type=int)
+    with self.argument_context('cdn origin list') as c:
+        # list commands can't use --ids argument.
+        c.argument('profile_name', id_part=None)
+        c.argument('endpoint_name', id_part=None)
 
     # WAF #
 
