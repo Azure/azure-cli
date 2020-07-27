@@ -4757,5 +4757,45 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --off')
 
 
+class VMCrossTenantUpdateScenarioTest(ScenarioTest):
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_cross_tenant_', location='westus2')
+    def test_vm_cross_tenant_update(self, resource_group):
+        self.kwargs.update({
+            'location': 'westus2',
+            'another_rg': self.create_random_name('cli_test_vm_cross_tenant_', 40),
+            'another_vm': self.create_random_name('cli_test_vm_cross_tenant_', 40),
+            'image_name': self.create_random_name('cli_test_vm_cross_tenant_', 40),
+            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
+            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47',
+            'vm': self.create_random_name('cli_test_vm_cross_tenant_', 40)
+        })
+
+        # Prepare sig in another tenant
+        self.cmd('group create -g {another_rg} --location {location} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['another_rg']))
+        self.cmd(
+            'vm create -g {another_rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+        self.cmd(
+            'vm run-command invoke -g {another_rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {another_rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('vm generalize -g {another_rg} -n {vm} --subscription {aux_sub}')
+        res = self.cmd(
+            'image create -g {another_rg} -n {image_name} --source {vm} --subscription {aux_sub}').get_output_in_json()
+        self.kwargs.update({
+            'image_id': res['id']
+        })
+
+        self.cmd(
+            'vm create -g {rg} -n {vm} --image {image_id} --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
+        self.cmd('vm update -g {rg} -n {vm} --set tags.tagName=tagValue', checks=[
+            self.check('tags.tagName', 'tagValue')
+        ])
+
+        self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
+
+
 if __name__ == '__main__':
     unittest.main()

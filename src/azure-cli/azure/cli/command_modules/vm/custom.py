@@ -1227,8 +1227,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
-    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
-                       resource_group_name, vm_name, **kwargs)
+    aux_subscriptions = None
+    if vm and vm.storage_profile and vm.storage_profile.image_reference and vm.storage_profile.image_reference.id:
+        aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference.id)
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+    return sdk_no_wait(no_wait, client.virtual_machines.create_or_update,resource_group_name, vm_name, **kwargs)
 # endregion
 
 
