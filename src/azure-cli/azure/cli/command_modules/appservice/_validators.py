@@ -31,7 +31,7 @@ def validate_site_create(cmd, namespace):
         else:
             plan_info = client.app_service_plans.get(resource_group_name, plan)
         if not plan_info:
-            raise CLIError("The plan '{}' doesn't exist".format(plan))
+            raise CLIError("The plan '{}' doesn't exist in the resource group '{}'".format(plan, resource_group_name))
         # verify that the name is available for create
         validation_payload = {
             "name": namespace.name,

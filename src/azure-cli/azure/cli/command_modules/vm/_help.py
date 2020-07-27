@@ -1895,6 +1895,14 @@ examples:
 
 """
 
+helps['vm simulate-eviction'] = """
+type: command
+short-summary: Simulate the eviction of a Spot VM.
+examples:
+  - name: Simulate the eviction of a Spot VM.
+    text: az vm simulate-eviction --resource-group MyResourceGroup --name MyVm
+"""
+
 helps['vm start'] = """
 type: command
 short-summary: Start a stopped VM.
@@ -2528,6 +2536,14 @@ examples:
     crafted: true
 """
 
+helps['vmss simulate-eviction'] = """
+type: command
+short-summary: Simulate the eviction of a Spot virtual machine in a VM scale set.
+examples:
+  - name: Simulate the eviction of a Spot virtual machine in a VM scale set.
+    text: az vmss simulate-eviction --resource-group MyResourceGroup --name MyScaleSet --instance-id 0
+"""
+
 helps['vmss start'] = """
 type: command
 short-summary: Start VMs within a VMSS.
@@ -2607,6 +2623,15 @@ short-summary: Manage monitor aspect for a vm.
 helps['vm monitor log'] = """
 type: group
 short-summary: Manage log analytics workspace for a vm.
+"""
+
+helps['vm monitor log show'] = """
+type: command
+short-summary: Execute a query against the Log Analytics workspace linked with a VM.
+examples:
+  - name: Get performance log for a VM linked with a workspace
+    text: >
+        az vm monitor log show --name myVM -g myRG -q "Perf | limit 10"
 """
 
 helps['vm monitor metrics'] = """

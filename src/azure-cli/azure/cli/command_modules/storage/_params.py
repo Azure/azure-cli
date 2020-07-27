@@ -422,7 +422,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
         c.argument('account_name', acct_name_type, options_list=['--account-name'])
-        c.argument('permission', options_list=('--permissions',), required=True,
+        c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
                    validator=get_permission_validator(t_account_permissions))
@@ -484,7 +484,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
                                                                   'get_container_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
         c.ignore('sas_token')
@@ -623,9 +623,40 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_id', help='The active lease id for the blob.')
 
     with self.argument_context('storage blob lease') as c:
-        c.argument('lease_duration', type=int)
-        c.argument('lease_break_period', type=int)
         c.argument('blob_name', arg_type=blob_name_type)
+
+    with self.argument_context('storage blob lease acquire') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.extra('lease_id', options_list='--proposed-lease-id', help='Proposed lease ID, in a GUID string format. '
+                'The Blob service returns 400 (Invalid request) if the proposed lease ID is not in the correct format.')
+        c.argument('lease_duration', help='Specify the duration of the lease, in seconds, or negative one (-1) for '
+                   'a lease that never expires. A non-infinite lease can be between 15 and 60 seconds. A lease '
+                   'duration cannot be changed using renew or change. Default is -1 (infinite lease)', type=int)
+
+    with self.argument_context('storage blob lease break') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.argument('lease_break_period', type=int,
+                   help="This is the proposed duration of seconds that the lease should continue before it is broken, "
+                   "between 0 and 60 seconds. This break period is only used if it is shorter than the time remaining "
+                   "on the lease. If longer, the time remaining on the lease is used. A new lease will not be "
+                   "available before the break period has expired, but the lease may be held for longer than the break "
+                   "period. If this header does not appear with a break operation, a fixed-duration lease breaks after "
+                   "the remaining lease period elapses, and an infinite lease breaks immediately.")
+
+    with self.argument_context('storage blob lease change') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.extra('proposed_lease_id', help='Proposed lease ID, in a GUID string format. The Blob service returns 400 '
+                '(Invalid request) if the proposed lease ID is not in the correct format.', required=True)
+        c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
+
+    for item in ['release', 'renew']:
+        with self.argument_context('storage blob lease {}'.format(item)) as c:
+            c.register_precondition_options()
+            c.register_blob_arguments()
+            c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
 
     with self.argument_context('storage copy') as c:
         c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "
@@ -810,7 +841,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
                                                                   'get_container_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_container_permissions)),
                    validator=get_permission_validator(t_container_permissions))
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
@@ -903,7 +934,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_share_permissions, 'share_name', 'get_share_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
@@ -954,7 +985,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_container_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_file_permissions)),
                    validator=get_permission_validator(t_file_permissions))
         c.ignore('sas_token')
@@ -1064,7 +1095,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_queue_permissions, 'queue_name', 'get_queue_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
         c.ignore('sas_token')
@@ -1145,7 +1176,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the table\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
                    validator=table_permission_validator)
         c.ignore('sas_token')

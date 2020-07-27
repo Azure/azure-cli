@@ -20,7 +20,7 @@ def load_command_table(self, _):
         cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage,
         cf_log_analytics_workspace_saved_searches, cf_subscription_diagnostics,
         cf_log_analytics_workspace_data_exports)
-    from ._exception_handler import monitor_exception_handler, missing_resource_handler
+    from ._exception_handler import monitor_exception_handler, missing_resource_handler, data_export_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
 
@@ -396,7 +396,8 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('update', 'update')
 
-    with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk, custom_command_type=log_analytics_workspace_custom) as g:
+    with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
+                            custom_command_type=log_analytics_workspace_custom, exception_handler=data_export_handler) as g:
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_log_analytics_workspace_data_exports',

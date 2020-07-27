@@ -9,7 +9,7 @@
 from collections import deque
 
 
-class QueryExecutionContext(object):
+class QueryExecutionContext:
     """
     This is the execution context class.
     """

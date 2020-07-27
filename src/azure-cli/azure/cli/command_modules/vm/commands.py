@@ -172,11 +172,6 @@ def load_command_table(self, _):
         client_factory=cf_img_bldr_image_templates,
     )
 
-    log_analytics_data_plane_sdk = CliCommandType(
-        operations_tmpl="custom#{}",
-        client_factory=cf_log_analytics_data_plane,
-    )
-
     compute_disk_encryption_set_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
         client_factory=cf_disk_encryption_set
@@ -272,6 +267,7 @@ def load_command_table(self, _):
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
+        g.command('simulate-eviction', 'simulate_eviction', min_api='2019-12-01')
         g.command('start', 'start', supports_no_wait=True)
         g.command('stop', 'power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.command('reapply', 'reapply', supports_no_wait=True, min_api='2019-07-01')
@@ -397,6 +393,7 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
+        g.command('simulate-eviction', 'simulate_eviction', command_type=compute_vmss_vm_sdk, min_api='2019-12-01')
         g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
@@ -474,7 +471,7 @@ def load_command_table(self, _):
         g.generic_update_command('update')
         g.command('delete', 'delete')
 
-    with self.command_group('vm monitor log', log_analytics_data_plane_sdk, client_factory=cf_log_analytics_data_plane) as g:
+    with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
         g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)
 
     with self.command_group('vm monitor metrics', custom_command_type=monitor_custom, command_type=metric_definitions_sdk, resource_type=ResourceType.MGMT_MONITOR, operation_group='metric_definitions', min_api='2018-01-01', is_preview=True) as g:
