@@ -623,9 +623,40 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_id', help='The active lease id for the blob.')
 
     with self.argument_context('storage blob lease') as c:
-        c.argument('lease_duration', type=int)
-        c.argument('lease_break_period', type=int)
         c.argument('blob_name', arg_type=blob_name_type)
+
+    with self.argument_context('storage blob lease acquire') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.extra('lease_id', options_list='--proposed-lease-id', help='Proposed lease ID, in a GUID string format. '
+                'The Blob service returns 400 (Invalid request) if the proposed lease ID is not in the correct format.')
+        c.argument('lease_duration', help='Specify the duration of the lease, in seconds, or negative one (-1) for '
+                   'a lease that never expires. A non-infinite lease can be between 15 and 60 seconds. A lease '
+                   'duration cannot be changed using renew or change. Default is -1 (infinite lease)', type=int)
+
+    with self.argument_context('storage blob lease break') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.argument('lease_break_period', type=int,
+                   help="This is the proposed duration of seconds that the lease should continue before it is broken, "
+                   "between 0 and 60 seconds. This break period is only used if it is shorter than the time remaining "
+                   "on the lease. If longer, the time remaining on the lease is used. A new lease will not be "
+                   "available before the break period has expired, but the lease may be held for longer than the break "
+                   "period. If this header does not appear with a break operation, a fixed-duration lease breaks after "
+                   "the remaining lease period elapses, and an infinite lease breaks immediately.")
+
+    with self.argument_context('storage blob lease change') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.extra('proposed_lease_id', help='Proposed lease ID, in a GUID string format. The Blob service returns 400 '
+                '(Invalid request) if the proposed lease ID is not in the correct format.', required=True)
+        c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
+
+    for item in ['release', 'renew']:
+        with self.argument_context('storage blob lease {}'.format(item)) as c:
+            c.register_precondition_options()
+            c.register_blob_arguments()
+            c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
 
     with self.argument_context('storage copy') as c:
         c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "

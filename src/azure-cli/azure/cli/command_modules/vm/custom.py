@@ -1351,7 +1351,7 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
-class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods
+class BootLogStreamWriter:  # pylint: disable=too-few-public-methods
 
     def __init__(self, out):
         self.out = out
