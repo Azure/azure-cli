@@ -361,15 +361,15 @@ class AzCliCommandParser(CLICommandParser):
                                                       extension_name=ext_name)
                         run_after_extension_installed = cli_ctx.config.getboolean('extension',
                                                                                   'run_after_dynamic_install',
-                                                                                  True)
+                                                                                  False)
                         if use_dynamic_install.lower() == 'yes_without_prompt':
-                            logger.warning('You are running a command from the extension %s. '
+                            logger.warning('The command requires the extension %s. '
                                            'It will be installed first.', ext_name)
                             go_on = True
                         else:
                             from knack.prompting import prompt_y_n, NoTTYException
-                            prompt_msg = 'You are running a command from the extension {}. ' \
-                                'Would you like to install it first?'.format(ext_name)
+                            prompt_msg = 'The command requires the extension {}. ' \
+                                'Do you want to install it now?'.format(ext_name)
                             if run_after_extension_installed:
                                 prompt_msg = '{} The command will continue to run after the extension is installed.' \
                                     .format(prompt_msg)
@@ -380,7 +380,7 @@ class AzCliCommandParser(CLICommandParser):
                                 if go_on:
                                     logger.warning(NO_PROMPT_CONFIG_MSG)
                             except NoTTYException:
-                                logger.warning("You are running a command from the extension %s.\n "
+                                logger.warning("The command requires the extension %s.\n "
                                                "Unable to prompt for extension install confirmation as no tty "
                                                "available. %s", ext_name, NO_PROMPT_CONFIG_MSG)
                                 go_on = False
@@ -396,8 +396,8 @@ class AzCliCommandParser(CLICommandParser):
                             else:
                                 error_msg = 'Extension {} installed. Please rerun your command.'.format(ext_name)
                         else:
-                            error_msg = "Command failed due to corresponding extension not installed. " \
-                                "Please run 'az extension add -n {}' first.".format(ext_name)
+                            error_msg = "The command requires the extension {ext_name}. " \
+                                "To install, run 'az extension add -n {ext_name}'.".format(ext_name=ext_name)
                 if not error_msg:
                     # parser has no `command_source`, value is part of command itself
                     error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'." \
