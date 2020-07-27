@@ -839,6 +839,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Name of the destination blob. If the exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
 
+    with self.argument_context('storage blob query') as c:
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.argument('query_expression')
+        c.extra('blob_format', help='Define the serialization of the data currently stored in the blob. '
+                'The default is to treat the blob data as CSV data formatted in the default dialect. This can be '
+                'overridden with a custom DelimitedTextDialect, or alternatively a DelimitedJSON.')
+        c.extra('output_format')
+        c.extra('lease', options_list='--lease-id')
+
     with self.argument_context('storage blob sync') as c:
         c.extra('destination_container', options_list=['--container', '-c'], required=True,
                 help='The sync destination container.')
