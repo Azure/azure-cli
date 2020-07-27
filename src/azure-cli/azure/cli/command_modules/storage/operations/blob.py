@@ -656,3 +656,14 @@ def acquire_blob_lease(client, lease_duration=-1, **kwargs):
 def renew_blob_lease(client, **kwargs):
     client.renew(**kwargs)
     return client.id
+
+
+def config_query_format(cmd, type, line_separator=None, column_separator=None, quote_char=None, record_separator=None,
+                     escape_char=None, has_header=None):
+    if type == 'csv':
+        DelimitedTextDialect = cmd.get_models('DelimitedTextDialect', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        return DelimitedTextDialect(delimiter=column_separator, quotechar=quote_char, lineterminator=record_separator,
+                                    escapechar=escape_char, has_header=has_header)
+    if type == 'json':
+        DelimitedJSON = cmd.get_models('DelimitedJSON', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        return DelimitedJSON(delimiter=line_separator)

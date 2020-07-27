@@ -842,12 +842,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob query') as c:
         c.register_blob_arguments()
         c.register_precondition_options()
-        c.argument('query_expression')
+        c.argument('query_expression', help='The query expression in SQL. The maximum size of the query expression '
+                   'is 256KiB. For more information about the expression syntax, please see '
+                   'https://docs.microsoft.com/azure/storage/blobs/query-acceleration-sql-reference')
         c.extra('blob_format', help='Define the serialization of the data currently stored in the blob. '
-                'The default is to treat the blob data as CSV data formatted in the default dialect. This can be '
-                'overridden with a custom DelimitedTextDialect, or alternatively a DelimitedJSON.')
-        c.extra('output_format')
-        c.extra('lease', options_list='--lease-id')
+                'The default is to treat the blob data as CSV data formatted in the default dialect.')
+        c.extra('output_format', help='Define the output serialization for the data stream. By default the data will '
+                'be returned as it is represented in the blob. By providing an output format, the blob data will be '
+                'reformatted according to that profile.')
+        c.extra('lease', options_list='--lease-id',
+                help='Required if the blob has an active lease.')
+
+    with self.argument_context('storage blob config-query-format') as c:
+        c.argument('type', arg_type=get_enum_type(['csv', 'json']), help='The serialization format.')
+        c.argument('line_separator', arg_group='Delimited JSON Configuration',
+                   help="The string used to separate records. The default value is '\\n'.")
+        c.argument('column_separator', arg_group='Delimited CSV Configuration',
+                   help="The string used to separate columns. Default to ','.")
+        c.argument('quote_char', arg_group='Delimited CSV Configuration',
+                   help="The string used to quote a specific field. Default to '\"'.")
+        c.argument('record_separator', arg_group='Delimited CSV Configuration',
+                   help="The string used to separate records. Default to '\\n'")
+        c.argument('escape_char', arg_group='Delimited CSV Configuration',
+                   help='The string used as an escape character. Default to empty.')
+        c.argument('has_header', arg_group='Delimited CSV Configuration', arg_type=get_three_state_flag(),
+                   help='Whether the blob data includes headers in the first line. The default value is False, '
+                   'meaning that the data will be returned inclusive of the first line. If set to True, the data '
+                   'will be returned exclusive of the first line.')
 
     with self.argument_context('storage blob sync') as c:
         c.extra('destination_container', options_list=['--container', '-c'], required=True,
