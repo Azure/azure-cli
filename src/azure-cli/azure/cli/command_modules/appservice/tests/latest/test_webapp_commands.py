@@ -1604,24 +1604,6 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
 
-class FunctionAppKeys(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
-    @StorageAccountPreparer()
-    def test_functionapp_create_host_key(self, resource_group, storage_account):
-        functionapp_name = self.create_random_name(
-            'functionappkeys', 40)
-
-        self.cmd('functionapp create -g {} -n {} -c westus -s {}'
-                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('kind', 'functionapp'),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
-
-        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
-
-
 class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
