@@ -437,7 +437,7 @@ def validate_arm_template_at_subscription_scope(cmd,
                                                 template_file=None, template_uri=None, parameters=None,
                                                 deployment_name=None, deployment_location=None,
                                                 no_wait=False, handle_extended_json_format=None,
-                                                no_prompt=False):
+                                                no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_subscription_scope(cmd=cmd,
                                                       template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                       deployment_name=deployment_name, deployment_location=deployment_location,
@@ -511,7 +511,7 @@ def validate_arm_template_at_resource_group(cmd,
                                             resource_group_name=None,
                                             template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, mode=None, rollback_on_error=None,
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                            no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_resource_group(cmd,
                                                   resource_group_name=resource_group_name,
                                                   template_file=template_file, template_uri=template_uri, parameters=parameters,
@@ -559,7 +559,7 @@ def deploy_arm_template_at_management_group(cmd,
                                             management_group_id=None,
                                             template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, deployment_location=None,
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                            no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_management_group(cmd=cmd,
                                                     management_group_id=management_group_id,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
@@ -574,7 +574,7 @@ def validate_arm_template_at_management_group(cmd,
                                               template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None,
-                                              no_prompt=False):
+                                              no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_management_group(cmd=cmd,
                                                     management_group_id=management_group_id,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
@@ -612,9 +612,9 @@ def _deploy_arm_template_at_management_group(cmd,
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
-                           management_group_id, deployment_name, deployment)
+                           management_group_id, deployment_name, deployment)  
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
-                       management_group_id, deployment_name, deployment_obj)
+                       management_group_id, deployment_name, deployment_properties)
 
 
 # pylint: disable=unused-argument
@@ -633,7 +633,7 @@ def deploy_arm_template_at_tenant_scope(cmd,
 def validate_arm_template_at_tenant_scope(cmd,
                                           template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, deployment_location=None,
-                                          no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                          no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
                                                 template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
