@@ -364,6 +364,8 @@ def load_arguments(self, _):
                    configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
+    with self.argument_context('webapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
