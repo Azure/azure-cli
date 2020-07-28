@@ -379,11 +379,7 @@ class JsonCTemplate:
 
 class JSONSerializer(Serializer):
     def body(self, data, data_type, **kwargs):
-<<<<<<< HEAD
-        if data_type in ('Deployment', 'ScopedDeployment', 'DeploymentWhatIf'):
-=======
         if data_type in ('Deployment', 'ScopedDeployment', 'DeploymentWhatIf', 'ScopedDeploymentWhatIf'):
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
             # Be sure to pass a DeploymentProperties
             template = data.properties.template  # pylint: disable=redefined-outer-name
             if template:
@@ -429,11 +425,7 @@ def deploy_arm_template_at_subscription_scope(cmd,
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
             return None
 
-<<<<<<< HEAD
-    return _deploy_arm_template_at_subscription_scope(cmd,
-=======
     return _deploy_arm_template_at_subscription_scope(cmd=cmd,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
                                                       template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                       deployment_name=deployment_name, deployment_location=deployment_location,
                                                       validate_only=False, no_wait=no_wait,
@@ -445,13 +437,8 @@ def validate_arm_template_at_subscription_scope(cmd,
                                                 template_file=None, template_uri=None, parameters=None,
                                                 deployment_name=None, deployment_location=None,
                                                 no_wait=False, handle_extended_json_format=None,
-<<<<<<< HEAD
-                                                no_prompt=False, template_spec=None):
-    return _deploy_arm_template_at_subscription_scope(cmd,
-=======
                                                 no_prompt=False):
     return _deploy_arm_template_at_subscription_scope(cmd=cmd,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
                                                       template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                       deployment_name=deployment_name, deployment_location=deployment_location,
                                                       validate_only=True, no_wait=no_wait,
@@ -461,14 +448,8 @@ def validate_arm_template_at_subscription_scope(cmd,
 def _deploy_arm_template_at_subscription_scope(cmd,
                                                template_file=None, template_uri=None, parameters=None,
                                                deployment_name=None, deployment_location=None, validate_only=False,
-<<<<<<< HEAD
-                                               no_wait=False, no_prompt=False, template_spec=None,):
-
+                                               no_wait=False, no_prompt=False, template_spec=None):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
-=======
-                                               no_wait=False, no_prompt=False):
-    deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cmd.cli_ctx, template_file=template_file,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
                                                                       template_uri=template_uri, parameters=parameters,
                                                                       mode='Incremental',
                                                                       no_prompt=no_prompt,
@@ -476,13 +457,6 @@ def _deploy_arm_template_at_subscription_scope(cmd,
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
-<<<<<<< HEAD
-    Deployment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment', mod='models')
-    deployment_obj = Deployment(location=deployment_location, properties=deployment_properties)
-
-    validation_poller = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, parameters=deployment_obj, properties=deployment_properties)
-    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-=======
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
@@ -492,7 +466,6 @@ def _deploy_arm_template_at_subscription_scope(cmd,
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment_properties, deployment_location)
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -500,15 +473,10 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     if validate_only:
         return validation_result
 
-<<<<<<< HEAD
-    return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope,
-                       deployment_name, deployment_obj)
-=======
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope, deployment_name, deployment)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope, deployment_name,
                        deployment_properties, deployment_location)
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
 
 
 # pylint: disable=unused-argument
@@ -529,11 +497,7 @@ def deploy_arm_template_at_resource_group(cmd,
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
             return None
 
-<<<<<<< HEAD
-    return _deploy_arm_template_at_resource_group(cmd,
-=======
     return _deploy_arm_template_at_resource_group(cmd=cmd,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
                                                   resource_group_name=resource_group_name,
                                                   template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                   deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
@@ -547,13 +511,8 @@ def validate_arm_template_at_resource_group(cmd,
                                             resource_group_name=None,
                                             template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, mode=None, rollback_on_error=None,
-<<<<<<< HEAD
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
-    return _deploy_arm_template_at_resource_group(cmd=cmd,
-=======
                                             no_wait=False, handle_extended_json_format=None, no_prompt=False):
     return _deploy_arm_template_at_resource_group(cmd,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
                                                   resource_group_name=resource_group_name,
                                                   template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                   deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
@@ -566,28 +525,14 @@ def _deploy_arm_template_at_resource_group(cmd,
                                            template_file=None, template_uri=None, parameters=None,
                                            deployment_name=None, mode=None, rollback_on_error=None,
                                            validate_only=False, no_wait=False,
-<<<<<<< HEAD
                                            aux_subscriptions=None, aux_tenants=None, no_prompt=False, template_spec=None):
-    deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd, template_file=template_file,
-=======
-                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False):
-    deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cmd.cli_ctx, template_file=template_file,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
+    deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
                                                                       template_uri=template_uri,
                                                                       parameters=parameters, mode=mode,
                                                                       rollback_on_error=rollback_on_error,
                                                                       no_prompt=no_prompt, template_spec=template_spec)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
-<<<<<<< HEAD
-                                                    aux_tenants=aux_tenants, plug_pipeline=(template_uri is None and template_spec is None))
-
-    Deployment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment', mod='models')
-    deployment_obj = Deployment(properties=deployment_properties)
-
-    validation_poller = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, parameters=deployment_obj, properties=deployment_properties)
-    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-=======
                                                     aux_tenants=aux_tenants, plug_pipeline=(template_uri is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
@@ -597,7 +542,6 @@ def _deploy_arm_template_at_resource_group(cmd,
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment_properties)
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -605,14 +549,9 @@ def _deploy_arm_template_at_resource_group(cmd,
     if validate_only:
         return validation_result
 
-<<<<<<< HEAD
-    return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name,
-                       deployment_name, deployment_obj)
-=======
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name, deployment_name, deployment)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name, deployment_name, deployment_properties)
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
 
 
 # pylint: disable=unused-argument
@@ -620,11 +559,7 @@ def deploy_arm_template_at_management_group(cmd,
                                             management_group_id=None,
                                             template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, deployment_location=None,
-<<<<<<< HEAD
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
-=======
                                             no_wait=False, handle_extended_json_format=None, no_prompt=False):
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
     return _deploy_arm_template_at_management_group(cmd=cmd,
                                                     management_group_id=management_group_id,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
@@ -639,13 +574,8 @@ def validate_arm_template_at_management_group(cmd,
                                               template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None,
-<<<<<<< HEAD
-                                              no_prompt=False, template_spec=None):
-    return _deploy_arm_template_at_management_group(cmd,
-=======
                                               no_prompt=False):
     return _deploy_arm_template_at_management_group(cmd=cmd,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
                                                     management_group_id=management_group_id,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                     deployment_name=deployment_name, deployment_location=deployment_location,
@@ -657,26 +587,12 @@ def _deploy_arm_template_at_management_group(cmd,
                                              management_group_id=None,
                                              template_file=None, template_uri=None, parameters=None,
                                              deployment_name=None, deployment_location=None, validate_only=False,
-<<<<<<< HEAD
                                              no_wait=False, no_prompt=False, template_spec=None):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
-=======
-                                             no_wait=False, no_prompt=False):
-    deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cmd.cli_ctx, template_file=template_file,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
                                                                       template_uri=template_uri,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt, template_spec=template_spec)
 
-<<<<<<< HEAD
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
-
-    ScopedDeployment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ScopedDeployment', mod='models')
-    deployment_obj = ScopedDeployment(location=deployment_location, properties=deployment_properties)
-
-    validation_poller = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, parameters=deployment_obj)
-    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-=======
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
@@ -687,7 +603,6 @@ def _deploy_arm_template_at_management_group(cmd,
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
                                                                            deployment_properties, deployment_location)
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -706,11 +621,7 @@ def _deploy_arm_template_at_management_group(cmd,
 def deploy_arm_template_at_tenant_scope(cmd,
                                         template_file=None, template_uri=None, parameters=None,
                                         deployment_name=None, deployment_location=None,
-<<<<<<< HEAD
                                         no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
-=======
-                                        no_wait=False, handle_extended_json_format=None, no_prompt=False):
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
                                                 template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
@@ -722,11 +633,7 @@ def deploy_arm_template_at_tenant_scope(cmd,
 def validate_arm_template_at_tenant_scope(cmd,
                                           template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, deployment_location=None,
-<<<<<<< HEAD
-                                          no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None):
-=======
                                           no_wait=False, handle_extended_json_format=None, no_prompt=False):
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
                                                 template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
@@ -737,25 +644,12 @@ def validate_arm_template_at_tenant_scope(cmd,
 def _deploy_arm_template_at_tenant_scope(cmd,
                                          template_file=None, template_uri=None, parameters=None,
                                          deployment_name=None, deployment_location=None, validate_only=False,
-<<<<<<< HEAD
                                          no_wait=False, no_prompt=False, template_spec=None):
-    deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd, template_file=template_file,
-=======
-                                         no_wait=False, no_prompt=False):
-    deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cmd.cli_ctx, template_file=template_file,
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
+    deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
                                                                       template_uri=template_uri,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt, template_spec=template_spec,)
 
-<<<<<<< HEAD
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
-
-    ScopedDeployment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ScopedDeployment', mod='models')
-    deployment_obj = ScopedDeployment(location=deployment_location, properties=deployment_properties)
-    validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment_obj, location=deployment_location)
-    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-=======
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
@@ -767,7 +661,6 @@ def _deploy_arm_template_at_tenant_scope(cmd,
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
                                                                  properties=deployment_properties,
                                                                  location=deployment_location)
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
@@ -775,15 +668,10 @@ def _deploy_arm_template_at_tenant_scope(cmd,
     if validate_only:
         return validation_result
 
-<<<<<<< HEAD
-    return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_tenant_scope,
-                       deployment_name, deployment_properties)
-=======
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_tenant_scope, deployment_name, deployment)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_tenant_scope, deployment_name,
                        deployment_properties, deployment_location)
->>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
 
 
 def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
