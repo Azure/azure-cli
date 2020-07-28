@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 import os
 import json
+from re import template
 from knack.util import CLIError
-from azure.cli.core.util import get_file_json
+from azure.cli.core.util import read_file_content
+from azure.cli.command_modules.resource.custom import _remove_comments_from_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 
@@ -29,9 +31,12 @@ class PackingContext():  # pylint: disable=too-few-public-methods
 def Pack(cmd, template_file):
     root_template_file_path = os.path.abspath(template_file)
     context = PackingContext(os.path.dirname(root_template_file_path))
-    templateObj = get_file_json(template_file)
+    template_content = read_file_content(template_file)
+    sanitized_template = _remove_comments_from_json(template_content)
+    template_string = json.dumps(sanitized_template)
+    template_json = json.loads(template_string)
     PackArtifacts(cmd, root_template_file_path, context)
-    return PackagedTemplate(templateObj, getattr(context, 'Artifact'))
+    return PackagedTemplate(template_json, getattr(context, 'Artifact'))
 
 #  Recursively packs the specified template and its referenced artifacts and
 #  adds the artifacts to the current packing context.
@@ -48,7 +53,10 @@ def PackArtifacts(cmd, template_abs_file_path, context):
     originalDirectory = getattr(context, 'CurrentDirectory')
     try:
         context.CurrentDirectory = os.path.dirname(template_abs_file_path)
-        artifactableTemplateObj = get_file_json(template_abs_file_path)
+        template_content = read_file_content(template_abs_file_path)
+        artifactableTemplateObj = sanitized_template = _remove_comments_from_json(template_content)
+        template_string = json.dumps(sanitized_template)
+        template_json = json.loads(template_string)
         templateLinktoArtifactObjs = GetTemplateLinksToArtifacts(cmd, artifactableTemplateObj, includeNested=True)
 
         for templateLinkObj in templateLinktoArtifactObjs:
@@ -86,8 +94,11 @@ def PackArtifacts(cmd, template_abs_file_path, context):
             PackArtifacts(cmd, absoluteLocalPath, context)
             TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
                                                    'TemplateSpecTemplateArtifact', mod='models')
-            templateObj = get_file_json(absoluteLocalPath)
-            artifact = TemplateSpecTemplateArtifact(path=asRelativePath, template=templateObj)
+            template_content = read_file_content(absoluteLocalPath)
+            sanitized_template = _remove_comments_from_json(template_content)
+            template_string = json.dumps(sanitized_template)
+            template_json = json.loads(template_string)
+            artifact = TemplateSpecTemplateArtifact(path=asRelativePath, template=template_json)
             context.Artifact.append(artifact)
     finally:
         context.CurrentDirectory = originalDirectory
