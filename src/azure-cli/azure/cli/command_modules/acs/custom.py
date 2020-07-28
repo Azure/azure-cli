@@ -999,7 +999,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            return _invoke_deployment(cmd.cli_ctx, resource_group_name, deployment_name,
+            return _invoke_deployment(cmd, resource_group_name, deployment_name,
                                       template, params, validate, no_wait)
         except CloudError as ex:
             retry_exception = ex
@@ -1050,18 +1050,29 @@ def load_service_principals(config_path):
         return None
 
 
-def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
+def _invoke_deployment(cmd, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
 
-    from azure.cli.core.profiles import ResourceType, get_sdk
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
+    from azure.cli.core.profiles import ResourceType
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                   subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = smc.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, deployment)
+
+    if validate:
         return smc.validate(resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, properties)
 
@@ -2257,9 +2268,7 @@ def aks_update(cmd, client, resource_group_name, name,
             _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=instance)
 
     if enable_aad:
-        if instance.aad_profile is None:
-            raise CLIError('Cannot specify "--enable-aad" for a non-AAD cluster')
-        if instance.aad_profile.managed:
+        if instance.aad_profile is not None and instance.aad_profile.managed:
             raise CLIError('Cannot specify "--enable-aad" if managed AAD is already enabled')
         instance.aad_profile = ManagedClusterAADProfile(
             managed=True
@@ -2818,7 +2827,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
 
     deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
     # publish the Container Insights solution to the Log Analytics workspace
-    return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
+    return _invoke_deployment(cmd, resource_group, deployment_name, template, params,
                               validate=False, no_wait=False, subscription_id=subscription_id)
 
 

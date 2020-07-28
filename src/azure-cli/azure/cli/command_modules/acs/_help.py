@@ -468,8 +468,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 0.0.0.0/32
   - name: Update a AKS-managed AAD cluster with tenant ID or admin group object IDs.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
-  - name: Update an existing AKS AAD-Integrated cluster to the new AKS-managed AAD experience.
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad
+  - name: Migrate a AKS AAD-Integrated cluster or a non-AAD cluster to a AKS-managed AAD cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
 """
 
 helps['aks delete'] = """

@@ -95,6 +95,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertTrue(result['identity']['principalId'])
         self.assertTrue(result['identity']['tenantId'])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
         name = self.create_random_name(prefix='cli', length=24)
@@ -247,6 +248,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account create -n {} -g {} --allow-blob-public-access false'.format(name3, resource_group),
                  checks=[JMESPathCheck('allowBlobPublicAccess', False)])
 
+    @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     @StorageAccountPreparer(name_prefix='blob')
@@ -493,6 +495,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         assert renewed_kerb_keys[2] != original_keys[2]
         assert renewed_kerb_keys[3] == original_keys[3]
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_create_account_sas(self, storage_account):
@@ -1060,9 +1063,8 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
-
-        self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}',
-                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
+        with self.assertRaisesRegexp(CloudError, 'Your connection is already approved. No need to approve again.'):
+            self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])

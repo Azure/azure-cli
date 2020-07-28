@@ -6,6 +6,7 @@
 import os
 import unittest
 from random import randint
+import mock
 
 
 from knack.log import get_logger
@@ -45,13 +46,14 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
-        self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create', checks=[
-            self.check('tags.test', 'create'),
-            self.check('name', '{name}'),
-            self.check('masterProfile.subnetId', '{master_subnet_resource}'),
-            self.check('workerProfiles[0].subnetId', '{worker_subnet_resource}'),
-            self.check('provisioningState', 'Succeeded')
-        ])
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
+            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create', checks=[
+                self.check('tags.test', 'create'),
+                self.check('name', '{name}'),
+                self.check('masterProfile.subnetId', '{master_subnet_resource}'),
+                self.check('workerProfiles[0].subnetId', '{worker_subnet_resource}'),
+                self.check('provisioningState', 'Succeeded')
+            ])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_list_cred', location='eastus')
@@ -80,7 +82,8 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
-        self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list-cred')
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
+            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list-cred')
 
         self.cmd('aro list-credentials -g {rg} -n {name} --subscription {subscription}', checks=[self.check('kubeadminUsername', 'kubeadmin')])
 
@@ -112,13 +115,9 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
-        self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=show')
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
+            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=show')
 
-        self.cmd('aro show -g {rg} -n {name} --subscription {subscription}', checks=[
-            self.check('name', '{name}'),
-            self.check_pattern('id', '.*{name}'),
-            self.check('resourceGroup', '{rg}')
-        ])
         self.cmd('aro show -g {rg} -n {name} --subscription {subscription} --output table', checks=[
             StringContainCheck(name),
             StringContainCheck(resource_group),
@@ -153,7 +152,8 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
-        self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list')
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
+            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list')
 
         self.cmd('aro list -g {rg} --subscription {subscription}', checks=[
             self.check('[0].name', '{name}'),
@@ -188,7 +188,8 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
-        self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=delete')
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
+            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=delete')
 
         self.cmd('aro delete -y -g {rg} -n {name} --subscription {subscription}', expect_failure=False)
 
@@ -219,6 +220,7 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
-        self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=update')
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
+            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=update')
 
         self.cmd('aro update -g {rg} -n {name} --subscription {subscription}', expect_failure=False)
