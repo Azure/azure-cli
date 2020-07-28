@@ -285,5 +285,5 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Subdomain for the IoT Central URL. Each application must have a unique subdomain.')
         c.argument('template', options_list=['--template', '-t'],
                    help='IoT Central application template name. Default is a custom application.')
-        c.argument('display_name', options_list=['--display-name', '--dn'],
+        c.argument('display_name', options_list=['--display-name', '-d'],
                    help='Custom display name for the IoT Central application. Default is resource name.')
