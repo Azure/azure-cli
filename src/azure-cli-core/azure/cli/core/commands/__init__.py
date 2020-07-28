@@ -579,6 +579,8 @@ class AzCliCommandInvoker(CommandInvoker):
         parsed_args = self.parser.parse_args(args)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
 
+        self._hackthon_log_history(args)
+
         # print local context warning
         if self.cli_ctx.local_context.is_on and command and command in self.commands_loader.command_table:
             local_context_args = []
@@ -675,6 +677,16 @@ class AzCliCommandInvoker(CommandInvoker):
             event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
+
+    def _hackthon_log_history(self, args):
+        from knack.util import ensure_dir
+
+        base_dir = os.path.join(self.cli_ctx.config.config_dir, 'recommendation')
+
+        ensure_dir(base_dir)
+
+        with open(os.path.join(base_dir, 'hackthon_cmd_history.log'), 'a+') as fd:
+            print(" ".join(args), file=fd)
 
     @staticmethod
     def _extract_parameter_names(args):
