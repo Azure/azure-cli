@@ -277,7 +277,7 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs['image_id'] = output['artifactId']
 
         # check that vm successfully created from template.
-        self.cmd('vm create --name {vm} -g {rg} --image {image_id} --generate-ssh-keys')
+        self.cmd('vm create --name {vm} -g {rg} --image {image_id} --generate-ssh-keys --admin-username azureuser')
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
         # test template creation from managed image
@@ -330,7 +330,7 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs['image_id'] = output['artifactId']
 
         # check that vm successfully created from template.
-        self.cmd('vm create --name {vm} -g {rg} --image {image_id} --generate-ssh-keys')
+        self.cmd('vm create --name {vm} -g {rg} --image {image_id} --generate-ssh-keys --admin-username azureuser')
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
         # test template creation from sig image

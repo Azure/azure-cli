@@ -864,6 +864,59 @@ examples:
     crafted: true
 """
 
+helps['monitor diagnostic-settings subscription'] = """
+type: group
+short-summary: Manage diagnostic settings for subscription.
+"""
+
+helps['monitor diagnostic-settings subscription create'] = """
+type: command
+short-summary: Create diagnostic settings for a subscription
+examples:
+  - name: Create diagnostic settings for a subscription with EventHub.
+    text: |
+        az monitor diagnostic-settings subscription create -n {name} --location westus --event-hub-auth-rule {eventHubRuleID} --storage-account {storageAccount} \\
+        --logs '[
+           {
+             "category": "Security",
+             "enabled": true,
+           },
+           {
+             "category": "Administrative",
+             "enabled": true,
+           },
+           {
+             "category": "ServiceHealth",
+             "enabled": true,
+           },
+           {
+             "category": "Alert",
+             "enabled": true,
+           },
+           {
+             "category": "Recommendation",
+             "enabled": true,
+           },
+           {
+             "category": "Policy",
+             "enabled": true,
+           },
+           {
+             "category": "Autoscale",
+             "enabled": true,
+           },
+           {
+             "category": "ResourceHealth",
+             "enabled": true,
+           }
+           ]'
+"""
+
+helps['monitor diagnostic-settings subscription update'] = """
+type: command
+short-summary: Update diagnostic settings for a subscription.
+"""
+
 helps['monitor log-analytics'] = """
 type: group
 short-summary: Manage Azure log analytics.
@@ -1243,6 +1296,45 @@ short-summary: Show a saved search for a given workspace.
 helps['monitor log-analytics workspace saved-search delete'] = """
 type: command
 short-summary: Delete a saved search for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export'] = """
+type: group
+short-summary: Manage data export ruls for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace data-export create'] = """
+type: command
+short-summary: Create a data export rule for a given workspace.
+examples:
+  - name: Create a data export rule for a given workspace.
+    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable -t {table_name}
+  - name: Create a data export rule for a given workspace with all tables.
+    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable --all
+
+"""
+
+helps['monitor log-analytics workspace data-export update'] = """
+type: command
+short-summary: Update a data export rule for a given workspace.
+examples:
+  - name: Update a data export rule for a given workspace.
+    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} --all --enable false
+"""
+
+helps['monitor log-analytics workspace data-export list'] = """
+type: command
+short-summary: List all data export ruleses for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export show'] = """
+type: command
+short-summary: Show a data export rule for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export delete'] = """
+type: command
+short-summary: Delete a data export rule for a given workspace.
 """
 
 helps['monitor log-profiles'] = """

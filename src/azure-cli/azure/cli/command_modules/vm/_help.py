@@ -127,8 +127,10 @@ helps['disk-encryption-set create'] = """
 type: command
 short-summary: Create a disk encryption set.
 examples:
-  - name: Create a disk encryption set
+  - name: Create a disk encryption set.
     text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
+  - name: Create a disk encryption set that supports double encryption.
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys
 """
 
 helps['disk-encryption-set delete'] = """
@@ -579,7 +581,9 @@ examples:
   - name: Replicate to one more region
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
-
+  - name: Update --exclude-from-latest. If it is set to true, people deploying VMs with version omitted will not use this version.
+    text: |
+        az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --set publishingProfile.excludeFromLatest=true
 """
 
 helps['sig image-version wait'] = """
@@ -1891,6 +1895,14 @@ examples:
 
 """
 
+helps['vm simulate-eviction'] = """
+type: command
+short-summary: Simulate the eviction of a Spot VM.
+examples:
+  - name: Simulate the eviction of a Spot VM.
+    text: az vm simulate-eviction --resource-group MyResourceGroup --name MyVm
+"""
+
 helps['vm start'] = """
 type: command
 short-summary: Start a stopped VM.
@@ -2522,6 +2534,14 @@ examples:
     text: |
         az vmss show --name MyScaleSet --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['vmss simulate-eviction'] = """
+type: command
+short-summary: Simulate the eviction of a Spot virtual machine in a VM scale set.
+examples:
+  - name: Simulate the eviction of a Spot virtual machine in a VM scale set.
+    text: az vmss simulate-eviction --resource-group MyResourceGroup --name MyScaleSet --instance-id 0
 """
 
 helps['vmss start'] = """

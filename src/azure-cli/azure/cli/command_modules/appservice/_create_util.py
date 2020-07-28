@@ -250,16 +250,11 @@ def detect_node_version_tocreate(detected_ver):
     # get major version & get the closest version from supported list
     major_ver = int(detected_ver.split('.')[0])
     node_ver = NODE_VERSION_DEFAULT
-    if major_ver < 4:
+    # TODO: Handle checking for minor versions if node major version is 10
+    if major_ver <= 11:
         node_ver = NODE_VERSION_DEFAULT
-    elif major_ver >= 4 and major_ver < 6:
-        node_ver = '4.5'
-    elif major_ver >= 6 and major_ver < 8:
-        node_ver = '6.9'
-    elif major_ver >= 8 and major_ver < 10:
-        node_ver = NODE_VERSION_DEFAULT
-    elif major_ver >= 10:
-        node_ver = '10.14'
+    else:
+        node_ver = '12.9'
     return node_ver
 
 

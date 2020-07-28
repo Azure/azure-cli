@@ -1,6 +1,10 @@
 # RPM spec file for Azure CLI
 # Definition of macros used - https://fedoraproject.org/wiki/Packaging:RPMMacros?rd=Packaging/RPMMacros
 
+%global __python %{__python3}
+# Turn off python byte compilation
+%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
+
 # .el7.centos -> .el7
 %if 0%{?rhel}
   %define dist .el%{?rhel}

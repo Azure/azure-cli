@@ -5,22 +5,72 @@
 
 import unittest
 import time
+import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+
+TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class ResourceGroupScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_rest')
-    def test_rest(self, resource_group):
+    def test_rest_arm(self):
+        from knack.util import CLIError
+
         self.kwargs.update({
-            'sa': self.create_random_name("tmpst", length=10)
+            'rg': self.create_random_name("test-rest-rg", length=20)
+        })
+
+        # Test ARM Subscriptions - List
+        # https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+        self.cmd('az rest -u /subscriptions?api-version=2020-01-01',
+                 checks=[self.exists("value")])
+
+        # Test ARM Tenants - List
+        # https://docs.microsoft.com/en-us/rest/api/resources/tenants/list
+        self.cmd('az rest -u /tenants?api-version=2020-01-01',
+                 checks=[self.exists("value")])
+
+        # Resource Groups - Create Or Update
+        # https://docs.microsoft.com/en-us/rest/api/resources/resourcegroups/createorupdate
+        self.cmd('az rest -m PUT -u https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{rg}?api-version=2019-10-01 '
+                 '--body \'{{"location": "eastus"}}\'',
+                 checks=[self.check("name", '{rg}')])
+
+        # Resource Groups - Get
+        # https://docs.microsoft.com/en-us/rest/api/resources/resourcegroups/get
+        self.cmd('az rest -u https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{rg}?api-version=2019-10-01',
+                 checks=[self.check("name", '{rg}')])
+
+        # Resource Groups - Delete
+        # https://docs.microsoft.com/en-us/rest/api/resources/resourcegroups/delete
+        self.cmd('az rest -m DELETE -u https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{rg}?api-version=2019-10-01',
+                 checks=[])
+
+        # Resource Groups - Get
+        # Polling for 404
+        # TODO: return 3 for 404
+        with self.assertRaises(CLIError):
+            while True:
+                time.sleep(5)
+                self.cmd('az rest -u https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{rg}?api-version=2019-10-01',
+                         checks=[])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_rest')
+    def test_rest_storage(self, resource_group):
+
+        self.kwargs.update({
+            'sa': self.create_random_name("tmpst", length=10),
+            # Please remember to add double quote to the variable reference of the file path in tests,
+            # otherwise \\ will be parsed to \, which will lead to the wrong path
+            'storage_account_create_body': os.path.join(TEST_DIR, 'rest_storage_account_create_body.json'),
+            'storage_account_sas_body': os.path.join(TEST_DIR, 'rest_storage_account_sas_body.json')
         })
 
         # Create a storage account
         # https://docs.microsoft.com/en-us/rest/api/storagerp/storageaccounts/create
         self.cmd('az rest -m PUT -u /subscriptions/{{subscriptionId}}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/{sa}?api-version=2019-06-01 '
-                 '-b @rest_storage_account_create_body.json')
+                 '-b @"{storage_account_create_body}"')
 
         # Poll on the provisioning state
         state = None
@@ -34,7 +84,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         # Create an account SAS token https://docs.microsoft.com/en-us/rest/api/storageservices/create-account-sas
         # https://docs.microsoft.com/en-us/rest/api/storagerp/storageaccounts/listaccountsas
         sas_token = self.cmd('az rest -m POST -u "/subscriptions/{{subscriptionId}}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/{sa}/ListAccountSas?api-version=2019-06-01" '
-                             '-b @rest_storage_account_sas_body.json').get_output_in_json()["accountSasToken"]
+                             '-b @"{storage_account_sas_body}"').get_output_in_json()["accountSasToken"]
 
         # Create a container with the SAS token
         # https://docs.microsoft.com/en-us/rest/api/storageservices/create-container

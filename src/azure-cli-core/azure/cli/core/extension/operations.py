@@ -15,9 +15,9 @@ import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
-import requests
 from pkg_resources import parse_version
 
+from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli,
@@ -63,6 +63,7 @@ def _run_pip(pip_exec_args, extension_path=None):
 
 
 def _whl_download_from_url(url_parse_result, ext_file):
+    import requests
     from azure.cli.core.util import should_disable_connection_verify
     url = url_parse_result.geturl()
     r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
@@ -105,6 +106,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
         tmp_dir = tempfile.mkdtemp()
         ext_file = os.path.join(tmp_dir, whl_filename)
         logger.debug('Downloading %s to %s', source, ext_file)
+        import requests
         try:
             cmd.cli_ctx.get_progress_controller().add(message='Downloading')
             _whl_download_from_url(url_parse_result, ext_file)
@@ -188,8 +190,8 @@ def _augment_telemetry_with_ext_info(extension_name, ext=None):
 
 def check_version_compatibility(azext_metadata):
     is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
+    # logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+    #              "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
         min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
                           "You have CLI core version {} and this extension " \
@@ -244,6 +246,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                            "Please use with discretion.", extension_name)
         elif extension_name and ext.preview:
             logger.warning("The installed extension '%s' is in preview.", extension_name)
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException:
         pass
 
@@ -263,6 +266,7 @@ def remove_extension(extension_name):
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name, ext)
         shutil.rmtree(ext.path, onerror=log_err)
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -315,6 +319,7 @@ def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=N
             logger.debug('Copying %s to %s', backup_dir, extension_path)
             shutil.copytree(backup_dir, extension_path)
             raise CLIError('Failed to update. Rolled {} back to {}.'.format(extension_name, cur_version))
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 

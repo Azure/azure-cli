@@ -3,9 +3,17 @@
 Release History
 ===============
 
-2.8.10
+2.9.10
 ++++++
 * Migrate authentication from ADAL to MSAL
+
+2.9.1
+++++++
+* Minor fixes
+
+2.9.0
+++++++
+* Fix get_token() issue in msi login and `expiresIn` key error in cloud shell login credentials for track 2 SDK related commands (#14187)
 
 2.8.0
 ++++++
@@ -260,8 +268,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36	
-++++++	
+2.0.36
+++++++
 * Minor fixes
 
 2.0.35

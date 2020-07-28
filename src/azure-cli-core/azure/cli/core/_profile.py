@@ -723,15 +723,15 @@ class MsiAccountTypes(object):
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from msrestazure.azure_active_directory import MSIAuthentication
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthentication(resource=resource)
+            return MSIAuthenticationWrapper(resource=resource)
         if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthentication(resource=resource, client_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthentication(resource=resource, object_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthentication(resource=resource, msi_res_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
