@@ -1,25 +1,25 @@
 interactions:
 - request:
     body: "{\"properties\": {\"parameters\": {\"scriptName\": {\"value\": \"script000002\"}},
-      \"mode\": \"Incremental\", template:{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
-      \   \"contentVersion\": \"1.0.0.0\",\r\n    \"parameters\": {\r\n        \"scriptName\":
-      {\r\n           \"type\": \"string\",\r\n           \"metadata\": {\r\n                \"description\":
-      \"Deployment script name\"\r\n            }\r\n        },\r\n        \"utcValue\":
-      {\r\n            \"type\": \"string\",\r\n            \"defaultValue\": \"[utcNow()]\"\r\n
-      \       }\r\n    },\r\n    \"resources\": [\r\n        {\r\n            \"type\":
-      \"Microsoft.Resources/deploymentScripts\",\r\n            \"apiVersion\": \"2019-10-01-preview\",\r\n
-      \           \"name\": \"[parameters('scriptName')]\",\r\n            \"location\":
-      \"[resourceGroup().location]\",\r\n            \"identity\": {\r\n                \"type\":
-      \"UserAssigned\",\r\n                \"userAssignedIdentities\": {\r\n                    \"[concat('/subscriptions/',
-      subscription().subscriptionId, '/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi')]\":
-      {}\r\n                }\r\n            },\r\n            \"kind\": \"AzureCLI\",\r\n
-      \           \"properties\": {\r\n                \"forceUpdateTag\": \"[parameters('utcValue')]\",\r\n
-      \               \"containerSettings\": {\r\n                    \"containerGroupName\":
-      \"mycustomaci\"\t\r\n                },\r\n                \"AzCliVersion\":
-      \"2.0.80\",\r\n                \"timeout\": \"PT30M\",\r\n                \"arguments\":
-      \"'foo' 'bar'\",\r\n                \"scriptContent\": \"echo 'foo'\",\r\n                \"cleanupPreference\":
-      \"OnExpiration\",\r\n                \"retentionInterval\": \"P1D\"\r\n            }\r\n
-      \       }\r\n    ],\r\n    \"outputs\": {}\r\n}}}"
+      \"mode\": \"Incremental\", template:{\n    \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\n
+      \   \"contentVersion\": \"1.0.0.0\",\n    \"parameters\": {\n        \"scriptName\":
+      {\n           \"type\": \"string\",\n           \"metadata\": {\n                \"description\":
+      \"Deployment script name\"\n            }\n        },\n        \"utcValue\":
+      {\n            \"type\": \"string\",\n            \"defaultValue\": \"[utcNow()]\"\n
+      \       }\n    },\n    \"resources\": [\n        {\n            \"type\": \"Microsoft.Resources/deploymentScripts\",\n
+      \           \"apiVersion\": \"2019-10-01-preview\",\n            \"name\": \"[parameters('scriptName')]\",\n
+      \           \"location\": \"[resourceGroup().location]\",\n            \"identity\":
+      {\n                \"type\": \"UserAssigned\",\n                \"userAssignedIdentities\":
+      {\n                    \"[concat('/subscriptions/', subscription().subscriptionId,
+      '/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi')]\":
+      {}\n                }\n            },\n            \"kind\": \"AzureCLI\",\n
+      \           \"properties\": {\n                \"forceUpdateTag\": \"[parameters('utcValue')]\",\n
+      \               \"containerSettings\": {\n                    \"containerGroupName\":
+      \"mycustomaci\"\t\n                },\n                \"AzCliVersion\": \"2.0.80\",\n
+      \               \"timeout\": \"PT30M\",\n                \"arguments\": \"'foo'
+      'bar'\",\n                \"scriptContent\": \"echo 'foo'\",\n                \"cleanupPreference\":
+      \"OnExpiration\",\n                \"retentionInterval\": \"P1D\"\n            }\n
+      \       }\n    ],\n    \"outputs\": {}\n}}}"
     headers:
       Accept:
       - application/json
@@ -30,21 +30,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1716'
+      - '1673'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --template-file --parameters
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/ds000003","name":"ds000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10149382041214521334","parameters":{"scriptName":{"type":"String","value":"script000002"},"utcValue":{"type":"String","value":"20200410T072221Z"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-04-10T07:22:21.2466754Z","duration":"PT0S","correlationId":"36052ee4-9fc6-4d05-9504-2afd0c40f1ef","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deploymentScripts","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deploymentScripts/script000002"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/ds000003","name":"ds000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10149382041214521334","parameters":{"scriptName":{"type":"String","value":"script000002"},"utcValue":{"type":"String","value":"20200706T225915Z"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-06T22:59:15.7492709Z","duration":"PT0S","correlationId":"29d64306-4a75-437b-b413-1e05a828abda","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deploymentScripts","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deploymentScripts/script000002"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -53,7 +53,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Apr 2020 07:22:21 GMT
+      - Mon, 06 Jul 2020 22:59:15 GMT
       expires:
       - '-1'
       pragma:
@@ -67,31 +67,31 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
 - request:
     body: "{\"properties\": {\"parameters\": {\"scriptName\": {\"value\": \"script000002\"}},
-      \"mode\": \"Incremental\", template:{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
-      \   \"contentVersion\": \"1.0.0.0\",\r\n    \"parameters\": {\r\n        \"scriptName\":
-      {\r\n           \"type\": \"string\",\r\n           \"metadata\": {\r\n                \"description\":
-      \"Deployment script name\"\r\n            }\r\n        },\r\n        \"utcValue\":
-      {\r\n            \"type\": \"string\",\r\n            \"defaultValue\": \"[utcNow()]\"\r\n
-      \       }\r\n    },\r\n    \"resources\": [\r\n        {\r\n            \"type\":
-      \"Microsoft.Resources/deploymentScripts\",\r\n            \"apiVersion\": \"2019-10-01-preview\",\r\n
-      \           \"name\": \"[parameters('scriptName')]\",\r\n            \"location\":
-      \"[resourceGroup().location]\",\r\n            \"identity\": {\r\n                \"type\":
-      \"UserAssigned\",\r\n                \"userAssignedIdentities\": {\r\n                    \"[concat('/subscriptions/',
-      subscription().subscriptionId, '/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi')]\":
-      {}\r\n                }\r\n            },\r\n            \"kind\": \"AzureCLI\",\r\n
-      \           \"properties\": {\r\n                \"forceUpdateTag\": \"[parameters('utcValue')]\",\r\n
-      \               \"containerSettings\": {\r\n                    \"containerGroupName\":
-      \"mycustomaci\"\t\r\n                },\r\n                \"AzCliVersion\":
-      \"2.0.80\",\r\n                \"timeout\": \"PT30M\",\r\n                \"arguments\":
-      \"'foo' 'bar'\",\r\n                \"scriptContent\": \"echo 'foo'\",\r\n                \"cleanupPreference\":
-      \"OnExpiration\",\r\n                \"retentionInterval\": \"P1D\"\r\n            }\r\n
-      \       }\r\n    ],\r\n    \"outputs\": {}\r\n}}}"
+      \"mode\": \"Incremental\", template:{\n    \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\n
+      \   \"contentVersion\": \"1.0.0.0\",\n    \"parameters\": {\n        \"scriptName\":
+      {\n           \"type\": \"string\",\n           \"metadata\": {\n                \"description\":
+      \"Deployment script name\"\n            }\n        },\n        \"utcValue\":
+      {\n            \"type\": \"string\",\n            \"defaultValue\": \"[utcNow()]\"\n
+      \       }\n    },\n    \"resources\": [\n        {\n            \"type\": \"Microsoft.Resources/deploymentScripts\",\n
+      \           \"apiVersion\": \"2019-10-01-preview\",\n            \"name\": \"[parameters('scriptName')]\",\n
+      \           \"location\": \"[resourceGroup().location]\",\n            \"identity\":
+      {\n                \"type\": \"UserAssigned\",\n                \"userAssignedIdentities\":
+      {\n                    \"[concat('/subscriptions/', subscription().subscriptionId,
+      '/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi')]\":
+      {}\n                }\n            },\n            \"kind\": \"AzureCLI\",\n
+      \           \"properties\": {\n                \"forceUpdateTag\": \"[parameters('utcValue')]\",\n
+      \               \"containerSettings\": {\n                    \"containerGroupName\":
+      \"mycustomaci\"\t\n                },\n                \"AzCliVersion\": \"2.0.80\",\n
+      \               \"timeout\": \"PT30M\",\n                \"arguments\": \"'foo'
+      'bar'\",\n                \"scriptContent\": \"echo 'foo'\",\n                \"cleanupPreference\":
+      \"OnExpiration\",\n                \"retentionInterval\": \"P1D\"\n            }\n
+      \       }\n    ],\n    \"outputs\": {}\n}}}"
     headers:
       Accept:
       - application/json
@@ -102,24 +102,24 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1716'
+      - '1673'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --template-file --parameters
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/ds000003","name":"ds000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10149382041214521334","parameters":{"scriptName":{"type":"String","value":"script000002"},"utcValue":{"type":"String","value":"20200410T072221Z"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-04-10T07:22:21.4934398Z","duration":"PT0.0755001S","correlationId":"8dbb946a-d3c5-45bb-9a68-c04177fe666b","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deploymentScripts","locations":["westus"]}]}],"dependencies":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/ds000003","name":"ds000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10149382041214521334","parameters":{"scriptName":{"type":"String","value":"script000002"},"utcValue":{"type":"String","value":"20200706T225915Z"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-07-06T22:59:17.6844133Z","duration":"PT1.6373888S","correlationId":"449a7d8c-a884-4830-a9be-dfe833347850","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deploymentScripts","locations":["westus"]}]}],"dependencies":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/ds000003/operationStatuses/08586151035440596701?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/ds000003/operationStatuses/08586075305294305865?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -127,7 +127,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Apr 2020 07:22:21 GMT
+      - Mon, 06 Jul 2020 22:59:17 GMT
       expires:
       - '-1'
       pragma:
@@ -137,7 +137,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -155,10 +155,10 @@ interactions:
       ParameterSetName:
       - -g -n --template-file --parameters
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586151035440596701?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586075305294305865?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -170,7 +170,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Apr 2020 07:22:51 GMT
+      - Mon, 06 Jul 2020 22:59:48 GMT
       expires:
       - '-1'
       pragma:
@@ -198,10 +198,10 @@ interactions:
       ParameterSetName:
       - -g -n --template-file --parameters
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586151035440596701?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586075305294305865?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -213,7 +213,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Apr 2020 07:23:21 GMT
+      - Mon, 06 Jul 2020 23:00:17 GMT
       expires:
       - '-1'
       pragma:
@@ -241,10 +241,10 @@ interactions:
       ParameterSetName:
       - -g -n --template-file --parameters
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586151035440596701?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586075305294305865?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -256,7 +256,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Apr 2020 07:23:50 GMT
+      - Mon, 06 Jul 2020 23:00:48 GMT
       expires:
       - '-1'
       pragma:
@@ -284,22 +284,22 @@ interactions:
       ParameterSetName:
       - -g -n --template-file --parameters
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/ds000003","name":"ds000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10149382041214521334","parameters":{"scriptName":{"type":"String","value":"script000002"},"utcValue":{"type":"String","value":"20200410T072221Z"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-04-10T07:23:45.3773204Z","duration":"PT1M23.9593807S","correlationId":"8dbb946a-d3c5-45bb-9a68-c04177fe666b","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deploymentScripts","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deploymentScripts/script000002"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deployments/ds000003","name":"ds000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10149382041214521334","parameters":{"scriptName":{"type":"String","value":"script000002"},"utcValue":{"type":"String","value":"20200706T225915Z"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-06T23:00:23.8282517Z","duration":"PT1M7.7812272S","correlationId":"449a7d8c-a884-4830-a9be-dfe833347850","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deploymentScripts","locations":["westus"]}]}],"dependencies":[],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deploymentScripts/script000002"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1051'
+      - '1050'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Apr 2020 07:23:51 GMT
+      - Mon, 06 Jul 2020 23:00:48 GMT
       expires:
       - '-1'
       pragma:
@@ -327,8 +327,8 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
       accept-language:
       - en-US
     method: GET
@@ -336,24 +336,23 @@ interactions:
   response:
     body:
       string: "{\r\n  \"kind\": \"AzureCLI\",\r\n  \"identity\": {\r\n    \"type\":
-        \"userAssigned\",\r\n    \"tenantId\": \"72f988bf-86f1-41af-91ab-2d7cd011db47\",\r\n
+        \"userAssigned\",\r\n    \"tenantId\": \"c445fb81-7c35-42a5-a47b-4686cb6946f7\",\r\n
         \   \"userAssignedIdentities\": {\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi\":
-        {\r\n        \"principalId\": \"73f6d2f6-b6da-44cc-b28b-1f34712cb932\",\r\n
-        \       \"clientId\": \"8cbb3b8b-563d-414e-aefb-04d8462d26ff\"\r\n      }\r\n
-        \   }\r\n  },\r\n  \"location\": \"WESTUS\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"jcotillo@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-04-10T07:22:22.6066023Z\",\r\n    \"lastModifiedBy\": \"jcotillo@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-04-10T07:22:22.6066023Z\"\r\n
+        {\r\n        \"principalId\": \"b19e90a0-0aac-4327-bac6-a450ad44b29b\",\r\n
+        \       \"clientId\": \"cd623fc2-66a6-4126-819f-9ace62524668\"\r\n      }\r\n
+        \   }\r\n  },\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"shenglong.li@outlook.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-07-06T22:59:19.4028359Z\",\r\n    \"lastModifiedBy\": \"shenglong.li@outlook.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-07-06T22:59:19.4028359Z\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"forceUpdateTag\": \"20200410T072221Z\",\r\n    \"azCliVersion\": \"2.0.80\",\r\n
+        \   \"forceUpdateTag\": \"20200706T225915Z\",\r\n    \"azCliVersion\": \"2.0.80\",\r\n
         \   \"scriptContent\": \"echo 'foo'\",\r\n    \"arguments\": \"'foo' 'bar'\",\r\n
         \   \"retentionInterval\": \"P1D\",\r\n    \"timeout\": \"PT30M\",\r\n    \"containerSettings\":
-        {\r\n      \"restartPolicy\": \"never\",\r\n      \"containerGroupName\":
-        \"mycustomaci\"\r\n    },\r\n    \"status\": {\r\n      \"containerInstanceId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.ContainerInstance/containerGroups/mycustomaci\",\r\n
-        \     \"storageAccountId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Storage/storageAccounts/zimuscjlqh5x4azscripts\",\r\n
-        \     \"startTime\": \"2020-04-10T07:22:29.04639Z\",\r\n      \"endTime\":
-        \"2020-04-10T07:23:27.8414789Z\",\r\n      \"expirationTime\": \"2020-04-11T07:23:27.8414789Z\"\r\n
+        {\r\n      \"containerGroupName\": \"mycustomaci\"\r\n    },\r\n    \"status\":
+        {\r\n      \"containerInstanceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.ContainerInstance/containerGroups/mycustomaci\",\r\n
+        \     \"storageAccountId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Storage/storageAccounts/v42ycfc2eymj6azscripts\",\r\n
+        \     \"startTime\": \"2020-07-06T22:59:22.9749374Z\",\r\n      \"endTime\":
+        \"2020-07-06T23:00:20.4671068Z\",\r\n      \"expirationTime\": \"2020-07-07T23:00:20.4671068Z\"\r\n
         \   },\r\n    \"cleanupPreference\": \"OnExpiration\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scripts000001/providers/Microsoft.Resources/deploymentScripts/script000002\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentScripts\",\r\n  \"name\": \"script000002\"\r\n}"
@@ -361,11 +360,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2186'
+      - '2159'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Apr 2020 07:23:52 GMT
+      - Mon, 06 Jul 2020 23:00:49 GMT
       expires:
       - '-1'
       pragma:
@@ -397,10 +396,10 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - --resource-group --name
+      - --resource-group --name --yes
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
       accept-language:
       - en-US
     method: DELETE
@@ -414,7 +413,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 10 Apr 2020 07:23:57 GMT
+      - Mon, 06 Jul 2020 23:00:55 GMT
       expires:
       - '-1'
       pragma:
@@ -442,42 +441,24 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.13 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.8.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentScripts?api-version=2019-10-01-preview
   response:
     body:
-      string: '{"value":[{"kind":"AzurePowerShell","identity":{"type":"userAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/user-assigned-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/contributor-identity":{"principalId":"fa82262f-046e-45a7-8086-e753e075bbf2","clientId":"65dfc4b2-36d3-4514-a502-b1c8cd70c4bb"}}},"location":"westus","tags":{"testTag":"tagValue"},"properties":{"provisioningState":"Failed","azPowerShellVersion":"2.7","scriptContent":"\r\nParam\r\n(\r\n  [string]\r\n  $Location,\r\n\r\n  [string]\r\n  $Name\r\n)\r\n\r\nWrite-Host
-        $Location\r\nWrite-Host $Name\r\n\r\n$deploymentScriptOutputs[''test''] =
-        ''value''\r\n\r\nWrite-Host $deploymentScriptOutputs[''test'']\r\n\r\nGet-AzResourceGroup
-        -Location $Location -Name $Name\r\n\r\nWrite-Host ''end of user script.''","arguments":"-Location
-        ''westus'' -Name \"*rg2\"","retentionInterval":"P1D","timeout":"P1D","containerSettings":{"restartPolicy":"never"},"status":{"containerInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/snek/providers/Microsoft.ContainerInstance/containerGroups/hfqhzgqhdfbmiazscripts","storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/snek/providers/Microsoft.Storage/storageAccounts/hfqhzgqhdfbmiazscripts","startTime":"2019-11-02T05:20:14.2503475Z"},"cleanupPreference":"Always"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/snek/providers/Microsoft.Resources/deploymentScripts/no-step-on-snek3","type":"Microsoft.Resources/deploymentScripts","name":"no-step-on-snek3"},{"kind":"AzurePowerShell","identity":{"type":"userAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Contoso/providers/Microsoft.ManagedIdentity/userAssignedIdentities/alex-test-identity":{"principalId":"1445c3d3-4dfa-4502-96bd-91d74f6ee71b","clientId":"c770324d-84a5-4cd7-8cff-59c7af0ffe80"}}},"location":"eastus","properties":{"provisioningState":"Succeeded","forceUpdateTag":"20191209T193407Z","azPowerShellVersion":"2.7","arguments":"-vaultName
-        alex-test-kv -certificateName test-cert -subjectName ''CN=contoso.com''","primaryScriptUri":"https://raw.githubusercontent.com/alex-frankel/VbDemos/master/misc/create-cert.ps1","retentionInterval":"P1D","timeout":"PT30M","containerSettings":{"restartPolicy":"never"},"status":{"containerInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alex-test-002/providers/Microsoft.ContainerInstance/containerGroups/kbbb26uhhrlfeazscripts","storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alex-test-002/providers/Microsoft.Storage/storageAccounts/kbbb26uhhrlfeazscripts","startTime":"2019-12-09T19:34:27.7986736Z","endTime":"2019-12-09T19:36:00.8936806Z"},"outputs":{"certThumbprint":"A07C5858F372A8DA6186DCCB2B27E755BB08EE21"},"cleanupPreference":"OnSuccess"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alex-test-002/providers/Microsoft.Resources/deploymentScripts/createCert","type":"Microsoft.Resources/deploymentScripts","name":"createCert"},{"kind":"AzurePowerShell","identity":{"type":"userAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Contoso/providers/Microsoft.ManagedIdentity/userAssignedIdentities/alex-test-identity":{"principalId":"1445c3d3-4dfa-4502-96bd-91d74f6ee71b","clientId":"c770324d-84a5-4cd7-8cff-59c7af0ffe80"}}},"location":"eastus","properties":{"provisioningState":"Succeeded","forceUpdateTag":"20191205T175253Z","azPowerShellVersion":"2.8","scriptContent":"\r\n            param([string]
-        $name)\r\n            $output = \"Hello $name\"\r\n            $output2 =
-        ''Hello {0}'' -f $name\r\n            Write-Output $output\r\n            Write-Output
-        $output2\r\n            $DeploymentScriptOutputs = @{}\r\n            $DeploymentScriptOutputs[''text'']
-        = $output\r\n            $DeploymentScriptOutputs[''text2''] = $output2\r\n          ","arguments":"-name
-        ''John Dole''","retentionInterval":"P1D","timeout":"PT1H","containerSettings":{"restartPolicy":"never"},"status":{"containerInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alex-test-002/providers/Microsoft.ContainerInstance/containerGroups/euiltybdhrsfyazscripts","storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alex-test-002/providers/Microsoft.Storage/storageAccounts/euiltybdhrsfyazscripts","startTime":"2019-12-05T17:53:20.2733811Z","endTime":"2019-12-05T17:54:37.9378349Z"},"outputs":{"text2":"Hello
-        John Dole","text":"Hello John Dole"},"cleanupPreference":"OnSuccess"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alex-test-002/providers/Microsoft.Resources/deploymentScripts/scriptInTemplate1","type":"Microsoft.Resources/deploymentScripts","name":"scriptInTemplate1"},{"kind":"AzurePowerShell","identity":{"type":"userAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/majastrz-successful-failure/providers/Microsoft.ManagedIdentity/userAssignedIdentities/majastrz-fail":{"principalId":"6d1b2075-49b9-446b-83e0-382e16e253db","clientId":"e5de4a19-65ee-44ad-b1e6-1284cc6a315f"}}},"location":"WESTUS2","systemData":{"createdBy":"majastrz@microsoft.com","createdByType":"User","createdAt":"2020-03-28T03:29:46.5338923Z","lastModifiedBy":"majastrz@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-03-28T03:29:46.5338923Z"},"properties":{"provisioningState":"Succeeded","azPowerShellVersion":"2.7","scriptContent":"Write-Output
-        ''Hello World!''","retentionInterval":"P30D","timeout":"P1D","containerSettings":{"restartPolicy":"never"},"status":{"containerInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/majastrz-scriptnoise/providers/Microsoft.ContainerInstance/containerGroups/yepwtmbvvqv34azscripts","storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/majastrz-scriptnoise/providers/Microsoft.Storage/storageAccounts/yepwtmbvvqv34azscripts","startTime":"2020-03-28T03:29:49.6286512Z","endTime":"2020-03-28T03:31:06.3625018Z","expirationTime":"2020-04-27T03:31:06.3625018Z"},"cleanupPreference":"OnExpiration"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/majastrz-scriptnoise/providers/Microsoft.Resources/deploymentScripts/ps-throw","type":"Microsoft.Resources/deploymentScripts","name":"ps-throw"},{"kind":"AzureCLI","identity":{"type":"userAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi":{"principalId":"73f6d2f6-b6da-44cc-b28b-1f34712cb932","clientId":"8cbb3b8b-563d-414e-aefb-04d8462d26ff"}}},"location":"WESTUS","systemData":{"createdBy":"jcotillo@microsoft.com","createdByType":"User","createdAt":"2020-04-10T07:22:22.5879842Z","lastModifiedBy":"jcotillo@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-04-10T07:22:22.5879842Z"},"properties":{"provisioningState":"Succeeded","forceUpdateTag":"20200410T072221Z","azCliVersion":"2.0.80","scriptContent":"echo
-        ''foo''","arguments":"''foo'' ''bar''","retentionInterval":"P1D","timeout":"PT30M","containerSettings":{"restartPolicy":"never","containerGroupName":"mycustomaci"},"status":{"containerInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scriptsfelr5rozriap77etkp5nzfgypexupb2alza33eccytvjumgw/providers/Microsoft.ContainerInstance/containerGroups/mycustomaci","storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scriptsfelr5rozriap77etkp5nzfgypexupb2alza33eccytvjumgw/providers/Microsoft.Storage/storageAccounts/y4wkmuzvv5l7qazscripts","startTime":"2020-04-10T07:22:24.0125459Z","endTime":"2020-04-10T07:23:20.3681456Z","expirationTime":"2020-04-11T07:23:20.3681456Z"},"cleanupPreference":"OnExpiration"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scriptsfelr5rozriap77etkp5nzfgypexupb2alza33eccytvjumgw/providers/Microsoft.Resources/deploymentScripts/scriptynyqp5runlfnel","type":"Microsoft.Resources/deploymentScripts","name":"scriptynyqp5runlfnel"},{"kind":"AzureCLI","identity":{"type":"userAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi":{"principalId":"73f6d2f6-b6da-44cc-b28b-1f34712cb932","clientId":"8cbb3b8b-563d-414e-aefb-04d8462d26ff"}}},"location":"WESTUS","systemData":{"createdBy":"jcotillo@microsoft.com","createdByType":"User","createdAt":"2020-04-10T07:22:23.73238Z","lastModifiedBy":"jcotillo@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-04-10T07:22:23.73238Z"},"properties":{"provisioningState":"Succeeded","forceUpdateTag":"20200410T072222Z","azCliVersion":"2.0.80","scriptContent":"echo
-        ''foo''","arguments":"''foo'' ''bar''","retentionInterval":"P1D","timeout":"PT30M","containerSettings":{"restartPolicy":"never","containerGroupName":"mycustomaci"},"status":{"containerInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scriptsarzxej3bvgyemzkqyyszoxx2s67oun2lzys2mkurnsyoix2g/providers/Microsoft.ContainerInstance/containerGroups/mycustomaci","storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scriptsarzxej3bvgyemzkqyyszoxx2s67oun2lzys2mkurnsyoix2g/providers/Microsoft.Storage/storageAccounts/ycaqvaru5ykj2azscripts","startTime":"2020-04-10T07:22:25.5060692Z","endTime":"2020-04-10T07:23:21.0087505Z","expirationTime":"2020-04-11T07:23:21.0087505Z"},"cleanupPreference":"OnExpiration"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_scriptsarzxej3bvgyemzkqyyszoxx2s67oun2lzys2mkurnsyoix2g/providers/Microsoft.Resources/deploymentScripts/script6bmuyidam45rle","type":"Microsoft.Resources/deploymentScripts","name":"script6bmuyidam45rle"},{"kind":"AzurePowerShell","identity":{"type":"userAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DeploymentScriptsRunnersStaticResources-eastus2euap/providers/Microsoft.ManagedIdentity/userAssignedIdentities/DeploymentScriptRunners-eastus2euap":{"principalId":"6bc230c7-5127-4fab-a303-0872df3d48b1","clientId":"62addabc-dd5d-4919-8ae7-8da4339e9baa"}}},"location":"EASTUS2EUAP","systemData":{"createdBy":"lewang@microsoft.com","createdByType":"User","createdAt":"2020-04-08T18:25:29.0913445Z","lastModifiedBy":"lewang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-04-09T23:11:18.4746179Z"},"properties":{"provisioningState":"Succeeded","azPowerShellVersion":"3.0","scriptContent":"param(\r\n\t[string]
-        $Location,\r\n\t[string] $Name\r\n\t)\r\n\r\nWrite-Host $Location\r\nWrite-Host
-        $Name\r\n\r\n$deploymentScriptOutputs[''test''] = ''value''\r\n\r\nWrite-Host
-        $deploymentScriptOutputs[''test'']\r\n\r\nWrite-Host ''end of user script.''","arguments":"-Location
-        eastus2euap -Name ''testScript''","retentionInterval":"P1DT1H","timeout":"PT25M","containerSettings":{"restartPolicy":"never"},"status":{"containerInstanceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/debugrg-eastus2euap/providers/Microsoft.ContainerInstance/containerGroups/2i3vnsi4rzcriazscripts","storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/debugrg-eastus2euap/providers/Microsoft.Storage/storageAccounts/2i3vnsi4rzcriazscripts","startTime":"2020-04-09T23:11:21.3069582Z","endTime":"2020-04-09T23:12:41.9316634Z","expirationTime":"2020-04-11T00:12:41.9316634Z"},"cleanupPreference":"OnExpiration"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/debugrg-eastus2euap/providers/Microsoft.Resources/deploymentScripts/debugScript","type":"Microsoft.Resources/deploymentScripts","name":"debugScript"}]}'
+      string: '{"value":[]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '12427'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 10 Apr 2020 07:23:57 GMT
+      - Mon, 06 Jul 2020 23:00:56 GMT
       expires:
       - '-1'
       pragma:
@@ -488,9 +469,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-original-request-ids:
-      - da0c2875-3a04-4eab-bc51-40cd5e49cfc4
-      - e08a0907-6bf2-4370-8f3f-37139e2dee83
     status:
       code: 200
       message: OK

@@ -146,13 +146,6 @@ def acr_update_set(cmd,
     if parameters.network_rule_set and registry.sku.name not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
-    if parameters.data_endpoint_enabled is not None:
-        # TODO remove the validation after service side blocking is available
-        from ._utils import validate_premium_registry
-        _, _ = validate_premium_registry(
-            cmd, registry_name, resource_group_name,
-            'Dadicated data endpoints are only supported for managed registries in Premium SKU')
-
     validate_sku_update(cmd, registry.sku.name, parameters.sku)
 
     return client.update(resource_group_name, registry_name, parameters)
