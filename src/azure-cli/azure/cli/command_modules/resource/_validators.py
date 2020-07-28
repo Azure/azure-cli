@@ -56,8 +56,7 @@ def _validate_deployment_name_with_template_specs(namespace):
             template_filename = os.path.basename(template_filename)
             namespace.deployment_name = os.path.splitext(template_filename)[0]
         else:
-            namespace.deployment_name = 'deployment1' + str(datetime.datetime.now().timestamp())
-
+            namespace.deployment_name = 'deployment1'
 
 def _validate_deployment_name(namespace):
     # If missing,try come out with a name associated with the template name
