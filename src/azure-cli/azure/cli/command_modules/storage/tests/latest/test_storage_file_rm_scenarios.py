@@ -5,7 +5,7 @@
 
 import os
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
-                               JMESPathCheck)
+                               JMESPathCheck, JMESPathCheckExists)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
@@ -206,7 +206,8 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share}', checks={
             JMESPathCheck('name', self.kwargs['share']),
-            JMESPathCheck('accessTier', 'Hot')
+            JMESPathCheck('accessTier', 'Hot'),
+            JMESPathCheckExists('accessTierChangeTime')
         })
 
         # Create with access tier
