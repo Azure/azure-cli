@@ -667,3 +667,34 @@ def config_query_format(cmd, type, line_separator=None, column_separator=None, q
     if type == 'json':
         DelimitedJSON = cmd.get_models('_models#DelimitedJSON', resource_type=ResourceType.DATA_STORAGE_BLOB)
         return DelimitedJSON(delimiter=line_separator)
+
+
+def add_progress_callback_v2(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def query_blob(client, query_expression, **kwargs):
+
+    reader = client.query_blob(query_expression=query_expression, **kwargs)
+    content = reader.readall()
+
+    return content
