@@ -8,19 +8,19 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 
 helps['next'] = """
-    type: group
-    short-summary: Commands to manage Nexts.
+    type: command
+    short-summary: Recommend what you do in next step.
 """
 
-helps['next create'] = """
-    type: command
-    short-summary: Create a Next.
-"""
+# helps['next create'] = """
+#     type: command
+#     short-summary: Create a Next.
+# """
 
-helps['next list'] = """
-    type: command
-    short-summary: List Nexts.
-"""
+# helps['next list'] = """
+#     type: command
+#     short-summary: List Nexts.
+# """
 
 # helps['next delete'] = """
 #     type: command
