@@ -16,7 +16,7 @@ from enum import Enum
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import in_cloud_console, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core._identity import Identity, ADALCredentialCache, MSALSecretStore
+from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -107,7 +107,7 @@ class Profile(object):
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
-        self._adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        self._adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
 
     # pylint: disable=too-many-branches,too-many-statements
     def login(self,
@@ -125,6 +125,7 @@ class Profile(object):
         credential = None
         auth_record = None
         identity = Identity(self._authority, tenant, cred_cache=self._adal_cache,
+                            scopes=[self.cli_ctx.cloud.endpoints.active_directory_resource_id],
                             allow_unencrypted=self.cli_ctx.config
                             .getboolean('core', 'allow_fallback_to_plaintext', fallback=True)
                             )
@@ -424,7 +425,7 @@ class Profile(object):
             self._storage[_SUBSCRIPTIONS] = subscriptions
 
             # Always remove credential from the legacy cred cache, regardless of MSAL cache, to be deprecated
-            adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+            adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
             adal_cache.remove_cached_creds(user_or_sp)
 
             logger.warning('Account %s was logged out from Azure CLI', user_or_sp)
@@ -455,7 +456,7 @@ class Profile(object):
         self._storage[_SUBSCRIPTIONS] = []
 
         # Always remove credentials from the legacy cred cache, regardless of MSAL cache
-        adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
         adal_cache.remove_all_cached_creds()
         logger.warning('All accounts were logged out.')
 
@@ -668,7 +669,7 @@ class Profile(object):
             user_type = account[_USER_ENTITY].get(_USER_TYPE)
             if user_type == _SERVICE_PRINCIPAL:
                 result['clientId'] = account[_USER_ENTITY][_USER_NAME]
-                msal_cache = MSALSecretStore(True)
+                msal_cache = MsalSecretStore(True)
                 secret, certificate_file = msal_cache.retrieve_secret_of_service_principal(
                     account[_USER_ENTITY][_USER_NAME], account[_TENANT_ID])
                 if secret:

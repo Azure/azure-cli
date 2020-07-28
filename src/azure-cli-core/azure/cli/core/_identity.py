@@ -32,24 +32,6 @@ _SERVICE_PRINCIPAL_CERT_FILE = 'certificateFile'
 _SERVICE_PRINCIPAL_CERT_THUMBPRINT = 'thumbprint'
 
 
-def _load_tokens_from_file(file_path):
-    if os.path.isfile(file_path):
-        try:
-            return get_file_json(file_path, throw_on_empty=False) or []
-        except (CLIError, ValueError) as ex:
-            raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
-                           "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
-                           "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
-    return []
-
-
-def _delete_file(file_path):
-    try:
-        os.remove(file_path)
-    except FileNotFoundError:
-        pass
-
-
 class Identity:
     """Class to interact with Azure Identity.
     """
@@ -64,15 +46,24 @@ class Identity:
 
     CLOUD_SHELL_IDENTITY_UNIQUE_NAME = "unique_name"
 
-    def __init__(self, authority=None, tenant_id=None, client_id=None, **kwargs):
+    def __init__(self, authority=None, tenant_id=None, client_id=None, scopes=None, **kwargs):
+        """
+
+        :param authority:
+        :param tenant_id:
+        :param client_id:
+        :param scopes: Scopes for the initial /authenticate API call
+        :param kwargs:
+        """
         self.authority = authority
         self.tenant_id = tenant_id or "organizations"
         self.client_id = client_id or _CLIENT_ID
         self._cred_cache = kwargs.pop('cred_cache', None)
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
-
+        self.scopes = scopes
+        self.__msal_app = None
         # Store for Service principal credential persistence
-        self._msal_store = MSALSecretStore(fallback_to_plaintext=self.allow_unencrypted)
+        self._msal_store = MsalSecretStore(fallback_to_plaintext=self.allow_unencrypted)
 
         # TODO: Allow disabling SSL verification
         # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
@@ -84,16 +75,18 @@ class Identity:
 
     @property
     def _msal_app(self):
-        # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
-        from msal import PublicClientApplication
-        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
-        from azure.identity._internal.persistent_cache import load_user_cache
+        if not self.__msal_app:
+            # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
+            from msal import PublicClientApplication
+            # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
+            from azure.identity._internal.persistent_cache import load_user_cache
 
-        # Store for user token persistence
-        cache = load_user_cache(self.allow_unencrypted)
-        # Build the authority in MSAL style
-        msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
-        return PublicClientApplication(authority=msal_authority, client_id=self.client_id, token_cache=cache)
+            # Store for user token persistence
+            cache = load_user_cache(self.allow_unencrypted)
+            # Build the authority in MSAL style
+            msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
+            self.__msal_app = PublicClientApplication(authority=msal_authority, client_id=self.client_id, token_cache=cache)
+        return self.__msal_app
 
     def login_with_interactive_browser(self):
         # Use InteractiveBrowserCredential
@@ -275,10 +268,6 @@ class Identity:
         decoded = json.loads(decoded_str)
         return decoded
 
-    def get_user(self, user=None):
-        accounts = self._msal_app.get_accounts(user) if user else self._msal_app.get_accounts()
-        return accounts
-
     def logout_user(self, user):
         accounts = self._msal_app.get_accounts(user)
         logger.info('Before account removal:')
@@ -311,8 +300,18 @@ class Identity:
         # remove service principal secrets
         self._msal_store.remove_all_cached_creds()
 
+    def get_user(self, user=None):
+        accounts = self._msal_app.get_accounts(user) if user else self._msal_app.get_accounts()
+        return accounts
+
     def get_user_credential(self, username):
-        account = self._msal_app.get_accounts(username)[0]
+        accounts = self._msal_app.get_accounts(username)
+        if not accounts:
+            self._migrate_adal_to_msal(username)
+            accounts = self._msal_app.get_accounts(username)
+
+        # TODO: Confirm with MSAL team that username can uniquely identify the account
+        account = accounts[0]
         auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
                                            account['home_account_id'], username)
         return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
@@ -333,6 +332,36 @@ class Identity:
     def get_msi_credential(client_id=None):
         return ManagedIdentityCredential(client_id=client_id)
 
+    def _migrate_adal_to_msal(self, username):
+        logger.debug("Trying to migrate token from ADAL cache.")
+
+        entries = AdalCredentialCache()._load_tokens_from_file()
+        adal_refresh_token = None
+        for entry in entries:
+            # TODO: refine the filter logic
+            if entry.get('userId') == username:
+                adal_refresh_token = entry['refreshToken']
+                break
+
+        if not adal_refresh_token:
+            # No token entry found in MSAL or ADAL
+            raise CLIError("Couldn't find token from MSAL or ADAL (legacy) cache. "
+                           "Please run `az login` to setup account.")
+
+        # TODO: Use ARM scope according to the current selected cloud
+        token_dict = self._msal_app.acquire_token_by_refresh_token(
+            adal_refresh_token, scopes=['https://management.core.windows.net/.default'])
+        if 'error' in token_dict:
+            raise CLIError("Failed to migrate token from ADAL cache to MSAL cache. {}".format(token_dict))
+        logger.warning("Token for account %s has been migrated from ADAL cache to MSAL cache.", username)
+        self._serialize_token_cache()
+
+    def _serialize_token_cache(self):
+        # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
+        logger.warning("Token cache is serialized as plain text and saved to `msal.cache.json`.")
+        with open(os.path.join(get_config_dir(), "msal.cache.json"), "w") as fd:
+            fd.write(self._msal_app.token_cache.serialize())
+
 
 TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
                                           'givenName',
@@ -341,7 +370,7 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 _TOKEN_ENTRY_USER_ID = 'userId'
 
 
-class ADALCredentialCache:
+class AdalCredentialCache:
     """Caches secrets in ADAL format, will be deprecated
     """
 
@@ -359,6 +388,22 @@ class ADALCredentialCache:
         if async_persist:
             import atexit
             atexit.register(self.flush_to_disk)
+
+    def _load_tokens_from_file(self):
+        if os.path.isfile(self._token_file):
+            try:
+                return get_file_json(self._token_file, throw_on_empty=False) or []
+            except (CLIError, ValueError) as ex:
+                raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
+                               "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
+                               "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+        return []
+
+    def _delete_token_file(self):
+        try:
+            os.remove(self._token_file)
+        except FileNotFoundError:
+            pass
 
     def persist_cached_creds(self):
         self._should_flush_to_disk = True
@@ -458,7 +503,7 @@ class ADALCredentialCache:
     def load_adal_token_cache(self):
         if self._adal_token_cache_attr is None:
             import adal
-            all_entries = _load_tokens_from_file(self._token_file)
+            all_entries = self._load_tokens_from_file()
             self.load_service_principal_creds(all_entries=all_entries)
             real_token = [x for x in all_entries if x not in self._service_principal_creds]
             self._adal_token_cache_attr = adal.TokenCache(json.dumps(real_token))
@@ -467,7 +512,7 @@ class ADALCredentialCache:
     def load_service_principal_creds(self, **kwargs):
         creds = kwargs.pop("all_entries", None)
         if not creds:
-            creds = _load_tokens_from_file(self._token_file)
+            creds = self._load_tokens_from_file()
         for c in creds:
             if c.get(_SERVICE_PRINCIPAL_ID):
                 self._service_principal_creds.append(c)
@@ -494,7 +539,7 @@ class ADALCredentialCache:
 
     def remove_all_cached_creds(self):
         # we can clear file contents, but deleting it is simpler
-        _delete_file(self._token_file)
+        self._delete_token_file()
 
 
 class ServicePrincipalAuth(object):   # pylint: disable=too-few-public-methods
@@ -537,7 +582,7 @@ class ServicePrincipalAuth(object):   # pylint: disable=too-few-public-methods
         return entry
 
 
-class MSALSecretStore:
+class MsalSecretStore:
     """Caches secrets in MSAL custom secret store
     """
 

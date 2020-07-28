@@ -1535,9 +1535,9 @@ class TestProfile(unittest.TestCase):
         mock_read_file.return_value = json.dumps(test_sp)
         mock_read_file2.return_value = json.dumps(test_sp)
         mock_read_file3.return_value = json.dumps(test_sp)
-        from azure.cli.core._identity import MSALSecretStore
+        from azure.cli.core._identity import MsalSecretStore
         # action
-        creds_cache = MSALSecretStore()
+        creds_cache = MsalSecretStore()
         token, file = creds_cache.retrieve_secret_of_service_principal("myapp", "mytenant")
 
         self.assertEqual(token, "Secret")
@@ -1554,9 +1554,9 @@ class TestProfile(unittest.TestCase):
         mock_read_file.return_value = json.dumps(test_sp)
         mock_read_file2.return_value = json.dumps(test_sp)
         mock_read_file3.return_value = json.dumps(test_sp)
-        from azure.cli.core._identity import MSALSecretStore
+        from azure.cli.core._identity import MsalSecretStore
         # action
-        creds_cache = MSALSecretStore()
+        creds_cache = MsalSecretStore()
         token, file = creds_cache.retrieve_secret_of_service_principal("myapp", "mytenant")
 
         # assert
@@ -1586,8 +1586,8 @@ class TestProfile(unittest.TestCase):
         mock_read_file1.return_value = json.dumps([test_sp])
         mock_read_file2.return_value = json.dumps([test_sp])
         mock_read_file3.return_value = json.dumps([test_sp])
-        from azure.cli.core._identity import MSALSecretStore
-        creds_cache = MSALSecretStore()
+        from azure.cli.core._identity import MsalSecretStore
+        creds_cache = MsalSecretStore()
 
         # action
         creds_cache.save_service_principal_cred(test_sp2)
@@ -1614,8 +1614,8 @@ class TestProfile(unittest.TestCase):
         mock_read_file1.return_value = json.dumps([test_sp])
         mock_read_file2.return_value = json.dumps([test_sp])
         mock_read_file3.return_value = json.dumps([test_sp])
-        from azure.cli.core._identity import MSALSecretStore
-        creds_cache = MSALSecretStore()
+        from azure.cli.core._identity import MsalSecretStore
+        creds_cache = MsalSecretStore()
 
         # action
         creds_cache.save_service_principal_cred(test_sp)
@@ -1643,8 +1643,8 @@ class TestProfile(unittest.TestCase):
         mock_read_file1.return_value = json.dumps([test_sp])
         mock_read_file2.return_value = json.dumps([test_sp])
         mock_read_file3.return_value = json.dumps([test_sp])
-        from azure.cli.core._identity import MSALSecretStore
-        creds_cache = MSALSecretStore()
+        from azure.cli.core._identity import MsalSecretStore
+        creds_cache = MsalSecretStore()
         new_creds = test_sp.copy()
         new_creds['accessToken'] = 'Secret2'
         # action
@@ -1672,8 +1672,8 @@ class TestProfile(unittest.TestCase):
         mock_read_file1.return_value = json.dumps([test_sp])
         mock_read_file2.return_value = json.dumps([test_sp])
         mock_read_file3.return_value = json.dumps([test_sp])
-        from azure.cli.core._identity import MSALSecretStore
-        creds_cache = MSALSecretStore()
+        from azure.cli.core._identity import MsalSecretStore
+        creds_cache = MsalSecretStore()
 
         # action logout a service principal
         creds_cache.remove_cached_creds('myapp')
@@ -1689,8 +1689,8 @@ class TestProfile(unittest.TestCase):
         mock_read_file2.side_effect = ValueError('a bad error for you')
         mock_read_file3.side_effect = ValueError('a bad error for you')
 
-        from azure.cli.core._identity import MSALSecretStore
-        creds_cache = MSALSecretStore()
+        from azure.cli.core._identity import MsalSecretStore
+        creds_cache = MsalSecretStore()
 
         # assert
         with self.assertRaises(CLIError) as context:
