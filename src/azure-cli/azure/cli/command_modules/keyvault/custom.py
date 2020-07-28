@@ -471,17 +471,27 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        return create_hsm(cmd=cmd,
-                          client=hsm_client,
-                          resource_group_name=resource_group_name,
-                          hsm_name=hsm_name,
-                          administrators=administrators,
-                          location=location,
-                          sku=sku,
-                          enable_purge_protection=enable_purge_protection,
-                          bypass=bypass,
-                          default_action=default_action,
-                          tags=tags)
+
+        from msrest.exceptions import ValidationError
+        try:
+            return create_hsm(cmd=cmd,
+                              client=hsm_client,
+                              resource_group_name=resource_group_name,
+                              hsm_name=hsm_name,
+                              administrators=administrators,
+                              location=location,
+                              sku=sku,
+                              enable_purge_protection=enable_purge_protection,
+                              bypass=bypass,
+                              default_action=default_action,
+                              tags=tags)
+        except ValidationError as ex:
+            error_msg = str(ex)
+            if 'Parameter \'name\' must conform to the following pattern' in error_msg:
+                error_msg = 'Managed HSM name must be between 3-24 alphanumeric characters. ' \
+                            'The name must begin with a letter, end with a letter or digit, ' \
+                            'and not contain consecutive hyphens.'
+            raise CLIError(error_msg)
 
 
 def create_hsm(cmd, client,
@@ -494,6 +504,8 @@ def create_hsm(cmd, client,
     if not administrators:
         raise CLIError('Please specify --administrators')
 
+    from azure.cli.core._profile import Profile
+
     if not sku:
         sku = 'Standard_B1'
 
@@ -501,7 +513,12 @@ def create_hsm(cmd, client,
     ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
 
-    properties = ManagedHsmProperties(enable_purge_protection=enable_purge_protection,
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    _, _, tenant_id = profile.get_login_credentials(
+        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+
+    properties = ManagedHsmProperties(tenant_id=tenant_id,
+                                      enable_purge_protection=enable_purge_protection,
                                       initial_admin_object_ids=administrators,
                                       network_acls=_create_network_rule_set(cmd, bypass, default_action))
     parameters = ManagedHsm(location=location,
@@ -925,8 +942,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 
 # region KeyVault Key
-def create_key(cmd, client, key_name, vault_base_url=None,
-               hsm_name=None, hsm_base_url=None, protection=None,  # pylint: disable=unused-argument
+def create_key(cmd, client, key_name=None, vault_base_url=None,
+               hsm_base_url=None, protection=None, identifier=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None, release_policy=None):
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
@@ -943,14 +960,14 @@ def create_key(cmd, client, key_name, vault_base_url=None,
 
 
 def backup_key(client, file_path, vault_base_url=None,
-               key_name=None, hsm_name=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
+               key_name=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
 def restore_key(client, file_path, vault_base_url=None,
-                hsm_name=None, hsm_base_url=None):  # pylint: disable=unused-argument
+                hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_key(vault_base_url, data)
@@ -997,8 +1014,8 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name, vault_base_url=None,
-               hsm_name=None, hsm_base_url=None,  # pylint: disable=unused-argument
+def import_key(cmd, client, key_name=None, vault_base_url=None,
+               hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None):
@@ -1126,7 +1143,7 @@ def _extract_ec_public_key_from_jwk(jwk_dict):
     return public.public_key(default_backend())
 
 
-def download_key(client, file_path, hsm_name=None, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
+def download_key(client, file_path, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
                  vault_base_url=None, key_name=None, key_version='', encoding=None):
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
@@ -1691,7 +1708,7 @@ def _reconstruct_role_definition(role_definition):
 
 def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=None,
                            role_assignment_name=None, hsm_base_url=None, assignee=None,
-                           assignee_principal_type=None, vault_base_url=None, hsm_name=None):  # pylint: disable=unused-argument
+                           assignee_principal_type=None, identifier=None):  # pylint: disable=unused-argument
     """ Create a new role assignment for a user, group, or service principal. """
     patch_akv_client(client)
 
@@ -1713,7 +1730,7 @@ def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=Non
         principal_id=assignee_object_id, role_definition_id=role_definition_id
     )
 
-    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url)
+    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url, identifier=identifier)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, [role_assignment])
 
@@ -1727,7 +1744,7 @@ def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=Non
 
 
 def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=None, scope=None, assignee=None,
-                           role=None, assignee_object_id=None, ids=None, vault_base_url=None, hsm_name=None):  # pylint: disable=unused-argument
+                           role=None, assignee_object_id=None, ids=None, identifier=None):
     """ Delete a role assignment. """
     patch_akv_client(client)
 
@@ -1761,7 +1778,7 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
                 )
             )
 
-    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url)
+    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url, identifier=identifier)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, deleted_role_assignments)
 
@@ -1776,7 +1793,7 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
 
 
 def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=None, role=None,
-                          assignee_object_id=None, hsm_name=None, vault_base_url=None):  # pylint: disable=unused-argument
+                          assignee_object_id=None, identifier=None):
     """ List role assignments. """
     patch_akv_client(client)
 
@@ -1809,7 +1826,7 @@ def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=N
                 continue
         matched_role_assignments.append(role_assignment)
 
-    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url)
+    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url, identifier=identifier)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, matched_role_assignments)
 
@@ -1823,7 +1840,7 @@ def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=N
     return matched_role_assignments
 
 
-def list_role_definitions(client, scope=None, vault_base_url=None, hsm_base_url=None, hsm_name=None):  # pylint: disable=unused-argument
+def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
     """ List role definitions. """
     patch_akv_client(client)
 
@@ -1842,7 +1859,7 @@ def list_role_definitions(client, scope=None, vault_base_url=None, hsm_base_url=
 
 
 # region full backup/restore
-def full_backup(client, storage_resource_uri, token, vault_base_url=None, hsm_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+def full_backup(client, storage_resource_uri, token, vault_base_url=None, no_wait=False):
     return sdk_no_wait(
         no_wait,
         client.begin_full_backup,
@@ -1853,7 +1870,7 @@ def full_backup(client, storage_resource_uri, token, vault_base_url=None, hsm_ba
 
 
 def full_restore(client, storage_resource_uri, token, folder_to_restore,
-                 vault_base_url=None, hsm_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+                 vault_base_url=None, no_wait=False):
     return sdk_no_wait(
         no_wait,
         client.begin_full_restore_operation,

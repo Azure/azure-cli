@@ -73,7 +73,7 @@ def load_command_table(self, _):
                             client_factory=private_mgmt_vaults_entity.client_factory) as g:
         g.generic_update_command(
             'update-hsm', setter_name='update_hsm_setter', setter_type=kv_vaults_custom,
-            custom_func_name='update_hsm',
+            custom_func_name='update_hsm', is_preview=True,
             doc_string_source=private_mgmt_vaults_entity.models_docs_tmpl.format('ManagedHsmProperties'))
 
     with self.command_group('keyvault network-rule',
