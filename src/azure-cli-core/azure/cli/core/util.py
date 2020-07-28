@@ -895,7 +895,7 @@ def _log_response(response, **kwargs):
         return response
 
 
-class ConfiguredDefaultSetter:
+class ScopedConfig:
 
     def __init__(self, cli_config, use_local_config=None):
         self.use_local_config = use_local_config
@@ -910,6 +910,9 @@ class ConfiguredDefaultSetter:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         setattr(self.cli_config, 'use_local_config', self.original_use_local_config)
+
+
+ConfiguredDefaultSetter = ScopedConfig
 
 
 def _ssl_context():
