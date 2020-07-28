@@ -2634,6 +2634,15 @@ type: group
 short-summary: Manage log analytics workspace for a vm.
 """
 
+helps['vm monitor log show'] = """
+type: command
+short-summary: Execute a query against the Log Analytics workspace linked with a VM.
+examples:
+  - name: Get performance log for a VM linked with a workspace
+    text: >
+        az vm monitor log show --name myVM -g myRG -q "Perf | limit 10"
+"""
+
 helps['vm monitor metrics'] = """
 type: group
 short-summary: Manage metrics for a vm.

@@ -257,7 +257,7 @@ def load_arguments(self, _):
         c.argument('private_link_name', options_list=['--name', '-n'], help='The name of Private Link.')
         c.argument('private_link_ip_address', options_list='--ip-address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', options_list='--subnet-prefix', help='The CIDR prefix to use when creating a new subnet')
-        c.argument('private_link_subnet_name', options_list='--subnet', help='The name of a subnet within the same vnet of an application gateway')
+        c.argument('private_link_subnet_name_or_id', options_list='--subnet', help='The name or an existing ID of a subnet within the same vnet of an application gateway')
         c.argument('private_link_primary', options_list='--primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
     with self.argument_context('network application-gateway private-link list', arg_group=None) as c:
