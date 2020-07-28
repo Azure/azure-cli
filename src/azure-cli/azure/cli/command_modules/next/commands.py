@@ -15,6 +15,5 @@ def load_command_table(self, _):
     #    operations_tmpl='<PATH>.operations#.{}',
     #    client_factory=cf_next)
 
-
     with self.command_group('') as g:
-        g.custom_command('next', 'handle_next')
+        g.custom_command('next', 'handle_next', is_preview=True)
