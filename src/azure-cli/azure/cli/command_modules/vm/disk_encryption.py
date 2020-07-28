@@ -317,7 +317,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
                                                                      extension['name'],
                                                                      'instanceView')
     logger.debug(extension_result)
-    if extension_result.instance_view.statuses:
+    if extension_result.instance_view and extension_result.instance_view.statuses:
         encryption_status['progressMessage'] = extension_result.instance_view.statuses[0].message
 
     substatus_message = None
@@ -546,7 +546,7 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])
 
     # ensure vault has 'EnabledForDiskEncryption' permission
-    if not key_vault.properties.enabled_for_disk_encryption:
+    if not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
         _report_client_side_validation_error("Keyvault '{}' is not enabled for disk encryption.".format(
             disk_vault_resource_info['resource_name']))
 

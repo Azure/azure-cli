@@ -123,10 +123,9 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "php|7.3"'.format(resource_group, webapp_name, plan))
 
-        # TODO: Bug #14409. Re-enable check after fixing https://github.com/Azure/azure-cli/issues/14409
-        # self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-        #     JMESPathCheck('phpVersion', '7.3')
-        # ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('phpVersion', '7.3')
+        ])
 
     def test_webapp_runtimes(self):
         self.cmd('webapp list-runtimes')
