@@ -437,6 +437,7 @@ def load_arguments(self, _):
     with self.argument_context('managedapp') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application', id_part='resource_group')
         c.argument('application_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('tags', tags_type)
 
     with self.argument_context('managedapp definition') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application definition', id_part='resource_group')

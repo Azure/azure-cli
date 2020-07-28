@@ -682,6 +682,22 @@ type: group
 short-summary: Manage storage blob leases.
 """
 
+helps['storage blob lease acquire'] = """
+type: command
+short-summary: Request a new lease.
+examples:
+  - name: Request a new lease.
+    text: az storage blob lease acquire -b myblob -c mycontainer --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage blob lease renew'] = """
+type: command
+short-summary: Renew the lease.
+examples:
+  - name: Renew the lease.
+    text: az storage blob lease renew -b myblob -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage blob list'] = """
 type: command
 short-summary: List blobs in a given container.

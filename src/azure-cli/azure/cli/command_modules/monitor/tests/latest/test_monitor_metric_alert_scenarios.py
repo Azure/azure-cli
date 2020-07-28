@@ -6,6 +6,7 @@
 import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
+from azure_devtools.scenario_tests import AllowLargeResponse
 from knack.util import CLIError
 
 
@@ -80,6 +81,7 @@ class MonitorTests(ScenarioTest):
             self.check('criteria.allOf[0].dimensions[0].values[0]', '*')
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='test_metrics_alert_metric_name_with_special_characters')
     @StorageAccountPreparer()
     def test_metrics_alert_metric_name_with_special_characters(self, resource_group):

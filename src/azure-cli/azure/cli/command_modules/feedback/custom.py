@@ -108,7 +108,7 @@ _AUTO_GEN_COMMENT = "<!--auto-generated-->"
 _LogMetadataType = namedtuple('LogMetadata', ['cmd', 'seconds_ago', 'file_path', 'p_id'])
 
 
-class CommandLogFile(object):
+class CommandLogFile:
     _LogRecordType = namedtuple("LogRecord", ["p_id", "date_time", "level", "logger", "log_msg"])
     UNKNOWN_CMD = "Unknown"
 
@@ -349,7 +349,7 @@ class CommandLogFile(object):
         return CommandLogFile._LogRecordType(*parts)
 
 
-class ErrorMinifier(object):
+class ErrorMinifier:
 
     _FILE_RE = re.compile(r'File "(.*)"')
     _CONTINUATION_STR = "...\n"
