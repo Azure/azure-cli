@@ -1199,13 +1199,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         #nodepool get-upgrades
         self.cmd('aks nodepool get-upgrades --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool1_name}', checks=[
-            self.check('type', "Microsoft.ContainerService/managedClusters/agentPools/upgradeProfiles"),
-            self.check('name', nodepool1_name)
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group),
+            StringContainCheck(nodepool1_name),
+            self.check('type', "Microsoft.ContainerService/managedClusters/agentPools/upgradeProfiles")
         ])
 
         self.cmd('aks nodepool get-upgrades --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool2_name}', checks=[
-            self.check('type', "Microsoft.ContainerService/managedClusters/agentPools/upgradeProfiles"),
-            self.check('name', nodepool2_name)
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group),
+            StringContainCheck(nodepool2_name),
+            self.check('type', "Microsoft.ContainerService/managedClusters/agentPools/upgradeProfiles")
         ])
 
         #nodepool update
