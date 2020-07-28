@@ -275,7 +275,7 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'plan': 'cli_res_create_plan',
-            'app': 'clirescreateweb',
+            'app': 'clirescreateweb2',
             'loc': resource_group_location
         })
 
@@ -892,6 +892,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('account management-group delete -n {mg}')
 
 
+# TODO
 class DeploymentTestAtTenantScope(ScenarioTest):
 
     def test_tenant_level_deployment(self):
@@ -2419,7 +2420,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         ])
 
         with self.assertRaises(CLIError):
-            self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg=test StorageAccountName1={sa1} StorageAccountName2={sa2}')
+            self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg=SomeRandomRG StorageAccountName1={sa1} StorageAccountName2={sa2}')
 
         self.cmd('group deployment create -g {rg1} -n {dn} --template-file "{tf}" --parameters CrossRg={rg2}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),

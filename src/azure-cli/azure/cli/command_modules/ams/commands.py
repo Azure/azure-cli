@@ -54,7 +54,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('sync-storage-keys', 'sync_storage_keys')
 
     with self.command_group('ams account sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
-        g.custom_command('create', 'create_assign_sp_to_mediaservice',
+        g.custom_command('create', 'create_or_update_assign_sp_to_mediaservice',
                          custom_command_type=get_custom_sdk('sp', get_mediaservices_client))
         g.custom_command('reset-credentials', 'reset_sp_credentials_for_mediaservice',
                          custom_command_type=get_custom_sdk('sp', get_mediaservices_client))

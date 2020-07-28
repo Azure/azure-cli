@@ -325,7 +325,7 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
         self.cmd('extension remove -n spring-cloud')
         super(TestMonitorAutoscaleComplexRules, self).tearDown()
 
-    @record_only()
+#    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rule_for_spring_cloud', location='westus2')
     def test_monitor_autoscale_rule_for_spring_cloud(self, resource_group):
         self.kwargs.update({

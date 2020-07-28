@@ -148,7 +148,11 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2019-09-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2020-06-01',
+<<<<<<< HEAD
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-06-01',
+=======
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
+>>>>>>> 4efdc3a2f1d72d1102d8a1969bbc97b518353d6a
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2019-10-01-preview',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2019-06-01-preview',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',

@@ -1,0 +1,435 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_image_builder_template_file_000001?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_image_builder_template_file_000001","name":"cli_test_image_builder_template_file_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-20T02:19:51Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 02:19:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-msi/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_image_builder_template_file_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1?api-version=2015-08-31-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_image_builder_template_file_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"2f79ed3a-f1d6-478e-b652-27c60fb887cf","clientId":"451490e0-05aa-4066-83f8-3fbc10fc6acd","clientSecretUrl":"https://control-westus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_image_builder_template_file_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1/credentials?tid=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a&oid=2f79ed3a-f1d6-478e-b652-27c60fb887cf&aid=451490e0-05aa-4066-83f8-3fbc10fc6acd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '888'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 02:20:02 GMT
+      expires:
+      - '-1'
+      location:
+      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_image_builder_template_file_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role assignment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --assignee --role --scope
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-authorization/0.52.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_image_builder_template_file_000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action","Microsoft.Blueprint/blueprintAssignments/write","Microsoft.Blueprint/blueprintAssignments/delete"],"dataActions":[],"notDataActions":[]}],"createdOn":"2015-02-02T21:55:09.8806423Z","updatedOn":"2019-02-05T21:24:38.4580610Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '832'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 02:20:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      set-cookie:
+      - x-ms-gateway-slice=Production; path=/; SameSite=None; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role assignment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --assignee --role --scope
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-graphrbac/0.60.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27451490e0-05aa-4066-83f8-3fbc10fc6acd%27%29&api-version=1.6
+  response:
+    body:
+      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"2f79ed3a-f1d6-478e-b652-27c60fb887cf","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_image_builder_template_file_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appId":"451490e0-05aa-4066-83f8-3fbc10fc6acd","applicationTemplateId":null,"appOwnerTenantId":null,"appRoleAssignmentRequired":false,"appRoles":[],"displayName":"ide1","errorUrl":null,"homepage":null,"informationalUrls":null,"keyCredentials":[{"customKeyIdentifier":"5A544987DD9F743B7CC51ACEA7C14E4B8DEF8F9D","endDate":"2020-10-18T02:14:00Z","keyId":"6ec8c3e5-e673-48bd-9e25-68934f86d268","startDate":"2020-07-20T02:14:00Z","type":"AsymmetricX509Cert","usage":"Verify","value":null}],"logoutUrl":null,"notificationEmailAddresses":[],"oauth2Permissions":[],"passwordCredentials":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyEndDateTime":null,"preferredTokenSigningKeyThumbprint":null,"publisherName":null,"replyUrls":[],"samlMetadataUrl":null,"samlSingleSignOnSettings":null,"servicePrincipalNames":["451490e0-05aa-4066-83f8-3fbc10fc6acd","https://identity.azure.net/WrvIh2cIkGZZJW2aI+p+kmxDFI4wCxWbVrBY9Zx2U2M="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null}]}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '1624'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Mon, 20 Jul 2020 02:20:50 GMT
+      duration:
+      - '2491269'
+      expires:
+      - '-1'
+      ocp-aad-diagnostics-server-name:
+      - w4Fp5QvpSZVkjmrLeuPuZ5uIQStd+cB8qrQqWrpH8DM=
+      ocp-aad-session-key:
+      - oPIF4HuOx3ORjDz6v3UgYRoAkQ-s1CxS0xm5NPdWPdL0SSFFePjwoSgheZRJp9D_3vGr0ccVMGtIvKzIAb2nbYVpU2B3C6onFPl0BToMOYEhVRjrwaqo_j-6eRusrgIL.s3oe1MOV7dSf84QOxzOeNwSXdqom6scopwlXdkxK5jw
+      pragma:
+      - no-cache
+      request-id:
+      - e5b5757a-95cf-493b-9b84-667965f21a1e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aad-resource-unit:
+      - '1'
+      x-aspnet-version:
+      - 4.0.30319
+      x-ms-dirapi-data-contract-version:
+      - '1.6'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "principalId": "2f79ed3a-f1d6-478e-b652-27c60fb887cf"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role assignment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '233'
+      Content-Type:
+      - application/json; charset=utf-8
+      Cookie:
+      - x-ms-gateway-slice=Production
+      ParameterSetName:
+      - --assignee --role --scope
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-authorization/0.52.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_image_builder_template_file_000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001?api-version=2018-09-01-preview
+  response:
+    body:
+      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"2f79ed3a-f1d6-478e-b652-27c60fb887cf","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_image_builder_template_file_000001","createdOn":"2020-07-20T02:20:50.6295870Z","updatedOn":"2020-07-20T02:20:50.6295870Z","createdBy":null,"updatedBy":"9ac534f1-d577-4034-a32d-48de400dacbf"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_image_builder_template_file_000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '903'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 02:20:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      set-cookie:
+      - x-ms-gateway-slice=Production; path=/; secure; HttpOnly; SameSite=None
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://raw.githubusercontent.com/qwordy/azvmimagebuilder/master/quickquickstarts/0_Creating_a_Custom_Linux_Managed_Image/example.json
+  response:
+    body:
+      string: "{\n    \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
+        \   \"apiVersion\": \"2020-02-14\",\n    \"location\": \"westus\",\n    \"dependsOn\":
+        [],\n    \"tags\": {\n        \"imagebuilderTemplate\": \"ubuntu1804\"\n    },\n
+        \   \"identity\": {\n        \"type\": \"UserAssigned\",\n        \"userAssignedIdentities\":
+        {\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fy/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
+        {}\n        }\n    },\n    \"properties\": {\n\n        \"buildTimeoutInMinutes\"
+        : 80,\n        \n        \"vmProfile\": {\n            \"vmSize\": \"Standard_D1_v2\",\n
+        \           \"osDiskSizeGB\": 30\n        },\n\n        \"source\": {\n            \"type\":
+        \"PlatformImage\",\n                \"publisher\": \"Canonical\",\n                \"offer\":
+        \"UbuntuServer\",\n                \"sku\": \"18.04-LTS\",\n                \"version\":
+        \"18.04.201903060\"\n        },\n        \"customize\": [\n            {\n
+        \               \"type\": \"Shell\",\n                \"name\": \"RunScriptFromSource\",\n
+        \               \"scriptUri\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\n
+        \           },\n\n            {\n                \"type\": \"Shell\",\n                \"name\":
+        \"CheckSumCompareShellScript\",\n                \"scriptUri\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript2.sh\",\n
+        \               \"sha256Checksum\": \"ade4c5214c3c675e92c66e2d067a870c5b81b9844b3de3cc72c49ff36425fc93\"\n
+        \           },\n            \n            {\n                \"type\": \"File\",\n
+        \               \"name\": \"downloadBuildArtifacts\",\n                \"sourceUri\":
+        \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html\",\n
+        \               \"destination\":\"/tmp/index.html\"\n            },\n\n            {\n
+        \               \"type\": \"Shell\",\n                \"name\": \"setupBuildPath\",\n
+        \               \"inline\": [\n                    \"sudo mkdir /buildArtifacts\",\n
+        \                   \"sudo cp /tmp/index.html /buildArtifacts/index.html\"\n
+        \               ]\n            },\n\n            {\n                \"type\":
+        \"Shell\",\n                \"name\": \"InstallUpgrades\",\n                \"inline\":
+        [\n                    \"sudo apt install unattended-upgrades\"\n                ]\n
+        \           }\n\n        ],\n        \"distribute\": \n            [\n                {
+        \  \"type\":\"ManagedImage\",\n                    \"imageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fy/providers/Microsoft.Compute/images/image\",\n
+        \                   \"location\": \"westus\",\n                    \"runOutputName\":
+        \"runOutputName\",\n                    \"artifactTags\": {\n                        \"source\":
+        \"azVmImageBuilder\",\n                        \"baseosimg\": \"ubuntu1804\"\n
+        \                   }\n                }\n            ]\n        }\n    }\n"
+    headers:
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - keep-alive
+      content-length:
+      - '2868'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 02:20:55 GMT
+      etag:
+      - W/"786a4e91b29975f62ce7442c6a3aca101625903670c3abfcf09f5a24086e1ee2"
+      expires:
+      - Mon, 20 Jul 2020 02:25:55 GMT
+      source-age:
+      - '0'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding, Accept-Encoding
+      via:
+      - 1.1 varnish (Varnish/6.0)
+      - 1.1 varnish
+      x-cache:
+      - MISS, MISS
+      x-cache-hits:
+      - 0, 0
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - 5641469e1b403b8ff2f9d4907805c36b772829fd
+      x-frame-options:
+      - deny
+      x-github-request-id:
+      - 4DD2:61C3:288189:2B6A0C:5F14FF86
+      x-served-by:
+      - cache-sin18025-SIN
+      x-timer:
+      - S1595211655.341967,VS0,VE334
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {"imagebuilderTemplate": "ubuntu1804"},
+      "properties": {"source": {"type": "PlatformImage", "publisher": "Canonical",
+      "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "18.04.201903060"},
+      "customize": [{"name": "RunScriptFromSource", "type": "Shell", "scriptUri":
+      "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"},
+      {"name": "CheckSumCompareShellScript", "type": "Shell", "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript2.sh",
+      "sha256Checksum": "ade4c5214c3c675e92c66e2d067a870c5b81b9844b3de3cc72c49ff36425fc93"},
+      {"name": "downloadBuildArtifacts", "type": "File", "sourceUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html",
+      "destination": "/tmp/index.html"}, {"name": "setupBuildPath", "type": "Shell",
+      "inline": ["sudo mkdir /buildArtifacts", "sudo cp /tmp/index.html /buildArtifacts/index.html"]},
+      {"name": "InstallUpgrades", "type": "Shell", "inline": ["sudo apt install unattended-upgrades"]}],
+      "distribute": [{"runOutputName": "runOutputName", "artifactTags": {"source":
+      "azVmImageBuilder", "baseosimg": "ubuntu1804"}, "type": "ManagedImage", "imageId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fy/providers/Microsoft.Compute/images/image",
+      "location": "westus"}], "buildTimeoutInMinutes": 80, "vmProfile": {"vmSize":
+      "Standard_D1_v2", "osDiskSizeGB": 30}}, "identity": {"type": "UserAssigned",
+      "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fy/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1":
+      {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image builder create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1757'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --image-template
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-imagebuilder/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_image_builder_template_file_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/tmp1?api-version=2020-02-14
+  response:
+    body:
+      string: '{"error":{"code":"LinkedAuthorizationFailed","message":"The client
+        has permission to perform action ''Microsoft.ManagedIdentity/userAssignedIdentities/assign/action''
+        on scope ''/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_image_builder_template_file_000001/providers/Microsoft.VirtualMachineImages/imageTemplates/tmp1'',
+        however the current tenant ''54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'' is not
+        authorized to access linked subscription ''1c638cf4-608f-4ee6-b680-c329e824c3a8''."}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '537'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 02:20:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 403
+      message: Forbidden
+version: 1
