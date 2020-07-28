@@ -612,7 +612,7 @@ def _deploy_arm_template_at_management_group(cmd,
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
-                           management_group_id, deployment_name, deployment)  
+                           management_group_id, deployment_name, deployment)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
                        management_group_id, deployment_name, deployment_properties)
 

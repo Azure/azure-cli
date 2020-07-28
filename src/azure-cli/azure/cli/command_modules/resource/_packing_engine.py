@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 import os
 import json
-from re import template
 from knack.util import CLIError
 from azure.cli.core.util import read_file_content
 from azure.cli.command_modules.resource.custom import _remove_comments_from_json
