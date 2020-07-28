@@ -72,8 +72,6 @@ def load_arguments(self, _):
     with self.argument_context('apim api list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
         c.argument('filter_display_name', arg_group='API', help='Filter of APIs by displayName.')
-        c.argument('skip', type=int, help='Number of records to skip.')
-        c.argument('top', type=int, help='Number of records to return.')
 
     with self.argument_context('apim api create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
@@ -83,8 +81,6 @@ def load_arguments(self, _):
         c.argument('description', arg_group='API', help='Description of the API. May include HTML formatting tags.')
         c.argument('subscription_key_header_name', arg_group='API', help='Specifies the subscription key header name.')
         c.argument('subscription_key_query_param_name', arg_group='API', help='Specifies the subscription key query string parameter name.')
-        c.argument('open_id_provider_id', help='Specifies the openid in the authentication setting.')
-        c.argument('bearer_token_sending_methods', nargs='+', help='Specifies the sending methods for bearer token.')
         c.argument('authorization_server_id', help='Specifies the OAuth authorization server ID.')
         c.argument('authorization_scope', help='Specifies the OAuth operations scope.')
         c.argument('service_url', arg_group='API', help='Absolute URL of the backend service implementing this API. Cannot be more than 2000 characters long.')

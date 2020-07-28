@@ -13,8 +13,7 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              ApiContract, ApiType, ApiCreateOrUpdateParameter, Protocol,
                                              VirtualNetworkType, SkuType, ApiCreateOrUpdatePropertiesWsdlSelector,
                                              SoapApiType, ContentFormat, SubscriptionKeyParameterNamesContract,
-                                             OAuth2AuthenticationSettingsContract, AuthenticationSettingsContract,
-                                             OpenIdAuthenticationSettingsContract)
+                                             OAuth2AuthenticationSettingsContract, AuthenticationSettingsContract)
 
 # Service Operations
 
@@ -125,10 +124,9 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 # API Operations
 
 def create_apim_api(client, resource_group_name, service_name, api_id, description=None, subscription_key_header_name=None,
-                    subscription_key_query_param_name=None, open_id_provider_id=None, bearer_token_sending_methods=None,
-                    authorization_server_id=None, authorization_scope=None, display_name=None, service_url=None, protocols=None,
-                    path=None, subscription_key_required=None, api_type=None,
-                    subscription_required=False, no_wait=False):
+                    subscription_key_query_param_name=None, authorization_server_id=None, authorization_scope=None,
+                    display_name=None, service_url=None, protocols=None, path=None, subscription_key_required=None,
+                    api_type=None, subscription_required=False, no_wait=False):
     """Creates a new API. """
 
     if authorization_server_id is not None and authorization_scope is not None:
@@ -138,15 +136,6 @@ def create_apim_api(client, resource_group_name, service_name, api_id, descripti
         )
         authentication_settings = AuthenticationSettingsContract(
             o_auth2=o_auth2,
-            subscription_key_required=subscription_key_required
-        )
-    elif open_id_provider_id is not None and bearer_token_sending_methods is not None:
-        openid = OpenIdAuthenticationSettingsContract(
-            openid_provider_id=open_id_provider_id,
-            bearer_token_sending_methods=bearer_token_sending_methods
-        )
-        authentication_settings = AuthenticationSettingsContract(
-            openid=openid,
             subscription_key_required=subscription_key_required
         )
     else:
@@ -178,13 +167,13 @@ def get_apim_api(client, resource_group_name, service_name, api_id):
     return client.api.get(resource_group_name, service_name, api_id)
 
 
-def list_apim_api(client, resource_group_name, service_name, filter_display_name=None, top=None, skip=None):
+def list_apim_api(client, resource_group_name, service_name, filter_display_name=None):
     """List all APIs of an API Management instance. """
 
     if filter_display_name is not None:
         filter_display_name = "properties/displayName eq '%s'" % filter_display_name
 
-    return client.api.list_by_service(resource_group_name, service_name, filter=filter_display_name, skip=skip, top=top)
+    return client.api.list_by_service(resource_group_name, service_name, filter=filter_display_name)
 
 
 def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=None, if_match=None, no_wait=False):
