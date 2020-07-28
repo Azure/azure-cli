@@ -96,3 +96,28 @@ def load_arguments(self, _):
         c.argument('api_type', arg_type=get_enum_type(API_TYPES), help='The type of the API.')
         c.argument('subscription_required', arg_type=get_three_state_flag(), help='If true, the API requires a subscription key on requests.')
         c.argument('tags', tags_type)
+
+    with self.argument_context('apim nv create') as c:
+        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
+        c.argument('named_value_id', help='The id of the API Management Named Value.')
+        c.argument('display_name', help='The display name of the API Management Named Value.')
+        c.argument('value', help='The value of the API Management Named Value.')
+        c.argument('secret', arg_type=get_three_state_flag(), help='If true, the Named Value is a secret.')
+        c.argument('tags', tags_type)
+
+    with self.argument_context('apim nv update') as c:
+        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
+        c.argument('value', help='The value of the API Management Named Value.')
+        c.argument('secret', arg_type=get_three_state_flag(), help='If true, the Named Value is a secret.')
+        c.argument('tags', tags_type)
+
+    with self.argument_context('apim nv delete') as c:
+        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
+        c.argument('named_value_id', help='The id of the API Management Named Value.')
+
+    with self.argument_context('apim nv show') as c:
+        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
+        c.argument('named_value_id', help='The id of the API Management Named Value.')
+
+    with self.argument_context('apim nv list') as c:
+        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')

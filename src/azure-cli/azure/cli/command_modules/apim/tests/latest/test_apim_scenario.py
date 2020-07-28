@@ -131,6 +131,43 @@ class ApimScenarioTest(ScenarioTest):
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
         self.assertEqual(api_count, 1)
 
+        # named value operations
+        self.kwargs.update({
+            'display_name': self.create_random_name('nv-name', 14),
+            'value': 'testvalue123',
+            'nv_id': self.create_random_name('az-nv', 12),
+            'secret': False,
+            'tags': "foo=baz",
+            'updatedtestvalue': 'updatedtestvalue123'
+        })
+
+        # create named value
+        self.cmd('apim nv create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --value "{value}" --named-value-id "{nv_id}" --secret "{secret}" --tags "{tags}"', checks=[
+            self.check('displayName', '{display_name}'),
+            self.check('value', '{value}'),
+            self.check('secret', '{secret}')
+        ])
+
+        # get named value
+        self.cmd('apim nv show -g {rg} --service-name {service_name} --named-value-id {nv_id}', checks=[
+            self.check('displayName', '{display_name}'),
+            self.check('value', '{value}')
+        ])
+
+        # update named value
+        self.cmd('apim nv update -g "{rg}" --service-name "{service_name}" --named-value-id "{nv_id}" --value "{updatedtestvalue}"', checks=[
+            self.check('value', '{updatedtestvalue}')
+        ])
+
+        # list named value
+        nv_count = len(self.cmd('apim nv list -g {rg} --service-name {service_name}').get_output_in_json())
+        self.assertEqual(nv_count, 1)
+
+        # delete named value
+        self.cmd('apim nv delete -g {rg} --service-name {service_name} --named-value-id {nv_id} -y')
+        nv_count = len(self.cmd('apim nv list -g {rg} --service-name {service_name}').get_output_in_json())
+        self.assertEqual(nv_count, 0)
+
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
 

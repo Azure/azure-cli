@@ -8,7 +8,7 @@ from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
                                              ApiContract, ApiType, Protocol,
-                                             VirtualNetworkType, SkuType)
+                                             VirtualNetworkType, SkuType, NamedValueCreateContract)
 
 # Service Operations
 
@@ -205,5 +205,52 @@ def update_apim_api(instance, description=None, subscription_key_parameter_names
 
     if tags is not None:
         instance.tags = tags
+
+    return instance
+
+
+# Named Value Operations
+
+def create_apim_nv(client, resource_group_name, service_name, named_value_id, display_name, value=None, tags=None, secret=False):
+    """Creates a new Named Value. """
+
+    resource = NamedValueCreateContract(
+        tags=tags,
+        secret=secret,
+        display_name=display_name,
+        value=value
+    )
+
+    return client.named_value.create_or_update(resource_group_name, service_name, named_value_id, resource)
+
+
+def get_apim_nv(client, resource_group_name, service_name, named_value_id):
+    """Shows details of a Named Value. """
+
+    return client.named_value.get(resource_group_name, service_name, named_value_id)
+
+
+def list_apim_nv(client, resource_group_name, service_name):
+    """List all Named Values of an API Management instance. """
+
+    return client.named_value.list_by_service(resource_group_name, service_name)
+
+
+def delete_apim_nv(client, resource_group_name, service_name, named_value_id):
+    """Deletes an existing Named Value. """
+
+    return client.named_value.delete(resource_group_name, service_name, named_value_id, if_match='*')
+
+
+def update_apim_nv(instance, value=None, tags=None, secret=None):
+    """Updates an existing Named Value."""
+    if tags is not None:
+        instance.tags = tags
+
+    if value is not None:
+        instance.value = value
+
+    if secret is not None:
+        instance.secret = secret
 
     return instance
