@@ -39,7 +39,6 @@ _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
 _CLIENT_ID = 'clientId'
-_USER_HOME_ACCOUNT_ID = 'homeAccountId'
 _CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
@@ -185,14 +184,11 @@ class Profile(object):
             bare_tenant = tenant or auth_record.tenant_id
             subscriptions = self._build_tenant_level_accounts([bare_tenant])
 
-        home_account_id = None
         if auth_record:
             username = auth_record.username
-            home_account_id = auth_record.home_account_id
 
         consolidated = self._normalize_properties(username, subscriptions,
-                                                  is_service_principal, bool(use_cert_sn_issuer),
-                                                  home_account_id=home_account_id)
+                                                  is_service_principal, bool(use_cert_sn_issuer))
 
         self._set_subscriptions(consolidated)
         # todo: remove after ADAL token deprecation
@@ -276,7 +272,7 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
-                              user_assigned_identity_id=None, home_account_id=None, managed_identity_info=None):
+                              user_assigned_identity_id=None, managed_identity_info=None):
         import sys
         consolidated = []
         for s in subscriptions:
@@ -301,8 +297,6 @@ class Profile(object):
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
             }
 
-            if home_account_id:
-                subscription_dict[_USER_ENTITY][_USER_HOME_ACCOUNT_ID] = home_account_id
             # for Subscriptions - List REST API 2019-06-01's subscription account
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
                 if hasattr(s, 'home_tenant_id'):
@@ -545,7 +539,6 @@ class Profile(object):
     def _create_identity_credential(self, account, aux_tenant_id=None):
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        home_account_id = account[_USER_ENTITY].get(_USER_HOME_ACCOUNT_ID)
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
 
@@ -560,9 +553,9 @@ class Profile(object):
 
             # User
             if user_type == _USER:
-                if not home_account_id:
-                    raise CLIError("CLI authentication is migrated to AADv2.0, please run 'az login' to re-login")
-                return identity.get_user_credential(home_account_id, username_or_sp_id)
+                # if not home_account_id:
+                #     raise CLIError("CLI authentication is migrated to AADv2.0, please run 'az login' to re-login")
+                return identity.get_user_credential(username_or_sp_id)
 
             # Service Principal
             use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
@@ -795,8 +788,7 @@ class SubscriptionFinder(object):
                                 allow_unencrypted=self.cli_ctx.config
                                 .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
             try:
-                specific_tenant_credential = identity.get_user_credential(auth_record.home_account_id,
-                                                                          auth_record.username)
+                specific_tenant_credential = identity.get_user_credential(auth_record.username)
                 # todo: remove after ADAL deprecation
                 if self.adal_cache:
                     self.adal_cache.add_credential(specific_tenant_credential)

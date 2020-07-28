@@ -311,9 +311,10 @@ class Identity:
         # remove service principal secrets
         self._msal_store.remove_all_cached_creds()
 
-    def get_user_credential(self, home_account_id, username):
+    def get_user_credential(self, username):
+        account = self._msal_app.get_accounts(username)[0]
         auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
-                                           home_account_id, username)
+                                           account['home_account_id'], username)
         return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
                                             enable_persistent_cache=True,
                                             allow_unencrypted_cache=self.allow_unencrypted)
