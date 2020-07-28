@@ -134,6 +134,7 @@ def _is_v2_sku(sku):
     return 'v2' in sku
 
 
+# pylint: disable=too-many-statements
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
@@ -244,10 +245,21 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     deployment_name = 'ag_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            from azure.cli.core.commands import LongRunningOperation
+            _log_pprint_template(template)
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
-
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
@@ -3076,10 +3088,21 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     deployment_name = 'lb_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            from azure.cli.core.commands import LongRunningOperation
+            _log_pprint_template(template)
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
-
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
@@ -5995,12 +6018,22 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            from azure.cli.core.commands import LongRunningOperation
+            _log_pprint_template(template)
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
-
-    return sdk_no_wait(no_wait, client.create_or_update,
-                       resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
