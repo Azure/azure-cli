@@ -13,7 +13,6 @@ import json
 import os
 import platform
 import re
-from re import template  # pylint: disable=unused-import
 import ssl
 import sys
 import uuid
@@ -381,7 +380,7 @@ class JSONSerializer(Serializer):
     def body(self, data, data_type, **kwargs):
         if data_type in ('Deployment', 'ScopedDeployment', 'DeploymentWhatIf', 'ScopedDeploymentWhatIf'):
             # Be sure to pass a DeploymentProperties
-            template = data.properties.template  # pylint: disable=redefined-outer-name
+            template = data.properties.template
             if template:
                 data_as_dict = data.serialize()
                 data_as_dict["properties"]["template"] = JsonCTemplate(template)
@@ -395,7 +394,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
         http_request = request.http_request
         logger.info(http_request.data)
         if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
-            template = http_request.data["properties"]["template"]  # pylint: disable=redefined-outer-name
+            template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
                 raise ValueError()
 
@@ -456,8 +455,6 @@ def _deploy_arm_template_at_subscription_scope(cmd,
                                                                       template_spec=template_spec)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
-
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         Deployment = cmd.get_models('Deployment')
@@ -614,7 +611,7 @@ def _deploy_arm_template_at_management_group(cmd,
         return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
                            management_group_id, deployment_name, deployment)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
-                       management_group_id, deployment_name, deployment_properties)
+                       management_group_id, deployment_name, deployment_properties, deployment_location)
 
 
 # pylint: disable=unused-argument

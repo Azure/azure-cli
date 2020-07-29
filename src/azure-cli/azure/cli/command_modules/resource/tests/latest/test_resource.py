@@ -371,6 +371,7 @@ class TagScenarioTest(ScenarioTest):
         self.kwargs['webhook_id'] = webhook['id']
         self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
+    
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
 
         # Test Microsoft.ContainerInstance/containerGroups
@@ -642,7 +643,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
-            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
+            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60)
         })
 
         self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
@@ -654,7 +655,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         ])
 
         self.cmd('deployment sub create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
+            self.check('properties.provisioningState', 'Succeeded'),
         ])
 
         self.cmd('deployment sub list', checks=[
@@ -747,7 +748,6 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'params_invalid': os.path.join(curr_dir, 'simple_deploy_parameters_invalid.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
-            'dn3': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\'),
         })
 
@@ -901,7 +901,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
             'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60),
             'mg': self.create_random_name('azure-cli-management-group', 40),
-            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
+            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
         })
 
         self.cmd('account management-group create --name {mg}', checks=[])
@@ -910,7 +910,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment tenant create --location WestUS -n {dn} --template-file {tf} --parameters targetMG="{mg}"', checks=[
+        self.cmd('deployment tenant create --location WestUS -n {dn} --template-file "{tf}" --parameters targetMG="{mg}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -942,7 +942,6 @@ class DeploymentTestAtTenantScope(ScenarioTest):
         ])
 
         self.cmd('group delete -n cli_tenant_level_deployment --yes')
-
         self.cmd('account management-group delete -n {mg}')
 
 
@@ -2089,6 +2088,7 @@ class PolicyScenarioTest(ScenarioTest):
     @AllowLargeResponse(4096)
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
+        
         self.kwargs.update({
             'pn': self.create_random_name('azure-cli-test-policy', 30),
             'pdn': self.create_random_name('test_policy', 20),
