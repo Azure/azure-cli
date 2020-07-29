@@ -1862,7 +1862,7 @@ def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
     return content.result()
 
 
-def list_publish_profiles(cmd, resource_group_name, name, slot=None):
+def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     import xmltodict
 
     content = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
@@ -1871,16 +1871,17 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None):
     for f in content:
         full_xml += f.decode()
 
-    profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
-    converted = []
-    for profile in profiles:
-        new = {}
-        for key in profile:
-            # strip the leading '@' xmltodict put in for attributes
-            new[key.lstrip('@')] = profile[key]
-        converted.append(new)
-
-    return converted
+    if not xml:
+        profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
+        converted = []
+        for profile in profiles:
+            new = {}
+            for key in profile:
+                # strip the leading '@' xmltodict put in for attributes
+                new[key.lstrip('@')] = profile[key]
+            converted.append(new)
+        return converted
+    return full_xml
 
 
 def enable_cd(cmd, resource_group_name, name, enable, slot=None):

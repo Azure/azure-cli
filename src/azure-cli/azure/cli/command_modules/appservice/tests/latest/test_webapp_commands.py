@@ -155,7 +155,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '10.14'),
+            JMESPathCheck('[0].value', '10.15'),
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
