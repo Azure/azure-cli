@@ -7,6 +7,7 @@ from azure.cli.command_modules.aro._params import load_arguments
 from azure.cli.command_modules.aro.commands import load_command_table
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.aro._client_factory import cf_aro  # pylint: disable=unused-import
 
 from azure.cli.command_modules.aro._help import helps  # pylint: disable=unused-import
@@ -19,7 +20,8 @@ class AroCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.aro.custom#{}',
             client_factory=cf_aro)
         super(AroCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                custom_command_type=aro_custom)
+                                                custom_command_type=aro_custom,
+                                                resource_type=ResourceType.MGMT_ARO)
 
     def load_command_table(self, args):
         load_command_table(self, args)
