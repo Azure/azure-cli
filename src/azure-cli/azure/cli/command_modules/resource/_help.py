@@ -622,7 +622,7 @@ examples:
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
   - name: Create a deployment at subscription scope from a template-spec
     text: >
-        az deployment group create --resource-group testrg  --template-spec resourceID
+        az deployment group create --resource-group testrg --template-spec resourceID
 """
 
 helps['deployment group what-if'] = """
