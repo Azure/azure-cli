@@ -2025,7 +2025,7 @@ short-summary: Manage template specs at subscription or resource group scope.
 
 helps['template-specs create'] = """
 type: command
-short-summary: Creates or updates a template spec and or template spec version.
+short-summary: Create or update a template spec and or template spec version.
 parameters:
   - name: --resource-group -g
     type: string
