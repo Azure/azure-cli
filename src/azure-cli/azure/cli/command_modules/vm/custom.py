@@ -3365,9 +3365,8 @@ def update_disk_encryption_set(instance, client, resource_group_name, key_url=No
 
 
 # region Disk Access
-def create_disk_access(cmd, resource_group_name, disk_access_name, location, tags=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.disk_accesses.create_or_update,
+def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update,
                        resource_group_name, disk_access_name,
                        location=location, tags=tags)
 
@@ -3382,5 +3381,12 @@ def update_disk_access(instance, tags=None):
     if tags is not None:
         instance.tags = tags
     return instance
+
+
+def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
+    location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, disk_access_name,
+                       location=location, tags=tags)
 
 # endregion

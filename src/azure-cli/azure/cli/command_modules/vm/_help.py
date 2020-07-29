@@ -138,7 +138,7 @@ short-summary: Update a disk access resource.
 examples:
   - name: Update a disk access resource.
     text: >
-        az disk-access update -g MyResourceGroup -l centraluseuap -n MyDiskAccess --tags tag1=val1 tag2=val2
+        az disk-access update -g MyResourceGroup -n MyDiskAccess --tags tag1=val1 tag2=val2
 """
 
 helps['disk-access list'] = """
@@ -166,6 +166,15 @@ examples:
   - name: Delete a disk access reosurce.
     text: |
         az disk-access delete -g MyResourceGroup -n MyDiskAccess
+"""
+
+helps['disk-access wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a disk access is met.
+examples:
+  - name: Place the CLI in a waiting state until the disk access is created with 'provisioningState' at 'Succeeded'.
+    text: |
+        az disk-access wait --created -g MyResourceGroup -n MyDiskAccess
 """
 
 helps['disk-encryption-set'] = """

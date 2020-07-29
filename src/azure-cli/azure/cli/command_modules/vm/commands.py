@@ -218,9 +218,10 @@ def load_command_table(self, _):
 
     with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_disk_access', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_accesses')
+        g.wait_command('wait')
         g.command('delete', 'delete')
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
