@@ -1014,3 +1014,12 @@ def get_linux_distro():
             release_info[k.lower()] = v.strip('"')
 
     return release_info.get('name', None), release_info.get('version_id', None)
+
+
+def is_guid(guid):
+    import uuid
+    try:
+        uuid.UUID(guid)
+        return True
+    except ValueError:
+        return False
