@@ -3410,3 +3410,25 @@ def update_disk_encryption_set(instance, client, resource_group_name, key_url=No
     return instance
 
 # endregion
+
+
+# region Disk Access
+def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, disk_access_name,
+                       location=location, tags=tags)
+
+
+def list_disk_accesses(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
+    location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, disk_access_name,
+                       location=location, tags=tags)
+
+# endregion
