@@ -4518,6 +4518,34 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss1} --image centos --os-disk-encryption-set {des1} --admin-username azureuser --admin-password testPassword0 --authentication-type password')
 
 
+class DiskAccessTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_access_', location='centraluseuap')
+    def test_disk_access(self, resource_group):
+        self.kwargs.update({
+            'loc': 'centraluseuap',
+            'name': 'mydiskaccess'
+        })
+
+        self.cmd('disk-access create -g {rg} -l {loc} -n {name}')
+        self.cmd('disk-access list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{name}'),
+            self.check('[0].location', '{loc}')
+        ])
+        self.cmd('disk-access update -g {rg} -n {name} --tags tag1=val1')
+        self.cmd('disk-access show -g {rg} -n {name}', checks=[
+            self.check('name', '{name}'),
+            self.check('location', '{loc}'),
+            self.check('tags.tag1', 'val1')
+        ])
+
+        self.cmd('disk-access delete -g {rg} -n {name}')
+        self.cmd('disk-access list -g {rg}', checks=[
+            self.check('length(@)', 0)
+        ])
+
+
 class VMSSCreateDiskOptionTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disk_iops_mbps_', location='eastus')
