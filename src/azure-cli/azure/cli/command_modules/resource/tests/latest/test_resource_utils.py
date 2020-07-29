@@ -48,12 +48,12 @@ class TestSplitResourceId(unittest.TestCase):
             f"/providers/Microsoft.Management/ManagementGroups/myManagementGroup/providers/Microsoft.Authorization/roleAssignments/{role_assignment_id}"
         )
 
-        self.assertEqual(scope, f"/providers/Microsoft.Management/ManagementGroups/myManagementGroup")
+        self.assertEqual(scope, "/providers/Microsoft.Management/ManagementGroups/myManagementGroup")
         self.assertEqual(relative_resource_id, f"Microsoft.Authorization/roleAssignments/{role_assignment_id}")
 
     def test_management_group_id(self):
         scope, relative_resource_id = split_resource_id(
-            f"/providers/Microsoft.Management/ManagementGroups/myManagementGroup"
+            "/providers/Microsoft.Management/ManagementGroups/myManagementGroup"
         )
 
         self.assertEqual(scope, "/")
