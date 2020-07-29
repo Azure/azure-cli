@@ -60,12 +60,10 @@ class MyCommandsLoader(AzCommandsLoader):
                                                custom_command_type=mymod_custom)
 
     def load_command_table(self, args):
-        super(MyCommandsLoader, self).load_command_table(args)
         # TODO: Register command groups and commands here
         return self.command_table
 
     def load_arguments(self, command):
-        super(MyCommandsLoader, self).load_arguments(command)
         # TODO: Register argument contexts and arguments here
 
 COMMAND_LOADER_CLS = MyCommandsLoader
