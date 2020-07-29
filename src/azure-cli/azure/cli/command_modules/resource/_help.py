@@ -2116,7 +2116,7 @@ examples:
 
 helps['template-specs delete'] = """
 type: command
-short-summary: Deletes a specified template spec or template spec version by name or resource ID.
+short-summary: Delete a specified template spec or template spec version by name or resource ID.
 parameters:
   - name: --resource-group -g
     type: string
