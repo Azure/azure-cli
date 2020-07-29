@@ -348,6 +348,13 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
 
+    with self.argument_context('deployment mg what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+
     with self.argument_context('deployment mg validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
@@ -368,6 +375,13 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+
+    with self.argument_context('deployment tenant what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
 
     with self.argument_context('deployment tenant validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
