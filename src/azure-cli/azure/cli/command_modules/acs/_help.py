@@ -682,6 +682,19 @@ type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
 """
 
+helps['aks nodepool get-upgrades'] = """
+type: command
+short-summary: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
+examples:
+  - name: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
+    text: az aks nodepool get-upgrades --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
+    crafted: true
+parameters:
+  - name: --nodepool-name
+    type: string
+    short-summary: name of the node pool.
+"""
+
 helps['aks nodepool list'] = """
 type: command
 short-summary: List node pools in the managed Kubernetes cluster.
