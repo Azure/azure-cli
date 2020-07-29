@@ -116,6 +116,47 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.clusterState', 'Running')
         ])
 
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_cluster_with_encryption_in_transit(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._with_encryption_in_transit()
+        )
+
+        self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
+            self.check('properties.encryptionInTransitProperties.isEncryptionInTransitEnabled', True),
+            self.check('properties.clusterState', 'Running')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_cluster_with_private_link(self, storage_account_info):
+        self.kwargs.update({
+            'vnet_name': self.create_random_name(prefix='hdicli-vnet', length=16),
+            'subnet_name': 'default'
+        })
+        vnet = self.cmd(
+            'az network vnet create -g {rg} --name {vnet_name} --subnet-name {subnet_name}').get_output_in_json()
+
+        # disable subnet's private link service policy
+        self.cmd(
+            'az network vnet subnet update --name {subnet_name} -g {rg} --vnet-name {vnet_name} '
+            '--disable-private-link-service-network-policies true')
+        subnet_id = vnet['newVNet']['subnets'][0]['id']
+
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._with_private_link(),
+            HDInsightClusterTests._with_virtual_netowrk_profile(subnet_id)
+        )
+
+        self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
+            self.check('properties.networkSettings.publicNetworkAccess', 'OutboundOnly'),
+            self.check('properties.networkSettings.outboundOnlyPublicNetworkAccessType', 'PublicLoadBalancer'),
+            self.check('properties.clusterState', 'Running')
+        ])
+
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -330,7 +371,8 @@ class HDInsightClusterTests(ScenarioTest):
                 break
         self.kwargs['target_host'] = target_host
         # restart host of the cluster
-        self.cmd('az hdinsight host restart --resource-group {rg} --cluster-name {cluster} --host-names {target_host} --yes')
+        self.cmd(
+            'az hdinsight host restart --resource-group {rg} --cluster-name {cluster} --host-names {target_host} --yes')
 
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
@@ -407,3 +449,15 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _with_minimal_tls_version(tls_version):
         return '--minimal-tls-version {}'.format(tls_version)
+
+    @staticmethod
+    def _with_encryption_in_transit():
+        return '--encryption-in-transit true'
+
+    @staticmethod
+    def _with_virtual_netowrk_profile(subnet_name):
+        return '--subnet {}'.format(subnet_name)
+
+    @staticmethod
+    def _with_private_link():
+        return '--public-network-access-type OutboundOnly --outbound-public-network-access-type PublicLoadBalancer'

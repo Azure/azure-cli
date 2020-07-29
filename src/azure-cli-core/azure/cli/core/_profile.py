@@ -15,14 +15,15 @@ import string
 from copy import deepcopy
 from enum import Enum
 
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
-from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -139,7 +140,7 @@ def _get_cloud_console_token_endpoint():
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes
-class Profile(object):
+class Profile:
 
     _global_creds_cache = None
 
@@ -759,7 +760,7 @@ class Profile(object):
         return installation_id
 
 
-class MsiAccountTypes(object):
+class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
     user_assigned_client_id = 'MSIClient'
@@ -785,7 +786,7 @@ class MsiAccountTypes(object):
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
-class SubscriptionFinder(object):
+class SubscriptionFinder:
     '''finds all subscriptions for a user or service principal'''
 
     def __init__(self, cli_ctx, auth_context_factory, adal_token_cache, arm_client_factory=None):
@@ -970,7 +971,7 @@ class SubscriptionFinder(object):
         return all_subscriptions
 
 
-class CredsCache(object):
+class CredsCache:
     '''Caches AAD tokena and service principal secrets, and persistence will
     also be handled
     '''
@@ -1128,7 +1129,7 @@ class CredsCache(object):
         _delete_file(self._token_file)
 
 
-class ServicePrincipalAuth(object):
+class ServicePrincipalAuth:
 
     def __init__(self, password_arg_value, use_cert_sn_issuer=None):
         if not password_arg_value:

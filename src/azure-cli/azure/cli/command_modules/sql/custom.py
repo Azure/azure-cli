@@ -5,6 +5,9 @@
 
 # pylint: disable=C0302
 from enum import Enum
+import calendar
+from datetime import datetime
+from dateutil.parser import parse
 
 from azure.cli.core.util import (
     CLIError,
@@ -50,9 +53,6 @@ from ._util import (
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
 )
 
-from datetime import datetime
-from dateutil.parser import parse
-import calendar
 
 logger = get_logger(__name__)
 

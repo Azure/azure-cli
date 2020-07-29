@@ -89,6 +89,21 @@ cloud update:
     cloud_name:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+config set:
+  parameters:
+    key_value:
+      rule_exclusions:
+        - no_positional_parameters
+config get:
+  parameters:
+    key:
+      rule_exclusions:
+        - no_positional_parameters
+config unset:
+  parameters:
+    key:
+      rule_exclusions:
+        - no_positional_parameters
 cosmosdb collection create:
   parameters:
     db_resource_group_name:
@@ -227,6 +242,16 @@ dls fs list:
   rule_exclusions:
   - no_ids_for_list_commands
 eventgrid event-subscription update:
+  parameters:
+    endpoint_type:
+      rule_exclusions:
+      - no_parameter_defaults_for_update_commands
+eventgrid partner topic event-subscription update:
+  parameters:
+    endpoint_type:
+      rule_exclusions:
+      - no_parameter_defaults_for_update_commands
+eventgrid system-topic event-subscription update:
   parameters:
     endpoint_type:
       rule_exclusions:
