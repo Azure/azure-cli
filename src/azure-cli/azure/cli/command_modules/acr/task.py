@@ -81,8 +81,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         context_path = None
         commit_trigger_enabled = False
         pull_request_trigger_enabled = False
-    
-    if context_path.lower().startswith("oci://"):
+
+    if context_path is not None and context_path.lower().startswith("oci://"):
         commit_trigger_enabled = False
         pull_request_trigger_enabled = False
 
