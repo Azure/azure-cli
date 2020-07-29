@@ -692,9 +692,14 @@ def add_progress_callback_v2(cmd, namespace):
     del namespace.no_progress
 
 
-def query_blob(client, query_expression, **kwargs):
+def query_blob(client, query_expression, input_config=None, output_config=None, result_file=None, **kwargs):
 
-    reader = client.query_blob(query_expression=query_expression, **kwargs)
-    content = reader.readall()
+    reader = client.query_blob(query_expression=query_expression, blob_format=input_config, output_format=output_config,
+                               **kwargs)
 
-    return content
+    if result_file is not None:
+        with open(result_file, 'wb') as stream:
+            reader.readinto(stream)
+        return None
+
+    return reader.readall()
