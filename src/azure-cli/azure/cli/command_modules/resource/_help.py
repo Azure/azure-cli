@@ -2089,7 +2089,7 @@ examples:
 
 helps['template-specs export'] = """
 type: command
-short-summary: Exports the specified template spec and artifacts (if any) to the specified output folder.
+short-summary: Export the specified template spec and artifacts (if any) to the specified output folder.
 parameters:
   - name: --resource-group -g
     type: string
