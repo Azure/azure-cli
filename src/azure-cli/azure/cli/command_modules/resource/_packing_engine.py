@@ -32,8 +32,7 @@ def Pack(cmd, template_file):
     context = PackingContext(os.path.dirname(root_template_file_path))
     template_content = read_file_content(template_file)
     sanitized_template = _remove_comments_from_json(template_content)
-    template_string = json.dumps(sanitized_template)
-    template_json = json.loads(template_string)
+    template_json = json.loads(json.dumps(sanitized_template))
     PackArtifacts(cmd, root_template_file_path, context)
     return PackagedTemplate(template_json, getattr(context, 'Artifact'))
 
@@ -54,8 +53,7 @@ def PackArtifacts(cmd, template_abs_file_path, context):
         context.CurrentDirectory = os.path.dirname(template_abs_file_path)
         template_content = read_file_content(template_abs_file_path)
         artifactableTemplateObj = sanitized_template = _remove_comments_from_json(template_content)
-        template_string = json.dumps(sanitized_template)
-        template_json = json.loads(template_string)
+        template_json = json.loads(json.dumps(sanitized_template))
         templateLinktoArtifactObjs = GetTemplateLinksToArtifacts(cmd, artifactableTemplateObj, includeNested=True)
 
         for templateLinkObj in templateLinktoArtifactObjs:
@@ -95,8 +93,7 @@ def PackArtifacts(cmd, template_abs_file_path, context):
                                                    'TemplateSpecTemplateArtifact', mod='models')
             template_content = read_file_content(absoluteLocalPath)
             sanitized_template = _remove_comments_from_json(template_content)
-            template_string = json.dumps(sanitized_template)
-            template_json = json.loads(template_string)
+            template_json = json.loads(json.dumps(sanitized_template))
             artifact = TemplateSpecTemplateArtifact(path=asRelativePath, template=template_json)
             context.Artifact.append(artifact)
     finally:
