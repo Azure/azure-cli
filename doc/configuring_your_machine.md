@@ -17,14 +17,14 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 
 ## Configuring your IDE
 #### Visual Studio (Windows only)
-1. Both VS 2015 and 2017 support Python development, but VS 2015 is more relible, particular on the intellisense and "Test Explorer". VS 2019's Python support is being actively improved, and we will recommend it here once the evalution result is promising.  
+1. Both VS 2015 and 2017 support Python development, but VS 2015 is more reliable, particular on the intellisense and "Test Explorer". VS 2019's Python support is being actively improved, and we will recommend it here once the evaluation result is promising.  
 2. Steps to setup VS 2015:
 
    - You can install VS 2015 from https://visualstudio.microsoft.com/vs/older-downloads/#visual-studio-2015-family
    - Click menu "View->Other Windows->Python Environment" and create a new one by pointing to a local installed Python like 3.7.0.
    - Click menu "File->New Project", and in the dialog select "Python->From Existing Python Code". This will create a project from your local clone.
    - Go through the wizard
-   - Once the project gets populated in the solution explorer, for better IDE performance, exlude folders not interested such as "bin", "build_scripts", "doc", etc. For ther same performance reason, under \<root\>\src\azure-cli\azure\cli\command_modules exlude all unrelated command modules.
+   - Once the project gets populated in the solution explorer, for better IDE performance, exclude folders not interested such as "bin", "build_scripts", "doc", etc. For the same performance reason, under \<root\>\src\azure-cli\azure\cli\command_modules exclude all unrelated command modules.
    - In solution explorer, right click "Python Environments", and invoke "Add Virtual Environment".
    - Save the new project and solution.
    - Back to the command prompt, activate the virtual environment by running "env\scripts\activate".
