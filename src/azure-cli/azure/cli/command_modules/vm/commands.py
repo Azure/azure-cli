@@ -178,11 +178,6 @@ def load_command_table(self, _):
         client_factory=cf_img_bldr_image_templates,
     )
 
-    log_analytics_data_plane_sdk = CliCommandType(
-        operations_tmpl="custom#{}",
-        client_factory=cf_log_analytics_data_plane,
-    )
-
     compute_disk_encryption_set_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
         client_factory=cf_disk_encryption_set
@@ -490,7 +485,7 @@ def load_command_table(self, _):
         g.generic_update_command('update')
         g.command('delete', 'delete')
 
-    with self.command_group('vm monitor log', log_analytics_data_plane_sdk, client_factory=cf_log_analytics_data_plane) as g:
+    with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
         g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)
 
     with self.command_group('vm monitor metrics', custom_command_type=monitor_custom, command_type=metric_definitions_sdk, resource_type=ResourceType.MGMT_MONITOR, operation_group='metric_definitions', min_api='2018-01-01', is_preview=True) as g:
