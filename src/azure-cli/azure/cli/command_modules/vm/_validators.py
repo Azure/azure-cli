@@ -634,7 +634,7 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
     if namespace.dedicated_host and namespace.dedicated_host_group:
         raise CLIError('usage error: User cannot specify both --host and --host-group properties.')
 
-    if not is_valid_resource_id(namespace.dedicated_host):
+    if namespace.dedicated_host and not is_valid_resource_id(namespace.dedicated_host):
         raise CLIError('usage error: --host is not a valid resource ID.')
 
     if namespace.dedicated_host_group:
