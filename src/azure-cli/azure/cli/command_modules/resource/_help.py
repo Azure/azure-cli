@@ -622,7 +622,7 @@ examples:
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
   - name: Create a deployment at subscription scope from a template-spec
     text: >
-        az deployment group create --resource-group testrg  --template-spec resourceID
+        az deployment group create --resource-group testrg --template-spec resourceID
 """
 
 helps['deployment group what-if'] = """
@@ -2025,7 +2025,7 @@ short-summary: Manage template specs at subscription or resource group scope.
 
 helps['template-specs create'] = """
 type: command
-short-summary: Creates or updates a template spec and or template spec version.
+short-summary: Create or update a template spec and or template spec version.
 parameters:
   - name: --resource-group -g
     type: string
@@ -2065,7 +2065,7 @@ examples:
 
 helps['template-specs get'] = """
 type: command
-short-summary: Gets the specified template spec or template spec version.
+short-summary: Get the specified template spec or template spec version.
 parameters:
   - name: --resource-group -g
     type: string
@@ -2089,7 +2089,7 @@ examples:
 
 helps['template-specs export'] = """
 type: command
-short-summary: Exports the specified template spec and artifacts (if any) to the specified output folder.
+short-summary: Export the specified template spec and artifacts (if any) to the specified output folder.
 parameters:
   - name: --resource-group -g
     type: string
@@ -2116,7 +2116,7 @@ examples:
 
 helps['template-specs delete'] = """
 type: command
-short-summary: Deletes a specified template spec or template spec version by name or resource ID.
+short-summary: Delete a specified template spec or template spec version by name or resource ID.
 parameters:
   - name: --resource-group -g
     type: string
