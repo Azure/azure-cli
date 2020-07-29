@@ -54,7 +54,4 @@ az -v
 az -h
 
 title 'Running tests'
-
-pip install git+https://github.com/haroldrandom/azure-python-devtools.git@fix-python-3.8.3
-
 python -m automation test --ci --profile $target_profile
