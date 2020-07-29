@@ -468,8 +468,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 0.0.0.0/32
   - name: Update a AKS-managed AAD cluster with tenant ID or admin group object IDs.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
-  - name: Update an existing AKS AAD-Integrated cluster to the new AKS-managed AAD experience.
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad
+  - name: Migrate a AKS AAD-Integrated cluster or a non-AAD cluster to a AKS-managed AAD cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
 """
 
 helps['aks delete'] = """
@@ -558,7 +558,7 @@ examples:
 
 helps['aks install-cli'] = """
 type: command
-short-summary: Download and install kubectl, the Kubernetes command-line tool.
+short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
 helps['aks install-connector'] = """
@@ -680,6 +680,19 @@ parameters:
 helps['aks nodepool delete'] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
+"""
+
+helps['aks nodepool get-upgrades'] = """
+type: command
+short-summary: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
+examples:
+  - name: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
+    text: az aks nodepool get-upgrades --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
+    crafted: true
+parameters:
+  - name: --nodepool-name
+    type: string
+    short-summary: name of the node pool.
 """
 
 helps['aks nodepool list'] = """

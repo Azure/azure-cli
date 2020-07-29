@@ -427,6 +427,8 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
             if new_status == "Approved" and old_status == "Rejected":
                 raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
                                  "Please create a new connection for approval.")
+            if new_status == "Approved" and old_status == "Approved":
+                raise CloudError(ex.response, "Your connection is already approved. No need to approve again.")
         raise ex
 
 

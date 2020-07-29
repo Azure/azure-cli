@@ -869,17 +869,32 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                      aux_subscriptions=aux_subscriptions).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        return client.validate(resource_group_name, deployment_name, properties)
 
-    # creates the VM deployment
-    if no_wait:
-        return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name, deployment_name, properties)
-    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        # creates the VM deployment
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
+
+        # creates the VM deployment
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
 
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
@@ -1070,6 +1085,9 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     vm = get_vm(cmd, resource_group_name, vm_name)
     location = vm.location
+    if not vm.network_profile:
+        raise CLIError("Network profile not found for VM '{}'".format(vm_name))
+
     nic_ids = list(vm.network_profile.network_interfaces)
     if len(nic_ids) > 1:
         raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
@@ -1227,8 +1245,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
-    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
-                       resource_group_name, vm_name, **kwargs)
+    aux_subscriptions = None
+    if vm and vm.storage_profile and vm.storage_profile.image_reference and vm.storage_profile.image_reference.id:
+        aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference.id)
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+    return sdk_no_wait(no_wait, client.virtual_machines.create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
 
 
@@ -1287,17 +1308,29 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     deployment_name = 'av_set_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    if validate:
-        return client.validate(resource_group_name, deployment_name, properties)
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name, deployment_name, properties)
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
 
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                  resource_group_name, deployment_name, properties))
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                      resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
+
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                      resource_group_name, deployment_name, properties))
+
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
 
@@ -1351,7 +1384,7 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
-class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods
+class BootLogStreamWriter:  # pylint: disable=too-few-public-methods
 
     def __init__(self, out):
         self.out = out
@@ -2496,18 +2529,33 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     deployment_name = 'vmss_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                      aux_subscriptions=aux_subscriptions).deployments
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
 
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        return sdk_no_wait(no_wait, client.validate, resource_group_name, deployment_name, properties)
 
-    # creates the VMSS deployment
-    deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-        sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        # creates the VMSS deployment
+        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
+
+        # creates the VMSS deployment
+        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
 
     if orchestration_mode.lower() == scale_set_vm_str.lower() and assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
@@ -3360,5 +3408,27 @@ def update_disk_encryption_set(instance, client, resource_group_name, key_url=No
     if source_vault:
         instance.active_key.source_vault.id = source_vault
     return instance
+
+# endregion
+
+
+# region Disk Access
+def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, disk_access_name,
+                       location=location, tags=tags)
+
+
+def list_disk_accesses(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
+    location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, disk_access_name,
+                       location=location, tags=tags)
 
 # endregion
