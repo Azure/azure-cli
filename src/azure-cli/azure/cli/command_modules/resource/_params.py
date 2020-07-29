@@ -56,6 +56,7 @@ def load_arguments(self, _):
                                        'To get more information, please visit https://docs.microsoft.com/en-us/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
+
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
                                                             arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
                                                             is_preview=True, min_api='2019-07-01')

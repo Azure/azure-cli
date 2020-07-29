@@ -371,7 +371,7 @@ class TagScenarioTest(ScenarioTest):
         self.kwargs['webhook_id'] = webhook['id']
         self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
-    
+
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
 
         # Test Microsoft.ContainerInstance/containerGroups
@@ -2088,7 +2088,7 @@ class PolicyScenarioTest(ScenarioTest):
     @AllowLargeResponse(4096)
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        
+
         self.kwargs.update({
             'pn': self.create_random_name('azure-cli-test-policy', 30),
             'pdn': self.create_random_name('test_policy', 20),
