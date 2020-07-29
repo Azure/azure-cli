@@ -1881,8 +1881,7 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
                 new[key.lstrip('@')] = profile[key]
             converted.append(new)
         return converted
-    else:
-        return full_xml
+    return full_xml
 
 
 def enable_cd(cmd, resource_group_name, name, enable, slot=None):
