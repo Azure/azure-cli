@@ -654,7 +654,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment sub create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment sub create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -748,7 +748,7 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'params_invalid': os.path.join(curr_dir, 'simple_deploy_parameters_invalid.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
-            'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\'),
+            'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\')
         })
 
         self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters @"{params}"', checks=[
