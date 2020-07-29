@@ -160,7 +160,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     from azure.cli.command_modules.network._template_builder import (
         build_application_gateway_resource, build_public_ip_resource, build_vnet_resource)
 
-    Deployment, DeploymentProperties = cmd.get_models('Deployment', 'DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     tags = tags or {}
@@ -258,7 +258,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
 
     if validate:
-        from azure.cli.core.commands import LongRunningOperation
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
@@ -3033,7 +3032,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     from azure.cli.command_modules.network._template_builder import (
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
-    Deployment, DeploymentProperties = cmd.get_models('Deployment','DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     tags = tags or {}
@@ -3102,7 +3101,6 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
 
     if validate:
-        from azure.cli.core.commands import LongRunningOperation
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
@@ -5996,7 +5994,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
 
     client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    Deployment, DeploymentProperties = cmd.get_models('Deployment', 'DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     tags = tags or {}
 
     # Build up the ARM template
@@ -6033,7 +6031,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
 
     if validate:
-        from azure.cli.core.commands import LongRunningOperation
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
