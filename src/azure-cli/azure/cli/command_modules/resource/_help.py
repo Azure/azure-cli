@@ -2065,7 +2065,7 @@ examples:
 
 helps['template-specs get'] = """
 type: command
-short-summary: Gets the specified template spec or template spec version.
+short-summary: Get the specified template spec or template spec version.
 parameters:
   - name: --resource-group -g
     type: string
