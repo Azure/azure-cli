@@ -30,6 +30,10 @@ class CdnScenarioMixin:
         command = 'cdn profile list -g {}'.format(group)
         return self.cmd(command, checks)
 
+    def profile_show_cmd(self, group, name, checks=None):
+        command = f'cdn profile show -g {group} -n {name}'
+        return self.cmd(command, checks)
+
     def profile_delete_cmd(self, group, name, checks=None):
         command = 'cdn profile delete -g {} -n {}'.format(group, name)
         return self.cmd(command, checks)
