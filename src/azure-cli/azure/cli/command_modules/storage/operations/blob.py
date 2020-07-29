@@ -700,6 +700,7 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
     if result_file is not None:
         with open(result_file, 'wb') as stream:
             reader.readinto(stream)
+        stream.close()
         return None
 
     return reader.readall()
