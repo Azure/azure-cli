@@ -26,7 +26,7 @@ from ._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
-    validate_vault_and_hsm_name_and_key_id, validate_vault_name_and_hsm_name, validate_vault_url_and_hsm_url,
+    validate_vault_name_and_hsm_name, set_vault_base_url,
     process_hsm_base_url, KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
@@ -90,8 +90,8 @@ def load_arguments(self, _):
     data_plane_hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --vault-name are '
                                                     'mutually exclusive, please specify just one of them)',
                                                type=get_hsm_base_url_type(self.cli_ctx),
-                                               #validator=validate_vault_and_hsm_name_and_key_id,
-                                               options_list=['--hsm-name'], id_part=None, is_preview=True)
+                                               options_list=['--hsm-name'], id_part=None, is_preview=True,
+                                               validator=set_vault_base_url)
 
     deleted_hsm_name_type = CLIArgumentType(help='Name of the deleted HSM. (--hsm-name and --name/-n are '
                                                  'mutually exclusive, please specify just one of them)',
@@ -282,8 +282,6 @@ def load_arguments(self, _):
     # custom functions
     for item in ['backup', 'create', 'download', 'import', 'restore']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            c.argument('hsm_base_url', data_plane_hsm_name_type)
-
             if item in ['create', 'backup', 'download', 'import']:
                 c.argument('identifier', options_list=['--id'],
                            help='Id of the Vault or HSM. '
@@ -295,6 +293,8 @@ def load_arguments(self, _):
                                 'If specified all other \'Id\' arguments should be omitted.',
                            validator=validate_vault_or_hsm)
 
+            c.argument('hsm_base_url', data_plane_hsm_name_type)
+
     # SDK functions
     for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover',
                  'set-attributes', 'show', 'show-deleted']:
@@ -302,9 +302,7 @@ def load_arguments(self, _):
             c.ignore('cls')
             if item in ['list', 'list-deleted']:
                 c.argument('vault_base_url', vault_name_type, required=False)
-                c.extra('hsm_base_url', data_plane_hsm_name_type, validator=None)
-            else:
-                c.extra('hsm_base_url', data_plane_hsm_name_type)
+            c.extra('hsm_base_url', data_plane_hsm_name_type)
 
     for item in ['create', 'import']:
         with self.argument_context('keyvault key {}'.format(item)) as c:

@@ -49,10 +49,13 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
 
     if hsm_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT).managed_hsms
-        for hsm in client.list_by_subscription():
-            id_comps = parse_resource_id(hsm.id)
-            if id_comps.get('name', None) and id_comps['name'].lower() == hsm_name.lower():
-                return id_comps['resource_group']
+        try:
+            for hsm in client.list_by_subscription():
+                id_comps = parse_resource_id(hsm.id)
+                if id_comps.get('name', None) and id_comps['name'].lower() == hsm_name.lower():
+                    return id_comps['resource_group']
+        finally:
+            return None
 
     return None
 
@@ -153,43 +156,12 @@ def process_hsm_base_url(ns):
         ns.hsm_base_url = ns.identifier
 
 
-def validate_vault_url_and_hsm_url(ns):
-    if getattr(ns, 'vault_base_url', None) and getattr(ns, 'hsm_base_url', None):
-        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
-
-    if not getattr(ns, 'vault_base_url', None) and not getattr(ns, 'hsm_base_url', None):
-        raise CLIError('Please specify --vault-name or --hsm-name.')
-
-
 def validate_vault_name_and_hsm_name(ns):
     if getattr(ns, 'vault_name', None) and getattr(ns, 'hsm_name', None):
         raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
 
     if not getattr(ns, 'vault_name', None) and not getattr(ns, 'hsm_name', None):
         raise CLIError('Please specify --vault-name or --hsm-name.')
-
-
-def validate_vault_and_hsm_name_and_key_id(ns):
-    try:
-        if getattr(ns, 'identifier', None):
-            items = ns.identifier.split('/')
-            ns.vault_base_url = '/'.join(items[:3])
-            if len(items) > 3:
-                ns.key_name = items[4]
-            if len(items) == 6:
-                ns.key_version = items[-1]
-    finally:
-        vault_base_url = getattr(ns, 'vault_base_url', None)
-        hsm_base_url = getattr(ns, 'hsm_base_url', None)
-
-        if vault_base_url and hsm_base_url:
-            raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
-
-        if not vault_base_url and not hsm_base_url:
-            raise CLIError('Please specify --vault-name or --hsm-name.')
-
-        if not vault_base_url:
-            ns.vault_base_url = hsm_base_url
 
 # PARAMETER NAMESPACE VALIDATORS
 
@@ -284,12 +256,18 @@ def validate_resource_group_name(cmd, ns):
     if not ns.resource_group_name:
         vault_name = getattr(ns, 'vault_name', None)
         hsm_name = getattr(ns, 'hsm_name', None)
+        if vault_name and hsm_name:
+            raise CLIError('--name/-n and --hsm-name are mutually exclusive.')
         group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, vault_name, hsm_name)
         if group_name:
             ns.resource_group_name = group_name
         else:
-            msg = "The Vault or HSM '{}' not found within subscription."
-            raise CLIError(msg.format(vault_name if vault_name else hsm_name))
+            if vault_name:
+                resource_type = 'Vault'
+            else:
+                resource_type = 'HSM'
+            msg = "The {} '{}' not found within subscription."
+            raise CLIError(msg.format(resource_type, vault_name if vault_name else hsm_name))
 
 
 def validate_deleted_vault_or_hsm_name(cmd, ns):
@@ -462,6 +440,13 @@ def validate_vault_or_hsm(ns):
 
         if not vault_base_url and not hsm_base_url:
             raise CLIError('Please specify --vault-name or --hsm-name.')
+
+
+def set_vault_base_url(ns):
+    vault_base_url = getattr(ns, 'vault_base_url', None)
+    hsm_base_url = getattr(ns, 'hsm_base_url', None)
+    if hsm_base_url and not vault_base_url:
+        setattr(ns, 'vault_base_url', hsm_base_url)
 
 
 def validate_key_id(entity_type):
