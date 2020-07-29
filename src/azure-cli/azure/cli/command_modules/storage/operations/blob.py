@@ -703,4 +703,4 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
         stream.close()
         return None
 
-    return reader.readall()
+    return reader.readall().decode("utf-8")
