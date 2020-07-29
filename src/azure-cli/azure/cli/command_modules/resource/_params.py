@@ -68,6 +68,11 @@ def load_arguments(self, _):
                                                                    arg_type=get_enum_type(ChangeType),
                                                                    help='Space-separated list of resource change types to be excluded from What-If results.',
                                                                    is_preview=True, min_api='2019-07-01')
+    tag_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The tag name.')
+    tag_value_type = CLIArgumentType(options_list='--value', help='The tag value.')
+    tag_resource_id_type = CLIArgumentType(options_list='--resource-id',
+                                           help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.',
+                                           min_api='2019-10-01')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -397,10 +402,9 @@ def load_arguments(self, _):
                    options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
 
     with self.argument_context('tag') as c:
-        c.argument('tag_name', options_list=['--name', '-n'])
-        c.argument('tag_value', options_list='--value')
-        c.argument('resource_id', options_list='--resource-id',
-                   help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.')
+        c.argument('tag_name', tag_name_type)
+        c.argument('tag_value', tag_value_type)
+        c.argument('resource_id', tag_resource_id_type)
         c.argument('tags', tags_type)
         c.argument('operation', options_list='--operation',
                    help='The update operation: options include Merge, Replace and Delete.')
