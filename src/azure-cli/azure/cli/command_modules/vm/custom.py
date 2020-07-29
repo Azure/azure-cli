@@ -3425,12 +3425,6 @@ def list_disk_accesses(cmd, client, resource_group_name=None):
     return client.list()
 
 
-def update_disk_access(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-    return instance
-
-
 def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
     location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     return sdk_no_wait(no_wait, client.create_or_update,
