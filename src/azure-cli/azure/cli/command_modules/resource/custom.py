@@ -413,9 +413,13 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                               confirm_with_what_if=None, what_if_result_format=None,
                                               what_if_exclude_change_types=None):
     if confirm_with_what_if:
-        what_if_deploy_arm_template_at_subscription_scope(cmd, template_file, template_uri, parameters,
-                                                          deployment_name, deployment_location, what_if_result_format,
-                                                          exclude_change_types=what_if_exclude_change_types)
+        what_if_deploy_arm_template_at_subscription_scope(cmd,
+                                                          template_file=template_file, template_uri=template_uri,
+                                                          parameters=parameters, deployment_name=deployment_name,
+                                                          deployment_location=deployment_location,
+                                                          result_format=what_if_result_format,
+                                                          exclude_change_types=what_if_exclude_change_types,
+                                                          no_prompt=no_prompt)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -482,9 +486,13 @@ def deploy_arm_template_at_resource_group(cmd,
                                           confirm_with_what_if=None, what_if_result_format=None,
                                           what_if_exclude_change_types=None):
     if confirm_with_what_if:
-        what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name, template_file, template_uri, parameters,
-                                                      deployment_name, mode, aux_tenants, what_if_result_format,
-                                                      exclude_change_types=what_if_exclude_change_types)
+        what_if_deploy_arm_template_at_resource_group(cmd,
+                                                      resource_group_name=resource_group_name,
+                                                      template_file=template_file, template_uri=template_uri,
+                                                      parameters=parameters, deployment_name=deployment_name, mode=mode,
+                                                      aux_tenants=aux_tenants, result_format=what_if_result_format,
+                                                      exclude_change_types=what_if_exclude_change_types,
+                                                      no_prompt=no_prompt)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -552,7 +560,23 @@ def deploy_arm_template_at_management_group(cmd,
                                             management_group_id=None,
                                             template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, deployment_location=None,
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                            no_wait=False, handle_extended_json_format=None, no_prompt=False,
+                                            confirm_with_what_if=None, what_if_result_format=None,
+                                            what_if_exclude_change_types=None):
+    if confirm_with_what_if:
+        what_if_deploy_arm_template_at_management_group(cmd,
+                                                        management_group_id=management_group_id,
+                                                        template_file=template_file, template_uri=template_uri,
+                                                        parameters=parameters, deployment_name=deployment_name,
+                                                        deployment_location=deployment_location,
+                                                        result_format=what_if_result_format,
+                                                        exclude_change_types=what_if_exclude_change_types,
+                                                        no_prompt=no_prompt)
+        from knack.prompting import prompt_y_n
+
+        if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+            return None
+
     return _deploy_arm_template_at_management_group(cmd=cmd,
                                                     management_group_id=management_group_id,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
@@ -614,7 +638,22 @@ def _deploy_arm_template_at_management_group(cmd,
 def deploy_arm_template_at_tenant_scope(cmd,
                                         template_file=None, template_uri=None, parameters=None,
                                         deployment_name=None, deployment_location=None,
-                                        no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                        no_wait=False, handle_extended_json_format=None, no_prompt=False,
+                                        confirm_with_what_if=None, what_if_result_format=None,
+                                        what_if_exclude_change_types=None):
+    if confirm_with_what_if:
+        what_if_deploy_arm_template_at_tenant_scope(cmd,
+                                                    template_file=template_file, template_uri=template_uri,
+                                                    parameters=parameters, deployment_name=deployment_name,
+                                                    deployment_location=deployment_location,
+                                                    result_format=what_if_result_format,
+                                                    exclude_change_types=what_if_exclude_change_types,
+                                                    no_prompt=no_prompt)
+        from knack.prompting import prompt_y_n
+
+        if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+            return None
+
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
                                                 template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
