@@ -558,7 +558,7 @@ examples:
 
 helps['aks install-cli'] = """
 type: command
-short-summary: Download and install kubectl, the Kubernetes command-line tool.
+short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
 helps['aks install-connector'] = """
