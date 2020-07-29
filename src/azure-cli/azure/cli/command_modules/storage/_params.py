@@ -870,7 +870,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 'By providing an output format, the blob data will be reformatted according to that profile. '
                 'If you choose `json`, please specify `Output Json Text Configuration Arguments` accordingly; '
                 'If you choose `csv`, please specify `Output Delimited Text Configuration Arguments`.')
-        c.extra('in_line_separator', options_list=['--in-line-separator', '--i-l'],
+        c.extra('in_line_separator',
                 arg_group='Input Json Text Configuration',
                 arg_type=line_separator)
         c.extra('in_column_separator', arg_group='Input Delimited Text Configuration',
@@ -883,7 +883,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 arg_type=escape_char)
         c.extra('in_has_header', arg_group='Input Delimited Text Configuration',
                 arg_type=has_header)
-        c.extra('out_line_separator', options_list=['--out-line-separator', '--o-l'],
+        c.extra('out_line_separator',
                 arg_group='Output Json Text Configuration',
                 arg_type=line_separator)
         c.extra('out_column_separator', arg_group='Output Delimited Text Configuration',
@@ -897,6 +897,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('out_has_header', arg_group='Output Delimited Text Configuration',
                 arg_type=has_header)
         c.extra('result_file', help='Specify the file path to save result.')
+        c.ignore('input_config')
+        c.ignore('output_config')
 
     with self.argument_context('storage blob config-query-format') as c:
         c.argument('type', arg_type=get_enum_type(['csv', 'json']), help='The serialization format.')

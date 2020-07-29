@@ -811,6 +811,11 @@ type: group
 short-summary: Manage blob metadata.
 """
 
+helps['storage blob query'] = """
+type: command
+short-summary: Enable users to select/project on blob/or blob snapshot data by providing simple query expressions.
+"""
+
 helps['storage blob restore'] = """
 type: command
 short-summary: Restore blobs in the specified blob ranges.
