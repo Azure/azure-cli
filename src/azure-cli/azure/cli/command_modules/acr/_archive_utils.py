@@ -218,4 +218,8 @@ def check_remote_source_code(source_location):
             if requests.head(source_location).status_code < 400:
                 return source_location
             raise CLIError("'{}' doesn't exist.".format(source_location))
+
+    # oci
+    if lower_source_location.startswith("oci://"):
+        return source_location
     raise CLIError("'{}' doesn't exist.".format(source_location))
