@@ -46,8 +46,6 @@ class BotTemplateDeployer:
 
         properties = DeploymentProperties(template=template, template_link=None,
                                           parameters=parameters, mode=mode)
-        deployment = Deployment(properties=properties)
-
         resource_mgmt_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
 
         if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
