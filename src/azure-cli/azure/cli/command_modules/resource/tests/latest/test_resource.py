@@ -462,6 +462,156 @@ class TagScenarioTest(ScenarioTest):
 
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
 
+    def test_tag_create_or_update_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_create_or_update_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_create_or_update_resourcegroup', location='westus')
+    def test_tag_create_or_update_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_create_or_update_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_create_or_update_resource', location='westus')
+    def test_tag_create_or_update_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_create_or_update_scope(resource_id=resource['id'])
+
+    # Utility method to test CreateOrUpdate for Tags within subscription, resource group, and tracked resources.
+    def utility_tag_create_or_update_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'expected_tags1': 'cliName1=cliValue1 cliName2=cliValue2',
+            'expected_tags2': 'cliName1=cliValue1 cliName2='
+        })
+
+        # 1. pass in an empty tag set, should throw error
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('tag create --resource-id {resource_id} --tags', checks=self.check('tags', {}))
+
+        # 2. pass in a complete tag string
+        tag_dict1 = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2'}
+        self.cmd('tag create --resource-id {resource_id} --tags {expected_tags1}', checks=[
+            self.check('properties.tags', tag_dict1)
+        ])
+
+        # 3. pass in one incomplete tag string
+        tag_dict2 = {'cliName1': 'cliValue1', 'cliName2': ''}
+        self.cmd('tag create --resource-id {resource_id} --tags {expected_tags2}', checks=[
+            self.check('properties.tags', tag_dict2)
+        ])
+
+        # 4. clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id}', checks=self.is_empty())
+
+    def test_tag_update_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_update_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_update_resourcegroup', location='westus')
+    def test_tag_update_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_update_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_update_resource', location='westus')
+    def test_tag_update_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_update_scope(resource_id=resource['id'])
+
+    # Utility method to test updating tags on subscription, resource group and tracked resource, including Merge, Replace, and Delete Operation.
+    def utility_tag_update_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'original_tags': 'cliName1=cliValue1 cliName2=cliValue2',
+            'merge_tags': 'cliName1=cliValue1 cliName3=cliValue3',
+            'replace_tags': 'cliName1=cliValue1 cliName4=cliValue4',
+            'delete_tags': 'cliName4=cliValue4',
+            'merge_operation': 'merge',
+            'replace_operation': 'replace',
+            'delete_operation': 'delete'
+        })
+
+        # setup original
+        self.cmd('tag create --resource-id {resource_id} --tags {original_tags}')
+
+        # 1. test merge operation
+        after_merge_tags_dict = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2', 'cliName3': 'cliValue3'}
+        self.cmd('tag update --resource-id {resource_id} --operation {merge_operation} --tags {merge_tags}', checks=[
+            self.check('properties.tags', after_merge_tags_dict)
+        ])
+
+        # 2. test replace operation
+        after_replace_tags_dict = {'cliName1': 'cliValue1', 'cliName4': 'cliValue4'}
+        self.cmd('tag update --resource-id {resource_id} --operation {replace_operation} --tags {replace_tags}',
+                 checks=[
+                     self.check('properties.tags', after_replace_tags_dict)
+                 ])
+
+        # 3. test delete operation
+        after_delete_tags_dict = {'cliName1': 'cliValue1'}
+        self.cmd('tag update --resource-id {resource_id} --operation {delete_operation} --tags {delete_tags}', checks=[
+            self.check('properties.tags', after_delete_tags_dict)
+        ])
+
+        # 4. clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id}', checks=self.is_empty())
+
+    def test_tag_get_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_get_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_get_resourcegroup', location='westus')
+    def test_tag_get_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_get_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_get_resource', location='westus')
+    def test_tag_get_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_get_scope(resource_id=resource['id'])
+
+    # Utility method to test Get for Tags within subscription, resource group and tracked resource.
+    def utility_tag_get_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'original_tags': 'cliName1=cliValue1 cliName2=cliValue2'
+        })
+
+        # setup original
+        self.cmd('tag create --resource-id {resource_id} --tags {original_tags}')
+
+        # test get operation
+        expected_tags_dict = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2'}
+        self.cmd('tag list --resource-id {resource_id}', checks=[
+            self.check('properties.tags', expected_tags_dict)
+        ])
+
+        # clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id}', checks=self.is_empty())
+
 
 class ProviderRegistrationTest(ScenarioTest):
 

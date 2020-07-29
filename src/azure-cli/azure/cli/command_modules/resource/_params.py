@@ -399,6 +399,11 @@ def load_arguments(self, _):
     with self.argument_context('tag') as c:
         c.argument('tag_name', options_list=['--name', '-n'])
         c.argument('tag_value', options_list='--value')
+        c.argument('resource_id', options_list='--resource-id',
+                   help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.')
+        c.argument('tags', tags_type)
+        c.argument('operation', options_list='--operation',
+                   help='The update operation: options include Merge, Replace and Delete.')
 
     with self.argument_context('lock') as c:
         c.argument('lock_name', options_list=['--name', '-n'], validator=validate_lock_parameters)

@@ -2537,6 +2537,43 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
+# region tags
+def get_tag_at_scope(cmd, resource_id=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        return rcf.tags.get_at_scope(scope=resource_id)
+
+    return rcf.tags.list()
+
+
+def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        if tags is None or bool(tags) is False:
+            raise IncorrectUsageError("Tags could not be empty.")
+        Tags = cmd.get_models('Tags')
+        tag_obj = Tags(tags=tags)
+        return rcf.tags.create_or_update_at_scope(scope=resource_id, properties=tag_obj)
+
+    return rcf.tags.create_or_update(tag_name=tag_name)
+
+
+def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        return rcf.tags.delete_at_scope(scope=resource_id)
+
+    return rcf.tags.delete(tag_name=tag_name)
+
+
+def update_tag_at_scope(cmd, resource_id, tags, operation):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    Tags = cmd.get_models('Tags')
+    tag_obj = Tags(tags=tags)
+    return rcf.tags.update_at_scope(scope=resource_id, properties=tag_obj, operation=operation)
+# endregion
+
+
 class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
