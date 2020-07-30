@@ -27,7 +27,8 @@ from ._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_id, validate_sas_definition_id,
     validate_storage_account_id, validate_storage_disabled_attribute,
-    validate_deleted_vault_name, validate_encryption, validate_decryption)
+    validate_deleted_vault_name, validate_encryption, validate_decryption,
+    KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
 
@@ -78,7 +79,8 @@ def load_arguments(self, _):
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag())
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag())
         c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag())
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(),
+                   deprecate_info=c.deprecate(expiration='2.11.0', hide='2.11.0'))
         c.argument('enable_purge_protection', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
@@ -91,7 +93,6 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
         c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag())
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
@@ -103,7 +104,8 @@ def load_arguments(self, _):
                                                          'Vnet/subnet pairs or subnet resource ids.')
 
     with self.argument_context('keyvault update') as c:
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag())
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(),
+                   deprecate_info=c.deprecate(expiration='2.11.0', hide='2.11.0'))
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault recover') as c:
@@ -229,10 +231,16 @@ def load_arguments(self, _):
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
 
     with self.argument_context('keyvault key encrypt') as c:
-        c.argument('value', help='The value to be encrypted.', validator=validate_encryption)
+        c.argument('value', help='The value to be encrypted. Default data type is Base64 encoded string.',
+                   validator=validate_encryption)
+        c.extra('data_type', help='The type of the original data.', arg_type=get_enum_type(KeyEncryptionDataType),
+                default='base64')
 
     with self.argument_context('keyvault key decrypt') as c:
-        c.argument('value', help='The value to be decrypted.', validator=validate_decryption)
+        c.argument('value', help='The value to be decrypted, which should be the result of "az keyvault encrypt"',
+                   validator=validate_decryption)
+        c.extra('data_type', help='The type of the original data.', arg_type=get_enum_type(KeyEncryptionDataType),
+                default='base64')
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
