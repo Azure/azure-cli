@@ -84,6 +84,7 @@ def _prepare_test_loader():
 
             def my_set(**kwargs):  # pylint:disable=unused-argument
                 return my_obj
+
             test_module = 'azure.cli.core.tests.test_generic_update'
             test_type = CliCommandType(operations_tmpl='{}#{{}}'.format(test_module))
             try:
