@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from typing import Optional
+
 from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, ProfileUpdateParameters,
                                    MinimumTlsVersion, EndpointPropertiesUpdateParametersDeliveryPolicy, DeliveryRule,
                                    DeliveryRuleRemoteAddressCondition, RemoteAddressMatchConditionParameters,
@@ -28,7 +30,7 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    PolicyMode, PolicyEnabledState, CdnWebApplicationFirewallPolicy, ManagedRuleSet,
                                    ManagedRuleGroupOverride, CustomRule, RateLimitRule)
 
-from azure.mgmt.cdn.operations import (EndpointsOperations)
+from azure.mgmt.cdn.operations import (EndpointsOperations, OriginsOperations)
 
 from azure.cli.core.util import (sdk_no_wait, find_child_item)
 from azure.cli.core.commands import upsert_to_collection
@@ -134,12 +136,12 @@ def set_endpoint_waf_policy_link(client: EndpointsOperations,
                         f'/resourceGroups/{waf_policy_resource_group_name}' \
                         f'/providers/Microsoft.Cdn' \
                         f'/CdnWebApplicationFirewallPolicies/{waf_policy_name}'
-    print(waf_policy_id)
+
     endpoint.web_application_firewall_policy_link = \
         EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=waf_policy_id)
 
     result = client.create(resource_group_name, profile_name, endpoint_name, endpoint).result()
-    if result is not None:
+    if result.web_application_firewall_policy_link is not None:
         return result.web_application_firewall_policy_link
     return EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=None)
 
@@ -588,6 +590,47 @@ def enable_custom_https(client, resource_group_name, profile_name, endpoint_name
                                         custom_domain_name)
 
     return updated
+
+
+def update_origin(client: OriginsOperations,
+                  resource_group_name: str,
+                  profile_name: str,
+                  endpoint_name: str,
+                  origin_name: str,
+                  http_port: Optional[int] = None,
+                  https_port: Optional[int] = None,
+                  private_link_resource_id: Optional[str] = None,
+                  private_link_location: Optional[str] = None,
+                  private_link_approval_message: Optional[str] = None):
+    from azure.mgmt.cdn.models import OriginUpdateParameters
+
+    existing = client.get(resource_group_name, profile_name, endpoint_name, origin_name)
+
+    if http_port is None:
+        http_port = existing.http_port
+    if https_port is None:
+        https_port = existing.https_port
+    if private_link_resource_id is None:
+        private_link_resource_id = existing.private_link_resource_id
+    if private_link_location is None:
+        private_link_location = existing.private_link_location
+    if private_link_approval_message is None:
+        private_link_approval_message = existing.private_link_approval_message
+
+    return client.update(resource_group_name,
+                         profile_name,
+                         endpoint_name,
+                         origin_name,
+                         OriginUpdateParameters(
+                             http_port=http_port,
+                             https_port=https_port,
+                             enabled=existing.enabled,
+                             origin_host_header=existing.origin_host_header,
+                             priority=existing.priority,
+                             weight=existing.weight,
+                             private_link_resource_id=private_link_resource_id,
+                             private_link_location=private_link_location,
+                             private_link_approval_message=private_link_approval_message))
 
 
 def update_profile(instance, tags=None):
