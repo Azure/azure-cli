@@ -602,27 +602,14 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
     """
     "host": {
       "$ref": "#/definitions/SubResource",
-      "description": "Specifies information about the dedicated host that the virtual machine resides in. <br><br>Minimum api-version: 2018-10-01."
+      "description": "Specifies information about the dedicated host that the virtual machine resides in.
+      <br><br>Minimum api-version: 2018-10-01."
     },
     "hostGroup": {
       "$ref": "#/definitions/SubResource",
-      "description": "Specifies information about the dedicated host group that the virtual machine resides in. <br><br>Minimum api-version: 2020-06-01. <br><br>NOTE: User cannot specify both host and hostGroup properties."
+      "description": "Specifies information about the dedicated host group that the virtual machine resides in.
+      <br><br>Minimum api-version: 2020-06-01. <br><br>NOTE: User cannot specify both host and hostGroup properties."
     }
-
-    If --host is name
-      If --host-group is a name, then it's an existing usage: host-group + host is used to specific host.
-      If --host-group is an ID, error.
-      If --host-group is None, error.
-
-    If --host is an ID
-      If --host-group is a name, error. host is enough to specific host, no need of host-group.
-      If --host-group is an ID, error. same as above.
-      If --host-group is None, OK.
-
-    If --host is None
-      If --host-group is name, OK.
-      If --host-group is id, OK.
-      If --host-group is None, OK.
 
     :param cmd:
     :param namespace:
@@ -643,59 +630,6 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
                 namespace='Microsoft.Compute', type='hostGroups', name=namespace.dedicated_host_group
             )
-
-
-    """
-    if is_valid_resource_id(namespace.dedicated_host):  # ID
-        if namespace.dedicated_host_group:  # name
-            raise CLIError('usage error: --host-group cannot be used together with --host')
-    elif namespace.dedicated_host:  # name
-        if is_valid_resource_id(namespace.dedicated_host_group):  # ID
-            raise CLIError('usage error: --host-group cannot be used together with --host')
-        if namespace.dedicated_host_group:  # name
-            pass
-        else:  # None
-            raise CLIError('usage error: Information of --host is not complete')
-    else:  # None
-        if namespace.dedicated_host_group:
-
-
-
-    # handle incorrect usage
-    if namespace.dedicated_host_group and namespace.dedicated_host is None:
-        raise CLIError("incorrect usage: --host ID | --host-group  NAME --host NAME")
-
-    # if this is a valid dedicated host resource id return
-    if is_valid_resource_id(namespace.dedicated_host):
-        if namespace.dedicated_host_group is not None:
-            logger.warning("Ignoring `--host-group` as `--host` is a valid resource id.")
-        return
-
-    # otherwise this should just be a dedicated host name. If host group provided, build resource id
-    if namespace.dedicated_host:
-        if namespace.dedicated_host_group is None:
-            raise CLIError("incorrect usage: --host ID | --host-group  NAME --host NAME")
-
-        host_name = namespace.dedicated_host
-        rg = namespace.resource_group_name
-        host_group_name = namespace.dedicated_host_group
-
-        if not check_existence(cmd.cli_ctx, host_name, rg, 'Microsoft.Compute', 'hosts',
-                               parent_name=host_group_name, parent_type='hostGroups'):
-            raise CLIError("The dedicated host '{}' in host group '{}' and resource group '{}' does not exist."
-                           .format(host_name, host_group_name, rg))
-
-        namespace.dedicated_host = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=rg,
-            namespace='Microsoft.Compute',
-            type='hostGroups',
-            name=host_group_name,
-            child_type_1="hosts",
-            child_name_1=host_name)
-
-        logger.info("Built dedicated host ID '%s' from host name and host group.", namespace.dedicated_host)
-    """
 
 
 def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
