@@ -4787,7 +4787,8 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
 
 class VMSSOrchestrationModeScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_')
+    @unittest.skip('not whitelist yet')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='centraluseuap')
     def test_vmss_orchestration_mode(self, resource_group):
         self.kwargs.update({
             'ppg': 'ppg1',
