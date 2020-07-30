@@ -206,9 +206,9 @@ def check_version_compatibility(azext_metadata):
         raise CLIError(min_max_msg_fmt)
 
 
-def add_extension(cmd=None, cli_ctx=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
-                  version=None):
+                  version=None, cli_ctx=None):
     ext_sha256 = None
 
     version = None if version == 'latest' else version
@@ -289,7 +289,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd=None, extension_name=None, cli_ctx=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None):
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
