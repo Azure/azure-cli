@@ -345,7 +345,7 @@ class AzCliCommandParser(CLICommandParser):
             use_dynamic_install = 'no'
         return use_dynamic_install
 
-    def _check_value(self, action, value):  # pylint: disable=too-many-statements
+    def _check_value(self, action, value):  # pylint: disable=too-many-statements, too-many-locals
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:  # pylint: disable=too-many-nested-blocks
