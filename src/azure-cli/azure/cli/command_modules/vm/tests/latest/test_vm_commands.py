@@ -18,7 +18,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer, JMESPathCheck)
+    StorageAccountPreparer, JMESPathCheck, StringContainCheck)
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
@@ -4013,9 +4013,9 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 class DedicatedHostScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
     def test_dedicated_host_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
-            'loc': resource_group_location,
             'host-group': 'my-host-group',
             'host-name': 'my-host',
             'vm-name': 'ded-host-vm'
@@ -4024,7 +4024,6 @@ class DedicatedHostScenarioTest(ScenarioTest):
         # create resources
         self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
             self.check('name', '{host-group}'),
-            self.check('location', '{loc}'),
             self.check('platformFaultDomainCount', 3),
             self.check('tags.foo', 'bar')
         ])
@@ -4032,7 +4031,6 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
                  '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
                      self.check('name', '{host-name}'),
-                     self.check('location', '{loc}'),
                      self.check('platformFaultDomain', 2),
                      self.check('sku.name', 'DSv3-Type1'),
                      self.check('autoReplaceOnFailure', False),
@@ -4046,8 +4044,17 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.assertTrue(instance_view["assetId"])
         self.assertTrue(instance_view["availableCapacity"])
 
+        self.cmd('vm host group get-instance-view -g {rg} -n {host-group}', checks=[
+            self.exists('instanceView')
+        ])
+
+        host_id = self.cmd('vm host show -g {rg} -n {host-name} --host-group {host-group}').get_output_in_json()['id']
+        self.kwargs.update({
+            'host_id': host_id
+        })
+
         self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
-                 ' --host-group {host-group} --host {host-name} --generate-ssh-keys --admin-username azureuser')
+                 '--host {host_id} --generate-ssh-keys --admin-username azureuser --nsg-rule NONE')
 
         # validate resources created successfully
         vm_json = self.cmd('vm show -n {vm-name} -g {rg}', checks=[
@@ -4074,6 +4081,26 @@ class DedicatedHostScenarioTest(ScenarioTest):
         # Service has problem. It is not deleted yet but it returns.
         time.sleep(30)
         self.cmd('vm host group delete --name {host-group} -g {rg} --yes')
+
+        # Test --automatic-placement
+        self.cmd('vm host group create -n {host-group} -c 1 -g {rg2} --automatic-placement', checks=[
+            self.check('supportAutomaticPlacement', True),
+        ])
+        host_id = self.cmd('vm host create -n {host-name} --host-group {host-group} -d 0 -g {rg2} --sku DSv3-Type1').get_output_in_json()['id']
+        self.kwargs.update({
+            'host_id': host_id
+        })
+        self.cmd('vm create -g {rg2} -n vm1 --image centos --host {host_id} --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm create -g {rg2} -n vm2 --image centos --host-group {host-group} --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm show -g {rg2} -n vm1', checks=[
+            self.check_pattern('host.id', '.*/{host-name}$')
+        ])
+        self.cmd('vm show -g {rg2} -n vm2', checks=[
+            self.check_pattern('hostGroup.id', '.*/{host-group}$')
+        ])
+        self.cmd('vm delete --name vm1 -g {rg2} --yes')
+        self.cmd('vm delete --name vm2 -g {rg2} --yes')
+        self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg2} --yes')
 # endregion
 
 
