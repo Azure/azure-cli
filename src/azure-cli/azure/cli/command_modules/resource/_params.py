@@ -26,6 +26,7 @@ def load_arguments(self, _):
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
         validate_msi)
+    from azure.cli.command_modules.resource.parameters import TagUpdateOperation
 
     DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
 
@@ -407,6 +408,7 @@ def load_arguments(self, _):
         c.argument('resource_id', tag_resource_id_type)
         c.argument('tags', tags_type)
         c.argument('operation', options_list='--operation',
+                   arg_type=get_enum_type([item.value for item in list(TagUpdateOperation)]),
                    help='The update operation: options include Merge, Replace and Delete.')
 
     with self.argument_context('lock') as c:

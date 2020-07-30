@@ -2572,8 +2572,6 @@ def update_tag_at_scope(cmd, resource_id, tags, operation):
         raise IncorrectUsageError("resource_id is invalid.")
     if not tags:
         raise IncorrectUsageError("Tags could not be empty.")
-    if (not operation) or (operation.strip().lower() not in set(['merge', 'replace', 'delete'])):
-        raise IncorrectUsageError("Operation could only be 'Merge', 'Replace', 'Delete'.")
     Tags = cmd.get_models('Tags')
     tag_obj = Tags(tags=tags)
     return rcf.tags.update_at_scope(scope=resource_id, properties=tag_obj, operation=operation)
