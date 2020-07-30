@@ -234,9 +234,6 @@ class ExecutionResult(object):
                 if command.startswith('az '):
                     command = command[3:]
                 coverage_file.write(command + '\n')
-                self.json_value = None
-                self.skip_assert = True
-                return
 
         self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
 
