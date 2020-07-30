@@ -1197,6 +1197,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('count', 3)
         ])
 
+        #nodepool get-upgrades
+        self.cmd('aks nodepool get-upgrades --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool1_name}', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group),
+            StringContainCheck(nodepool1_name),
+            self.check('type', "Microsoft.ContainerService/managedClusters/agentPools/upgradeProfiles")
+        ])
+
+        self.cmd('aks nodepool get-upgrades --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool2_name}', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group),
+            StringContainCheck(nodepool2_name),
+            self.check('type', "Microsoft.ContainerService/managedClusters/agentPools/upgradeProfiles")
+        ])
+
         #nodepool update
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --tags {new_tags}', checks=[
             self.check('tags.key2','value2')

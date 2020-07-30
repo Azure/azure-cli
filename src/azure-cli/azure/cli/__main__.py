@@ -2,9 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=wrong-import-position
+
+import timeit
+# Log the start time
+start_time = timeit.default_timer()
 
 import sys
-import timeit
 import uuid
 
 import azure.cli.core.telemetry as telemetry
@@ -63,8 +67,6 @@ except SystemExit as ex:  # some code directly call sys.exit, this is to make su
     raise ex
 
 finally:
-    telemetry.conclude()
-
     try:
         # Log the invoke finish time
         invoke_finish_time = timeit.default_timer()
@@ -74,3 +76,7 @@ finally:
                     invoke_finish_time - init_finish_time)
     except NameError:
         pass
+
+    telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
+    telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
+    telemetry.conclude()

@@ -895,7 +895,7 @@ def _log_response(response, **kwargs):
         return response
 
 
-class ConfiguredDefaultSetter:
+class ScopedConfig:
 
     def __init__(self, cli_config, use_local_config=None):
         self.use_local_config = use_local_config
@@ -910,6 +910,9 @@ class ConfiguredDefaultSetter:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         setattr(self.cli_config, 'use_local_config', self.original_use_local_config)
+
+
+ConfiguredDefaultSetter = ScopedConfig
 
 
 def _ssl_context():
@@ -1011,3 +1014,12 @@ def get_linux_distro():
             release_info[k.lower()] = v.strip('"')
 
     return release_info.get('name', None), release_info.get('version_id', None)
+
+
+def is_guid(guid):
+    import uuid
+    try:
+        uuid.UUID(guid)
+        return True
+    except ValueError:
+        return False

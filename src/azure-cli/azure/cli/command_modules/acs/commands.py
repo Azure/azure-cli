@@ -112,6 +112,7 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'aks_agentpool_upgrade', supports_no_wait=True)
         g.custom_command('update', 'aks_agentpool_update', supports_no_wait=True)
         g.custom_command('delete', 'aks_agentpool_delete', supports_no_wait=True)
+        g.custom_command('get-upgrades', 'aks_agentpool_get_upgrade_profile')
 
     # OSA commands
     with self.command_group('openshift', openshift_managed_clusters_sdk,

@@ -940,3 +940,10 @@ def load_arguments(self, _):
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
     # endregion
+
+    # region DiskAccess
+    with self.argument_context('disk-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disk_accesses') as c:
+        c.argument('disk_access_name', arg_type=name_arg_type, help='Name of the disk access resource.', id_part='name')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+    # endRegion
