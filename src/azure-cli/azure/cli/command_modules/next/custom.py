@@ -78,14 +78,14 @@ def _give_recommends(recommends):
     print("")
     for i in range(len(recommends)):
         rec = recommends[i]
-        print("{}. user {}".format(i + 1, rec['command']))
+        print("{}. az {}".format(i + 1, rec['command']))
         print("Recommended reason: {}% {}".format(rec['ratio'] * 100, rec['reason']))
 
 
 def handle_next(cmd):
     msg = '''
 Please select the type of recommendation you need:
-1. all: It will intelligently analyze the types of recommendation you need, and may recommend multiple types of content to you
+1. all: It will intelligently analyze the types of recommendation you need, and may recommend multiple types of command to you
 2. solution: Only the solutions to problems when errors occur are recommend
 3. command: Only the commands with high correlation with previously executed commands are recommend
 4. resource: Only the resources related to previously created resources are recommended
@@ -101,7 +101,14 @@ Please select the type of recommendation you need:
         raise CLIError("Failed to get recommend for '{}'.".format(last_cmd))
     _give_recommends(recommends)
     print()
-    option = _read_int("Which one is helpful to you? (If none, please input 0) :")
+    if len(recommends) > 1:
+        option = _read_int("Which one is helpful to you? (If none, please input 0) :")
+    else:
+        option = input("Does it helpful to you? (y/n): ")
+        if option in ["y", "yes", "Y", "Yes", "YES"]:
+            option = 1
+        else:
+            option = 0
     if option == 0:
         _send_feedback(cmd, False)
         return "recommend abort"
@@ -114,7 +121,7 @@ Please select the type of recommendation you need:
     nx_param = recommends[option]["arguments"]
     print("Run: az {} {}".format(nx_cmd, ' '.join(nx_param)))
     print()
-    doit = input("Do you want to do it now? (y/n): ")
+    doit = input("Do you want to run it now? (y/n): ")
     if doit not in ["y", "yes", "Y", "Yes", "YES"]:
         ret = {"result": "Thank you for your feedback"}
         return ret
