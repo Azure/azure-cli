@@ -398,7 +398,8 @@ class AzCliCommandParser(CLICommandParser):
                             add_extension(cli_ctx=cli_ctx, extension_name=ext_name)
                             if run_after_extension_installed:
                                 import subprocess
-                                exit_code = subprocess.call(cmd_list, shell=True)
+                                import platform
+                                exit_code = subprocess.call(cmd_list, shell=platform.system() == 'Windows')
                                 telemetry.set_user_fault("Extension {} dynamically installed and commands will be "
                                                          "rerun automatically.".format(ext_name))
                                 self.exit(exit_code)
