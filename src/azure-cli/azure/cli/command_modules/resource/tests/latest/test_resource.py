@@ -502,7 +502,7 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
-class TemplateSpecsTest(LiveScenarioTest):
+class TemplateSpecsTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs')
     def test_create_or_update_template_specs(self, resource_group, resource_group_location):
