@@ -86,8 +86,14 @@ def _prepare_test_loader():
                 return my_obj
             test_module = 'azure.cli.core.tests.test_generic_update'
             test_type = CliCommandType(operations_tmpl='{}#{{}}'.format(test_module))
-            setattr(sys.modules[test_module], my_get.__name__, my_get)
-            setattr(sys.modules[test_module], my_set.__name__, my_set)
+            try:
+                setattr(sys.modules[test_module], my_get.__name__, my_get)
+                setattr(sys.modules[test_module], my_set.__name__, my_set)
+            except KeyError:
+                import importlib
+                loaded_module = importlib.import_module(test_module)
+                setattr(loaded_module, my_get.__name__, my_get)
+                setattr(loaded_module, my_set.__name__, my_set)
             with self.command_group('', test_type) as g:
                 g.generic_update_command('genupdate', getter_name='my_get', setter_name='my_set')
 
