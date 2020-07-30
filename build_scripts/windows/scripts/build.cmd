@@ -95,6 +95,12 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-tel
 )
 %BUILDING_DIR%\python.exe -m pip install -r %CLI_SRC%\azure-cli\requirements.py3.windows.txt
 
+set AZURE_CLI_INIT_FILE=%BUILDING_DIR%\Lib\site-packages\azure\cli\__init__.py
+if exist %AZURE_CLI_INIT_FILE% (
+    echo Deleting __init__.py
+    del %AZURE_CLI_INIT_FILE%
+)
+
 if %errorlevel% neq 0 goto ERROR
 
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall urllib3==1.24.2
@@ -143,12 +149,6 @@ popd
 
 for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
     if exist %%d rmdir /s /q "%%d"
-)
-
-set AZURE_CLI_INIT_FILE=%BUILDING_DIR%\Lib\site-packages\azure\cli\__int__.pyc
-if exist %AZURE_CLI_INIT_FILE% (
-    echo Deleting __int__.pyc
-    del %AZURE_CLI_INIT_FILE%
 )
 
 if %errorlevel% neq 0 goto ERROR
