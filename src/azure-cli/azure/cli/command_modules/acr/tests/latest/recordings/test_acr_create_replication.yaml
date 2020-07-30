@@ -31,7 +31,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '472'
+      - '981'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -40,26 +40,34 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1188'
     status:
-      code: 409
-      message: Conflict
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - acr replication create
       Connection:
       - keep-alive
-      Content-Length:
-      - '0'
+      ParameterSetName:
+      - -n -r -l
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -85,51 +93,6 @@ interactions:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry?api-version=2016-02-01
-  response:
-    body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:38:12.1731772Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:38:13.1304809+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29074'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -139,617 +102,23 @@ interactions:
       message: OK
 - request:
     body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Creating","status":{"timestamp":"2020-07-14T10:38:20.0633444Z"},"regionEndpointEnabled":true}}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-1f50e582-c5be-11ea-96fa-84a93e84f251?api-version=2019-12-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '29074'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1187'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-1f50e582-c5be-11ea-96fa-84a93e84f251?api-version=2019-12-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry","namespace":"Microsoft.ContainerRegistry","authorizations":[{"applicationId":"6a0ec4d3-30cb-4a83-91c0-ae56bc0e3d26","roleDefinitionId":"78e18383-93eb-418a-9887-bc9271046576"},{"applicationId":"737d58c1-397a-46e7-9d12-7d8c830883c2","roleDefinitionId":"716bb53a-0390-4428-bf41-b1bedde7d751"},{"applicationId":"918d0db8-4a38-4938-93c1-9313bdfe0272","roleDefinitionId":"dcd2d2c9-3f80-4d72-95a8-2593111b4b12"},{"applicationId":"d2fa1650-4805-4a83-bcb9-cf41fe63539c","roleDefinitionId":"c15f8dab-b103-4f8d-9afb-fbe4b8e98de2"},{"applicationId":"a4c95b9e-3994-40cc-8953-5dc66d48348d","roleDefinitionId":"dc88c655-90fa-48d9-8d51-003cc8738508"},{"applicationId":"62c559cd-db0c-4da0-bab2-972528c65d42","roleDefinitionId":"437b639a-6d74-491d-959f-d172e8c5c1fc"}],"resourceTypes":[{"resourceType":"registries","locations":["West
-        US","East US","South Central US","West Europe","North Europe","UK South","UK
-        West","Australia East","Australia Southeast","Central India","Korea Central","France
-        Central","South Africa North","UAE North","East Asia","Japan East","Japan
-        West","Southeast Asia","South India","Brazil South","Canada East","Canada
-        Central","Central US","East US 2","North Central US","West Central US","West
-        US 2","Switzerland North","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01","2017-03-01"],"capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"registries/scopeMaps","locations":["West
-        US","East US","South Central US","West Europe","North Europe","UK South","UK
-        West","Australia East","Australia Southeast","Central India","East Asia","Japan
-        East","Japan West","Southeast Asia","South India","Brazil South","Canada East","Canada
-        Central","Central US","East US 2","North Central US","West Central US","West
-        US 2","Korea Central","France Central","South Africa North","UAE North","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-05-01-preview"]},{"resourceType":"registries/tokens","locations":["West
-        US","East US","South Central US","West Europe","North Europe","UK South","UK
-        West","Australia East","Australia Southeast","Central India","East Asia","Japan
-        East","Japan West","Southeast Asia","South India","Brazil South","Canada East","Canada
-        Central","Central US","East US 2","North Central US","West Central US","West
-        US 2","Korea Central","France Central","South Africa North","UAE North","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-05-01-preview"]},{"resourceType":"registries/generateCredentials","locations":["West
-        US","East US","South Central US","West Europe","North Europe","UK South","UK
-        West","Australia East","Australia Southeast","Central India","East Asia","Japan
-        East","Japan West","Southeast Asia","South India","Brazil South","Canada East","Canada
-        Central","Central US","East US 2","North Central US","West Central US","West
-        US 2","Korea Central","France Central","South Africa North","UAE North","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-05-01-preview"]},{"resourceType":"registries/privateEndpointConnections","locations":["West
-        US","East US","South Central US","West Europe","Switzerland North","North
-        Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Brazil
-        South","Canada East","Canada Central","Central US","East US 2","North Central
-        US","West Central US","West US 2","Korea Central","France Central","South
-        Africa North","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview"]},{"resourceType":"registries/privateEndpointConnectionProxies","locations":["West
-        US","East US","South Central US","West Europe","Switzerland North","North
-        Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Brazil
-        South","Canada East","Canada Central","Central US","East US 2","North Central
-        US","West Central US","West US 2","Korea Central","France Central","South
-        Africa North","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview"]},{"resourceType":"registries/privateEndpointConnectionProxies/validate","locations":["West
-        US","East US","South Central US","West Europe","Switzerland North","North
-        Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Brazil
-        South","Canada East","Canada Central","Central US","East US 2","North Central
-        US","West Central US","West US 2","Korea Central","France Central","South
-        Africa North","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview"]},{"resourceType":"registries/privateLinkResources","locations":["West
-        US","East US","South Central US","West Europe","Switzerland North","North
-        Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Brazil
-        South","Canada East","Canada Central","Central US","East US 2","North Central
-        US","West Central US","West US 2","Korea Central","France Central","South
-        Africa North","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview"]},{"resourceType":"registries/importImage","locations":["South
-        Central US","West Central US","East US","West Europe","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","France Central","South
-        Africa North","UAE North","Central US","Canada East","Canada Central","UK
-        South","UK West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01"]},{"resourceType":"registries/exportPipelines","locations":["West
-        US","East US","South Central US","West Europe","Switzerland North","North
-        Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Brazil
-        South","Canada East","Canada Central","Central US","East US 2","North Central
-        US","West Central US","West US 2","Korea Central","France Central","South
-        Africa North","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"registries/importPipelines","locations":["West
-        US","East US","South Central US","West Europe","Switzerland North","North
-        Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Brazil
-        South","Canada East","Canada Central","Central US","East US 2","North Central
-        US","West Central US","West US 2","Korea Central","France Central","South
-        Africa North","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview"],"capabilities":"SystemAssignedResourceIdentity"},{"resourceType":"registries/pipelineRuns","locations":["West
-        US","East US","South Central US","West Europe","Switzerland North","North
-        Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Brazil
-        South","Canada East","Canada Central","Central US","East US 2","North Central
-        US","West Central US","West US 2","Korea Central","France Central","South
-        Africa North","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview"]},{"resourceType":"registries/listBuildSourceUploadUrl","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview","2019-04-01","2018-09-01"]},{"resourceType":"registries/scheduleRun","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview","2019-04-01","2018-09-01"]},{"resourceType":"registries/runs","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview","2019-04-01","2018-09-01"]},{"resourceType":"registries/taskRuns","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview"]},{"resourceType":"registries/taskRuns/listDetails","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview"]},{"resourceType":"registries/agentPools","locations":["East
-        US","West US 2","South Central US","East US 2","East US 2 EUAP"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove"},{"resourceType":"registries/agentPools/listQueueStatus","locations":["East
-        US","West US 2","South Central US","East US 2","East US 2 EUAP"],"apiVersions":["2019-06-01-preview"]},{"resourceType":"registries/runs/listLogSasUrl","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview","2019-04-01","2018-09-01"]},{"resourceType":"registries/runs/cancel","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview","2019-04-01","2018-09-01"]},{"resourceType":"registries/tasks","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview","2019-04-01","2018-09-01"],"capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"registries/tasks/listDetails","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2019-06-01-preview","2019-04-01","2018-09-01"]},{"resourceType":"registries/getBuildSourceUploadUrl","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"registries/queueBuild","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"registries/builds","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"registries/builds/getLogLink","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"registries/builds/cancel","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"registries/buildTasks","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove"},{"resourceType":"registries/buildTasks/listSourceRepositoryProperties","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"registries/buildTasks/steps","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"registries/buildTasks/steps/listBuildArguments","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"registries/replications","locations":["South
-        Central US","West Central US","East US","West Europe","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","South Africa North","UAE
-        North","France Central","Central US","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01"],"capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove"},{"resourceType":"registries/webhooks","locations":["West
-        Central US","East US","West Europe","South Central US","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","South Africa North","UAE
-        North","France Central","Central US","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01"],"capabilities":"CrossResourceGroupResourceMove,
-        CrossSubscriptionResourceMove"},{"resourceType":"registries/webhooks/ping","locations":["West
-        Central US","East US","West Europe","South Central US","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","South Africa North","UAE
-        North","France Central","Central US","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01"]},{"resourceType":"registries/webhooks/getCallbackConfig","locations":["West
-        Central US","East US","West Europe","South Central US","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","South Africa North","UAE
-        North","France Central","Central US","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01"]},{"resourceType":"registries/webhooks/listEvents","locations":["West
-        Central US","East US","West Europe","South Central US","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","South Africa North","UAE
-        North","France Central","Central US","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01"]},{"resourceType":"locations/setupAuth","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"locations/authorize","locations":["East
-        US","West Europe","West US 2","South Central US","Australia East","Australia
-        Southeast","Brazil South","Canada Central","Canada East","Central India","Central
-        US","East Asia","East US 2","Japan East","Japan West","North Central US","North
-        Europe","Southeast Asia","South India","UK South","UK West","West US","West
-        Central US","France Central","Korea Central","South Africa North","UAE North","Switzerland
-        North","East US 2 EUAP"],"apiVersions":["2018-02-01-preview"]},{"resourceType":"locations/operationResults","locations":["West
-        Central US","East US","West Europe","South Central US","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","France Central","Central
-        US","South Africa North","UAE North","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01-preview","2019-05-01","2017-10-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":["West
-        Central US","East US","West Europe","South Central US","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","South Africa North","UAE
-        North","France Central","Central US","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-05-01","2017-10-01"]},{"resourceType":"registries/GetCredentials","locations":["West
-        US","East US","South Central US","West Europe","East US 2 EUAP","Central US
-        EUAP"],"apiVersions":["2016-06-27-preview"]},{"resourceType":"registries/listCredentials","locations":["South
-        Central US","East US","West US","West Europe","North Europe","UK South","UK
-        West","Australia East","Australia Southeast","Central India","Korea Central","South
-        Africa North","UAE North","France Central","East Asia","Japan East","Japan
-        West","Southeast Asia","South India","Brazil South","Canada East","Canada
-        Central","Central US","East US 2","North Central US","West Central US","West
-        US 2","Switzerland North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01","2017-03-01"]},{"resourceType":"registries/regenerateCredential","locations":["South
-        Central US","West US","East US","West Europe","North Europe","UK South","UK
-        West","Australia East","Australia Southeast","Central India","Korea Central","South
-        Africa North","UAE North","France Central","East Asia","Japan East","Japan
-        West","Southeast Asia","South India","Brazil South","Canada East","Canada
-        Central","Central US","East US 2","North Central US","West Central US","West
-        US 2","Switzerland North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01","2017-03-01"]},{"resourceType":"registries/listUsages","locations":["West
-        Central US","East US","West Europe","South Central US","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","South Africa North","UAE
-        North","France Central","Central US","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01"]},{"resourceType":"registries/listPolicies","locations":["West
-        US","East US","South Central US","West Europe","North Europe","UK South","UK
-        West","Australia East","Australia Southeast","Central India","Korea Central","South
-        Africa North","UAE North","France Central","East Asia","Japan East","Japan
-        West","Southeast Asia","South India","Brazil South","Canada East","Canada
-        Central","Central US","East US 2","North Central US","West Central US","West
-        US 2","Switzerland North","East US 2 EUAP","Central US EUAP"],"apiVersions":["2017-10-01"]},{"resourceType":"registries/updatePolicies","locations":["West
-        US","East US","South Central US","West Europe","North Europe","UK South","UK
-        West","Australia East","Australia Southeast","Central India","Korea Central","South
-        Africa North","UAE North","France Central","East Asia","Japan East","Japan
-        West","Southeast Asia","South India","Brazil South","Canada East","Canada
-        Central","Central US","East US 2","North Central US","West Central US","West
-        US 2","Switzerland North","East US 2 EUAP","Central US EUAP"],"apiVersions":["2017-10-01"]},{"resourceType":"registries/regenerateCredentials","locations":["West
-        US","East US","South Central US","West Europe","East US 2 EUAP","Central US
-        EUAP"],"apiVersions":["2016-06-27-preview"]},{"resourceType":"registries/eventGridFilters","locations":["South
-        Central US","West Central US","East US","West Europe","West US","Japan East","North
-        Europe","Southeast Asia","North Central US","East US 2","West US 2","Brazil
-        South","Australia East","Central India","Korea Central","South Africa North","UAE
-        North","France Central","Central US","Canada East","Canada Central","UK South","UK
-        West","Australia Southeast","East Asia","Japan West","South India","Switzerland
-        North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-05-01","2017-10-01"]},{"resourceType":"checkNameAvailability","locations":["South
-        Central US","East US","West US","Central US","East US 2","North Central US","West
-        Central US","West US 2","Brazil South","Canada East","Canada Central","West
-        Europe","North Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Korea
-        Central","France Central","South Africa North","UAE North","Switzerland North","East
-        US 2 EUAP","Central US EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01","2017-06-01-preview","2017-03-01","2016-06-27-preview"]},{"resourceType":"operations","locations":["South
-        Central US","East US","West US","Central US","East US 2","North Central US","West
-        Central US","West US 2","Brazil South","Canada East","Canada Central","West
-        Europe","North Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Korea
-        Central","France Central","South Africa North","UAE North","Switzerland North","Central
-        US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01","2017-10-01","2017-06-01-preview","2017-03-01"]},{"resourceType":"locations","locations":["South
-        Central US","East US","West US","Central US","East US 2","North Central US","West
-        Central US","West US 2","Brazil South","Canada East","Canada Central","West
-        Europe","North Europe","UK South","UK West","Australia East","Australia Southeast","Central
-        India","East Asia","Japan East","Japan West","Southeast Asia","South India","Korea
-        Central","France Central","South Africa North","UAE North","Switzerland North","Central
-        US EUAP","East US 2 EUAP"],"apiVersions":["2019-12-01-preview","2019-05-01-preview","2019-05-01","2017-10-01","2017-06-01-preview"]}],"registrationState":"Registering"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-1f50e582-c5be-11ea-96fa-84a93e84f251?api-version=2019-12-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '29074'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:32 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry?api-version=2016-02-01
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:31.7730914Z"},"regionEndpointEnabled":true}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29074'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdd7fbiswoiks53ktq2k4kfoyg66d4aktdmtr5ockrzawtp4lsubjgw3fcgriov5ot/providers/Microsoft.ContainerRegistry/registries/cliregwp5wnqa3exrz3i","name":"cliregwp5wnqa3exrz3i","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnlx4pnlhpelupg6k67zzck72sz6kmey2lp532nl6yrmjoeydgbs7lpopg6ka36owa/providers/Microsoft.ContainerRegistry/registries/cliregjjzqpcgf6oo2kg","name":"cliregjjzqpcgf6oo2kg","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{"foo":"bar","cat":""}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgtxilu5f65rwmvm74aocbvjfxzzbba4k3proytc5crx5womyzjngrr66jmofdvfaed/providers/Microsoft.ContainerRegistry/registries/testregd52kpxooxup35kjqdl","name":"testregd52kpxooxup35kjqdl","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgzwh5haccn5krxuw624jz6uoploabtgz5odfdgikrl6ru4pldci7zyljrczff7qoup/providers/Microsoft.ContainerRegistry/registries/cliregg3zmc7qdac5scm","name":"cliregg3zmc7qdac5scm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2196'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry?api-version=2016-02-01
-  response:
-    body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:38:12.1731772Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:38:13.1304809+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29074'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry?api-version=2016-02-01
-  response:
-    body:
-      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:31.7730914Z"},"regionEndpointEnabled":true}},{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/westus","name":"westus","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:23.2382076Z"},"regionEndpointEnabled":true}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29074'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdd7fbiswoiks53ktq2k4kfoyg66d4aktdmtr5ockrzawtp4lsubjgw3fcgriov5ot/providers/Microsoft.ContainerRegistry/registries/cliregwp5wnqa3exrz3i","name":"cliregwp5wnqa3exrz3i","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnlx4pnlhpelupg6k67zzck72sz6kmey2lp532nl6yrmjoeydgbs7lpopg6ka36owa/providers/Microsoft.ContainerRegistry/registries/cliregjjzqpcgf6oo2kg","name":"cliregjjzqpcgf6oo2kg","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{"foo":"bar","cat":""}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgtxilu5f65rwmvm74aocbvjfxzzbba4k3proytc5crx5womyzjngrr66jmofdvfaed/providers/Microsoft.ContainerRegistry/registries/testregd52kpxooxup35kjqdl","name":"testregd52kpxooxup35kjqdl","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgzwh5haccn5krxuw624jz6uoploabtgz5odfdgikrl6ru4pldci7zyljrczff7qoup/providers/Microsoft.ContainerRegistry/registries/cliregg3zmc7qdac5scm","name":"cliregg3zmc7qdac5scm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2196'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
-      false, "publicNetworkAccess": "Enabled"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr create
+      - acr replication create
       Connection:
       - keep-alive
-      Content-Length:
-      - '127'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g -l --sku
+      - -n -r -l
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
-    method: PUT
+    method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
   response:
     body:
@@ -762,103 +131,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:38:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr replication create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -l
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:31.7730914Z"},"regionEndpointEnabled":true}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '3015'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr replication create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -l
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdd7fbiswoiks53ktq2k4kfoyg66d4aktdmtr5ockrzawtp4lsubjgw3fcgriov5ot/providers/Microsoft.ContainerRegistry/registries/cliregwp5wnqa3exrz3i","name":"cliregwp5wnqa3exrz3i","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnlx4pnlhpelupg6k67zzck72sz6kmey2lp532nl6yrmjoeydgbs7lpopg6ka36owa/providers/Microsoft.ContainerRegistry/registries/cliregjjzqpcgf6oo2kg","name":"cliregjjzqpcgf6oo2kg","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{"foo":"bar","cat":""}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgtxilu5f65rwmvm74aocbvjfxzzbba4k3proytc5crx5womyzjngrr66jmofdvfaed/providers/Microsoft.ContainerRegistry/registries/testregd52kpxooxup35kjqdl","name":"testregd52kpxooxup35kjqdl","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgzwh5haccn5krxuw624jz6uoploabtgz5odfdgikrl6ru4pldci7zyljrczff7qoup/providers/Microsoft.ContainerRegistry/registries/cliregg3zmc7qdac5scm","name":"cliregg3zmc7qdac5scm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2196'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 10:38:38 GMT
+      - Tue, 14 Jul 2020 10:38:16 GMT
       expires:
       - '-1'
       pragma:
@@ -902,10 +175,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{"key":"value"},"properties":{"provisioningState":"Updating","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:31.7730914Z"},"regionEndpointEnabled":false}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Creating","status":{"timestamp":"2020-07-14T10:38:20.0633444Z"},"regionEndpointEnabled":true}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-2da3acae-c5be-11ea-b5fe-84a93e84f251?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-1f50e582-c5be-11ea-96fa-84a93e84f251?api-version=2019-12-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -913,7 +186,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:38:42 GMT
+      - Tue, 14 Jul 2020 10:38:21 GMT
       expires:
       - '-1'
       pragma:
@@ -925,7 +198,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1187'
     status:
       code: 201
       message: Created
@@ -943,24 +216,24 @@ interactions:
       ParameterSetName:
       - -n -r -l
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.8.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+        Azure-SDK-For-Python AZURECLI/2.9.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-18951a4e-bf20-11ea-a49f-c03eba45757e?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-1f50e582-c5be-11ea-96fa-84a93e84f251?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"status":"Creating"}'
+      string: '{"status":"Succeeded"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-18951a4e-bf20-11ea-a49f-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-1f50e582-c5be-11ea-96fa-84a93e84f251?api-version=2019-12-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '21'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 06 Jul 2020 00:32:12 GMT
+      - Tue, 14 Jul 2020 10:38:32 GMT
       expires:
       - '-1'
       pragma:
@@ -991,6 +264,437 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -r -l
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:31.7730914Z"},"regionEndpointEnabled":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '511'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdd7fbiswoiks53ktq2k4kfoyg66d4aktdmtr5ockrzawtp4lsubjgw3fcgriov5ot/providers/Microsoft.ContainerRegistry/registries/cliregwp5wnqa3exrz3i","name":"cliregwp5wnqa3exrz3i","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnlx4pnlhpelupg6k67zzck72sz6kmey2lp532nl6yrmjoeydgbs7lpopg6ka36owa/providers/Microsoft.ContainerRegistry/registries/cliregjjzqpcgf6oo2kg","name":"cliregjjzqpcgf6oo2kg","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{"foo":"bar","cat":""}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgtxilu5f65rwmvm74aocbvjfxzzbba4k3proytc5crx5womyzjngrr66jmofdvfaed/providers/Microsoft.ContainerRegistry/registries/testregd52kpxooxup35kjqdl","name":"testregd52kpxooxup35kjqdl","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgzwh5haccn5krxuw624jz6uoploabtgz5odfdgikrl6ru4pldci7zyljrczff7qoup/providers/Microsoft.ContainerRegistry/registries/cliregg3zmc7qdac5scm","name":"cliregg3zmc7qdac5scm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2196'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:38:12.1731772Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:38:13.1304809+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '981'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications?api-version=2019-12-01-preview
+  response:
+    body:
+      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:31.7730914Z"},"regionEndpointEnabled":true}},{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/westus","name":"westus","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:23.2382076Z"},"regionEndpointEnabled":true}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1026'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdd7fbiswoiks53ktq2k4kfoyg66d4aktdmtr5ockrzawtp4lsubjgw3fcgriov5ot/providers/Microsoft.ContainerRegistry/registries/cliregwp5wnqa3exrz3i","name":"cliregwp5wnqa3exrz3i","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnlx4pnlhpelupg6k67zzck72sz6kmey2lp532nl6yrmjoeydgbs7lpopg6ka36owa/providers/Microsoft.ContainerRegistry/registries/cliregjjzqpcgf6oo2kg","name":"cliregjjzqpcgf6oo2kg","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{"foo":"bar","cat":""}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgtxilu5f65rwmvm74aocbvjfxzzbba4k3proytc5crx5womyzjngrr66jmofdvfaed/providers/Microsoft.ContainerRegistry/registries/testregd52kpxooxup35kjqdl","name":"testregd52kpxooxup35kjqdl","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgzwh5haccn5krxuw624jz6uoploabtgz5odfdgikrl6ru4pldci7zyljrczff7qoup/providers/Microsoft.ContainerRegistry/registries/cliregg3zmc7qdac5scm","name":"cliregg3zmc7qdac5scm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2196'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:38:12.1731772Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:38:13.1304809+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '981'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:31.7730914Z"},"regionEndpointEnabled":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '511'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r --tags --region-endpoint-enabled
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdd7fbiswoiks53ktq2k4kfoyg66d4aktdmtr5ockrzawtp4lsubjgw3fcgriov5ot/providers/Microsoft.ContainerRegistry/registries/cliregwp5wnqa3exrz3i","name":"cliregwp5wnqa3exrz3i","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnlx4pnlhpelupg6k67zzck72sz6kmey2lp532nl6yrmjoeydgbs7lpopg6ka36owa/providers/Microsoft.ContainerRegistry/registries/cliregjjzqpcgf6oo2kg","name":"cliregjjzqpcgf6oo2kg","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{"foo":"bar","cat":""}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgtxilu5f65rwmvm74aocbvjfxzzbba4k3proytc5crx5womyzjngrr66jmofdvfaed/providers/Microsoft.ContainerRegistry/registries/testregd52kpxooxup35kjqdl","name":"testregd52kpxooxup35kjqdl","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgzwh5haccn5krxuw624jz6uoploabtgz5odfdgikrl6ru4pldci7zyljrczff7qoup/providers/Microsoft.ContainerRegistry/registries/cliregg3zmc7qdac5scm","name":"cliregg3zmc7qdac5scm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2196'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"key": "value"}, "properties": {"regionEndpointEnabled": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '74'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -r --tags --region-endpoint-enabled
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{"key":"value"},"properties":{"provisioningState":"Updating","status":{"displayStatus":"Ready","timestamp":"2020-07-14T10:38:31.7730914Z"},"regionEndpointEnabled":false}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-2da3acae-c5be-11ea-b5fe-84a93e84f251?api-version=2019-12-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '524'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 14 Jul 2020 10:38:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr replication update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r --tags --region-endpoint-enabled
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1035,11 +739,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication create
+      - acr replication update
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -r -l
+      - -n -r --tags --region-endpoint-enabled
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1052,7 +756,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '511'
+      - '525'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1082,11 +786,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication list
+      - acr replication delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -r
+      - -n -r
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1127,11 +831,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication list
+      - acr replication delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -r
+      - -n -r
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1176,26 +880,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication list
+      - acr replication delete
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
       ParameterSetName:
-      - -r
+      - -n -r
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications?api-version=2019-12-01-preview
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-06T00:32:16.8786406Z"},"regionEndpointEnabled":true}},{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/westus","name":"westus","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-07-06T00:32:04.5038693Z"},"regionEndpointEnabled":true}}]}'
+      string: 'null'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1026'
+      - '4'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1210,17 +916,13 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14996'
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -1229,7 +931,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication show
+      - acr replication delete
       Connection:
       - keep-alive
       ParameterSetName:
@@ -1241,25 +943,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-37a5e8fc-c5be-11ea-b224-84a93e84f251?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg3btyynny3rrz255pnzywctzo3r4jnw2jltcom7pgce7ku64dbbsnnsw5ihlkuparb/providers/Microsoft.ContainerRegistry/registries/testregvsuixnjr6x664l3ymr","name":"testregvsuixnjr6x664l3ymr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","identity":{"principalId":"cd27c347-9500-4a61-b834-8aa74cb31452","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg3btyynny3rrz255pnzywctzo3r4jnw2jltcom7pgce7ku64dbbsnnsw5ihlkuparb/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentitymmk2gf2mnzh5oiqc6s":{"principalId":"de57201c-2313-4ad9-b717-8d47b1e9392b","clientId":"45bf290b-11e8-4573-b148-c29d79340424"}}},"tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgev2x5zprzuvml5viri7jfudw73ay72zgh3kyjkd5qriueqckdel75iupucjlqxdfr/providers/Microsoft.ContainerRegistry/registries/clireguqtzn4b5iqn4p7","name":"clireguqtzn4b5iqn4p7","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgmu7bij6en5x76udraonmuaf65a4chheucjil7yvl2ayqmu4vzqyth5zxreyifxeja/providers/Microsoft.ContainerRegistry/registries/testregxdeqstc3c2n73","name":"testregxdeqstc3c2n73","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgmu7bij6en5x76udraonmuaf65a4chheucjil7yvl2ayqmu4vzqyth5zxreyifxeja/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentitydh74wl36":{"principalId":"71cc48dd-abe9-41cb-bfcf-2ae46d10eb19","clientId":"841116a8-41e7-4c85-9b90-97178c74dd3a"}}},"tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpv2twb2qljovunvk5hkwfsuhfkenrav4axarricud5pidpoqc5c2uks7cbibb7v2q/providers/Microsoft.ContainerRegistry/registries/cliregfyffrkjpowrlpy","name":"cliregfyffrkjpowrlpy","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}}]}'
+      string: ''
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2796'
-      content-type:
-      - application/json; charset=utf-8
+      - '0'
       date:
       - Tue, 14 Jul 2020 10:39:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1273,11 +972,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication show
+      - acr replication create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -r
+      - -n -r -l --region-endpoint-enabled
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1302,12 +1001,8 @@ interactions:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -1323,18 +1018,18 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication show
+      - acr replication create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -r
+      - -n -r -l --region-endpoint-enabled
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:38:12.1731772Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:38:13.1304809+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
@@ -1342,7 +1037,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '511'
+      - '981'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1365,74 +1060,28 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"location": "centralus", "properties": {"regionEndpointEnabled": false}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tags --region-endpoint-enabled
-      User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.0.0
-        Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg3btyynny3rrz255pnzywctzo3r4jnw2jltcom7pgce7ku64dbbsnnsw5ihlkuparb/providers/Microsoft.ContainerRegistry/registries/testregvsuixnjr6x664l3ymr","name":"testregvsuixnjr6x664l3ymr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","identity":{"principalId":"cd27c347-9500-4a61-b834-8aa74cb31452","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg3btyynny3rrz255pnzywctzo3r4jnw2jltcom7pgce7ku64dbbsnnsw5ihlkuparb/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentitymmk2gf2mnzh5oiqc6s":{"principalId":"de57201c-2313-4ad9-b717-8d47b1e9392b","clientId":"45bf290b-11e8-4573-b148-c29d79340424"}}},"tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgev2x5zprzuvml5viri7jfudw73ay72zgh3kyjkd5qriueqckdel75iupucjlqxdfr/providers/Microsoft.ContainerRegistry/registries/clireguqtzn4b5iqn4p7","name":"clireguqtzn4b5iqn4p7","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgmu7bij6en5x76udraonmuaf65a4chheucjil7yvl2ayqmu4vzqyth5zxreyifxeja/providers/Microsoft.ContainerRegistry/registries/testregxdeqstc3c2n73","name":"testregxdeqstc3c2n73","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rgmu7bij6en5x76udraonmuaf65a4chheucjil7yvl2ayqmu4vzqyth5zxreyifxeja/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentitydh74wl36":{"principalId":"71cc48dd-abe9-41cb-bfcf-2ae46d10eb19","clientId":"841116a8-41e7-4c85-9b90-97178c74dd3a"}}},"tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpv2twb2qljovunvk5hkwfsuhfkenrav4axarricud5pidpoqc5c2uks7cbibb7v2q/providers/Microsoft.ContainerRegistry/registries/cliregfyffrkjpowrlpy","name":"cliregfyffrkjpowrlpy","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2796'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 06 Jul 2020 00:32:27 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"tags": {"key": "value"}, "properties": {"regionEndpointEnabled": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr replication update
+      - acr replication create
       Connection:
       - keep-alive
       Content-Length:
-      - '74'
+      - '73'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -n -r --tags --region-endpoint-enabled
+      - -n -r -l --region-endpoint-enabled
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
-    method: PATCH
+    method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
   response:
     body:
@@ -1443,7 +1092,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '524'
+      - '487'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1471,11 +1120,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication update
+      - acr replication create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -r --tags --region-endpoint-enabled
+      - -n -r -l --region-endpoint-enabled
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1520,11 +1169,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication update
+      - acr replication create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -r --tags --region-endpoint-enabled
+      - -n -r -l --region-endpoint-enabled
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1537,7 +1186,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '524'
+      - '512'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1754,18 +1403,20 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication create
+      - acr delete
       Connection:
       - keep-alive
+      Content-Length:
+      - '0'
       ParameterSetName:
-      - -n -r -l --region-endpoint-enabled
+      - -n -g -y
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:38:12.1731772Z","provisioningState":"Deleting","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:38:13.1304809+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
@@ -1773,7 +1424,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1883'
+      - '980'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1784,17 +1435,17 @@ interactions:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/westus/operationResults/registries-54d6bc70-c5be-11ea-a11b-84a93e84f251?api-version=2019-12-01-preview
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14995'
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -1803,11 +1454,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr replication create
+      - acr delete
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -r -l --region-endpoint-enabled
+      - -n -g -y
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1815,14 +1466,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/westus/operationResults/registries-54d6bc70-c5be-11ea-a11b-84a93e84f251?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-06T00:31:56.3414785Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-06T00:31:57.2054439+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: ''
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '981'
-      content-type:
-      - application/json; charset=utf-8
+      - '0'
       date:
       - Tue, 14 Jul 2020 10:40:07 GMT
       expires:
@@ -1833,10 +1482,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:

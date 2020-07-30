@@ -493,16 +493,14 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
     status:
-      code: 409
-      message: Conflict
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -533,6 +531,8 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -541,8 +541,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
       code: 200
       message: OK
@@ -550,7 +548,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -595,7 +593,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -690,13 +688,15 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
       - acr identity remove
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -745,7 +745,7 @@ interactions:
       "Enabled"}}'
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -831,8 +831,12 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -844,11 +848,15 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - acr identity remove
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -887,13 +895,15 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
       - acr identity assign
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -931,7 +941,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -963,8 +973,12 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -982,9 +996,11 @@ interactions:
       "Enabled"}}'
     headers:
       Accept:
-      - '*/*'
+      - application/json
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - acr identity assign
       Connection:
       - keep-alive
       Content-Length:
@@ -1030,23 +1046,18 @@ interactions:
       code: 201
       message: Created
 - request:
-    body: '{"location": "westus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
-      false, "publicNetworkAccess": "Enabled"}}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr create
+      - acr identity assign
       Connection:
       - keep-alive
-      Content-Length:
-      - '127'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
-      - --name --resource-group --sku
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1080,8 +1091,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
     status:
       code: 200
       message: OK
@@ -1093,11 +1102,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - identity create
+      - acr identity assign
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name -g
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1119,8 +1128,12 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -1129,22 +1142,18 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus"}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - identity create
+      - acr identity remove
       Connection:
       - keep-alive
-      Content-Length:
-      - '22'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
-      - --name -g
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
         Azure-SDK-For-Python AZURECLI/2.9.0
@@ -1166,21 +1175,17 @@ interactions:
       - Fri, 17 Jul 2020 02:21:21 GMT
       expires:
       - '-1'
-      location:
-      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentity000002
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -1189,18 +1194,18 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - identity create
+      - acr identity remove
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name -g
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004?api-version=2019-12-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","identity":{"principalId":"2182f8d4-a4fd-4b70-9ce3-34ff2148c826","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"systemAssigned"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","location":"westus","tags":{},"properties":{"loginServer":"testreg000004.azurecr.io","creationDate":"2020-07-17T02:19:47.7577162Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-17T02:21:05.5439085+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
@@ -1217,8 +1222,12 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -1241,7 +1250,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - identity create
+      - acr identity remove
       Connection:
       - keep-alive
       Content-Length:
@@ -1249,14 +1258,14 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - --name -g
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentity2000003?api-version=2015-08-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004?api-version=2019-12-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","identity":{"principalId":"2182f8d4-a4fd-4b70-9ce3-34ff2148c826","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"systemAssigned"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","location":"westus","tags":{},"properties":{"loginServer":"testreg000004.azurecr.io","creationDate":"2020-07-17T02:19:47.7577162Z","provisioningState":"Updating","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-17T02:21:27.0596741+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
@@ -1273,8 +1282,6 @@ interactions:
       - Fri, 17 Jul 2020 02:21:31 GMT
       expires:
       - '-1'
-      location:
-      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentity2000003
       pragma:
       - no-cache
       server:
@@ -1284,7 +1291,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -1408,8 +1415,6 @@ interactions:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgics53ppnkuqsfgx76fuke2gilxv26fowhl2peept2r635qjkcghnsavqbs7rgnckf/providers/Microsoft.ContainerRegistry/registries/clireg34yjyxsubdj4ap","name":"clireg34yjyxsubdj4ap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","identity":{"principalId":"2182f8d4-a4fd-4b70-9ce3-34ff2148c826","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004/operationStatuses/registries-1de5e8fa-bf20-11ea-8b36-c03eba45757e?api-version=2019-12-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1429,8 +1434,8 @@ interactions:
       x-content-type-options:
       - nosniff
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -1455,8 +1460,6 @@ interactions:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","location":"westus","tags":{},"properties":{"loginServer":"testreg000004.azurecr.io","creationDate":"2020-07-17T02:19:47.7577162Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-17T02:21:27.0596741+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004/operationStatuses/registries-1de5e8fa-bf20-11ea-8b36-c03eba45757e?api-version=2019-12-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2248,7 +2251,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr identity show
+      - acr identity assign
       Connection:
       - keep-alive
       Content-Length:
@@ -2256,14 +2259,14 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - --name
+      - --name --identities
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004?api-version=2019-12-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","identity":{"principalId":"41e2e0ec-112c-4581-b07c-997be279a038","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"systemAssigned,
@@ -2378,52 +2381,6 @@ interactions:
       - '-1'
       pragma:
       - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr identity show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgics53ppnkuqsfgx76fuke2gilxv26fowhl2peept2r635qjkcghnsavqbs7rgnckf/providers/Microsoft.ContainerRegistry/registries/clireg34yjyxsubdj4ap","name":"clireg34yjyxsubdj4ap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","identity":{"principalId":"41e2e0ec-112c-4581-b07c-997be279a038","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentity000002":{"principalId":"18ebe36e-4e7d-4f79-8017-8f2b9b026725","clientId":"b453173e-c115-4246-bcee-51116a26d52d"}}},"tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1579'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 17 Jul 2020 02:23:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -2451,12 +2408,58 @@ interactions:
       ParameterSetName:
       - --name --identities
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgics53ppnkuqsfgx76fuke2gilxv26fowhl2peept2r635qjkcghnsavqbs7rgnckf/providers/Microsoft.ContainerRegistry/registries/clireg34yjyxsubdj4ap","name":"clireg34yjyxsubdj4ap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","identity":{"principalId":"41e2e0ec-112c-4581-b07c-997be279a038","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentity000002":{"principalId":"18ebe36e-4e7d-4f79-8017-8f2b9b026725","clientId":"b453173e-c115-4246-bcee-51116a26d52d"}}},"tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1579'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2020 02:23:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr identity remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --identities
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004?api-version=2019-12-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","identity":{"principalId":"41e2e0ec-112c-4581-b07c-997be279a038","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"systemAssigned,
@@ -2474,8 +2477,12 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -2513,7 +2520,7 @@ interactions:
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
-    method: GET
+    method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004?api-version=2019-12-01-preview
   response:
     body:
@@ -2643,14 +2650,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {}, "sku": {"name": "Premium"}, "identity":
-      {"principalId": "cd27c347-9500-4a61-b834-8aa74cb31452", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-      "type": "None"}, "properties": {"adminUserEnabled": false, "networkRuleSet":
-      {"defaultAction": "Allow", "virtualNetworkRules": [], "ipRules": []}, "policies":
-      {"quarantinePolicy": {"status": "disabled"}, "trustPolicy": {"type": "Notary",
-      "status": "disabled"}, "retentionPolicy": {"days": 7, "status": "disabled"}},
-      "encryption": {"status": "disabled"}, "dataEndpointEnabled": false, "publicNetworkAccess":
-      "Enabled"}}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -2660,10 +2660,6 @@ interactions:
       - acr identity remove
       Connection:
       - keep-alive
-      Content-Length:
-      - '601'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --name --identities
       User-Agent:
@@ -2678,8 +2674,6 @@ interactions:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgics53ppnkuqsfgx76fuke2gilxv26fowhl2peept2r635qjkcghnsavqbs7rgnckf/providers/Microsoft.ContainerRegistry/registries/clireg34yjyxsubdj4ap","name":"clireg34yjyxsubdj4ap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","identity":{"principalId":"41e2e0ec-112c-4581-b07c-997be279a038","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned,
         UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentity000002":{"principalId":"18ebe36e-4e7d-4f79-8017-8f2b9b026725","clientId":"b453173e-c115-4246-bcee-51116a26d52d"},"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentity2000003":{"principalId":"4ff6a62e-894d-41cc-a86b-12305d0d121e","clientId":"7c6bf22a-ae8f-4e1f-8939-eef602385517"}}},"tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.ContainerRegistry/registries/zhoxingtest","name":"zhoxingtest","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}}]}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004/operationStatuses/registries-28ccedce-bf20-11ea-b7f5-c03eba45757e?api-version=2019-12-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2692,17 +2686,15 @@ interactions:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -2722,14 +2714,12 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004/operationStatuses/registries-28ccedce-bf20-11ea-b7f5-c03eba45757e?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004?api-version=2019-12-01-preview
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","identity":{"principalId":"41e2e0ec-112c-4581-b07c-997be279a038","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"systemAssigned,
         userAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testidentity000002":{"principalId":"18ebe36e-4e7d-4f79-8017-8f2b9b026725","clientId":"b453173e-c115-4246-bcee-51116a26d52d"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","location":"westus","tags":{},"properties":{"loginServer":"testreg000004.azurecr.io","creationDate":"2020-07-17T02:19:47.7577162Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-17T02:23:15.0746053+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004/operationStatuses/registries-28ccedce-bf20-11ea-b7f5-c03eba45757e?api-version=2019-12-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2920,7 +2910,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr identity assign
+      - acr identity remove
       Connection:
       - keep-alive
       ParameterSetName:
@@ -2966,7 +2956,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr identity assign
+      - acr identity remove
       Connection:
       - keep-alive
       ParameterSetName:
@@ -3022,7 +3012,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr identity assign
+      - acr identity remove
       Connection:
       - keep-alive
       Content-Length:
@@ -3036,7 +3026,7 @@ interactions:
         Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
-    method: PATCH
+    method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004?api-version=2019-12-01-preview
   response:
     body:
@@ -3138,8 +3128,6 @@ interactions:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004","name":"testreg000004","location":"westus","tags":{},"properties":{"loginServer":"testreg000004.azurecr.io","creationDate":"2020-07-17T02:19:47.7577162Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-17T02:23:56.6863765+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000004/operationStatuses/registries-32468bf9-bf20-11ea-bdd7-c03eba45757e?api-version=2019-12-01-preview
       cache-control:
       - no-cache
       content-length:
