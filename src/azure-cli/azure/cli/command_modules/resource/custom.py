@@ -530,7 +530,7 @@ def _deploy_arm_template_at_resource_group(cmd,
                                                                       no_prompt=no_prompt, template_spec=template_spec)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
-                                                    aux_tenants=aux_tenants, plug_pipeline=(template_uri is None))
+                                                    aux_tenants=aux_tenants, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         Deployment = cmd.get_models('Deployment')
@@ -590,7 +590,7 @@ def _deploy_arm_template_at_management_group(cmd,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt, template_spec=template_spec)
 
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         ScopedDeployment = cmd.get_models('ScopedDeployment')
@@ -647,7 +647,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt, template_spec=template_spec,)
 
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         ScopedDeployment = cmd.get_models('ScopedDeployment')
@@ -1698,7 +1698,6 @@ def create_or_update_template_spec(cmd, resource_group_name, name, template_file
     TemplateSpec, TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', 'TemplateSpecVersion', mod='models')
 
     # TODO: Check if root template already exists
-    # Tags needs to work
     template_root = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     if version:
         rcf.template_specs.create_or_update(resource_group_name, name, template_root)
