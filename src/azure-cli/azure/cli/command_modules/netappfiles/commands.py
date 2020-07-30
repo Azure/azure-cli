@@ -10,7 +10,6 @@ from ._client_factory import (
     accounts_mgmt_client_factory,
     pools_mgmt_client_factory,
     volumes_mgmt_client_factory,
-    mount_targets_mgmt_client_factory,
     snapshots_mgmt_client_factory)
 from ._exception_handler import netappfiles_exception_handler
 
@@ -31,12 +30,6 @@ def load_command_table(self, _):
     netappfiles_volumes_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.netapp.operations._volumes_operations#VolumesOperations.{}',
         client_factory=volumes_mgmt_client_factory,
-        exception_handler=netappfiles_exception_handler
-    )
-
-    netappfiles_mount_targets_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations._mount_targets_operations#MountTargetsOperations.{}',
-        client_factory=mount_targets_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
 
@@ -107,6 +100,10 @@ def load_command_table(self, _):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#VolumePatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.custom_command('revert', 'revert_snapshot',
+                         client_factory=volumes_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#Volume',
+                         exception_handler=netappfiles_exception_handler)
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
         g.generic_update_command('add',
@@ -135,9 +132,6 @@ def load_command_table(self, _):
         g.command('resume', 'resync_replication')
         g.command('remove', 'delete_replication')
         g.command('status', 'replication_status_method')
-
-    with self.command_group('netappfiles', netappfiles_mount_targets_sdk) as g:
-        g.command('list-mount-targets', 'list')
 
     with self.command_group('netappfiles snapshot', netappfiles_snapshots_sdk) as g:
         g.show_command('show', 'get')

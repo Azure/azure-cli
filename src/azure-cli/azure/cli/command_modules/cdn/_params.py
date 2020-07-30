@@ -40,9 +40,12 @@ def load_arguments(self, _):
         c.argument('endpoint_name', name_arg_type, id_part='child_name_1', help='Name of the CDN endpoint.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('origins', options_list='--origin', nargs='+', action=OriginType, validator=validate_origin,
-                   help='Endpoint origin specified by the following space-delimited 3 '
-                        'tuple: `www.example.com http_port https_port`. The HTTP and HTTPs'
-                        'ports are optional and will default to 80 and 443 respectively.')
+                   help='Endpoint origin specified by the following space-delimited 6 tuple: '
+                        '`www.example.com http_port https_port private_link_resource_id private_link_location '
+                        'private_link_approval_message`. The HTTP and HTTPS ports and the private link resource ID and '
+                        'location are optional. The HTTP and HTTPS ports default to 80 and 443, respectively. Private '
+                        'link fields are only valid for the sku Standard_Microsoft, and private_link_location is '
+                        'required if private_link_resource_id is set.')
         c.argument('is_http_allowed', arg_type=get_three_state_flag(invert=True), options_list='--no-http',
                    help='Indicates whether HTTP traffic is not allowed on the endpoint. '
                    'Default is to allow HTTP traffic.')
@@ -164,7 +167,17 @@ def load_arguments(self, _):
 
     # Origin #
     with self.argument_context('cdn origin') as c:
-        c.argument('origin_name', name_arg_type, id_part='name')
+        c.argument('name', name_arg_type, id_part='child_name_2', help='Name of the origin.')
+        c.argument('origin_name', name_arg_type, id_part='child_name_2', help='Name of the origin.')
+        c.argument('profile_name', help=profile_name_help, id_part='name')
+        c.argument('endpoint_name', endpoint_name_type, id_part='child_name_1', help='Name of the CDN endpoint.')
+    with self.argument_context('cdn origin update') as c:
+        c.argument('http_port', type=int)
+        c.argument('https_port', type=int)
+    with self.argument_context('cdn origin list') as c:
+        # list commands can't use --ids argument.
+        c.argument('profile_name', id_part=None)
+        c.argument('endpoint_name', id_part=None)
 
     # WAF #
 
