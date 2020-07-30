@@ -14,7 +14,20 @@ _relative_resource_id_pattern = r"^\/providers/(?P<relative_resource_id>.+$)"
 
 
 def split_resource_id(resource_id):
-    """Split a fully qualified resource identifier into two parts (resource scope and relative resource identifer)."""
+    """Splits a fully qualified resource ID into two parts.
+
+    Returns the resource scope and the relative resource ID extracted from the given resource ID.
+
+    Examples:
+
+      - split_resource_id("/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG) returns
+        "/subscriptions/00000000-0000-0000-0000-000000000000", "resourceGroups/myRG"
+      - split_resource_id("/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG\
+/providers/Microsoft.Storage/storageAccounts/myStorageAccount) returns
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG,
+        "Microsoft.Storage/storageAccounts/myStorageAccount"
+
+    """
     if not resource_id:
         return None, None
 

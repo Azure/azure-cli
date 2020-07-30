@@ -284,7 +284,7 @@ parameters:
   - name: --name -n
     short-summary: The deployment name.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -419,7 +419,7 @@ parameters:
   - name: --name -n
     short-summary: The deployment name.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -584,7 +584,7 @@ parameters:
   - name: --mode
     short-summary: The deployment mode.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -790,7 +790,7 @@ parameters:
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at management group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -944,7 +944,7 @@ parameters:
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at tenant scope from a remote template file, using parameters from a local JSON file.
     text: >
