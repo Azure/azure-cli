@@ -407,8 +407,7 @@ def load_arguments(self, _):
         c.argument('tag_value', tag_value_type)
         c.argument('resource_id', tag_resource_id_type)
         c.argument('tags', tags_type)
-        c.argument('operation', options_list='--operation',
-                   arg_type=get_enum_type([item.value for item in list(TagUpdateOperation)]),
+        c.argument('operation', arg_type=get_enum_type([item.value for item in list(TagUpdateOperation)]),
                    help='The update operation: options include Merge, Replace and Delete.')
 
     with self.argument_context('lock') as c:

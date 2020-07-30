@@ -2568,8 +2568,6 @@ def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
 
 def update_tag_at_scope(cmd, resource_id, tags, operation):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    if not resource_id:
-        raise IncorrectUsageError("resource_id is invalid.")
     if not tags:
         raise IncorrectUsageError("Tags could not be empty.")
     Tags = cmd.get_models('Tags')
