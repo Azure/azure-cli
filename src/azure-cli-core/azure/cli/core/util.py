@@ -59,6 +59,12 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
+    from requests.exceptions import SSLError
+    import traceback
+
+    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
+    # Print the call stack
+    logger.debug(traceback.format_exc())
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
@@ -79,9 +85,10 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
         if isinstance(ex, ValidationError):
             logger.error('validation error: %s', ex)
             return 1
-        if isinstance(ex, ClientRequestError):
+        if isinstance(ex, (ClientRequestError, SSLError)):
             msg = str(ex)
             if 'SSLError' in msg:
+                # SSL verification failed
                 logger.error("request failed: %s", SSLERROR_TEMPLATE.format(msg))
             else:
                 logger.error("request failed: %s", ex)

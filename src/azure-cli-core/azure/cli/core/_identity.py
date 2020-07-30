@@ -85,7 +85,9 @@ class Identity:
             cache = load_user_cache(self.allow_unencrypted)
             # Build the authority in MSAL style
             msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
-            self.__msal_app = PublicClientApplication(authority=msal_authority, client_id=self.client_id, token_cache=cache)
+            self.__msal_app = PublicClientApplication(authority=msal_authority, client_id=self.client_id,
+                                                      token_cache=cache,
+                                                      verify=self.ssl_kwargs.get('connection_verify', True))
         return self.__msal_app
 
     def login_with_interactive_browser(self):
@@ -94,7 +96,8 @@ class Identity:
                                                   tenant_id=self.tenant_id,
                                                   client_id=self.client_id,
                                                   enable_persistent_cache=True,
-                                                  allow_unencrypted_cache=self.allow_unencrypted)
+                                                  allow_unencrypted_cache=self.allow_unencrypted,
+                                                  **self.ssl_kwargs)
         auth_record = credential.authenticate()
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
@@ -112,7 +115,8 @@ class Identity:
                                               client_id=self.client_id,
                                               enable_persistent_cache=True,
                                               prompt_callback=prompt_callback,
-                                              allow_unencrypted_cache=self.allow_unencrypted)
+                                              allow_unencrypted_cache=self.allow_unencrypted,
+                                              **self.ssl_kwargs)
 
             auth_record = credential.authenticate()
             # todo: remove after ADAL token deprecation
@@ -133,7 +137,8 @@ class Identity:
                                                 username=username,
                                                 password=password,
                                                 enable_persistent_cache=True,
-                                                allow_unencrypted_cache=self.allow_unencrypted)
+                                                allow_unencrypted_cache=self.allow_unencrypted,
+                                                **self.ssl_kwargs)
         auth_record = credential.authenticate()
 
         # todo: remove after ADAL token deprecation
@@ -316,7 +321,8 @@ class Identity:
                                            account['home_account_id'], username)
         return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
                                             enable_persistent_cache=True,
-                                            allow_unencrypted_cache=self.allow_unencrypted)
+                                            allow_unencrypted_cache=self.allow_unencrypted,
+                                            **self.ssl_kwargs)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
         client_secret, certificate_path = self._msal_store.retrieve_secret_of_service_principal(client_id,
