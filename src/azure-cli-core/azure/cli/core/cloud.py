@@ -174,12 +174,14 @@ def _get_storage_sync_endpoint(cloud_name):
     return storage_sync_endpoint_mapper.get(cloud_name, None)
 
 
-def _get_database_server_endpoint(db_prefix, sql_server_hostname, cloud_name):
-    if cloud_name == 'AzureCloud':
-        return db_prefix + '.database.azure.com'
-    if not sql_server_hostname:
-        return None
-    return db_prefix + sql_server_hostname
+def _get_database_server_endpoint(sql_server_hostname, cloud_name):
+    def _concat_db_server_endpoint(db_prefix):
+        if cloud_name == 'AzureCloud':
+            return db_prefix + '.database.azure.com'
+        if not sql_server_hostname:
+            return None
+        return db_prefix + sql_server_hostname
+    return _concat_db_server_endpoint
 
 
 def _get_app_insights_telemetry_channel_resource_id(cloud_name):
@@ -222,7 +224,21 @@ def _add_starting_dot(suffix):
     return suffix if not suffix or suffix.startswith('.') else '.' + suffix
 
 
+def _get_arm_endpoint(arm_dict, is_suffix=False):
+    def _get_processed_arm_endpoint(name, add_dot=False, fallback_value=None):
+        if is_suffix:
+            return (_add_starting_dot(arm_dict['suffixes'][name]) if add_dot else arm_dict['suffixes'][name]) if name in arm_dict['suffixes'] else fallback_value
+        return arm_dict[name] if name in arm_dict else fallback_value
+    return _get_processed_arm_endpoint
+
+
 def _arm_to_cli_mapper(arm_dict):
+    get_endpoint = _get_arm_endpoint(arm_dict)
+    get_suffix = _get_arm_endpoint(arm_dict, is_suffix=True)
+
+    sql_server_hostname = get_suffix('sqlServerHostname', add_dot=True)
+    get_db_server_endpoint = _get_database_server_endpoint(sql_server_hostname, arm_dict['name'])
+
     return Cloud(
         arm_dict['name'],
         endpoints=CloudEndpoints(
@@ -239,20 +255,20 @@ def _arm_to_cli_mapper(arm_dict):
             media_resource_id=arm_dict['media'],
             ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # change once ossrdbms_resource_id is available via ARM
             active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,
-            app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else _get_app_insights_resource_id(arm_dict['name']),
-            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else _get_log_analytics_resource_id(arm_dict['name']),
-            app_insights_telemetry_channel_resource_id=arm_dict['appInsightsTelemetryChannelResourceId'] if 'appInsightsTelemetryChannelResourceId' in arm_dict else _get_app_insights_telemetry_channel_resource_id(arm_dict['name'])),
+            app_insights_resource_id=get_endpoint('appInsightsResourceId', fallback_value=_get_app_insights_resource_id(arm_dict['name'])),
+            log_analytics_resource_id=get_endpoint('logAnalyticsResourceId', fallback_value=_get_log_analytics_resource_id(arm_dict['name'])),
+            app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=_get_app_insights_telemetry_channel_resource_id(arm_dict['name']))),
         suffixes=CloudSuffixes(
-            storage_endpoint=arm_dict['suffixes']['storage'],
-            storage_sync_endpoint=arm_dict['suffix']['storageSyncEndpointSuffix'] if 'storageSyncEndpointSuffix' in arm_dict['suffixes'] else _get_storage_sync_endpoint(arm_dict['name']),
-            keyvault_dns=_add_starting_dot(arm_dict['suffixes']['keyVaultDns']),
-            sql_server_hostname=_add_starting_dot(arm_dict['suffixes']['sqlServerHostname']),
-            mysql_server_endpoint=_add_starting_dot(arm_dict['suffixes']['mysqlServerEndpoint']) if 'mysqlServerEndpoint' in arm_dict['suffixes'] else _get_database_server_endpoint('.mysql', _add_starting_dot(arm_dict['suffixes']['sqlServerHostname']), arm_dict['name']),
-            postgresql_server_endpoint=_add_starting_dot(arm_dict['suffixes']['postgresqlServerEndpoint']) if 'postgresqlServerEndpoint' in arm_dict['suffixes'] else _get_database_server_endpoint('.postgres', _add_starting_dot(arm_dict['suffixes']['sqlServerHostname']), arm_dict['name']),
-            mariadb_server_endpoint=_add_starting_dot(arm_dict['suffixes']['mariadbServerEndpoint']) if 'mariadbServerEndpoint' in arm_dict['suffixes'] else _get_database_server_endpoint('.mariadb', _add_starting_dot(arm_dict['suffixes']['sqlServerHostname']), arm_dict['name']),
-            azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,
-            azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,
-            acr_login_server_endpoint=_add_starting_dot(arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None)))
+            storage_endpoint=get_suffix('storage'),
+            storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=_get_storage_sync_endpoint(arm_dict['name'])),
+            keyvault_dns=get_suffix('keyVaultDns', add_dot=True),
+            sql_server_hostname=sql_server_hostname,
+            mysql_server_endpoint=get_suffix('mysqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mysql')),
+            postgresql_server_endpoint=get_suffix('postgresqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.postgres')),
+            mariadb_server_endpoint=get_suffix('mariadbServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mariadb')),
+            azure_datalake_store_file_system_endpoint=get_suffix('azureDataLakeStoreFileSystem'),
+            azure_datalake_analytics_catalog_and_job_endpoint=get_suffix('azureDataLakeAnalyticsCatalogAndJob'),
+            acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True)))
 
 
 class Cloud:  # pylint: disable=too-few-public-methods
