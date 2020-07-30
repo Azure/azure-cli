@@ -280,11 +280,40 @@ class AzCliCommandParser(CLICommandParser):
         self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
         return self._namespace, self._raw_arguments
 
+    def _get_extension_command_tree(self):
+        from azure.cli.core._session import EXT_CMD_TREE
+        import os
+        VALID_SECOND = 3600 * 24 * 10
+        # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
+        # use cli_ctx from cli_help which is not lost.
+        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        if not cli_ctx:
+            return None
+        EXT_CMD_TREE.load(os.path.join(cli_ctx.config.config_dir, 'extensionCommandTree.json'), VALID_SECOND)
+        if not EXT_CMD_TREE.data:
+            import requests
+            from azure.cli.core.util import should_disable_connection_verify
+            try:
+                response = requests.get(
+                    'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json',
+                    verify=(not should_disable_connection_verify()),
+                    timeout=300)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info("Request failed for extension command tree: %s", str(ex))
+                return None
+            if response.status_code == 200:
+                EXT_CMD_TREE.data = response.json()
+                EXT_CMD_TREE.save_with_retry()
+            else:
+                logger.info("Error when retrieving extension command tree. Response code: %s", response.status_code)
+                return None
+        return EXT_CMD_TREE
+
     def _search_in_extension_commands(self, command_str):
-        """Search the command in an extension commands dict which mimics a trie.
+        """Search the command in an extension commands dict which mimics a prefix tree.
         If the value of the dict item is a string, then the key represents the end of a complete command
         and the value is the name of the extension that the command belongs to.
-        An example of the dict read from extCmdIndex.json:
+        An example of the dict read from extensionCommandTree.json:
         {
             "aks": {
                 "create": "aks-preview",
@@ -293,37 +322,12 @@ class AzCliCommandParser(CLICommandParser):
                     "up": "deploy-to-azure"
                 },
                 "use-dev-spaces": "dev-spaces"
-            }
+            },
+            ...
         }
         """
-        from azure.cli.core._session import EXT_CMD_INDEX
-        import os
-        VALID_SECOND = 3600 * 24 * 10
-        # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
-        # use cli_ctx from cli_help which is not lost.
-        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
-        if not cli_ctx:
-            return None
-        EXT_CMD_INDEX.load(os.path.join(cli_ctx.config.config_dir,
-                                        'extCmdIndex.json'), VALID_SECOND)
-        if not EXT_CMD_INDEX.data:
-            import requests
-            from azure.cli.core.util import should_disable_connection_verify
-            try:
-                response = requests.get(
-                    'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extCmdIndex.json',
-                    verify=(not should_disable_connection_verify()),
-                    timeout=300)
-            except Exception as ex:  # pylint: disable=broad-except
-                logger.info("Request failed for extension command index: %s", str(ex))
-                return None
-            if response.status_code == 200:
-                EXT_CMD_INDEX.data = response.json()
-                EXT_CMD_INDEX.save_with_retry()
-            else:
-                logger.info("Error when retrieving extension command index. Response code: %s", response.status_code)
-                return None
-        cmd_chain = EXT_CMD_INDEX
+
+        cmd_chain = self._get_extension_command_tree()
         for part in command_str.split():
             try:
                 if isinstance(cmd_chain[part], str):
@@ -332,6 +336,14 @@ class AzCliCommandParser(CLICommandParser):
             except KeyError:
                 return None
         return None
+
+    def _get_extension_use_dynamic_install_config(self):
+        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        use_dynamic_install = cli_ctx.config.get(
+            'extension', 'use_dynamic_install', 'no').lower() if cli_ctx else 'no'
+        if use_dynamic_install not in ['no', 'yes_prompt', 'yes_without_prompt']:
+            use_dynamic_install = 'no'
+        return use_dynamic_install
 
     def _check_value(self, action, value):  # pylint: disable=too-many-statements
         # Override to customize the error message when a argument is not among the available choices
@@ -344,11 +356,8 @@ class AzCliCommandParser(CLICommandParser):
                 # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
                 # use cli_ctx from cli_help which is not lost.
                 cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
-                use_dynamic_install = cli_ctx.config.get(
-                    'extension', 'use_dynamic_install', 'no') if cli_ctx else 'no'
-                if use_dynamic_install.lower() not in ['no', 'yes_prompt', 'yes_without_prompt']:
-                    use_dynamic_install = 'no'
-                if use_dynamic_install.lower() != 'no' and not candidates:
+                use_dynamic_install = self._get_extension_use_dynamic_install_config()
+                if use_dynamic_install != 'no' and not candidates:
                     # Check if the command is from an extension
                     from azure.cli.core.util import roughly_parse_command
                     cmd_list = self.prog.split() + self._raw_arguments
@@ -361,8 +370,8 @@ class AzCliCommandParser(CLICommandParser):
                                                       extension_name=ext_name)
                         run_after_extension_installed = cli_ctx.config.getboolean('extension',
                                                                                   'run_after_dynamic_install',
-                                                                                  False)
-                        if use_dynamic_install.lower() == 'yes_without_prompt':
+                                                                                  False) if cli_ctx else False
+                        if use_dynamic_install == 'yes_without_prompt':
                             logger.warning('The command requires the extension %s. '
                                            'It will be installed first.', ext_name)
                             go_on = True

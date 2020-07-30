@@ -114,5 +114,5 @@ INDEX = Session()
 # an upgrade of azure-cli happens
 VERSIONS = Session()
 
-# EXT_CMD_INDEX provides command to extension name mapping
-EXT_CMD_INDEX = Session()
+# EXT_CMD_TREE provides command to extension name mapping
+EXT_CMD_TREE = Session()
