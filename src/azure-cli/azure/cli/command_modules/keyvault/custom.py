@@ -666,15 +666,17 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=VaultCreateOrUpdateParameters(
+                                       tags=parameters.tags,
                                        location=parameters.location,
                                        properties=parameters.properties))
 
 
-def update_hsm_setter(cmd, client, parameters, resource_group_name, hsm_name):
+def update_hsm_setter(cmd, client, parameters, resource_group_name, name):
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
     return client.create_or_update(resource_group_name=resource_group_name,
-                                   name=hsm_name,
+                                   name=name,
                                    parameters=ManagedHsm(
+                                       tags=parameters.tags,
                                        location=parameters.location,
                                        properties=parameters.properties))
 
@@ -1693,8 +1695,11 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
 
     # fill in principal names
     if role_assignment.get('principalId'):
-        role_assignment['principalName'], role_assignment['principalType'] = \
-            principal_dics.get(role_assignment['principalId'])
+        principal_info = principal_dics.get(role_assignment['principalId'])
+        if principal_info:
+            role_assignment['principalName'], role_assignment['principalType'] = principal_info
+        else:
+            role_assignment['principalName'] = role_assignment['principalType'] = 'Unknown'
 
 
 def _reconstruct_role_definition(role_definition):

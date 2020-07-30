@@ -38,12 +38,16 @@ def load_command_table(self, _):
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
 
-    private_mgmt_vaults_entity = get_client(self.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.vaults)
+    private_mgmt_vaults_entity = get_client(self.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)
     private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
         client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.vaults)
+    )
+    kv_hsms_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
+        client_factory=get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)
     )
     # endregion
 
@@ -72,7 +76,7 @@ def load_command_table(self, _):
     with self.command_group('keyvault', private_mgmt_vaults_entity.command_type,
                             client_factory=private_mgmt_vaults_entity.client_factory) as g:
         g.generic_update_command(
-            'update-hsm', setter_name='update_hsm_setter', setter_type=kv_vaults_custom,
+            'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
             custom_func_name='update_hsm', is_preview=True,
             doc_string_source=private_mgmt_vaults_entity.models_docs_tmpl.format('ManagedHsmProperties'))
 

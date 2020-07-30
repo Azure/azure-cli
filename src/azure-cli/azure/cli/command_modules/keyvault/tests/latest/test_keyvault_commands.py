@@ -174,6 +174,72 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                  ])
 
 
+class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
+    def test_keyvault_hsm_mgmt(self):
+        self.kwargs.update({
+            'hsm': 'clitestnew',
+            'rg': 'bim-rg',
+            'loc': 'eastus2',
+            'init_admin': 'bf0cee9f-b26b-4e25-b4ab-92ec7466cf33'
+        })
+
+        hsm = self.cmd('keyvault create -g {rg} --hsm-name {hsm} -l {loc} '
+                       '--administrators {init_admin}',
+                       checks=[
+                           self.check('location', '{loc}'),
+                           self.check('name', '{hsm}'),
+                           self.check('resourceGroup', '{rg}'),
+                           self.check('sku.name', 'Standard_B1'),
+                           self.check('length(properties.initialAdminObjectIds)', 1),
+                           self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
+                           self.exists('properties.hsmUri')
+                       ]).get_output_in_json()
+
+        self.kwargs['hsm_url'] = hsm['properties']['hsmUri']
+        self.cmd('keyvault show --hsm-name {hsm}',
+                 checks=[
+                     self.check('location', '{loc}'),
+                     self.check('name', '{hsm}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('sku.name', 'Standard_B1'),
+                     self.check('length(properties.initialAdminObjectIds)', 1),
+                     self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
+                     self.exists('properties.hsmUri')
+                 ])
+        self.cmd('keyvault show --hsm-name {hsm} -g {rg}',
+                 checks=[
+                     self.check('location', '{loc}'),
+                     self.check('name', '{hsm}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('sku.name', 'Standard_B1'),
+                     self.check('length(properties.initialAdminObjectIds)', 1),
+                     self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
+                     self.exists('properties.hsmUri')
+                 ])
+        self.cmd('keyvault list --resource-type hsm',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].location', '{loc}'),
+                     self.check('[0].name', '{hsm}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].sku.name', 'Standard_B1'),
+                     self.check('length([0].properties.initialAdminObjectIds)', 1),
+                     self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
+                     self.exists('[0].properties.hsmUri')
+                 ])
+        self.cmd('keyvault list --resource-type hsm -g {rg}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].location', '{loc}'),
+                     self.check('[0].name', '{hsm}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].sku.name', 'Standard_B1'),
+                     self.check('length([0].properties.initialAdminObjectIds)', 1),
+                     self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
+                     self.exists('[0].properties.hsmUri')
+                 ])
+
+
 class KeyVaultMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
     def test_keyvault_mgmt(self, resource_group):
@@ -715,9 +781,9 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
 class KeyVaultHSMKeyScenarioTest(ScenarioTest):
     def test_keyvault_hsm_key(self):
         self.kwargs.update({
-            'kv': 'clitest',
+            'kv': 'clitestnew',
             'key': self.create_random_name('key-', 24),
-            'hsm_url': 'https://eastus.clitest.managedhsm-preview.azure.net'
+            'hsm_url': 'https://eastus2.clitestnew.managedhsm.azure.net'
         })
 
         _clear_hsm(self, hsm_url=self.kwargs['hsm_url'])
@@ -939,7 +1005,7 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
 class KeyVaultHSMKeyDownloadScenarioTest(ScenarioTest):
     def test_keyvault_hsm_key_download(self):
         self.kwargs.update({
-            'hsm_url': 'https://eastus.clitest.managedhsm-preview.azure.net'
+            'hsm_url': 'https://eastus2.clitestnew.managedhsm.azure.net'
         })
 
         key_names = [

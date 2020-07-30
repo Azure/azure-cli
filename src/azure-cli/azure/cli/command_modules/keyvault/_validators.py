@@ -54,7 +54,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
                 id_comps = parse_resource_id(hsm.id)
                 if id_comps.get('name', None) and id_comps['name'].lower() == hsm_name.lower():
                     return id_comps['resource_group']
-        finally:
+        except:  # pylint: disable=bare-except
             return None
 
     return None
@@ -256,6 +256,9 @@ def validate_resource_group_name(cmd, ns):
     if not ns.resource_group_name:
         vault_name = getattr(ns, 'vault_name', None)
         hsm_name = getattr(ns, 'hsm_name', None)
+        if 'keyvault update-hsm' in cmd.name:
+            hsm_name = getattr(ns, 'name', None)
+
         if vault_name and hsm_name:
             raise CLIError('--name/-n and --hsm-name are mutually exclusive.')
         group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, vault_name, hsm_name)

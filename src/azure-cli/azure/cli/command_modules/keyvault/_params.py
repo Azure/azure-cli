@@ -154,8 +154,7 @@ def load_arguments(self, _):
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault update-hsm') as c:
-        c.ignore('vault_name')
-        c.argument('hsm_name', hsm_name_type)
+        c.argument('name', options_list=['--hsm-name'], help='Name of the HSM.')
         c.argument('secondary_locations', nargs='+',
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
