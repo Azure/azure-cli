@@ -2508,15 +2508,16 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
             'properties': {
                 'singlePlacementGroup': single_placement_group,
-                'proximityPlacementGroup': {
-                    'id': proximity_placement_group
-                },
                 'provisioningState': 0,
                 'platformFaultDomainCount': platform_fault_domain_count
             }
         }
         if zones is not None:
             vmss_resource['zones'] = zones
+        if proximity_placement_group is not None:
+            vmss_resource['properties']['proximityPlacementGroup'] = {
+                'id': proximity_placement_group
+            }
     else:
         raise CLIError('usage error: --orchestration-mode (ScaleSet | VM)')
 
