@@ -6,6 +6,9 @@
 from ._client_factory import web_client_factory
 
 
+MSI_LOCAL_ID = '[system]'
+
+
 def _generic_site_operation(cli_ctx, resource_group_name, name, operation_name, slot=None,
                             extra_parameter=None, client=None):
     client = client or web_client_factory(cli_ctx)
