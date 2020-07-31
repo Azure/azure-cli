@@ -6,10 +6,6 @@ Release History
 2.10.0
 ++++++
 
-**`knack.commands.CLICommandsLoader.load_arguments`**
-
-* (https://github.com/microsoft/knack/blob/fe3bf5d3a79a3dd2ce5ddb0c38d93843a3380f6f/knack/commands.py#L214-L232)'s work is already taken care of by `azure.cli.core.MainCommandsLoader.load_arguments` at (#13879)
-
 **AKS**
 
 * `az aks update`: Change --enable-aad argument to migrate a RBAC-enabled non-AAD cluster to a AKS-managed AAD cluster (#14420)
@@ -26,7 +22,7 @@ Release History
 
 **App Service**
 
-* Fix#-13035- Added validation for az webapp config access-restriction … (#14486)
+* Fix #13035: Add validation for az webapp config access-restriction to avoid adding duplicates (#14486)
 
 **AppConfig**
 
@@ -55,7 +51,7 @@ Release History
 * Select a valid username for user if the default username is invalid (#14346)
 * `az vm update`: support cross tenant image (#14532)
 * `az disk-access`: Add new command group to operate disk access resource (#14460)
-* Dedicated host group automatic placement (#14439)
+* Support dedicated host group automatic placement (#14439)
 * Support ppg and spg in VMSS orchestration mode (#14443)
 
 **Config**
@@ -68,7 +64,7 @@ Release History
 
 **HDInsight**
 
-* Added 3 parameters to the command `az hdinsight create` to support private link and encryption in transit feature: (#14504)
+* Add 3 parameters to the command `az hdinsight create` to support private link and encryption in transit feature: (#14504)
 
 **Iot Hub**
 
@@ -89,9 +85,9 @@ Release History
 
 **NetAppFiles**
 
-* `az volume revert`:  Added Volume Revert to revert a volume to one of its snapshots. (#14424)
-* [BREAKING CHANGE] az netappfiles mount-target: Removed. (#14424)
-* `az volume show`: Added site to Active Directory Properties (#14424)
+* `az volume revert`:  Add Volume Revert to revert a volume to one of its snapshots. (#14424)
+* [BREAKING CHANGE] Remove `az netappfiles mount-target`. (#14424)
+* `az volume show`: Add site to Active Directory Properties (#14424)
 
 **Network**
 
@@ -100,7 +96,7 @@ Release History
 
 **Storage**
 
-* Fix issue#10302 to support guess content-type when synchronizing files (#14353)
+* Fix #10302: Support guess content-type when synchronizing files (#14353)
 * `az storage blob lease`: Apply new api version for blob lease operations (#14231)
 * `az storage fs access`: Support AAD credential in managing access control for ADLS Gen2 account (#14506)
 * `az storage share-rm create/update`: add --access-tier to support access tier (#14148)
