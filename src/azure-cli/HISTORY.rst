@@ -48,7 +48,7 @@ Release History
 
 **Compute**
 
-* Select a valid username for user if the default username is invalid (#14346)
+* `az vm/vmss create`: Select a valid username for user if the default username is invalid (#14346)
 * `az vm update`: support cross tenant image (#14532)
 * `az disk-access`: Add new command group to operate disk access resource (#14460)
 * Support dedicated host group automatic placement (#14439)
@@ -70,7 +70,7 @@ Release History
 
 * Fix #7792: IoT Hub Create is not idempotent (#14449)
 
-**IoTCentral**
+**IoT Central**
 
 * Add paramater option list for iot central (#14471)
 
