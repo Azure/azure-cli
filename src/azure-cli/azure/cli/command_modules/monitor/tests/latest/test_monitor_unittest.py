@@ -151,3 +151,59 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         ns = self._build_namespace()
         with self.assertRaisesRegexp(CLIError, 'usage error: --condition'):
             self.call_condition(ns, 'avg Wra!!ga * woo')
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'avg SuccessE2ELatenc,|y > 250 where ApiName includes Get|,%_Blob or PutB,_lob')
+        self.check_condition(ns, 'Average', None, 'SuccessE2ELatenc,|y', 'GreaterThan', '250')
+        self.check_dimension(ns, 0, 'ApiName', 'Include', ['Get|,%_Blob', 'PutB,_lob'])
+
+
+class MonitorAutoscaleActionTest(unittest.TestCase):
+
+    def _build_namespace(self, name_or_id=None, resource_group=None, provider_namespace=None, parent=None,
+                         resource_type=None):
+        from argparse import Namespace
+        return Namespace()
+
+    def call_condition(self, ns, value):
+        from azure.cli.command_modules.monitor.actions import AutoscaleConditionAction
+        AutoscaleConditionAction('--condition', 'condition').__call__(None, ns, value.split(), '--condition')
+
+    def check_condition(self, ns, metric_namespace, metric_name, operator, threshold, time_aggregation, time_window):
+        prop = ns.condition
+        self.assertEqual(prop.time_aggregation, time_aggregation)
+        self.assertEqual(prop.metric_namespace, metric_namespace)
+        self.assertEqual(prop.metric_name, metric_name)
+        self.assertEqual(prop.operator, operator)
+        self.assertEqual(prop.threshold, threshold)
+        self.assertEqual(prop.time_window, time_window)
+
+    def check_dimension(self, ns, index, dimension_name, operator, values):
+        dim = ns.condition.dimensions[index]
+        self.assertEqual(dim.dimension_name, dimension_name)
+        self.assertEqual(dim.operator, operator)
+        self.assertEqual(dim.values, values)
+
+    def test_monitor_autoscale_condition_action(self):
+
+        ns = self._build_namespace()
+        self.call_condition(ns, '"ns" CPU Percent > 90 avg 1h5m')
+        self.check_condition(ns, 'ns', 'CPU Percent', 'GreaterThan', '90', 'Average', 'PT5M1H')
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'CPU Percent > 90 avg 1h5m')
+        self.check_condition(ns, None, 'CPU Percent', 'GreaterThan', '90', 'Average', 'PT5M1H')
+
+        ns = self._build_namespace()
+        self.call_condition(ns, 'process.cpu.usage > 0 avg 3m where App == app1 and Deployment == default and Instance == instance1')
+        self.check_condition(ns, None, 'process.cpu.usage', 'GreaterThan', '0', 'Average', 'PT3M')
+        self.check_dimension(ns, 0, 'App', 'Equals', ['app1'])
+        self.check_dimension(ns, 1, 'Deployment', 'Equals', ['default'])
+        self.check_dimension(ns, 2, 'Instance', 'Equals', ['instance1'])
+
+        ns = self._build_namespace()
+        self.call_condition(ns, '"Microsoft.AppPlatform/Spring" tomcat.global.request.total.count > 0 avg 3m where App == app1 or app3 and Deployment == default and Instance != instance1')
+        self.check_condition(ns, "Microsoft.AppPlatform/Spring", 'tomcat.global.request.total.count', 'GreaterThan', '0', 'Average', 'PT3M')
+        self.check_dimension(ns, 0, 'App', 'Equals', ['app1', 'app3'])
+        self.check_dimension(ns, 1, 'Deployment', 'Equals', ['default'])
+        self.check_dimension(ns, 2, 'Instance', 'NotEquals', ['instance1'])

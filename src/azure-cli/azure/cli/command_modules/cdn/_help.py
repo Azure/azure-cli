@@ -102,6 +102,12 @@ examples:
     text: >
         az cdn endpoint create -g group -n endpoint --profile-name profile
         --origin www.example.com 88 4444
+  - name: Create an endpoint with a custom domain origin with private link enabled.
+    text: >
+        az cdn endpoint create -g group -n endpoint --profile-name profile
+        --origin www.example.com 80 443
+        /subscriptions/subid/resourcegroups/rg1/providers/Microsoft.Network/privateLinkServices/pls1
+        eastus "Please approve this request"
   - name: Create an endpoint with a custom domain with compression and only HTTPS.
     text: >
         az cdn endpoint create -g group -n endpoint --profile-name profile
@@ -347,6 +353,39 @@ examples:
 helps['cdn origin'] = """
 type: group
 short-summary: List or show existing origins related to CDN endpoints.
+"""
+
+helps['cdn origin update'] = """
+type: command
+short-summary: Update an origin.
+parameters:
+  - name: --http-port
+    type: int
+    short-summary: >
+        The port used for http requests to the origin.
+  - name: --https-port
+    type: int
+    short-summary: >
+        The port used for https requests to the origin.
+  - name: --private-link-resource-id
+    type: string
+    short-summary: >
+        The resource id of the private link that the origin will be connected to.
+  - name: --private-link-location
+    type: string
+    short-summary: >
+        The location of the private link that the origin will be connected to.
+  - name: --private-link-approval-message
+    type: string
+    short-summary: >
+        The message that is shown to the approver of the private link request.
+examples:
+  - name: Update an origin with private link fields
+    text: >
+      az cdn origin update -g group --profile-name profile --endpoint-name endpoint -n origin --http-port 80
+        --https-port 443 --private-link-resource-id
+        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group/providers/Microsoft.Network/privateLinkServices/pls
+        --private-link-location EastUS --private-link-approval-message 'Please approve this request'
 """
 
 helps['cdn profile'] = """

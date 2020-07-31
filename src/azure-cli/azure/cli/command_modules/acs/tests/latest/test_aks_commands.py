@@ -1197,6 +1197,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('count', 3)
         ])
 
+        #nodepool get-upgrades
+        self.cmd('aks nodepool get-upgrades --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool1_name}', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group),
+            StringContainCheck(nodepool1_name),
+            self.check('type', "Microsoft.ContainerService/managedClusters/agentPools/upgradeProfiles")
+        ])
+
+        self.cmd('aks nodepool get-upgrades --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool2_name}', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group),
+            StringContainCheck(nodepool2_name),
+            self.check('type', "Microsoft.ContainerService/managedClusters/agentPools/upgradeProfiles")
+        ])
+
         #nodepool update
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --tags {new_tags}', checks=[
             self.check('tags.key2','value2')
@@ -1726,7 +1741,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='canadacentral')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_nonaad_and_update_with_managed_aad(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
@@ -1751,7 +1766,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--enable-aad ' \
                      '--aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 ' \
                      '--aad-tenant-id 00000000-0000-0000-0000-000000000002 -o json'
-        self.cmd(update_cmd, expect_failure=True)
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('aadProfile.managed', True),
+            self.check('aadProfile.adminGroupObjectIds[0]', '00000000-0000-0000-0000-000000000001'),
+            self.check('aadProfile.tenantId', '00000000-0000-0000-0000-000000000002')
+        ])
 
     @classmethod
     def generate_ssh_keys(cls):
