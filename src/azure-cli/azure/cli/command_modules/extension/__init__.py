@@ -39,12 +39,12 @@ class ExtensionCommandsLoader(AzCommandsLoader):
         extension_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.extension.custom#{}')
 
         with self.command_group('extension', extension_custom) as g:
-            g.command('add', 'add_extension', confirmation=ext_add_has_confirmed, validator=validate_extension_add)
+            g.command('add', 'add_extension_cmd', confirmation=ext_add_has_confirmed, validator=validate_extension_add)
             g.command('remove', 'remove_extension')
             g.command('list', 'list_extensions')
             g.show_command('show', 'show_extension')
             g.command('list-available', 'list_available_extensions', table_transformer=transform_extension_list_available)
-            g.command('update', 'update_extension')
+            g.command('update', 'update_extension_cmd')
 
         return self.command_table
 
