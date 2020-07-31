@@ -6,12 +6,12 @@
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.cli.core.commands import LongRunningOperation
 
 from ._utils import (
     validate_managed_registry, get_registry_from_name_or_login_server, get_registry_by_name
 )
 
-from azure.cli.core.commands import LongRunningOperation
 
 logger = get_logger(__name__)
 

@@ -10,7 +10,7 @@ import stat
 import tempfile
 
 
-class RecordsCollection(object):
+class RecordsCollection:
     def __init__(self, last_sent, config_dir):
         from azure.cli.telemetry.components.telemetry_logging import get_logger
 

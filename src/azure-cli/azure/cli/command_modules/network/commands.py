@@ -406,7 +406,12 @@ def load_command_table(self, _):
 
     # region ApplicationGateways
     with self.command_group('network application-gateway', network_ag_sdk) as g:
-        g.custom_command('create', 'create_application_gateway', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_ag_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'create_application_gateway',
+                         transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
+                         supports_no_wait=True,
+                         table_transformer=deployment_validate_table_format,
+                         validator=process_ag_create_namespace,
+                         exception_handler=handle_template_based_exception)
         g.command('delete', 'delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_application_gateways')
@@ -519,6 +524,26 @@ def load_command_table(self, _):
         g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
         g.custom_command('remove', 'remove_ag_identity', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_identity')
+
+    with self.command_group('network application-gateway private-link',
+                            command_type=network_ag_sdk,
+                            min_api='2020-05-01',
+                            is_preview=True) as g:
+        g.custom_command('add', 'add_ag_private_link', supports_no_wait=True)
+        g.custom_command('remove', 'remove_ag_private_link', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'show_ag_private_link')
+        g.custom_command('list', 'list_ag_private_link')
+        g.wait_command('wait')
+
+    with self.command_group('network application-gateway private-link ip-config',
+                            command_type=network_ag_sdk,
+                            min_api='2020-05-01',
+                            is_preview=True) as g:
+        g.custom_command('add', 'add_ag_private_link_ip', supports_no_wait=True)
+        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'show_ag_private_link_ip')
+        g.custom_command('list', 'list_ag_private_link_ip')
+        g.wait_command('wait')
     # endregion
 
     # region ApplicationGatewayWAFPolicy

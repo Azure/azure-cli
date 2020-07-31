@@ -233,10 +233,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_three_state_flag(),
                    help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
                    'platform managed keys for data at rest.')
-        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default interpretation is true for this property.')
-        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version), is_preview=True,
+                   'The default value for this property is null, which is equivalent to true. When true, containers '
+                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'not enable anonymous access to any data in the account. The additional step of configuring the '
+                   'public access setting for a container is required to enable anonymous access.')
+        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
 
@@ -279,10 +282,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
-        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default interpretation is true for this property.')
-        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version), is_preview=True,
+                   'The default value for this property is null, which is equivalent to true. When true, containers '
+                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'not enable anonymous access to any data in the account. The additional step of configuring the '
+                   'public access setting for a container is required to enable anonymous access.')
+        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
 
@@ -422,7 +428,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
         c.argument('account_name', acct_name_type, options_list=['--account-name'])
-        c.argument('permission', options_list=('--permissions',), required=True,
+        c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
                    validator=get_permission_validator(t_account_permissions))
@@ -484,7 +490,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
                                                                   'get_container_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
         c.ignore('sas_token')
@@ -515,7 +521,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_tier_validator,
                                                                    blob_rehydrate_priority_validator)
-
+        c.register_blob_arguments()
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
         c.argument('tier', validator=blob_tier_validator)
         c.argument('timeout', type=int)
@@ -543,15 +549,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob show') as c:
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the blob snapshot to retrieve.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
-        c.argument('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
-                                    'specifies the blob snapshot to retrieve.')
-        c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
-                                    "the operation only if the resource's ETag matches the value specified.")
-        c.argument('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
-                                         "the operation only if the resource's ETag does not match the value specified."
-                                         " Specify the wildcard character (*) to perform the operation only if the "
-                                         "resource does not exist, and fail the operation if it does exist.")
 
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
@@ -559,6 +561,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False)
+        c.register_blob_arguments()
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
         c.argument('max_connections', type=int)
@@ -623,9 +626,40 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_id', help='The active lease id for the blob.')
 
     with self.argument_context('storage blob lease') as c:
-        c.argument('lease_duration', type=int)
-        c.argument('lease_break_period', type=int)
         c.argument('blob_name', arg_type=blob_name_type)
+
+    with self.argument_context('storage blob lease acquire') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.extra('lease_id', options_list='--proposed-lease-id', help='Proposed lease ID, in a GUID string format. '
+                'The Blob service returns 400 (Invalid request) if the proposed lease ID is not in the correct format.')
+        c.argument('lease_duration', help='Specify the duration of the lease, in seconds, or negative one (-1) for '
+                   'a lease that never expires. A non-infinite lease can be between 15 and 60 seconds. A lease '
+                   'duration cannot be changed using renew or change. Default is -1 (infinite lease)', type=int)
+
+    with self.argument_context('storage blob lease break') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.argument('lease_break_period', type=int,
+                   help="This is the proposed duration of seconds that the lease should continue before it is broken, "
+                   "between 0 and 60 seconds. This break period is only used if it is shorter than the time remaining "
+                   "on the lease. If longer, the time remaining on the lease is used. A new lease will not be "
+                   "available before the break period has expired, but the lease may be held for longer than the break "
+                   "period. If this header does not appear with a break operation, a fixed-duration lease breaks after "
+                   "the remaining lease period elapses, and an infinite lease breaks immediately.")
+
+    with self.argument_context('storage blob lease change') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.extra('proposed_lease_id', help='Proposed lease ID, in a GUID string format. The Blob service returns 400 '
+                '(Invalid request) if the proposed lease ID is not in the correct format.', required=True)
+        c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
+
+    for item in ['release', 'renew']:
+        with self.argument_context('storage blob lease {}'.format(item)) as c:
+            c.register_precondition_options()
+            c.register_blob_arguments()
+            c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
 
     with self.argument_context('storage copy') as c:
         c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "
@@ -810,7 +844,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
                                                                   'get_container_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_container_permissions)),
                    validator=get_permission_validator(t_container_permissions))
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
@@ -844,8 +878,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'update']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
-            t_enabled_protocols, t_root_squash = self.get_models('EnabledProtocols', 'RootSquashType',
-                                                                 resource_type=ResourceType.MGMT_STORAGE)
+            t_enabled_protocols, t_root_squash, t_access_tier = \
+                self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',
+                                resource_type=ResourceType.MGMT_STORAGE)
             c.argument('share_quota', type=int, options_list=['--quota', '-q'],
                        help='The maximum size of the share in gigabytes. Must be greater than 0, and less than or '
                             'equal to 5TB (5120). For Large File Shares, the maximum size is 102400.')
@@ -858,6 +893,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        'only available for premium file shares (file shares in the FileStorage account type).')
             c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
                        min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
+            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), is_preview=True, min_api='2019-06-01',
+                       help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
+                       '(default), Hot, and Cool. FileStorage account can choose Premium.')
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
@@ -903,7 +941,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_share_permissions, 'share_name', 'get_share_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
@@ -954,7 +992,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_container_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_file_permissions)),
                    validator=get_permission_validator(t_file_permissions))
         c.ignore('sas_token')
@@ -1064,7 +1102,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_queue_permissions, 'queue_name', 'get_queue_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
         c.ignore('sas_token')
@@ -1145,7 +1183,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the table\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
-        c.argument('permission', options_list='--permissions', required=True,
+        c.argument('permission', options_list='--permissions',
                    help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
                    validator=table_permission_validator)
         c.ignore('sas_token')

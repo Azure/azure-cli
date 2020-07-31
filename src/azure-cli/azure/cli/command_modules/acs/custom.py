@@ -13,6 +13,7 @@ import os.path
 import platform
 import random
 import re
+import shutil
 import ssl
 import stat
 import string
@@ -277,6 +278,17 @@ def _urlretrieve(url, filename):
         f.write(req.read())
 
 
+def _unzip(src, dest):
+    logger.debug('Extracting %s to %s.', src, dest)
+    system = platform.system()
+    if system in ('Linux', 'Darwin', 'Windows'):
+        import zipfile
+        with zipfile.ZipFile(src, 'r') as zipObj:
+            zipObj.extractall(dest)
+    else:
+        raise CLIError('The current system is not supported.')
+
+
 def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
     """
     Downloads the dcos command line from Mesosphere
@@ -307,8 +319,16 @@ def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 
-def k8s_install_cli(cmd, client_version='latest', install_location=None):
-    """Install kubectl, a command-line interface for Kubernetes clusters."""
+def k8s_install_cli(cmd, client_version='latest', install_location=None,
+                    kubelogin_version='latest', kubelogin_install_location=None):
+    k8s_install_kubectl(cmd, client_version, install_location)
+    k8s_install_kubelogin(cmd, kubelogin_version, kubelogin_install_location)
+
+
+def k8s_install_kubectl(cmd, client_version='latest', install_location=None):
+    """
+    Install kubectl, a command-line interface for Kubernetes clusters.
+    """
 
     source_url = "https://storage.googleapis.com/kubernetes-release/release"
     cloud_name = cmd.cli_ctx.cloud.name
@@ -348,6 +368,73 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as ex:
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
+
+    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
+        env_paths = os.environ['PATH'].split(';')
+        found = next((x for x in env_paths if x.lower().rstrip('\\') == install_dir.lower()), None)
+        if not found:
+            # pylint: disable=logging-format-interpolation
+            logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
+                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \'{0}\'" for PowerShell. '
+                           'This is good for the current command session.\n'
+                           '    2. Update system PATH environment variable by following '
+                           '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
+                           'You only need to do it once'.format(install_dir, cli))
+    else:
+        logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
+                       install_dir, cli)
+
+
+def k8s_install_kubelogin(cmd, client_version='latest', install_location=None):
+    """
+    Install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
+    """
+
+    source_url = 'https://github.com/Azure/kubelogin/releases/download'
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == 'azurechinacloud':
+        source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
+
+    if client_version == 'latest':
+        context = _ssl_context()
+        latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+        if cloud_name.lower() == 'azurechinacloud':
+            latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
+        latest_release = urlopen(latest_release_url, context=context).read()
+        client_version = json.loads(latest_release)['tag_name'].strip()
+    else:
+        client_version = "v%s" % client_version
+
+    base_url = source_url + '/{}/kubelogin.zip'
+    file_url = base_url.format(client_version)
+
+    # ensure installation directory exists
+    install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)
+
+    system = platform.system()
+    if system == 'Windows':
+        sub_dir, binary_name = 'windows_amd64', 'kubelogin.exe'
+    elif system == 'Linux':
+        # TODO: Support ARM CPU here
+        sub_dir, binary_name = 'linux_amd64', 'kubelogin'
+    elif system == 'Darwin':
+        sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
+    else:
+        raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        try:
+            download_path = os.path.join(tmp_dir, 'kubelogin.zip')
+            logger.warning('Downloading client to "%s" from "%s"', download_path, file_url)
+            _urlretrieve(file_url, download_path)
+        except IOError as ex:
+            raise CLIError('Connection error while attempting to download client ({})'.format(ex))
+        _unzip(download_path, tmp_dir)
+        download_path = os.path.join(tmp_dir, 'bin', sub_dir, binary_name)
+        shutil.move(download_path, install_location)
+    os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
     if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
         env_paths = os.environ['PATH'].split(';')
@@ -999,7 +1086,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            return _invoke_deployment(cmd.cli_ctx, resource_group_name, deployment_name,
+            return _invoke_deployment(cmd, resource_group_name, deployment_name,
                                       template, params, validate, no_wait)
         except CloudError as ex:
             retry_exception = ex
@@ -1050,18 +1137,29 @@ def load_service_principals(config_path):
         return None
 
 
-def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
+def _invoke_deployment(cmd, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
 
-    from azure.cli.core.profiles import ResourceType, get_sdk
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
+    from azure.cli.core.profiles import ResourceType
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                   subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = smc.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, deployment)
+
+    if validate:
         return smc.validate(resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, properties)
 
@@ -2257,9 +2355,7 @@ def aks_update(cmd, client, resource_group_name, name,
             _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=instance)
 
     if enable_aad:
-        if instance.aad_profile is None:
-            raise CLIError('Cannot specify "--enable-aad" for a non-AAD cluster')
-        if instance.aad_profile.managed:
+        if instance.aad_profile is not None and instance.aad_profile.managed:
             raise CLIError('Cannot specify "--enable-aad" if managed AAD is already enabled')
         instance.aad_profile = ManagedClusterAADProfile(
             managed=True
@@ -2818,7 +2914,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
 
     deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
     # publish the Container Insights solution to the Log Analytics workspace
-    return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
+    return _invoke_deployment(cmd, resource_group, deployment_name, template, params,
                               validate=False, no_wait=False, subscription_id=subscription_id)
 
 
@@ -3027,6 +3123,10 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
 
     return sdk_no_wait(no_wait, client.delete, resource_group_name, cluster_name, nodepool_name)
+
+
+def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_name, nodepool_name):
+    return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
 
 
 def _ensure_aks_acr_role_assignment(cli_ctx,

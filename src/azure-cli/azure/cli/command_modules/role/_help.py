@@ -36,7 +36,7 @@ examples:
         }]
   - name: Create an application with a role
     text: |
-        az ad app create --id e042ec79-34cd-498f-9d9f-123456781234 --display-name mytestapp --identifier-uris https://mytestapp.websites.net --app-roles @manifest.json
+        az ad app create --display-name mytestapp --identifier-uris https://mytestapp.websites.net --app-roles @manifest.json
         ("manifest.json" contains the following content)
         [{
             "allowedMemberTypes": [

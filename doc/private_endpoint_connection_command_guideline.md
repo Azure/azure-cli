@@ -33,9 +33,9 @@ Add enough test cases for your new service into this [file](https://github.com/A
     - Delete the private endpoint connection.
 
 
-## Depracted
+## Deprecated
 
-The following documentations are depracated.
+The following documentations are deprecated.
 
 #### Private Endpoint Connection
 
@@ -106,7 +106,7 @@ namespace.resource_group = result['resource_group']
 namespace.endpoint = result['name']
 namespace.name = result['child_name_1']
 ```
-The best practice to support extra `--id` is to add extra argument in `_param.py`. Then you can use the `parse_proxy_resource_id` to parse the `--id` and delete this extra argument from the namspace. Storage's PR is a good example.
+The best practice to support extra `--id` is to add extra argument in `_param.py`. Then you can use the `parse_proxy_resource_id` to parse the `--id` and delete this extra argument from the namespace. Storage's PR is a good example.
 ```
 with self.argument_context('storage account private-endpoint-connection {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
      c.extra('connection_id', options_list=['--id'], help='help='The ID of the private endpoint connection associated with the Storage Account.')

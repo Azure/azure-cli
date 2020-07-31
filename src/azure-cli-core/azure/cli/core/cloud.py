@@ -177,6 +177,7 @@ def _get_storage_sync_endpoint(cloud_name):
     }
     return storage_sync_endpoint_mapper.get(cloud_name, None)
 
+
 def _get_synapse_analytics_endpoint(cloud_name):
     synapse_analytics_endpoint_mapper = {
         'AzureCloud': 'dev.azuresynapse.net',
