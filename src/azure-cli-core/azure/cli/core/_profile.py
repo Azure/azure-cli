@@ -306,7 +306,7 @@ class Profile:
         # pylint: disable=too-many-statements
 
         import jwt
-        from requests import HTTPError, ConnectionError
+        import requests
         from msrestazure.tools import is_valid_resource_id
         from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -317,7 +317,7 @@ class Profile:
                     try:
                         msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
                         identity_type = MsiAccountTypes.user_assigned_resource_id
-                    except HTTPError:
+                    except requests.HTTPError:
                         raise CLIError('Failed to connect to MSI with resource ID {}'.format(identity_id))
                 else:
                     authenticated = False
@@ -325,7 +325,7 @@ class Profile:
                         msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
                         identity_type = MsiAccountTypes.user_assigned_client_id
                         authenticated = True
-                    except HTTPError as ex:
+                    except requests.HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
                             logger.info('Sniff: not an MSI client id')
                         else:
@@ -336,7 +336,7 @@ class Profile:
                             identity_type = MsiAccountTypes.user_assigned_object_id
                             msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
                             authenticated = True
-                        except HTTPError as ex:
+                        except requests.HTTPError as ex:
                             if ex.response.reason == 'Bad Request' and ex.response.status == 400:
                                 logger.info('Sniff: not an MSI object id')
                             else:
@@ -349,11 +349,11 @@ class Profile:
                 try:
                     identity_type = MsiAccountTypes.system_assigned
                     msi_creds = MSIAuthenticationWrapper(resource=resource)
-                except HTTPError:
+                except requests.HTTPError:
                     # Capture HTTPError in case no managed identity is configured
                     raise CLIError("Failed to connect to MSI with the default identity. Please make sure MSI is "
                                    "configured correctly.")
-        except ConnectionError as ex:
+        except requests.ConnectionError as ex:
             # Capture ConnectionError in case az is ran on a machine that doesn't support managed identity
             # (No managed identity endpoint at all)
             raise CLIError("MSI endpoint is not responding. Please make sure MSI is configured correctly. "
@@ -788,7 +788,7 @@ class MsiAccountTypes:
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from requests.exceptions import HTTPError, ConnectionError
+        import requests
         try:
             from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
             if cli_account_name == MsiAccountTypes.system_assigned:
@@ -800,12 +800,14 @@ class MsiAccountTypes:
             if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
                 return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
             raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
-        except HTTPError:
+        except requests.HTTPError:
+            # HTTPError returned by msrestazure doesn't contain the error message
+            # https://github.com/Azure/msrestazure-for-python/issues/153
             raise CLIError('Failed to retrieve a token from managed identity endpoint. The managed identity may '
                            'have been unassigned since `az login`.')
-        except ConnectionError:
-            raise CLIError('Managed identity endpoint is not responding. The managed identity endpoint may '
-                           'have been disabled since `az login`.')
+        except requests.ConnectionError as ex:
+            raise CLIError('MSI is not responding. The managed identity endpoint may '
+                           'have been disabled since `az login`. Error details: {}'.format(ex))
 
 
 class SubscriptionFinder:
