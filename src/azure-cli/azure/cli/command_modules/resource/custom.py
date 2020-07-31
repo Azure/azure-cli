@@ -743,7 +743,7 @@ def what_if_deploy_arm_template_at_management_group(cmd, management_group_id=Non
                                                     deployment_name=None, deployment_location=None,
                                                     result_format=None, no_pretty_print=None, no_prompt=False,
                                                     exclude_change_types=None, template_spec=None):
-    what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
+    what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec=template_spec)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     what_if_poller = mgmt_client.what_if_at_management_group_scope(management_group_id, deployment_name,
@@ -757,7 +757,7 @@ def what_if_deploy_arm_template_at_tenant_scope(cmd,
                                                 deployment_name=None, deployment_location=None,
                                                 result_format=None, no_pretty_print=None, no_prompt=False,
                                                 exclude_change_types=None, template_spec=None):
-    what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
+    what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     what_if_poller = mgmt_client.what_if_at_tenant_scope(deployment_name, deployment_location, what_if_properties)
