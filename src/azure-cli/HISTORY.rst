@@ -40,7 +40,7 @@ Release History
 * `az deployment mg/tenant create`: Add --confirm-with-what-if/-c parameter. (#14568)
 * `az deployment mg/tenant create`: Add --what-if-result-format/-r parameter. (#14568)
 * `az deployment mg/tenant create`: Add --what-if-exclude-change-types/-x parameter. (#14568)
-* az tag support for resource id parameter (#14558)
+* `az tag`: az tag support for resource id parameter (#14558)
 
 **Backup**
 
