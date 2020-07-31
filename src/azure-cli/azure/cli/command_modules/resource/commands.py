@@ -221,10 +221,11 @@ def load_command_table(self, _):
         g.custom_command('unregister', 'unregister_feature')
 
     # Tag commands
-    with self.command_group('tag', resource_tag_sdk) as g:
-        g.command('list', 'list')
-        g.command('create', 'create_or_update')
-        g.command('delete', 'delete')
+    with self.command_group('tag', resource_tag_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+        g.custom_command('list', 'get_tag_at_scope')
+        g.custom_command('create', 'create_or_update_tag_at_scope')
+        g.custom_command('delete', 'delete_tag_at_scope', confirmation=True)
+        g.custom_command('update', 'update_tag_at_scope', min_api='2019-10-01')
         g.command('add-value', 'create_or_update_value')
         g.command('remove-value', 'delete_value')
 

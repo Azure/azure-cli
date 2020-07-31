@@ -2026,7 +2026,7 @@ examples:
 
 helps['tag'] = """
 type: group
-short-summary: Manage resource tags.
+short-summary: Tag Management on a resource.
 """
 
 helps['tag add-value'] = """
@@ -2040,18 +2040,104 @@ examples:
 
 helps['tag create'] = """
 type: command
-short-summary: Create a tag in the subscription.
+short-summary: Create tags on a specific resource.
+long-summary: >
+    The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
+    This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
+    The specified entity can have a maximum of 50 tags.
+parameters:
+  - name: --name -n
+    short-summary: The name of the tag to create.
+  - name: --subscription
+    short-summary: Name or ID of subscription. You can configure the default subscription using az account set -s NAME_OR_ID.
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+  - name: --tags
+    short-summary: The tags to be applied on the resource.
 examples:
   - name: Create a tag in the subscription.
     text: >
         az tag create --name MyTag
+  - name: Create or update the entire set of tags on a subscription.
+    text: >
+        az tag create --resource-id /subscriptions/{subId} --tags Dept=Finance Status=Normal
+  - name: Create or update the entire set of tags on a resource group.
+    text: >
+        az tag create --resource-id /subscriptions/{sub-id}/resourcegroups/{rg} --tags Dept=Finance Status=Normal
+  - name: Create or update the entire set of tags on a resource.
+    text: >
+        az tag create --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --tags Dept=Finance Status=Normal
 """
 
 helps['tag delete'] = """
 type: command
-short-summary: Delete a tag in the subscription.
+short-summary: Delete tags on a specific resource.
+long-summary:
+    The az tag delete command with an id deletes the entire set of tags on a resource, resource group or subscription.
+parameters:
+  - name: --name -n
+    short-summary: The name of the tag to be deleted.
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
 examples:
   - name: Delete a tag from the subscription.
     text: >
         az tag delete --name MyTag
+  - name: Delete the entire set of tags on a subscription.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}
+  - name: Delete the entire set of tags on a resource group.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
+  - name: Delete the entire set of tags on a resource.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
+"""
+
+helps['tag list'] = """
+type: command
+short-summary: List the entire set of tags on a specific resource.
+long-summary: The az tag list command with an id lists the entire set of tags on a resource, resource group or subscription.
+parameters:
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+examples:
+  - name: List the entire set of tags on a subscription.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}
+  - name: List the entire set of tags on a resource group.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
+  - name: List the entire set of tags on a resource.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
+"""
+
+helps['tag update'] = """
+type: command
+short-summary: Selectively update the set of tags on a specific resource.
+long-summary: >
+    The az tag update command with an id selectively updates the set of tags on a resource, resource group or subscription.
+    This operation allows replacing, merging or selectively deleting tags on the specified resource, resource group or subscription.
+    The specified entity can have a maximum of 50 tags at the end of the operation.
+    The 'replace' option replaces the entire set of existing tags with a new set.
+    The 'merge' option allows adding tags with new names and updating the values of tags with existing names.
+    The 'delete' option allows selectively deleting tags based on given names or name/value pairs.
+parameters:
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+  - name: --operation
+    short-summary: The update operation. Options are Merge, Replace and Delete.
+  - name: --tags
+    short-summary: The tags to be updated on the resource.
+examples:
+  - name: Selectively update the set of tags on a subscription with "merge" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id} --operation merge --tags key1=value1 key3=value3
+  - name: Selectively update the set of tags on a resource group with "replace" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg} --operation replace --tags key1=value1 key3=value3
+  - name: Selectively update the set of tags on a resource with "delete" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --operation delete --tags key1=value1
 """
