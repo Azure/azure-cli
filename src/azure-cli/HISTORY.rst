@@ -95,7 +95,7 @@ Release History
 
 **Network**
 
-* application-gateway private-link add: Support to specify an existing subnet by ID (#14463)
+* `az application-gateway private-link add`: support to specify an existing subnet by ID (#14463)
 * `az network application-gateway waf-policy create`: support version and type (#14531)
 
 **Storage**
