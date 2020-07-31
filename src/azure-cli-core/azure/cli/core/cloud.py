@@ -185,6 +185,7 @@ def _get_synapse_analytics_endpoint(cloud_name):
     }
     return synapse_analytics_endpoint_mapper.get(cloud_name, None)
 
+
 def _get_database_server_endpoint(sql_server_hostname, cloud_name):
     def _concat_db_server_endpoint(db_prefix):
         if cloud_name == 'AzureCloud':
@@ -221,12 +222,14 @@ def _get_app_insights_resource_id(cloud_name):
     }
     return app_insights_resource_id_mapper.get(cloud_name, None)
 
+
 def _get_synapse_analytics_resource_id(cloud_name):
     synapse_analytics_resource_id_mapper = {
         'AzureCloud': 'https://dev.azuresynapse.net',
         'AzureChinaCloud': 'https://dev.azuresynapse.net'
     }
     return synapse_analytics_resource_id_mapper.get(cloud_name, None)
+
 
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
