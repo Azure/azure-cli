@@ -1117,6 +1117,53 @@ class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
         ])
 
 
+class DeploymentWhatIfAtManagementGroupTest(ScenarioTest):
+    def test_management_group_level_what_if(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
+            'mg': self.create_random_name('azure-cli-management', 30),
+            'sub-rg': self.create_random_name('azure-cli-sub-resource-group', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg what-if --management-group-id {mg} --location WestUS --template-file "{tf}" --no-pretty-print '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
+                 checks=[
+                     self.check('status', 'Succeeded'),
+                     self.check("length(changes)", 4),
+                     self.check("changes[0].changeType", "Create"),
+                     self.check("changes[1].changeType", "Create"),
+                     self.check("changes[2].changeType", "Create"),
+                     self.check("changes[3].changeType", "Create"),
+                 ])
+
+
+class DeploymentWhatIfAtTenantScopeTest(ScenarioTest):
+    def test_tenant_level_what_if(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60),
+            'mg': self.create_random_name('azure-cli-management-group', 40),
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --parameters targetMG="{mg}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+            self.check("length(changes)", 3),
+            self.check("changes[0].changeType", "Create"),
+            self.check("changes[1].changeType", "Create"),
+            self.check("changes[2].changeType", "Create"),
+        ])
+
+
 class DeploymentScriptsTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
     def test_list_all_deployment_scripts(self, resource_group):

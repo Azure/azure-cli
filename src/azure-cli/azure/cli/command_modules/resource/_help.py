@@ -284,7 +284,7 @@ parameters:
   - name: --name -n
     short-summary: The deployment name.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -419,7 +419,7 @@ parameters:
   - name: --name -n
     short-summary: The deployment name.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -584,7 +584,7 @@ parameters:
   - name: --mode
     short-summary: The deployment mode.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -737,6 +737,39 @@ examples:
     text: az deployment mg validate --management-group-id testmg --location WestUS --template-file {template-file}
 """
 
+helps['deployment mg what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at management group scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --management-group-id -m
+    short-summary: The management group id to create deployment at.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --location -l
+    short-summary: The location to store the deployment metadata.
+  - name: --result-format -r
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at a management group.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at a management group with ResourceIdOnly format.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at a management group without pretty-printing the result.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
+"""
+
 helps['deployment mg create'] = """
 type: command
 short-summary: Start a deployment at management group.
@@ -756,6 +789,8 @@ parameters:
     short-summary: The deployment name.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at management group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -860,6 +895,37 @@ examples:
     text: az deployment tenant validate --location WestUS --template-file {template-file}
 """
 
+helps['deployment tenant what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at tenant scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --location -l
+    short-summary: The location to store the deployment What-If operation metadata.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --result-format -r
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at tenant scope.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at tenant scope with ResourceIdOnly format.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at tenant scope without pretty-printing the result.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
+"""
+
 helps['deployment tenant create'] = """
 type: command
 short-summary: Start a deployment at tenant scope.
@@ -877,6 +943,8 @@ parameters:
     short-summary: The deployment name.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at tenant scope from a remote template file, using parameters from a local JSON file.
     text: >
