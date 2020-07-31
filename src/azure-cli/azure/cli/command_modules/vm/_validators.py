@@ -1353,7 +1353,6 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.plan_product,
             namespace.plan_promotion_code,
             namespace.plan_publisher,
-            namespace.proximity_placement_group,
             namespace.priority,
             namespace.public_ip_address,
             namespace.public_ip_address_allocation,
@@ -1362,7 +1361,6 @@ def process_vmss_create_namespace(cmd, namespace):
             # namespace.identity_role,
             namespace.identity_scope,
             namespace.secrets,
-            namespace.single_placement_group,
             namespace.ssh_dest_key_path,
             namespace.ssh_key_value,
             # namespace.storage_container_name,
@@ -1379,8 +1377,8 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.vnet_name
         ]
         if any(param is not None for param in banned_params):
-            raise CLIError('usage error: in VM mode, only name, resource-group, location, '
-                           'tags, zones, platform-fault-domain-count are allowed')
+            raise CLIError('usage error: In VM mode, only name, resource-group, location, '
+                           'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
         return
     validate_tags(namespace)
     if namespace.vm_sku is None:
