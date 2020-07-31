@@ -1331,10 +1331,6 @@ class DeploymentScriptsTest(ScenarioTest):
 
 
 class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
-    def tearDown(self):
-        self.cmd('policy assignment delete -n location-lock')
-        self.cmd('policy definition delete -n policy2')
-        self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
     @AllowLargeResponse(4096)
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs_tenant_deploy', location='eastus')
@@ -1348,32 +1344,20 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
             'template_spec_version_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group + '/providers/Microsoft.Resources/templateSpecs/' + template_spec_name + '/versions/1.0',
             'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
+             # params-uri below is the raw file url of the subscription_level_parameters.json above
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
         })
 
-        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f {tf}')
+        self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"')
 
-        self.cmd('deployment sub validate --location WestUS --template-file "{template_spec_version_id}" --parameters @"{params}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-spec {template_spec_version_id} --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
-
-        self.cmd('deployment sub validate --location WestUS --template-spec "{template_spec_version_id}" --parameters "{params_uri}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
-
-        self.cmd('deployment sub validate --location WestUS')
 
         self.cmd('deployment sub create -n {dn} --location WestUS --template-spec {template_spec_version_id} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
-        ])
-
-        self.cmd('deployment sub list', checks=[
-            self.check('[0].name', '{dn}'),
-        ])
-
-        self.cmd('deployment sub list --filter "provisioningState eq \'Succeeded\'"', checks=[
-            self.check('[0].name', '{dn}'),
         ])
 
         self.cmd('deployment sub show -n {dn}', checks=[
