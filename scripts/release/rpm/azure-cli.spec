@@ -46,6 +46,7 @@ source %{repo_path}/scripts/install_full.sh
 
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
 rm -f %{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/azure/cli/__init__.py
+rm -f %{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/azure/cli/__pycache__/__init__*
 
 deactivate
 
