@@ -43,7 +43,7 @@ def load_arguments(self, _):
          'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          'JsonWebKeyEncryptionAlgorithm',
-         resource_type=ResourceType.DATA_KEYVAULT)
+         resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
@@ -53,6 +53,7 @@ def load_arguments(self, _):
         wrap_key = "wrapKey"
         unwrap_key = "unwrapKey"
         import_ = "import"
+        export = "export"
 
     JsonWebKeyOperation = CLIJsonWebKeyOperation  # TODO: Remove this patch when new SDK is released
 
@@ -370,7 +371,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('release_policy', options_list=['--policy'],
                        help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
-                       type=get_json_object)
+                       type=get_json_object, is_preview=True)
     # endregion
 
     # region KeyVault Secret

@@ -948,8 +948,33 @@ def create_key(cmd, client, key_name=None, vault_base_url=None,
                hsm_base_url=None, protection=None, identifier=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None, release_policy=None):
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+
+    if key_ops and 'export' in key_ops:
+        key_attrs.exportable = True
+
+    """
+    if release_policy:
+        KeyReleasePolicy = cmd.get_models('KeyReleasePolicy', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+        KeyReleaseCondition = cmd.get_models('KeyReleaseCondition', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+        KeyReleaseAuthority = cmd.get_models('KeyReleaseAuthority', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+        authorities = []
+        for raw_authority in release_policy.get('any_of', []):
+            authority_url = raw_authority['authority']
+            all_of = raw_authority.get('all_of', [])
+            conditions = []
+            for raw_cond in all_of:
+                claim_type = raw_cond['claim']
+                claim_condition = raw_cond['condition']
+                value = raw_cond['value']
+                condition = KeyReleaseCondition(claim_type=claim_type, claim_condition=claim_condition, value=value)
+                conditions.append(condition)
+            authority = KeyReleaseAuthority(authority_url=authority_url, all_of=all_of)
+            authorities.append(authority)
+        release_policy = KeyReleasePolicy(version=release_policy['version'], any_of=authorities)
+    """
+
     return client.create_key(vault_base_url=vault_base_url,
                              key_name=key_name,
                              kty=kty,
@@ -1020,11 +1045,11 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,
                hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None):
+               byok_string=None, release_policy=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
@@ -1065,7 +1090,8 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,
         key_obj.kty = 'RSA-HSM'
         key_obj.t = byok_data
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags,
+                             release_policy=release_policy)
 
 
 def _bytes_to_int(b):

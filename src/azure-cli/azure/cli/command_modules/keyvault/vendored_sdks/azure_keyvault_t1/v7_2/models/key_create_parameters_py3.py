@@ -51,6 +51,7 @@ class KeyCreateParameters(Model):
         'key_attributes': {'key': 'attributes', 'type': 'KeyAttributes'},
         'tags': {'key': 'tags', 'type': '{str}'},
         'curve': {'key': 'crv', 'type': 'str'},
+        'release_policy': {'key': 'release_policy', 'type': 'KeyReleasePolicy'},
     }
 
     def __init__(self, *, kty, key_size: int=None, key_ops=None, key_attributes=None, tags=None, curve=None, release_policy=None, **kwargs) -> None:

@@ -19,6 +19,7 @@ class JsonWebKeyType(str, Enum):
     rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
     rsa_hsm = "RSA-HSM"  #: RSA with a private key which is not exportable from the HSM.
     oct = "oct"  #: Octet sequence (used to represent symmetric keys)
+    oct_hsm = "oct-HSM"
 
 
 class JsonWebKeyCurveName(str, Enum):
@@ -35,6 +36,9 @@ class DeletionRecoveryLevel(str, Enum):
     recoverable_purgeable = "Recoverable+Purgeable"
     recoverable = "Recoverable"
     recoverable_protected_subscription = "Recoverable+ProtectedSubscription"
+    customized_recoverable_purgeable = "CustomizedRecoverable+Purgeable"
+    customized_recoverable = "CustomizedRecoverable"
+    customized_recoverable_protected_subscription = "CustomizedRecoverable+ProtectedSubscription"
 
 
 class KeyUsageType(str, Enum):
@@ -56,6 +60,16 @@ class ActionType(str, Enum):
     auto_renew = "AutoRenew"
 
 
+class KeyReleaseConditionCondition(str, Enum):
+
+    equals = "equals"  #: equals comparison.
+
+
+class KeyReleasePolicyVersion(str, Enum):
+
+    zero_full_stop_two = "0.2"  #: Schema version 0.2
+
+
 class JsonWebKeyOperation(str, Enum):
 
     encrypt = "encrypt"
@@ -64,6 +78,8 @@ class JsonWebKeyOperation(str, Enum):
     verify = "verify"
     wrap_key = "wrapKey"
     unwrap_key = "unwrapKey"
+    import_enum = "import"
+    export = "export"
 
 
 class JsonWebKeyEncryptionAlgorithm(str, Enum):
@@ -71,6 +87,18 @@ class JsonWebKeyEncryptionAlgorithm(str, Enum):
     rsa_oaep = "RSA-OAEP"
     rsa_oaep_256 = "RSA-OAEP-256"
     rsa1_5 = "RSA1_5"
+    a128_gcm = "A128GCM"
+    a192_gcm = "A192GCM"
+    a256_gcm = "A256GCM"
+    a128_kw = "A128KW"
+    a192_kw = "A192KW"
+    a256_kw = "A256KW"
+    a128_cbc = "A128CBC"
+    a192_cbc = "A192CBC"
+    a256_cbc = "A256CBC"
+    a128_cbcpad = "A128CBCPAD"
+    a192_cbcpad = "A192CBCPAD"
+    a256_cbcpad = "A256CBCPAD"
 
 
 class JsonWebKeySignatureAlgorithm(str, Enum):

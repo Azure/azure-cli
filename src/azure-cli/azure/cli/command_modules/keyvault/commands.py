@@ -144,7 +144,7 @@ def load_command_table(self, _):
                           doc_string_source=private_data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
-        g.keyvault_custom('get-policy-template', 'get_policy_template')
+        g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
         g.keyvault_command('encrypt', 'encrypt', is_preview=True)
         g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 

@@ -28,19 +28,26 @@ class KeyAttributes(Attributes):
     :vartype created: datetime
     :ivar updated: Last updated time in UTC.
     :vartype updated: datetime
+    :ivar recoverable_days: softDelete data retention days. Value should be
+     >=7 and <=90 when softDelete enabled, otherwise 0.
+    :vartype recoverable_days: int
     :ivar recovery_level: Reflects the deletion recovery level currently in
      effect for keys in the current vault. If it contains 'Purgeable' the key
      can be permanently deleted by a privileged user; otherwise, only the
      system can purge the key, at the end of the retention interval. Possible
      values include: 'Purgeable', 'Recoverable+Purgeable', 'Recoverable',
-     'Recoverable+ProtectedSubscription'
+     'Recoverable+ProtectedSubscription', 'CustomizedRecoverable+Purgeable',
+     'CustomizedRecoverable', 'CustomizedRecoverable+ProtectedSubscription'
     :vartype recovery_level: str or
-     ~azure.keyvault.v7_0.models.DeletionRecoveryLevel
+     ~azure.keyvault.v7_2.models.DeletionRecoveryLevel
+    :param exportable: Indicates if the private key can be exported.
+    :type exportable: bool
     """
 
     _validation = {
         'created': {'readonly': True},
         'updated': {'readonly': True},
+        'recoverable_days': {'readonly': True},
         'recovery_level': {'readonly': True},
     }
 
@@ -50,9 +57,13 @@ class KeyAttributes(Attributes):
         'expires': {'key': 'exp', 'type': 'unix-time'},
         'created': {'key': 'created', 'type': 'unix-time'},
         'updated': {'key': 'updated', 'type': 'unix-time'},
+        'recoverable_days': {'key': 'recoverableDays', 'type': 'int'},
         'recovery_level': {'key': 'recoveryLevel', 'type': 'str'},
+        'exportable': {'key': 'exportable', 'type': 'bool'},
     }
 
-    def __init__(self, *, enabled: bool=None, not_before=None, expires=None, **kwargs) -> None:
+    def __init__(self, *, enabled: bool=None, not_before=None, expires=None, exportable: bool=None, **kwargs) -> None:
         super(KeyAttributes, self).__init__(enabled=enabled, not_before=not_before, expires=expires, **kwargs)
+        self.recoverable_days = None
         self.recovery_level = None
+        self.exportable = exportable
