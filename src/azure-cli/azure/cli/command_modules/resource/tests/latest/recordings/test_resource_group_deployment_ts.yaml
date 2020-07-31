@@ -1,0 +1,1327 @@
+interactions:
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - template-specs create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-07-31T16:32:05.524729Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-07-31T16:32:05.524729Z\"\r\n
+        \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-resource-group-ts-deploy000002\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '717'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "westus", "properties": {"artifacts": [], "template": {"$schema":
+      "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"location": {"type": "string", "defaultValue":
+      "[resourceGroup().location]", "metadata": {"description": "Location for the
+      network security group."}}, "name": {"type": "string", "metadata": {"description":
+      "Name of the network security group."}}}, "variables": {}, "resources": [{"type":
+      "Microsoft.Network/networkSecurityGroups", "name": "[parameters(''name'')]",
+      "apiVersion": "2015-06-15", "location": "[parameters(''location'')]", "properties":
+      {"securityRules": []}, "dependsOn": []}], "outputs": {"NewNSG": {"type": "object",
+      "value": "[reference(parameters(''name''))]"}}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - template-specs create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '781'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-07-31T16:32:06.7856936Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-07-31T16:32:06.7856936Z\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
+        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"Location for the
+        network security group.\"\r\n          }\r\n        },\r\n        \"name\":
+        {\r\n          \"type\": \"string\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"Name of the network security group.\"\r\n          }\r\n        }\r\n      },\r\n
+        \     \"variables\": {},\r\n      \"resources\": [\r\n        {\r\n          \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n          \"name\": \"[parameters('name')]\",\r\n
+        \         \"apiVersion\": \"2015-06-15\",\r\n          \"location\": \"[parameters('location')]\",\r\n
+        \         \"properties\": {\r\n            \"securityRules\": []\r\n          },\r\n
+        \         \"dependsOn\": []\r\n        }\r\n      ],\r\n      \"outputs\":
+        {\r\n        \"NewNSG\": {\r\n          \"type\": \"object\",\r\n          \"value\":
+        \"[reference(parameters('name'))]\"\r\n        }\r\n      }\r\n    }\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources","namespace":"Microsoft.Resources","authorization":{"applicationId":"3b990c8b-9607-4c2a-8b04-1d41985facca"},"resourceTypes":[{"resourceType":"tenants","locations":[],"apiVersions":["2020-01-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"operationresults","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"notifyResourceJobs","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01"],"capabilities":"None"},{"resourceType":"tags","locations":[],"apiVersions":["2019-10-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyCompliance","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"capabilities":"None"},{"resourceType":"providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"checkresourcename","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"calculateTemplateHash","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions","locations":[],"apiVersions":["2019-10-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/operationresults","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"resourceGroups","locations":["Central
+        US","East Asia","Southeast Asia","East US","East US 2","West US","West US
+        2","North Central US","South Central US","West Central US","North Europe","West
+        Europe","Japan East","Japan West","Brazil South","Australia Southeast","Australia
+        East","West India","South India","Central India","Canada Central","Canada
+        East","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Australia Central","Switzerland North","Germany
+        West Central","Norway East","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsLocation"},{"resourceType":"subscriptions/resourceGroups","locations":["Central
+        US","East Asia","Southeast Asia","East US","East US 2","West US","West US
+        2","North Central US","South Central US","West Central US","North Europe","West
+        Europe","Japan East","Japan West","Brazil South","Australia Southeast","Australia
+        East","West India","South India","Central India","Canada Central","Canada
+        East","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Australia Central","Switzerland North","Germany
+        West Central","Norway East","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"subscriptions/resourcegroups/resources","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/locations","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagnames","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagNames/tagValues","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments/operations","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"links","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2015-01-01"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2015-01-01"}],"capabilities":"None"},{"resourceType":"deploymentScripts","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"deploymentScripts/logs","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"locations/deploymentScriptOperationResults","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"templateSpecs","locations":["East
+        Asia","Southeast Asia","Australia East","Australia Central","Australia Central
+        2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
+        North","Central US EUAP","East US 2","East US","Central US","North Central
+        US","East US 2 EUAP","France Central","UK South","UK West","Central India","West
+        India","South India","Japan East","Japan West","Korea Central","Korea South","North
+        Europe","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"templateSpecs/versions","locations":["East
+        Asia","Southeast Asia","Australia East","Australia Central","Australia Central
+        2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
+        North","Central US EUAP","East US 2","East US","Central US","North Central
+        US","East US 2 EUAP","France Central","UK South","UK West","Central India","West
+        India","South India","Japan East","Japan West","Korea Central","Korea South","North
+        Europe","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"}],"registrationState":"Registered","registrationPolicy":"RegistrationFree"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '15800'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-07-31T16:32:06.7856936Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-07-31T16:32:06.7856936Z\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
+        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"Location for the
+        network security group.\"\r\n          }\r\n        },\r\n        \"name\":
+        {\r\n          \"type\": \"string\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"Name of the network security group.\"\r\n          }\r\n        }\r\n      },\r\n
+        \     \"variables\": {},\r\n      \"resources\": [\r\n        {\r\n          \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n          \"name\": \"[parameters('name')]\",\r\n
+        \         \"apiVersion\": \"2015-06-15\",\r\n          \"location\": \"[parameters('location')]\",\r\n
+        \         \"properties\": {\r\n            \"securityRules\": []\r\n          },\r\n
+        \         \"dependsOn\": []\r\n        }\r\n      ],\r\n      \"outputs\":
+        {\r\n        \"NewNSG\": {\r\n          \"type\": \"object\",\r\n          \"value\":
+        \"[reference(parameters('name'))]\"\r\n        }\r\n      }\r\n    }\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0"},
+      "parameters": {"location": {"value": "westus"}, "name": {"value": "azure-cli-deploy-test-nsg1"}},
+      "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '425'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:09.3583318Z","duration":"PT0S","correlationId":"7d833cf5-461d-445f-bbc1-5594632e03ea","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1303'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources","namespace":"Microsoft.Resources","authorization":{"applicationId":"3b990c8b-9607-4c2a-8b04-1d41985facca"},"resourceTypes":[{"resourceType":"tenants","locations":[],"apiVersions":["2020-01-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"operationresults","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"notifyResourceJobs","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01"],"capabilities":"None"},{"resourceType":"tags","locations":[],"apiVersions":["2019-10-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyCompliance","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"capabilities":"None"},{"resourceType":"providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"checkresourcename","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"calculateTemplateHash","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions","locations":[],"apiVersions":["2019-10-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/operationresults","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"resourceGroups","locations":["Central
+        US","East Asia","Southeast Asia","East US","East US 2","West US","West US
+        2","North Central US","South Central US","West Central US","North Europe","West
+        Europe","Japan East","Japan West","Brazil South","Australia Southeast","Australia
+        East","West India","South India","Central India","Canada Central","Canada
+        East","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Australia Central","Switzerland North","Germany
+        West Central","Norway East","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsLocation"},{"resourceType":"subscriptions/resourceGroups","locations":["Central
+        US","East Asia","Southeast Asia","East US","East US 2","West US","West US
+        2","North Central US","South Central US","West Central US","North Europe","West
+        Europe","Japan East","Japan West","Brazil South","Australia Southeast","Australia
+        East","West India","South India","Central India","Canada Central","Canada
+        East","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Australia Central","Switzerland North","Germany
+        West Central","Norway East","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"subscriptions/resourcegroups/resources","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/locations","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagnames","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagNames/tagValues","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments/operations","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"links","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2015-01-01"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2015-01-01"}],"capabilities":"None"},{"resourceType":"deploymentScripts","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"deploymentScripts/logs","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"locations/deploymentScriptOperationResults","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"templateSpecs","locations":["East
+        Asia","Southeast Asia","Australia East","Australia Central","Australia Central
+        2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
+        North","Central US EUAP","East US 2","East US","Central US","North Central
+        US","East US 2 EUAP","France Central","UK South","UK West","Central India","West
+        India","South India","Japan East","Japan West","Korea Central","Korea South","North
+        Europe","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"templateSpecs/versions","locations":["East
+        Asia","Southeast Asia","Australia East","Australia Central","Australia Central
+        2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
+        North","Central US EUAP","East US 2","East US","Central US","North Central
+        US","East US 2 EUAP","France Central","UK South","UK West","Central India","West
+        India","South India","Japan East","Japan West","Korea Central","Korea South","North
+        Europe","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"}],"registrationState":"Registered","registrationPolicy":"RegistrationFree"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '15800'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-07-31T16:32:06.7856936Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-07-31T16:32:06.7856936Z\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
+        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"Location for the
+        network security group.\"\r\n          }\r\n        },\r\n        \"name\":
+        {\r\n          \"type\": \"string\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"Name of the network security group.\"\r\n          }\r\n        }\r\n      },\r\n
+        \     \"variables\": {},\r\n      \"resources\": [\r\n        {\r\n          \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n          \"name\": \"[parameters('name')]\",\r\n
+        \         \"apiVersion\": \"2015-06-15\",\r\n          \"location\": \"[parameters('location')]\",\r\n
+        \         \"properties\": {\r\n            \"securityRules\": []\r\n          },\r\n
+        \         \"dependsOn\": []\r\n        }\r\n      ],\r\n      \"outputs\":
+        {\r\n        \"NewNSG\": {\r\n          \"type\": \"object\",\r\n          \"value\":
+        \"[reference(parameters('name'))]\"\r\n        }\r\n      }\r\n    }\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0"},
+      "parameters": {"location": {"value": "westus"}, "name": {"value": "azure-cli-deploy-test-nsg1"}},
+      "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '425'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:11.7466937Z","duration":"PT0S","correlationId":"3cececde-b20d-40b4-9d56-6077884b9595","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1421'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0"},
+      "parameters": {"location": {"value": "westus"}, "name": {"value": "azure-cli-deploy-test-nsg1"}},
+      "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '425'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-07-31T16:32:13.329676Z","duration":"PT0.7497171S","correlationId":"f9a7e2e1-ae01-4fda-a0cb-d1fd58de7486","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003/operationStatuses/08586053937528976541?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1175'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586053937528976541?api-version=2020-06-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:18.4908674Z","duration":"PT5.9109085S","correlationId":"f9a7e2e1-ae01-4fda-a0cb-d1fd58de7486","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"23676db4-337e-40f6-8f4b-85c62c733b38","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5887'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/?api-version=2020-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:18.4908674Z","duration":"PT5.9109085S","correlationId":"f9a7e2e1-ae01-4fda-a0cb-d1fd58de7486","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"23676db4-337e-40f6-8f4b-85c62c733b38","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5899'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --filter
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/?$filter=provisioningState%20eq%20%27Succeeded%27&api-version=2020-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:18.4908674Z","duration":"PT5.9109085S","correlationId":"f9a7e2e1-ae01-4fda-a0cb-d1fd58de7486","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"23676db4-337e-40f6-8f4b-85c62c733b38","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5899'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:18.4908674Z","duration":"PT5.9109085S","correlationId":"f9a7e2e1-ae01-4fda-a0cb-d1fd58de7486","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"23676db4-337e-40f6-8f4b-85c62c733b38","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"0d07ebe3-69f6-43f9-a7ac-b4616bd944fb\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5887'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group export
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/exportTemplate?api-version=2020-06-01
+  response:
+    body:
+      string: '{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"location":{"defaultValue":"[resourceGroup().location]","type":"String","metadata":{"description":"Location
+        for the network security group."}},"name":{"type":"String","metadata":{"description":"Name
+        of the network security group."}}},"variables":{},"resources":[{"type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2015-06-15","name":"[parameters(''name'')]","location":"[parameters(''location'')]","dependsOn":[],"properties":{"securityRules":[]}}],"outputs":{"NewNSG":{"type":"Object","value":"[reference(parameters(''name''))]"}}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '685'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment operation group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/deployments/mock-deployment/operations?api-version=2020-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003/operations/BCC5733513D7C496","operationId":"BCC5733513D7C496","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:18.3106559Z","duration":"PT4.3018057S","trackingId":"6510d727-28a0-4044-bb42-26f29d416539","serviceRequestId":"fd159c81-f532-4f00-9141-31a811cec9e8","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"azure-cli-deploy-test-nsg1"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003/operations/08586053937528976541","operationId":"08586053937528976541","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:18.4719399Z","duration":"PT0.0634371S","trackingId":"fe4a24b7-7961-48e8-b169-7af31c741035","statusCode":"OK"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1512'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters --no-wait
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources","namespace":"Microsoft.Resources","authorization":{"applicationId":"3b990c8b-9607-4c2a-8b04-1d41985facca"},"resourceTypes":[{"resourceType":"tenants","locations":[],"apiVersions":["2020-01-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"operationresults","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"notifyResourceJobs","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01"],"capabilities":"None"},{"resourceType":"tags","locations":[],"apiVersions":["2019-10-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyCompliance","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"capabilities":"None"},{"resourceType":"providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"checkresourcename","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"calculateTemplateHash","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions","locations":[],"apiVersions":["2019-10-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/operationresults","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"resourceGroups","locations":["Central
+        US","East Asia","Southeast Asia","East US","East US 2","West US","West US
+        2","North Central US","South Central US","West Central US","North Europe","West
+        Europe","Japan East","Japan West","Brazil South","Australia Southeast","Australia
+        East","West India","South India","Central India","Canada Central","Canada
+        East","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Australia Central","Switzerland North","Germany
+        West Central","Norway East","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsLocation"},{"resourceType":"subscriptions/resourceGroups","locations":["Central
+        US","East Asia","Southeast Asia","East US","East US 2","West US","West US
+        2","North Central US","South Central US","West Central US","North Europe","West
+        Europe","Japan East","Japan West","Brazil South","Australia Southeast","Australia
+        East","West India","South India","Central India","Canada Central","Canada
+        East","UK South","UK West","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Australia Central","Switzerland North","Germany
+        West Central","Norway East","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"subscriptions/resourcegroups/resources","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/locations","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagnames","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagNames/tagValues","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments/operations","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"links","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2015-01-01"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2015-01-01"}],"capabilities":"None"},{"resourceType":"deploymentScripts","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"deploymentScripts/logs","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"locations/deploymentScriptOperationResults","locations":["East
+        Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
+        US 2","East US","Central US","North Central US","UK South","Central India","South
+        India","Japan East","Korea Central","North Europe","West Central US","West
+        Europe","West US 2","West US","South Central US","Canada East","Central US
+        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"templateSpecs","locations":["East
+        Asia","Southeast Asia","Australia East","Australia Central","Australia Central
+        2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
+        North","Central US EUAP","East US 2","East US","Central US","North Central
+        US","East US 2 EUAP","France Central","UK South","UK West","Central India","West
+        India","South India","Japan East","Japan West","Korea Central","Korea South","North
+        Europe","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"templateSpecs/versions","locations":["East
+        Asia","Southeast Asia","Australia East","Australia Central","Australia Central
+        2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
+        North","Central US EUAP","East US 2","East US","Central US","North Central
+        US","East US 2 EUAP","France Central","UK South","UK West","Central India","West
+        India","South India","Japan East","Japan West","Korea Central","Korea South","North
+        Europe","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"}],"registrationState":"Registered","registrationPolicy":"RegistrationFree"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '15800'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters --no-wait
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-07-31T16:32:06.7856936Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-07-31T16:32:06.7856936Z\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
+        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
+        \         \"metadata\": {\r\n            \"description\": \"Location for the
+        network security group.\"\r\n          }\r\n        },\r\n        \"name\":
+        {\r\n          \"type\": \"string\",\r\n          \"metadata\": {\r\n            \"description\":
+        \"Name of the network security group.\"\r\n          }\r\n        }\r\n      },\r\n
+        \     \"variables\": {},\r\n      \"resources\": [\r\n        {\r\n          \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n          \"name\": \"[parameters('name')]\",\r\n
+        \         \"apiVersion\": \"2015-06-15\",\r\n          \"location\": \"[parameters('location')]\",\r\n
+        \         \"properties\": {\r\n            \"securityRules\": []\r\n          },\r\n
+        \         \"dependsOn\": []\r\n        }\r\n      ],\r\n      \"outputs\":
+        {\r\n        \"NewNSG\": {\r\n          \"type\": \"object\",\r\n          \"value\":
+        \"[reference(parameters('name'))]\"\r\n        }\r\n      }\r\n    }\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1817'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0"},
+      "parameters": {"location": {"value": "westus"}, "name": {"value": "azure-cli-deploy-test-nsg1"}},
+      "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '425'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters --no-wait
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000004","name":"azure-cli-resource-group-deployment000004","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-31T16:32:50.0929675Z","duration":"PT0S","correlationId":"d7032db9-e0fa-4147-859c-498c2d322ecf","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1421'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0"},
+      "parameters": {"location": {"value": "westus"}, "name": {"value": "azure-cli-deploy-test-nsg1"}},
+      "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '425'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group -n --template-spec --parameters --no-wait
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000004","name":"azure-cli-resource-group-deployment000004","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-07-31T16:32:51.3938167Z","duration":"PT0.7665845S","correlationId":"d4651f71-e7f9-428f-83eb-3cf327a8e79f","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000004/operationStatuses/08586053937148503843?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1176'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group cancel
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/cancel?api-version=2020-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Fri, 31 Jul 2020 16:32:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.10.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000004","name":"azure-cli-resource-group-deployment000004","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_resource_group_deployment000001/providers/Microsoft.Resources/templateSpecs/cli-test-resource-group-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Canceled","timestamp":"2020-07-31T16:32:52.6416912Z","duration":"PT2.014459S","correlationId":"d4651f71-e7f9-428f-83eb-3cf327a8e79f","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1175'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Jul 2020 16:32:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

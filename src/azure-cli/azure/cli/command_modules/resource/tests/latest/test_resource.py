@@ -654,7 +654,7 @@ class ProviderOperationTest(ScenarioTest):
 
 class TemplateSpecsTest(LiveScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location ='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_create_or_update_template_specs(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
@@ -674,11 +674,11 @@ class TemplateSpecsTest(LiveScenarioTest):
             self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json')
         ]).get_output_in_json()
 
-        #clean up
+        # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
         self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location ='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_get_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-get-template-spec', 60)
@@ -704,10 +704,10 @@ class TemplateSpecsTest(LiveScenarioTest):
         assert len(ts_cnt_by_id) > 0
         assert len(ts_cnt) == len(ts_cnt_by_id)
 
-        #clean up
+        # clean up
         self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location ='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_export_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         dir_name = self.create_random_name('TemplateSpecExport', 30)
@@ -722,9 +722,9 @@ class TemplateSpecsTest(LiveScenarioTest):
         })
 
         result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
-                    checks=self.check('name', '1.0')).get_output_in_json()
+                          checks=self.check('name', '1.0')).get_output_in_json()
 
-        self.kwargs['template_spec_version_id'] = result['id'] 
+        self.kwargs['template_spec_version_id'] = result['id']
 
         os.makedirs(self.kwargs['output_folder'])
         output_path = self.cmd('template-specs export -g {rg} --name {template_spec_name} --version 1.0 --output-folder {output_folder}').get_output_in_json()
@@ -753,7 +753,7 @@ class TemplateSpecsTest(LiveScenarioTest):
         self.assertTrue(os.path.isfile(_artifactFile2))\
 
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location ='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_delete_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
@@ -764,9 +764,9 @@ class TemplateSpecsTest(LiveScenarioTest):
         })
 
         result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
-                        checks=self.check('name', '1.0')).get_output_in_json()
+                          checks=self.check('name', '1.0')).get_output_in_json()
 
-        self.kwargs['template_spec_version_id'] = result['id'] 
+        self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
 
         self.cmd('template-specs get --template-spec {template_spec_version_id}')
@@ -1542,16 +1542,16 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
             'resource_group_location': resource_group_location,
             'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
-             # params-uri below is the raw file url of the subscription_level_parameters.json above
+            # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
         })
 
         result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
-                    checks=self.check('name', '1.0')).get_output_in_json()
+                          checks=self.check('name', '1.0')).get_output_in_json()
 
-        self.kwargs['template_spec_version_id'] = result['id'] 
+        self.kwargs['template_spec_version_id'] = result['id']
 
         self.cmd('deployment sub validate --location WestUS --template-spec {template_spec_version_id} --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
@@ -1580,7 +1580,7 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
-        #clean up
+        # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
         self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
 
@@ -1602,9 +1602,9 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
         })
 
         result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
-                    checks=self.check('name', '1.0')).get_output_in_json()
+                          checks=self.check('name', '1.0')).get_output_in_json()
 
-        self.kwargs['template_spec_version_id'] = result['id'] 
+        self.kwargs['template_spec_version_id'] = result['id']
 
         self.cmd('deployment group validate --resource-group {rg} --template-spec "{template_spec_version_id}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')

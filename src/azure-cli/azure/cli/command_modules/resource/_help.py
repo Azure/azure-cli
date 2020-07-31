@@ -774,6 +774,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -t
+    short-summary: The template spec resource id.
   - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
   - name: --name -n
@@ -936,6 +938,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -t
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment What-If operation metadata.
   - name: --name -n
