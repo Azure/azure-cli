@@ -652,15 +652,3 @@ def remove_cloud(cli_ctx, cloud_name):
 
 def cloud_forbid_telemetry(cli_ctx):
     return get_active_cloud_name(cli_ctx) in CLOUDS_FORBIDDING_TELEMETRY
-© 2020 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
