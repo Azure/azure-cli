@@ -306,44 +306,58 @@ class Profile:
         # pylint: disable=too-many-statements
 
         import jwt
-        from requests import HTTPError
+        from requests import HTTPError, ConnectionError
         from msrestazure.tools import is_valid_resource_id
         from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        if identity_id:
-            if is_valid_resource_id(identity_id):
-                msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
-                identity_type = MsiAccountTypes.user_assigned_resource_id
-            else:
-                authenticated = False
-                try:
-                    msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
-                    identity_type = MsiAccountTypes.user_assigned_client_id
-                    authenticated = True
-                except HTTPError as ex:
-                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        logger.info('Sniff: not an MSI client id')
-                    else:
-                        raise
-
-                if not authenticated:
+        try:
+            if identity_id:
+                if is_valid_resource_id(identity_id):
                     try:
-                        identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
+                        msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
+                        identity_type = MsiAccountTypes.user_assigned_resource_id
+                    except HTTPError:
+                        raise CLIError('Failed to connect to MSI with resource ID {}'.format(identity_id))
+                else:
+                    authenticated = False
+                    try:
+                        msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
+                        identity_type = MsiAccountTypes.user_assigned_client_id
                         authenticated = True
                     except HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                            logger.info('Sniff: not an MSI object id')
+                            logger.info('Sniff: not an MSI client id')
                         else:
                             raise
 
-                if not authenticated:
-                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
+                    if not authenticated:
+                        try:
+                            identity_type = MsiAccountTypes.user_assigned_object_id
+                            msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
+                            authenticated = True
+                        except HTTPError as ex:
+                            if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                                logger.info('Sniff: not an MSI object id')
+                            else:
+                                raise
 
-        else:
-            identity_type = MsiAccountTypes.system_assigned
-            msi_creds = MSIAuthenticationWrapper(resource=resource)
+                    if not authenticated:
+                        raise CLIError('Failed to connect to MSI with managed identity ID {}.'.format(identity_id))
+
+            else:
+                try:
+                    identity_type = MsiAccountTypes.system_assigned
+                    msi_creds = MSIAuthenticationWrapper(resource=resource)
+                except HTTPError:
+                    # Capture HTTPError in case no managed identity is configured
+                    raise CLIError("Failed to connect to MSI with the default identity. Please make sure MSI is "
+                                   "configured correctly.")
+        except ConnectionError as ex:
+            # Capture ConnectionError in case az is ran on a machine that doesn't support managed identity
+            # (No managed identity endpoint at all)
+            raise CLIError("MSI endpoint is not responding. Please make sure MSI is configured correctly. "
+                           "Error detail: {}".format(ex))
 
         token_entry = msi_creds.token
         token = token_entry['access_token']
@@ -774,16 +788,24 @@ class MsiAccountTypes:
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
-        if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthenticationWrapper(resource=resource)
-        if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
-        raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
+        from requests.exceptions import HTTPError, ConnectionError
+        try:
+            from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
+            if cli_account_name == MsiAccountTypes.system_assigned:
+                return MSIAuthenticationWrapper(resource=resource)
+            if cli_account_name == MsiAccountTypes.user_assigned_client_id:
+                return MSIAuthenticationWrapper(resource=resource, client_id=identity)
+            if cli_account_name == MsiAccountTypes.user_assigned_object_id:
+                return MSIAuthenticationWrapper(resource=resource, object_id=identity)
+            if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
+                return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
+            raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
+        except HTTPError:
+            raise CLIError('Failed to retrieve a token from managed identity endpoint. The managed identity may '
+                           'have been unassigned since `az login`.')
+        except ConnectionError:
+            raise CLIError('Managed identity endpoint is not responding. The managed identity endpoint may '
+                           'have been disabled since `az login`.')
 
 
 class SubscriptionFinder:
