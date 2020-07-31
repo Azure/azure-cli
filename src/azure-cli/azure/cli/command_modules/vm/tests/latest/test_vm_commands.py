@@ -4812,6 +4812,21 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --off')
 
 
+class VMSSOrchestrationModeScenarioTest(ScenarioTest):
+
+    @unittest.skip('not whitelist yet')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='centraluseuap')
+    def test_vmss_orchestration_mode(self, resource_group):
+        self.kwargs.update({
+            'ppg': 'ppg1',
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('ppg create -g {rg} -n {ppg}')
+        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM --single-placement-group false --ppg {ppg} '
+                 '--platform-fault-domain-count 3 --generate-ssh-keys')
+
+
 class VMCrossTenantUpdateScenarioTest(ScenarioTest):
 
     @live_only()
