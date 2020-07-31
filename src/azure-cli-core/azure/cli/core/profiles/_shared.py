@@ -52,7 +52,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_DEPLOYMENTSCRIPTS = ('azure.mgmt.resource.deploymentscripts', 'DeploymentScriptsClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
-    DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault', 'KeyVaultClient')
+    DATA_PRIVATE_KEYVAULT_T2 = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t2', 'KeyVaultClient')
+    DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
@@ -164,6 +165,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
+        ResourceType.DATA_PRIVATE_KEYVAULT_T2: '7.2',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2018-11-09',
@@ -224,6 +226,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
         ResourceType.MGMT_PRIVATE_KEYVAULT: '2020-04-01',
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
+        ResourceType.DATA_PRIVATE_KEYVAULT_T2: '7.2',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01',
             'policy_assignments': '2016-12-01',
@@ -260,6 +263,7 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
+        ResourceType.DATA_PRIVATE_KEYVAULT_T2: '7.2',
         ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-04-17',
@@ -284,6 +288,7 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
+        ResourceType.DATA_PRIVATE_KEYVAULT_T2: '7.2',
         ResourceType.DATA_STORAGE: '2015-04-05',
         ResourceType.DATA_STORAGE_BLOB: '2015-04-05',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2015-04-05',

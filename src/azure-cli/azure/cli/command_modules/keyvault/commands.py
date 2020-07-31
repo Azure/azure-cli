@@ -40,6 +40,7 @@ def load_command_table(self, _):
 
     private_mgmt_vaults_entity = get_client(self.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)
     private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
+    private_data_entity_t2 = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT_T2)
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -110,18 +111,18 @@ def load_command_table(self, _):
         g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
-    with self.command_group('keyvault backup', private_data_entity.command_type, is_preview=True) as g:
+    with self.command_group('keyvault backup', private_data_entity_t2.command_type, is_preview=True) as g:
         g.keyvault_custom('start', 'full_backup', supports_no_wait=True,
-                          doc_string_source=private_data_entity.operations_docs_tmpl.format('begin_full_backup'))
+                          doc_string_source=private_data_entity_t2.operations_docs_tmpl.format('begin_full_backup'))
         g.keyvault_command('status', 'full_backup_status')
 
-    with self.command_group('keyvault restore', private_data_entity.command_type, is_preview=True) as g:
+    with self.command_group('keyvault restore', private_data_entity_t2.command_type, is_preview=True) as g:
         g.keyvault_custom('start', 'full_restore', supports_no_wait=True,
-                          doc_string_source=private_data_entity.operations_docs_tmpl.format(
+                          doc_string_source=private_data_entity_t2.operations_docs_tmpl.format(
                               'begin_full_restore_operation'))
         g.keyvault_command('status', 'restore_status')
 
-    with self.command_group('keyvault key', data_entity.command_type) as g:
+    with self.command_group('keyvault key', private_data_entity.command_type) as g:
         g.keyvault_command('list', 'get_keys',
                            transform=multi_transformers(
                                filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
@@ -130,7 +131,7 @@ def load_command_table(self, _):
         g.keyvault_command('list-deleted', 'get_deleted_keys',
                            transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_custom('create', 'create_key',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
+                          doc_string_source=private_data_entity.operations_docs_tmpl.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
@@ -138,9 +139,9 @@ def load_command_table(self, _):
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
+                          doc_string_source=private_data_entity.operations_docs_tmpl.format('backup_key'))
         g.keyvault_custom('restore', 'restore_key',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
+                          doc_string_source=private_data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
         g.keyvault_custom('get-policy-template', 'get_policy_template')
