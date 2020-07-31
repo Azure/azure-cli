@@ -169,7 +169,7 @@ def validate_client_parameters(cmd, namespace):
         n.sas_token = n.sas_token.lstrip('?')
 
     # account name with secondary
-    if n.account_name.endswith('-secondary'):
+    if n.account_name and n.account_name.endswith('-secondary'):
         n.location_mode = 'secondary'
         n.account_name = n.account_name[:-10]
 
