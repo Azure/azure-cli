@@ -1047,7 +1047,7 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
 
 def iot_central_app_create(
         cmd, client, app_name, resource_group_name, subdomain, sku="ST2",
-        location=None, template=None, display_name=None
+        location=None, template=None, display_name=None, no_wait=False
 ):
     cli_ctx = cmd.cli_ctx
     location = _ensure_location(cli_ctx, resource_group_name, location)
@@ -1072,7 +1072,7 @@ def iot_central_app_get(client, app_name, resource_group_name=None):
     return client.apps.get(resource_group_name, app_name)
 
 
-def iot_central_app_delete(client, app_name, resource_group_name):
+def iot_central_app_delete(client, app_name, resource_group_name, no_wait=False):
     if no_wait:
         return client.apps.delete(resource_group_name, app_name)
     result = LongRunningOperation(cmd.cli_ctx)(client.apps.delete(resource_group_name, app_name))
