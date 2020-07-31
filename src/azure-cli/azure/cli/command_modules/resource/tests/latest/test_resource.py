@@ -1045,7 +1045,6 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('account management-group delete -n {mg}')
 
 
-# TODO
 class DeploymentTestAtTenantScope(ScenarioTest):
 
     def test_tenant_level_deployment(self):
