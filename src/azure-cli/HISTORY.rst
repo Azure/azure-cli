@@ -3,6 +3,108 @@
 Release History
 ===============
 
+2.10.0
+++++++
+
+**`knack.commands.CLICommandsLoader.load_arguments`**
+
+* (https://github.com/microsoft/knack/blob/fe3bf5d3a79a3dd2ce5ddb0c38d93843a3380f6f/knack/commands.py#L214-L232)'s work is already taken care of by `azure.cli.core.MainCommandsLoader.load_arguments` at (#13879)
+
+**AKS**
+
+* `az aks update`: Change --enable-aad argument to migrate a RBAC-enabled non-AAD cluster to a AKS-managed AAD cluster (#14420)
+* `az aks install-cli`: Add --kubelogin-version and --kubelogin-install-location arguments to install kubelogin (#14441)
+* Add az aks nodepool get-upgrades command (#14516)
+
+**AMS**
+
+* Fix #14021: az ams account sp is not idempotent (#14429)
+
+**APIM**
+
+* apim api import: support API import and enchance other api level cli commands (#14363)
+
+**App Service**
+
+* Fix#-13035- Added validation for az webapp config access-restriction … (#14486)
+
+**AppConfig**
+
+* Default to standard sku if not specified (#14398)
+* [BREAKING CHANGE] Support settings with JSON content type (#14170)
+
+**ARM**
+
+* Fixed the bug of managedApp tagging and some related test issues (#14381)
+* `az deployment mg/tenant what-if`: Add support to management group and tenant level deployment What-If (#14568)
+* `az deployment mg/tenant create`: Add --confirm-with-what-if/-c parameter. (#14568)
+* `az deployment mg/tenant create`: Add --what-if-result-format/-r parameter. (#14568)
+* `az deployment mg/tenant create`: Add --what-if-exclude-change-types/-x parameter. (#14568)
+* az tag support for resource id parameter (#14558)
+
+**Backup**
+
+* Trigger AFS container/item discovery only when needed (#14479)
+
+**CDN**
+
+* Add private link fields to origin (#14520)
+
+**Compute**
+
+* Select a valid username for user if the default username is invalid (#14346)
+* `az vm update`: support cross tenant image (#14532)
+* `az disk-access`: Add new command group to operate disk access resource (#14460)
+* Dedicated host group automatic placement (#14439)
+* Support ppg and spg in VMSS orchestration mode (#14443)
+
+**Config**
+
+* `az config`: Add new `config` command module (#14436)
+
+**Extension**
+
+* Support automatically installing an extension if the extension of a command is not installed (#14478)
+
+**HDInsight**
+
+* Added 3 parameters to the command `az hdinsight create` to support private link and encryption in transit feature: (#14504)
+
+**Iot Hub**
+
+* Fix #7792: IoT Hub Create is not idempotent (#14449)
+
+**IoTCentral**
+
+* Add paramater option list for iot central (#14471)
+
+**KeyVault**
+
+* `az keyvault key encrypt/decrypt`: add parameter `--data-type` for explicitly specifing the type of original data (#14386)
+
+**Monitor**
+
+* `az monitor log-analytics workspace data-export`: support event hub namespace as the destination. (#14434)
+* `az monitor autoscale`: support namespace and dimensions for --condition (#14255)
+
+**NetAppFiles**
+
+* `az volume revert`:  Added Volume Revert to revert a volume to one of its snapshots. (#14424)
+* [BREAKING CHANGE] az netappfiles mount-target: Removed. (#14424)
+* `az volume show`: Added site to Active Directory Properties (#14424)
+
+**Network**
+
+* application-gateway private-link add: Support to specify an existing subnet by ID (#14463)
+* `az network application-gateway waf-policy create`: support version and type (#14531)
+
+**Storage**
+
+* Fix issue#10302 to support guess content-type when synchronizing files (#14353)
+* `az storage blob lease`: Apply new api version for blob lease operations (#14231)
+* `az storage fs access`: Support AAD credential in managing access control for ADLS Gen2 account (#14506)
+* `az storage share-rm create/update`: add --access-tier to support access tier (#14148)
+
 2.9.1
 ++++++
 
