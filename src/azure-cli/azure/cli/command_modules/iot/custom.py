@@ -1060,8 +1060,9 @@ def iot_central_app_create(
               sku=appSku,
               template=template)
 
-    createResult = client.apps.create_or_update(
-        resource_group_name, app_name, app)
+    if no_wait:
+        return client.apps.create_or_update(resource_group_name, app_name, app)
+    createResult = LongRunningOperation(cmd.cli_ctx)(client.apps.create_or_update(resource_group_name, app_name, app))
     return createResult
 
 
@@ -1072,7 +1073,10 @@ def iot_central_app_get(client, app_name, resource_group_name=None):
 
 
 def iot_central_app_delete(client, app_name, resource_group_name):
-    return client.apps.delete(resource_group_name, app_name)
+    if no_wait:
+        return client.apps.delete(resource_group_name, app_name)
+    result = LongRunningOperation(cmd.cli_ctx)(client.apps.delete(resource_group_name, app_name))
+    return result
 
 
 def iot_central_app_list(client, resource_group_name=None):
