@@ -35,7 +35,7 @@ Release History
 
 **ARM**
 
-* Fixed the bug of managedApp tagging and some related test issues (#14381)
+* `az resource tag`: Fix the bug of managedApp tagging and some related test issues (#14381)
 * `az deployment mg/tenant what-if`: Add support to management group and tenant level deployment What-If (#14568)
 * `az deployment mg/tenant create`: Add --confirm-with-what-if/-c parameter. (#14568)
 * `az deployment mg/tenant create`: Add --what-if-result-format/-r parameter. (#14568)
