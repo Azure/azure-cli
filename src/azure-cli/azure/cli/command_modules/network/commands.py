@@ -564,6 +564,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_ag_waf_policy')
         g.command('delete', 'delete')
         g.show_command('show', 'get')
+        g.show_command('show-test-coverage', 'get')
         g.custom_command('list', 'list_ag_waf_policies')
         g.generic_update_command('update', custom_func_name='update_ag_waf_policy')
         g.wait_command('wait')
