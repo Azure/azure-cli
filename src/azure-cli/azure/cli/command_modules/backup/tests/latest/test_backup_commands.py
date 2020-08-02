@@ -418,7 +418,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertTrue(protection_check == '')
 
     @ResourceGroupPreparer(location="southeastasia")
-    @ResourceGroupPreparer(parameter_name="target_resource_group",location="southeastasia")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
