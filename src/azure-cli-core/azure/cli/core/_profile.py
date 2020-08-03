@@ -93,11 +93,31 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
+def _adal_resource_to_msal_scopes(resource):
+    """
+    Convert the ADAL resource ID to MSAL scope by appending the /.default suffix. For example:
+    'https://management.core.windows.net/' -> ('https://management.core.windows.net/.default',)
+    :param resource: The ADAL resource ID
+    :return: A iterable scopes tuple
+    """
+    return resource.rstrip('/') + "/.default",
+
+
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
 class Profile(object):
 
-    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
-                 async_persist=True, cli_ctx=None):
+    def __init__(self, cli_ctx=None, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
+                 async_persist=True, authenticate_scopes=None):
+        """
+
+        :param storage:
+        :param auth_ctx_factory:
+        :param use_global_creds_cache:
+        :param async_persist:
+        :param authenticate_scopes: The initial scopes for authentication (/authorize), it must include all scopes
+            for following get_token calls.
+        :param cli_ctx:
+        """
         from azure.cli.core import get_default_cli
 
         self.cli_ctx = cli_ctx or get_default_cli()
@@ -108,6 +128,7 @@ class Profile(object):
         self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
+        self._msal_authenticate_scopes = authenticate_scopes or _adal_resource_to_msal_scopes(self._ad_resource_uri)
 
     # pylint: disable=too-many-branches,too-many-statements
     def login(self,
@@ -125,7 +146,7 @@ class Profile(object):
         credential = None
         auth_record = None
         identity = Identity(self._authority, tenant, cred_cache=self._adal_cache,
-                            scopes=[self.cli_ctx.cloud.endpoints.active_directory_resource_id],
+                            scopes=self._msal_authenticate_scopes,
                             allow_unencrypted=self.cli_ctx.config
                             .getboolean('core', 'allow_fallback_to_plaintext', fallback=True)
                             )
@@ -204,8 +225,7 @@ class Profile(object):
         # Managed identities for Azure resources is the new name for the service formerly known as
         # Managed Service Identity (MSI).
 
-        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        identity = Identity(scopes=[self.cli_ctx.cloud.endpoints.active_directory_resource_id])
+        identity = Identity(scopes=self._msal_authenticate_scopes)
         credential, mi_info = identity.login_with_managed_identity(identity_id)
 
         tenant = mi_info[Identity.MANAGED_IDENTITY_TENANT_ID]
@@ -251,9 +271,8 @@ class Profile(object):
 
     def login_in_cloud_shell(self, allow_no_subscriptions=None, find_subscriptions=True):
         # TODO: deprecate allow_no_subscriptions
-        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        identity = Identity()
-        credential, identity_info = identity.login_in_cloud_shell(resource)
+        identity = Identity(scopes=self._msal_authenticate_scopes)
+        credential, identity_info = identity.login_in_cloud_shell()
 
         tenant = identity_info[Identity.MANAGED_IDENTITY_TENANT_ID]
         if find_subscriptions:

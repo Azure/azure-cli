@@ -52,7 +52,7 @@ class Identity:
         :param authority:
         :param tenant_id:
         :param client_id:
-        :param scopes: Scopes for the initial /authenticate API call
+        :param scopes: Scopes for the initial /authorize API call
         :param kwargs:
         """
         self.authority = authority
@@ -99,7 +99,7 @@ class Identity:
                                                   enable_persistent_cache=True,
                                                   allow_unencrypted_cache=self.allow_unencrypted,
                                                   **self.credential_kwargs)
-        auth_record = credential.authenticate()
+        auth_record = credential.authenticate(scopes=self.scopes)
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
         return credential, auth_record
@@ -119,7 +119,7 @@ class Identity:
                                               allow_unencrypted_cache=self.allow_unencrypted,
                                               **self.credential_kwargs)
 
-            auth_record = credential.authenticate()
+            auth_record = credential.authenticate(scopes=self.scopes)
             # todo: remove after ADAL token deprecation
             self._cred_cache.add_credential(credential)
             return credential, auth_record
@@ -140,7 +140,7 @@ class Identity:
                                                 enable_persistent_cache=True,
                                                 allow_unencrypted_cache=self.allow_unencrypted,
                                                 **self.credential_kwargs)
-        auth_record = credential.authenticate()
+        auth_record = credential.authenticate(scopes=self.scopes)
 
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
@@ -252,9 +252,10 @@ class Identity:
 
         return credential, managed_identity_info
 
-    def login_in_cloud_shell(self, resource):
+    def login_in_cloud_shell(self):
         credential = ManagedIdentityCredential()
-        decoded = self._decode_managed_identity_token(credential, resource)
+        token = credential.get_token(*self.scopes)
+        decoded = Identity._decode_managed_identity_token(token)
 
         cloud_shell_identity_info = {
             self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
