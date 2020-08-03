@@ -546,10 +546,9 @@ class Profile(object):
         """get access token for current user account, used by vsts and iot module"""
         tenant = tenant or 'common'
         account = self.get_subscription()
-        home_account_id = account[_USER_ENTITY][_USER_HOME_ACCOUNT_ID]
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         identity = Identity(authority, tenant, cred_cache=self._adal_cache)
-        identity_credential = identity.get_user_credential(home_account_id, username)
+        identity_credential = identity.get_user_credential(username)
         from azure.cli.core.authentication import AuthenticationWrapper
         auth = AuthenticationWrapper(identity_credential, resource=resource)
         token = auth.get_token()
