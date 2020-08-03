@@ -38,9 +38,6 @@ export PATH=$PATH:$WORKDIR/python_env/bin
 find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
 
-rm -f ${WORKDIR}/python_env/lib/python3.6/site-packages/azure/cli/__init__.py
-rm -f ${WORKDIR}/python_env/lib/python3.6/site-packages/azure/cli/__pycache__/__init__*
-
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian
 $SCRIPT_DIR/prepare.sh $WORKDIR/debian $WORKDIR/az.completion $WORKDIR

@@ -44,10 +44,6 @@ source %{buildroot}%{cli_lib_dir}/bin/activate
 
 source %{repo_path}/scripts/install_full.sh
 
-python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
-rm -f %{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/azure/cli/__init__.py
-rm -f %{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/azure/cli/__pycache__/__init__*
-
 deactivate
 
 # Fix up %{buildroot} appearing in some files...
@@ -55,6 +51,7 @@ for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" 
 
 # Create executable
 mkdir -p %{buildroot}%{_bindir}
+python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
 printf "#!/usr/bin/env bash\nAZ_INSTALLER=RPM PYTHONPATH=%{cli_lib_dir}/lib/${python_version}/site-packages /usr/bin/%{python_cmd} -sm azure.cli \"\$@\"" > %{buildroot}%{_bindir}/az
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 
