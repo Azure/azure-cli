@@ -276,14 +276,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('app_name', app_name_type, options_list=['--name', '-n'])
 
     with self.argument_context('iot central app create') as c:
-        c.argument('app_name', completer=None)
+        c.argument('app_name', completer=None,
+                   help='Give your IoT Central app a unique name so you can find it later.'
+                        'This will be used as the resource name in the Azure portal and CLI.'
+                        'Avoid special characters - '
+                        'instead, use lower case letters (a-z), numbers (0-9), and dashes (-)')
         c.argument('location', get_location_type(self.cli_ctx),
-                   help='Location of your IoT Central application. Default is the location of target resource group.')
-        c.argument('sku', arg_type=get_enum_type(AppSku),
-                   help='Pricing tier for IoT Central applications. Default value is ST2.')
+                   help='Where your app\'s info and resources are stored. We will default to the location'
+                        ' of the target resource group. See documentation for a full list of supported locations.')
+        c.argument('sku', arg_type=get_enum_type(AppSku), options_list=['--sku', '-p'],
+                   help='Pricing plan for IoT Central application.')
         c.argument('subdomain', options_list=['--subdomain', '-s'],
-                   help='Subdomain for the IoT Central URL. Each application must have a unique subdomain.')
+                   help='Enter a unique URL. Your app will be accessible via https://<subdomain>.azureiotcentral.com/.'
+                   ' Avoid special characters - instead, use lower case letters (a-z), numbers (0-9), and dashes (-).')
         c.argument('template', options_list=['--template', '-t'],
-                   help='IoT Central application template name. Default is a custom application.')
+                   help='IoT Central application template name. Default is "Custom application". See documentation for'
+                        ' a list of available templates.')
         c.argument('display_name', options_list=['--display-name', '-d'],
-                   help='Custom display name for the IoT Central application. Default is resource name.')
+                   help='Custom display name for the IoT Central app. This will be used in the IoT Central application'
+                        ' manager to help you identify your app. Default value is the resource name.')
