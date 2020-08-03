@@ -4562,7 +4562,7 @@ class DiskAccessTest(ScenarioTest):
             self.check('[0].name', '{diskaccess}'),
             self.check('[0].location', '{loc}')
         ])
-        
+
         self.cmd('disk-access update -g {rg} -n {diskaccess} --tags tag1=val1')
         disk_access_output = self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
             self.check('name', '{diskaccess}'),
