@@ -413,9 +413,13 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                               confirm_with_what_if=None, what_if_result_format=None,
                                               what_if_exclude_change_types=None):
     if confirm_with_what_if:
-        what_if_deploy_arm_template_at_subscription_scope(cmd, template_file, template_uri, parameters,
-                                                          deployment_name, deployment_location, what_if_result_format,
-                                                          exclude_change_types=what_if_exclude_change_types)
+        what_if_deploy_arm_template_at_subscription_scope(cmd,
+                                                          template_file=template_file, template_uri=template_uri,
+                                                          parameters=parameters, deployment_name=deployment_name,
+                                                          deployment_location=deployment_location,
+                                                          result_format=what_if_result_format,
+                                                          exclude_change_types=what_if_exclude_change_types,
+                                                          no_prompt=no_prompt)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -482,9 +486,13 @@ def deploy_arm_template_at_resource_group(cmd,
                                           confirm_with_what_if=None, what_if_result_format=None,
                                           what_if_exclude_change_types=None):
     if confirm_with_what_if:
-        what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name, template_file, template_uri, parameters,
-                                                      deployment_name, mode, aux_tenants, what_if_result_format,
-                                                      exclude_change_types=what_if_exclude_change_types)
+        what_if_deploy_arm_template_at_resource_group(cmd,
+                                                      resource_group_name=resource_group_name,
+                                                      template_file=template_file, template_uri=template_uri,
+                                                      parameters=parameters, deployment_name=deployment_name, mode=mode,
+                                                      aux_tenants=aux_tenants, result_format=what_if_result_format,
+                                                      exclude_change_types=what_if_exclude_change_types,
+                                                      no_prompt=no_prompt)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -552,7 +560,23 @@ def deploy_arm_template_at_management_group(cmd,
                                             management_group_id=None,
                                             template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, deployment_location=None,
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                            no_wait=False, handle_extended_json_format=None, no_prompt=False,
+                                            confirm_with_what_if=None, what_if_result_format=None,
+                                            what_if_exclude_change_types=None):
+    if confirm_with_what_if:
+        what_if_deploy_arm_template_at_management_group(cmd,
+                                                        management_group_id=management_group_id,
+                                                        template_file=template_file, template_uri=template_uri,
+                                                        parameters=parameters, deployment_name=deployment_name,
+                                                        deployment_location=deployment_location,
+                                                        result_format=what_if_result_format,
+                                                        exclude_change_types=what_if_exclude_change_types,
+                                                        no_prompt=no_prompt)
+        from knack.prompting import prompt_y_n
+
+        if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+            return None
+
     return _deploy_arm_template_at_management_group(cmd=cmd,
                                                     management_group_id=management_group_id,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
@@ -614,7 +638,22 @@ def _deploy_arm_template_at_management_group(cmd,
 def deploy_arm_template_at_tenant_scope(cmd,
                                         template_file=None, template_uri=None, parameters=None,
                                         deployment_name=None, deployment_location=None,
-                                        no_wait=False, handle_extended_json_format=None, no_prompt=False):
+                                        no_wait=False, handle_extended_json_format=None, no_prompt=False,
+                                        confirm_with_what_if=None, what_if_result_format=None,
+                                        what_if_exclude_change_types=None):
+    if confirm_with_what_if:
+        what_if_deploy_arm_template_at_tenant_scope(cmd,
+                                                    template_file=template_file, template_uri=template_uri,
+                                                    parameters=parameters, deployment_name=deployment_name,
+                                                    deployment_location=deployment_location,
+                                                    result_format=what_if_result_format,
+                                                    exclude_change_types=what_if_exclude_change_types,
+                                                    no_prompt=no_prompt)
+        from knack.prompting import prompt_y_n
+
+        if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
+            return None
+
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
                                                 template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
@@ -691,6 +730,33 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                                 DeploymentMode.incremental, result_format, no_prompt)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
+
+    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+
+
+def what_if_deploy_arm_template_at_management_group(cmd, management_group_id=None,
+                                                    template_file=None, template_uri=None, parameters=None,
+                                                    deployment_name=None, deployment_location=None,
+                                                    result_format=None, no_pretty_print=None, no_prompt=False,
+                                                    exclude_change_types=None):
+    what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
+                                                                DeploymentMode.incremental, result_format, no_prompt)
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
+    what_if_poller = mgmt_client.what_if_at_management_group_scope(management_group_id, deployment_name,
+                                                                   deployment_location, what_if_properties)
+
+    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+
+
+def what_if_deploy_arm_template_at_tenant_scope(cmd,
+                                                template_file=None, template_uri=None, parameters=None,
+                                                deployment_name=None, deployment_location=None,
+                                                result_format=None, no_pretty_print=None, no_prompt=False,
+                                                exclude_change_types=None):
+    what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
+                                                                DeploymentMode.incremental, result_format, no_prompt)
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
+    what_if_poller = mgmt_client.what_if_at_tenant_scope(deployment_name, deployment_location, what_if_properties)
 
     return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
@@ -2534,6 +2600,45 @@ def list_resource_links(cmd, scope=None, filter_string=None):
     if scope is not None:
         return links_client.list_at_source_scope(scope, filter=filter_string)
     return links_client.list_at_subscription(filter=filter_string)
+# endregion
+
+
+# region tags
+def get_tag_at_scope(cmd, resource_id=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        return rcf.tags.get_at_scope(scope=resource_id)
+
+    return rcf.tags.list()
+
+
+def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        if not tags:
+            raise IncorrectUsageError("Tags could not be empty.")
+        Tags = cmd.get_models('Tags')
+        tag_obj = Tags(tags=tags)
+        return rcf.tags.create_or_update_at_scope(scope=resource_id, properties=tag_obj)
+
+    return rcf.tags.create_or_update(tag_name=tag_name)
+
+
+def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        return rcf.tags.delete_at_scope(scope=resource_id)
+
+    return rcf.tags.delete(tag_name=tag_name)
+
+
+def update_tag_at_scope(cmd, resource_id, tags, operation):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if not tags:
+        raise IncorrectUsageError("Tags could not be empty.")
+    Tags = cmd.get_models('Tags')
+    tag_obj = Tags(tags=tags)
+    return rcf.tags.update_at_scope(scope=resource_id, properties=tag_obj, operation=operation)
 # endregion
 
 
