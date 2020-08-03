@@ -882,7 +882,11 @@ jobs:
   - bash: |
       set -ev
       . env/bin/activate
-      azdev linter --ci-exclusions
+      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+        azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+      else
+        azdev linter --ci-exclusions --min-severity medium
+      fi
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
