@@ -102,7 +102,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('remove', 'storage_remove', is_preview=True)
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
-        g.custom_command('copy', 'storage_copy', is_preview=True)
+        g.storage_custom_command('copy', 'storage_copy', is_preview=True)
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
