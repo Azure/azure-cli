@@ -1037,6 +1037,8 @@ def _format_fx_version(custom_image_name, container_config_type=None):
 def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None):
     fx_version = _format_fx_version(custom_image_name)
     web_app = get_webapp(cmd, resource_group_name, name, slot)
+    if not web_app:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     linux_fx = fx_version if web_app.reserved else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
