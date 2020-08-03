@@ -147,6 +147,7 @@ def load_command_table(self, _):
     with self.command_group('cdn origin', cdn_origin_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_endpoint')
+        g.custom_command('update', 'update_origin', client_factory=cf_origins)
 
     with self.command_group('cdn edge-node', cdn_edge_sdk) as g:
         g.command('list', 'list')

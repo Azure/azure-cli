@@ -170,7 +170,6 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('mod-only', 'sample_vm_get')
                     g.command('overridden', 'sample_vm_get')
@@ -180,7 +179,6 @@ class TestCommandRegistration(unittest.TestCase):
         class Test2CommandsLoader(AzCommandsLoader):
             # An extra group that is not loaded if a module is found from the index
             def load_command_table(self, args):
-                super(Test2CommandsLoader, self).load_command_table(args)
                 with self.command_group('extra', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     # A command that shouldn't be overridden, just like what `final` decorator indicated
                     # https://docs.python.org/3/library/typing.html#typing.final
@@ -192,7 +190,6 @@ class TestCommandRegistration(unittest.TestCase):
         class ExtCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(ExtCommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('ext-only', 'sample_vm_get')
                 self.__module__ = "azext_hello1"
@@ -202,7 +199,6 @@ class TestCommandRegistration(unittest.TestCase):
         class Ext2CommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(Ext2CommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('overridden', 'sample_vm_get')
                 self.__module__ = "azext_hello2"

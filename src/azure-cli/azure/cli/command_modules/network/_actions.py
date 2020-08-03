@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from collections import defaultdict
+
 import argparse
 from knack.util import CLIError
-from collections import defaultdict
 
 
 # pylint: disable=protected-access

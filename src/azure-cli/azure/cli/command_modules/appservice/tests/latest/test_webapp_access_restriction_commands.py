@@ -15,9 +15,14 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
+LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
+LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+
 
 class WebAppAccessRestrictionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_show(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
@@ -40,7 +45,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_set_simple(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
@@ -56,7 +61,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', True)
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_set_complex(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
@@ -76,7 +81,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
@@ -96,7 +101,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_ip_address_validation(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
@@ -153,7 +158,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_remove(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
@@ -179,7 +184,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_scm(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
@@ -199,7 +204,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_remove_scm(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
@@ -225,7 +230,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_slot(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
