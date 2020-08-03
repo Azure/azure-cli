@@ -233,8 +233,8 @@ class ExecutionResult(object):
             with open(COVERAGE_FILE, 'a') as coverage_file:
                 if command.startswith('az '):
                     command = command[3:]
-                command = command.replace('\n', ' ')
-                coverage_file.write(command + '\n')
+                saved_command = command.replace('\n', ' ')
+                coverage_file.write(saved_command + '\n')
 
         self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
 
