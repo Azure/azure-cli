@@ -1756,8 +1756,8 @@ def create_or_update_template_spec(cmd, resource_group_name, name, template_file
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if template_file:
-        from azure.cli.command_modules.resource._packing_engine import (Pack)
-        packed_template = Pack(cmd, template_file)
+        from azure.cli.command_modules.resource._packing_engine import (pack)
+        packed_template = pack(cmd, template_file)
         template = getattr(packed_template, 'RootTemplate')
         artifacts = getattr(packed_template, 'Artifacts')
 
@@ -1782,8 +1782,8 @@ def export_template_spec(cmd, output_folder, resource_group_name=None, name=None
         if version == name:
             version = None
     exported_template = rcf.template_spec_versions.get(resource_group_name, name, version) if version else rcf.template_specs.get(resource_group_name, name)
-    from azure.cli.command_modules.resource._packing_engine import (Unpack)
-    return Unpack(cmd, exported_template, output_folder, (str(name) + '.JSON'))
+    from azure.cli.command_modules.resource._packing_engine import (unpack)
+    return unpack(cmd, exported_template, output_folder, (str(name) + '.JSON'))
 
 
 def delete_template_spec(cmd, resource_group_name=None, name=None, version=None, template_spec=None):

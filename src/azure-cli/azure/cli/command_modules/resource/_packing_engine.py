@@ -27,13 +27,13 @@ class PackingContext():  # pylint: disable=too-few-public-methods
 # :param template_file: The path to the template spec .json file.
 # :type name: str
 
-def Pack(cmd, template_file):
+def pack(cmd, template_file):
     root_template_file_path = os.path.abspath(template_file)
     context = PackingContext(os.path.dirname(root_template_file_path))
     template_content = read_file_content(template_file)
     sanitized_template = _remove_comments_from_json(template_content)
     template_json = json.loads(json.dumps(sanitized_template))
-    PackArtifacts(cmd, root_template_file_path, context)
+    _pack_artifacts(cmd, root_template_file_path, context)
     return PackagedTemplate(template_json, getattr(context, 'Artifact'))
 
 #  Recursively packs the specified template and its referenced artifacts and
@@ -47,14 +47,14 @@ def Pack(cmd, template_file):
 # :type artifactableTemplateObj : JSON
 
 
-def PackArtifacts(cmd, template_abs_file_path, context):
+def _pack_artifacts(cmd, template_abs_file_path, context):
     originalDirectory = getattr(context, 'CurrentDirectory')
     try:
         context.CurrentDirectory = os.path.dirname(template_abs_file_path)
         template_content = read_file_content(template_abs_file_path)
         artifactableTemplateObj = sanitized_template = _remove_comments_from_json(template_content)
         template_json = json.loads(json.dumps(sanitized_template))
-        templateLinktoArtifactObjs = GetTemplateLinksToArtifacts(cmd, artifactableTemplateObj, includeNested=True)
+        templateLinktoArtifactObjs = _get_template_links_to_artifacts(cmd, artifactableTemplateObj, includeNested=True)
 
         for templateLinkObj in templateLinktoArtifactObjs:
             relativePath = str(templateLinkObj['relativePath'])
@@ -82,13 +82,13 @@ def PackArtifacts(cmd, template_abs_file_path, context):
             # directory path, and then if we haven't already processed that template into
             # an artifact elsewhere, we'll do so here...
 
-            asRelativePath = AbsoluteToRelativePath(getattr(context, 'RootTemplateDirectory'), absoluteLocalPath)
+            asRelativePath = _absolute_to_relative_path(getattr(context, 'RootTemplateDirectory'), absoluteLocalPath)
             for prevAddedArtifact in getattr(context, 'Artifact'):
                 prevAddedArtifact = os.path.join(getattr(context, 'RootTemplateDirectory'),
                                                  getattr(prevAddedArtifact, 'path'))
                 if os.path.samefile(prevAddedArtifact, absoluteLocalPath):
                     continue
-            PackArtifacts(cmd, absoluteLocalPath, context)
+            _pack_artifacts(cmd, absoluteLocalPath, context)
             TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
                                                    'TemplateSpecTemplateArtifact', mod='models')
             template_content = read_file_content(absoluteLocalPath)
@@ -100,7 +100,7 @@ def PackArtifacts(cmd, template_abs_file_path, context):
         context.CurrentDirectory = originalDirectory
 
 
-def GetDeploymentResourceObjects(cmd, templateObj, includeNested=False):
+def _get_deployment_resource_objects(cmd, templateObj, includeNested=False):
     immediateDeploymentResources = []
 
     if 'resources' in templateObj:
@@ -114,13 +114,14 @@ def GetDeploymentResourceObjects(cmd, templateObj, includeNested=False):
         if(includeNested and 'properties' in deploymentResourceObj):
             deploymentResourcePropsObj = deploymentResourceObj['properties']
             if 'template' in deploymentResourcePropsObj:
-                results.extend(GetDeploymentResourceObjects(cmd,
-                                                            deploymentResourcePropsObj['template'], includeNested=True))
+                results.extend(_get_deployment_resource_objects(cmd,
+                                                                deploymentResourcePropsObj['template'],
+                                                                includeNested=True))
     return results
 
 
-def GetTemplateLinksToArtifacts(cmd, templateObj, includeNested=False):
-    deploymentResourceObjs = GetDeploymentResourceObjects(cmd, templateObj, includeNested)
+def _get_template_links_to_artifacts(cmd, templateObj, includeNested=False):
+    deploymentResourceObjs = _get_deployment_resource_objects(cmd, templateObj, includeNested)
     templateLinkObjs = []
     # TODO: Verify JSON Objects
     for obj in deploymentResourceObjs:
@@ -133,7 +134,7 @@ def GetTemplateLinksToArtifacts(cmd, templateObj, includeNested=False):
     return templateLinkObjs
 
 
-def AbsoluteToRelativePath(rootDirectoryPath, absoluteFilePath):
+def _absolute_to_relative_path(rootDirectoryPath, absoluteFilePath):
     rootDirectoryPath = rootDirectoryPath.rstrip(os.sep)
     # Ensure we have a trailing seperator
     rootDirectoryPath += os.sep
@@ -145,7 +146,7 @@ def AbsoluteToRelativePath(rootDirectoryPath, absoluteFilePath):
     return relative_path
 
 
-def Unpack(cmd, exported_template, targetDirectory, templateFileName):
+def unpack(cmd, exported_template, targetDirectory, templateFileName):
 
     packagedTemplate = PackagedTemplate(exported_template.template, exported_template.artifacts)
     # Ensure paths are normalized:
