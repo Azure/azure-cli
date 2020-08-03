@@ -31,16 +31,27 @@ def storage_copy(cmd, source=None,
                  destination_file_path=None,
                  destination_local_path=None,
                  exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None,
-                 follow_symlinks=None):
-    def get_url_with_sas(source, account_name, container, blob, share, file_path, local_path):
+                 follow_symlinks=None, **kwargs):
+    def get_url_with_sas(source, account_name, container, blob, share, file_path, local_path, **kwargs):
         import re
         import os
         from azure.cli.command_modules.storage._validators import _query_account_key
         from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
         storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
+        account_key = kwargs.pop('account_key', None)
+        connection_string = kwargs.pop('connection_string', None)
+        sas_token = kwargs.pop('sas_token', None)
+        if connection_string:
+            from azure.cli.core.commands.validators import validate_key_value_pairs
+            conn_dict = validate_key_value_pairs(connection_string)
+            account_name = conn_dict.get('AccountName')
+            account_key = conn_dict.get('AccountKey')
+            source_sas = conn_dict.get('SharedAccessSignature')
+
         if source is not None:
             if "?" in source:  # sas token exists
                 return source
+            # validate source is uri or local path
             storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
             result = re.findall(storage_pattern, source)
             if result:   # source is URL
@@ -51,12 +62,10 @@ def storage_copy(cmd, source=None,
                 elif storage_info[1] in ['file']:
                     service = 'file'
                 else:
-                    raise ValueError('Not supported service type')
-                account_key = _query_account_key(cmd.cli_ctx, account_name)
+                    raise ValueError('{} is not valid storage endpoint.'.format(source))
             else:   # source is path
                 return source
         elif account_name:
-            account_key = _query_account_key(cmd.cli_ctx, account_name)
             if container:
                 client = blob_data_service_factory(cmd.cli_ctx, {'account_name': account_name})
                 if blob is None:
@@ -70,7 +79,7 @@ def storage_copy(cmd, source=None,
                 dir_name = None if dir_name in ('', '.') else dir_name
                 source = client.make_file_url(share, dir_name, file_name)
                 service = 'file'
-            else:  # Only support account transfer for blob
+            else:  # In account level, only blob service is supported
                 source = 'https://{}.blob.core.windows.net'.format(account_name)
                 service = 'blob'
         elif local_path is not None:
@@ -78,15 +87,26 @@ def storage_copy(cmd, source=None,
         else:
             raise ValueError('Not valid file')
 
-        sas_token = _generate_sas_token(cmd, account_name, account_key, service)
+        # Add sas in url
+        if sas_token:
+            if kwargs.pop('sas_token', None):
+                source_sas = source_sas.lstrip('?')
+                return '{}{}{}'.format(source, '?', source_sas)
+        if not account_key:
+            account_key = _query_account_key(cmd.cli_ctx, account_name)
+        if not sas_token:
+            sas_token = _generate_sas_token(cmd, account_name, account_key, service)
         return _add_url_sas(source, sas_token)
 
     # Figure out source and destination type
     full_source = get_url_with_sas(source, source_account_name, source_container,
-                                   source_blob, source_share, source_file_path, source_local_path)
+                                   source_blob, source_share, source_file_path, source_local_path,
+                                   account_key=kwargs.pop('source_account_key', None),
+                                   connection_string=kwargs.pop('source_connection_string', None),
+                                   sas_token=kwargs.pop('source_connection_string', None))
     full_destination = get_url_with_sas(destination, destination_account_name, destination_container,
                                         destination_blob, destination_share, destination_file_path,
-                                        destination_local_path)
+                                        destination_local_path, sas_token=kwargs.pop('sas_token', None))
 
     azcopy = AzCopy()
     flags = []
