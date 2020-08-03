@@ -135,7 +135,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
-                               "Please invoke 'list-runtimes' to cross check".format(runtime))
+                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -163,7 +163,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                            "only appliable on linux webapp")
         match = helper.resolve(runtime)
         if not match:
-            raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+            raise CLIError("Runtime '{}' is not supported. Please invoke 'az webapp list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
 
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
