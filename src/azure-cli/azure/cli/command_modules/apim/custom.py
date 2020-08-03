@@ -10,7 +10,7 @@ from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
-                                             NamedValueCreateContract, ApiContract, ApiType, ApiCreateOrUpdateParameter, 
+                                             NamedValueCreateContract, ApiContract, ApiType, ApiCreateOrUpdateParameter,
                                              Protocol, VirtualNetworkType, SkuType, ApiCreateOrUpdatePropertiesWsdlSelector,
                                              SoapApiType, ContentFormat, SubscriptionKeyParameterNamesContract,
                                              OAuth2AuthenticationSettingsContract, AuthenticationSettingsContract,
@@ -283,7 +283,7 @@ def update_apim_nv(instance, value=None, tags=None, secret=None):
 
     return instance
 
-  
+
 def import_apim_api(client, resource_group_name, service_name, path, description=None, subscription_key_header_name=None,
                     subscription_key_query_param_name=None, api_id=None, api_revision=None, display_name=None, service_url=None,
                     protocols=None, specification_path=None, specification_url=None, specification_format=None,
