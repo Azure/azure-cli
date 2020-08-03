@@ -181,9 +181,6 @@ parameters:
   - name: --value
     type: string
     short-summary: The value of the Named Value.
-  - name: secret
-    type: boolean
-    short-summary: If true, the Named Value is a secret.
 examples:
   - name: Create a Named Value.
     text: |-
@@ -205,9 +202,6 @@ parameters:
   - name: --value
     type: string
     short-summary: The value of the Named Value.
-  - name: secret
-    type: boolean
-    short-summary: If true, the Named Value is a secret.
 examples:
   - name: Create a basic API.
     text: |-
