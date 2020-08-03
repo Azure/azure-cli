@@ -205,8 +205,8 @@ class Profile(object):
         # Managed Service Identity (MSI).
 
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        identity = Identity()
-        credential, mi_info = identity.login_with_managed_identity(resource, identity_id)
+        identity = Identity(scopes=[self.cli_ctx.cloud.endpoints.active_directory_resource_id])
+        credential, mi_info = identity.login_with_managed_identity(identity_id)
 
         tenant = mi_info[Identity.MANAGED_IDENTITY_TENANT_ID]
         if find_subscriptions:
@@ -232,9 +232,13 @@ class Profile(object):
         }
 
         # Previously we persist user's input in assignedIdentityInfo:
+        #     "assignedIdentityInfo": "MSI",
         #     "assignedIdentityInfo": "MSIClient-eecb2419-a29d-4580-a92a-f6a7b7b71300",
+        #     "assignedIdentityInfo": "MSIObject-27c363a5-7016-4ae0-8540-818ec05673f1",
+        #     "assignedIdentityInfo": "MSIResource-/subscriptions/.../providers/Microsoft.ManagedIdentity/
+        #                              userAssignedIdentities/id",
         # Now we persist the output - info extracted from the access token.
-        # client_id, object_id, and resource_id are unified to client_id, which is the only persisted field.
+        # All client_id, object_id, and resource_id are preserved.
         # Also, the name "MSI" is deprecated. So will be assignedIdentityInfo.
         legacy_identity_type = id_type_to_identity_type[mi_info[Identity.MANAGED_IDENTITY_ID_TYPE]]
         legacy_base_name = ('{}-{}'.format(legacy_identity_type, identity_id) if identity_id else legacy_identity_type)
@@ -308,14 +312,17 @@ class Profile(object):
             if cert_sn_issuer_auth:
                 subscription_dict[_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
             if managed_identity_info:
-                subscription_dict[_USER_ENTITY]['clientId'] = managed_identity_info[Identity.MANAGED_IDENTITY_CLIENT_ID]
-                subscription_dict[_USER_ENTITY]['objectId'] = managed_identity_info[Identity.MANAGED_IDENTITY_OBJECT_ID]
+                subscription_dict[_USER_ENTITY]['clientId'] = \
+                    managed_identity_info[Identity.MANAGED_IDENTITY_CLIENT_ID]
+                subscription_dict[_USER_ENTITY]['objectId'] = \
+                    managed_identity_info[Identity.MANAGED_IDENTITY_OBJECT_ID]
                 subscription_dict[_USER_ENTITY]['resourceId'] = \
                     managed_identity_info[Identity.MANAGED_IDENTITY_RESOURCE_ID]
 
             # This will be deprecated and client_id will be the only persisted ID
             if user_assigned_identity_id:
-                logger.warning("assignedIdentityInfo will be deprecated in the future. Only client ID should be used.")
+                logger.warning("assignedIdentityInfo will be deprecated in the future. All IDs of the identity "
+                               "are now preserved.")
                 subscription_dict[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
 
             consolidated.append(subscription_dict)
@@ -550,7 +557,7 @@ class Profile(object):
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
                 if aux_tenant_id:
                     raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-                return Identity.get_msi_credential()
+                return Identity.get_managed_identity_credential()
 
             # User
             if user_type == _USER:
@@ -565,7 +572,7 @@ class Profile(object):
         # MSI
         if aux_tenant_id:
             raise CLIError("Tenant shouldn't be specified for MSI account")
-        return Identity.get_msi_credential(identity_id)
+        return Identity.get_managed_identity_credential(identity_id)
 
     def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         if aux_tenants and aux_subscriptions:

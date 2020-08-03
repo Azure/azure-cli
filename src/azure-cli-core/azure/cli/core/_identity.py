@@ -71,7 +71,8 @@ class Identity:
         # However, MSAL defaults verify to True, thus overriding ConnectionConfiguration
         # Still not work yet
         from azure.cli.core._debug import change_ssl_cert_verification_track2
-        self.ssl_kwargs = change_ssl_cert_verification_track2()
+        self.credential_kwargs = {}
+        self.credential_kwargs.update(change_ssl_cert_verification_track2())
 
     @property
     def _msal_app(self):
@@ -87,7 +88,7 @@ class Identity:
             msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
             self.__msal_app = PublicClientApplication(authority=msal_authority, client_id=self.client_id,
                                                       token_cache=cache,
-                                                      verify=self.ssl_kwargs.get('connection_verify', True))
+                                                      verify=self.credential_kwargs.get('connection_verify', True))
         return self.__msal_app
 
     def login_with_interactive_browser(self):
@@ -97,7 +98,7 @@ class Identity:
                                                   client_id=self.client_id,
                                                   enable_persistent_cache=True,
                                                   allow_unencrypted_cache=self.allow_unencrypted,
-                                                  **self.ssl_kwargs)
+                                                  **self.credential_kwargs)
         auth_record = credential.authenticate()
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
@@ -116,7 +117,7 @@ class Identity:
                                               enable_persistent_cache=True,
                                               prompt_callback=prompt_callback,
                                               allow_unencrypted_cache=self.allow_unencrypted,
-                                              **self.ssl_kwargs)
+                                              **self.credential_kwargs)
 
             auth_record = credential.authenticate()
             # todo: remove after ADAL token deprecation
@@ -138,7 +139,7 @@ class Identity:
                                                 password=password,
                                                 enable_persistent_cache=True,
                                                 allow_unencrypted_cache=self.allow_unencrypted,
-                                                **self.ssl_kwargs)
+                                                **self.credential_kwargs)
         auth_record = credential.authenticate()
 
         # todo: remove after ADAL token deprecation
@@ -172,25 +173,28 @@ class Identity:
         credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
         return credential
 
-    def login_with_managed_identity(self, resource, identity_id=None):  # pylint: disable=too-many-statements
+    def login_with_managed_identity(self, identity_id=None):  # pylint: disable=too-many-statements
         from msrestazure.tools import is_valid_resource_id
         from requests import HTTPError
         from azure.core.exceptions import ClientAuthenticationError
 
         credential = None
         id_type = None
-        scope = resource.rstrip('/') + '/.default'
+        token = None
+        # scope = resource.rstrip('/') + '/.default'
+        # https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
         if identity_id:
             # Try resource ID
             if is_valid_resource_id(identity_id):
-                credential = ManagedIdentityCredential(identity_config={"msi_res_id": identity_id})
+                credential = ManagedIdentityCredential(identity_config={"mi_res_id": identity_id})
+                token = credential.get_token(*self.scopes)
                 id_type = self.MANAGED_IDENTITY_RESOURCE_ID
             else:
                 authenticated = False
                 try:
                     # Try client ID
                     credential = ManagedIdentityCredential(client_id=identity_id)
-                    credential.get_token(scope)
+                    token = credential.get_token(*self.scopes)
                     id_type = self.MANAGED_IDENTITY_CLIENT_ID
                     authenticated = True
                 except ClientAuthenticationError as e:
@@ -206,7 +210,7 @@ class Identity:
                     try:
                         # Try object ID
                         credential = ManagedIdentityCredential(identity_config={"object_id": identity_id})
-                        credential.get_token(scope)
+                        token = credential.get_token(*self.scopes)
                         id_type = self.MANAGED_IDENTITY_OBJECT_ID
                         authenticated = True
                     except ClientAuthenticationError as e:
@@ -222,9 +226,11 @@ class Identity:
                     raise CLIError('Failed to connect to MSI, check your managed service identity id.')
 
         else:
+            # Use the default managed identity. It can be either system assigned or user assigned.
             credential = ManagedIdentityCredential()
+            token = credential.get_token(*self.scopes)
 
-        decoded = self._decode_managed_identity_token(credential, resource)
+        decoded = Identity._decode_managed_identity_token(token)
         resource_id = decoded.get('xms_mirid')
         # User-assigned identity has resourceID as
         # /subscriptions/xxx/resourcegroups/xxx/providers/Microsoft.ManagedIdentity/userAssignedIdentities/xxx
@@ -242,7 +248,7 @@ class Identity:
             self.MANAGED_IDENTITY_OBJECT_ID: decoded['oid'],
             self.MANAGED_IDENTITY_RESOURCE_ID: resource_id,
         }
-        logger.warning('Using Managed Identity: %s', json.dumps(managed_identity_info))
+        logger.debug('Using Managed Identity: %s', json.dumps(managed_identity_info))
 
         return credential, managed_identity_info
 
@@ -257,21 +263,6 @@ class Identity:
         }
         logger.warning('Using Cloud Shell Managed Identity: %s', json.dumps(cloud_shell_identity_info))
         return credential, cloud_shell_identity_info
-
-    @staticmethod
-    def _decode_managed_identity_token(credential, resource):
-        # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
-        # The resource is only used for acquiring the initial access token
-        scope = resource.rstrip('/') + '/.default'
-        token = credential.get_token(scope)
-        from msal.oauth2cli.oidc import decode_part
-        access_token = token.token
-
-        # Access token consists of headers.claims.signature. Decode the claim part
-        decoded_str = decode_part(access_token.split('.')[1])
-        logger.debug('MSI token retrieved: %s', decoded_str)
-        decoded = json.loads(decoded_str)
-        return decoded
 
     def logout_user(self, user):
         accounts = self._msal_app.get_accounts(user)
@@ -322,7 +313,7 @@ class Identity:
         return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
                                             enable_persistent_cache=True,
                                             allow_unencrypted_cache=self.allow_unencrypted,
-                                            **self.ssl_kwargs)
+                                            **self.credential_kwargs)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
         client_secret, certificate_path = self._msal_store.retrieve_secret_of_service_principal(client_id,
@@ -335,8 +326,21 @@ class Identity:
         raise CLIError("Secret of service principle {} not found. Please run 'az login'".format(client_id))
 
     @staticmethod
-    def get_msi_credential(client_id=None):
+    def get_managed_identity_credential(client_id=None):
         return ManagedIdentityCredential(client_id=client_id)
+
+    @staticmethod
+    def _decode_managed_identity_token(token):
+        # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
+        # The resource is only used for acquiring the initial access token
+        from msal.oauth2cli.oidc import decode_part
+        access_token = token.token
+
+        # Access token consists of headers.claims.signature. Decode the claim part
+        decoded_str = decode_part(access_token.split('.')[1])
+        logger.debug('MSI token retrieved: %s', decoded_str)
+        decoded = json.loads(decoded_str)
+        return decoded
 
     def _migrate_adal_to_msal(self, username):
         logger.debug("Trying to migrate token from ADAL cache.")
