@@ -275,7 +275,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('show', 'acr_config_retention_show')
         g.command('update', 'acr_config_retention_update')
 
-    with self.command_group('acr helm', acr_helm_util) as g:
+    def _helm_deprecate_message(self):
+        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
+        msg += " Use '{}' instead.".format(self.redirect)
+        msg += " For more information go to"
+        msg += " https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos"
+        return msg
+
+    with self.command_group('acr helm', acr_helm_util,
+                            deprecate_info=self.deprecate(redirect="helm v3",
+                                                          message_func=_helm_deprecate_message)) as g:
         g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format)
         g.command('show', 'acr_helm_show', table_transformer=helm_show_output_format)
         g.command('delete', 'acr_helm_delete')

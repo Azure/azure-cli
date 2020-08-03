@@ -24,7 +24,7 @@ DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
 
 
-class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
+class TelemetrySession:  # pylint: disable=too-many-instance-attributes
     def __init__(self, correlation_id=None, application=None):
         self.start_time = None
         self.end_time = None
@@ -45,6 +45,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.extension_management_detail = None
         self.raw_command = None
         self.mode = 'default'
+        self.init_time_elapsed = None
+        self.invoke_time_elapsed = None
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
@@ -164,6 +166,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
                               lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
         set_custom_properties(result, 'StartTime', str(self.start_time))
         set_custom_properties(result, 'EndTime', str(self.end_time))
+        set_custom_properties(result, 'InitTimeElapsed', str(self.init_time_elapsed))
+        set_custom_properties(result, 'InvokeTimeElapsed', str(self.invoke_time_elapsed))
         set_custom_properties(result, 'OutputType', self.output_type)
         set_custom_properties(result, 'RawCommand', self.raw_command)
         set_custom_properties(result, 'Params', ','.join(self.parameters or []))
@@ -225,6 +229,16 @@ def start(mode=None):
     if mode:
         _session.mode = mode
     _session.start_time = datetime.datetime.utcnow()
+
+
+@decorators.suppress_all_exceptions()
+def set_init_time_elapsed(init_time_elapsed):
+    _session.init_time_elapsed = init_time_elapsed
+
+
+@decorators.suppress_all_exceptions()
+def set_invoke_time_elapsed(invoke_time_elapsed):
+    _session.invoke_time_elapsed = invoke_time_elapsed
 
 
 @_user_agrees_to_telemetry
@@ -437,6 +451,7 @@ def _get_azure_subscription_id():
 
 
 def _get_shell_type():
+    # This method is not accurate and needs improvement, for instance all shells on Windows return 'cmd'.
     if 'ZSH_VERSION' in os.environ:
         return 'zsh'
     if 'BASH_VERSION' in os.environ:
@@ -445,6 +460,9 @@ def _get_shell_type():
         return 'ksh'
     if 'WINDIR' in os.environ:
         return 'cmd'
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        return 'cloud-shell'
     return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
 

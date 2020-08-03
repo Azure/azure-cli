@@ -1298,13 +1298,13 @@ def _get_target_instance(reliability_level):
 # pylint: disable=inconsistent-return-statements
 def _get_reliability_level(cluster_size):
     size = int(cluster_size)
-    if size > 0 and size < 3:
+    if 0 < size < 3:
         return 'None'
-    if size >= 3 and size < 5:
+    if 3 <= size < 5:
         return 'Bronze'
-    if size >= 5 and size < 7:
+    if 5 <= size < 7:
         return 'Silver'
-    if size >= 7 and size < 9:
+    if 7 <= size < 9:
         return 'Gold'
     if size >= 9:
         return 'Platinum'
@@ -1338,7 +1338,7 @@ def _dict_to_fabric_settings(setting_dict):
     return settings
 
 
-def _deploy_arm_template_core(cli_ctx,
+def _deploy_arm_template_core(cmd,
                               resource_group_name,
                               template,
                               parameters,
@@ -1346,18 +1346,30 @@ def _deploy_arm_template_core(cli_ctx,
                               mode='incremental',
                               validate_only=False,
                               no_wait=False):
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
-
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
-    client = resource_client_factory(cli_ctx)
-    if validate_only:
-        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, properties)
+    client = resource_client_factory(cmd.cli_ctx)
 
-    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
-                              deployment_name, properties)
-    result = LongRunningOperation(cli_ctx)(deploy_poll)
-    return result
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate_only:
+            deploy_poll = sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
+                                      deployment)
+        else:
+            deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
+                                      deployment_name, deployment)
+        return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
+                           properties)
+
+    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name, deployment_name,
+                              properties)
+    return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
 
 def _get_vault_name(resource_group_name, vault_name):

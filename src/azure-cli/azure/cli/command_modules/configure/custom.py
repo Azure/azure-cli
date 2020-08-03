@@ -27,7 +27,8 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_PROMPT_FILE_LOGGING,
                                                          MSG_PROMPT_CACHE_TTL,
                                                          WARNING_CLOUD_FORBID_TELEMETRY,
-                                                         DEFAULT_CACHE_TTL)
+                                                         DEFAULT_CACHE_TTL,
+                                                         MSG_PROMPT_ALLOW_PLAINTEXT)
 from azure.cli.command_modules.configure._utils import get_default_from_config
 
 answers = {}
@@ -135,11 +136,14 @@ def _handle_global_configuration(config, cloud_forbid_telemetry):
                 except ValueError:
                     logger.error('TTL must be a positive integer')
                     cache_ttl = None
+            allow_fallback_to_plaintext = prompt_y_n(MSG_PROMPT_ALLOW_PLAINTEXT, default='y')
+
             # save the global config
             config.set_value('core', 'output', OUTPUT_LIST[output_index]['name'])
             config.set_value('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
             config.set_value('core', 'cache_ttl', cache_ttl)
             config.set_value('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
+            config.set_value('core', 'allow_fallback_to_plaintext', 'yes' if allow_fallback_to_plaintext else 'no')
 
 
 # pylint: disable=inconsistent-return-statements

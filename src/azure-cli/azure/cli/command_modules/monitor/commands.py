@@ -17,8 +17,10 @@ def load_command_table(self, _):
         cf_log_analytics_workspace_intelligence_packs, cf_log_analytics_cluster,
         cf_log_analytics_workspace_linked_service, cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
-        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage, cf_log_analytics_workspace_saved_searches)
-    from ._exception_handler import monitor_exception_handler, missing_resource_handler
+        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage,
+        cf_log_analytics_workspace_saved_searches, cf_subscription_diagnostics,
+        cf_log_analytics_workspace_data_exports)
+    from ._exception_handler import monitor_exception_handler, missing_resource_handler, data_export_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
 
@@ -108,6 +110,18 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_profiles#{}',
         client_factory=cf_log_profiles,
         operation_group='log_profiles',
+        exception_handler=monitor_exception_handler)
+
+    subscription_dianostic_settings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#SubscriptionDiagnosticSettingsOperations.{}',
+        client_factory=cf_subscription_diagnostics,
+        operation_group='subscription_diagnostic_settings',
+        exception_handler=monitor_exception_handler)
+
+    subscription_dianostic_settings_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.subscription_diagnostic_settings#{}',
+        client_factory=cf_subscription_diagnostics,
+        operation_group='subscription_diagnostic_settings',
         exception_handler=monitor_exception_handler)
 
     alert_custom = CliCommandType(
@@ -231,6 +245,12 @@ def load_command_table(self, _):
     log_analytics_workspace_table_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#TablesOperations.{}',
         client_factory=cf_log_analytics_workspace_tables,
+        exception_handler=monitor_exception_handler
+    )
+
+    log_analytics_workspace_data_exports_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#DataExportsOperations.{}',
+        client_factory=cf_log_analytics_workspace_data_exports,
         exception_handler=monitor_exception_handler
     )
 
@@ -358,7 +378,7 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
 
-    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
         g.show_command('show', 'get')
@@ -373,8 +393,17 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk) as g:
         g.command('list', 'list_by_workspace')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('update', 'update')
+
+    with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
+                            custom_command_type=log_analytics_workspace_custom, exception_handler=data_export_handler) as g:
+        g.command('list', 'list_by_workspace')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_log_analytics_workspace_data_exports',
+                         client_factory=cf_log_analytics_workspace_data_exports)
+        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_data_exports')
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_intelligence_packs_sdk) as g:
         g.command('list', 'list')
@@ -383,7 +412,7 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics workspace saved-search', log_analytics_workspace_saved_search_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
-        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches,)
+        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_workspace')
@@ -443,3 +472,10 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
                          validator=validate_private_endpoint_connection_id, confirmation=True)
+
+    with self.command_group('monitor diagnostic-settings subscription', subscription_dianostic_settings_sdk, custom_command_type=subscription_dianostic_settings_custom) as g:
+        g.custom_command('create', 'create_subscription_diagnostic_settings')
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.generic_update_command('update', custom_func_name='update_subscription_diagnostic_settings')

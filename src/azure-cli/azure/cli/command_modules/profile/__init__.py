@@ -8,8 +8,9 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.parameters import get_enum_type
 
 from azure.cli.command_modules.profile._format import transform_account_list
-from ._validators import validate_tenant
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
+
+from ._validators import validate_tenant
 
 cloud_resource_types = ["oss-rdbms", "arm", "aad-graph", "ms-graph", "batch", "media", "data-lake"]
 

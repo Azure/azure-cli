@@ -44,9 +44,8 @@ from azure.mgmt.iotcentral.models import (AppSkuInfo,
                                           App)
 
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType
-from ._constants import PNP_ENDPOINT
-from ._client_factory import resource_service_factory, get_pnp_client
-from ._utils import open_certificate, get_auth_header, generateKey
+from ._client_factory import resource_service_factory
+from ._utils import open_certificate, generateKey
 
 
 logger = get_logger(__name__)
@@ -403,7 +402,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         raise CLIError('Key-based authentication requires a connection string.')
     if identity_based_file_upload and not fileupload_storage_container_uri:
         raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
-    _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
@@ -438,12 +436,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                                         properties=properties)
 
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
-
-
-def _check_name_availability(iot_hub_resource, hub_name):
-    name_availability = iot_hub_resource.check_name_availability(hub_name)
-    if name_availability is not None and not name_availability.name_available:
-        raise CLIError(name_availability.message)
 
 
 def iot_hub_get(cmd, client, hub_name, resource_group_name=None):
@@ -936,76 +928,6 @@ def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_
         return client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region)
     LongRunningOperation(cmd.cli_ctx)(client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region))
     return iot_hub_get(cmd, client, hub_name, resource_group_name)
-
-
-def pnp_create_repository(cmd, client, repo_name, repo_endpoint=PNP_ENDPOINT):
-    return _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name)
-
-
-def pnp_update_repository(cmd, client, repo_id, repo_name, repo_endpoint=PNP_ENDPOINT):
-    return _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id)
-
-
-def pnp_list_repository(cmd, client, repo_endpoint=PNP_ENDPOINT):
-    headers = get_auth_header(cmd)
-    return get_pnp_client(repo_endpoint).get_repositories_async(api_version=client.api_version, custom_headers=headers)
-
-
-def pnp_get_repository(cmd, client, repo_id, repo_endpoint=PNP_ENDPOINT):
-    headers = get_auth_header(cmd)
-    return get_pnp_client(repo_endpoint).get_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
-
-
-def pnp_delete_repository(cmd, client, repo_id, repo_endpoint=PNP_ENDPOINT):
-    headers = get_auth_header(cmd)
-    return get_pnp_client(repo_endpoint).delete_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
-
-
-def pnp_track_provision_status(cmd, client, repo_id, track_id, repo_endpoint=PNP_ENDPOINT):
-    headers = get_auth_header(cmd)
-    return get_pnp_client(repo_endpoint).get_provision_status(repo_id, track_id, api_version=client.api_version, custom_headers=headers)
-
-
-def pnp_create_key(cmd, client, repo_id, user_role, repo_endpoint=PNP_ENDPOINT):
-    return _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role)
-
-
-def pnp_update_key(cmd, client, repo_id, key_id, user_role, repo_endpoint=PNP_ENDPOINT):
-    return _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id)
-
-
-def pnp_list_key(cmd, client, repo_id, repo_endpoint=PNP_ENDPOINT):
-    headers = get_auth_header(cmd)
-    return get_pnp_client(repo_endpoint).get_keys_async(repository_id=repo_id, api_version=client.api_version, custom_headers=headers)
-
-
-def pnp_get_key(cmd, client, repo_id, key_id, repo_endpoint=PNP_ENDPOINT):
-    headers = get_auth_header(cmd)
-    return get_pnp_client(repo_endpoint).get_key_async(repo_id, key_id, api_version=client.api_version, custom_headers=headers)
-
-
-def pnp_delete_key(cmd, client, repo_id, key_id, repo_endpoint=PNP_ENDPOINT):
-    headers = get_auth_header(cmd)
-    return get_pnp_client(repo_endpoint).delete_key_async(key_id, repo_id, api_version=client.api_version, custom_headers=headers)
-
-
-def _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id=None):
-    from .digitaltwinrepositoryprovisioningservice.models import RepositoryUpsertRequestProperties
-    headers = get_auth_header(cmd)
-    repositoryUpsertRequestProperties = RepositoryUpsertRequestProperties(id=repo_id, name=repo_name)
-    return get_pnp_client(repo_endpoint).create_or_update_repository_async(api_version=client.api_version,
-                                                                           properties=repositoryUpsertRequestProperties,
-                                                                           custom_headers=headers)
-
-
-def _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id=None):
-    from .digitaltwinrepositoryprovisioningservice.models import RepositoryKeyRequestProperties
-    headers = get_auth_header(cmd)
-    repositoryKeyRequestProperties = RepositoryKeyRequestProperties(id=key_id, user_role=user_role)
-    return get_pnp_client(repo_endpoint).create_or_update_key_async(repository_id=repo_id,
-                                                                    api_version=client.api_version,
-                                                                    properties=repositoryKeyRequestProperties,
-                                                                    custom_headers=headers)
 
 
 def _get_iot_hub_by_name(client, hub_name):

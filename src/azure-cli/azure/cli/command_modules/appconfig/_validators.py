@@ -126,6 +126,7 @@ def validate_filter_parameters(namespace):
         for item in namespace.filter_parameters:
             param_tuple = validate_filter_parameter(item)
             if param_tuple:
+                # pylint: disable=unbalanced-tuple-unpacking
                 param_name, param_value = param_tuple
                 # If param_name already exists, convert the values to a list
                 if param_name in filter_parameters_dict:

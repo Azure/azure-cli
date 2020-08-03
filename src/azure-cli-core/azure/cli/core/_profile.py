@@ -13,13 +13,12 @@ import re
 from copy import deepcopy
 from enum import Enum
 
+from knack.log import get_logger
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import in_cloud_console, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from azure.cli.core._identity import Identity, ADALCredentialCache, MSALSecretStore
 
-from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -95,7 +94,7 @@ def _get_cloud_console_token_endpoint():
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
-class Profile(object):
+class Profile:
 
     def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
                  async_persist=True, cli_ctx=None, store_adal_cache=True):
@@ -128,7 +127,10 @@ class Profile(object):
 
         credential = None
         auth_record = None
-        identity = Identity(self._authority, tenant, client_id, self._get_scopes(scopes), cred_cache=self._adal_cache)
+        identity = Identity(self._authority, tenant, client_id, self._get_scopes(scopes), cred_cache=self._adal_cache,
+                            allow_unencrypted=self.cli_ctx.config
+                            .getboolean('core', 'allow_fallback_to_plaintext', fallback=True)
+                            )
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
@@ -719,7 +721,7 @@ class Profile(object):
         return installation_id
 
 
-class MsiAccountTypes(object):
+class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
     user_assigned_client_id = 'MSIClient'
@@ -733,19 +735,19 @@ class MsiAccountTypes(object):
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from msrestazure.azure_active_directory import MSIAuthentication
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthentication(resource=resource)
+            return MSIAuthenticationWrapper(resource=resource)
         if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthentication(resource=resource, client_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthentication(resource=resource, object_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthentication(resource=resource, msi_res_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
-class SubscriptionFinder(object):
+class SubscriptionFinder:
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
     # authentication work, but only find subscriptions
     def __init__(self, cli_ctx, arm_client_factory=None, **kwargs):
@@ -801,7 +803,9 @@ class SubscriptionFinder(object):
             if hasattr(t, 'additional_properties'):  # Remove this line once SDK is fixed
                 t.display_name = t.additional_properties.get('displayName')
 
-            identity = Identity(self.authority, tenant_id)
+            identity = Identity(self.authority, tenant_id,
+                                allow_unencrypted=self.cli_ctx.config
+                                .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
             try:
                 specific_tenant_credential = identity.get_user_credential(auth_record.home_account_id,
                                                                           auth_record.username)

@@ -8,6 +8,7 @@ import mock
 
 from azure.cli.command_modules.profile.custom import list_subscriptions, get_access_token, login
 from azure.cli.core.mock import DummyCli
+from knack.util import CLIError
 
 
 class ProfileCommandTest(unittest.TestCase):
@@ -80,6 +81,18 @@ class ProfileCommandTest(unittest.TestCase):
         }
         self.assertEqual(result, expected_result)
 
+        # test get token with Managed Identity
+        get_raw_token_mock.return_value = (['bearer', 'token123', {'expires_on': '1593497681'}], None, tenant_id)
+        result = get_access_token(cmd, tenant=tenant_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, tenant_id)
+        expected_result = {
+            'tokenType': 'bearer',
+            'accessToken': 'token123',
+            'expiresOn': '2020-06-30 06:14:41.000000',
+            'tenant': tenant_id
+        }
+        self.assertEqual(result, expected_result)
+
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
     def test_get_login(self, profile_mock):
         invoked = []
@@ -99,3 +112,42 @@ class ProfileCommandTest(unittest.TestCase):
 
         # assert
         self.assertTrue(invoked)
+
+    def test_login_validate_tenant(self):
+        from azure.cli.command_modules.profile._validators import validate_tenant
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        namespace = mock.MagicMock()
+
+        microsoft_tenant_id = '72f988bf-86f1-41af-91ab-2d7cd011db47'
+
+        # Test tenant is unchanged for None
+        namespace.tenant = None
+        validate_tenant(cmd, namespace)
+        self.assertEqual(namespace.tenant, None)
+
+        # Test tenant is unchanged for GUID
+        namespace.tenant = microsoft_tenant_id
+        validate_tenant(cmd, namespace)
+        self.assertEqual(namespace.tenant, microsoft_tenant_id)
+
+        # Test tenant is resolved for canonical name
+        namespace.tenant = "microsoft.onmicrosoft.com"
+        validate_tenant(cmd, namespace)
+        self.assertEqual(namespace.tenant, microsoft_tenant_id)
+
+        # Test tenant is resolved for domain name
+        namespace.tenant = "microsoft.com"
+        validate_tenant(cmd, namespace)
+        self.assertEqual(namespace.tenant, microsoft_tenant_id)
+
+        # Test error is raised for non-existing tenant
+        namespace.tenant = "non-existing-tenant"
+        with self.assertRaisesRegex(CLIError, 'Failed to resolve tenant'):
+            validate_tenant(cmd, namespace)
+
+        # Test error is raised for non-existing tenant
+        namespace.tenant = "non-existing-tenant.onmicrosoft.com"
+        with self.assertRaisesRegex(CLIError, 'Failed to resolve tenant'):
+            validate_tenant(cmd, namespace)
