@@ -9,14 +9,6 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-try:
-    from azure_bdist_wheel import cmdclass
-except ImportError:
-    from distutils import log as logger
-
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
-    cmdclass = {}
-
 VERSION = "2.9.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -105,6 +97,5 @@ setup(
         "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,
-    package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
-    cmdclass=cmdclass
+    package_data={'azure.cli.core': ['auth_landing_pages/*.html']}
 )

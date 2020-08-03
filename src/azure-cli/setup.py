@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 import sys
 
 try:
-    from azure_bdist_wheel import cmdclass
+    from azure_cli_bdist_wheel import cmdclass
 except ImportError:
     from distutils import log as logger
 
@@ -162,7 +162,7 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure"]),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     package_data={
         'azure.cli.command_modules.acr': ['*.json'],
