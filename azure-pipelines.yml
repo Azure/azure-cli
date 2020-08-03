@@ -410,6 +410,7 @@ jobs:
         profile: 'latest'
     - task: PublishPipelineArtifact@0
       displayName: 'Publish Artifact: Test Command'
+      condition: succeededOrFailed()
       inputs:
         TargetPath: 'az_command_coverage.txt'
         ArtifactName: command_coverage
