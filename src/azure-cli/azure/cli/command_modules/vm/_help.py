@@ -118,6 +118,65 @@ examples:
     crafted: true
 """
 
+helps['disk-access'] = """
+type: group
+short-summary: Manage disk access resources.
+"""
+
+helps['disk-access create'] = """
+type: command
+short-summary: Create a disk access resource.
+examples:
+  - name: Create a disk access resource.
+    text: >
+        az disk-access create -g MyResourceGroup -l centraluseuap -n MyDiskAccess
+"""
+
+helps['disk-access update'] = """
+type: command
+short-summary: Update a disk access resource.
+examples:
+  - name: Update a disk access resource.
+    text: >
+        az disk-access update -g MyResourceGroup -n MyDiskAccess --tags tag1=val1 tag2=val2
+"""
+
+helps['disk-access list'] = """
+type: command
+short-summary: List disk access resources.
+examples:
+  - name: List all disk access reosurces in a resource group.
+    text: |
+        az disk-access list -g MyResourceGroup
+"""
+
+helps['disk-access show'] = """
+type: command
+short-summary: Get information of a disk access resource.
+examples:
+  - name: Get information of a disk access reosurce.
+    text: |
+        az disk-access show -g MyResourceGroup -n MyDiskAccess
+"""
+
+helps['disk-access delete'] = """
+type: command
+short-summary: Delete a disk access resource.
+examples:
+  - name: Delete a disk access reosurce.
+    text: |
+        az disk-access delete -g MyResourceGroup -n MyDiskAccess
+"""
+
+helps['disk-access wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a disk access is met.
+examples:
+  - name: Place the CLI in a waiting state until the disk access is created with 'provisioningState' at 'Succeeded'.
+    text: |
+        az disk-access wait --created -g MyResourceGroup -n MyDiskAccess
+"""
+
 helps['disk-encryption-set'] = """
 type: group
 short-summary: Disk Encryption Set resource.
@@ -1384,6 +1443,15 @@ examples:
     crafted: true
 """
 
+helps['vm host group get-instance-view'] = """
+type: command
+short-summary: Get instance view of a dedicated host group.
+examples:
+  - name: Get instance view of a dedicated host group
+    text: |
+        az vm host group get-instance-view --name MyDedicatedHostGroup --resource-group MyResourceGroup
+"""
+
 helps['vm host group update'] = """
 type: command
 short-summary: Update a dedicated host group.
@@ -2623,6 +2691,15 @@ short-summary: Manage monitor aspect for a vm.
 helps['vm monitor log'] = """
 type: group
 short-summary: Manage log analytics workspace for a vm.
+"""
+
+helps['vm monitor log show'] = """
+type: command
+short-summary: Execute a query against the Log Analytics workspace linked with a VM.
+examples:
+  - name: Get performance log for a VM linked with a workspace
+    text: >
+        az vm monitor log show --name myVM -g myRG -q "Perf | limit 10"
 """
 
 helps['vm monitor metrics'] = """

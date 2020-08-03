@@ -10,7 +10,7 @@ import shutil
 from azure.cli.testsdk.preparers import AbstractPreparer
 
 
-class StorageScenarioMixin(object):
+class StorageScenarioMixin:
     profile = None
 
     def get_current_profile(self):

@@ -822,7 +822,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         dedicated_host=dedicated_host, priority=priority, max_price=max_price, eviction_policy=eviction_policy,
         enable_agent=enable_agent, vmss=vmss, os_disk_encryption_set=os_disk_encryption_set,
         data_disk_encryption_sets=data_disk_encryption_sets, specialized=specialized,
-        encryption_at_host=encryption_at_host)
+        encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -869,17 +869,32 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                      aux_subscriptions=aux_subscriptions).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        return client.validate(resource_group_name, deployment_name, properties)
 
-    # creates the VM deployment
-    if no_wait:
-        return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name, deployment_name, properties)
-    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        # creates the VM deployment
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
+
+        # creates the VM deployment
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
 
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
@@ -1070,6 +1085,9 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     vm = get_vm(cmd, resource_group_name, vm_name)
     location = vm.location
+    if not vm.network_profile:
+        raise CLIError("Network profile not found for VM '{}'".format(vm_name))
+
     nic_ids = list(vm.network_profile.network_interfaces)
     if len(nic_ids) > 1:
         raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
@@ -1227,8 +1245,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
-    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
-                       resource_group_name, vm_name, **kwargs)
+    aux_subscriptions = None
+    if vm and vm.storage_profile and vm.storage_profile.image_reference and vm.storage_profile.image_reference.id:
+        aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference.id)
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+    return sdk_no_wait(no_wait, client.virtual_machines.create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
 
 
@@ -1287,17 +1308,29 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     deployment_name = 'av_set_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    if validate:
-        return client.validate(resource_group_name, deployment_name, properties)
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name, deployment_name, properties)
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
 
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                  resource_group_name, deployment_name, properties))
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                      resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
+
+        if no_wait:
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                      resource_group_name, deployment_name, properties))
+
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
 
@@ -1351,7 +1384,7 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
-class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods
+class BootLogStreamWriter:  # pylint: disable=too-few-public-methods
 
     def __init__(self, out):
         self.out = out
@@ -2207,7 +2240,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
-                automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None):
+                automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
+                host_group=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2441,7 +2475,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
             data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
             data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period,
-            specialized=specialized, os_disk_size_gb=os_disk_size_gb, encryption_at_host=encryption_at_host)
+            specialized=specialized, os_disk_size_gb=os_disk_size_gb, encryption_at_host=encryption_at_host,
+            host_group=host_group)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2472,13 +2507,17 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             'tags': tags,
             'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
             'properties': {
-                'singlePlacementGroup': True,
+                'singlePlacementGroup': single_placement_group,
                 'provisioningState': 0,
                 'platformFaultDomainCount': platform_fault_domain_count
             }
         }
         if zones is not None:
             vmss_resource['zones'] = zones
+        if proximity_placement_group is not None:
+            vmss_resource['properties']['proximityPlacementGroup'] = {
+                'id': proximity_placement_group
+            }
     else:
         raise CLIError('usage error: --orchestration-mode (ScaleSet | VM)')
 
@@ -2496,18 +2535,33 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     deployment_name = 'vmss_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                      aux_subscriptions=aux_subscriptions).deployments
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
 
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        return sdk_no_wait(no_wait, client.validate, resource_group_name, deployment_name, properties)
 
-    # creates the VMSS deployment
-    deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-        sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+        # creates the VMSS deployment
+        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment))
+    else:
+        if validate:
+            return client.validate(resource_group_name, deployment_name, properties)
+
+        # creates the VMSS deployment
+        deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
 
     if orchestration_mode.lower() == scale_set_vm_str.lower() and assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
@@ -3179,12 +3233,12 @@ def list_proximity_placement_groups(client, resource_group_name=None):
 
 # region dedicated host
 def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count=None,
-                                location=None, zones=None, tags=None):
+                                automatic_placement=None, location=None, zones=None, tags=None):
     DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     host_group_params = DedicatedHostGroup(location=location, platform_fault_domain_count=platform_fault_domain_count,
-                                           zones=zones, tags=tags)
+                                           support_automatic_placement=automatic_placement, zones=zones, tags=tags)
 
     return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
 
@@ -3193,6 +3247,10 @@ def list_dedicated_host_groups(cmd, client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list_by_subscription()
+
+
+def get_dedicated_host_group_instance_view(client, host_group_name, resource_group_name):
+    return client.get(resource_group_name, host_group_name, expand="instanceView")
 
 
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
@@ -3360,5 +3418,27 @@ def update_disk_encryption_set(instance, client, resource_group_name, key_url=No
     if source_vault:
         instance.active_key.source_vault.id = source_vault
     return instance
+
+# endregion
+
+
+# region Disk Access
+def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, disk_access_name,
+                       location=location, tags=tags)
+
+
+def list_disk_accesses(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
+    location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, disk_access_name,
+                       location=location, tags=tags)
 
 # endregion
