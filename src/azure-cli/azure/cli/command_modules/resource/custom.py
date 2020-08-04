@@ -1761,13 +1761,13 @@ def create_or_update_template_spec(cmd, resource_group_name, name, template_file
         template = getattr(packed_template, 'RootTemplate')
         artifacts = getattr(packed_template, 'Artifacts')
 
-    TemplateSpecModel, TemplateSpecVersionModel = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecModel', 'TemplateSpecVersionModel', mod='models')
+    TemplateSpec, TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', 'TemplateSpecVersion', mod='models')
 
     # TODO: Check if root template already exists
-    template_root = TemplateSpecModel(location=location, description=description, display_name=display_name, tags=tags)
+    template_root = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     if version:
         rcf.template_specs.create_or_update(resource_group_name, name, template_root)
-        template_spec = TemplateSpecVersionModel(location=location, artifacts=artifacts, description=vdescription, template=template, tags=tags)
+        template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=vdescription, template=template, tags=tags)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec)
     return rcf.template_specs.create_or_update(resource_group_name, name, template_root)
 

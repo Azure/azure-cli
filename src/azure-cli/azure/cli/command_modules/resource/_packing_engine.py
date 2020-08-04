@@ -73,7 +73,6 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
 
             if(not os.path.commonpath([getattr(context, 'RootTemplateDirectory')]) ==
                os.path.commonpath([getattr(context, 'RootTemplateDirectory'), absoluteLocalPath])):
-                # TODO: Localize
                 raise CLIError('Unable to handle the reference to file ' + absoluteLocalPath + 'from ' +
                                template_abs_file_path + 'because it exists outside of the root template directory of ' +
                                getattr(context, 'RootTemplateDirectory'))
@@ -155,7 +154,7 @@ def unpack(cmd, exported_template, targetDirectory, templateFileName):
     rootTemplateFilePath = os.path.join(targetDirectory, templateFileName)
 
     # TODO: Directory/file existence checks..
-    # Go through each artifact and make sure it's not going to place artifacts
+    # Go through each artifact ad make sure it's not going to place artifacts
     # outside of the target directory:
 
     for artifact in getattr(packagedTemplate, 'Artifacts'):
@@ -177,8 +176,6 @@ def unpack(cmd, exported_template, targetDirectory, templateFileName):
                                            'TemplateSpecTemplateArtifact', mod='models')
     for artifact in getattr(packagedTemplate, 'Artifacts'):
         if not isinstance(artifact, TemplateSpecTemplateArtifact):
-            # TODO: Localize
-
             raise CLIError('Unknown artifact type encountered...')
         absoluteLocalPath = os.path.abspath(os.path.join(targetDirectory, getattr(artifact, 'path')))
         if not os.path.exists(os.path.dirname(absoluteLocalPath)):
