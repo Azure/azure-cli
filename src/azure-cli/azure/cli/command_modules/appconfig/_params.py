@@ -76,6 +76,8 @@ def load_arguments(self, _):
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('assign_identity', arg_type=identities_arg_type, is_preview=True)
+        c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
+                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
