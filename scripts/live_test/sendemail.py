@@ -180,7 +180,7 @@ def get_content(container):
                         passed_sum += passed
                         failed_sum += failed
                 except Exception:
-                    traceback.print_exc()
+                    print(traceback.format_exc())
 
     sorted(items, key=lambda x: x[0])
 
