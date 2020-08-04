@@ -56,7 +56,8 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
         template_content = read_file_content(template_abs_file_path)
         artifactable_template_obj = sanitized_template = _remove_comments_from_json(template_content)
         template_json = json.loads(json.dumps(sanitized_template))
-        template_link_to_artifact_objs = _get_template_links_to_artifacts(cmd, artifactable_template_obj, includeNested=True)
+        template_link_to_artifact_objs = _get_template_links_to_artifacts(cmd, artifactable_template_obj,
+                                                                          includeNested=True)
 
         for template_link_obj in template_link_to_artifact_objs:
             relative_path = str(template_link_obj['relative_path'])
@@ -83,10 +84,10 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
             # directory path, and then if we haven't already processed that template into
             # an artifact elsewhere, we'll do so here...
 
-            as_relative_path = _absolute_to_relative_path(getattr(context, 'RootTemplateDirectory'), abs_local_p ath)
+            as_relative_path = _absolute_to_relative_path(getattr(context, 'RootTemplateDirectory'), abs_local_path)
             for prev_added_artifact in getattr(context, 'Artifact'):
                 prev_added_artifact = os.path.join(getattr(context, 'RootTemplateDirectory'),
-                                                 getattr(prev_added_artifact, 'path'))
+                                                   getattr(prev_added_artifact, 'path'))
                 if os.path.samefile(prev_added_artifact, abs_local_path):
                     continue
             _pack_artifacts(cmd, abs_local_path, context)
