@@ -1499,6 +1499,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
         with open(cert_file, "rt") as f:
             cert_string = f.read()
             cf.write(cert_string)
+    os.chmod(creds_file, 0o600)
 
     # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
     cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
