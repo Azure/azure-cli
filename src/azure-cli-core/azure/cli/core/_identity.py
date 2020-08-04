@@ -677,7 +677,10 @@ class MsalSecretStore:
             self._persist_cached_creds()
 
     def remove_all_cached_creds(self):
-        _delete_file(self._token_file)
+        try:
+            os.remove(self._token_file)
+        except FileNotFoundError:
+            pass
 
     def _persist_cached_creds(self):
         persistence = self._build_persistence()
