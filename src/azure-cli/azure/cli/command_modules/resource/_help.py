@@ -303,7 +303,7 @@ examples:
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
   - name: Create a deployment at subscription scope from a template-spec
     text: >
-        az deployment create --location WestUS --template-spec resourceID
+        az deployment create --location WestUS --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
 
 helps['deployment export'] = """
