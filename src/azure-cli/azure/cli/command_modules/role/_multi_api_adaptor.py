@@ -6,7 +6,7 @@
 from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 
 
-class MultiAPIAdaptor(object):
+class MultiAPIAdaptor:
     # We will bridge all the code difference here caused by SDK breaking changes
     def __init__(self, cli_ctx):
         self.old_api = supported_api_version(cli_ctx, resource_type=ResourceType.MGMT_AUTHORIZATION,

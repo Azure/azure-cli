@@ -235,7 +235,6 @@ class SqlVmScenarioTest(ScenarioTest):
         # test list sql vm should be empty
         self.cmd('sql vm list -g {}'.format(resource_group), checks=[NoneCheck()])
 
-    @unittest.skip('skip temporarily')
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_create')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm2')
@@ -425,8 +424,8 @@ class SqlVmScenarioTest(ScenarioTest):
 
 class SqlVmGroupScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account1')
-    @StorageAccountPreparer(parameter_name='storage_account2')
+    @StorageAccountPreparer(parameter_name='storage_account1', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='storage_account2', kind='StorageV2')
     def test_sqlvm_group_mgmt(self, resource_group, resource_group_location, storage_account1, storage_account2):
 
         name = 'sqlvmgroup'
@@ -436,15 +435,11 @@ class SqlVmGroupScenarioTest(ScenarioTest):
         operator_acc = 'myvmadmin'
         sql_service_acc = 'sqlservice'
 
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account1, resource_group))
-
         sa_1 = self.cmd('storage account show -n {} -g {}'
                         .format(storage_account1, resource_group)).get_output_in_json()
 
         key_1 = self.cmd('storage account keys list -n {} -g {}'
                          .format(storage_account1, resource_group)).get_output_in_json()
-
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account2, resource_group))
 
         sa_2 = self.cmd('storage account show -n {} -g {}'
                         .format(storage_account2, resource_group)).get_output_in_json()
@@ -517,11 +512,10 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
     """
     This is a very lengthy test, it may take more than 45 minutes to run.
     """
-    @unittest.skip('skip temporarily')
     @ResourceGroupPreparer()
     @DomainPreparer()
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_sqlvm_add_and_remove(self, resource_group, resource_group_location, domainvm, sqlvm1, storage_account):
 
         add_account_script = '\"Set-AdUser -UserPrincipalName admin123@domain.com -Identity admin123 -PasswordNeverExpires $true\"'
@@ -539,8 +533,6 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                          resource_group,
                          'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-vm-domain-join-existing/azuredeploy.json',
                          parameters_string))
-
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
 
         # Create the sqlvm group
         sa = self.cmd('storage account show -n {} -g {}'

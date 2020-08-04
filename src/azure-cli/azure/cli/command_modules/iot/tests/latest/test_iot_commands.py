@@ -403,7 +403,7 @@ class IoTHubTest(ScenarioTest):
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
-        containerName = 'iothubcontainer1'
+        containerName = 'iothubcontainer'
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'

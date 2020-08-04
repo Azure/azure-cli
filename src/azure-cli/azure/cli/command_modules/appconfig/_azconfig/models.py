@@ -11,7 +11,7 @@ import azure.cli.command_modules.appconfig._azconfig.constants as constants
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
 
-class KeyValue(object):
+class KeyValue:
     '''
     Key value class.
 
@@ -65,7 +65,7 @@ class QueryFields(Enum):
     ALL = KEY | LABEL | VALUE | CONTENT_TYPE | ETAG | LAST_MODIFIED | LOCKED | TAGS
 
 
-class QueryKeyValueOptions(object):
+class QueryKeyValueOptions:
     '''
     Query options for retriving the key-value
 
@@ -98,7 +98,7 @@ class QueryKeyValueOptions(object):
             uuid.uuid4()) if correlation_request_id is None else correlation_request_id
 
 
-class QueryKeyValueCollectionOptions(object):
+class QueryKeyValueCollectionOptions:
     '''
     Query options for retriving the key-values
 
@@ -137,7 +137,7 @@ class QueryKeyValueCollectionOptions(object):
             uuid.uuid4()) if correlation_request_id is None else correlation_request_id
 
 
-class ModifyKeyValueOptions(object):
+class ModifyKeyValueOptions:
     '''
     Options for modifying key-value
 
@@ -156,7 +156,7 @@ class ModifyKeyValueOptions(object):
             uuid.uuid4()) if correlation_request_id is None else correlation_request_id
 
 
-class ClientOptions(object):
+class ClientOptions:
     '''
     Options for customizing Azconfig client
 

@@ -17,10 +17,19 @@ except ImportError:
     import mock
 
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
-from azure.cli.command_modules.resource.custom import \
-    (_get_missing_parameters, _extract_lock_params, _process_parameters, _find_missing_parameters,
-     _prompt_for_parameters, _load_file_string_or_uri, deploy_arm_template_at_resource_group,
-     deploy_arm_template_at_subscription_scope, _what_if_deploy_arm_template_core)
+from azure.cli.command_modules.resource.custom import (
+    _get_missing_parameters,
+    _extract_lock_params,
+    _process_parameters,
+    _find_missing_parameters,
+    _prompt_for_parameters,
+    _load_file_string_or_uri,
+    _what_if_deploy_arm_template_core,
+    deploy_arm_template_at_resource_group,
+    deploy_arm_template_at_subscription_scope,
+    deploy_arm_template_at_management_group,
+    deploy_arm_template_at_tenant_scope,
+)
 
 
 def _simulate_no_tty():
@@ -352,6 +361,28 @@ class TestCustom(unittest.TestCase):
         prompt_y_n_mock.return_value = False
         # Act.
         result = deploy_arm_template_at_subscription_scope(mock.MagicMock(), confirm_with_what_if=True)
+        # Assert.
+        prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
+        self.assertIsNone(result)
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_management_group", autospec=True)
+    def test_confirm_with_what_if_prompt_at_management_group(self, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        prompt_y_n_mock.return_value = False
+        # Act.
+        result = deploy_arm_template_at_management_group(mock.MagicMock(), confirm_with_what_if=True)
+        # Assert.
+        prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
+        self.assertIsNone(result)
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_tenant_scope", autospec=True)
+    def test_confirm_with_what_if_prompt_at_tenant_scope(self, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        prompt_y_n_mock.return_value = False
+        # Act.
+        result = deploy_arm_template_at_tenant_scope(mock.MagicMock(), confirm_with_what_if=True)
         # Assert.
         prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
         self.assertIsNone(result)
