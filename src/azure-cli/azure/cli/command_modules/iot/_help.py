@@ -800,7 +800,7 @@ helps['iot central app delete'] = """
 type: command
 short-summary: Delete an IoT Central application.
 long-summary: |
-    Permanently delete your IoT Central app. 
+    Permanently delete your IoT Central app.
     -Warning- This operation is irreversible. Once you've deleted your app, you cannot restore it.
 examples:
   - name: Deletes an IoT Central app called 'my-first-iot-app'.
@@ -810,7 +810,7 @@ examples:
 helps['iot central app list'] = """
 type: command
 short-summary: List IoT Central applications.
-long-summary: All of the IoT Central apps that are part of your subscription. 
+long-summary: All of the IoT Central apps that are part of your subscription.
 examples:
   - name: List all IoT Central apps in my subscription.
     text: >
