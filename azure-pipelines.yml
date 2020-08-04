@@ -881,18 +881,17 @@ jobs:
   dependsOn: AutomationTest
   condition: succeeded()
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
+      TargetPath: '$(Build.ArtifactStagingDirectory)/command_coverage'
+      artifactName: command_coverage
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - script: |
-       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
-       set
-
-       build_scripts/windows/scripts/build.cmd
+       cp $(System.ArtifactsDirectory)/command_coverage/az_command_coverage.txt ./az_command_coverage.txt
+       set -ev
+       . env/bin/activate
+       azdev linter test storage
     displayName: 'Build Windows MSI'
