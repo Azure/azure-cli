@@ -157,11 +157,13 @@ def get_content(container):
     """
 
     # summary
+    print('Generating summary...')
     items = []
     for root, dirs, files in os.walk(ARTIFACT_DIR):
         for name in files:
             if name.endswith('json'):
                 try:
+                    print('Reading '.format(name))
                     module = name.split('.')[0]
                     with open(os.path.join(root, name)) as f:
                         result = json.loads(f.read())
@@ -174,6 +176,7 @@ def get_content(container):
                         rate = 1 if total == 0 else passed / total
                         rate = '{:.2%}'.format(rate)
                         items.append(module, passed, failed, rate)
+                        print('module: {}, passed: {}, failed: {}, rate: {}'.format(module, passed, failed, rate))
                         passed_sum += passed
                         failed_sum += failed
                 except Exception:
@@ -203,6 +206,7 @@ def get_content(container):
       </tr>
     </table>
     """.format(passed_sum, failed_sum, rate_sum)
+    print('module: Total, passed: {}, failed: {}, rate: {}'.format(passed_sum, failed_sum, rate_sum))
 
     content += table
 
