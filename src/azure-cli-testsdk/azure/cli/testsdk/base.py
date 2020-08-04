@@ -29,7 +29,7 @@ logger = logging.getLogger('azure.cli.testsdk')
 
 
 ENV_COMMAND_COVERAGE = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
-COVERAGE_FILE = 'az_command_coverage.txt'
+COVERAGE_FILE = 'AZURE_CLI_TEST_COMMAND_COVERAGE_FILE_PATH'
 
 
 class CheckerMixin(object):
@@ -230,7 +230,8 @@ class ExecutionResult(object):
         cli_ctx.data['_cache'] = None
 
         if os.environ.get(ENV_COMMAND_COVERAGE, None):
-            with open(COVERAGE_FILE, 'a') as coverage_file:
+            file_path = os.environ.get(COVERAGE_FILE, 'az_command_coverage.txt')
+            with open(file_path, 'a') as coverage_file:
                 if command.startswith('az '):
                     command = command[3:]
                 saved_command = command.replace('\n', ' ')
