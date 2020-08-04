@@ -2266,7 +2266,7 @@ examples:
   - name: Export the specified template spec with all versions.
     text: az template-specs export -g testrg --name TemplateSpecName --output-folder C:/path/
   - name: Export the specified template spec.
-    text: az template-specs export -t resourceID --output-folder C:/path/
+    text: az template-specs export -s resourceID --output-folder C:/path/
   - name: Export the specified template spec version.
     text: az template-specs export -g testrg --name TemplateSpecName --version VersionName --output-folder C:/path/
 """
