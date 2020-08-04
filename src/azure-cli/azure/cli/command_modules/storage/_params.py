@@ -691,7 +691,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                      'account name.')
         c.extra('source_connection_string', arg_group='Copy source',
                 help='Connection string of source storage account.')
-        c.extra('source_account_sas', arg_group='Copy source',
+        c.extra('source_sas', arg_group='Copy source',
                 help='Shared Access Signature (SAS) token of copy source. Must be used in conjunction with storage '
                      'account name.')
         c.argument('put_md5', arg_group='Additional Flags', action='store_true',

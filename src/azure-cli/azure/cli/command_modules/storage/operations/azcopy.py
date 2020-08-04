@@ -89,9 +89,8 @@ def storage_copy(cmd, source=None,
 
         # Add sas in url
         if sas_token:
-            if kwargs.pop('sas_token', None):
-                source_sas = source_sas.lstrip('?')
-                return '{}{}{}'.format(source, '?', source_sas)
+            source_sas = sas_token.lstrip('?')
+            return '{}{}{}'.format(source, '?', source_sas)
         if not account_key:
             account_key = _query_account_key(cmd.cli_ctx, account_name)
         if not sas_token:
@@ -103,7 +102,7 @@ def storage_copy(cmd, source=None,
                                    source_blob, source_share, source_file_path, source_local_path,
                                    account_key=kwargs.pop('source_account_key', None),
                                    connection_string=kwargs.pop('source_connection_string', None),
-                                   sas_token=kwargs.pop('source_connection_string', None))
+                                   sas_token=kwargs.pop('source_sas', None))
     full_destination = get_url_with_sas(destination, account_name, destination_container,
                                         destination_blob, destination_share, destination_file_path,
                                         destination_local_path,
