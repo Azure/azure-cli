@@ -163,7 +163,7 @@ def get_content(container):
         for name in files:
             if name.endswith('json'):
                 try:
-                    print('Reading '.format(name))
+                    print('Reading {}'.format(name))
                     module = name.split('.')[0]
                     with open(os.path.join(root, name)) as f:
                         result = json.loads(f.read())
@@ -180,7 +180,7 @@ def get_content(container):
                         passed_sum += passed
                         failed_sum += failed
                 except Exception:
-                    pass
+                    traceback.print_exc()
 
     sorted(items, key=lambda x: x[0])
 
