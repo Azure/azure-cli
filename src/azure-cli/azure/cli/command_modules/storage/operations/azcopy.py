@@ -24,7 +24,7 @@ def storage_copy(cmd, source=None,
                  source_share=None,
                  source_file_path=None,
                  source_local_path=None,
-                 destination_account_name=None,
+                 account_name=None,
                  destination_container=None,
                  destination_blob=None,
                  destination_share=None,
@@ -104,9 +104,12 @@ def storage_copy(cmd, source=None,
                                    account_key=kwargs.pop('source_account_key', None),
                                    connection_string=kwargs.pop('source_connection_string', None),
                                    sas_token=kwargs.pop('source_connection_string', None))
-    full_destination = get_url_with_sas(destination, destination_account_name, destination_container,
+    full_destination = get_url_with_sas(destination, account_name, destination_container,
                                         destination_blob, destination_share, destination_file_path,
-                                        destination_local_path, sas_token=kwargs.pop('sas_token', None))
+                                        destination_local_path,
+                                        account_key=kwargs.pop('account_key', None),
+                                        connection_string=kwargs.pop('connection_string', None),
+                                        sas_token=kwargs.pop('sas_token', None))
 
     azcopy = AzCopy()
     flags = []
