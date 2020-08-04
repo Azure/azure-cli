@@ -22,7 +22,7 @@ def main():
     else:
         mode = ''
     container = date + mode
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {}'
+    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'
     os.popen(cmd.format(container, ACCOUNT_KEY))
 
     # Upload files
