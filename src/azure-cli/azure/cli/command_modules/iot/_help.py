@@ -837,6 +837,7 @@ helps['iot central app update'] = """
 type: command
 short-summary: Update metadata for an IoT Central application.
 long-summary: Update metadata, like app name, subdomain, pricing plan, and location.
+examples:
   - name: Update the SKU for 'my-first-iot-app'
     text: >
         az iot central app update -n my-first-iot-app -g MyResourceGroup --set sku.name=ST1
