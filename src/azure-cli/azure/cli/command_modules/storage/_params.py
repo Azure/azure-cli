@@ -778,14 +778,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination_account_name', arg_group='Copy Destination',
                    help='Storage account name of copy destination',
                    deprecate_info=c.deprecate(redirect='--account-name', hide=True))
-        c.extra('source_account_name'.format(item), arg_group='Copy source',
+        c.extra('source_account_name', arg_group='Copy source',
                 help='Account name of copy source storage account.')
-        c.extra('source_account_key'.format(item), arg_group='Copy source',
+        c.extra('source_account_key', arg_group='Copy source',
                 help='Account key of copy source storage account. Must be used in conjunction with storage '
                      'account name.')
-        c.extra('source_connection_string'.format(item), arg_group='Copy source',
+        c.extra('source_connection_string', arg_group='Copy source',
                 help='Connection string of source storage account.')
-        c.extra('source_account_sas'.format(item), arg_group='Copy source',
+        c.extra('source_account_sas', arg_group='Copy source',
                 help='Shared Access Signature (SAS) token of copy source. Must be used in conjunction with storage '
                      'account name.')
         c.argument('put_md5', arg_group='Additional Flags', action='store_true',
