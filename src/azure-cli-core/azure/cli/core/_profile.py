@@ -16,7 +16,7 @@ from enum import Enum
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import in_cloud_console, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore
+from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, adal_resource_to_msal_scopes
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -93,16 +93,6 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
-def _adal_resource_to_msal_scopes(resource):
-    """
-    Convert the ADAL resource ID to MSAL scope by appending the /.default suffix. For example:
-    'https://management.core.windows.net/' -> ('https://management.core.windows.net/.default',)
-    :param resource: The ADAL resource ID
-    :return: A iterable scopes tuple
-    """
-    return resource.rstrip('/') + "/.default",
-
-
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
 class Profile(object):
 
@@ -128,7 +118,7 @@ class Profile(object):
         self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
-        self._msal_authenticate_scopes = authenticate_scopes or _adal_resource_to_msal_scopes(self._ad_resource_uri)
+        self._msal_authenticate_scopes = authenticate_scopes or adal_resource_to_msal_scopes(self._ad_resource_uri)
 
     # pylint: disable=too-many-branches,too-many-statements
     def login(self,

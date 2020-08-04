@@ -61,7 +61,7 @@ class Identity:
         self._cred_cache = kwargs.pop('cred_cache', None)
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
         self.scopes = scopes
-        self.__msal_app = None
+        self._msal_app_instance = None
         # Store for Service principal credential persistence
         self._msal_store = MsalSecretStore(fallback_to_plaintext=self.allow_unencrypted)
 
@@ -74,22 +74,26 @@ class Identity:
         self.credential_kwargs = {}
         self.credential_kwargs.update(change_ssl_cert_verification_track2())
 
+    def _build_persistent_msal_app(self, authority):
+        # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
+        from msal import PublicClientApplication
+        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
+        from azure.identity._internal.persistent_cache import load_user_cache
+
+        # Store for user token persistence
+        cache = load_user_cache(self.allow_unencrypted)
+        msal_app = PublicClientApplication(authority=authority, client_id=self.client_id,
+                                           token_cache=cache,
+                                           verify=self.credential_kwargs.get('connection_verify', True))
+        return msal_app
+
     @property
     def _msal_app(self):
-        if not self.__msal_app:
-            # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
-            from msal import PublicClientApplication
-            # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
-            from azure.identity._internal.persistent_cache import load_user_cache
-
-            # Store for user token persistence
-            cache = load_user_cache(self.allow_unencrypted)
-            # Build the authority in MSAL style
+        if not self._msal_app_instance:
+            # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
             msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
-            self.__msal_app = PublicClientApplication(authority=msal_authority, client_id=self.client_id,
-                                                      token_cache=cache,
-                                                      verify=self.credential_kwargs.get('connection_verify', True))
-        return self.__msal_app
+            self._msal_app_instance = self._build_persistent_msal_app(msal_authority)
+        return self._msal_app_instance
 
     def login_with_interactive_browser(self):
         # Use InteractiveBrowserCredential
@@ -304,10 +308,12 @@ class Identity:
     def get_user_credential(self, username):
         accounts = self._msal_app.get_accounts(username)
         if not accounts:
-            self._migrate_adal_to_msal(username)
+            self._migrate_adal_to_msal()
             accounts = self._msal_app.get_accounts(username)
 
         # TODO: Confirm with MSAL team that username can uniquely identify the account
+        if not accounts:
+            raise CLIError("User doesn't exist in the credential cache.")
         account = accounts[0]
         auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
                                            account['home_account_id'], username)
@@ -343,29 +349,33 @@ class Identity:
         decoded = json.loads(decoded_str)
         return decoded
 
-    def _migrate_adal_to_msal(self, username):
+    def _migrate_adal_to_msal(self):
+        """Migrate ADAL token cache to MSAL."""
         logger.debug("Trying to migrate token from ADAL cache.")
 
         entries = AdalCredentialCache()._load_tokens_from_file()
         adal_refresh_token = None
+        processed_usernames = []
         for entry in entries:
             # TODO: refine the filter logic
-            if entry.get('userId') == username:
-                adal_refresh_token = entry['refreshToken']
-                break
+            if 'userId' in entry:
+                # User account
+                username = entry['userId']
+                authority = entry['_authority']
+                scopes = adal_resource_to_msal_scopes(entry['resource'])
+                refresh_token = entry['refreshToken']
 
-        if not adal_refresh_token:
-            # No token entry found in MSAL or ADAL
-            raise CLIError("Couldn't find token from MSAL or ADAL (legacy) cache. "
-                           "Please run `az login` to setup account.")
-
-        # TODO: Use ARM scope according to the current selected cloud
-        token_dict = self._msal_app.acquire_token_by_refresh_token(
-            adal_refresh_token, scopes=['https://management.core.windows.net/.default'])
-        if 'error' in token_dict:
-            raise CLIError("Failed to migrate token from ADAL cache to MSAL cache. {}".format(token_dict))
-        logger.warning("Token for account %s has been migrated from ADAL cache to MSAL cache.", username)
-        self._serialize_token_cache()
+                msal_app = self._build_persistent_msal_app(authority)
+                # TODO: Not work in ADFS:
+                # {'error': 'invalid_grant', 'error_description': "MSIS9614: The refresh token received in 'refresh_token' parameter is invalid."}
+                logger.warning("Migrating ADAL token: username: %s, authority: %s, scopes: %s",
+                               username, authority, scopes)
+                token_dict = msal_app.acquire_token_by_refresh_token(refresh_token, scopes)
+                if 'error' in token_dict:
+                    raise CLIError("Failed to migrate token from ADAL cache to MSAL cache. {}".format(token_dict))
+            else:
+                # Service principal account
+                pass
 
     def _serialize_token_cache(self):
         # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
@@ -705,3 +715,13 @@ class MsalSecretStore:
                 # todo: add missing lib in message
                 logger.warning("Encryption unavailable. Opting in to plain text.")
         return FilePersistence(self._token_file)
+
+
+def adal_resource_to_msal_scopes(resource):
+    """
+    Convert the ADAL resource ID to MSAL scope by appending the /.default suffix. For example:
+    'https://management.core.windows.net/' -> ('https://management.core.windows.net/.default',)
+    :param resource: The ADAL resource ID
+    :return: A iterable scopes tuple
+    """
+    return [resource.rstrip('/') + "/.default"]
