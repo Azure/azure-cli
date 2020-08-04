@@ -522,8 +522,6 @@ def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
     sub_mod_prefix = kwargs.get('mod', None)
     operation_group = kwargs.get('operation_group', None)
     sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group)
-    if str(resource_type) == "ResourceType.MGMT_RESOURCE_TEMPLATESPECS":
-        sdk_path = 'azure.mgmt.resource.templatespecs.v2019_06_preview'
     if not attr_args:
         # No attributes to load. Return the versioned sdk
         return import_module(sdk_path)
