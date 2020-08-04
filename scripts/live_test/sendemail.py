@@ -175,7 +175,7 @@ def get_content(container):
                         total = passed + failed
                         rate = 1 if total == 0 else passed / total
                         rate = '{:.2%}'.format(rate)
-                        items.append(module, passed, failed, rate)
+                        items.append((module, passed, failed, rate))
                         print('module: {}, passed: {}, failed: {}, rate: {}'.format(module, passed, failed, rate))
                         passed_sum += passed
                         failed_sum += failed
