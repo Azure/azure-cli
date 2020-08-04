@@ -50,9 +50,9 @@ def _get_recommend_from_local(last_cmd, last_param, request_type, top_num=5, ext
         if item['command'] == last_cmd:
             if last_cmd == 'notification-hub namespace create':
                 if fix_error:
-                    return item['nextCommand'][1:]
+                    return item['nextCommand'][2:]
                 else:
-                    return [item['nextCommand'][0]]
+                    return item['nextCommand'][:2]
             return item['nextCommand']
 
     return []
