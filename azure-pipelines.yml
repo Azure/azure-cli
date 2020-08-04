@@ -895,5 +895,5 @@ jobs:
        cp $(System.ArtifactsDirectory)/command_coverage/az_command_coverage.txt ./az_command_coverage.txt
        set -ev
        . env/bin/activate
-       azdev linter test storage
-    displayName: 'Build Windows MSI'
+       azdev linter test --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+    displayName: 'Test Coverage Result'
