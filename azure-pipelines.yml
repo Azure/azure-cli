@@ -886,6 +886,10 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/command_coverage'
       artifactName: command_coverage
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.6
   - template: .azure-pipelines/templates/azdev_setup.yml
   - script: |
        cp $(System.ArtifactsDirectory)/command_coverage/az_command_coverage.txt ./az_command_coverage.txt
