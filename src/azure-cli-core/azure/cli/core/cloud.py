@@ -72,7 +72,8 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  ossrdbms_resource_id=None,
                  log_analytics_resource_id=None,
                  app_insights_resource_id=None,
-                 app_insights_telemetry_channel_resource_id=None):
+                 app_insights_telemetry_channel_resource_id=None,
+                 synapse_analytics_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -90,6 +91,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.log_analytics_resource_id = log_analytics_resource_id
         self.app_insights_resource_id = app_insights_resource_id
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
+        self.synapse_analytics_resource_id = synapse_analytics_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -123,7 +125,8 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
                  acr_login_server_endpoint=None,
                  mysql_server_endpoint=None,
                  postgresql_server_endpoint=None,
-                 mariadb_server_endpoint=None):
+                 mariadb_server_endpoint=None,
+                 synapse_analytics_endpoint=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.storage_sync_endpoint = storage_sync_endpoint
@@ -135,6 +138,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
         self.acr_login_server_endpoint = acr_login_server_endpoint
+        self.synapse_analytics_endpoint = synapse_analytics_endpoint
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -174,6 +178,14 @@ def _get_storage_sync_endpoint(cloud_name):
     return storage_sync_endpoint_mapper.get(cloud_name, None)
 
 
+def _get_synapse_analytics_endpoint(cloud_name):
+    synapse_analytics_endpoint_mapper = {
+        'AzureCloud': 'dev.azuresynapse.net',
+        'AzureChinaCloud': 'dev.azuresynapse.azure.cn'
+    }
+    return synapse_analytics_endpoint_mapper.get(cloud_name, None)
+
+
 def _get_database_server_endpoint(sql_server_hostname, cloud_name):
     def _concat_db_server_endpoint(db_prefix):
         if cloud_name == 'AzureCloud':
@@ -209,6 +221,14 @@ def _get_app_insights_resource_id(cloud_name):
         'AzureUSGovernment': 'https://api.applicationinsights.us'
     }
     return app_insights_resource_id_mapper.get(cloud_name, None)
+
+
+def _get_synapse_analytics_resource_id(cloud_name):
+    synapse_analytics_resource_id_mapper = {
+        'AzureCloud': 'https://dev.azuresynapse.net',
+        'AzureChinaCloud': 'https://dev.azuresynapse.net'
+    }
+    return synapse_analytics_resource_id_mapper.get(cloud_name, None)
 
 
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
@@ -257,6 +277,7 @@ def _arm_to_cli_mapper(arm_dict):
             active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,
             app_insights_resource_id=get_endpoint('appInsightsResourceId', fallback_value=_get_app_insights_resource_id(arm_dict['name'])),
             log_analytics_resource_id=get_endpoint('logAnalyticsResourceId', fallback_value=_get_log_analytics_resource_id(arm_dict['name'])),
+            synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=_get_synapse_analytics_resource_id(arm_dict['name'])),
             app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=_get_app_insights_telemetry_channel_resource_id(arm_dict['name']))),
         suffixes=CloudSuffixes(
             storage_endpoint=get_suffix('storage'),
@@ -268,6 +289,7 @@ def _arm_to_cli_mapper(arm_dict):
             mariadb_server_endpoint=get_suffix('mariadbServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mariadb')),
             azure_datalake_store_file_system_endpoint=get_suffix('azureDataLakeStoreFileSystem'),
             azure_datalake_analytics_catalog_and_job_endpoint=get_suffix('azureDataLakeAnalyticsCatalogAndJob'),
+            synapse_analytics_endpoint=get_suffix('synapseAnalytics', add_dot=True, fallback_value=_get_synapse_analytics_endpoint(arm_dict['name'])),
             acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True)))
 
 
@@ -315,7 +337,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net',
         app_insights_resource_id='https://api.applicationinsights.io',
         log_analytics_resource_id='https://api.loganalytics.io',
-        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track'),
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track',
+        synapse_analytics_resource_id='https://dev.azuresynapse.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         storage_sync_endpoint='afs.azure.net',
@@ -326,7 +349,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         mariadb_server_endpoint='.mariadb.database.azure.com',
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
         azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net',
-        acr_login_server_endpoint='.azurecr.io'))
+        acr_login_server_endpoint='.azurecr.io',
+        synapse_analytics_endpoint='.dev.azuresynapse.net'))
 
 AZURE_CHINA_CLOUD = Cloud(
     'AzureChinaCloud',
@@ -345,7 +369,8 @@ AZURE_CHINA_CLOUD = Cloud(
         ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn',
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
-        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track'),
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
+        synapse_analytics_resource_id='https://dev.azuresynapse.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -353,7 +378,8 @@ AZURE_CHINA_CLOUD = Cloud(
         mysql_server_endpoint='.mysql.database.chinacloudapi.cn',
         postgresql_server_endpoint='.postgres.database.chinacloudapi.cn',
         mariadb_server_endpoint='.mariadb.database.chinacloudapi.cn',
-        acr_login_server_endpoint='.azurecr.cn'))
+        acr_login_server_endpoint='.azurecr.cn',
+        synapse_analytics_endpoint='.dev.azuresynapse.azure.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
     'AzureUSGovernment',
