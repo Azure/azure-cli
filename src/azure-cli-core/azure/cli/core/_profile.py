@@ -42,6 +42,8 @@ _CLIENT_ID = 'clientId'
 _CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
+_TOKEN_CACHE_PROVIDER = 'tokenCacheProvider'
+_TOKEN_CACHE_PROVIDER_MSAL = 'MSAL'
 _ENVIRONMENT_NAME = 'environmentName'
 _STATE = 'state'
 _USER_TYPE = 'type'
@@ -553,6 +555,15 @@ class Profile(object):
         return None, None
 
     def _create_identity_credential(self, account, aux_tenant_id=None):
+        # Check if the token has been migrated to MSAL by checking "tokenCacheProvider": "MSAL"
+        # If not yet, do it now
+        provider = self._storage.get(_TOKEN_CACHE_PROVIDER)
+        if provider != _TOKEN_CACHE_PROVIDER_MSAL:
+            identity = Identity()
+            identity.migrate_adal_to_msal()
+            # "tokenCacheProvider": "MSAL"
+            self._storage[_TOKEN_CACHE_PROVIDER] = _TOKEN_CACHE_PROVIDER_MSAL
+
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
