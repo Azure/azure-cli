@@ -37,6 +37,9 @@ def _get_recommend_from_local(last_cmd, last_param, request_type, top_num=5, ext
 
     for item in db['data']:
         if item['command'] == last_cmd:
+            if last_cmd == 'notification-hub namespace create':
+                # return [item['nextCommand'][0]]
+                return item['nextCommand'][1:]
             return item['nextCommand']
 
     return []
@@ -133,10 +136,11 @@ Please select the type of recommendation you need:
         args.append(param)
         args.append(value)
 
-    invocation = cmd.cli_ctx.invocation_cls(cli_ctx=cmd.cli_ctx,
-                                            parser_cls=cmd.cli_ctx.parser_cls,
-                                            commands_loader_cls=cmd.cli_ctx.commands_loader_cls,
-                                            help_cls=cmd.cli_ctx.help_cls)
-    _update_last_cmd(nx_cmd)
-    ret = invocation.execute(args)
-    return ret
+    # invocation = cmd.cli_ctx.invocation_cls(cli_ctx=cmd.cli_ctx,
+    #                                         parser_cls=cmd.cli_ctx.parser_cls,
+    #                                         commands_loader_cls=cmd.cli_ctx.commands_loader_cls,
+    #                                         help_cls=cmd.cli_ctx.help_cls)
+    # _update_last_cmd(nx_cmd)
+    # ret = invocation.execute(args)
+    ret = cmd.cli_ctx.invoke(args)
+    return None
