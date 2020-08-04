@@ -873,3 +873,26 @@ jobs:
       displayName: "Install pip and wheel"
     - bash: ./scripts/ci/test_ref_doc.sh
       displayName: "Verify Sphinx Document Generator"
+
+
+- job: TestCoverage
+  displayName: Test Coverage
+
+  dependsOn: AutomationTest
+  condition: succeeded()
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+
+  - script: |
+       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+       set
+
+       build_scripts/windows/scripts/build.cmd
+    displayName: 'Build Windows MSI'
