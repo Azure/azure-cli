@@ -435,8 +435,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         # Download a single file with source account key
         local_folder = self.create_temp_dir()
         self.cmd('storage copy --source-account-name {} --source-account-key {} --source-container {} --source-blob {} '
-                 '--destination-local-path "{}"'.format(
-            first_account, first_account_info[1].strip(), first_container, 'readme', local_folder))
+                 '--destination-local-path "{}"'.format(first_account, first_account_info[1].strip(), first_container,
+                                                        'readme', local_folder))
         self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download entire directory with source connection string
@@ -450,8 +450,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         first_sas_token = self.cmd(
             'storage container generate-sas --connection-string {} -n {} --expiry {} --permissions {} -o tsv'.format(
-            first_connection_string, first_container, expiry, 'rwalcd')).output.strip()
-        self.cmd('storage copy --source-account-name {} --source-sas {} --source-container {} --include-path {} --include-pattern {} --destination-local-path "{}" --recursive'
+             first_connection_string, first_container, expiry, 'rwalcd')).output.strip()
+        self.cmd('storage copy --source-account-name {} --source-sas {} --source-container {} --include-path {} '
+                 '--include-pattern {} --destination-local-path "{}" --recursive'
                  .format(first_account, first_sas_token, first_container, 'apple', 'file*', local_folder))
         self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
@@ -476,7 +477,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage container list ', second_account_info).assert_with_checks(
             JMESPathCheck('length(@)', 2))
         self.storage_cmd('storage blob list -c {} ', second_account_info, second_container)\
-            .assert_with_checks(JMESPathCheck('length(@)', 22))
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
