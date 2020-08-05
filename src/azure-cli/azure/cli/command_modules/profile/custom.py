@@ -112,7 +112,7 @@ def account_clear(cmd, clear_credential=False):
 
 # pylint: disable=inconsistent-return-statements
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, tenant_access=False):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, tenant_access=False, environment=False):
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
@@ -122,6 +122,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
+    if any([password, service_principal, username, identity, use_device_code]) and environment:
+        raise CLIError("usage error: '--environment' is not applicable with other arguments")
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
@@ -146,6 +148,9 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
                 raise CLIError('Please specify both username and password in non-interactive mode.')
     else:
         interactive = True
+
+    if environment:
+        return profile.login_with_environment_credential(find_subscriptions=not tenant_access)
 
     try:
         subscriptions = profile.login(

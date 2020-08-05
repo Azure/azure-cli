@@ -16,7 +16,8 @@ from enum import Enum
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import in_cloud_console, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, adal_resource_to_msal_scopes
+from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, adal_resource_to_msal_scopes, \
+    AZURE_CLI_CLIENT_ID
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -49,6 +50,7 @@ _STATE = 'state'
 _USER_TYPE = 'type'
 _USER = 'user'
 _SERVICE_PRINCIPAL = 'servicePrincipal'
+_IS_ENVIRONMENT_CREDENTIAL = 'isEnvironmentCredential'
 _SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH = 'useCertSNIssuerAuth'
 _TOKEN_ENTRY_USER_ID = 'userId'
 _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
@@ -99,16 +101,17 @@ def _get_cloud_console_token_endpoint():
 class Profile(object):
 
     def __init__(self, cli_ctx=None, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
-                 async_persist=True, authenticate_scopes=None):
-        """
+                 async_persist=True, client_id=AZURE_CLI_CLIENT_ID, authenticate_scopes=None):
+        """Class to manage CLI's accounts (profiles) and identities (credentials).
 
+        :param cli_ctx:
         :param storage:
         :param auth_ctx_factory:
         :param use_global_creds_cache:
         :param async_persist:
+        :param client_id: The AAD client ID for the CLI application. Default to Azure CLI's client ID.
         :param authenticate_scopes: The initial scopes for authentication (/authorize), it must include all scopes
-            for following get_token calls.
-        :param cli_ctx:
+            for following get_token calls. Default to Azure Resource Manager of the current cloud.
         """
         from azure.cli.core import get_default_cli
 
@@ -120,6 +123,7 @@ class Profile(object):
         self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
+        self._client_id = client_id
         self._msal_authenticate_scopes = authenticate_scopes or adal_resource_to_msal_scopes(self._ad_resource_uri)
 
     # pylint: disable=too-many-branches,too-many-statements
@@ -177,7 +181,7 @@ class Profile(object):
             if tenant and credential:
                 subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
             elif credential and auth_record:
-                subscriptions = subscription_finder.find_using_common_tenant(auth_record, credential)
+                subscriptions = subscription_finder.find_using_common_tenant(auth_record.username, credential)
             if not allow_no_subscriptions and not subscriptions:
                 if username:
                     msg = "No subscriptions found for {}.".format(username)
@@ -195,6 +199,7 @@ class Profile(object):
                 if not subscriptions:
                     return []
         else:
+            # Build a tenant account
             bare_tenant = tenant or auth_record.tenant_id
             subscriptions = self._build_tenant_level_accounts([bare_tenant])
 
@@ -287,8 +292,49 @@ class Profile(object):
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
+    def login_with_environment_credential(self, find_subscriptions=True):
+        identity = Identity(scopes=self._msal_authenticate_scopes)
+
+        tenant = os.environ.get('AZURE_TENANT_ID')
+        username = os.environ.get('AZURE_USERNAME')
+        client_id = os.environ.get('AZURE_CLIENT_ID')
+
+        if username:
+            user_type = _USER
+            # If the user doesn't provide AZURE_CLIENT_ID, fill it will CLI's client ID
+            if not client_id:
+                logger.info("set AZURE_CLIENT_ID=%s", self._client_id)
+                os.environ['AZURE_CLIENT_ID'] = self._client_id
+        else:
+            user_type = _SERVICE_PRINCIPAL
+
+        credential = identity.get_environment_credential()
+
+        if find_subscriptions:
+            subscription_finder = SubscriptionFinder(self.cli_ctx)
+            if tenant:
+                logger.info('Finding subscriptions under tenant %s.', tenant)
+                subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
+            else:
+                logger.info('Finding subscriptions under all available tenants.')
+                subscriptions = subscription_finder.find_using_common_tenant(username, credential)
+        else:
+            # Build a tenant account
+            if not tenant:
+                # For user account, tenant may not be given. As credential._credential is a UsernamePasswordCredential,
+                # call `authenticate` to get the home tenant ID
+                authentication_record = credential._credential.authenticate(scopes=self._msal_authenticate_scopes)
+                tenant = authentication_record.tenant_id
+            subscriptions = self._build_tenant_level_accounts([tenant])
+
+        consolidated = self._normalize_properties(username or client_id, subscriptions,
+                                                  is_service_principal=(user_type == _SERVICE_PRINCIPAL),
+                                                  is_environment=True)
+        self._set_subscriptions(consolidated)
+        return deepcopy(consolidated)
+
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
-                              user_assigned_identity_id=None, managed_identity_info=None):
+                              user_assigned_identity_id=None, managed_identity_info=None, is_environment=False):
         import sys
         consolidated = []
         for s in subscriptions:
@@ -306,7 +352,8 @@ class Profile(object):
                 _STATE: s.state.value,
                 _USER_ENTITY: {
                     _USER_NAME: user,
-                    _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
+                    _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER,
+                    _IS_ENVIRONMENT_CREDENTIAL: is_environment
                 },
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
@@ -568,6 +615,7 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
+        is_environment = account[_USER_ENTITY][_IS_ENVIRONMENT_CREDENTIAL]
 
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         identity = Identity(authority, tenant_id, cred_cache=self._adal_cache)
@@ -577,6 +625,10 @@ class Profile(object):
                 if aux_tenant_id:
                     raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
                 return Identity.get_managed_identity_credential()
+
+            # EnvironmentCredential. Ignore user_type
+            if is_environment:
+                return identity.get_environment_credential()
 
             # User
             if user_type == _USER:
@@ -791,7 +843,7 @@ class SubscriptionFinder(object):
         self.tenants = [tenant]
         return result
 
-    def find_using_common_tenant(self, auth_record, credential=None):
+    def find_using_common_tenant(self, username, credential=None):
         import adal
         all_subscriptions = []
         empty_tenants = []
@@ -815,7 +867,7 @@ class SubscriptionFinder(object):
                                 allow_unencrypted=self.cli_ctx.config
                                 .getboolean('core', 'allow_fallback_to_plaintext', fallback=True))
             try:
-                specific_tenant_credential = identity.get_user_credential(auth_record.username)
+                specific_tenant_credential = identity.get_user_credential(username)
                 # todo: remove after ADAL deprecation
                 if self.adal_cache:
                     self.adal_cache.add_credential(specific_tenant_credential)
@@ -831,6 +883,8 @@ class SubscriptionFinder(object):
                 else:
                     logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
+
+            logger.info("Finding subscriptions under tenant %s.", tenant_id)
             subscriptions = self.find_using_specific_tenant(
                 tenant_id,
                 specific_tenant_credential)

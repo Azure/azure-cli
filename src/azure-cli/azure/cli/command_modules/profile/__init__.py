@@ -69,6 +69,9 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('use_device_code', action='store_true',
                        help="Use CLI's old authentication flow based on device code. CLI will also use this if it can't launch a browser in your behalf, e.g. in remote SSH or Cloud Shell")
             c.argument('use_cert_sn_issuer', action='store_true', help='used with a service principal configured with Subject Name and Issuer Authentication in order to support automatic certificate rolls')
+            c.argument('environment', options_list=['--environment', '-e'], action='store_true',
+                       help='Use EnvironmentCredential. Both user and service principal accounts are supported. '
+                            'For required environment variables, see https://docs.microsoft.com/en-us/python/api/overview/azure/identity-readme?view=azure-python#environment-variables')
 
         with self.argument_context('logout') as c:
             c.argument('username', options_list=['--username', '-u'], help='account user, if missing, logout the current active account')

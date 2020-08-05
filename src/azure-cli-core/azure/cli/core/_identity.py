@@ -19,10 +19,12 @@ from azure.identity import (
     UsernamePasswordCredential,
     ClientSecretCredential,
     CertificateCredential,
-    ManagedIdentityCredential
+    ManagedIdentityCredential,
+    EnvironmentCredential
 )
 
-_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
+AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
+
 logger = get_logger(__name__)
 
 _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
@@ -57,7 +59,7 @@ class Identity:
         """
         self.authority = authority
         self.tenant_id = tenant_id or "organizations"
-        self.client_id = client_id or _CLIENT_ID
+        self.client_id = client_id or AZURE_CLI_CLIENT_ID
         self._cred_cache = kwargs.pop('cred_cache', None)
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
         self.scopes = scopes
@@ -331,6 +333,9 @@ class Identity:
             return CertificateCredential(self.tenant_id, client_id, certificate_path)
         raise CLIError("Secret of service principle {} not found. Please run 'az login'".format(client_id))
 
+    def get_environment_credential(self):
+        return EnvironmentCredential(**self.credential_kwargs)
+
     @staticmethod
     def get_managed_identity_credential(client_id=None):
         return ManagedIdentityCredential(client_id=client_id)
@@ -499,7 +504,7 @@ class AdalCredentialCache:
     def add_credential(self, credential):
         try:
             query = {
-                "client_id": _CLIENT_ID,
+                "client_id": AZURE_CLI_CLIENT_ID,
                 "environment": credential._auth_record.authority,
                 "home_account_id": credential._auth_record.home_account_id
             }
@@ -517,7 +522,7 @@ class AdalCredentialCache:
                 "userId": credential._auth_record.username,
                 "accessToken": access_token.token,
                 "refreshToken": refresh_token[0]['secret'],
-                "_clientId": _CLIENT_ID,
+                "_clientId": AZURE_CLI_CLIENT_ID,
                 "_authority": self._cli_ctx.cloud.endpoints.active_directory.rstrip('/') +
                 "/" + credential._auth_record.tenant_id,  # pylint: disable=bad-continuation
                 "isMRRT": True
