@@ -298,9 +298,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_deployment_script', confirmation=True)
 
     with self.command_group('template-specs', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, is_preview=True) as g:
-        g.custom_command('create', 'create_or_update_template_spec', validator=_validate_template_input)
+        g.custom_command('create', 'create_template_spec', validator=_validate_template_input)
+        g.custom_command('update', 'update_template_spec', validator=_validate_template_input, confirmation=True)
         g.custom_command('export', 'export_template_spec', validator=_validate_template_spec_out)
-        g.custom_show_command('get', 'get_template_spec', validator=_validate_template_spec)
+        g.custom_show_command('show', 'show_template_spec', validator=_validate_template_spec)
         g.custom_command('list', 'list_template_specs')
         g.custom_command('delete', 'delete_template_spec', validator=_validate_template_spec, confirmation=True)
 
