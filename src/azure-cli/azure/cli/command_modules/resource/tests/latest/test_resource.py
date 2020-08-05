@@ -1529,6 +1529,7 @@ class DeploymentWhatIfAtTenantScopeTest(ScenarioTest):
             self.check("changes[2].changeType", "Create"),
         ])
 
+
 class DeploymentWhatIfTestWithTemplateSpecs(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_what_if_template_specs', location='westus')
     def test_resource_group_level_what_if_ts(self, resource_group, resource_group_location):
@@ -1554,9 +1555,9 @@ class DeploymentWhatIfTestWithTemplateSpecs(ScenarioTest):
             self.check("changes[?resourceId == '{storage_account_id}'] | [0].delta[?path == 'sku.name'] | [0].before", 'Standard_LRS'),
             self.check("changes[?resourceId == '{storage_account_id}'] | [0].delta[?path == 'sku.name'] | [0].after", 'Standard_GRS')
         ])
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_what_if_template_specs', location='westus')
-    def test_subscription_level_what_if_ts(self,resource_group, resource_group_location):
+    def test_subscription_level_what_if_ts(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-deploy-what-if-sub-deploy', 60)
         self.kwargs.update({
@@ -1565,7 +1566,7 @@ class DeploymentWhatIfTestWithTemplateSpecs(ScenarioTest):
             'tf': os.path.join(curr_dir, 'policy_definition_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'policy_definition_deploy_parameters.json').replace('\\', '\\\\'),
         })
-        
+
         result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
         self.kwargs['template_spec_version_id'] = result['id']
 
