@@ -89,21 +89,21 @@ cloud update:
     cloud_name:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
-config set:
-  parameters:
-    key_value:
-      rule_exclusions:
-        - no_positional_parameters
 config get:
   parameters:
     key:
       rule_exclusions:
-        - no_positional_parameters
+      - no_positional_parameters
+config set:
+  parameters:
+    key_value:
+      rule_exclusions:
+      - no_positional_parameters
 config unset:
   parameters:
     key:
       rule_exclusions:
-        - no_positional_parameters
+      - no_positional_parameters
 cosmosdb collection create:
   parameters:
     db_resource_group_name:
@@ -241,21 +241,6 @@ dls account trusted-provider list:
 dls fs list:
   rule_exclusions:
   - no_ids_for_list_commands
-eventgrid event-subscription update:
-  parameters:
-    endpoint_type:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
-eventgrid partner topic event-subscription update:
-  parameters:
-    endpoint_type:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
-eventgrid system-topic event-subscription update:
-  parameters:
-    endpoint_type:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
 find:
   parameters:
     cli_term:
@@ -265,9 +250,6 @@ iot hub certificate list:
   rule_exclusions:
   - no_ids_for_list_commands
 iot hub consumer-group list:
-  rule_exclusions:
-  - no_ids_for_list_commands
-iot hub job list:
   rule_exclusions:
   - no_ids_for_list_commands
 iot hub message-enrichment list:
@@ -287,16 +269,6 @@ iot hub routing-endpoint create:
 iot hub routing-endpoint list:
   rule_exclusions:
   - no_ids_for_list_commands
-iot pnp key update:
-  parameters:
-    repo_endpoint:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
-iot pnp repository update:
-  parameters:
-    repo_endpoint:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
 mariadb server configuration list:
   rule_exclusions:
   - no_ids_for_list_commands
@@ -426,6 +398,11 @@ sql db copy:
 sql db list:
   rule_exclusions:
   - no_ids_for_list_commands
+sql db ltr-backup restore:
+  parameters:
+    target_resource_group_name:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 sql db op list:
   rule_exclusions:
   - no_ids_for_list_commands
