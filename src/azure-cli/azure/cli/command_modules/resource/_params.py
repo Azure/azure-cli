@@ -524,15 +524,21 @@ def load_arguments(self, _):
         c.argument('location', options_list=['--location', '-l'])
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('description', options_list=['--description'])
-        c.argument('vdescription', options_list=['--vdescription'])
-        c.argument('tags')
+        c.argument('version_description', options_list=['--version-description'])
 
-    with self.argument_context('template-specs get') as c:
-        c.argument('template_spec', options_list=['--template-spec', '-s'])
+    with self.argument_context('template-specs update') as c:
+        c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
+        c.argument('template_file', options_list=['--template-file', '-f'])
+        c.argument('display_name', options_list=['--display-name', '-d'])
+        c.argument('description', options_list=['--description'])
+        c.argument('version_description', options_list=['--version-description'])
+
+    with self.argument_context('template-specs show') as c:
+        c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
 
     with self.argument_context('template-specs export') as c:
         c.argument('output_folder', options_list=['--output-folder'])
-        c.argument('template_spec', options_list=['--template-spec', '-s'])
+        c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
 
     with self.argument_context('template-specs delete') as c:
-        c.argument('template_spec', options_list=['--template-spec', '-s'])
+        c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')

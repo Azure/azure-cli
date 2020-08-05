@@ -60,7 +60,7 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
                                                                           includeNested=True)
 
         for template_link_obj in template_link_to_artifact_objs:
-            relative_path = str(template_link_obj['relative_path'])
+            relative_path = str(template_link_obj['relativePath'])
             if not relative_path:
                 continue
             # This is a templateLink to a local template... Get the absolute path of the
@@ -102,11 +102,11 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
         context.CurrentDirectory = original_directory
 
 
-def _get_deployment_resource_objects(cmd, templateObj, includeNested=False):
+def _get_deployment_resource_objects(cmd, template_obj, includeNested=False):
     immediate_deployment_resources = []
 
-    if 'resources' in templateObj:
-        resources = templateObj['resources']
+    if 'resources' in template_obj:
+        resources = template_obj['resources']
         for resource in resources:
             if (str(resource['type']) == 'Microsoft.Resources/deployments') is True:
                 immediate_deployment_resources.append(resource)
@@ -122,8 +122,8 @@ def _get_deployment_resource_objects(cmd, templateObj, includeNested=False):
     return results
 
 
-def _get_template_links_to_artifacts(cmd, templateObj, includeNested=False):
-    deployment_resource_objs = _get_deployment_resource_objects(cmd, templateObj, includeNested)
+def _get_template_links_to_artifacts(cmd, template_obj, includeNested=False):
+    deployment_resource_objs = _get_deployment_resource_objects(cmd, template_obj, includeNested)
     template_link_objs = []
     # TODO: Verify JSON Objects
     for obj in deployment_resource_objs:
@@ -131,7 +131,7 @@ def _get_template_links_to_artifacts(cmd, templateObj, includeNested=False):
             props_obj = obj['properties']
             if 'templateLink' in props_obj:
                 template_link_obj = props_obj['templateLink']
-                if 'relative_path' in template_link_obj:
+                if 'relativePath' in template_link_obj:
                     template_link_objs.append(template_link_obj)
     return template_link_objs
 

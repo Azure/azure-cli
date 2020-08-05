@@ -27,7 +27,7 @@ def _validate_template_spec(namespace):
             raise CLIError('incorrect usage: Please enter '
                            'a resource group and resource name or a resource ID for --template-spec')
     else:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.template_spec):
             raise CLIError('--template-spec is not a valid resource ID.')
 
@@ -47,7 +47,7 @@ def _validate_deployment_name_with_template_specs(namespace):
         if namespace.template_uri and urlparse(namespace.template_uri).scheme:
             template_filename = urlsplit(namespace.template_uri).path
         if namespace.template_spec:
-            from msrestazure.tools import parse_resource_id, is_valid_resource_id
+            from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
             if not is_valid_resource_id(namespace.template_spec):
                 raise CLIError('--template-spec is not a valid resource ID.')
             template_filename = parse_resource_id(namespace.template_spec).get('resource_name')
@@ -74,9 +74,15 @@ def _validate_deployment_name(namespace):
 
 
 def process_deployment_create_namespace(namespace):
-    if bool(namespace.template_uri) == bool(namespace.template_file) == bool(namespace.template_spec):
-        raise CLIError('incorrect usage: Chose only one of'
-                       ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
+    if namespace.template_spec:
+        if [bool(namespace.template_uri), bool(namespace.template_file),
+                bool(namespace.template_spec)].count(True) != 1:
+            raise CLIError('incorrect usage: Chose only one of'
+                           ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
+    else:
+        if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) != 1:
+            raise CLIError('incorrect usage: Chose only one of'
+                           ' --template-file FILE | --template-uri URI')
     if(bool(namespace.template_uri) or bool(namespace.template_file)):
         _validate_deployment_name(namespace)
     else:

@@ -2183,7 +2183,7 @@ short-summary: Manage template specs at subscription or resource group scope.
 
 helps['template-specs create'] = """
 type: command
-short-summary: Create or update a template spec and or template spec version.
+short-summary: Create a template spec and or template spec version.
 parameters:
   - name: --resource-group -g
     type: string
@@ -2198,30 +2198,64 @@ parameters:
     type: template_spec
     short-summary: The path to the template file.
   - name: --location -l
-    short-summary: The location to store the template-spec.
+    short-summary: The location to store the template-spec and template-spec version(s). Cannot be changed after creation.
   - name: --display-name -d
     type: string
     short-summary: The display name of the template spec.
   - name : --description
     type: string
     short-summary: The description of the root template spec.
-  - name : --vdescription
+  - name : --version-description
     type: string
     short-summary: The description of template spec version.
-  - name: --tags
-    short-summary: Resource Tags.
 examples:
   - name: Create a template spec.
-    text: az template-specs create -g testRG --name TemplateSpecName -l WestUS --display-name "BasicTemplate" --description "Simple template spec"
+    text: az template-specs create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec"
   - name: Create a template spec version.
-    text: az template-specs create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --vdescription "Less simple template spec"
+    text: az template-specs create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec"
   - name: Create a template spec and a version of the template spec.
-    text: az template-specs create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "SimpleTemplate" --description "Basic template spec" --vdescription "Version of basic template spec"
-  - name: Update an existing template spec.
-    text: az template-specs create -g testrg -n MyTemplateSpecName -l WestUS -v 1.0 -f updatedFile.json
+    text: az template-specs create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec"
 """
 
-helps['template-specs get'] = """
+helps['template-specs update'] = """
+type: command
+short-summary: Update a template spec version.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of resource group.
+  - name: --name -n
+    type: string
+    short-summary: Name of the template spec.
+  - name: --version -v
+    type: string
+    short-summary: The template spec version.
+  - name: --template-spec -s
+    short-summary: The template spec resource ID.
+  - name: --template-file -f
+    type: template_spec
+    short-summary: The location to store the template-spec.
+  - name: --display-name -d
+    type: string
+    short-summary: The display name of the template spec.
+  - name : --description
+    type: string
+    short-summary: The description of the parent template spec.
+  - name : --version-description
+    type: string
+    short-summary: The description of template spec version.
+examples:
+  - name: Update the template content of a template spec or template spec version based on the resource ID.
+    text: az template-specs update --template-spec resourceID -f updatedFile.json
+  - name: Update the display name of a template spec based on the resource ID.
+    text: az template-specs update --template-spec resourceID --display-name "NewParentDisplayName"
+  - name: Update the description of a template spec version.
+    text: az template-specs update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description"
+  - name: Update all the properties of a template spec version.
+    text: az template-specs update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
+"""
+
+helps['template-specs show'] = """
 type: command
 short-summary: Get the specified template spec or template spec version.
 parameters:
@@ -2237,12 +2271,12 @@ parameters:
   - name: --template-spec -s
     short-summary: The template spec resource ID.
 examples:
-  - name: Get the specified template spec with all versions.
-    text: az template-specs get -g testrg --name TemplateSpecName
-  - name: Get the specified template spec version.
-    text: az template-specs get -g testrg --name TemplateSpecName --version VersionName
-  - name: Get specified template spec based on the resource ID.
-    text: az template-specs get --template-spec resourceID
+  - name: Show the specified template spec.
+    text: az template-specs show -g testrg --name TemplateSpecName
+  - name: Show the specified template spec version.
+    text: az template-specs show -g testrg --name TemplateSpecName --version VersionName
+  - name: Show the specified template spec or template spec version based on the resource ID.
+    text: az template-specs show --template-spec resourceID
 """
 
 helps['template-specs export'] = """
@@ -2298,11 +2332,14 @@ examples:
 
 helps['template-specs list'] = """
 type: command
-short-summary: List all the template specs within the specified subscription or resource group.
+short-summary: List template specs or template spec versions.
 parameters:
   - name: --resource-group -g
     type: string
     short-summary: Name of resource group.
+  - name: --name -n
+    type: string
+    short-summary: Name of the template spec.
 examples:
   - name: List all template specs in current default subscription.
     text: az template-specs list
@@ -2310,4 +2347,6 @@ examples:
     text: az template-specs list --subscription Subscription
   - name: List all template specs in resource group.
     text: az template-specs list -g MyResourceGroup
+  - name: List all versions of parent template spec.
+    text: az template-specs list -g MyResourceGroup -n TemplateSpecName
 """
