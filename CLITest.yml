@@ -239,28 +239,40 @@ jobs:
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
         # Sequential
-        azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-m serial --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 -s"
+        azdev test $(Target) $(USER_LIVE) --xml-path test_results.sequential.xml --no-exitfirst -a "-m serial --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 -s"
         # Parallel
-        azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n $(USER_PARALLELISM) -m \"not serial\" --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
+        azdev test $(Target) $(USER_LIVE) --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) -m \"not serial\" --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
         pwd
         ls
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
-        testResultsFiles: '/home/vsts/.azdev/env_config/home/vsts/work/1/env/test_results.xml'
+        testResultsFiles: 'test_results.*.xml'
         testRunTitle: 'Azure CLI live test results of $(Target)'
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
       condition: succeededOrFailed()
       inputs:
-        PathtoPublish: '/home/vsts/work/1/$(Target).report.json'
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
         ArtifactName: '$(Target).report.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
       condition: succeededOrFailed()
       inputs:
-        PathtoPublish: '/home/vsts/work/1/$(Target).report.html'
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
+        ArtifactName: '$(Target).report.html'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+        condition: succeededOrFailed()
+        inputs:
+          PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
+          ArtifactName: '$(Target).report.json'
+          publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: succeededOrFailed()
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
         ArtifactName: '$(Target).report.html'
         publishLocation: 'Container'
 
