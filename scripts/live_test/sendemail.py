@@ -139,7 +139,9 @@ def get_content(container):
     if container != '':
         content += """
         <p>
-        Test results are saved to https://clitestresultstac.blob.core.windows.net/{}
+        Test results are saved to the following container.<br>
+        Storage account: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clitestresult/providers/Microsoft.Storage/storageAccounts/clitestresultstac <br>
+        Container: {}
         </p>
         """.format(container)
 
