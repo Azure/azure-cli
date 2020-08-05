@@ -87,7 +87,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_python_e2e(self, resource_group):
         plan = self.create_random_name('up-pythonplan', 24)
         webapp_name = self.create_random_name('up-pythonapp', 24)
@@ -315,6 +315,52 @@ class WebAppUpE2ETests(ScenarioTest):
             self.cmd('webapp up -n {} --dryrun'.format(webapp_name))
         with self.assertRaises(CLIError):
             self.cmd('webapp up -n {}'.format(webapp_name))
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_webapp_up_different_skus(self, resource_group):
+        webapp_name = self.create_random_name('up-different-skus', 40)
+        webapp_name_2 = self.create_random_name('up-different-skus-2', 40)
+        webapp_name_3 = self.create_random_name('up-different-skus-3', 40)
+        plan = self.create_random_name('up-different-skus-plan', 40)
+        plan_2 = self.create_random_name('up-different-skus-plan-2', 40)
+
+        zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'python-docs-hello-world')
+        os.chdir(up_working_dir)
+
+        result = self.cmd(
+            'webapp up -n {} --sku S1 -g {} --plan {}'.format(webapp_name, resource_group, plan)).get_output_in_json()
+        self.assertTrue(result['name'] == webapp_name)
+        self.assertTrue(result['sku'].lower() == 'standard')
+
+        # Creating an app with new ASP with free sku should work
+        result = self.cmd(
+            'webapp up -n {} --sku F1 -g {} --plan {}'.format(webapp_name_2, resource_group, plan_2)).get_output_in_json()
+        self.assertTrue(result['name'] == webapp_name_2)
+        self.assertTrue(result['sku'].lower() == 'free')
+
+        # Creating an app with existing ASP that isn't free should not work
+        from azure.cli.core.util import CLIError
+        with self.assertRaises(CLIError):
+            self.cmd('webapp up -n {} --sku F1 -g {} --plan {}'.format(webapp_name_3, resource_group, plan))
 
         # cleanup
         # switch back the working dir
