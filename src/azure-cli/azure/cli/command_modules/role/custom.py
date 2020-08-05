@@ -678,7 +678,7 @@ def create_group(cmd, display_name, mail_nickname, force=None, description=None)
                 raise CLIError(err.format(', '.join([x.object_id for x in matches])))
             logger.warning('A group with the same display name and mail nickname already exists, returning.')
             return matches[0]
-        group_create_parameters = GroupCreateParameters(display_name=display_name,mail_nickname=mail_nickname)
+        group_create_parameters = GroupCreateParameters(display_name=display_name, mail_nickname=mail_nickname)
         if description is not None:
             group_create_parameters.additional_properties = {'description': description}
     group = graph_client.groups.create(group_create_parameters)
