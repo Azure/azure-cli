@@ -1740,9 +1740,14 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
         if version == name:
             version = None
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
+    root_template_and_children = []
     if version:
-        return rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
-    return rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+        root_template_and_children.append(rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name))
+        root_template_and_children.append(rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version))
+        return root_template_and_children
+    root_template_and_children.append(rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name))
+    root_template_and_children.append(list(rcf.template_spec_versions.list(resource_group_name=resource_group_name, template_spec_name=name)))
+    return root_template_and_children
 
 
 def create_or_update_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
