@@ -448,9 +448,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # Download a set of files with source sas token
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
-        first_sas_token = self.cmd(
-            'storage container generate-sas --connection-string {} -n {} --expiry {} --permissions {} -o tsv'.format(
-             first_connection_string, first_container, expiry, 'rwalcd')).output.strip()
+        first_sas_token = self.cmd('storage container generate-sas --connection-string {} -n {} --expiry {} '
+                                   '--permissions {} -o tsv'.format(first_connection_string, first_container,
+                                                                    expiry, 'rwalcd')).output.strip()
         self.cmd('storage copy --source-account-name {} --source-sas {} --source-container {} --include-path {} '
                  '--include-pattern {} --destination-local-path "{}" --recursive'
                  .format(first_account, first_sas_token, first_container, 'apple', 'file*', local_folder))
