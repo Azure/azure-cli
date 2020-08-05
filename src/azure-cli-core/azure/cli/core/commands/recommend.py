@@ -253,10 +253,14 @@ class TreeBuilder:
                 recommendations.extend(node.get_function_recommend())
         recommendations.sort(key=lambda x: x._group)
         groups = ["default", "select", "condition", "function", "limit_number"]
-        for group in groups:
-            print("Group {}:".format(group))
-            printlist(recommendations, group)
-            print("")
+        # for group in groups:
+        #     print("Group {}:".format(group))
+        #     printlist(recommendations, group)
+        #     print("")
+        ret = []
+        for item in recommendations:
+            ret.append({"query_string": item._query_str, "help": item._help_str})
+        return ret
 
     def _get_from_list(self, data):
         '''Try to get not None item from input list
