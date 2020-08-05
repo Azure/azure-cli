@@ -150,10 +150,9 @@ def _get_mgmt_service_client(cli_ctx,
     
     client_id = kwargs.pop('client_id', None)
 
-    profile = Profile(cli_ctx=cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx, scopes=scopes, client_id=client_id)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id,
-                                                             resource=resource, scopes=scopes,
-                                                             client_id=client_id,
+                                                             resource=resource,
                                                              aux_subscriptions=aux_subscriptions,
                                                              aux_tenants=aux_tenants)
 
