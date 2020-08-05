@@ -1287,7 +1287,15 @@ disk create:
     gallery_image_reference_lun:
       rule_exclusions:
       - option_length_too_long
+    network_access_policy:
+      rule_exclusions:
+      - option_length_too_long
     source_storage_account_id:
+      rule_exclusions:
+      - option_length_too_long
+disk update:
+  parameters:
+    network_access_policy:
       rule_exclusions:
       - option_length_too_long
 dla account blob-storage list:
@@ -3015,7 +3023,15 @@ signalr update:
       - no_parameter_defaults_for_update_commands
 snapshot create:
   parameters:
+    network_access_policy:
+      rule_exclusions:
+      - option_length_too_long
     source_storage_account_id:
+      rule_exclusions:
+      - option_length_too_long
+snapshot update:
+  parameters:
+    network_access_policy:
       rule_exclusions:
       - option_length_too_long
 sql db classification list:
