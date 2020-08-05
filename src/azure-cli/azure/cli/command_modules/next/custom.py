@@ -35,7 +35,7 @@ def _get_recommend_from_local(last_cmd, last_param, request_type, top_num=5, ext
     with open(mock_db, 'r') as f:
         db = json.load(f)
 
-    error_path = os.path.join(os.environ['HOME'], '.azure', 'recommendation','error')
+    error_path = os.path.join(os.environ['HOME'], '.azure', 'recommendation', 'error')
     if last_cmd == 'notification-hub namespace create':
         if os.path.isfile(error_path):
             fix_error = True
@@ -43,8 +43,6 @@ def _get_recommend_from_local(last_cmd, last_param, request_type, top_num=5, ext
         else:
             open(error_path, 'a').close()
             fix_error = False
-        
-
 
     for item in db['data']:
         if item['command'] == last_cmd:

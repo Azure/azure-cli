@@ -17,7 +17,7 @@ class NextCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.next.custom#{}',
             client_factory=cf_next)
         super(NextCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                  custom_command_type=next_custom)
+                                                 custom_command_type=next_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.next.commands import load_command_table
