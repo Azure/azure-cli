@@ -4551,23 +4551,43 @@ class DiskAccessTest(ScenarioTest):
     def test_disk_access(self, resource_group):
         self.kwargs.update({
             'loc': 'centraluseuap',
-            'name': 'mydiskaccess'
+            'diskaccess': 'mydiskaccess',
+            'disk': 'mydisk',
+            'snapshot': 'mysnapshot'
         })
 
-        self.cmd('disk-access create -g {rg} -l {loc} -n {name}')
+        self.cmd('disk-access create -g {rg} -l {loc} -n {diskaccess}')
         self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 1),
-            self.check('[0].name', '{name}'),
+            self.check('[0].name', '{diskaccess}'),
             self.check('[0].location', '{loc}')
         ])
-        self.cmd('disk-access update -g {rg} -n {name} --tags tag1=val1')
-        self.cmd('disk-access show -g {rg} -n {name}', checks=[
-            self.check('name', '{name}'),
+
+        self.cmd('disk-access update -g {rg} -n {diskaccess} --tags tag1=val1')
+        disk_access_output = self.cmd('disk-access show -g {rg} -n {diskaccess}', checks=[
+            self.check('name', '{diskaccess}'),
             self.check('location', '{loc}'),
             self.check('tags.tag1', 'val1')
+        ]).get_output_in_json()
+        disk_access_id = disk_access_output['id']
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
+        self.cmd('disk show -g {rg} -n {disk}', checks=[
+            self.check('name', '{disk}'),
+            self.check('diskAccessId', disk_access_id),
+            self.check('networkAccessPolicy', 'AllowPrivate')
         ])
 
-        self.cmd('disk-access delete -g {rg} -n {name}')
+        self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
+        self.cmd('snapshot show -g {rg} -n {snapshot}', checks=[
+            self.check('name', '{snapshot}'),
+            self.check('diskAccessId', disk_access_id),
+            self.check('networkAccessPolicy', 'AllowPrivate')
+        ])
+
+        self.cmd('disk delete -g {rg} -n {disk} --yes')
+        self.cmd('snapshot delete -g {rg} -n {snapshot}')
+        self.cmd('disk-access delete -g {rg} -n {diskaccess}')
         self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 0)
         ])
