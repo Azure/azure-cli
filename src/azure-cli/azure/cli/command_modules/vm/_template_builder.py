@@ -254,7 +254,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
-        encryption_at_host=None):
+        encryption_at_host=None, dedicated_host_group=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -435,6 +435,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
     if dedicated_host:
         vm_properties['host'] = {'id': dedicated_host}
+
+    if dedicated_host_group:
+        vm_properties['hostGroup'] = {'id': dedicated_host_group}
 
     if priority is not None:
         vm_properties['priority'] = priority
@@ -679,7 +682,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
                         data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None,
-                        specialized=None, os_disk_size_gb=None, encryption_at_host=None):
+                        specialized=None, os_disk_size_gb=None, encryption_at_host=None, host_group=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -904,6 +907,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if encryption_at_host:
         vmss_properties['virtualMachineProfile']['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+
+    if host_group:
+        vmss_properties['hostGroup'] = {'id': host_group}
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',

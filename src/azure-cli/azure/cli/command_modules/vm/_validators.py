@@ -599,43 +599,37 @@ def _validate_vm_create_vmss(cmd, namespace):
 
 
 def _validate_vm_create_dedicated_host(cmd, namespace):
+    """
+    "host": {
+      "$ref": "#/definitions/SubResource",
+      "description": "Specifies information about the dedicated host that the virtual machine resides in.
+      <br><br>Minimum api-version: 2018-10-01."
+    },
+    "hostGroup": {
+      "$ref": "#/definitions/SubResource",
+      "description": "Specifies information about the dedicated host group that the virtual machine resides in.
+      <br><br>Minimum api-version: 2020-06-01. <br><br>NOTE: User cannot specify both host and hostGroup properties."
+    }
+
+    :param cmd:
+    :param namespace:
+    :return:
+    """
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    # handle incorrect usage
-    if namespace.dedicated_host_group and namespace.dedicated_host is None:
-        raise CLIError("incorrect usage: --host ID | --host-group  NAME --host NAME")
+    if namespace.dedicated_host and namespace.dedicated_host_group:
+        raise CLIError('usage error: User cannot specify both --host and --host-group properties.')
 
-    # if this is a valid dedicated host resource id return
-    if is_valid_resource_id(namespace.dedicated_host):
-        if namespace.dedicated_host_group is not None:
-            logger.warning("Ignoring `--host-group` as `--host` is a valid resource id.")
-        return
+    if namespace.dedicated_host and not is_valid_resource_id(namespace.dedicated_host):
+        raise CLIError('usage error: --host is not a valid resource ID.')
 
-    # otherwise this should just be a dedicated host name. If host group provided, build resource id
-    if namespace.dedicated_host:
-        if namespace.dedicated_host_group is None:
-            raise CLIError("incorrect usage: --host ID | --host-group  NAME --host NAME")
-
-        host_name = namespace.dedicated_host
-        rg = namespace.resource_group_name
-        host_group_name = namespace.dedicated_host_group
-
-        if not check_existence(cmd.cli_ctx, host_name, rg, 'Microsoft.Compute', 'hosts',
-                               parent_name=host_group_name, parent_type='hostGroups'):
-            raise CLIError("The dedicated host '{}' in host group '{}' and resource group '{}' does not exist."
-                           .format(host_name, host_group_name, rg))
-
-        namespace.dedicated_host = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=rg,
-            namespace='Microsoft.Compute',
-            type='hostGroups',
-            name=host_group_name,
-            child_type_1="hosts",
-            child_name_1=host_name)
-
-        logger.info("Built dedicated host ID '%s' from host name and host group.", namespace.dedicated_host)
+    if namespace.dedicated_host_group:
+        if not is_valid_resource_id(namespace.dedicated_host_group):
+            namespace.dedicated_host_group = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute', type='hostGroups', name=namespace.dedicated_host_group
+            )
 
 
 def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
@@ -1359,7 +1353,6 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.plan_product,
             namespace.plan_promotion_code,
             namespace.plan_publisher,
-            namespace.proximity_placement_group,
             namespace.priority,
             namespace.public_ip_address,
             namespace.public_ip_address_allocation,
@@ -1368,7 +1361,6 @@ def process_vmss_create_namespace(cmd, namespace):
             # namespace.identity_role,
             namespace.identity_scope,
             namespace.secrets,
-            namespace.single_placement_group,
             namespace.ssh_dest_key_path,
             namespace.ssh_key_value,
             # namespace.storage_container_name,
@@ -1385,8 +1377,8 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.vnet_name
         ]
         if any(param is not None for param in banned_params):
-            raise CLIError('usage error: in VM mode, only name, resource-group, location, '
-                           'tags, zones, platform-fault-domain-count are allowed')
+            raise CLIError('usage error: In VM mode, only name, resource-group, location, '
+                           'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
         return
     validate_tags(namespace)
     if namespace.vm_sku is None:
@@ -1411,6 +1403,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
+    _validate_vmss_create_host_group(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1711,3 +1704,14 @@ def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-
     """
     if namespace.automatic_repairs_grace_period is not None:
         namespace.automatic_repairs_grace_period = 'PT' + namespace.automatic_repairs_grace_period + 'M'
+
+
+def _validate_vmss_create_host_group(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if namespace.host_group:
+        if not is_valid_resource_id(namespace.host_group):
+            namespace.host_group = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute', type='hostGroups', name=namespace.host_group
+            )

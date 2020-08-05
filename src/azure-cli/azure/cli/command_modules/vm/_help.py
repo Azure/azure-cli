@@ -57,6 +57,9 @@ examples:
   - name: Create a disk and specify maximum number of VMs that can attach to the disk at the same time.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --size-gb 256 --max-shares 2 -l centraluseuap
+  - name: Create a disk and associate it with a disk access resource.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --network-access-policy AllowPrivate --disk-access MyDiskAccessID
 """
 
 helps['disk delete'] = """
@@ -106,6 +109,9 @@ examples:
     text: |
         az disk update --name MyManagedDisk --resource-group MyResourceGroup --size-gb 20
     crafted: true
+  - name: Update a managed disk and associate it with a disk access resource.
+    text: |
+        az disk update --name MyManagedDisk --resource-group MyResourceGroup --network-access-policy AllowPrivate --disk-access MyDiskAccessID
 """
 
 helps['disk wait'] = """
@@ -681,6 +687,8 @@ examples:
     text: az snapshot create -g MyResourceGroup -n MySnapshot2 --source MyDisk
   - name: Create a snapshot from an existing disk in another resource group.
     text: az snapshot create -g MyResourceGroup -n MySnapshot2 --source "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.Compute/disks/MyDisk"
+  - name: Create a snapshot and associate it with a disk access resource.
+    text: az snapshot create -g MyResourceGroup -n MySnapshot --size-gb 10 --network-access-policy AllowPrivate --disk-access MyDiskAccessID
 """
 
 helps['snapshot grant-access'] = """
@@ -716,6 +724,9 @@ examples:
     text: |
         az snapshot update --name MySnapshot --resource-group MyResourceGroup --subscription MySubscription
     crafted: true
+  - name: Update a snapshot and associate it with a disk access resource.
+    text: |
+        az snapshot update --name MySnapshot --resource-group MyResourceGroup --network-access-policy AllowPrivate --disk-access MyDiskAccessID
 """
 
 helps['snapshot wait'] = """
@@ -1441,6 +1452,15 @@ examples:
     text: |
         az vm host group show --name MyDedicatedHostGroup --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['vm host group get-instance-view'] = """
+type: command
+short-summary: Get instance view of a dedicated host group.
+examples:
+  - name: Get instance view of a dedicated host group
+    text: |
+        az vm host group get-instance-view --name MyDedicatedHostGroup --resource-group MyResourceGroup
 """
 
 helps['vm host group update'] = """
