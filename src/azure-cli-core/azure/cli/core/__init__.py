@@ -815,7 +815,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             raise ValueError("The operation '{}' is invalid.".format(operation))
 
 
-def get_default_cli(cli_name='az'):
+def get_default_cli():
     from azure.cli.core.azlogging import AzCliLogging
     from azure.cli.core.commands import AzCliCommandInvoker
     from azure.cli.core.parser import AzCliCommandParser
@@ -823,7 +823,7 @@ def get_default_cli(cli_name='az'):
     from azure.cli.core._help import AzCliHelp
     from azure.cli.core._output import AzOutputProducer
 
-    return AzCli(cli_name=cli_name,
+    return AzCli(cli_name='az',
                  config_dir=GLOBAL_CONFIG_DIR,
                  config_env_var_prefix=ENV_VAR_PREFIX,
                  commands_loader_cls=MainCommandsLoader,
