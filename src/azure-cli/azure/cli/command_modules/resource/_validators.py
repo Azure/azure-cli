@@ -46,7 +46,7 @@ def _validate_deployment_name_with_template_specs(namespace):
             template_filename = namespace.template_file
         if namespace.template_uri and urlparse(namespace.template_uri).scheme:
             template_filename = urlsplit(namespace.template_uri).path
-        if namespace.template_spec is not None:
+        if namespace.template_spec:
             from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
             if not is_valid_resource_id(namespace.template_spec):
                 raise CLIError('--template-spec is not a valid resource ID.')
@@ -74,9 +74,15 @@ def _validate_deployment_name(namespace):
 
 
 def process_deployment_create_namespace(namespace):
-    if [bool(namespace.template_uri), bool(namespace.template_file), bool(namespace.template_spec)].count(True) != 1:
-        raise CLIError('incorrect usage: Chose only one of'
-                       ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
+    if namespace.template_spec:
+        if [bool(namespace.template_uri), bool(namespace.template_file),
+                bool(namespace.template_spec)].count(True) != 1:
+            raise CLIError('incorrect usage: Chose only one of'
+                           ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
+    else:
+        if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) != 1:
+            raise CLIError('incorrect usage: Chose only one of'
+                           ' --template-file FILE | --template-uri URI')
     if(bool(namespace.template_uri) or bool(namespace.template_file)):
         _validate_deployment_name(namespace)
     else:
