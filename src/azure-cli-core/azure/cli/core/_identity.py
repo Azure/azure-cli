@@ -23,7 +23,7 @@ from azure.identity import (
 )
 
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
-_DEFAULT_SCOPES = ('https://management.core.windows.net/.default')
+_DEFAULT_SCOPES = ('https://management.core.windows.net/.default',)
 logger = get_logger(__name__)
 
 _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
@@ -70,6 +70,8 @@ class Identity:
         self.tenant_id = tenant_id or "organizations"
         self.client_id = client_id or _CLIENT_ID
         self.scopes = scopes or _DEFAULT_SCOPES
+        if self.scopes and not isinstance(self.scopes, (list, tuple)):
+            self.scopes = (self.scopes,)
         self._cred_cache = kwargs.pop('cred_cache', None)
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
 

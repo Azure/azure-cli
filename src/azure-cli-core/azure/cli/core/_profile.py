@@ -104,6 +104,8 @@ class Profile:
         self._storage = storage or ACCOUNT
 
         self._scopes = scopes
+        if self._scopes and not isinstance(self._scopes, (list, tuple)):
+            self._scopes = (self._scopes,)
         self._client_id = client_id
 
         self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
