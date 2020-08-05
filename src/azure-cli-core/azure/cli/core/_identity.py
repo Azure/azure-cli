@@ -137,7 +137,6 @@ class Identity:
                                "allow fallback to plaintext if encrypt credential fail via 'az configure'.")
             raise
 
-
     def login_with_username_password(self, username, password):
         # Use UsernamePasswordCredential
         credential = UsernamePasswordCredential(authority=self.authority,
@@ -437,10 +436,8 @@ class ADALCredentialCache:
                 credential._cache.CredentialType.REFRESH_TOKEN,
                 # target=scopes,  # AAD RTs are scope-independent
                 query=query)
-
             access_token = credential.get_token(self._cli_ctx.cloud.endpoints.active_directory_resource_id.rstrip('/') +
                                                 '/.default')
-
             import datetime
             entry = {
                 "tokenType": "Bearer",

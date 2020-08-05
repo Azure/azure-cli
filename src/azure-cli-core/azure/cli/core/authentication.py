@@ -25,7 +25,8 @@ def _create_scopes(resource):
         scope = resource + '/.default'
     else:
         scope = resource.rstrip('/') + '/.default'
-    return scope,
+    # Return the single scope in tuple format
+    return (scope,)
 
 
 class AuthenticationWrapper(Authentication):
@@ -44,7 +45,7 @@ class AuthenticationWrapper(Authentication):
             scopes = self._scopes
         if not scopes:
             if self._resource:
-                scopes = [_create_scopes(self._resource)]
+                scopes = _create_scopes(self._resource)
             else:
                 raise CLIError("Unexpected error: Resource or Scope need be specified to get access token")
         
