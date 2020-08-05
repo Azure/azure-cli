@@ -20,7 +20,7 @@ LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 
 class WebAppUpE2ETests(ScenarioTest):
     @live_only()
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_node_e2e(self, resource_group):
         plan = self.create_random_name('up-nodeplan', 24)
         webapp_name = self.create_random_name('up-nodeapp', 24)
@@ -155,7 +155,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_up_dotnetcore_e2e(self, resource_group):
         plan = self.create_random_name('up-dotnetcoreplan', 24)
         webapp_name = self.create_random_name('up-dotnetcoreapp', 24)
@@ -225,7 +225,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_up_statichtml_e2e(self, resource_group):
         plan = self.create_random_name('up-statichtmlplan', 24)
         webapp_name = self.create_random_name('up-statichtmlapp', 24)
@@ -293,7 +293,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_invalid_name(self, resource_group):
         webapp_name = self.create_random_name('invalid_name', 40)
         zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
@@ -370,7 +370,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_name_exists_not_in_subscription(self, resource_group):
         # Make sure webapp_name is the name of an existing web app and is not in your subscription
         webapp_name = 'helloworld'
@@ -402,7 +402,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_name_exists_in_subscription(self, resource_group):
         plan = self.create_random_name('up-name-exists-plan', 40)
         webapp_name = self.create_random_name('up-name-exists-app', 40)
