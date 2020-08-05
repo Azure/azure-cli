@@ -1497,8 +1497,56 @@ def db_audit_policy_update(
     # Apply state
     if state:
         instance.state = BlobAuditingPolicyState[state.lower()]
-    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
 
+    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
+    
+    # Set storage-related properties
+    _db_security_policy_update(
+        cmd.cli_ctx,
+        instance,
+        enabled,
+        storage_account,
+        storage_endpoint,
+        storage_account_access_key,
+        instance.is_storage_secondary_key_in_use)
+
+    # Set other properties
+    if audit_actions_and_groups:
+        instance.audit_actions_and_groups = audit_actions_and_groups
+
+    # If auditing is enabled, make sure that the actions and groups are set to default
+    # value in case they were removed previously (When disabling auditing)
+    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
+        instance.audit_actions_and_groups = [
+            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+            "FAILED_DATABASE_AUTHENTICATION_GROUP",
+            "BATCH_COMPLETED_GROUP"]
+
+    if retention_days:
+        instance.retention_days = retention_days
+
+    return instance
+
+
+def server_audit_policy_update(
+        cmd,
+        instance,
+        state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        audit_actions_and_groups=None,
+        retention_days=None):
+    '''
+    Updates an audit policy. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = BlobAuditingPolicyState[state.lower()]
+
+    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
+    
     # Set storage-related properties
     _db_security_policy_update(
         cmd.cli_ctx,
