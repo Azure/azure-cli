@@ -9,9 +9,9 @@ import time
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
 RG_LOCATION = "westus2"
-ANF_LOCATION = "westus2"
-DP_RG_LOCATION = "westus2"
-DP_ANF_LOCATION = "westus2"
+ANF_LOCATION = "westus2stage"
+DP_RG_LOCATION = "southcentralus"
+DP_ANF_LOCATION = "southcentralusstage"
 GIB_SCALE = 1024 * 1024 * 1024
 
 # No tidy up of tests required. The resource group is automatically removed

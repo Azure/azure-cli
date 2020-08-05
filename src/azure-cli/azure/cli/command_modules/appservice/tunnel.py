@@ -36,7 +36,7 @@ class TunnelWebSocket(WebSocket):
 
 
 # pylint: disable=no-member,too-many-instance-attributes,bare-except,no-self-use
-class TunnelServer(object):
+class TunnelServer:
     def __init__(self, local_addr, local_port, remote_addr, remote_user_name, remote_password):
         self.local_addr = local_addr
         self.local_port = local_port

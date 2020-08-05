@@ -33,7 +33,7 @@ def _get_current_system_username():
     return None
 
 
-class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
+class AzCLILocalContext:  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
@@ -180,7 +180,7 @@ class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
         return result
 
 
-class LocalContextAttribute(object):
+class LocalContextAttribute:
     # pylint: disable=too-few-public-methods
     def __init__(self, name, actions, scopes=None):
         """ Local Context Attribute arguments

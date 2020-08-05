@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
 from azure.cli.core.util import CLIError
 
 from ._utils import (
     get_resource_group_name_by_registry_name,
     validate_premium_registry
 )
-from knack.log import get_logger
 
 logger = get_logger(__name__)
 

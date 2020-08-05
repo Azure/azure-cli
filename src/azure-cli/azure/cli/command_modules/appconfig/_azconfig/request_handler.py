@@ -12,7 +12,7 @@ import azure.cli.command_modules.appconfig._azconfig.http_logger as logger
 import azure.cli.command_modules.appconfig._azconfig.exceptions as exceptions
 
 
-class RequestHandler(object):
+class RequestHandler:
 
     def __init__(self, connection_string, request_options):
         self.connection_string = connection_string

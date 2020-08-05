@@ -71,11 +71,13 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
-        c.argument('sku', help='The sku of App Configuration', arg_type=get_enum_type(['free', 'standard']))
+        c.argument('sku', help='The sku of App Configuration', arg_type=get_enum_type(['Free', 'Standard']))
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('assign_identity', arg_type=identities_arg_type, is_preview=True)
+        c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
+                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
@@ -106,9 +108,9 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv import', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='Imported file format. Required for file arguments. Currently, feature flags are not supported in properties format.')
-        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not applicable for property files or feature flags.")
+        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default if --separator is provided. Not applicable for property files or feature flags.")
         # bypass cli allowed values limition
-        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
+        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
         c.argument('src_name', help='The name of the source App Configuration.')
@@ -132,9 +134,9 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
         c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='File format exporting to. Required for file arguments. Currently, feature flags are not supported in properties format.')
-        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not appicable for property files or feature flags.")
+        c.argument('depth', validator=validate_import_depth, help="Depth for flattening the key-value pairs to json or yaml file. Flatten to the deepest level by default. Not applicable for property files or feature flags.")
         # bypass cli allowed values limition
-        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
+        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the key-value pairs to json or yaml file. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
 
