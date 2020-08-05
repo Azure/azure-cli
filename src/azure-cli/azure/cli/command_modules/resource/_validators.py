@@ -24,7 +24,7 @@ def _validate_template_input(namespace):
 def _validate_template_spec(namespace):
     if namespace.template_spec is None:
         if (namespace.name is None or namespace.resource_group_name is None):
-            raise CLIError('incorrect usage: Please enter'
+            raise CLIError('incorrect usage: Please enter '
                            'a resource group and resource name or a resource ID for --template-spec')
     else:
         from msrestazure.tools import is_valid_resource_id
