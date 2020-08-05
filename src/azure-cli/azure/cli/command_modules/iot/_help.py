@@ -803,7 +803,7 @@ long-summary: |
     Permanently delete your IoT Central app.
     -Warning- This operation is irreversible. Once you've deleted your app, you cannot restore it.
 examples:
-  - name: Deletes an IoT Central app called 'my-first-iot-app'.
+  - name: Delete an IoT Central app called 'my-first-iot-app'.
     text: az iot central app delete -n my-first-iot-app -g MyResourceGroup
 """
 
