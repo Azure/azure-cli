@@ -8,9 +8,9 @@ Release History
 
 **App Service**
 
-* Fixes # 9887 webapp and functionapp, support assigning/removing user managed identity (#14233)
-* : Fix #1382, #14055: Updating error messages for az webapp create and az webapp config container set (#14633)
-* :  Fix az webapp up default ASP selection logic when --plan parameter is not provided (#14673)
+* Fix # 9887 webapp and functionapp, support assigning/removing user managed identity (#14233)
+* Fix #1382, #14055: Update error messages for az webapp create and az webapp config container set (#14633)
+* `az webapp up`: Fix default ASP selection logic when --plan parameter is not provided (#14673)
 
 **AppConfig**
 
