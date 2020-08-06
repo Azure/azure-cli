@@ -591,8 +591,8 @@ class Profile:
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         identity = Identity(authority, tenant, cred_cache=self._adal_cache)
         identity_credential = identity.get_user_credential(username)
-        from azure.cli.core.authentication import AuthenticationWrapper
-        auth = AuthenticationWrapper(identity_credential, resource=resource)
+        from azure.cli.core.credential import CredentialAdaptor
+        auth = CredentialAdaptor(identity_credential, resource=resource)
         token = auth.get_token()
         return token.token
 
@@ -671,10 +671,10 @@ class Profile:
         external_credentials = []
         for sub_tenant_id in external_tenants_info:
             external_credentials.append(self._create_identity_credential(account, sub_tenant_id))
-        from azure.cli.core.authentication import AuthenticationWrapper
-        auth_object = AuthenticationWrapper(identity_credential,
-                                            external_credentials=external_credentials if external_credentials else None,
-                                            resource=resource, scopes=scopes)
+        from azure.cli.core.credential import CredentialAdaptor
+        auth_object = CredentialAdaptor(identity_credential,
+                                        external_credentials=external_credentials if external_credentials else None,
+                                        resource=resource, scopes=scopes)
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
@@ -685,8 +685,8 @@ class Profile:
         account = self.get_subscription(subscription)
         identity_credential = self._create_identity_credential(account, tenant)
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        from azure.cli.core.authentication import AuthenticationWrapper, _convert_token_entry
-        auth = AuthenticationWrapper(identity_credential, resource=resource, scopes=scopes)
+        from azure.cli.core.credential import CredentialAdaptor, _convert_token_entry
+        auth = CredentialAdaptor(identity_credential, resource=resource, scopes=scopes)
         token = auth.get_token()
         cred = 'Bearer', token.token, _convert_token_entry(token)
         return (cred,
@@ -856,8 +856,8 @@ class SubscriptionFinder:
         empty_tenants = []
         mfa_tenants = []
 
-        from azure.cli.core.authentication import AuthenticationWrapper
-        track1_credential = AuthenticationWrapper(credential, resource=self._graph_resource_id)
+        from azure.cli.core.credential import CredentialAdaptor
+        track1_credential = CredentialAdaptor(credential, resource=self._graph_resource_id)
         client = self._arm_client_factory(track1_credential)
         tenants = client.tenants.list()
 
@@ -936,8 +936,8 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def find_using_specific_tenant(self, tenant, credential):
-        from azure.cli.core.authentication import AuthenticationWrapper
-        track1_credential = AuthenticationWrapper(credential, resource=self._graph_resource_id)
+        from azure.cli.core.credential import CredentialAdaptor
+        track1_credential = CredentialAdaptor(credential, resource=self._graph_resource_id)
         client = self._arm_client_factory(track1_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
