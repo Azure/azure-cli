@@ -9,7 +9,6 @@ from msrestazure.tools import is_valid_resource_id
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 from .util import get_resource_id_by_name
 
-
 VALIDATION_TIME_OUT = 20
 
 
@@ -145,3 +144,26 @@ class HDInsightValidator():
                         self.resource_name)
         except CLIError as e:
             self.exception = e
+
+
+def validate_timezone_name(namespace):
+    if namespace.timezone:
+        from .util import AUTOSCALE_TIMEZONES
+        zone = next((x for x in AUTOSCALE_TIMEZONES if x.lower() == namespace.timezone.lower()), None)
+        if not zone:
+            raise CLIError(
+                "Invalid time zone: '{}'. Run 'az hdinsight autoscale list-timezones' for values.".format(
+                    namespace.timezone))
+        namespace.timezone = zone
+        return zone
+    return None
+
+
+def validate_time(namespace):
+    if namespace.time:
+        hour, minute = namespace.time.split(':')
+        if len(hour) < 2:
+            hour = '0' + hour
+        if len(minute) < 2:
+            minute = minute + '0'
+        namespace.time = '{}:{}'.format(hour, minute)

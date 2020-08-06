@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-def load_command_table(self, _):
+def load_command_table(self, _):  # pylint: disable=too-many-statements
     from azure.cli.core.commands import CliCommandType
     from ._client_factory import cf_hdinsight_applications
     from ._client_factory import cf_hdinsight_clusters
@@ -104,3 +104,18 @@ def load_command_table(self, _):
                             client_factory=cf_hdinsight_virtual_machines) as g:
         g.command('list', 'list_hosts')
         g.command('restart', 'restart_hosts', confirmation=True)
+
+    # Autoscale operations
+    with self.command_group('hdinsight autoscale', hdinsight_clusters_sdk, client_factory=cf_hdinsight_clusters) as g:
+        g.custom_command('create', 'create_autoscale')
+        g.custom_command('update', 'update_autoscale')
+        g.custom_command('show', 'show_autoscale')
+        g.custom_command('delete', 'delete_autoscale')
+        g.custom_command('list-timezones', 'list_timezones')
+
+    with self.command_group('hdinsight autoscale condition', hdinsight_clusters_sdk,
+                            client_factory=cf_hdinsight_clusters) as g:
+        g.custom_command('create', 'create_autoscale_condition')
+        g.custom_command('update', 'update_autoscale_condition')
+        g.custom_command('list', 'list_autoscale_condition')
+        g.custom_command('delete', 'delete_autoscale_condition')
