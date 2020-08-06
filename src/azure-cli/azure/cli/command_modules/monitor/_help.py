@@ -667,7 +667,11 @@ parameters:
   - name: --condition
     short-summary: The condition which triggers the scaling action.
     long-summary: >
-        The form of a condition is "METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD".
+        Usage:  --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD
+                            [where DIMENSION {==,!=} VALUE [or VALUE ...]
+                            [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]
+
+        Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
         Values for METRIC and appropriate THRESHOLD values can be obtained from the `az monitor metric` command.
         Format of PERIOD is "##h##m##s".
   - name: --scale
@@ -1296,6 +1300,45 @@ short-summary: Show a saved search for a given workspace.
 helps['monitor log-analytics workspace saved-search delete'] = """
 type: command
 short-summary: Delete a saved search for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export'] = """
+type: group
+short-summary: Manage data export ruls for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace data-export create'] = """
+type: command
+short-summary: Create a data export rule for a given workspace.
+examples:
+  - name: Create a data export rule for a given workspace.
+    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable -t {table_name}
+  - name: Create a data export rule for a given workspace with all tables.
+    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable --all
+
+"""
+
+helps['monitor log-analytics workspace data-export update'] = """
+type: command
+short-summary: Update a data export rule for a given workspace.
+examples:
+  - name: Update a data export rule for a given workspace.
+    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} --all --enable false
+"""
+
+helps['monitor log-analytics workspace data-export list'] = """
+type: command
+short-summary: List all data export ruleses for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export show'] = """
+type: command
+short-summary: Show a data export rule for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export delete'] = """
+type: command
+short-summary: Delete a data export rule for a given workspace.
 """
 
 helps['monitor log-profiles'] = """

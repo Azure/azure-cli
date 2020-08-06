@@ -571,7 +571,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(mock_get_token.call_count, 2)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -602,7 +602,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.token_read_count)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_user_assigned_with_client_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -633,7 +633,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.client_id, test_client_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_user_assigned_with_object_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -664,7 +664,7 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.object_id, test_object_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_login_credentials_msi_user_assigned_with_res_id(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -753,7 +753,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     def test_get_raw_token_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
 
@@ -899,7 +899,7 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual([], subs)
 
-    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
     @mock.patch('azure.cli.core._profile._get_cloud_console_token_endpoint', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
@@ -1048,7 +1048,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
-    @mock.patch('azure.cli.core._profile.MSIAuthenticationWrapper', autospec=True)
+    @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, mock_subscription_finder, mock_get_client_class,

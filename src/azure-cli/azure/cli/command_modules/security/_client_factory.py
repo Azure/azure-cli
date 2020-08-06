@@ -107,6 +107,11 @@ def cf_security_regulatory_compliance_assessment(cli_ctx, _):
     return _cf_security(cli_ctx).regulatory_compliance_assessments
 
 
+def cf_security_adaptive_application_controls(cli_ctx, _):
+    # do not return cli_ctx.adaptive_application_controls for home region compatibility
+    return _cf_security(cli_ctx).adaptive_application_controls
+
+
 def cf_security_adaptive_network_hardenings(cli_ctx, _):
     # do not return cli_ctx.adaptive_network_hardenings for home region compatibility
     return _cf_security(cli_ctx).adaptive_network_hardenings

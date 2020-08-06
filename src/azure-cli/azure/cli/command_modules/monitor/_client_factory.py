@@ -105,6 +105,10 @@ def cf_log_analytics_workspace_tables(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).tables
 
 
+def cf_log_analytics_workspace_data_exports(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).data_exports
+
+
 def cf_log_analytics_workspace_management_groups(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).management_groups
 

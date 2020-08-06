@@ -8,7 +8,6 @@ import threading
 import time
 import ast
 
-
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -20,11 +19,11 @@ import json
 import ssl
 import sys
 import uuid
+from functools import reduce
+
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
-from functools import reduce
-
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -73,7 +72,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
-                  using_webapp_up=False, language=None):
+                  using_webapp_up=False, language=None, assign_identities=None,
+                  role='Contributor', scope=None):
     SiteConfig, SkuDescription, Site, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'Site', 'NameValuePair')
     if deployment_source_url and deployment_local_git:
@@ -88,13 +88,25 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:
         plan_info = client.app_service_plans.get(resource_group_name, plan)
     if not plan_info:
-        raise CLIError("The plan '{}' doesn't exist".format(plan))
+        raise CLIError("The plan '{}' doesn't exist in the resource group '{}".format(plan, resource_group_name))
     is_linux = plan_info.reserved
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     name_validation = client.check_name_availability(name, 'Site')
     if not name_validation.name_available:
+        if name_validation.reason == 'Invalid':
+            raise CLIError(name_validation.message)
+        logger.warning("Webapp '%s' already exists. The command will use the existing app's settings.", name)
+        app_details = get_app_details(cmd, name)
+        if app_details is None:
+            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that "
+                           "the app is a part of the current subscription".format(name))
+        current_rg = app_details.resource_group
+        if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
+            raise CLIError("The webapp '{}' exists in resource group '{}' and does not "
+                           "match the value entered '{}'. Please re-run command with the "
+                           "correct parameters.". format(name, current_rg, resource_group_name))
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
                                                         name, 'list_application_settings')
         settings = []
@@ -123,7 +135,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
-                               "Please invoke 'list-runtimes' to cross check".format(runtime))
+                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -151,8 +163,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                            "only appliable on linux webapp")
         match = helper.resolve(runtime)
         if not match:
-            raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+            raise CLIError("Runtime '{}' is not supported. Please invoke 'az webapp list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
+
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
             if name_validation.name_available:
@@ -189,6 +202,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
                                   deployment_container_image_name, docker_registry_server_user,
                                   docker_registry_server_password=docker_registry_server_password)
+
+    if assign_identities is not None:
+        identity = assign_identity(cmd, resource_group_name, name, assign_identities,
+                                   role, None, scope)
+        webapp.identity = identity
 
     return webapp
 
@@ -692,14 +710,55 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     return result
 
 
-def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def _build_identities_info(identities):
+    from ._appservice_utils import MSI_LOCAL_ID
+    identities = identities or []
+    identity_types = []
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_types.append('SystemAssigned')
+    external_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if external_identities:
+        identity_types.append('UserAssigned')
+    identity_types = ','.join(identity_types)
+    info = {'type': identity_types}
+    if external_identities:
+        info['userAssignedIdentities'] = {e: {} for e in external_identities}
+    return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
+
+
+def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
+    ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
+                                                                  'ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        if webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned and external_identities:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif webapp.identity and webapp.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities:
+            identity_types = ResourceIdentityType.user_assigned
+        else:
+            identity_types = ResourceIdentityType.system_assigned
+
+        if webapp.identity:
+            webapp.identity.type = identity_types
+        else:
+            webapp.identity = ManagedServiceIdentity(type=identity_types)
+        if external_identities:
+            if not webapp.identity.user_assigned_identities:
+                webapp.identity.user_assigned_identities = {}
+            for identity in external_identities:
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -712,14 +771,46 @@ def show_identity(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
 
 
-def remove_identity(cmd, resource_group_name, name, slot=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
+    IdentityType = cmd.get_models('ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='None')
+        if webapp.identity is None:
+            return webapp
+        to_remove = []
+        existing_identities = {x.lower() for x in list((webapp.identity.user_assigned_identities or {}).keys())}
+        if external_identities:
+            to_remove = {x.lower() for x in external_identities}
+            non_existing = to_remove.difference(existing_identities)
+            if non_existing:
+                raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+            if not list(existing_identities - to_remove):
+                if webapp.identity.type == IdentityType.user_assigned:
+                    webapp.identity.type = IdentityType.none
+                elif webapp.identity.type == IdentityType.system_assigned_user_assigned:
+                    webapp.identity.type = IdentityType.system_assigned
+
+        webapp.identity.user_assigned_identities = None
+        if remove_local_identity:
+            webapp.identity.type = (IdentityType.none
+                                    if webapp.identity.type == IdentityType.system_assigned or
+                                    webapp.identity.type == IdentityType.none
+                                    else IdentityType.user_assigned)
+
+        if webapp.identity.type not in [IdentityType.none, IdentityType.system_assigned]:
+            webapp.identity.user_assigned_identities = {}
+        if to_remove:
+            for identity in list(existing_identities - to_remove):
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+        else:
+            for identity in list(existing_identities):
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -800,8 +891,8 @@ def list_runtimes(cmd, linux=False):
 
 def list_runtimes_hardcoded(linux=False):
     if linux:
-        return RUNTIME_STACKS['linux']
-    return RUNTIME_STACKS['windows']
+        return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['linux']]
+    return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['windows']]
 
 
 def _rename_server_farm_props(webapp):
@@ -946,6 +1037,8 @@ def _format_fx_version(custom_image_name, container_config_type=None):
 def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None):
     fx_version = _format_fx_version(custom_image_name)
     web_app = get_webapp(cmd, resource_group_name, name, slot)
+    if not web_app:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     linux_fx = fx_version if web_app.reserved else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
@@ -1850,7 +1943,7 @@ def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
     return content.result()
 
 
-def list_publish_profiles(cmd, resource_group_name, name, slot=None):
+def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     import xmltodict
 
     content = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
@@ -1859,16 +1952,17 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None):
     for f in content:
         full_xml += f.decode()
 
-    profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
-    converted = []
-    for profile in profiles:
-        new = {}
-        for key in profile:
-            # strip the leading '@' xmltodict put in for attributes
-            new[key.lstrip('@')] = profile[key]
-        converted.append(new)
-
-    return converted
+    if not xml:
+        profiles = xmltodict.parse(full_xml, xml_attribs=True)['publishData']['publishProfile']
+        converted = []
+        for profile in profiles:
+            new = {}
+            for key in profile:
+                # strip the leading '@' xmltodict put in for attributes
+                new[key.lstrip('@')] = profile[key]
+            converted.append(new)
+        return converted
+    return full_xml
 
 
 def enable_cd(cmd, resource_group_name, name, enable, slot=None):
@@ -2410,7 +2504,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
-class _StackRuntimeHelper(object):
+class _StackRuntimeHelper:
 
     def __init__(self, cmd, client, linux=False):
         self._cmd = cmd
@@ -2419,13 +2513,13 @@ class _StackRuntimeHelper(object):
         self._stacks = []
 
     def resolve(self, display_name):
-        self._load_stacks()
+        self._load_stacks_hardcoded()
         return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
                     None)
 
     @property
     def stacks(self):
-        self._load_stacks()
+        self._load_stacks_hardcoded()
         return self._stacks
 
     @staticmethod
@@ -2442,6 +2536,22 @@ class _StackRuntimeHelper(object):
         site_config.app_settings += [NameValuePair(name=k, value=v) for k, v in stack['configs'].items()]
         return site_config
 
+    def _load_stacks_hardcoded(self):
+        if self._stacks:
+            return
+        result = []
+        if self._linux:
+            result = get_file_json(RUNTIME_STACKS)['linux']
+        else:  # Windows stacks
+            result = get_file_json(RUNTIME_STACKS)['windows']
+            for r in result:
+                r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
+                               r['displayName'] else _StackRuntimeHelper.update_site_config)
+        self._stacks = result
+
+    # Currently using hardcoded values instead of this function. This function calls the stacks API;
+    # Stacks API is updated with Antares deployments,
+    # which are infrequent and don't line up with stacks EOL schedule.
     def _load_stacks(self):
         if self._stacks:
             return
@@ -3409,15 +3519,16 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         if _site_availability.reason == 'Invalid':
             raise CLIError(_site_availability.message)
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
-        logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
+        logger.warning("Webapp '%s' already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
         if app_details is None:
-            raise CLIError("Unable to retrieve details of the existing app {}. Please check that the app is a part of "
-                           "the current subscription".format(name))
+            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that the app "
+                           "is a part of the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
-            raise CLIError("The webapp {} exists in ResourceGroup {} and does not match the value entered {}. Please "
-                           "re-run command with the correct parameters.". format(name, current_rg, resource_group_name))
+            raise CLIError("The webapp '{}' exists in ResourceGroup '{}' and does not "
+                           "match the value entered '{}'. Please re-run command with the "
+                           "correct parameters.". format(name, current_rg, resource_group_name))
         rg_name = resource_group_name or current_rg
         if location is None:
             loc = app_details.location.replace(" ", "").lower()
@@ -3426,7 +3537,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         plan_details = parse_resource_id(app_details.server_farm_id)
         current_plan = plan_details['name']
         if plan is not None and current_plan.lower() != plan.lower():
-            raise CLIError("The plan name entered {} does not match the plan name that the webapp is hosted in {}."
+            raise CLIError("The plan name entered '{}' does not match the plan name that the webapp is hosted in '{}'."
                            "Please check if you have configured defaults for plan name and re-run command."
                            .format(plan, current_plan))
         plan = plan or plan_details['name']
@@ -3435,7 +3546,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         current_os = 'Linux' if plan_info.reserved else 'Windows'
         # Raise error if current OS of the app is different from the current one
         if current_os.lower() != os_name.lower():
-            raise CLIError("The webapp {} is a {} app. The code detected at '{}' will default to "
+            raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                            "'{}'. "
                            "Please create a new app to continue this operation.".format(name, current_os, src_dir, os))
         _is_linux = plan_info.reserved
@@ -3443,13 +3554,20 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         # Get site config to check the runtime version
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
-        logger.warning("webapp %s doesn't exist", name)
+        logger.warning("The webapp '%s' doesn't exist", name)
         sku = get_sku_to_use(src_dir, html, sku)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
         _is_linux = os_name.lower() == 'linux'
         _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
-        plan = get_plan_to_use(cmd, user, os_name, loc, sku, rg_name, _create_new_rg, plan)
+        plan = get_plan_to_use(cmd=cmd,
+                               user=user,
+                               os_name=os_name,
+                               loc=loc,
+                               sku=sku,
+                               create_rg=_create_new_rg,
+                               resource_group_name=rg_name,
+                               plan=plan)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",

@@ -18,8 +18,9 @@ def load_command_table(self, _):
         cf_log_analytics_workspace_linked_service, cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
         cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage,
-        cf_log_analytics_workspace_saved_searches, cf_subscription_diagnostics)
-    from ._exception_handler import monitor_exception_handler, missing_resource_handler
+        cf_log_analytics_workspace_saved_searches, cf_subscription_diagnostics,
+        cf_log_analytics_workspace_data_exports)
+    from ._exception_handler import monitor_exception_handler, missing_resource_handler, data_export_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
 
@@ -247,6 +248,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    log_analytics_workspace_data_exports_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#DataExportsOperations.{}',
+        client_factory=cf_log_analytics_workspace_data_exports,
+        exception_handler=monitor_exception_handler
+    )
+
     log_analytics_cluster_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#ClustersOperations.{}',
         client_factory=cf_log_analytics_cluster,
@@ -386,8 +393,17 @@ def load_command_table(self, _):
 
     with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk) as g:
         g.command('list', 'list_by_workspace')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('update', 'update')
+
+    with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
+                            custom_command_type=log_analytics_workspace_custom, exception_handler=data_export_handler) as g:
+        g.command('list', 'list_by_workspace')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_log_analytics_workspace_data_exports',
+                         client_factory=cf_log_analytics_workspace_data_exports)
+        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_data_exports')
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_intelligence_packs_sdk) as g:
         g.command('list', 'list')

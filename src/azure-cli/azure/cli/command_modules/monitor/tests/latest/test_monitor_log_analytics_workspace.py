@@ -220,7 +220,6 @@ class TestLogProfileScenarios(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_public_access', location='eastus')
     def test_monitor_log_analytics_workspace_public_access(self, resource_group):
-        from msrestazure.tools import resource_id
         self.kwargs.update({
             'name': self.create_random_name('clitest', 20),
             'name_2': self.create_random_name('clitest', 20)
@@ -375,3 +374,97 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd('monitor log-analytics workspace saved-search delete -g {rg} --workspace-name {workspace_name} -n {saved_search_name} -y')
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_data_export', location='eastus')
+    @StorageAccountPreparer(name_prefix='saws1', kind='StorageV2', sku='Standard_LRS', parameter_name='account_1',
+                            location='eastus')
+    def test_monitor_log_analytics_workspace_data_export(self, resource_group, account_1):
+        from msrestazure.tools import resource_id
+        self.kwargs.update({
+            'workspace_name': self.create_random_name('clitest', 20),
+            'data_export_name': 'clitest',
+            'data_export_name_2': 'clitest2',
+            'sa_1': account_1,
+            'sa_id_1': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=account_1,
+                namespace='Microsoft.Storage',
+                type='storageAccounts'),
+            'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
+            'eventhubname': "hub_name",
+            'rg': resource_group
+        })
+
+        self.cmd(
+            "monitor log-analytics workspace create -g {rg} -n {workspace_name} --quota 1 --level 100 --sku CapacityReservation",
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('retentionInDays', 30),
+                self.check('sku.name', 'capacityreservation'),
+                self.check('sku.capacityReservationLevel', 100),
+                self.check('workspaceCapping.dailyQuotaGb', 1.0)
+            ])
+        self.kwargs.update({
+            'table_name': 'Syslog'
+        })
+
+        self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
+                 '--destination {sa_id_1} --enable -t {table_name}',
+                 checks=[
+                 ])
+        from knack.util import CLIError
+        with self.assertRaisesRegexp(CLIError, 'Table SecurityEvent Heartbeat does not exist in the workspace'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
+                     checks=[
+                     ])
+        with self.assertRaisesRegexp(CLIError, 'You have exceeded the allowed export rules for the provided table'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t {table_name}',
+                     checks=[
+                     ])
+        with self.assertRaisesRegexp(CLIError, 'Table ABC does not exist in the workspace'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t ABC',
+                     checks=[
+                     ])
+        with self.assertRaisesRegexp(CLIError, 'You have exceeded the allowed export rules for the provided table'):
+            self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
+                     '--destination {sa_id_1} --enable -t AppPerformanceCounters',
+                     checks=[
+                     ])
+        self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}', checks=[
+        ])
+
+        self.cmd('monitor log-analytics workspace data-export list -g {rg} --workspace-name {workspace_name}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        result = self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename}').get_output_in_json()
+        self.kwargs.update({
+            'namespace_id': result['id']
+        })
+        result = self.cmd('eventhubs eventhub create --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}').get_output_in_json()
+        self.kwargs.update({
+            'eventhub_id': result['id']
+        })
+        self.cmd(
+            'monitor log-analytics workspace data-export update -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
+            '--destination {namespace_id} --all --enable true',
+            checks=[
+            ])
+
+        self.cmd('eventhubs eventhub list -g {rg} --namespace-name {namespacename}')
+
+        self.cmd('monitor log-analytics workspace data-export delete -g {rg} --workspace-name {workspace_name} -n {data_export_name} -y')
+
+        self.cmd(
+            'monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
+            '--destination {eventhub_id} --all --enable false',
+            checks=[
+            ])
+
+        self.cmd('monitor log-analytics workspace data-export delete -g {rg} --workspace-name {workspace_name} -n {data_export_name} -y')
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}')

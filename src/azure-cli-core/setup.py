@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.8.0"
+VERSION = "2.10.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -56,7 +56,7 @@ DEPENDENCIES = [
     'colorama~=0.4.1',
     'humanfriendly>=4.7,<9.0',
     'jmespath',
-    'knack==0.7.1',
+    'knack==0.7.2',
     'msal~=1.0.0',
     'msal-extensions~=0.1.3',
     'msrest>=0.4.4',

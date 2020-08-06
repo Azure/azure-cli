@@ -288,7 +288,7 @@ parameters:
   - name: --name -n
     short-summary: The deployment name.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -430,7 +430,7 @@ parameters:
   - name: --name -n
     short-summary: The deployment name.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -601,7 +601,7 @@ parameters:
   - name: --mode
     short-summary: The deployment mode.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -761,6 +761,39 @@ examples:
     text: az deployment mg validate --management-group-id testmg --location WestUS --template-file {template-file}
 """
 
+helps['deployment mg what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at management group scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --management-group-id -m
+    short-summary: The management group id to create deployment at.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --location -l
+    short-summary: The location to store the deployment metadata.
+  - name: --result-format -r
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at a management group.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at a management group with ResourceIdOnly format.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at a management group without pretty-printing the result.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
+"""
+
 helps['deployment mg create'] = """
 type: command
 short-summary: Start a deployment at management group.
@@ -782,6 +815,8 @@ parameters:
     short-summary: The deployment name.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at management group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -888,6 +923,37 @@ examples:
     text: az deployment tenant validate --location WestUS --template-file {template-file}
 """
 
+helps['deployment tenant what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at tenant scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --location -l
+    short-summary: The location to store the deployment What-If operation metadata.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --result-format -r
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at tenant scope.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at tenant scope with ResourceIdOnly format.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at tenant scope without pretty-printing the result.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
+"""
+
 helps['deployment tenant create'] = """
 type: command
 short-summary: Start a deployment at tenant scope.
@@ -907,6 +973,8 @@ parameters:
     short-summary: The deployment name.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at tenant scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -1988,7 +2056,7 @@ examples:
 
 helps['tag'] = """
 type: group
-short-summary: Manage resource tags.
+short-summary: Tag Management on a resource.
 """
 
 helps['tag add-value'] = """
@@ -2002,18 +2070,104 @@ examples:
 
 helps['tag create'] = """
 type: command
-short-summary: Create a tag in the subscription.
+short-summary: Create tags on a specific resource.
+long-summary: >
+    The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
+    This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
+    The specified entity can have a maximum of 50 tags.
+parameters:
+  - name: --name -n
+    short-summary: The name of the tag to create.
+  - name: --subscription
+    short-summary: Name or ID of subscription. You can configure the default subscription using az account set -s NAME_OR_ID.
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+  - name: --tags
+    short-summary: The tags to be applied on the resource.
 examples:
   - name: Create a tag in the subscription.
     text: >
         az tag create --name MyTag
+  - name: Create or update the entire set of tags on a subscription.
+    text: >
+        az tag create --resource-id /subscriptions/{subId} --tags Dept=Finance Status=Normal
+  - name: Create or update the entire set of tags on a resource group.
+    text: >
+        az tag create --resource-id /subscriptions/{sub-id}/resourcegroups/{rg} --tags Dept=Finance Status=Normal
+  - name: Create or update the entire set of tags on a resource.
+    text: >
+        az tag create --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --tags Dept=Finance Status=Normal
 """
 
 helps['tag delete'] = """
 type: command
-short-summary: Delete a tag in the subscription.
+short-summary: Delete tags on a specific resource.
+long-summary:
+    The az tag delete command with an id deletes the entire set of tags on a resource, resource group or subscription.
+parameters:
+  - name: --name -n
+    short-summary: The name of the tag to be deleted.
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
 examples:
   - name: Delete a tag from the subscription.
     text: >
         az tag delete --name MyTag
+  - name: Delete the entire set of tags on a subscription.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}
+  - name: Delete the entire set of tags on a resource group.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
+  - name: Delete the entire set of tags on a resource.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
+"""
+
+helps['tag list'] = """
+type: command
+short-summary: List the entire set of tags on a specific resource.
+long-summary: The az tag list command with an id lists the entire set of tags on a resource, resource group or subscription.
+parameters:
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+examples:
+  - name: List the entire set of tags on a subscription.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}
+  - name: List the entire set of tags on a resource group.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
+  - name: List the entire set of tags on a resource.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
+"""
+
+helps['tag update'] = """
+type: command
+short-summary: Selectively update the set of tags on a specific resource.
+long-summary: >
+    The az tag update command with an id selectively updates the set of tags on a resource, resource group or subscription.
+    This operation allows replacing, merging or selectively deleting tags on the specified resource, resource group or subscription.
+    The specified entity can have a maximum of 50 tags at the end of the operation.
+    The 'replace' option replaces the entire set of existing tags with a new set.
+    The 'merge' option allows adding tags with new names and updating the values of tags with existing names.
+    The 'delete' option allows selectively deleting tags based on given names or name/value pairs.
+parameters:
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+  - name: --operation
+    short-summary: The update operation. Options are Merge, Replace and Delete.
+  - name: --tags
+    short-summary: The tags to be updated on the resource.
+examples:
+  - name: Selectively update the set of tags on a subscription with "merge" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id} --operation merge --tags key1=value1 key3=value3
+  - name: Selectively update the set of tags on a resource group with "replace" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg} --operation replace --tags key1=value1 key3=value3
+  - name: Selectively update the set of tags on a resource with "delete" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --operation delete --tags key1=value1
 """

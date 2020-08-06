@@ -139,6 +139,66 @@ examples:
     text: az network application-gateway delete -g MyResourceGroup -n MyAppGateway
 """
 
+helps['network application-gateway private-link'] = """
+type: group
+short-summary: Manage Private Link of an Application Gateway
+"""
+
+helps['network application-gateway private-link add'] = """
+type: command
+short-summary: Add a new Private Link with a default IP Configuration and associate it with an existing Frontend IP
+"""
+
+helps['network application-gateway private-link remove'] = """
+type: command
+short-summary: Remove a Private Link and clear association with Frontend IP. The subnet associate with a Private Link might need to clear manually
+"""
+
+helps['network application-gateway private-link show'] = """
+type: command
+short-summary: Show a Private Link
+"""
+
+helps['network application-gateway private-link list'] = """
+type: command
+short-summary: List all the Private Link
+"""
+
+helps['network application-gateway private-link wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the condition of corresponding application gateway is met
+"""
+
+helps['network application-gateway private-link ip-config'] = """
+type: group
+short-summary: Manage IP configuration of a Private Link to configure its capability
+"""
+
+helps['network application-gateway private-link ip-config add'] = """
+type: command
+short-summary: Add an IP configuration to a Private Link to scale up its capability
+"""
+
+helps['network application-gateway private-link ip-config remove'] = """
+type: command
+short-summary: Remove an IP configuration from a Private Link to scale down its capability
+"""
+
+helps['network application-gateway private-link ip-config show'] = """
+type: command
+short-summary: Show an IP configuration of a Private Link
+"""
+
+helps['network application-gateway private-link ip-config list'] = """
+type: command
+short-summary: List all the IP configuration of a Private Link
+"""
+
+helps['network application-gateway private-link ip-config wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the condition of corresponding application gateway is met
+"""
+
 helps['network application-gateway frontend-ip'] = """
 type: group
 short-summary: Manage frontend IP addresses of an application gateway.
@@ -3700,7 +3760,7 @@ examples:
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags \\
             --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage \\
-            --destination-port-ranges * --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
+            --destination-port-ranges '*' --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
   - name: Create a security rule using application security groups. https://aka.ms/applicationsecuritygroups
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg \\

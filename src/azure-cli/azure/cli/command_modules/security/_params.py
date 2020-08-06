@@ -71,6 +71,9 @@ adaptive_network_hardenings_resource_resource_type = CLIArgumentType(option_list
 adaptive_network_hardenings_resource_resource_name = CLIArgumentType(option_list=('--resource_name'), metave='RESOURCENAME', help='Name of the resource')
 adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name = CLIArgumentType(option_list=('--adaptive_network_hardenings_resource_name'), metave='ADAPTIVENETWORKHARDENINGSRESOURCENAME', help='Adaptive Network Hardening resource name')
 
+# Adaptive Application Controls
+adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
+
 
 def load_arguments(self, _):
     for scope in ['alert',
@@ -96,6 +99,7 @@ def load_arguments(self, _):
                   'regulatory-compliance-standards',
                   'regulatory-compliance-controls',
                   'regulatory-compliance-assessments',
+                  'adaptive-application-controls',
                   'adaptive_network_hardenings',
                   'allowed_connections']:
         with self.argument_context('security {}'.format(scope)) as c:
@@ -264,3 +268,9 @@ def load_arguments(self, _):
             c.argument(
                 'iot_solution_name',
                 arg_type=iot_solution_name_arg_type)
+
+    for scope in ['adaptive-application-controls']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'group_name',
+                arg_type=adaptive_application_controls_group_name)

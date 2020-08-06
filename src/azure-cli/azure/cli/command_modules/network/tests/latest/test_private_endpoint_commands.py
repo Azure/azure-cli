@@ -8,7 +8,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
@@ -1024,6 +1024,322 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
         self.cmd('az network vnet subnet delete --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name}')
         self.cmd('az network vnet delete --resource-group {resource_group_net} --name {vnet_name}')
         self.cmd('az eventgrid domain delete --name {domain_name} --resource-group {rg}')
+
+
+class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_appgw_private_endpoint_with_default')
+    def test_appgw_private_endpoint_with_default(self, resource_group):
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_pe_vnet': 'appgw_private_endpoint_vnet',
+            'appgw_pe_subnet': 'appgw_private_endpoint_subnet',
+            'appgw_ip': 'appgw_ip',
+            'appgw_pe': 'appgw_private_endpoint',
+            'appgw_pec': 'appgw_private_endpoint_connection'
+        })
+
+        # Enable private link feature on Application Gateway would require a public IP with Standard tier
+        self.cmd('network public-ip create -g {rg} -n {appgw_ip} --sku Standard')
+
+        # Prepare the vnet to be connected to
+        self.cmd('network vnet create -g {rg} -n {appgw_pe_vnet} --subnet-name {appgw_pe_subnet}')
+        # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        self.cmd('network vnet subnet update -g {rg} -n {appgw_pe_subnet} '
+                 '--vnet-name {appgw_pe_vnet} '
+                 '--disable-private-endpoint-network-policies true')
+
+        # Enable private link feature on Application Gateway would require Standard_v2,WAF_v2 SKU tiers
+        # --enable-private-link would enable private link feature with default settings
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--sku Standard_v2 '
+                 '--public-ip-address {appgw_ip} '
+                 '--enable-private-link')
+
+        show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
+
+        self.assertEqual(show_appgw_data['name'], self.kwargs['appgw'])
+        self.assertEqual(show_appgw_data['sku']['tier'], 'Standard_v2')
+        # One default private link would be here
+        self.assertEqual(len(show_appgw_data['privateLinkConfigurations']), 1)
+        self.assertEqual(len(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations']), 1)
+        # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
+        self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
+                         show_appgw_data['privateLinkConfigurations'][0]['id'])
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['name'], 'PrivateLinkDefaultConfiguration')
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIpAllocationMethod'],
+                         'Dynamic')
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], None)
+
+        appgw_vnet = self.cmd('network vnet show -g {rg} -n "{appgw}Vnet"').get_output_in_json()
+        self.assertEqual(len(appgw_vnet['subnets']), 2)
+        self.assertEqual(appgw_vnet['subnets'][0]['name'], 'default')
+        self.assertEqual(appgw_vnet['subnets'][0]['addressPrefix'], '10.0.0.0/24')
+        # The subnet name and CIDR is default one
+        self.assertEqual(appgw_vnet['subnets'][1]['name'], 'PrivateLinkDefaultSubnet')
+        self.assertEqual(appgw_vnet['subnets'][1]['addressPrefix'], '10.0.1.0/24')
+
+        self.kwargs.update({
+            'appgw_id': show_appgw_data['id']
+        })
+
+        private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
+        self.assertEqual(len(private_link_resource), 1)
+        self.assertEqual(private_link_resource[0]['name'], 'appGatewayFrontendIP')
+
+        self.kwargs.update({
+            'private_link_group_id': private_link_resource[0]['properties']['groupId']
+        })
+
+        # Create a private endpoint against this application gateway
+        self.cmd('network private-endpoint create -g {rg} -n {appgw_pe} '
+                 '--connection-name {appgw_pec} '
+                 '--vnet-name {appgw_pe_vnet} '
+                 '--subnet {appgw_pe_subnet} '
+                 '--private-connection-resource-id {appgw_id} '
+                 '--group-id {private_link_group_id}')
+
+        list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
+        self.assertEqual(len(list_private_endpoint_conn), 1)
+        self.assertEqual(list_private_endpoint_conn[0]['properties']['privateLinkServiceConnectionState']['status'], 'Approved')
+
+        self.kwargs.update({
+            'private_endpoint_conn_id': list_private_endpoint_conn[0]['id']
+        })
+
+        self.cmd('network private-endpoint-connection reject --id {private_endpoint_conn_id}').get_output_in_json()
+
+        show_private_endpoint_conn = self.cmd('network private-endpoint-connection show --id {private_endpoint_conn_id}').get_output_in_json()
+        self.assertEqual(show_private_endpoint_conn['properties']['privateLinkServiceConnectionState']['status'], 'Rejected')
+
+        self.cmd('network private-endpoint delete -g {rg} -n {appgw_pe}')
+
+    @ResourceGroupPreparer(name_prefix='test_appgw_private_endpoint_with_overwrite_default')
+    def test_appgw_private_endpoint_with_overwrite_default(self, resource_group):
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_pe_vnet': 'appgw_private_endpoint_vnet',
+            'appgw_pe_subnet': 'appgw_private_endpoint_subnet',
+            'appgw_ip': 'appgw_ip',
+            'appgw_pe': 'appgw_private_endpoint',
+            'appgw_pec': 'appgw_private_endpoint_connection'
+        })
+
+        # Enable private link feature on Application Gateway would require a public IP with Standard tier
+        self.cmd('network public-ip create -g {rg} -n {appgw_ip} --sku Standard')
+
+        # Prepare the vnet to be connected to
+        self.cmd('network vnet create -g {rg} -n {appgw_pe_vnet} --subnet-name {appgw_pe_subnet}')
+        # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        self.cmd('network vnet subnet update -g {rg} -n {appgw_pe_subnet} '
+                 '--vnet-name {appgw_pe_vnet} '
+                 '--disable-private-endpoint-network-policies true')
+
+        # Enable private link feature on Application Gateway would require Standard_v2,WAF_v2 SKU tiers
+        # --enable-private-link would enable private link feature with default settings
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--sku Standard_v2 '
+                 '--public-ip-address {appgw_ip} '
+                 '--enable-private-link '
+                 '--private-link-subnet YetAnotherSubnetName '
+                 '--private-link-primary true '
+                 '--private-link-subnet-prefix 10.0.2.0/24')
+
+        show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
+
+        self.assertEqual(show_appgw_data['name'], self.kwargs['appgw'])
+        self.assertEqual(show_appgw_data['sku']['tier'], 'Standard_v2')
+        # One default private link would be here
+        self.assertEqual(len(show_appgw_data['privateLinkConfigurations']), 1)
+        self.assertEqual(len(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations']), 1)
+        # The frontendIpConfigurations must be assocciated with the same ID of private link configuration ID
+        self.assertEqual(show_appgw_data['frontendIpConfigurations'][0]['privateLinkConfiguration']['id'],
+                         show_appgw_data['privateLinkConfigurations'][0]['id'])
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['name'], 'PrivateLinkDefaultConfiguration')
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['privateIpAllocationMethod'],
+                         'Dynamic')
+        self.assertEqual(show_appgw_data['privateLinkConfigurations'][0]['ipConfigurations'][0]['primary'], True)
+
+        # The vnet created along with this application gateway
+        appgw_vnet = self.cmd('network vnet show -g {rg} -n "{appgw}Vnet"').get_output_in_json()
+        self.assertEqual(len(appgw_vnet['subnets']), 2)
+        self.assertEqual(appgw_vnet['subnets'][0]['name'], 'default')
+        self.assertEqual(appgw_vnet['subnets'][0]['addressPrefix'], '10.0.0.0/24')
+        # The subnet name and CIDR is different from default one
+        self.assertEqual(appgw_vnet['subnets'][1]['name'], 'YetAnotherSubnetName')
+        self.assertEqual(appgw_vnet['subnets'][1]['addressPrefix'], '10.0.2.0/24')
+
+        self.kwargs.update({
+            'appgw_id': show_appgw_data['id']
+        })
+
+        private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
+        self.assertEqual(len(private_link_resource), 1)
+        self.assertEqual(private_link_resource[0]['name'], 'appGatewayFrontendIP')
+
+        self.kwargs.update({
+            'private_link_group_id': private_link_resource[0]['properties']['groupId']
+        })
+
+        # Create a private endpoint against this application gateway
+        self.cmd('network private-endpoint create -g {rg} -n {appgw_pe} '
+                 '--connection-name {appgw_pec} '
+                 '--vnet-name {appgw_pe_vnet} '
+                 '--subnet {appgw_pe_subnet} '
+                 '--private-connection-resource-id {appgw_id} '
+                 '--group-id {private_link_group_id}')
+
+        list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
+        self.assertEqual(len(list_private_endpoint_conn), 1)
+        self.assertEqual(list_private_endpoint_conn[0]['properties']['privateLinkServiceConnectionState']['status'], 'Approved')
+
+        self.kwargs.update({
+            'private_endpoint_conn_id': list_private_endpoint_conn[0]['id']
+        })
+
+        self.cmd('network private-endpoint-connection reject --id {private_endpoint_conn_id}').get_output_in_json()
+
+        show_private_endpoint_conn = self.cmd('network private-endpoint-connection show --id {private_endpoint_conn_id}').get_output_in_json()
+        self.assertEqual(show_private_endpoint_conn['properties']['privateLinkServiceConnectionState']['status'], 'Rejected')
+
+        self.cmd('network private-endpoint delete -g {rg} -n {appgw_pe}')
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_manage_appgw_private_endpoint')
+    def test_manage_appgw_private_endpoint(self, resource_group):
+        """
+        Add/Remove/Show/List Private Link
+        """
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_private_link_for_public': 'appgw_private_link_for_public',
+            'appgw_private_link_for_private': 'appgw_private_link_for_private',
+            'appgw_private_link_subnet_for_public': 'appgw_private_link_subnet_for_public',
+            'appgw_private_link_subnet_for_private': 'appgw_private_link_subnet_for_private',
+            'appgw_public_ip': 'public_ip',
+            'appgw_private_ip': 'private_ip',
+            'appgw_private_endpoint_for_public': 'appgw_private_endpoint_for_public',
+            'appgw_private_endpoint_for_private': 'appgw_private_endpoint_for_private',
+            'appgw_private_endpoint_vnet': 'appgw_private_endpoint_vnet',
+            'appgw_private_endpoint_subnet_for_public': 'appgw_private_endpoint_subnet_for_public',
+            'appgw_private_endpoint_subnet_for_private': 'appgw_private_endpoint_subnet_for_private',
+            'appgw_private_endpoint_connection_for_public': 'appgw_private_endpoint_connection_for_public',
+            'appgw_private_endpoint_connection_for_private': 'appgw_private_endpoint_connection_for_private'
+        })
+
+        # Enable private link feature on Application Gateway would require a public IP with Standard tier
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip} --sku Standard')
+
+        # Create a application gateway without enable --enable-private-link
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--sku Standard_v2 '
+                 '--public-ip-address {appgw_public_ip}')
+
+        # Add one private link
+        self.cmd('network application-gateway private-link add -g {rg} '
+                 '--gateway-name {appgw} '
+                 '--name {appgw_private_link_for_public} '
+                 '--frontend-ip appGatewayFrontendIP '
+                 '--subnet {appgw_private_link_subnet_for_public} '
+                 '--subnet-prefix 10.0.4.0/24')
+        show_appgw_data = self.cmd('network application-gateway show -g {rg} -n {appgw}').get_output_in_json()
+        self.kwargs.update({
+            'appgw_id': show_appgw_data['id']
+        })
+
+        self.cmd('network application-gateway private-link show -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_private_link_for_public}')
+
+        self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
+
+        private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
+        self.assertEqual(len(private_link_resource), 1)
+        self.assertEqual(private_link_resource[0]['name'], 'appGatewayFrontendIP')
+
+        self.kwargs.update({
+            'private_link_group_id_for_public': private_link_resource[0]['properties']['groupId']
+        })
+
+        # Prepare the first vnet to be connected to
+        self.cmd('network vnet create -g {rg} '
+                 '--name {appgw_private_endpoint_vnet} '
+                 '--subnet-name {appgw_private_endpoint_subnet_for_public}')
+        # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        self.cmd('network vnet subnet update -g {rg} '
+                 '--vnet-name {appgw_private_endpoint_vnet} '
+                 '--name {appgw_private_endpoint_subnet_for_public} '
+                 '--disable-private-endpoint-network-policies true')
+        # Create the first private endpoint against this application gateway's public IP
+        self.cmd('network private-endpoint create -g {rg} '
+                 '--name {appgw_private_endpoint_for_public} '
+                 '--connection-name {appgw_private_endpoint_connection_for_public} '
+                 '--vnet-name {appgw_private_endpoint_vnet} '
+                 '--subnet {appgw_private_endpoint_subnet_for_public} '
+                 '--private-connection-resource-id {appgw_id} '
+                 '--group-id {private_link_group_id_for_public}')
+
+        # list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
+
+        # ------------------------------------------------------------------------------------------
+
+        # Add another frontend IP
+        self.cmd('network application-gateway frontend-ip create -g {rg} '
+                 '--gateway-name {appgw} '
+                 '--name {appgw_private_ip} '
+                 '--vnet-name "{appgw}Vnet" '
+                 '--subnet default '
+                 '--private-ip-address 10.0.0.11')
+
+        # Add another private link
+        self.cmd('network application-gateway private-link add -g {rg} '
+                 '--gateway-name {appgw} '
+                 '--name {appgw_private_link_for_private} '
+                 '--frontend-ip {appgw_private_ip} '
+                 '--subnet {appgw_private_link_subnet_for_private} '
+                 '--subnet-prefix 10.0.5.0/24')
+        self.cmd('network application-gateway private-link show -g {rg} --gateway-name {appgw} '
+                 '--name {appgw_private_link_for_private}')
+        self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
+
+        private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
+        self.assertEqual(len(private_link_resource), 2)
+        self.assertEqual(private_link_resource[1]['name'], self.kwargs['appgw_private_ip'])
+
+        # self.kwargs.update({
+        #     'private_link_group_id_for_private': private_link_resource[1]['properties']['groupId']
+        # })
+
+        # The rest of code is not working, service is 500 while creating another private endpoint
+        # on the settings below. It's a bug.
+        # If want to use like below, currently have to create a request routing rule to use the private frontend
+        # ------------------------------------------------------------------
+        # # Prepare the second vnet to be connected to
+        # self.cmd('network vnet subnet create -g {rg} '
+        #          '--vnet-name {appgw_private_endpoint_vnet} '
+        #          '--name {appgw_private_endpoint_subnet_for_private} '
+        #          '--address-prefixes 10.0.6.0/24')
+        # # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        # self.cmd('network vnet subnet update -g {rg} '
+        #          '--vnet-name {appgw_private_endpoint_vnet} '
+        #          '--name {appgw_private_endpoint_subnet_for_private} '
+        #          '--disable-private-endpoint-network-policies true')
+        # # Create the second private endpoint against this application gateway's public IP
+        # self.cmd('network private-endpoint create -g {rg} '
+        #          '--name {appgw_private_endpoint_for_private} '
+        #          '--connection-name {appgw_private_endpoint_connection_for_private} '
+        #          '--vnet-name {appgw_private_endpoint_vnet} '
+        #          '--subnet {appgw_private_endpoint_subnet_for_private} '
+        #          '--private-connection-resource-id {appgw_id} '
+        #          '--group-id {private_link_group_id_for_private}')
+
+        # self.cmd('network applicatin-gateway private-link remove -g {rg} '
+        #          '--gateway-name {appgw} '
+        #          '--name {appgw_private_link_subnet_for_public}')
+
+        # self.cmd('network applicatin-gateway private-link remove -g {rg} '
+        #          '--gateway-name {appgw} '
+        #          '--name {appgw_private_link_for_private}')
+
+        # self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
 
 
 if __name__ == '__main__':

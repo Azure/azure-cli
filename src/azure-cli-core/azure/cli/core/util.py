@@ -12,10 +12,10 @@ import base64
 import binascii
 import platform
 import ssl
-import six
 import re
 import logging
 
+import six
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
@@ -49,6 +49,15 @@ _GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/
 
 _VERSION_CHECK_TIME = 'check_time'
 _VERSION_UPDATE_TIME = 'update_time'
+
+# A list of reserved names that cannot be used as admin username of VM
+DISALLOWED_USER_NAMES = [
+    "administrator", "admin", "user", "user1", "test", "user2",
+    "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm",
+    "admin2", "aspnet", "backup", "console", "guest",
+    "owner", "root", "server", "sql", "support", "support_388945a0",
+    "sys", "test2", "test3", "user4", "user5"
+]
 
 
 def handle_exception(ex):  # pylint: disable=too-many-return-statements
@@ -596,9 +605,13 @@ def reload_module(module):
 
 def get_default_admin_username():
     try:
-        return getpass.getuser()
+        username = getpass.getuser()
     except KeyError:
-        return None
+        username = None
+    if username is None or username.lower() in DISALLOWED_USER_NAMES:
+        logger.warning('Default username %s is a reserved username. Use azureuser instead.', username)
+        username = 'azureuser'
+    return username
 
 
 def _find_child(parent, *args, **kwargs):
@@ -735,16 +748,17 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
     from azure.cli.core._profile import Profile
-    profile = Profile()
+    profile = Profile(cli_ctx=cli_ctx)
     if '{subscriptionId}' in url:
         url = url.replace('{subscriptionId}', cli_ctx.data['subscription_id'] or profile.get_subscription_id())
 
+    # Prepare the Bearer token for `Authorization` header
     if not skip_authorization_header and url.lower().startswith('https://'):
-        # Prepare `resource`
+        # Prepare `resource` for `get_raw_token`
         if not resource:
-            # If url starts with ARM endpoint, like https://management.azure.com/,
-            # use active_directory_resource_id for resource.
-            # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
+            # If url starts with ARM endpoint, like `https://management.azure.com/`,
+            # use `active_directory_resource_id` for resource, like `https://management.core.windows.net/`.
+            # This follows the same behavior as `azure.cli.core.commands.client_factory._get_mgmt_service_client`
             if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
                 resource = endpoints.active_directory_resource_id
             else:
@@ -758,11 +772,15 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                         resource = value
                         break
         if resource:
-            # If this is an ARM request, extract subscription ID from the URL.
-            # In the future when multi-tenant subscription is supported, we won't be able to uniquely identity the token
-            # from subscription anymore.
+            # Prepare `subscription` for `get_raw_token`
+            # If this is an ARM request, try to extract subscription ID from the URL.
+            # But there are APIs which don't require subscription ID, like /subscriptions, /tenants
+            # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identify
+            #   the token from subscription anymore.
+            token_subscription = None
             if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
                 token_subscription = _extract_subscription_id(url)
+            if token_subscription:
                 logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
                 token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
             else:
@@ -804,9 +822,12 @@ def _extract_subscription_id(url):
     """Extract the subscription ID from an ARM request URL."""
     subscription_regex = '/subscriptions/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
     match = re.search(subscription_regex, url, re.IGNORECASE)
-    if not match:
-        raise CLIError('No subscription ID specified in the URL')
-    return match.groups()[0]
+    if match:
+        subscription_id = match.groups()[0]
+        logger.debug('Found subscription ID %s in the URL %s', subscription_id, url)
+        return subscription_id
+    logger.debug('No subscription ID specified in the URL %s', url)
+    return None
 
 
 def _log_request(request):
@@ -874,7 +895,7 @@ def _log_response(response, **kwargs):
         return response
 
 
-class ConfiguredDefaultSetter(object):
+class ScopedConfig:
 
     def __init__(self, cli_config, use_local_config=None):
         self.use_local_config = use_local_config
@@ -889,6 +910,9 @@ class ConfiguredDefaultSetter(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         setattr(self.cli_config, 'use_local_config', self.original_use_local_config)
+
+
+ConfiguredDefaultSetter = ScopedConfig
 
 
 def _ssl_context():
@@ -990,3 +1014,25 @@ def get_linux_distro():
             release_info[k.lower()] = v.strip('"')
 
     return release_info.get('name', None), release_info.get('version_id', None)
+
+
+def roughly_parse_command(args):
+    # Roughly parse the command part: <az vm create> --name vm1
+    # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but we don't need to bother with
+    # positional args
+    nouns = []
+    for arg in args:
+        if arg and arg[0] != '-':
+            nouns.append(arg)
+        else:
+            break
+    return ' '.join(nouns).lower()
+
+
+def is_guid(guid):
+    import uuid
+    try:
+        uuid.UUID(guid)
+        return True
+    except ValueError:
+        return False

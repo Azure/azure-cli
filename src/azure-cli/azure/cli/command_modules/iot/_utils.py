@@ -53,16 +53,6 @@ def open_certificate(certificate_path):
     return certificate
 
 
-def get_auth_header(cmd):
-    from azure.cli.core._profile import Profile
-    from ._constants import CLIENT_ID
-
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    account = profile.get_subscription()
-    access_token = profile.get_access_token_for_resource(account['user']['name'], account['tenantId'], CLIENT_ID)
-    return {'Authorization': '{}'.format('Bearer ' + access_token)}
-
-
 def generateKey(byteLength=32):
     key = ''
     while byteLength > 0:
