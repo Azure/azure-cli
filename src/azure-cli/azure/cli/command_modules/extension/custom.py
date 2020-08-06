@@ -14,7 +14,8 @@ logger = get_logger(__name__)
 def add_extension_cmd(cmd, source=None, extension_name=None, index_url=None, yes=None,
                       pip_extra_index_urls=None, pip_proxy=None, system=None, version=None):
     return add_extension(cli_ctx=cmd.cli_ctx, source=source, extension_name=extension_name, index_url=index_url,
-                         yes=yes, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system, version=version)
+                         yes=yes, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system,
+                         version=version)
 
 
 def remove_extension_cmd(extension_name):

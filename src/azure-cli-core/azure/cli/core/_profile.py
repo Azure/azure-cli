@@ -746,9 +746,12 @@ class Profile:
         endpoint_mappings['sql_management'] = 'sqlManagementEndpointUrl'
         endpoint_mappings['gallery'] = 'galleryEndpointUrl'
         endpoint_mappings['management'] = 'managementEndpointUrl'
-
+        from azure.cli.core.cloud import CloudEndpointNotSetException
         for e in endpoint_mappings:
-            result[endpoint_mappings[e]] = getattr(get_active_cloud(self.cli_ctx).endpoints, e)
+            try:
+                result[endpoint_mappings[e]] = getattr(get_active_cloud(self.cli_ctx).endpoints, e)
+            except CloudEndpointNotSetException:
+                result[endpoint_mappings[e]] = None
         return result
 
     def get_installation_id(self):
