@@ -25,15 +25,10 @@ class BotTemplateDeployer:
     def deploy_arm_template(cmd, resource_group_name,  # pylint: disable=too-many-arguments
                             template_file=None, deployment_name=None,
                             parameters=None, mode=None):
-<<<<<<< HEAD
-        Deployment, DeploymentProperties, _ = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                          'Deployment', 'DeploymentProperties', 'TemplateLink', mod='models')
-=======
         DeploymentProperties = cmd.get_models(
             'DeploymentProperties',
             resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
         )
->>>>>>> 959166f624c1154a4225188a267842db777c48fe
 
         template = {}
         # TODO: get_file_json() can return None if specified, otherwise it can throw an error.
@@ -51,15 +46,7 @@ class BotTemplateDeployer:
 
         properties = DeploymentProperties(template=template, template_link=None,
                                           parameters=parameters, mode=mode)
-        deployment = Deployment(properties=properties)
 
-<<<<<<< HEAD
-        resource_management_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        return LongRunningOperation(cli_ctx, 'Deploying ARM Tempalte')(
-            resource_management_client.deployments.create_or_update(resource_group_name,
-                                                                    deployment_name,
-                                                                    deployment, raw=False))
-=======
         resource_mgmt_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
 
         if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
@@ -70,7 +57,6 @@ class BotTemplateDeployer:
             deployment_poller = resource_mgmt_client.create_or_update(resource_group_name, deployment_name, properties)
 
         return LongRunningOperation(cmd.cli_ctx, 'Deploying ARM Tempalte')(deployment_poller)
->>>>>>> 959166f624c1154a4225188a267842db777c48fe
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements

@@ -1140,29 +1140,15 @@ def load_service_principals(config_path):
 def _invoke_deployment(cmd, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
 
-<<<<<<< HEAD
-    from azure.cli.core.profiles import ResourceType, get_sdk
-    Deployment, DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment','DeploymentProperties', mod='models')
-    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    deployment = Deployment(properties=properties)
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-=======
     from azure.cli.core.profiles import ResourceType
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
->>>>>>> 959166f624c1154a4225188a267842db777c48fe
                                   subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
-<<<<<<< HEAD
-        validation_poller = smc.validate(resource_group_name, deployment_name, deployment)
-        return LongRunningOperation(cli_ctx)(validation_poller)
-    return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, deployment)
-
-=======
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -1176,7 +1162,6 @@ def _invoke_deployment(cmd, resource_group_name, deployment_name, template, para
     if validate:
         return smc.validate(resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, properties)
->>>>>>> 959166f624c1154a4225188a267842db777c48fe
 
 
 def k8s_get_credentials(cmd, client, name, resource_group_name,

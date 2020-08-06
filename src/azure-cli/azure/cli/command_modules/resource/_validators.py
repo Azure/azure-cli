@@ -6,7 +6,6 @@
 import os
 import re
 import argparse
-import datetime
 
 from knack.util import CLIError
 try:
@@ -15,26 +14,6 @@ except ImportError:
     from urlparse import urlparse, urlsplit  # pylint: disable=import-error
 
 MSI_LOCAL_ID = '[system]'
-
-
-def _validate_deployment_name_with_template_specs(namespace):
-    # If missing,try come out with a name associated with the template name
-    if namespace.deployment_name is None:
-        template_filename = None
-        if namespace.template_file and os.path.isfile(namespace.template_file):
-            template_filename = namespace.template_file
-        if namespace.template_uri and urlparse(namespace.template_uri).scheme:
-            template_filename = urlsplit(namespace.template_uri).path
-        if namespace.template_spec:
-            from msrestazure.tools import parse_resource_id, is_valid_resource_id
-            if not is_valid_resource_id(namespace.template_spec):
-                raise CLIError('--template-spec is not a valid resource ID.')
-            template_filename = parse_resource_id(namespace.template_spec).get('resource_name')
-        if template_filename:
-            template_filename = os.path.basename(template_filename)
-            namespace.deployment_name = os.path.splitext(template_filename)[0]
-        else:
-            namespace.deployment_name = 'deployment1' + str(datetime.datetime.now().timestamp())
 
 
 def _validate_deployment_name(namespace):
@@ -49,17 +28,13 @@ def _validate_deployment_name(namespace):
             template_filename = os.path.basename(template_filename)
             namespace.deployment_name = os.path.splitext(template_filename)[0]
         else:
-            namespace.deployment_name = 'deployment1' + str(datetime.datetime.now().timestamp())
+            namespace.deployment_name = 'deployment1'
 
 
 def process_deployment_create_namespace(namespace):
-    if bool(namespace.template_uri) == bool(namespace.template_file) == bool(namespace.template_spec):
-        raise CLIError('incorrect usage: Chose only one of'
-                       ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
-    if(bool(namespace.template_uri) or bool(namespace.template_file)):
-        _validate_deployment_name(namespace)
-    else:
-        _validate_deployment_name_with_template_specs(namespace)
+    if bool(namespace.template_uri) == bool(namespace.template_file):
+        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
+    _validate_deployment_name(namespace)
 
 
 def internal_validate_lock_parameters(namespace, resource_group, resource_provider_namespace,
