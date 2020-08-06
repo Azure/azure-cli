@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 def create_metric_alert(client, resource_group_name, rule_name, scopes, condition, disabled=False, description=None,
                         tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
-                        auto_mitigate=None):
+                        auto_mitigate=None, target_resource_type=None, target_resource_region=None):
     from azure.mgmt.monitor.models import (MetricAlertResource,
                                            MetricAlertSingleResourceMultipleMetricCriteria,
                                            MetricAlertMultipleResourceMultipleMetricCriteria)
@@ -20,8 +20,6 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
     for i, cond in enumerate(condition):
         cond.name = 'cond{}'.format(i)
     criteria = None
-    target_resource_type = None
-    target_resource_region = None
     if len(scopes) == 1:
         criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
     else:
@@ -213,17 +211,32 @@ def _parse_action_removals(actions):
 
 
 def _parse_resource_type(scopes):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from azure.cli.core import CLIError
+
     namespace = None
-    resource_type = None
-    for item in scopes:
-        item_namespace = parse_resource_id(item)['namespace']
-        item_resource_type = parse_resource_id(item)['resource_type']
-        if namespace is None and resource_type is None:
-            namespace = item_namespace
+    resource_type1 = None
+    scope_type1 = None
+
+    def set_fields(item_namespace, item_resource_type, item_scope_type):
+        if namespace is None and resource_type1 is None and scope_type1 is None:
+            # namespace = item_namespace
             resource_type = item_resource_type
+            scope_type = item_scope_type
         else:
-            if namespace != item_namespace or resource_type != item_resource_type:
+            if namespace != item_namespace or resource_type1 != item_resource_type or scope_type1 != item_scope_type:
                 raise CLIError('Multiple scopes should be the same resource type.')
-    return namespace + '/' + resource_type
+
+    for item in scopes:
+        result = parse_resource_id(item)
+        if 'namespace' in result and 'resource_type' in result:
+            item_namespace = result['namespace']
+            item_resource_type = result['resource_type']
+            set_fields(item_namespace, item_resource_type, 'resource')
+        elif 'resource_group' in result:
+            set_fields('', '', 'resource_group')
+        elif 'subscription' in result:
+            set_fields('', '', 'subscription')
+        else:
+            raise CLIError('Scope must be a valid resource id.')
+    return namespace + '/' + resource_type1
