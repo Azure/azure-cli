@@ -6,7 +6,6 @@ import json
 import re
 import random
 from six import string_types
-import jellyfish
 
 from azure.cli.core.commands import LongRunningOperation, _is_poller, cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -31,7 +30,7 @@ def register_global_query_recommend(cli_ctx):
         arg_group = kwargs.get('arg_group')
         arg_group.add_argument('--query-recommend', dest='_query_recommend',
                                help="Recommend JMESPath string for you", nargs="*")
-                               
+
     def handle_recommend_parameter(cli, **kwargs):
         args = kwargs['args']
         cli_ctx.invocation.data['output'] = 'table'
@@ -77,10 +76,9 @@ class TreeNode:
         self._child = []  # list of child node
         self._from_list = False
         self._list_length = 5  # valid only when from_list is true
-        self._similarity_threshold = 0.75
 
     def _get_data(self, key):
-        '''Return all key value'''
+        '''Return all key values with given key'''
         values = []
         if isinstance(self._data, list):
             for item in self._data:
@@ -107,30 +105,32 @@ class TreeNode:
         return key in self._list_keys
 
     def _get_trace(self):
+        '''Return the trace from root node to current node'''
         traces = []
         if self._parent:  # only calculate non-root node
             traces.extend(self._parent._get_trace())
             traces.append(self._name)
         return traces
 
-    def _get_match_items(self, select_items, similarity_threshold=0, keys=None):
-        '''Fuzzy match select items with self._keys
+    def _get_match_items(self, select_items, keys=None):
+        '''
+        Fuzzy match select items with self._keys
+
+        :param select_items: User input which they are intrested in
+        :param keys: if None, select from all keys in dict
         '''
         if keys is None:
             keys = self._keys
-        if len(select_items) == 0:
+        if not select_items:  # no keywords are provided
             return keys
-        simi_dict = {}
+        match_list = []
         for item in select_items:
             for key in keys:
-                similarity = jellyfish.jaro_winkler_similarity(item, key)
-                simi_dict[key] = max(simi_dict.get(key, 0), similarity)
-        sorted_list = sorted(simi_dict, key=simi_dict.get)
-        sorted_list = list(filter(
-            lambda k: simi_dict[k] > similarity_threshold, sorted_list))
-        return sorted_list[::-1]
+                if item in key:
+                    match_list.append(item)
+        return match_list
 
-    def _get_trace_str(self, number=None, filter_rules=False, select_items=None):
+    def _get_trace_str(self, number=None, filter_rules=False):
         '''The correct JMESPath to get to current node'''
         trace_str = ""
         if self._parent:
@@ -158,8 +158,7 @@ class TreeNode:
             for key in self._keys:
                 select_list.add(key)
         else:
-            select_list.update(self._get_match_items(
-                select_items, self._similarity_threshold))
+            select_list.update(self._get_match_items(select_items))
         for item in select_list:
             ret.append(Recommendation(trace_str + item,
                                       help_str="Get all {} from output".format(
@@ -189,8 +188,7 @@ class TreeNode:
             if not (isinstance(self.get_one_value(key), list) or
                     isinstance(self.get_one_value(key), dict)):
                 viable_keys.append(key)
-        match_items = self._get_match_items(
-            select_items, similarity_threshold=self._similarity_threshold, keys=viable_keys)
+        match_items = self._get_match_items(select_items, keys=viable_keys)
         if match_items is not None and len(match_items) > 0:
             query_str = "{}=='{}'".format(
                 match_items[0], self.get_one_value(match_items[0]))
