@@ -215,16 +215,19 @@ def _parse_resource_type(scopes):
     from azure.cli.core import CLIError
 
     namespace = None
-    resource_type1 = None
-    scope_type1 = None
+    resource_type = None
+    scope_type = None
 
     def set_fields(item_namespace, item_resource_type, item_scope_type):
-        if namespace is None and resource_type1 is None and scope_type1 is None:
-            # namespace = item_namespace
+        nonlocal namespace
+        nonlocal resource_type
+        nonlocal scope_type
+        if namespace is None and resource_type is None and scope_type is None:
+            namespace = item_namespace
             resource_type = item_resource_type
             scope_type = item_scope_type
         else:
-            if namespace != item_namespace or resource_type1 != item_resource_type or scope_type1 != item_scope_type:
+            if namespace != item_namespace or resource_type != item_resource_type or scope_type != item_scope_type:
                 raise CLIError('Multiple scopes should be the same resource type.')
 
     for item in scopes:
@@ -239,4 +242,4 @@ def _parse_resource_type(scopes):
             set_fields('', '', 'subscription')
         else:
             raise CLIError('Scope must be a valid resource id.')
-    return namespace + '/' + resource_type1
+    return namespace + '/' + resource_type, scope_type
