@@ -94,7 +94,7 @@ class TunnelServer:
             http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
-        if not self.instance is None:
+        if self.instance is not None:
             headers['Cookie'] = 'ARRAffinity=' + self.instance
         r = http.request(
             'GET',
