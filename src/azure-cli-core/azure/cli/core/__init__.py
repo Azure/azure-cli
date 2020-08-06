@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.10.0"
+__version__ = "2.10.1"
 
 import os
 import sys
@@ -394,16 +394,30 @@ class MainCommandsLoader(CLICommandsLoader):
                 logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
                 from azure.cli.core.util import roughly_parse_command
                 # The index may be outdated. Make sure the command appears in the loaded command table
-                command_str = roughly_parse_command(args)
-                if command_str in self.command_table:
-                    logger.debug("Found a match in the command table for '%s'", command_str)
-                    return self.command_table
-                if command_str in self.command_group_table:
-                    logger.debug("Found a match in the command group table for '%s'", command_str)
+                raw_cmd = roughly_parse_command(args)
+                for cmd in self.command_table:
+                    if raw_cmd.startswith(cmd):
+                        # For commands with positional arguments, the raw command won't match the one in the
+                        # command table. For example, `az find vm create` won't exist in the command table, but the
+                        # corresponding command should be `az find`.
+                        # raw command  : az find vm create
+                        # command table: az find
+                        # remaining    :         vm create
+                        logger.debug("Found a match in the command table.")
+                        logger.debug("Raw command  : %s", raw_cmd)
+                        logger.debug("Command table: %s", cmd)
+                        remaining = raw_cmd[len(cmd) + 1:]
+                        if remaining:
+                            logger.debug("remaining    : %s %s", ' ' * len(cmd), remaining)
+                        return self.command_table
+                # For command group, it must be an exact match, as no positional argument is supported by
+                # command group operations.
+                if raw_cmd in self.command_group_table:
+                    logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
                     return self.command_table
 
-                logger.debug("Could not find a match in the command table for '%s'. The index may be outdated",
-                             command_str)
+                logger.debug("Could not find a match in the command or command group table for '%s'. "
+                             "The index may be outdated.", raw_cmd)
             else:
                 logger.debug("No module found from index for '%s'", args)
 
