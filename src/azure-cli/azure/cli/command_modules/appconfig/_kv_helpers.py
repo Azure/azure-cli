@@ -8,7 +8,6 @@
 import io
 import json
 import re
-import sys
 
 import chardet
 import javaproperties
@@ -32,7 +31,7 @@ FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "featur
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
 
 
-class FeatureManagementReservedKeywords(object):
+class FeatureManagementReservedKeywords:
     '''
     Feature management keywords used in files in different naming conventions.
 
@@ -122,7 +121,12 @@ def validate_import_feature(feature):
 # File <-> List of KeyValue object
 
 
-def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", depth=None):
+def __read_kv_from_file(file_path,
+                        format_,
+                        separator=None,
+                        prefix_to_add="",
+                        depth=None,
+                        content_type=None):
     config_data = {}
     try:
         with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
@@ -154,16 +158,30 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
     except OSError:
         raise CLIError('File is not available.')
     flattened_data = {}
-    index = 0
-    is_list = isinstance(config_data, list)
-    for key in config_data:
-        if is_list:
-            __flatten_key_value(prefix_to_add + str(index), key, flattened_data,
-                                sys.maxsize if depth is None else int(depth), separator)
-            index += 1
-        else:
-            __flatten_key_value(
-                prefix_to_add + key, config_data[key], flattened_data, sys.maxsize if depth is None else int(depth), separator)
+    if format_ == 'json' and content_type and __is_json_content_type(content_type):
+        for key in config_data:
+            __flatten_json_key_value(key=prefix_to_add + key,
+                                     value=config_data[key],
+                                     flattened_data=flattened_data,
+                                     depth=depth,
+                                     separator=separator)
+    else:
+        index = 0
+        is_list = isinstance(config_data, list)
+        for key in config_data:
+            if is_list:
+                __flatten_key_value(key=prefix_to_add + str(index),
+                                    value=key,
+                                    flattened_data=flattened_data,
+                                    depth=depth,
+                                    separator=separator)
+                index += 1
+            else:
+                __flatten_key_value(key=prefix_to_add + key,
+                                    value=config_data[key],
+                                    flattened_data=flattened_data,
+                                    depth=depth,
+                                    separator=separator)
 
     # convert to KeyValue list
     key_values = []
@@ -318,7 +336,8 @@ def __write_kv_and_features_to_config_store(cmd,
         for kv in key_values:
             if not preserve_labels:
                 kv.label = label
-            if content_type:
+            # Don't overwrite the content type of feature flags
+            if content_type and not __is_feature_flag(kv):
                 kv.content_type = content_type
 
             azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
@@ -342,7 +361,7 @@ def __discard_features_from_retrieved_kv(src_kvs):
 
 # App Service <-> List of KeyValue object
 
-def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
+def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", content_type=None):
     try:
         key_values = []
         from azure.cli.command_modules.appservice.custom import get_app_settings
@@ -388,11 +407,19 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
                         logger.debug(
                             'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', key, value, str(e))
 
+                elif content_type and __is_json_content_type(content_type):
+                    # If appservice values are being imported with JSON content type,
+                    # we need to validate that values are in valid JSON format.
+                    try:
+                        json.loads(value)
+                    except ValueError:
+                        raise CLIError('Value "{}" for key "{}" is not a valid JSON object, which conflicts with the provided content type "{}".'.format(value, key, content_type))
+
                 kv = KeyValue(key=key, value=value, tags=tags)
                 key_values.append(kv)
         return key_values
     except Exception as exception:
-        raise CLIError("Failed to read key-values from appservice." + str(exception))
+        raise CLIError("Failed to read key-values from appservice.\n" + str(exception))
 
 
 def __write_kv_to_app_service(cmd, key_values, appservice_account):
@@ -529,7 +556,7 @@ def __print_features_preview(old_json, new_json):
     for action, changes in res.items():
         if action.label == 'delete':
             continue  # we do not delete KVs while importing/exporting
-        elif action.label == 'insert':
+        if action.label == 'insert':
             logger.warning('\nAdding:')
             for key, adding in changes.items():
                 record = {'feature': key}
@@ -575,7 +602,7 @@ def __print_preview(old_json, new_json):
     for action, changes in res.items():
         if action.label == 'delete':
             continue  # we do not delete KVs while importing/exporting
-        elif action.label == 'insert':
+        if action.label == 'insert':
             logger.warning('\nAdding:')
             for key, adding in changes.items():
                 record = {'key': key}
@@ -621,6 +648,47 @@ def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
     confirmation_message = "Do you want to continue? \n"
     user_confirmation(confirmation_message)
     return True
+
+
+def __is_json_content_type(content_type):
+    if not content_type:
+        return False
+
+    content_type = content_type.strip().lower()
+    mime_type = content_type.split(';')[0].strip()
+
+    type_parts = mime_type.split('/')
+    if len(type_parts) != 2:
+        return False
+
+    (main_type, sub_type) = type_parts
+    if main_type != "application":
+        return False
+
+    sub_types = sub_type.split('+')
+    if "json" in sub_types:
+        return True
+
+    return False
+
+
+def __flatten_json_key_value(key, value, flattened_data, depth, separator):
+    if depth > 1:
+        depth = depth - 1
+        if value and isinstance(value, dict):
+            if separator is None or not separator:
+                raise CLIError(
+                    "A non-empty separator is required for importing hierarchical configurations.")
+            for nested_key in value:
+                __flatten_json_key_value(
+                    key + separator + nested_key, value[nested_key], flattened_data, depth, separator)
+        else:
+            if key in flattened_data:
+                logger.debug(
+                    "The key %s already exist, value has been overwritten.", key)
+            flattened_data[key] = json.dumps(value)
+    else:
+        flattened_data[key] = json.dumps(value)
 
 
 def __flatten_key_value(key, value, flattened_data, depth, separator):
@@ -698,6 +766,13 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
     try:
         for kv in fetched_items:
             key = kv.key
+            if format_ != 'properties' and __is_json_content_type(kv.content_type):
+                try:
+                    # Convert JSON string value to python object
+                    kv.value = json.loads(kv.value)
+                except ValueError:
+                    logger.debug('Error while converting value "%s" for key "%s" to JSON. Value will be treated as string.', kv.value, kv.key)
+
             if prefix is not None:
                 if not key.startswith(prefix):
                     continue
@@ -898,7 +973,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError(str(exception))
 
 
-class Undef(object):  # pylint: disable=too-few-public-methods
+class Undef:  # pylint: disable=too-few-public-methods
     '''
     Dummy undef class used to preallocate space for kv exporting.
 

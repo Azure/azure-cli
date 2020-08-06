@@ -35,7 +35,7 @@ class FeatureQueryFields(Enum):
     ALL = KEY | LABEL | LAST_MODIFIED | LOCKED | STATE | DESCRIPTION | CONDITIONS
 
 
-class FeatureFlagValue(object):
+class FeatureFlagValue:
     '''
     Schema of Value inside KeyValue when key is a Feature Flag.
 
@@ -72,7 +72,7 @@ class FeatureFlagValue(object):
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
 
 
-class FeatureFlag(object):
+class FeatureFlag:
     '''
     Feature Flag schema as displayed to the user.
 
@@ -124,7 +124,7 @@ class FeatureFlag(object):
         return json.dumps(featureflag, indent=2, ensure_ascii=False)
 
 
-class FeatureFilter(object):
+class FeatureFilter:
     '''
     Feature filters class.
 

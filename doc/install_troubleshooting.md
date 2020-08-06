@@ -24,7 +24,7 @@ use `stretch`. Distributions released before Ubuntu Trusty and Debian Wheezy are
 Install on RHEL 7.6 or other YUM-managed systems without Python 3
 -----------------------------------------------------------------
 
-If you can, please upgrade your system to a verison with official support for `python3` package. Otherwise, you need to first install a `python3` package, either [build from source](https://github.com/linux-on-ibm-z/docs/wiki/Building-Python-3.6.x) or install through some [additional repo](https://developers.redhat.com/blog/2018/08/13/install-python3-rhel/). Then you can download the package and install it without dependency.
+If you can, please upgrade your system to a version with official support for `python3` package. Otherwise, you need to first install a `python3` package, either [build from source](https://github.com/linux-on-ibm-z/docs/wiki/Building-Python-3.6.x) or install through some [additional repo](https://developers.redhat.com/blog/2018/08/13/install-python3-rhel/). Then you can download the package and install it without dependency.
 ```bash
 $ sudo yum install yum-utils
 $ sudo yumdownloader azure-cli
@@ -35,7 +35,7 @@ $ sudo rpm -ivh --nodeps azure-cli-*.rpm
 Install on SLES 12 or other other zypper-managed systems without Python 3.6
 ---------------------------------------------------------------------------
 
-On SLES 12, the defualt `python3` package is 3.4 and not supported by Azure CLI. You can first build a higher version `python3` from source. Then you can download the Azure CLI package and install it without dependency.
+On SLES 12, the default `python3` package is 3.4 and not supported by Azure CLI. You can first build a higher version `python3` from source. Then you can download the Azure CLI package and install it without dependency.
 ```bash
 $ sudo zypper install -y gcc gcc-c++ make ncurses patch wget tar zlib-devel zlib
 # Download Python source code

@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.9.1"
+__version__ = "2.10.0"
 
 import os
 import sys
@@ -373,18 +373,6 @@ class MainCommandsLoader(CLICommandsLoader):
                             res.append(sup)
             return res
 
-        def _roughly_parse_command(args):
-            # Roughly parse the command part: <az vm create> --name vm1
-            # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but we don't need to bother with
-            # positional args
-            nouns = []
-            for arg in args:
-                if arg and arg[0] != '-':
-                    nouns.append(arg)
-                else:
-                    break
-            return ' '.join(nouns).lower()
-
         # Clear the tables to make this method idempotent
         self.command_group_table.clear()
         self.command_table.clear()
@@ -404,8 +392,9 @@ class MainCommandsLoader(CLICommandsLoader):
                 _update_command_table_from_extensions([], index_extensions)
 
                 logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
+                from azure.cli.core.util import roughly_parse_command
                 # The index may be outdated. Make sure the command appears in the loaded command table
-                command_str = _roughly_parse_command(args)
+                command_str = roughly_parse_command(args)
                 if command_str in self.command_table:
                     logger.debug("Found a match in the command table for '%s'", command_str)
                     return self.command_table
@@ -579,7 +568,7 @@ class CommandIndex:
         logger.debug("Command index has been invalidated.")
 
 
-class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
+class ModExtensionSuppress:  # pylint: disable=too-few-public-methods
 
     def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
                  recommend_update=False):

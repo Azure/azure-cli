@@ -26,7 +26,7 @@ SYSTEM_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
 SYSTEM_ASSIGNED_IDENTITY = '[system]'
 
 
-def create_configstore(client, resource_group_name, name, location, sku, assign_identity=None):
+def create_configstore(client, resource_group_name, name, location, sku="Standard", assign_identity=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 

@@ -6,6 +6,7 @@
 
 
 from knack.log import get_logger
+from azure.mgmt.signalr.models import SignalRRequestType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
@@ -23,7 +24,6 @@ from ._constants import (
     SIGNALR_KEY_TYPE,
     SIGNALR_SERVICE_MODE_TYPE
 )
-from azure.mgmt.signalr.models import SignalRRequestType
 
 
 logger = get_logger(__name__)

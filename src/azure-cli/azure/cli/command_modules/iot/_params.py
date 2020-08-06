@@ -281,9 +281,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Location of your IoT Central application. Default is the location of target resource group.')
         c.argument('sku', arg_type=get_enum_type(AppSku),
                    help='Pricing tier for IoT Central applications. Default value is ST2.')
-        c.argument('subdomain',
+        c.argument('subdomain', options_list=['--subdomain', '-s'],
                    help='Subdomain for the IoT Central URL. Each application must have a unique subdomain.')
-        c.argument('template',
+        c.argument('template', options_list=['--template', '-t'],
                    help='IoT Central application template name. Default is a custom application.')
-        c.argument('display_name',
+        c.argument('display_name', options_list=['--display-name', '-d'],
                    help='Custom display name for the IoT Central application. Default is resource name.')

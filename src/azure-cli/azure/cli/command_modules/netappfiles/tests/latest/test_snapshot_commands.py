@@ -85,6 +85,27 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         restored_volume = self.create_volume(account_name, pool_name, restored_volume_name, rg, snapshot_id=snapshot["snapshotId"], volume_only=volume_only)
         assert restored_volume['name'] == account_name + '/' + pool_name + '/' + restored_volume_name
 
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', parameter_name='rg', random_name_length=63)
+    def test_revert_volume_from_snapshot(self, rg):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        snapshot_name = self.create_random_name(prefix='cli-sn-', length=24)
+
+        volume = self.create_volume(account_name, pool_name, volume_name, rg)
+        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
+        # check the created fields is populated. Checking exact dates are a little harder due to session records
+        assert snapshot['created'] is not None
+
+        snapshot_list = self.cmd("az netappfiles snapshot list --resource-group %s --account-name %s --pool-name %s --volume-name %s" % (rg, account_name, pool_name, volume_name)).get_output_in_json()
+        assert len(snapshot_list) == 1
+        snapshot = self.cmd("az netappfiles snapshot show -g {rg} -a %s -p %s -v %s -s %s" % (account_name, pool_name, volume_name, snapshot_name)).get_output_in_json()
+        assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
+        volume = self.cmd("az netappfiles volume revert --resource-group {rg} -a %s -p %s -v %s -s %s" % (account_name, pool_name, volume_name, snapshot["snapshotId"]))
+        snapshot_list = self.cmd("az netappfiles snapshot list --resource-group %s --account-name %s --pool-name %s --volume-name %s" % (rg, account_name, pool_name, volume_name)).get_output_in_json()
+        assert len(snapshot_list) == 1
+
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
     def test_list_snapshots(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
