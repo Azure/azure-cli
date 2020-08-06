@@ -248,32 +248,32 @@ jobs:
       condition: succeededOrFailed()
       inputs:
         testResultsFiles: 'test_results.*.xml'
-        testRunTitle: 'Azure CLI live test resultss of $(Target)'
+        testRunTitle: 'Azure CLI live test results of $(Target)'
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
       condition: succeededOrFailed()
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
-        ArtifactName: '$(Target).report.json'
+        ArtifactName: '$(Target).report.sequential.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
       condition: succeededOrFailed()
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
-        ArtifactName: '$(Target).report.html'
+        ArtifactName: '$(Target).report.sequential.html'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-        condition: succeededOrFailed()
-        inputs:
-          PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
-          ArtifactName: '$(Target).report.json'
-          publishLocation: 'Container'
+      condition: succeededOrFailed()
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
+        ArtifactName: '$(Target).report.parallel.json'
+        publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
       condition: succeededOrFailed()
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
-        ArtifactName: '$(Target).report.html'
+        ArtifactName: '$(Target).report.parallel.html'
         publishLocation: 'Container'
 
 - job: SendEmail
