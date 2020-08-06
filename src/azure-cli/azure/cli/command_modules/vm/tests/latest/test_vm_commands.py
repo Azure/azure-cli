@@ -13,6 +13,7 @@ import unittest
 import mock
 import uuid
 
+import pytest
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_only
 from azure.cli.core.profiles import ResourceType
@@ -4595,6 +4596,7 @@ class DiskAccessTest(ScenarioTest):
 
 class VMSSCreateDiskOptionTest(ScenarioTest):
 
+    @pytest.mark.serial()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disk_iops_mbps_', location='eastus')
     @AllowLargeResponse(size_kb=99999)
     def test_vmss_create_disk_iops_mbps(self, resource_group):
