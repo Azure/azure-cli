@@ -59,7 +59,7 @@ DEPENDENCIES = [
     'knack==0.7.2',
     'msal~=1.3.0',
     'msal-extensions~=0.2.2',
-    'azure-identity==1.4.0b8',
+    'azure-identity==1.4.0b7',
     'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',

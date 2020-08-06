@@ -59,20 +59,23 @@ def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 
-def get_access_token(cmd, subscription=None, resource=None, resource_type=None, tenant=None):
+def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None):
     """
-    get AAD token to access to a specified resource
-    :param resource: Azure resource endpoints. Default to Azure Resource Manager
-    :param resource-type: Name of Azure resource endpoints. Can be used instead of resource.
+    get AAD token to access to a specified resource.
     Use 'az cloud show' command for other Azure resources
     """
     if resource is None and resource_type is not None:
         endpoints_attr_name = cloud_resource_type_mappings[resource_type]
         resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
-    else:
-        resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+
+    if resource and scopes:
+        raise CLIError("resource and scopes can't be provided at the same time.")
+
+    resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, tenant=tenant)
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
+                                                        tenant=tenant)
 
     token_entry = creds[2]
     # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`

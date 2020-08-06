@@ -100,7 +100,7 @@ def _get_cloud_console_token_endpoint():
 class Profile:
 
     def __init__(self, cli_ctx=None, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
-                 async_persist=True, client_id=AZURE_CLI_CLIENT_ID, authenticate_scopes=None):
+                 async_persist=True, client_id=AZURE_CLI_CLIENT_ID, scopes=None, store_adal_cache=True):
         """Class to manage CLI's accounts (profiles) and identities (credentials).
 
         :param cli_ctx:
@@ -109,8 +109,10 @@ class Profile:
         :param use_global_creds_cache:
         :param async_persist:
         :param client_id: The AAD client ID for the CLI application. Default to Azure CLI's client ID.
-        :param authenticate_scopes: The initial scopes for authentication (/authorize), it must include all scopes
+        :param scopes: The initial scopes for authentication (/authorize), it must include all scopes
             for following get_token calls. Default to Azure Resource Manager of the current cloud.
+        :param store_adal_cache: Save tokens to the old ~/.azure/accessToken.json for backward compatibility.
+            This option will be deprecated very soon.
         """
         from azure.cli.core import get_default_cli
 
@@ -121,9 +123,11 @@ class Profile:
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
-        self._adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
+        self._adal_cache = None
+        if store_adal_cache:
+            self._adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
         self._client_id = client_id
-        self._msal_authenticate_scopes = authenticate_scopes or adal_resource_to_msal_scopes(self._ad_resource_uri)
+        self._msal_scopes = scopes or adal_resource_to_msal_scopes(self._ad_resource_uri)
 
     # pylint: disable=too-many-branches,too-many-statements
     def login(self,
@@ -140,11 +144,11 @@ class Profile:
 
         credential = None
         auth_record = None
-        identity = Identity(self._authority, tenant, cred_cache=self._adal_cache,
-                            scopes=self._msal_authenticate_scopes,
+        identity = Identity(authority=self._authority, tenant=tenant, client_id=self._client_id,
+                            scopes=self._msal_scopes,
                             allow_unencrypted=self.cli_ctx.config
-                            .getboolean('core', 'allow_fallback_to_plaintext', fallback=True)
-                            )
+                            .getboolean('core', 'allow_fallback_to_plaintext', fallback=True),
+                            cred_cache=self._adal_cache)
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
@@ -221,7 +225,7 @@ class Profile:
         # Managed identities for Azure resources is the new name for the service formerly known as
         # Managed Service Identity (MSI).
 
-        identity = Identity(scopes=self._msal_authenticate_scopes)
+        identity = Identity(scopes=self._msal_scopes)
         credential, mi_info = identity.login_with_managed_identity(identity_id)
 
         tenant = mi_info[Identity.MANAGED_IDENTITY_TENANT_ID]
@@ -267,7 +271,7 @@ class Profile:
 
     def login_in_cloud_shell(self, allow_no_subscriptions=None, find_subscriptions=True):
         # TODO: deprecate allow_no_subscriptions
-        identity = Identity(scopes=self._msal_authenticate_scopes)
+        identity = Identity(scopes=self._msal_scopes)
         credential, identity_info = identity.login_in_cloud_shell()
 
         tenant = identity_info[Identity.MANAGED_IDENTITY_TENANT_ID]
@@ -292,7 +296,7 @@ class Profile:
         return deepcopy(consolidated)
 
     def login_with_environment_credential(self, find_subscriptions=True):
-        identity = Identity(scopes=self._msal_authenticate_scopes)
+        identity = Identity(scopes=self._msal_scopes)
 
         tenant = os.environ.get('AZURE_TENANT_ID')
         username = os.environ.get('AZURE_USERNAME')
@@ -322,7 +326,7 @@ class Profile:
             if not tenant:
                 # For user account, tenant may not be given. As credential._credential is a UsernamePasswordCredential,
                 # call `authenticate` to get the home tenant ID
-                authentication_record = credential._credential.authenticate(scopes=self._msal_authenticate_scopes)
+                authentication_record = credential._credential.authenticate(scopes=self._msal_scopes)
                 tenant = authentication_record.tenant_id
             subscriptions = self._build_tenant_level_accounts([tenant])
 
@@ -616,8 +620,8 @@ class Profile:
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
         is_environment = account[_USER_ENTITY][_IS_ENVIRONMENT_CREDENTIAL]
 
-        authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-        identity = Identity(authority, tenant_id, cred_cache=self._adal_cache)
+        identity = Identity(client_id=self._client_id, authority=self._authority, tenant_id=tenant_id,
+                            cred_cache=self._adal_cache)
 
         if identity_type is None:
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
@@ -644,11 +648,15 @@ class Profile:
             raise CLIError("Tenant shouldn't be specified for MSI account")
         return Identity.get_managed_identity_credential(identity_id)
 
-    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
+    def get_login_credentials(self, resource=None, scopes=None, subscription_id=None, aux_subscriptions=None,
+                              aux_tenants=None):
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
 
         account = self.get_subscription(subscription_id)
+        if resource and scopes:
+            raise CLIError("resource and scopes can't be provided together.")
+
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
         external_tenants_info = []
         if aux_tenants:
@@ -666,19 +674,19 @@ class Profile:
         from azure.cli.core.authentication import AuthenticationWrapper
         auth_object = AuthenticationWrapper(identity_credential,
                                             external_credentials=external_credentials if external_credentials else None,
-                                            resource=resource)
+                                            resource=resource, scopes=scopes)
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    def get_raw_token(self, resource=None, subscription=None, tenant=None):
+    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
         identity_credential = self._create_identity_credential(account, tenant)
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
         from azure.cli.core.authentication import AuthenticationWrapper, _convert_token_entry
-        auth = AuthenticationWrapper(identity_credential, resource=resource)
+        auth = AuthenticationWrapper(identity_credential, resource=resource, scopes=scopes)
         token = auth.get_token()
         cred = 'Bearer', token.token, _convert_token_entry(token)
         return (cred,

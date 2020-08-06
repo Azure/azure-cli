@@ -137,10 +137,27 @@ def _get_mgmt_service_client(cli_ctx,
                              api_version=None,
                              base_url_bound=True,
                              resource=None,
+                             scopes=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
                              aux_tenants=None,
                              **kwargs):
+    """
+
+    :param cli_ctx:
+    :param client_type:
+    :param subscription_bound:
+    :param subscription_id:
+    :param api_version:
+    :param base_url_bound:
+    :param resource: For track 1 SDK which uses msrest and ADAL
+    :param scopes: For track 2 SDK which uses Azure Identity and MSAL
+    :param sdk_profile:
+    :param aux_subscriptions:
+    :param aux_tenants:
+    :param kwargs:
+    :return:
+    """
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id

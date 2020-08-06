@@ -54,7 +54,7 @@ class Identity:
         :param authority:
         :param tenant_id:
         :param client_id:
-        :param scopes: Scopes for the initial /authorize API call
+        :param scopes: Scopes for the `authenticate` method call (initial /authorize API)
         :param kwargs:
         """
         self.authority = authority
@@ -746,4 +746,8 @@ def adal_resource_to_msal_scopes(resource):
     :param resource: The ADAL resource ID
     :return: A list of scopes
     """
-    return [resource.rstrip('/') + "/.default"]
+    if 'datalake' in resource or 'batch' in resource or 'database' in resource:
+        scope = resource + '/.default'
+    else:
+        scope = resource.rstrip('/') + '/.default'
+    return [scope]
