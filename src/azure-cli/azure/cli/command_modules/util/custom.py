@@ -29,11 +29,42 @@ def show_version(cmd):  # pylint: disable=unused-argument
     return versions
 
 
-def upgrade_version(cmd):
-    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+def upgrade_version(cmd, all=None):
     import subprocess
-    # TODO check whether it's already the latest version
-    try:
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+    from azure.cli.core.util import CLI_PACKAGE_NAME, _get_local_versions, _update_latest_from_pypi
+    from distutils.version import LooseVersion
+    from knack.util import CLIError
+
+    update_cli = True
+    versions = _get_local_versions()
+    local = versions[CLI_PACKAGE_NAME]['local']
+    versions, success = _update_latest_from_pypi(versions)
+    if not success:
+        raise CLIError("Failed to fetch the latest version. Please check your network connectivity.")
+
+    pypi = versions[CLI_PACKAGE_NAME].get('pypi', None)
+    latest_version = pypi
+    if pypi and LooseVersion(pypi) <= LooseVersion(local):
+        logger.warning("You already have the latest %s: %s", CLI_PACKAGE_NAME, local)
+        update_cli = False
+        if not all:
+            return
+    ext_sources = []
+    if all:
+        from azure.cli.core.extension import get_extensions, WheelExtension
+        from azure.cli.core.extension._resolve import resolve_from_index, NoExtensionCandidatesError
+        from azure.cli.core.extension.operations import update_extension
+        extensions = get_extensions(ext_type=WheelExtension)
+        if extensions:
+            for ext in extensions:
+                try:
+                    download_url, _ = resolve_from_index(ext.name, cur_version=ext.version)
+                    ext_sources.append((ext.name, download_url))
+                except NoExtensionCandidatesError:
+                    pass
+    if update_cli:
+        import os
         installer = os.getenv(_ENV_AZ_INSTALLER)
         if installer == 'DEB':
             subprocess.call('sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli', shell=True)
@@ -51,5 +82,7 @@ def upgrade_version(cmd):
             # logger.warning('Update with the latest MSI https://aka.ms/installazurecliwindows')
         else:
             logger.warning('Not able to upgrade automatically. Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli')
-    except Exception:  # pylint: disable=broad-except
-        pass
+    
+    for name, download_url in ext_sources:
+        logger.warning("Update extension: {}".format(name))
+        update_extension(cli_ctx=cmd.cli_ctx, extension_name=name, source=download_url)
