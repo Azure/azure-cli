@@ -33,8 +33,8 @@ def register_global_query_recommend(cli_ctx):
 
     def handle_recommend_parameter(cli, **kwargs):
         args = kwargs['args']
-        cli_ctx.invocation.data['output'] = 'table'
         if args._query_recommend is not None:
+            cli_ctx.invocation.data['output'] = 'table'
             def analyze_output(cli_ctx, **kwargs):
                 tree_builder = TreeBuilder()
                 tree_builder.build(kwargs['event_data']['result'])
@@ -96,7 +96,7 @@ class TreeNode:
         '''Return only one value'''
         values = self._get_data(key)
         if len(values) > 0:
-            return values[0]  # TODO: check if null
+            return values[0]
         else:
             return None
 
@@ -190,6 +190,8 @@ class TreeNode:
                 viable_keys.append(key)
         match_items = self._get_match_items(select_items, keys=viable_keys)
         if match_items is not None and len(match_items) > 0:
+            item_key = match_items[0]
+            item_value = self.get_one_value(item_key)
             query_str = "{}=='{}'".format(
                 match_items[0], self.get_one_value(match_items[0]))
             ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
