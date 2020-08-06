@@ -202,6 +202,12 @@ def load_arguments(self, _):
         c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-json')
         c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
 
+        # VM profile
+        c.argument('vm_size', help='VM size. E.g. Standard_D1_v2')
+        c.argument('os_disk_size', help='Disk size in GB of VM')
+        c.argument('vnet', help='Name of VNET for VM. You should only specify it when subnet is a name')
+        c.argument('subnet', help='Name or ID of subnet for VM')
+
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
         c.argument('checksum', arg_type=ib_source_type)
