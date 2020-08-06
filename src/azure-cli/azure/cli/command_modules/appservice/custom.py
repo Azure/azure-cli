@@ -1951,9 +1951,9 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     application_logs = None
     if application_logging is not None:
         if application_logging == 'true':
-            level='Error'
+            level = 'Error'
         else:
-            level='Off'
+            level = 'Off'
         fs_log = FileSystemApplicationLogsConfig(level=level)
         application_logs = ApplicationLogsConfig(file_system=fs_log)
 
