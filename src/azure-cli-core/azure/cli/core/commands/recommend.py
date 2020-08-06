@@ -8,7 +8,6 @@ import random
 from six import string_types
 import jellyfish
 
-from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller, cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
@@ -32,9 +31,10 @@ def register_global_query_recommend(cli_ctx):
         arg_group = kwargs.get('arg_group')
         arg_group.add_argument('--query-recommend', dest='_query_recommend',
                                help="Recommend JMESPath string for you", nargs="*")
-
+                               
     def handle_recommend_parameter(cli, **kwargs):
         args = kwargs['args']
+        cli_ctx.invocation.data['output'] = 'table'
         if args._query_recommend is not None:
             def analyze_output(cli_ctx, **kwargs):
                 tree_builder = TreeBuilder()
@@ -59,6 +59,9 @@ class Recommendation:
         self._query_str = query_str
         self._help_str = help_str
         self._group = group_name
+
+    def _asdict(self):
+        return {"query string": self._query_str, "help": self._help_str}
 
     def __str__(self):
         return "{}\t{}".format(self._query_str, self._help_str)
@@ -235,14 +238,6 @@ class TreeBuilder:
             self._root = self._do_parse('root', [data])
 
     def generate_recommend(self, keywords_list):
-        def printlist(my_list, group):
-            if isinstance(my_list, list):
-                for item in my_list:
-                    if item._group == group:
-                        print(item)
-            else:
-                print(my_list)
-
         recommendations = []
         for node in self._all_nodes.values():
             recommendations.extend(node.get_select_string(keywords_list))
@@ -252,15 +247,7 @@ class TreeBuilder:
                     node.get_condition_recommend(keywords_list))
                 recommendations.extend(node.get_function_recommend())
         recommendations.sort(key=lambda x: x._group)
-        groups = ["default", "select", "condition", "function", "limit_number"]
-        # for group in groups:
-        #     print("Group {}:".format(group))
-        #     printlist(recommendations, group)
-        #     print("")
-        ret = []
-        for item in recommendations:
-            ret.append({"query_string": item._query_str, "help": item._help_str})
-        return ret
+        return todict(recommendations)
 
     def _get_from_list(self, data):
         '''Try to get not None item from input list
