@@ -356,6 +356,9 @@ parameters:
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
+  - name: --node-osdisk-diskencryptionset-id -d
+    type: string
+    short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -387,6 +390,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$'
   - name: Create a kubernetes cluster with managed AAD enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Create a kubernetes cluster with server side encryption using your owned key.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
 """
 
 helps['aks update'] = """
