@@ -5,10 +5,11 @@
 
 # pylint: disable=too-many-statements
 # pylint: disable=line-too-long
+from enum import Enum
 from argcomplete.completers import FilesCompleter
 
 from azure.cli.core.commands.parameters import (
-    get_resource_name_completion_list, name_type, get_enum_type, get_three_state_flag, tags_type)
+    get_resource_name_completion_list, name_type, get_enum_type, get_three_state_flag, tags_type, get_datetime_type, get_location_type)
 from azure.cli.core.util import shell_safe_json_parse
 
 from azure.cli.command_modules.cosmosdb._validators import (
@@ -16,7 +17,7 @@ from azure.cli.command_modules.cosmosdb._validators import (
     validate_virtual_network_rules, validate_ip_range_filter)
 
 from azure.cli.command_modules.cosmosdb.actions import (
-    CreateLocation)
+    CreateLocation, CreateDatabaseRestoreResource)
 from azure.cli.command_modules.cosmosdb.custom import (
     CosmosKeyTypes)
 
@@ -37,6 +38,11 @@ CASSANDRA_SCHEMA_EXAMPLE = """--schema "{\\"columns\\": [{\\"name\\": \\"columnA
 """
 
 
+class BackupPolicyTypes(str, Enum):
+    periodic = "Periodic"
+    continuous = "Continuous"
+
+
 def load_arguments(self, _):
     from knack.arguments import CLIArgumentType
     from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind, TriggerType, TriggerOperation, ServerVersion
@@ -50,6 +56,11 @@ def load_arguments(self, _):
         c.argument('key_uri', help="The URI of the key vault", is_preview=True)
         c.argument('enable_free_tier', arg_type=get_three_state_flag(), help="If enabled the account is free-tier.", is_preview=True)
         c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
+        c.argument('is_restore_request', options_list=['--is-restore-request', '-r'], arg_type=get_three_state_flag(), help="Restore from an existing/deleted account.", is_preview=True)
+        c.argument('restore_source', help="The restorable-database-account Id of the source account from which the account has to be restored. Required if --is-restore-request is set to true.", is_preview=True)
+        c.argument('restore_timestamp', arg_type=get_datetime_type(help="The timestamp to which the account has to be restored to. Required if --is-restore-request is set to true."), is_preview=True)
+        c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource, is_preview=True)
+        c.argument('backup_policy_type', arg_type=get_enum_type(BackupPolicyTypes), help="The type of backup policy of the account to create")
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -69,6 +80,15 @@ def load_arguments(self, _):
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
             c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), help="Enable or disable public network access to server.")
             c.argument('enable_analytical_storage', arg_type=get_three_state_flag(), help="Flag to enable log storage on the account.", is_preview=True)
+            c.argument('backup_interval', type=int, help="the frequency(in minutes) with which backups are taken (only for accounts with periodic mode backups)")
+            c.argument('backup_retention', type=int, help="the time(in hours) for which each backup is retained (only for accounts with periodic mode backups)")
+
+    with self.argument_context('cosmosdb restore') as c:
+        c.argument('target_database_account_name', options_list=['--target-database-account-name', '-n'], help='Name of the new target Cosmos DB database account after the restore')
+        c.argument('account_name', completer=None, options_list=['--account-name', '-a'], help='Name of the source Cosmos DB database account for the restore', id_part=None)
+        c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], arg_type=get_datetime_type(help="The timestamp to which the account has to be restored to."))
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help="The location of the source account from which restore is triggered. This will also be the write region of the restored account")
+        c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource)
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
         with self.argument_context(scope) as c:
@@ -291,3 +311,8 @@ def load_arguments(self, _):
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', type=int, help='The throughput of Table (RU/s).')
         c.argument('max_throughput', max_throughput_type)
+
+# Restorable Database Accounts
+    with self.argument_context('cosmosdb restorable-database-account') as c:
+        c.argument('location', options_list=['--location', '-l'], help="Location", required=False)
+        c.argument('instance_id', options_list=['--instance-id', '-i'], help="InstanceId of the Account", required=False)
