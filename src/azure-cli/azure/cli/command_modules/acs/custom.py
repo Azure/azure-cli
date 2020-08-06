@@ -1938,6 +1938,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 load_balancer_profile=load_balancer_profile,
                 outbound_type=outbound_type,
             )
+        if load_balancer_sku.lower() == "basic":
+            network_profile = ContainerServiceNetworkProfile(
+                load_balancer_sku=load_balancer_sku.lower(),
+            )
 
     addon_profiles = _handle_addons_args(
         cmd,
