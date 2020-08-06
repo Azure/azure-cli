@@ -3560,7 +3560,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
         _is_linux = os_name.lower() == 'linux'
         _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
-        plan = get_plan_to_use(cmd, user, os_name, loc, sku, rg_name, _create_new_rg, plan)
+        plan = get_plan_to_use(cmd=cmd,
+                               user=user,
+                               os_name=os_name,
+                               loc=loc,
+                               sku=sku,
+                               create_rg=_create_new_rg,
+                               resource_group_name=rg_name,
+                               plan=plan)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",
