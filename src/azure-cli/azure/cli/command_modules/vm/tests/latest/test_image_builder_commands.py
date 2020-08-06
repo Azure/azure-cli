@@ -92,9 +92,8 @@ class ImageTemplateTest(ScenarioTest):
             # self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
             self.cmd('role assignment create --assignee {identity_id} --role Contributor --scope {scope}')
 
-    # Test framework has problem, hence, live only.
+    @unittest.skip('The identity is genereated dynamically. Template file should contain it')
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
-    @live_only()
     def test_image_builder_template_file(self, resource_group):
         self._identity_role(resource_group)
 
@@ -548,6 +547,8 @@ class ImageTemplateTest(ScenarioTest):
                  '{img}={loc} --identity {ide}')
         self.cmd('image builder run -g {rg} -n {tmpl} --no-wait')
         self.cmd('image builder show -g {rg} -n {tmpl}')
+        time.sleep(15)
+        # Service is not stable
         self.cmd('image builder cancel -g {rg} -n {tmpl}')
         self.cmd('image builder show -g {rg} -n {tmpl}', checks=[
             self.check_pattern('lastRunStatus.runState', 'Canceling|Canceled')

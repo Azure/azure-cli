@@ -26,6 +26,7 @@ def load_arguments(self, _):
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
         validate_msi)
+    from azure.cli.command_modules.resource.parameters import TagUpdateOperation
 
     DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
 
@@ -68,6 +69,11 @@ def load_arguments(self, _):
                                                                    arg_type=get_enum_type(ChangeType),
                                                                    help='Space-separated list of resource change types to be excluded from What-If results.',
                                                                    is_preview=True, min_api='2019-07-01')
+    tag_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The tag name.')
+    tag_value_type = CLIArgumentType(options_list='--value', help='The tag value.')
+    tag_resource_id_type = CLIArgumentType(options_list='--resource-id',
+                                           help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.',
+                                           min_api='2019-10-01')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -347,6 +353,20 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
+                   min_api="2019-10-01")
+
+    with self.argument_context('deployment mg what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
 
     with self.argument_context('deployment mg validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -368,6 +388,20 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
+                   min_api="2019-10-01")
+
+    with self.argument_context('deployment tenant what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
 
     with self.argument_context('deployment tenant validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -397,8 +431,12 @@ def load_arguments(self, _):
                    options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
 
     with self.argument_context('tag') as c:
-        c.argument('tag_name', options_list=['--name', '-n'])
-        c.argument('tag_value', options_list='--value')
+        c.argument('tag_name', tag_name_type)
+        c.argument('tag_value', tag_value_type)
+        c.argument('resource_id', tag_resource_id_type)
+        c.argument('tags', tags_type)
+        c.argument('operation', arg_type=get_enum_type([item.value for item in list(TagUpdateOperation)]),
+                   help='The update operation: options include Merge, Replace and Delete.')
 
     with self.argument_context('lock') as c:
         c.argument('lock_name', options_list=['--name', '-n'], validator=validate_lock_parameters)
@@ -437,6 +475,7 @@ def load_arguments(self, _):
     with self.argument_context('managedapp') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application', id_part='resource_group')
         c.argument('application_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('tags', tags_type)
 
     with self.argument_context('managedapp definition') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application definition', id_part='resource_group')

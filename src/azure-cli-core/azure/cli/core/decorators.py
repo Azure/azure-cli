@@ -17,7 +17,7 @@ from knack.log import get_logger
 
 
 # pylint: disable=too-few-public-methods
-class Completer(object):
+class Completer:
 
     def __init__(self, func):
         self.func = func

@@ -13,14 +13,13 @@ import re
 from copy import deepcopy
 from enum import Enum
 
+from knack.log import get_logger
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import in_cloud_console, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, adal_resource_to_msal_scopes, \
     AZURE_CLI_CLIENT_ID
 
-from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -98,7 +97,7 @@ def _get_cloud_console_token_endpoint():
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
-class Profile(object):
+class Profile:
 
     def __init__(self, cli_ctx=None, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
                  async_persist=True, client_id=AZURE_CLI_CLIENT_ID, authenticate_scopes=None):
@@ -781,7 +780,7 @@ class Profile(object):
         return installation_id
 
 
-class MsiAccountTypes(object):
+class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
     user_assigned_client_id = 'MSIClient'
@@ -807,7 +806,7 @@ class MsiAccountTypes(object):
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
-class SubscriptionFinder(object):
+class SubscriptionFinder:
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
     # authentication work, but only find subscriptions
     def __init__(self, cli_ctx, arm_client_factory=None, **kwargs):

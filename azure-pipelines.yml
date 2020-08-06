@@ -140,25 +140,10 @@ jobs:
     displayName: 'Use Python 3.7'
     inputs:
       versionSpec: 3.7
-
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      #!/usr/bin/env bash
-
       set -ev
-
-      pip install virtualenv
-      python -m virtualenv venv/
-      . ./venv/bin/activate
-      pip install azdev
-      azdev setup -c $(pwd)
-    displayName: 'Install azdev'
-
-  - bash: |
-      #!/usr/bin/env bash
-      . ./venv/bin/activate
-
-      set -ev
-
+      . env/bin/activate
       azdev verify history
 
     displayName: 'Verify History'
@@ -835,7 +820,6 @@ jobs:
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
-
       . env/bin/activate
       azdev style
 
@@ -849,8 +833,10 @@ jobs:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
+      set -ev
+      . env/bin/activate
       azdev verify license
       azdev verify history
       azdev verify document-map
@@ -893,8 +879,10 @@ jobs:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
+      set -ev
+      . env/bin/activate
       azdev linter --ci-exclusions
 
 - job: VerifySphinxDocumentGenerator

@@ -305,11 +305,34 @@ def autoscale_rule_create(cmd, client, autoscale_name, resource_group_name, cond
                           scale, profile_name=DEFAULT_PROFILE_NAME, cooldown=5, source=None,
                           timegrain="avg 1m"):
     from azure.mgmt.monitor.models import ScaleRule, ScaleAction, ScaleDirection
+    from azure.mgmt.core.tools import parse_resource_id, resource_id
     autoscale_settings = client.get(resource_group_name, autoscale_name)
     profile = _identify_profile(autoscale_settings.profiles, profile_name)
     condition.metric_resource_uri = source or autoscale_settings.target_resource_uri
     condition.statistic = timegrain.statistic
     condition.time_grain = timegrain.time_grain
+
+    def preprocess_for_spring_cloud_service():
+        try:
+            result = parse_resource_id(autoscale_settings.target_resource_uri)
+            if result['namespace'].lower() == 'microsoft.appplatform' and result['type'].lower() == 'spring':
+                if condition.metric_namespace is None:
+                    condition.metric_namespace = "Microsoft.AppPlatform/Spring"
+                    logger.warning('Set metricNamespace to Microsoft.AppPlatform/Spring')
+                if source is None:
+                    condition.metric_resource_uri = resource_id(
+                        subscription=result['subscription'],
+                        resource_group=result['resource_group'],
+                        namespace=result['namespace'],
+                        type=result['type'],
+                        name=result['name']
+                    )
+                    logger.warning('Set metricResourceUri to Spring Cloud service')
+        except KeyError:
+            pass
+
+    preprocess_for_spring_cloud_service()
+
     rule = ScaleRule(
         metric_trigger=condition,
         scale_action=ScaleAction(
