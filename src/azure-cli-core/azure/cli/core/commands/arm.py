@@ -31,7 +31,7 @@ EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client'])
 
 
 # pylint:disable=too-many-lines
-class ArmTemplateBuilder(object):
+class ArmTemplateBuilder():
 
     def __init__(self):
         template = OrderedDict()
