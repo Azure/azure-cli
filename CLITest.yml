@@ -241,7 +241,7 @@ jobs:
         # Sequential
         azdev test $(Target) $(USER_LIVE) --xml-path test_results.sequential.xml --no-exitfirst -a "-m serial --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 -s"
         # Parallel
-        azdev test $(Target) $(USER_LIVE) --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) -m \"not serial\" --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
+        azdev test $(Target) $(USER_LIVE) --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) -m 'not serial' --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
         pwd
         ls
     - task: PublishTestResults@2
