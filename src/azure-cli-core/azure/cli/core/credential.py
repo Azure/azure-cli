@@ -24,12 +24,11 @@ class CredentialAdaptor:
       - Track 2: azure.core.credentials.TokenCredential, which exposes get_token
     """
 
-    def __init__(self, credential, resource=None, scopes=None, external_credentials=None):
+    def __init__(self, credential, resource=None, external_credentials=None):
         self._credential = credential
         # _external_credentials and _resource are only needed in Track1 SDK
         self._external_credentials = external_credentials
         self._resource = resource
-        self._scopes = scopes
 
     def _get_token(self, *scopes):
         external_tenant_tokens = []

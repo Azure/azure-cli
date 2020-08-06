@@ -452,6 +452,7 @@ class Profile:
 
             set_cloud_subscription(self.cli_ctx, active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
+        self._storage[_TOKEN_CACHE_PROVIDER] = _TOKEN_CACHE_PROVIDER_MSAL
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
@@ -674,20 +675,30 @@ class Profile:
         from azure.cli.core.credential import CredentialAdaptor
         auth_object = CredentialAdaptor(identity_credential,
                                         external_credentials=external_credentials if external_credentials else None,
-                                        resource=resource, scopes=scopes)
+                                        resource=resource)
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
     def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
+        # Convert resource to scopes
+        if resource and not scopes:
+            scopes = adal_resource_to_msal_scopes(resource)
+
+        # Use ARM as the default scopes
+        if not scopes:
+            scopes = adal_resource_to_msal_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
+
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
+
         account = self.get_subscription(subscription)
         identity_credential = self._create_identity_credential(account, tenant)
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
+
         from azure.cli.core.credential import CredentialAdaptor, _convert_token_entry
-        auth = CredentialAdaptor(identity_credential, resource=resource, scopes=scopes)
-        token = auth.get_token()
+        auth = CredentialAdaptor(identity_credential)
+        token = auth.get_token(*scopes)
+        # (tokenType, accessToken, tokenEntry)
         cred = 'Bearer', token.token, _convert_token_entry(token)
         return (cred,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),

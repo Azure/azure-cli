@@ -73,8 +73,7 @@ class TestProfile(unittest.TestCase):
                                              cls.display_name1,
                                              cls.state1,
                                              tenant_id=cls.tenant_id,
-                                             managed_by_tenants=cls.managed_by_tenants,
-                                             home_tenant_id=cls.tenant_id)
+                                             managed_by_tenants=cls.managed_by_tenants)
         # Dummy result of azure.cli.core._profile.Profile._normalize_properties
         cls.subscription1_normalized = {
             'environmentName': 'AzureCloud',
@@ -126,8 +125,7 @@ class TestProfile(unittest.TestCase):
         cls.subscription2 = SubscriptionStub(cls.id2,
                                              cls.display_name2,
                                              cls.state2,
-                                             tenant_id=cls.tenant_id,
-                                             home_tenant_id=cls.tenant_id)
+                                             tenant_id=cls.tenant_id)
         cls.subscription2_normalized = {
             'environmentName': 'AzureCloud',
             'id': '2',
@@ -218,6 +216,8 @@ class TestProfile(unittest.TestCase):
                 'username': cls.user2,
                 'authority_type': 'MSSTS'
             }] + cls.msal_accounts
+
+        cls.msal_scopes = ['https://foo/.default']
 
     def test_normalize(self):
         cli = DummyCli()
@@ -569,8 +569,10 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(user, self.user1)
 
     @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
-    def test_get_login_credentials(self, get_token):
+    @mock.patch('msal.PublicClientApplication', autospec=True)
+    def test_get_login_credentials(self, public_client_application, get_token):
         cli = DummyCli()
+        public_client_application.get_accounts.return_value = self.msal_accounts
         get_token.return_value = TestProfile.raw_token1
         # setup
         storage_mock = {'subscriptions': None}
@@ -580,7 +582,7 @@ class TestProfile(unittest.TestCase):
                                              'MSI-DEV-INC', self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties(self.user1,
                                                      [test_subscription],
-                                                     False, None, None, self.home_account_id)
+                                                     False, None, None)
         profile._set_subscriptions(consolidated)
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
@@ -762,20 +764,30 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(token, self.access_token)
 
     @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
-    def test_get_raw_token(self, get_token):
+    @mock.patch('msal.PublicClientApplication.get_accounts', autospec=True)
+    def test_get_raw_token(self, get_accounts, get_token):
         cli = DummyCli()
+        get_accounts.return_value = self.msal_accounts
         get_token.return_value = self.access_token
+
         # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1,
                                                      [self.subscription1],
-                                                     False, None, None, self.home_account_id)
+                                                     False, None, None)
         profile._set_subscriptions(consolidated)
+
         # action
-        creds, sub, tenant = profile.get_raw_token(resource='https://foo')
+        # Get token with ADAL-style resource
+        resource_result = profile.get_raw_token(resource='https://foo')
+        # Get token with MSAL-style scopes
+        scopes_result = profile.get_raw_token(scopes=self.msal_scopes)
 
         # verify
+        self.assertEqual(resource_result, scopes_result)
+        creds, sub, tenant = scopes_result
+
         self.assertEqual(creds[0], self.token_entry1['tokenType'])
         self.assertEqual(creds[1], self.raw_token1)
         import datetime
@@ -1806,8 +1818,7 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[],
-                 home_tenant_id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[]):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
@@ -1822,8 +1833,6 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         self.tenant_id = tenant_id
         self.managed_by_tenants = managed_by_tenants
         # if home_tenant_id is None, this denotes a Subscription from SDK
-        if home_tenant_id:
-            self.home_tenant_id = home_tenant_id
 
 
 class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-methods
