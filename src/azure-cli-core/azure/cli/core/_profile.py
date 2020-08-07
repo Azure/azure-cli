@@ -129,7 +129,7 @@ class Profile:
         self._client_id = client_id
         self._msal_scopes = scopes or adal_resource_to_msal_scopes(self._ad_resource_uri)
         if self._msal_scopes and not isinstance(self._msal_scopes, (list, tuple)):
-            self._msal_scopes = (self._msal_scopes,)
+            self._msal_scopes = [self._msal_scopes]
 
     # pylint: disable=too-many-branches,too-many-statements
     def login(self,

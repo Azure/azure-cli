@@ -64,7 +64,7 @@ class Identity:
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
         self.scopes = scopes
         if self.scopes and not isinstance(self.scopes, (list, tuple)):
-            self.scopes = (self.scopes,)
+            self.scopes = [self.scopes]
         self._msal_app_instance = None
         # Store for Service principal credential persistence
         self._msal_secret_store = MsalSecretStore(fallback_to_plaintext=self.allow_unencrypted)
