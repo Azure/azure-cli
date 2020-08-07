@@ -105,6 +105,58 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_public_network_access(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='PubNetworkTrue', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'enable_public_network': 'true'
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', 'Enabled')])
+
+        config_store_name = self.create_random_name(prefix='PubNetworkFalse', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'enable_public_network': 'false'
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', 'Disabled')])
+
+        config_store_name = self.create_random_name(prefix='PubNetworkNull', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_name
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', None)])
+
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
 
