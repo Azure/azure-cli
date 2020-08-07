@@ -35,6 +35,7 @@ def register_global_query_recommend(cli_ctx):
         args = kwargs['args']
         if args._query_recommend is not None:
             cli_ctx.invocation.data['output'] = 'table'
+
             def analyze_output(cli_ctx, **kwargs):
                 tree_builder = TreeBuilder()
                 tree_builder.build(kwargs['event_data']['result'])
@@ -54,13 +55,20 @@ def register_global_query_recommend(cli_ctx):
 
 
 class Recommendation:
-    def __init__(self, query_str, help_str="", group_name="default"):
+    def __init__(self, query_str, help_str="", group_name="default", max_length=40):
         self._query_str = query_str
         self._help_str = help_str
         self._group = group_name
+        self._max_length = max_length
 
     def _asdict(self):
-        return {"query string": self._query_str, "help": self._help_str}
+        query_str = self._query_str
+        if len(query_str) > self._max_length:
+            query_str = query_str[:self._max_length] + '...'
+        help_str = self._help_str
+        if len(help_str) > 2 * self._max_length:
+            help_str = help_str[: 2 * self._max_length] + '...'
+        return {"query string": query_str, "help": help_str}
 
     def __str__(self):
         return "{}\t{}".format(self._query_str, self._help_str)
@@ -119,6 +127,7 @@ class TreeNode:
         :param select_items: User input which they are intrested in
         :param keys: if None, select from all keys in dict
         '''
+        exclude_keys = ['id', 'subscriptions']
         if keys is None:
             keys = self._keys
         if not select_items:  # no keywords are provided
@@ -126,6 +135,8 @@ class TreeNode:
         match_list = []
         for item in select_items:
             for key in keys:
+                if key in exclude_keys:
+                    pass
                 if item in key:
                     match_list.append(item)
         return match_list
