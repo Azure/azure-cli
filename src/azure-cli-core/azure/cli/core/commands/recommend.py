@@ -130,15 +130,16 @@ class TreeNode:
         exclude_keys = ['id', 'subscriptions']
         if keys is None:
             keys = self._keys
-        if not select_items:  # no keywords are provided
-            return keys
         match_list = []
-        for item in select_items:
-            for key in keys:
-                if key in exclude_keys:
-                    pass
-                if item in key:
-                    match_list.append(item)
+        for key in keys:
+            if key in exclude_keys:
+                continue
+            if select_items:
+                for item in select_items:
+                    if item in key:
+                        match_list.append(item)
+            else:
+                match_list.append(key)
         return match_list
 
     def _get_trace_str(self, number=None, filter_rules=False):
@@ -164,12 +165,7 @@ class TreeNode:
         if self._parent or self._from_list:
             trace_str = "{}.".format(self._get_trace_str())
 
-        select_list = set()
-        if len(select_items) == 0:
-            for key in self._keys:
-                select_list.add(key)
-        else:
-            select_list.update(self._get_match_items(select_items))
+        select_list = self._get_match_items(select_items)
         for item in select_list:
             ret.append(Recommendation(trace_str + item,
                                       help_str="Get all {} from output".format(
