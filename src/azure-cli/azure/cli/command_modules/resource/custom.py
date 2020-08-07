@@ -1776,7 +1776,9 @@ def list_resources(cmd, resource_group_name=None,
     odata_filter = _list_resources_odata_filter_builder(resource_group_name,
                                                         resource_provider_namespace,
                                                         resource_type, name, tag, location)
-    resources = rcf.resources.list(filter=odata_filter)
+
+    expand = "createdTime,changedTime,provisioningState"
+    resources = rcf.resources.list(filter=odata_filter, expand=expand)
     return list(resources)
 
 
