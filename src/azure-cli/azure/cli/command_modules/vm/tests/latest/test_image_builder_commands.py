@@ -127,6 +127,8 @@ class ImageTemplateTest(ScenarioTest):
 
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
             'tmpl_01': 'template01',
             'tmpl_02': 'template02',
             'img_src': LINUX_IMAGE_SOURCE,
@@ -135,8 +137,10 @@ class ImageTemplateTest(ScenarioTest):
             'vhd_out': "my_vhd_output",
         })
 
+        subnet_id = self.cmd('az network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
+
         # test template creation works. use cache
-        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --identity {ide} --defer',
+        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --identity {ide} --vm-size Standard_D1_v2 --os-disk-size 20 --defer',
                  checks=[
                      self.check('properties.source.offer', 'UbuntuServer'), self.check('properties.source.publisher', 'Canonical'),
                      self.check('properties.source.sku', '18.04-LTS'), self.check('properties.source.version', '18.04.201808140'),
@@ -147,6 +151,10 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('properties.customize[0].type', 'Shell'),
                      self.check('properties.customize[1].name', 'customizeScript.sh'), self.check('properties.customize[1].scriptUri', TEST_SHELL_SCRIPT_URL),
                      self.check('properties.customize[1].type', 'Shell'),
+
+                     self.check('properties.vmProfile.vmSize', 'Standard_D1_v2'),
+                     self.check('properties.vmProfile.osDiskSizeGB', 20),
+                     # self.check('properties.vmProfile.vnetConfig.subnetId', subnet_id, False)
                  ])
 
         self.kwargs.update({

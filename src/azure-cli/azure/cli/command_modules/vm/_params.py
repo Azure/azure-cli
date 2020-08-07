@@ -203,10 +203,10 @@ def load_arguments(self, _):
         c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
 
         # VM profile
-        c.argument('vm_size', help='VM size. E.g. Standard_D1_v2')
-        c.argument('os_disk_size', help='Disk size in GB of VM')
-        c.argument('vnet', help='Name of VNET for VM. You should only specify it when subnet is a name')
-        c.argument('subnet', help='Name or ID of subnet for VM')
+        c.argument('vm_size', help='Size of the virtual machine used to build, customize and capture images. Omit or specify empty string to use the default (Standard_D1_v2)')
+        c.argument('os_disk_size', type=int, help='Size of the OS disk in GB. Omit or specify 0 to use Azure\'s default OS disk size')
+        c.argument('vnet', help='Name of VNET to deploy the build virtual machine. You should only specify it when subnet is a name')
+        c.argument('subnet', help='Name or ID of subnet to deploy the build virtual machine')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
