@@ -31,10 +31,10 @@ def register_providers():
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
-    _register_one_provider('Microsoft.Compute/diskAccesses', '2020-05-01', False, support_manually_approve=False)
+    _register_one_provider('Microsoft.Compute/diskAccesses', '2020-05-01', False, support_connection_operation=False)
 
 
-def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_manually_approve=True):  # pylint: disable=line-too-long
+def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
     """
     :param provider: namespace + type.
     :param api_version: API version for private link scenarios.
@@ -45,14 +45,16 @@ def _register_one_provider(provider, api_version, support_list_or_not, resource_
         "api_version": api_version,
         "support_list_or_not": support_list_or_not,
         "resource_get_api_version": resource_get_api_version,
-        "support_manually_approve": support_manually_approve
+        "support_connection_operation": support_connection_operation
     }
 
     TYPE_CLIENT_MAPPING[provider] = general_client_settings
 
 
-def _check_manually_approve_support(rp_mapping, resource_provider):
-    if resource_provider in rp_mapping and not rp_mapping[resource_provider]['support_manually_approve']:
+def _check_connection_operation_support(rp_mapping, resource_provider):
+    if resource_provider in rp_mapping \
+       and isinstance(rp_mapping[resource_provider], dict) \
+       and not rp_mapping[resource_provider]['support_connection_operation']:
         raise CLIError("Resource provider {} currently does not support this operation".format(resource_provider))
 
 
@@ -75,7 +77,7 @@ def list_private_link_resource(cmd, resource_group_name, name, resource_provider
 
 def approve_private_endpoint_connection(cmd, resource_group_name, resource_name, resource_provider,
                                         name, approval_description=None):
-    _check_manually_approve_support(TYPE_CLIENT_MAPPING, resource_provider)
+    _check_connection_operation_support(TYPE_CLIENT_MAPPING, resource_provider)
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
     return client.approve_private_endpoint_connection(cmd, resource_group_name,
                                                       resource_name, name,
@@ -84,7 +86,7 @@ def approve_private_endpoint_connection(cmd, resource_group_name, resource_name,
 
 def reject_private_endpoint_connection(cmd, resource_group_name, resource_name, resource_provider,
                                        name, rejection_description=None):
-    _check_manually_approve_support(TYPE_CLIENT_MAPPING, resource_provider)
+    _check_connection_operation_support(TYPE_CLIENT_MAPPING, resource_provider)
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
     return client.reject_private_endpoint_connection(cmd, resource_group_name,
                                                      resource_name, name,
@@ -92,13 +94,13 @@ def reject_private_endpoint_connection(cmd, resource_group_name, resource_name, 
 
 
 def remove_private_endpoint_connection(cmd, resource_group_name, resource_name, resource_provider, name):
-    _check_manually_approve_support(TYPE_CLIENT_MAPPING, resource_provider)
+    _check_connection_operation_support(TYPE_CLIENT_MAPPING, resource_provider)
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
     return client.remove_private_endpoint_connection(cmd, resource_group_name, resource_name, name)
 
 
 def show_private_endpoint_connection(cmd, resource_group_name, resource_name, resource_provider, name):
-    _check_manually_approve_support(TYPE_CLIENT_MAPPING, resource_provider)
+    _check_connection_operation_support(TYPE_CLIENT_MAPPING, resource_provider)
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
     return client.show_private_endpoint_connection(cmd, resource_group_name, resource_name, name)
 
