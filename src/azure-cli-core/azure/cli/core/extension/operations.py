@@ -358,6 +358,45 @@ def list_available_extensions(index_url=None, show_details=False):
     return results
 
 
+def list_versions(extension_name, index_url=None):
+    index_data = get_index_extensions(index_url=index_url)
+
+    try:
+        exts = index_data[extension_name]
+    except Exception:
+        raise CLIError('Extension {} not found.'.format(extension_name))
+
+    try:
+        installed_ext = get_extension(extension_name, ext_type=WheelExtension)
+    except ExtensionNotInstalledException:
+        installed_ext = None
+
+    results = []
+    latest_compatible_version = '0.0.0'
+
+    for ext in sorted(exts, key=lambda c: parse_version(c['metadata']['version']), reverse=True):
+        compatible = ext_compat_with_cli(ext['metadata'])[0]
+        ext_version = ext['metadata']['version']
+        if compatible and latest_compatible_version == '0.0.0':
+            latest_compatible_version = ext_version
+        installed = ext_version == installed_ext.version if installed_ext else False
+        if installed and parse_version(latest_compatible_version) > parse_version(installed_ext.version):
+            installed = str(True) + ' (upgrade available)'
+        version = ext['metadata']['version']
+        if latest_compatible_version == ext_version:
+            version = version + ' (max compatible version)'
+        results.append({
+            'name': extension_name,
+            'version': version,
+            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False),
+            'experimental': ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'installed': installed,
+            'compatible': compatible
+        })
+    results.reverse()
+    return results
+
+
 def reload_extension(extension_name, extension_module=None):
     return reload_module(extension_module if extension_module else get_extension_modname(ext_name=extension_name))
 
