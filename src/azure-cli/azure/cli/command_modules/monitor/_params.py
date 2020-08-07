@@ -125,6 +125,12 @@ def load_arguments(self, _):
                                              'The resources specified in this parameter must be of the same type and exist in the same location.')
         c.argument('disabled', arg_type=get_three_state_flag())
         c.argument('enabled', arg_type=get_three_state_flag(), help='Whether the metric alert rule is enabled.')
+        c.argument('target_resource_type',
+                   help='The resource type of the target resource(s) in scopes. '
+                        'This must be provided when scopes is resource group or subscription.')
+        c.argument('target_resource_region',
+                   help='The region of the target resource(s) in scopes. '
+                        'This must be provided when scopes is resource group or subscription.')
 
     with self.argument_context('monitor metrics alert create', arg_group=None) as c:
         c.argument('actions', options_list=['--action', '-a'], action=MetricAlertAddAction, nargs='+', validator=get_action_group_validator('actions'))

@@ -24,7 +24,7 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
     resource_type, scope_type = _parse_resource_type(scopes)
     if scope_type in ['resource_group', 'subscription']:
         if target_resource_type is None or target_resource_region is None:
-            raise CLIError('target-resource-type and target-resource-region must be provided.')
+            raise CLIError('--target-resource-type and --target-resource-region must be provided.')
         criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
     else:
         if len(scopes) == 1:
