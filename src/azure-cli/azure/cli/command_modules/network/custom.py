@@ -1942,11 +1942,11 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'cname':
                 record_obj.update({'alias': record.cname.rstrip('.') + '.'})
             elif record_type == 'mx':
-                record_obj.update({'preference': record.preference, 'host': record.exchange})
+                record_obj.update({'preference': record.preference, 'host': record.exchange.rstrip('.') + '.'})
             elif record_type == 'ns':
-                record_obj.update({'host': record.nsdname})
+                record_obj.update({'host': record.nsdname.rstrip('.') + '.'})
             elif record_type == 'ptr':
-                record_obj.update({'host': record.ptrdname})
+                record_obj.update({'host': record.ptrdname.rstrip('.') + '.'}})
             elif record_type == 'soa':
                 record_obj.update({
                     'mname': record.host.rstrip('.') + '.',
@@ -1958,7 +1958,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 zone_obj['$ttl'] = record.minimum_ttl
             elif record_type == 'srv':
                 record_obj.update({'priority': record.priority, 'weight': record.weight,
-                                   'port': record.port, 'target': record.target})
+                                   'port': record.port, 'target': record.target.rstrip('.') + '.'})
             elif record_type == 'txt':
                 record_obj.update({'txt': ''.join(record.value)})
 
