@@ -288,7 +288,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Pricing plan for IoT Central application.')
         c.argument('subdomain', options_list=['--subdomain', '-s'],
                    help='Enter a unique URL. Your app will be accessible via https://<subdomain>.azureiotcentral.com/.'
-                   ' Avoid special characters `-` instead, use lower case letters (a-z), numbers (0-9), and dashes (-).')
+                        ' Avoid special characters `-` instead, use lower '
+                        'case letters (a-z), numbers (0-9), and dashes (-).')
         c.argument('template', options_list=['--template', '-t'],
                    help='IoT Central application template name. Default is "Custom application". See documentation for'
                         ' a list of available templates.')
