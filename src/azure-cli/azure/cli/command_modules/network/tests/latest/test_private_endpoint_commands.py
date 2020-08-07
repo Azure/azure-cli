@@ -1383,7 +1383,7 @@ class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
         })
 
         # Check the auto-approve of the private endpoint connection
-        self.cmd('az network private-endpoint-connection list -g {rg} -n {disk_access} --type Microsoft.Compute/diskAccesses',
+        self.cmd('network private-endpoint-connection list -g {rg} -n {disk_access} --type Microsoft.Compute/diskAccesses',
                  checks=[
                      self.check('length(@)', 1),
                      self.check('@[0].properties.privateEndpoint.id', '{pe_id}'),

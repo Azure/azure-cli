@@ -45,7 +45,7 @@ def _register_one_provider(provider, api_version, support_list_or_not, resource_
         "api_version": api_version,
         "support_list_or_not": support_list_or_not,
         "resource_get_api_version": resource_get_api_version,
-        "support_manually_approve": support_manually_approve,
+        "support_manually_approve": support_manually_approve
     }
 
     TYPE_CLIENT_MAPPING[provider] = general_client_settings
