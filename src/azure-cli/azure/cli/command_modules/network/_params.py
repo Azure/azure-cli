@@ -34,7 +34,7 @@ from azure.cli.command_modules.network._validators import (
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_application_gateway_identity, validate_virtul_network_gateway, validate_private_dns_zone,
+    validate_user_assigned_identity, validate_virtul_network_gateway, validate_private_dns_zone,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     process_vnet_name_or_id)
@@ -129,7 +129,7 @@ def load_arguments(self, _):
         c.argument('firewall_policy', options_list='--waf-policy', min_api='2018-12-01', help='Name or ID of a web application firewall (WAF) policy.', validator=validate_waf_policy)
 
     with self.argument_context('network application-gateway', arg_group='Identity') as c:
-        c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
+        c.argument('user_assigned_identity', options_list='--identity', help="Name or ID of the ManagedIdentity Resource", validator=validate_user_assigned_identity)
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
@@ -145,6 +145,13 @@ def load_arguments(self, _):
         c.argument('http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.')
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
+
+    with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
+        c.argument('enable_private_link', action='store_true', help='Enable Private Link feature for this application gateway', default=False)
+        c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
+        c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
+        c.argument('private_link_subnet', help='The name of the subnet within the same vnet of an application gateway')
+        c.argument('private_link_primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
     with self.argument_context('network application-gateway create') as c:
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
@@ -178,7 +185,8 @@ def load_arguments(self, _):
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
         {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
         {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
-        {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'}
+        {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'},
+        {'name': 'private-link', 'display': 'private link', 'ref': 'private_link_configurations'}
     ]
     if self.supported_api_version(min_api='2018-08-01'):
         ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
@@ -243,6 +251,24 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
+
+    with self.argument_context('network application-gateway private-link', arg_group=None) as c:
+        c.argument('frontend_ip', help='The frontend IP which the Private Link will associate to')
+        c.argument('private_link_name', options_list=['--name', '-n'], help='The name of Private Link.')
+        c.argument('private_link_ip_address', options_list='--ip-address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
+        c.argument('private_link_subnet_prefix', options_list='--subnet-prefix', help='The CIDR prefix to use when creating a new subnet')
+        c.argument('private_link_subnet_name_or_id', options_list='--subnet', help='The name or an existing ID of a subnet within the same vnet of an application gateway')
+        c.argument('private_link_primary', options_list='--primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
+
+    with self.argument_context('network application-gateway private-link list', arg_group=None) as c:
+        c.argument('application_gateway_name', id_part=None)
+
+    with self.argument_context('network application-gateway private-link ip-config', arg_group=None) as c:
+        c.argument('private_link_ip_name', options_list='--name', help='The name of the private IP for Private Link')
+        c.argument('private_link_name', options_list='--private-link', help='The name of Private Link.')
+
+    with self.argument_context('network application-gateway private-link ip-config list', arg_group=None) as c:
+        c.argument('application_gateway_name', id_part=None)
 
     with self.argument_context('network application-gateway rewrite-rule') as c:
         rewrite_rule_set_name_type = CLIArgumentType(help='Name of the rewrite rule set.', options_list='--rule-set-name', id_part='child_name_1')
@@ -421,6 +447,14 @@ def load_arguments(self, _):
          'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
+        c.argument('rule_set_type', options_list='--type',
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
+                   help='The type of the web application firewall rule set.')
+        c.argument('rule_set_version',
+                   options_list='--version',
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   help='The version of the web application firewall rule set type. '
+                        '0.1 is used for Microsoft_BotManagerRuleSet')
 
     with self.argument_context('network application-gateway waf-policy policy-setting', min_api='2019-09-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None,
@@ -482,14 +516,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
                                min_api='2019-09-01') as c:
-        c.argument('rule_set_type', options_list='--type',
-                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
-                   help='The type of the web application firewall rule set.')
-        c.argument('rule_set_version',
-                   options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
-                   help='The version of the web application firewall rule set type. '
-                        '0.1 is used for Microsoft_BotManagerRuleSet')
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
@@ -733,6 +759,11 @@ def load_arguments(self, _):
         c.argument('peering', help='Name or ID of an ExpressRoute peering.', validator=validate_express_route_peering)
         c.argument('circuit_name', er_circuit_name_type, id_part=None)
 
+    with self.argument_context('network express-route gateway connection', arg_group='Routing Configuration', min_api='2020-04-01', is_preview=True) as c:
+        c.argument('associated_route_table', options_list=['--associated', '--associated-route-table'], help='The resource id of route table associated with this routing configuration.')
+        c.argument('propagated_route_tables', options_list=['--propagated', '--propagated-route-tables'], nargs='+', help='Space-separated list of resource id of propagated route tables.')
+        c.argument('labels', nargs='+', help='Space-separated list of labels for propagated route tables.')
+
     with self.argument_context('network express-route gateway connection list', min_api='2018-08-01') as c:
         c.argument('express_route_gateway_name', er_gateway_name_type, id_part=None)
 
@@ -768,7 +799,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network express-route port identity assign', arg_group='Identity', min_api='2019-08-01') as c:
         c.argument('user_assigned_identity', options_list='--identity',
-                   help="Name or ID of the ManagedIdentity Resource", validator=validate_application_gateway_identity)
+                   help="Name or ID of the ManagedIdentity Resource", validator=validate_user_assigned_identity)
     # endregion
 
     # region PrivateEndpoint
@@ -781,7 +812,7 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help=subnet_help, id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
-        c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'], help='The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use "az network private-link-resource list" to obtain the list of group ids.')
+        c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'], help='The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use "az network private-link-resource list" to obtain the supported group ids.')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
         c.argument('manual_request', help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.", arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
@@ -1821,6 +1852,7 @@ def load_arguments(self, _):
         c.argument('security_provider_name', arg_type=get_enum_type(SecurityProviderName), help='The security provider name', options_list=['--provider'])
         c.argument('security_partner_provider_name', options_list=['--name', '-n'], help='Name of the Security Partner Provider.')
         c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
+    # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
     from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING, register_providers
@@ -1843,4 +1875,30 @@ def load_arguments(self, _):
                        arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
             c.argument('resource_group_name', required=False)
             c.argument('resource_name', required=False, help='Name of the resource')
+    # endregion
+
+    # region Network Virtual Appliance
+    with self.argument_context('network virtual-appliance', arg_group='Sku') as c:
+        c.argument('vendor', help='Virtual Appliance Vendor.')
+        c.argument('bundled_scale_unit', options_list=['--scale-unit'], help='Virtual Appliance Scale Unit.')
+        c.argument('market_place_version', options_list=['--version', '-v'], help='Virtual Appliance Version.')
+    with self.argument_context('network virtual-appliance') as c:
+        c.argument('network_virtual_appliance_name', help='The name of Network Virtual Appliance', options_list=['--name', '-n'])
+        c.argument('boot_strap_configuration_blobs', options_list=['--boot-strap-config-blobs', '--boot-blobs'], nargs='+', help='Space-separated list of BootStrapConfigurationBlobs storage URLs.')
+        c.argument('cloud_init_configuration_blobs', options_list=['--cloud-init-config-blobs', '--cloud-blobs'], nargs='+', help='Space-separated list of CloudInitConfigurationBlob storage URLs.')
+        c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
+        c.argument('cloud_init_configuration', options_list=['--cloud-init-config', '--init-config'], help='CloudInitConfiguration scripts that will be run during cloud initialization')
+        c.argument('asn', type=int, help='VirtualAppliance ASN. The valid value ranges from 1 to 4294967295. ')
+
+    with self.argument_context('network virtual-appliance sku') as c:
+        c.argument('sku_name', help='The name of Network Virtual Appliance SKU', options_list=['--name', '-n'])
+
+    with self.argument_context('network virtual-appliance site') as c:
+        c.argument('network_virtual_appliance_name', options_list=['--appliance-name'])
+        c.argument('site_name', help='The name of Network Virtual Appliance Site', options_list=['--name', '-n'])
+        c.argument('address_prefix', help='Address Prefix of Network Virtual Appliance Site')
+    with self.argument_context('network virtual-appliance site', arg_group='Breakout of O365') as c:
+        c.argument('allow', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 allow category.')
+        c.argument('optimize', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 optimize category.')
+        c.argument('default', arg_type=get_three_state_flag(), help='Flag to control breakout of o365 default category.')
     # endregion

@@ -14,7 +14,8 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only,
+    record_only)
 
 from knack.util import CLIError
 
@@ -536,6 +537,10 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
                  ' -g {rg} --gateway-name {gw} '
                  '--name MySSLCert '
                  '--key-vault-secret-id {secret_id}')
+
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gw} -n cert1 --keyvault-secret {secret_id}', checks=[
+            self.check('trustedRootCertificates[0].keyVaultSecretId', '{secret_id}')
+        ])
 
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
@@ -1503,6 +1508,81 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp2'])
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
+    def test_network_app_gateway_waf_policy_with_version_and_type(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group,
+            'csr_grp1': 'REQUEST-921-PROTOCOL-ATTACK',
+            'csr_grp2': 'REQUEST-913-SCANNER-DETECTION'
+        })
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf} --version 3.1 --type OWASP')
+
+        # case 1: Initialize(add) managed rule set
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp1} --rules 921120 921110')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.1'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921120')
+        ])
+
+        # case 2: Append(add) another managed rule set to same rule group
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp1} --rules 921150')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 3),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150')
+                 ])
+
+        # # case 3: Add another managed rule set of different rule group
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp2} --rules 913100')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].rules | length(@)', 1),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100')
+                 ])
+
+        # case 4: override(update) existing managed rule set
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp1} --rules 921130 921140')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921130'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[1].ruleId', '921140')
+                 ])
+
+        # # case 5: clear manage rule set by group {csr_grp1}
+        self.cmd('network application-gateway waf-policy managed-rule rule-set remove -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp1} ')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp2'])
+                 ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_exclusion')
     def test_network_app_gateway_waf_policy_managed_rules_exclusions(self, resource_group):
         self.kwargs.update({
@@ -1765,6 +1845,49 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
 
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route')
+    def test_network_express_route_connection_routing_configuration(self, resource_group):
+        self.kwargs = {
+            'rg': 'dedharrtv3final',
+            'gw': '16297a6ff5314c0f8d0eb580aa7861b3-eastus-er-gw',
+            'connection': 'yuerconnection',
+            'peering': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/expressRouteCircuits/clicktfinal/peerings/AzurePrivatePeering',
+            'route_table1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/virtualHubs/blhub/hubRouteTables/routetable1',
+            'route_table2': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dedharrtv3final/providers/Microsoft.Network/virtualHubs/blhub/hubRouteTables/routetable2'
+        }
+
+        self.cmd('network express-route gateway connection update '
+                 '-n {connection} '
+                 '-g {rg} '
+                 '--gateway-name {gw} '
+                 '--peering {peering} '
+                 '--associated-route-table {route_table1} '
+                 '--propagated-route-tables {route_table1} {route_table2} '
+                 '--labels label1 label2',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('name', self.kwargs['connection']),
+                     self.check('routingConfiguration.associatedRouteTable.id', self.kwargs['route_table1']),
+                     self.check('length(routingConfiguration.propagatedRouteTables.ids)', 2),
+                     self.check('routingConfiguration.propagatedRouteTables.ids[0].id', self.kwargs['route_table1']),
+                     self.check('routingConfiguration.propagatedRouteTables.ids[1].id', self.kwargs['route_table2']),
+                     self.check('length(routingConfiguration.propagatedRouteTables.labels)', 2),
+                     self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label1'),
+                     self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')])
+
+        self.cmd('network express-route gateway connection show -n {connection} -g {rg} --gateway-name {gw}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['connection']),
+            self.check('routingConfiguration.associatedRouteTable.id', self.kwargs['route_table1']),
+            self.check('length(routingConfiguration.propagatedRouteTables.ids)', 2),
+            self.check('routingConfiguration.propagatedRouteTables.ids[0].id', self.kwargs['route_table1']),
+            self.check('routingConfiguration.propagatedRouteTables.ids[1].id', self.kwargs['route_table2']),
+            self.check('length(routingConfiguration.propagatedRouteTables.labels)', 2),
+            self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label1'),
+            self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')
+        ])
+
 
 class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
@@ -1861,6 +1984,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
 
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_load_balancer')
     def test_network_lb(self, resource_group):
 
@@ -2128,6 +2252,13 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  '--backend-addresses-config-file @"{lb_address_pool_file_path}"',
                  checks=self.check('name', 'bap1'))
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '2'))
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap1', checks=self.is_empty())
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}', checks=self.check('length(@)', 1))
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet}', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
+
+        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '1'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_lb_probes')
     def test_network_lb_probes(self, resource_group):
@@ -2231,6 +2362,7 @@ class NetworkLocalGatewayScenarioTest(ScenarioTest):
 
 class NetworkNicScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_nic_scenario')
     def test_network_nic(self, resource_group):
 
@@ -2670,6 +2802,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
 
 class NetworkVNetScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_vnet_test')
     def test_network_vnet(self, resource_group):
 
@@ -3773,6 +3906,92 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
             self.check('length(@)', 1)
         ])
         self.cmd('network security-partner-provider delete -n {name} -g {rg}')
+
+
+class NetworkVirtualApplianceScenarioTest(ScenarioTest):
+    def setUp(self):
+        super(NetworkVirtualApplianceScenarioTest, self).setUp()
+        self.cmd('extension add -n virtual-wan')
+
+    def tearDown(self):
+        self.cmd('extension remove -n virtual-wan')
+        super(NetworkVirtualApplianceScenarioTest, self).tearDown()
+
+    @ResourceGroupPreparer(location='westcentralus')
+    def test_network_virtual_appliance(self, resource_group):
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clitestvhub',
+            'name': 'cli-virtual-appliance',
+            'site': 'cli-site',
+            'blob': 'https://azurecliprod.blob.core.windows.net/cli-extensions/account-0.1.0-py2.py3-none-any.whl',
+            'rg': resource_group
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 --sku Standard')
+
+        self.cmd('network virtual-appliance create -n {name} -g {rg} --vhub {vhub} --vendor "barracudasdwanrelease" '
+                 '--scale-unit 2 -v latest --asn 10000 --init-config "echo $abc" '
+                 '--boot-blobs {blob} {blob} --cloud-blobs {blob} {blob}',
+                 checks=[
+                     self.check('name', '{name}'),
+                     self.check('length(bootStrapConfigurationBlobs)', 2),
+                     self.check('length(cloudInitConfigurationBlobs)', 2),
+                     self.check('virtualApplianceAsn', 10000),
+                     self.check('cloudInitConfiguration', "echo $abc")
+                 ])
+        self.cmd('network virtual-appliance update -n {name} -g {rg} --asn 20000 --init-config "echo $abcd"', checks=[
+            self.check('virtualApplianceAsn', 20000),
+            self.check('cloudInitConfiguration', "echo $abcd")
+        ])
+        self.cmd('network virtual-appliance show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('length(bootStrapConfigurationBlobs)', 2),
+            self.check('length(cloudInitConfigurationBlobs)', 2),
+            self.check('virtualApplianceAsn', 20000),
+            self.check('cloudInitConfiguration', "echo $abcd")
+        ])
+        self.cmd('network virtual-appliance list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network virtual-appliance list', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        self.cmd('network virtual-appliance sku list', checks=[
+            self.check('length(@)', 3)
+        ])
+        self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"', checks=[
+            self.check('name', 'barracudasdwanrelease')
+        ])
+
+        self.cmd('network virtual-appliance site create -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.0/24 --allow --default --optimize', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', True),
+            self.check('o365Policy.breakOutCategories.default', True),
+            self.check('o365Policy.breakOutCategories.optimize', True),
+            self.check('addressPrefix', '10.0.0.0/24')
+        ])
+        self.cmd('network virtual-appliance site update -n {site} -g {rg} --appliance-name {name} --address-prefix 10.0.0.1/24 --allow false --default false --optimize false', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', False),
+            self.check('o365Policy.breakOutCategories.default', False),
+            self.check('o365Policy.breakOutCategories.optimize', False),
+            self.check('addressPrefix', '10.0.0.1/24')
+        ])
+        self.cmd('network virtual-appliance site show -n {site} -g {rg} --appliance-name {name}', checks=[
+            self.check('name', '{site}'),
+            self.check('o365Policy.breakOutCategories.allow', False),
+            self.check('o365Policy.breakOutCategories.default', False),
+            self.check('o365Policy.breakOutCategories.optimize', False),
+            self.check('addressPrefix', '10.0.0.1/24')
+        ])
+        self.cmd('network virtual-appliance site list -g {rg} --appliance-name {name}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
+        self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')
 
 
 if __name__ == '__main__':

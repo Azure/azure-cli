@@ -17,7 +17,7 @@ import azure.cli.command_modules.appconfig._azconfig.request_message as request_
 import azure.cli.command_modules.appconfig._azconfig.request_handler as handler
 
 
-class AzconfigClient(object):
+class AzconfigClient:
     """Represents an azconfig client.
 
     Provides a client-side logical representation of the Azure config service.

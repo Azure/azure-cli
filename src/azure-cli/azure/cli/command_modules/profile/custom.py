@@ -74,6 +74,15 @@ def get_access_token(cmd, subscription=None, resource=None, resource_type=None, 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, tenant=tenant)
 
+    token_entry = creds[2]
+    # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`
+    # Unify to ISO `expiresOn`, like "2020-06-30 06:14:41"
+    if 'expires_on' in token_entry:
+        from datetime import datetime
+        # https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
+        token_entry['expiresOn'] = datetime.fromtimestamp(int(token_entry['expires_on']))\
+            .strftime("%Y-%m-%d %H:%M:%S.%f")
+
     result = {
         'tokenType': creds[0],
         'accessToken': creds[1],
@@ -206,6 +215,7 @@ def check_cli(cmd):
     except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_commands'] = ex
         logger.error('Error occurred loading commands!\n')
+        raise ex
 
     print('Retrieving all help...')
     try:
@@ -214,6 +224,7 @@ def check_cli(cmd):
     except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_help'] = ex
         logger.error('Error occurred loading help!\n')
+        raise ex
 
     if not exceptions:
         print('CLI self-test completed: OK')

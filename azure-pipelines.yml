@@ -140,25 +140,10 @@ jobs:
     displayName: 'Use Python 3.7'
     inputs:
       versionSpec: 3.7
-
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      #!/usr/bin/env bash
-
       set -ev
-
-      pip install virtualenv
-      python -m virtualenv venv/
-      . ./venv/bin/activate
-      pip install azdev
-      azdev setup -c $(pwd)
-    displayName: 'Install azdev'
-
-  - bash: |
-      #!/usr/bin/env bash
-      . ./venv/bin/activate
-
-      set -ev
-
+      . env/bin/activate
       azdev verify history
 
     displayName: 'Verify History'
@@ -639,10 +624,10 @@ jobs:
 
        echo "== Test yum package on CentOS =="
 
-       docker pull centos:centos7
-       docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos:centos7 /bin/bash -c "yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
+       docker pull centos:centos8
+       docker run --rm -e YUM_NAME=$YUM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum -v $(pwd):/azure-cli centos:centos8 /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
 
-    displayName: 'Bash Script'
+    displayName: 'Test Yum Package'
 
 - job: BuildUbuntuPackages
   displayName: Build Ubuntu Packages
@@ -834,7 +819,6 @@ jobs:
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
-
       . env/bin/activate
       azdev style
 
@@ -848,25 +832,41 @@ jobs:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
+      set -ev
+      . env/bin/activate
       azdev verify license
       azdev verify history
       azdev verify document-map
 
-- job: CheckLoadPerformance
-  displayName: "Check Module Load Performance"
-
+- job: PerformanceCheck
+  displayName: "PerformanceCheck"
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
+    displayName: 'Use Python $(python.version)'
     inputs:
-      versionSpec: 3.6
+      versionSpec: '$(python.version)'
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
+      set -ev
+      . env/bin/activate
       azdev perf load-times
+    displayName: "Load Performance"
+  # - bash: |
+  #     set -ev
+  #     . env/bin/activate
+
+  #     azdev perf benchmark "version" "network vnet -h" "rest -h" "storage account"
+  #   displayName: "Execution Performance"
 
 - job: CheckLinter
   displayName: "Check CLI Linter"
@@ -878,9 +878,15 @@ jobs:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
-      azdev linter --ci-exclusions
+      set -ev
+      . env/bin/activate
+      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+        azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+      else
+        azdev linter --ci-exclusions --min-severity medium
+      fi
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"

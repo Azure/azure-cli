@@ -139,6 +139,66 @@ examples:
     text: az network application-gateway delete -g MyResourceGroup -n MyAppGateway
 """
 
+helps['network application-gateway private-link'] = """
+type: group
+short-summary: Manage Private Link of an Application Gateway
+"""
+
+helps['network application-gateway private-link add'] = """
+type: command
+short-summary: Add a new Private Link with a default IP Configuration and associate it with an existing Frontend IP
+"""
+
+helps['network application-gateway private-link remove'] = """
+type: command
+short-summary: Remove a Private Link and clear association with Frontend IP. The subnet associate with a Private Link might need to clear manually
+"""
+
+helps['network application-gateway private-link show'] = """
+type: command
+short-summary: Show a Private Link
+"""
+
+helps['network application-gateway private-link list'] = """
+type: command
+short-summary: List all the Private Link
+"""
+
+helps['network application-gateway private-link wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the condition of corresponding application gateway is met
+"""
+
+helps['network application-gateway private-link ip-config'] = """
+type: group
+short-summary: Manage IP configuration of a Private Link to configure its capability
+"""
+
+helps['network application-gateway private-link ip-config add'] = """
+type: command
+short-summary: Add an IP configuration to a Private Link to scale up its capability
+"""
+
+helps['network application-gateway private-link ip-config remove'] = """
+type: command
+short-summary: Remove an IP configuration from a Private Link to scale down its capability
+"""
+
+helps['network application-gateway private-link ip-config show'] = """
+type: command
+short-summary: Show an IP configuration of a Private Link
+"""
+
+helps['network application-gateway private-link ip-config list'] = """
+type: command
+short-summary: List all the IP configuration of a Private Link
+"""
+
+helps['network application-gateway private-link ip-config wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the condition of corresponding application gateway is met
+"""
+
 helps['network application-gateway frontend-ip'] = """
 type: group
 short-summary: Manage frontend IP addresses of an application gateway.
@@ -2402,6 +2462,10 @@ short-summary: Manage ExpressRoute gateway connections.
 helps['network express-route gateway connection create'] = """
 type: command
 short-summary: Create an ExpressRoute gateway connection.
+examples:
+  - name: Create an ExpressRoute gateway connection.
+    text: |
+        az network express-route gateway connection create --gateway-name MyGateway -n MyExpressRouteConnection -g MyResourceGroup --peering /subscriptions/MySub/resourceGroups/MyResourceGroup/providers/Microsoft.Network/expressRouteCircuits/MyCircuit/peerings/AzurePrivatePeering --associated-route-table /MySub/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyHub/hubRouteTables/MyRouteTable1 --propagated-route-tables /MySub/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyHub/hubRouteTables/MyRouteTable1 /MySub/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyHub/hubRouteTables/MyRouteTable2 --labels label1 label2
 """
 
 helps['network express-route gateway connection delete'] = """
@@ -2437,6 +2501,10 @@ examples:
 helps['network express-route gateway connection update'] = """
 type: command
 short-summary: Update an ExpressRoute gateway connection.
+examples:
+  - name: Update an ExpressRoute gateway connection.
+    text: |
+        az network express-route gateway connection update --gateway-name MyGateway -n MyExpressRouteConnection -g MyResourceGroup --peering /subscriptions/MySub/resourceGroups/MyResourceGroup/providers/Microsoft.Network/expressRouteCircuits/MyCircuit/peerings/AzurePrivatePeering --associated-route-table /MySub/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyHub/hubRouteTables/MyRouteTable1 --propagated-route-tables /MySub/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyHub/hubRouteTables/MyRouteTable1 /MySub/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualHubs/MyHub/hubRouteTables/MyRouteTable2 --labels label1 label2
 """
 
 helps['network express-route gateway create'] = """
@@ -3692,7 +3760,7 @@ examples:
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags \\
             --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage \\
-            --destination-port-ranges * --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
+            --destination-port-ranges '*' --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
   - name: Create a security rule using application security groups. https://aka.ms/applicationsecuritygroups
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg \\
@@ -6112,4 +6180,95 @@ short-summary: List all Azure security partner provider.
 helps['network security-partner-provider show'] = """
 type: command
 short-summary: Show a Azure security partner provider.
+"""
+
+helps['network virtual-appliance'] = """
+type: group
+short-summary: Manage Azure Network Virtual Appliance.
+"""
+
+helps['network virtual-appliance create'] = """
+type: command
+short-summary: Create an Azure network virtual appliance.
+examples:
+  - name: Create an Azure network virtual appliance.
+    text: |
+        az network virtual-appliance create -n MyName -g MyRG --vhub {vhubID} --vendor "barracudasdwanrelease" --scale-unit 2 -v latest --asn 10000 --init-config "echo $hello" --boot-blobs {blobUrl1} {blobUrl2} --cloud-blobs {blobUrl3} {blobUrl4}
+"""
+
+helps['network virtual-appliance update'] = """
+type: command
+short-summary: Update an Azure network virtual appliance.
+examples:
+  - name: Update an Azure network virtual appliance.
+    text: |
+        az network virtual-appliance update -n MyName -g MyRG --asn 20000 --init-config "echo $hello"
+"""
+
+helps['network virtual-appliance show'] = """
+type: command
+short-summary: Show the detail of an Azure network virtual appliance.
+"""
+
+helps['network virtual-appliance list'] = """
+type: command
+short-summary: List all Azure network virtual appliance.
+"""
+
+helps['network virtual-appliance delete'] = """
+type: command
+short-summary: Delete an Azure network virtual appliance.
+"""
+
+helps['network virtual-appliance site'] = """
+type: group
+short-summary: Manage Azure Network Virtual Appliance Site.
+"""
+
+helps['network virtual-appliance site create'] = """
+type: command
+short-summary: Create an Azure network virtual appliance site.
+examples:
+  - name: Create an Azure network virtual appliance site.
+    text: |
+        az network virtual-appliance site create -n MyName -g MyRG --appliance-name MyAppliance --address-prefix 10.0.0.0/24 --allow --default --optimize
+"""
+
+helps['network virtual-appliance site update'] = """
+type: command
+short-summary: Update an Azure network virtual appliance site.
+examples:
+  - name: Update an Azure network virtual appliance site.
+    text: |
+        az network virtual-appliance site update -n MyName -g MyRG --appliance-name MyAppliance --address-prefix 10.0.0.0/24 --allow false --default false --optimize false
+"""
+
+helps['network virtual-appliance site show'] = """
+type: command
+short-summary: Show the detail of an Azure network virtual appliance site.
+"""
+
+helps['network virtual-appliance site list'] = """
+type: command
+short-summary: List all Azure network virtual appliance site.
+"""
+
+helps['network virtual-appliance site delete'] = """
+type: command
+short-summary: Delete an Azure network virtual appliance site.
+"""
+
+helps['network virtual-appliance sku'] = """
+type: group
+short-summary: Manage Azure Network Virtual Appliance Sku.
+"""
+
+helps['network virtual-appliance sku show'] = """
+type: command
+short-summary: Show the detail of an Azure network virtual appliance sku.
+"""
+
+helps['network virtual-appliance sku list'] = """
+type: command
+short-summary: List all Azure network virtual appliance sku.
 """

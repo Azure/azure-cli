@@ -146,13 +146,6 @@ def acr_update_set(cmd,
     if parameters.network_rule_set and registry.sku.name not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
-    if parameters.data_endpoint_enabled is not None:
-        # TODO remove the validation after service side blocking is available
-        from ._utils import validate_premium_registry
-        _, _ = validate_premium_registry(
-            cmd, registry_name, resource_group_name,
-            'Dadicated data endpoints are only supported for managed registries in Premium SKU')
-
     validate_sku_update(cmd, registry.sku.name, parameters.sku)
 
     return client.update(resource_group_name, registry_name, parameters)
@@ -509,6 +502,8 @@ def show_encryption(cmd, client, registry_name, resource_group_name=None):
 
 def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=None, resource_group_name=None):
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    if not registry.encryption or not registry.encryption.key_vault_properties:
+        raise CLIError('usage error: key rotation is only applicable to registries with CMK enabled')
     if key_encryption_key:
         registry.encryption.key_vault_properties.key_identifier = key_encryption_key
     if identity:

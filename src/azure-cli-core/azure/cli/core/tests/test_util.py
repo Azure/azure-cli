@@ -301,6 +301,28 @@ class TestUtils(unittest.TestCase):
         request = send_mock.call_args.args[1]
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
+        # Test ARM Subscriptions - List
+        # https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+        # /subscriptions?api-version=2020-01-01
+        send_raw_request(cli_ctx, 'GET', '/subscriptions?api-version=2020-01-01', body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, test_arm_endpoint.rstrip('/') + '/subscriptions?api-version=2020-01-01')
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
+
+        # Test ARM Tenants - List
+        # https://docs.microsoft.com/en-us/rest/api/resources/tenants/list
+        # /tenants?api-version=2020-01-01
+        send_raw_request(cli_ctx, 'GET', '/tenants?api-version=2020-01-01', body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, test_arm_endpoint.rstrip('/') + '/tenants?api-version=2020-01-01')
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
+
         # Test ARM resource ID
         # /subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01
         send_raw_request(cli_ctx, 'GET', arm_resource_id, body=test_body,

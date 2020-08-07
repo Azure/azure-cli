@@ -68,7 +68,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
         string = construct_connection_string(cmd, config_store_name)
 
     if connection_string:
-        if string and connection_string != string:
+        if string and ';'.join(sorted(connection_string.split(';'))) != string:
             raise CLIError(error_message)
         string = connection_string
 
@@ -80,7 +80,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
             raise CLIError(
                 "The environment variable connection string is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
 
-        if string and connection_string_env != string:
+        if string and ';'.join(sorted(connection_string_env.split(';'))) != string:
             raise CLIError(error_message)
         string = connection_string_env
 
@@ -95,9 +95,10 @@ def is_valid_connection_string(connection_string):
         segments = connection_string.split(';')
         if len(segments) != 3:
             return False
-        if segments[0][:9] != 'Endpoint=' or segments[1][:3] != 'Id=' or segments[2][:7] != 'Secret=':
-            return False
-        return True
+
+        segments.sort()
+        if segments[0].startswith('Endpoint=') and segments[1].startswith('Id=') and segments[2].startswith('Secret='):
+            return True
     return False
 
 

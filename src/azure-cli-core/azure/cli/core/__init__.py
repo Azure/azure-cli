@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.8.0"
+__version__ = "2.10.1"
 
 import os
 import sys
@@ -30,8 +30,12 @@ logger = get_logger(__name__)
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
-# Extensions that will always be loaded if installed. These extensions don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSION_MODNAMES = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
+
+# [Reserved, in case of future usage]
+# Modules that will always be loaded. They don't expose commands but hook into CLI core.
+ALWAYS_LOADED_MODULES = []
+# Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
 
 
 class AzCli(CLI):
@@ -147,13 +151,14 @@ class AzCli(CLI):
             args_str = []
             for name, value in local_context_args:
                 args_str.append('{}: {}'.format(name, value))
-            logger.warning('Command argument values saved to local context: %s', ', '.join(args_str))
+            logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
+                           'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
 
 
 class MainCommandsLoader(CLICommandsLoader):
 
     # Format string for pretty-print the command module table
-    header_mod = "%-20s %10s %9s %9s" % ("Extension", "Load Time", "Groups", "Commands")
+    header_mod = "%-20s %10s %9s %9s" % ("Name", "Load Time", "Groups", "Commands")
     item_format_string = "%-20s %10.3f %9d %9d"
     header_ext = header_mod + "  Directory"
     item_ext_format_string = item_format_string + "  %s"
@@ -181,12 +186,19 @@ class MainCommandsLoader(CLICommandsLoader):
             get_extensions, get_extension_path, get_extension_modname)
 
         def _update_command_table_from_modules(args, command_modules=None):
-            '''Loads command table(s)
-            When `module_name` is specified, only commands from that module will be loaded.
-            If the module is not found, all commands are loaded.
-            '''
+            """Loads command tables from modules and merge into the main command table.
 
-            if not command_modules:
+            :param args: Arguments of the command.
+            :param list command_modules: Command modules to load, in the format like ['resource', 'profile'].
+             If None, will do module discovery and load all modules.
+             If [], only ALWAYS_LOADED_MODULES will be loaded.
+             Otherwise, the list will be extended using ALWAYS_LOADED_MODULES.
+            """
+
+            # As command modules are built-in, the existence of modules in ALWAYS_LOADED_MODULES is NOT checked
+            if command_modules is not None:
+                command_modules.extend(ALWAYS_LOADED_MODULES)
+            else:
                 # Perform module discovery
                 command_modules = []
                 try:
@@ -234,9 +246,15 @@ class MainCommandsLoader(CLICommandsLoader):
                          cumulative_group_count, cumulative_command_count)
 
         def _update_command_table_from_extensions(ext_suppressions, extension_modname=None):
+            """Loads command tables from extensions and merge into the main command table.
 
-            from azure.cli.core.extension.operations import check_version_compatibility
-
+            :param ext_suppressions: Extension suppression information.
+            :param extension_modname: Command modules to load, in the format like ['azext_timeseriesinsights'].
+             If None, will do extension discovery and load all extensions.
+             If [], only ALWAYS_LOADED_EXTENSIONS will be loaded.
+             Otherwise, the list will be extended using ALWAYS_LOADED_EXTENSIONS.
+             If the extensions in the list are not installed, it will be skipped.
+            """
             def _handle_extension_suppressions(extensions):
                 filtered_extensions = []
                 for ext in extensions:
@@ -251,19 +269,20 @@ class MainCommandsLoader(CLICommandsLoader):
             def _filter_modname(extensions):
                 # Extension's name may not be the same as its modname. eg. name: virtual-wan, modname: azext_vwan
                 filtered_extensions = []
-                extension_modname.extend(ALWAYS_LOADED_EXTENSION_MODNAMES)
                 for ext in extensions:
-                    ext_name = ext.name
-                    ext_dir = ext.path or get_extension_path(ext.name)
-                    ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
+                    ext_mod = get_extension_modname(ext.name, ext.path)
                     # Filter the extensions according to the index
                     if ext_mod in extension_modname:
                         filtered_extensions.append(ext)
+                        extension_modname.remove(ext_mod)
+                if extension_modname:
+                    logger.debug("These extensions are not installed and will be skipped: %s", extension_modname)
                 return filtered_extensions
 
             extensions = get_extensions()
             if extensions:
-                if extension_modname:
+                if extension_modname is not None:
+                    extension_modname.extend(ALWAYS_LOADED_EXTENSIONS)
                     extensions = _filter_modname(extensions)
                 allowed_extensions = _handle_extension_suppressions(extensions)
                 module_commands = set(self.command_table.keys())
@@ -277,6 +296,9 @@ class MainCommandsLoader(CLICommandsLoader):
 
                 for ext in allowed_extensions:
                     try:
+                        # Import in the `for` loop because `allowed_extensions` can be []. In such case we
+                        # don't need to import `check_version_compatibility` at all.
+                        from azure.cli.core.extension.operations import check_version_compatibility
                         check_version_compatibility(ext.get_metadata())
                     except CLIError as ex:
                         # issue warning and skip loading extensions that aren't compatible with the CLI core
@@ -351,18 +373,6 @@ class MainCommandsLoader(CLICommandsLoader):
                             res.append(sup)
             return res
 
-        def _roughly_parse_command(args):
-            # Roughly parse the command part: <az vm create> --name vm1
-            # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but we don't need to bother with
-            # positional args
-            nouns = []
-            for arg in args:
-                if arg and arg[0] != '-':
-                    nouns.append(arg)
-                else:
-                    break
-            return ' '.join(nouns).lower()
-
         # Clear the tables to make this method idempotent
         self.command_group_table.clear()
         self.command_table.clear()
@@ -375,21 +385,39 @@ class MainCommandsLoader(CLICommandsLoader):
             index_result = command_index.get(args)
             if index_result:
                 index_modules, index_extensions = index_result
-                if index_modules:
-                    _update_command_table_from_modules(args, index_modules)
-                if index_extensions:
-                    # The index won't contain suppressed extensions
-                    _update_command_table_from_extensions([], index_extensions)
+                # Always load modules and extensions, because some of them (like those in
+                # ALWAYS_LOADED_EXTENSIONS) don't expose a command, but hooks into handlers in CLI core
+                _update_command_table_from_modules(args, index_modules)
+                # The index won't contain suppressed extensions
+                _update_command_table_from_extensions([], index_extensions)
 
                 logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
+                from azure.cli.core.util import roughly_parse_command
                 # The index may be outdated. Make sure the command appears in the loaded command table
-                command_str = _roughly_parse_command(args)
-                if command_str in self.command_table or command_str in self.command_group_table:
-                    logger.debug("Found a match in the command table for '%s'", command_str)
+                raw_cmd = roughly_parse_command(args)
+                for cmd in self.command_table:
+                    if raw_cmd.startswith(cmd):
+                        # For commands with positional arguments, the raw command won't match the one in the
+                        # command table. For example, `az find vm create` won't exist in the command table, but the
+                        # corresponding command should be `az find`.
+                        # raw command  : az find vm create
+                        # command table: az find
+                        # remaining    :         vm create
+                        logger.debug("Found a match in the command table.")
+                        logger.debug("Raw command  : %s", raw_cmd)
+                        logger.debug("Command table: %s", cmd)
+                        remaining = raw_cmd[len(cmd) + 1:]
+                        if remaining:
+                            logger.debug("remaining    : %s %s", ' ' * len(cmd), remaining)
+                        return self.command_table
+                # For command group, it must be an exact match, as no positional argument is supported by
+                # command group operations.
+                if raw_cmd in self.command_group_table:
+                    logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
                     return self.command_table
 
-                logger.debug("Could not find a match in the command table for '%s'. The index may be outdated",
-                             command_str)
+                logger.debug("Could not find a match in the command or command group table for '%s'. "
+                             "The index may be outdated.", raw_cmd)
             else:
                 logger.debug("No module found from index for '%s'", args)
 
@@ -554,7 +582,7 @@ class CommandIndex:
         logger.debug("Command index has been invalidated.")
 
 
-class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
+class ModExtensionSuppress:  # pylint: disable=too-few-public-methods
 
     def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
                  recommend_update=False):

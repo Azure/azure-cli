@@ -10,11 +10,13 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
+from azure.cli.core.util import get_file_json
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
+from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS
+from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
 
@@ -62,19 +64,7 @@ def load_arguments(self, _):
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
-    # combine all runtime versions for all functions versions
-    functionapp_runtime_to_version = {}
-    for functions_version in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS.values():
-        for runtime, val in functions_version.items():
-            # dotnet version is not configurable, so leave out of help menu
-            if runtime != 'dotnet':
-                functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val)
-
-    functionapp_runtime_to_version_texts = []
-    for runtime, runtime_versions in functionapp_runtime_to_version.items():
-        runtime_versions_list = list(runtime_versions)
-        runtime_versions_list.sort(key=float)
-        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(runtime_versions_list) + ']')
+    functionapp_runtime_to_version, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -215,6 +205,10 @@ def load_arguments(self, _):
             c.argument('deployment_source_branch', options_list=['--deployment-source-branch', '-b'],
                        help='the branch to deploy')
             c.argument('tags', arg_type=tags_type)
+            c.argument('assign_identities', nargs='*', options_list=['--assign-identity'],
+                       help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
+            c.argument('scope', options_list=['--scope'], help="Scope that the system assigned identity can access")
+            c.argument('role', options_list=['--role'], help="Role name or id the system assigned identity will have")
 
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
@@ -281,6 +275,10 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' identity') as c:
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")
+        with self.argument_context(scope + ' identity assign') as c:
+            c.argument('assign_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
+        with self.argument_context(scope + ' identity remove') as c:
+            c.argument('remove_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
@@ -375,6 +373,8 @@ def load_arguments(self, _):
                    configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
+    with self.argument_context('webapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -620,18 +620,18 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
-        c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="Vnet name",
+        c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
+        c.argument('vnet', help="The name or resource ID of the Vnet",
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help="Subnet name",
+        c.argument('subnet', help="The name of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('functionapp vnet-integration') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
-        c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="Vnet name", validator=validate_add_vnet,
+        c.argument('slot', help="The name of the slot. Default to the productions slot if not specified")
+        c.argument('vnet', help="The name or resource ID of the Vnet", validator=validate_add_vnet,
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
-        c.argument('subnet', help="Subnet name",
+        c.argument('subnet', help="The name of the subnet",
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('functionapp') as c:
@@ -657,10 +657,10 @@ def load_arguments(self, _):
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
         c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.',
-                   arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
+                   arg_type=get_enum_type(functionapp_runtime_to_version.keys()))
         c.argument('runtime_version',
                    help='The version of the functions runtime stack. '
-                        'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
+                        'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights',
@@ -749,6 +749,8 @@ def load_arguments(self, _):
         c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)",
                    required=False)
 
+    with self.argument_context('functionapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('functionapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         # This is set to webapp to simply reuse webapp functions, without rewriting same functions for function apps.
@@ -901,3 +903,46 @@ def load_arguments(self, _):
                    help="The path of your build output relative to your apps location. For example, setting a value "
                         "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
                         "be served.")
+
+
+def _get_functionapp_runtime_versions():
+    # set up functionapp create help menu
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
+    stacks_api_json_list = []
+    stacks_api_json_list.append(get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['windows']))
+    stacks_api_json_list.append(get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['linux']))
+
+    # build a map of runtime -> runtime version -> runtime version properties
+    runtime_to_version = {}
+    for stacks_api_json in stacks_api_json_list:
+        for runtime_json in stacks_api_json[KEYS.VALUE]:
+            runtime_name = runtime_json[KEYS.NAME]
+            for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
+                runtime_version = runtime_version_json[KEYS.DISPLAY_VERSION]
+                runtime_version_properties = {
+                    KEYS.IS_HIDDEN: runtime_version_json[KEYS.IS_HIDDEN],
+                    KEYS.IS_PREVIEW: runtime_version_json[KEYS.IS_PREVIEW],
+                }
+                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                runtime_to_version[runtime_name][runtime_version] = runtime_version_properties
+
+    # traverse the map to build an ordered string of runtimes -> runtime versions,
+    # taking their properties into account (i.e. isHidden, isPreview)
+    runtime_to_version_strings = []
+    for runtime, runtime_versions in runtime_to_version.items():
+        # dotnet version is not configurable, so leave out of help menu
+        if runtime == 'dotnet':
+            continue
+        ordered_runtime_versions = list(runtime_versions.keys())
+        ordered_runtime_versions.sort(key=float)
+        ordered_runtime_versions_strings = []
+        for version in ordered_runtime_versions:
+            if runtime_versions[version][KEYS.IS_HIDDEN]:
+                continue
+            if runtime_versions[version][KEYS.IS_PREVIEW]:
+                ordered_runtime_versions_strings.append(version + ' (preview)')
+            else:
+                ordered_runtime_versions_strings.append(version)
+        runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(ordered_runtime_versions_strings) + ']')
+
+    return runtime_to_version, runtime_to_version_strings

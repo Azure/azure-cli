@@ -5,6 +5,9 @@
 
 # pylint: disable=C0302
 from enum import Enum
+import calendar
+from datetime import datetime
+from dateutil.parser import parse
 
 from azure.cli.core.util import (
     CLIError,
@@ -50,9 +53,6 @@ from ._util import (
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
 )
 
-from datetime import datetime
-from dateutil.parser import parse
-import calendar
 
 logger = get_logger(__name__)
 
@@ -2661,7 +2661,8 @@ def managed_instance_update(
         public_data_endpoint_enabled=None,
         tier=None,
         family=None,
-        minimal_tls_version=None):
+        minimal_tls_version=None,
+        tags=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2696,6 +2697,9 @@ def managed_instance_update(
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
+
+    if tags is not None:
+        instance.tags = tags
 
     return instance
 

@@ -221,3 +221,11 @@ def transform_blob_json_output(result):
     del result['contentSettings']
     new_result.update(result)
     return new_result
+
+
+def transform_immutability_policy(result):
+    # service returns policy with period value of "0" after it has been deleted
+    # this only shows the policy if the property value is greater than 0
+    if result.immutability_period_since_creation_in_days:
+        return result
+    return None
