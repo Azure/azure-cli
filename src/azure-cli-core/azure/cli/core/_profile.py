@@ -128,6 +128,8 @@ class Profile:
             self._adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
         self._client_id = client_id
         self._msal_scopes = scopes or adal_resource_to_msal_scopes(self._ad_resource_uri)
+        if self._msal_scopes and not isinstance(self._msal_scopes, (list, tuple)):
+            self._msal_scopes = (self._msal_scopes,)
 
     # pylint: disable=too-many-branches,too-many-statements
     def login(self,
@@ -144,7 +146,7 @@ class Profile:
 
         credential = None
         auth_record = None
-        identity = Identity(authority=self._authority, tenant=tenant, client_id=self._client_id,
+        identity = Identity(authority=self._authority, tenant_id=tenant, client_id=self._client_id,
                             scopes=self._msal_scopes,
                             allow_unencrypted=self.cli_ctx.config
                             .getboolean('core', 'allow_fallback_to_plaintext', fallback=True),
@@ -214,7 +216,8 @@ class Profile:
 
         self._set_subscriptions(consolidated)
         # todo: remove after ADAL token deprecation
-        self._adal_cache.persist_cached_creds()
+        if self._adal_cache:
+            self._adal_cache.persist_cached_creds()
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 

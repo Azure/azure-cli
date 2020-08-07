@@ -63,6 +63,8 @@ class Identity:
         self._cred_cache = kwargs.pop('cred_cache', None)
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
         self.scopes = scopes
+        if self.scopes and not isinstance(self.scopes, (list, tuple)):
+            self.scopes = (self.scopes,)
         self._msal_app_instance = None
         # Store for Service principal credential persistence
         self._msal_secret_store = MsalSecretStore(fallback_to_plaintext=self.allow_unencrypted)
@@ -107,7 +109,8 @@ class Identity:
                                                   **self.credential_kwargs)
         auth_record = credential.authenticate(scopes=self.scopes)
         # todo: remove after ADAL token deprecation
-        self._cred_cache.add_credential(credential)
+        if self._cred_cache:
+            self._cred_cache.add_credential(credential)
         return credential, auth_record
 
     def login_with_device_code(self):
@@ -127,7 +130,8 @@ class Identity:
 
             auth_record = credential.authenticate(scopes=self.scopes)
             # todo: remove after ADAL token deprecation
-            self._cred_cache.add_credential(credential)
+            if self._cred_cache:
+                self._cred_cache.add_credential(credential)
             return credential, auth_record
         except ValueError as ex:
             logger.debug('Device code authentication failed: %s', str(ex))
@@ -149,7 +153,8 @@ class Identity:
         auth_record = credential.authenticate(scopes=self.scopes)
 
         # todo: remove after ADAL token deprecation
-        self._cred_cache.add_credential(credential)
+        if self._cred_cache:
+            self._cred_cache.add_credential(credential)
         return credential, auth_record
 
     def login_with_service_principal_secret(self, client_id, client_secret):
@@ -160,7 +165,8 @@ class Identity:
         entry = sp_auth.get_entry_to_persist()
         self._msal_secret_store.save_service_principal_cred(entry)
         # backward compatible with ADAL, to be deprecated
-        self._cred_cache.save_service_principal_cred(entry)
+        if self._cred_cache:
+            self._cred_cache.save_service_principal_cred(entry)
 
         credential = ClientSecretCredential(self.tenant_id, client_id, client_secret, authority=self.authority)
         return credential
@@ -173,7 +179,8 @@ class Identity:
         entry = sp_auth.get_entry_to_persist()
         self._msal_secret_store.save_service_principal_cred(entry)
         # backward compatible with ADAL, to be deprecated
-        self._cred_cache.save_service_principal_cred(entry)
+        if self._cred_cache:
+            self._cred_cache.save_service_principal_cred(entry)
 
         # TODO: support use_cert_sn_issuer in CertificateCredential
         credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
