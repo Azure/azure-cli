@@ -279,7 +279,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('app_name', completer=None,
                    help='Give your IoT Central app a unique name so you can find it later.'
                         'This will be used as the resource name in the Azure portal and CLI.'
-                        'Avoid special characters - '
+                        'Avoid special characters `-` '
                         'instead, use lower case letters (a-z), numbers (0-9), and dashes (-)')
         c.argument('location', get_location_type(self.cli_ctx),
                    help='Where your app\'s info and resources are stored. We will default to the location'
@@ -288,7 +288,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Pricing plan for IoT Central application.')
         c.argument('subdomain', options_list=['--subdomain', '-s'],
                    help='Enter a unique URL. Your app will be accessible via https://<subdomain>.azureiotcentral.com/.'
-                   ' Avoid special characters - instead, use lower case letters (a-z), numbers (0-9), and dashes (-).')
+                   ' Avoid special characters `-` instead, use lower case letters (a-z), numbers (0-9), and dashes (-).')
         c.argument('template', options_list=['--template', '-t'],
                    help='IoT Central application template name. Default is "Custom application". See documentation for'
                         ' a list of available templates.')
