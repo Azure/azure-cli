@@ -1342,5 +1342,54 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         # self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
 
 
+class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_disk_access_private_endpoint_')
+    def test_disk_access_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'loc': 'centraluseuap',
+            'disk_access': 'disk_access_name',
+            'pe_vnet': 'private_endpoint_vnet',
+            'pe_subnet': 'private_endpoint_subnet',
+            'pe_name': 'private_endpoint_name',
+            'pe_connection': 'private_connection_name'
+        })
+
+        # Create disk access for private endpoint
+        disk_access_output = self.cmd('disk-access create -g {rg} -l {loc} -n {disk_access}').get_output_in_json()
+        self.kwargs.update({
+            'disk_access_id': disk_access_output['id']
+        })
+
+        # Check private link resource
+        self.cmd('network private-link-resource list -g {rg} -n {disk_access} --type Microsoft.Compute/diskAccesses',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('@[0].name', 'disks')
+                 ])
+
+        # Prepare the vnet to be connected to
+        self.cmd('network vnet create -g {rg} -n {pe_vnet} --subnet-name {pe_subnet}')
+        # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        self.cmd('network vnet subnet update -g {rg} -n {pe_subnet} '
+                 '--vnet-name {pe_vnet} '
+                 '--disable-private-endpoint-network-policies true')
+
+        # Create a private endpoint connection for the disk access object
+        pe_output = self.cmd('network private-endpoint create -g {rg} -n {pe_name} --vnet-name {pe_vnet} '
+                             '--subnet {pe_subnet} --private-connection-resource-id {disk_access_id} '
+                             '--group-ids disks --connection-name {pe_connection}').get_output_in_json()
+        self.kwargs.update({
+            'pe_id': pe_output['id']
+        })
+
+        # Check the auto-approve of the private endpoint connection
+        self.cmd('az network private-endpoint-connection list -g {rg} -n {disk_access} --type Microsoft.Compute/diskAccesses',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('@[0].properties.privateEndpoint.id', '{pe_id}'),
+                     self.check('@[0].properties.privateLinkServiceConnectionState.status', 'Approved')
+                 ])
+
+
 if __name__ == '__main__':
     unittest.main()
