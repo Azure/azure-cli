@@ -75,6 +75,14 @@ def _quote_field(data, field):
     return data
 
 
+def _append_trailing_dot(data, field):
+    if data is None:
+        return None
+    if not data[field].endswith("."):
+        data[field] += "."
+    return data
+
+
 def process_rr(io, data, record_type, record_keys, name, print_name):
     """ Print out single line record entries """
     if data is None:
@@ -93,7 +101,7 @@ def process_rr(io, data, record_type, record_keys, name, print_name):
 
 
 def process_ns(io, data, name, print_name=False):
-    process_rr(io, data, 'NS', 'host', name, print_name)
+    process_rr(io, _append_trailing_dot(data, 'host'), 'NS', 'host', name, print_name)
 
 
 def process_a(io, data, name, print_name=False):
@@ -113,11 +121,11 @@ def process_cname(io, data, name, print_name=False):
 
 
 def process_mx(io, data, name, print_name=False):
-    return process_rr(io, data, 'MX', ['preference', 'host'], name, print_name)
+    return process_rr(io, _append_trailing_dot(data, 'host'), 'MX', ['preference', 'host'], name, print_name)
 
 
 def process_ptr(io, data, name, print_name=False):
-    return process_rr(io, data, 'PTR', 'host', name, print_name)
+    return process_rr(io, _append_trailing_dot(data, 'host'), 'PTR', 'host', name, print_name)
 
 
 def process_txt(io, data, name, print_name=False):
@@ -125,4 +133,4 @@ def process_txt(io, data, name, print_name=False):
 
 
 def process_srv(io, data, name, print_name=False):
-    return process_rr(io, data, 'SRV', ['priority', 'weight', 'port', 'target'], name, print_name)
+    return process_rr(io, _append_trailing_dot(data, 'host'), 'SRV', ['priority', 'weight', 'port', 'target'], name, print_name)
