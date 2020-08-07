@@ -141,7 +141,8 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
         logger.warning('source type %s', 'blob' if source_container else 'file')
         logger.warning('    pattern %s', pattern)
         logger.warning(' operations')
-    source_sas = source_sas.lstrip('?')
+
+    source_sas = source_sas.lstrip('?') if source_sas else source_sas
     if source_container:
         # copy blobs for blob container
 
