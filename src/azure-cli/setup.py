@@ -183,6 +183,9 @@ setup(
             'resources/WindowsFunctionsStacks.json',
             'resources/LinuxFunctionsStacks.json',
             'resources/WebappRuntimeStacks.json'
+        ],
+        'azure.cli.command_modules.util': [
+            'upgrade.ps1'
         ]
     },
     cmdclass=cmdclass

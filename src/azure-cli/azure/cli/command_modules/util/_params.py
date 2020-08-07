@@ -35,4 +35,4 @@ def load_arguments(self, _):
                         'of "az cloud show --query endpoints"')
 
     with self.argument_context('upgrade') as c:
-        c.argument('all', arg_type=get_three_state_flag(), help='Enable updating extensions as well.', default='true')
+        c.argument('_all', options_list=['--all'], arg_type=get_three_state_flag(), help='Enable updating extensions as well.', default='true')

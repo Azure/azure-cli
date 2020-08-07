@@ -2,10 +2,10 @@ If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 {
     $arguments = "& '" + $myinvocation.mycommand.definition + "'"
     Start-Process powershell -Verb runAs -ArgumentList $arguments
-    Break
+    # Break
 }
 
 Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi;
 Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet';
 Remove-Item .\AzureCLI.msi
-Write-Output "Upgrade Complete!"
+Write-Output "Update completed for Azure CLI!"

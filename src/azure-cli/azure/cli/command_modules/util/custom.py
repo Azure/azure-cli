@@ -29,7 +29,7 @@ def show_version(cmd):  # pylint: disable=unused-argument
     return versions
 
 
-def upgrade_version(cmd, all=None):
+def upgrade_version(cmd, _all=None):  # pylint: disable=too-many-locals, too-many-statements
     import subprocess
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.util import CLI_PACKAGE_NAME, _get_local_versions, _update_latest_from_pypi
@@ -44,14 +44,13 @@ def upgrade_version(cmd, all=None):
         raise CLIError("Failed to fetch the latest version. Please check your network connectivity.")
 
     pypi = versions[CLI_PACKAGE_NAME].get('pypi', None)
-    latest_version = pypi
     if pypi and LooseVersion(pypi) <= LooseVersion(local):
         logger.warning("You already have the latest %s: %s", CLI_PACKAGE_NAME, local)
         update_cli = False
-        if not all:
+        if not _all:
             return
     ext_sources = []
-    if all:
+    if _all:
         from azure.cli.core.extension import get_extensions, WheelExtension
         from azure.cli.core.extension._resolve import resolve_from_index, NoExtensionCandidatesError
         from azure.cli.core.extension.operations import update_extension
@@ -66,6 +65,7 @@ def upgrade_version(cmd, all=None):
     if update_cli:
         import os
         installer = os.getenv(_ENV_AZ_INSTALLER)
+        logger.warning("Update Azure CLI to %s", pypi)
         if installer == 'DEB':
             subprocess.call('sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli', shell=True)
         elif installer == 'RPM':
@@ -74,15 +74,25 @@ def upgrade_version(cmd, all=None):
             subprocess.call('brew update && brew upgrade -y azure-cli', shell=True)
         elif installer == 'PIP':
             subprocess.call('pip install --upgrade azure-cli', shell=True)
+            pip_args = ['install', '--upgrade', 'azure-cli']
+            logger.debug('Executing pip with args: %s', pip_args)
+            from azure.cli.core.extension._homebrew_patch import HomebrewPipPatch
+            with HomebrewPipPatch():
+                from azure.cli.core.extension.operations import _run_pip
+                pip_status_code = _run_pip(pip_args)
+            if pip_status_code > 0:
+                raise CLIError('An error occurred. Pip failed with status code {}. '
+                               'Use --debug for more information.'.format(pip_status_code))
         elif installer == 'DOCKER':
-            logger.warning('Exit the container to pull latest image with docker pull mcr.microsoft.com/azure-cli or pip install --upgrade azure-cli in this container')
+            logger.warning('Exit the container to pull latest image with docker pull mcr.microsoft.com/azure-cli '
+                           'or pip install --upgrade azure-cli in this container')
         elif installer == 'MSI':
-            # TODO put the script in a storage account, download it and store in a tmp dir
-            subprocess.call('powershell.exe "C:\\upgrade.ps1"', shell=True)
-            # logger.warning('Update with the latest MSI https://aka.ms/installazurecliwindows')
+            logger.warning('Update with the latest MSI https://aka.ms/installazurecliwindows')
+            ps_path = os.path.abspath(os.path.join(os.path.abspath(__file__), '../upgrade.ps1'))
+            subprocess.call('powershell.exe "{}"'.format(ps_path.replace('\\', '\\\\')), shell=True)
         else:
-            logger.warning('Not able to upgrade automatically. Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli')
-    
+            logger.warning('Not able to upgrade automatically. Instructions can be found at '
+                           'https://docs.microsoft.com/en-us/cli/azure/install-azure-cli')
     for name, download_url in ext_sources:
-        logger.warning("Update extension: {}".format(name))
+        logger.warning("Update extension: %s", name)
         update_extension(cli_ctx=cmd.cli_ctx, extension_name=name, source=download_url)
