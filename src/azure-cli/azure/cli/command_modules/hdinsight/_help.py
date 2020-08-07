@@ -129,13 +129,13 @@ examples:
     text: |-
         az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
-        --autoscale-type Load --autoscale-min-count 3 --autoscale-max-count 5
+        --autoscale-type Load --autoscale-min-workernode-count 3 --autoscale-max-workernode-count 5
   - name: Create a cluster which Schedule-based Autoscale.
     text: |-
         az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --autoscale-type Schedule --timezone "Pacific Standard Time" --days Monday \\
-        --time 09:00 --autoscale-count 5
+        --time 09:00 --autoscale-workernode-count 5
 """
 
 helps['hdinsight list'] = """
@@ -211,7 +211,7 @@ examples:
 
 helps['hdinsight autoscale'] = """
 type: group
-short-summary: Manage HDInsight cluster's autoscale configuration.
+short-summary: Manage HDInsight cluster's Autoscale configuration.
 """
 
 helps['hdinsight autoscale create'] = """
@@ -221,21 +221,21 @@ examples:
   - name: Enable Load-based Autoscale for a running cluster.
     text: |-
         az hdinsight autoscale create --resource-group MyResourceGroup --cluster-name MyCluster --type Load \\
-        --min-count 3 --max-count 5
+        --min-workernode-count 3 --max-workernode-count 5
   - name: Enable Schedule-based Autoscale for a running cluster.
     text: |-
         az hdinsight autoscale create --resource-group MyResourceGroup --cluster-name MyCluster --type Schedule \\
-        --timezone "Pacific Standard Time" --days Monday Tuesday --time 09:00 --count 5
+        --timezone "Pacific Standard Time" --days Monday Tuesday --time 09:00 --workernode-count 5
 """
 
 helps['hdinsight autoscale update'] = """
 type: command
 short-summary: Update the Autoscale configuration.
 examples:
-  - name: Update Load-based Autoscale configuration.
+  - name: Update Load-based Autoscale related configuration.
     text: |-
-        az hdinsight autoscale update --resource-group MyResourceGroup --cluster-name MyCluster --max-count 5
-  - name: Update Schedule-based Autoscale configuration.
+        az hdinsight autoscale update --resource-group MyResourceGroup --cluster-name MyCluster --max-workernode-count 5
+  - name: Update Schedule-based Autoscale related configuration.
     text: |-
         az hdinsight autoscale update --resource-group MyResourceGroup --cluster-name MyCluster --timezone "China Standard Time"
 """
@@ -253,7 +253,7 @@ helps['hdinsight autoscale delete'] = """
 type: command
 short-summary: Disable Autoscale for a running cluster.
 examples:
-  - name: Update Load-based Autoscale configuration
+  - name: Disable Autoscale for a running cluster.
     text: |-
         az hdinsight autoscale delete --resource-group MyResourceGroup --cluster-name MyCluster
 """
@@ -265,6 +265,11 @@ examples:
   - name: List the available timezone name.
     text: |-
         az hdinsight autoscale list-timezones
+"""
+
+helps['hdinsight autoscale wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until an operation is complete.
 """
 
 helps['hdinsight autoscale condition'] = """
@@ -279,17 +284,17 @@ examples:
   - name: Add a new schedule condition.
     text: |-
         az hdinsight autoscale condition create --resource-group MyResourceGroup --cluster-name MyCluster \\
-        --days Monday Tuesday --time 09:00 --count 5
+        --days Monday Tuesday --time 09:00 --workernode-count 5
 """
 
 helps['hdinsight autoscale condition update'] = """
 type: command
-short-summary: Update a new schedule condition.
+short-summary: Update a schedule condition.
 examples:
-  - name: Update a new schedule condition.
+  - name: Update a schedule condition.
     text: |-
         az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0\\
-        --time 10:00 --count 5
+        --time 10:00 --workernode-count 5
 """
 
 helps['hdinsight autoscale condition list'] = """
@@ -305,12 +310,25 @@ helps['hdinsight autoscale condition delete'] = """
 type: command
 short-summary: Delete schedule condition.
 examples:
-  - name: Delete schedule condition.
+  - name: Delete a schedule condition.
     text: |-
         az hdinsight autoscale condition delete --resource-group MyResourceGroup --cluster-name MyCluster --index 0
+  - name: Delete multiple schedule conditions.
+    text: |-
+        az hdinsight autoscale condition delete --resource-group MyResourceGroup --cluster-name MyCluster --index 0 1
+"""
+
+helps['hdinsight autoscale condition wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until an operation is complete.
 """
 
 helps['hdinsight wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until an operation is complete.
+"""
+
+helps['hdinsight autoscale wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until an operation is complete.
 """

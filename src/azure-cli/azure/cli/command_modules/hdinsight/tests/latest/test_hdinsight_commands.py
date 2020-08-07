@@ -412,8 +412,8 @@ class HDInsightClusterTests(ScenarioTest):
 
         # enable load-based autoscale
         self.cmd(
-            'az hdinsight autoscale create --cluster-name {cluster} --resource-group {rg} --type Load --min-count 4 '
-            ' --max-count 5')
+            'az hdinsight autoscale create --cluster-name {cluster} --resource-group {rg} --type Load '
+            '--min-workernode-count 4 --max-workernode-count 5 --yes')
         self.cmd('az hdinsight show --name {cluster} --resource-group {rg}', checks=[
             self.exists("properties.computeProfile.roles[?name=='workernode'].autoscaleConfiguration"),
             self.check(
@@ -426,7 +426,7 @@ class HDInsightClusterTests(ScenarioTest):
         time.sleep(150)
         # update load-based autoscale
         self.cmd(
-            'az hdinsight autoscale update --cluster-name {cluster} --resource-group {rg} --min-count 3')
+            'az hdinsight autoscale update --cluster-name {cluster} --resource-group {rg} --min-workernode-count 3')
         self.cmd('az hdinsight show --name {cluster} --resource-group {rg}', checks=[
             self.exists("properties.computeProfile.roles[?name=='workernode'].autoscaleConfiguration"),
             self.check(
@@ -440,17 +440,15 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
         # disable autoscale
-        self.cmd('az hdinsight autoscale delete --cluster-name {cluster} --resource-group {rg}')
-        self.cmd('az hdinsight show --name {cluster} --resource-group {rg}', checks=[
-            self.not_exists("properties.computeProfile.roles[?name=='workernode'].autoscaleConfiguration")
-        ])
+        self.cmd('az hdinsight autoscale delete --cluster-name {cluster} --resource-group {rg} --yes')
+        self.cmd('az hdinsight show --name {cluster} --resource-group {rg}')
 
         # to get robust
         time.sleep(150)
         # enable schedule-based autoscale
         self.cmd(
             'az hdinsight autoscale create --cluster-name {cluster} --resource-group {rg} --type Schedule --timezone '
-            '"China Standard Time" --days Monday --time 09:00 --count 4')
+            '"China Standard Time" --days Monday --time 09:00 --workernode-count 4 --yes')
         self.cmd('az hdinsight autoscale show --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check("recurrence.schedule[0].days", ["Monday"])
         ])
@@ -459,7 +457,7 @@ class HDInsightClusterTests(ScenarioTest):
         # add a new schedule condition
         self.cmd(
             'az hdinsight autoscale condition create --cluster-name {cluster} --resource-group {rg} --days Tuesday '
-            '--time 08:00 --count 5')
+            '--time 08:00 --workernode-count 5')
         self.cmd('az hdinsight autoscale show --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check("recurrence.schedule[1].days", ["Tuesday"])
         ])
@@ -467,7 +465,8 @@ class HDInsightClusterTests(ScenarioTest):
         time.sleep(120)
         # update schedule condition
         self.cmd(
-            'az hdinsight autoscale condition update --cluster-name {cluster} --resource-group {rg} --index 1 --count 4')
+            'az hdinsight autoscale condition update --cluster-name {cluster} --resource-group {rg} '
+            '--index 1 --workernode-count 4')
         self.cmd('az hdinsight autoscale show --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check("recurrence.schedule[1].timeAndCapacity.minInstanceCount", 4)
         ])
@@ -479,7 +478,8 @@ class HDInsightClusterTests(ScenarioTest):
 
         time.sleep(120)
         # delete schedule condition
-        self.cmd('az hdinsight autoscale condition delete --cluster-name {cluster} --resource-group {rg} --index 1')
+        self.cmd(
+            'az hdinsight autoscale condition delete --cluster-name {cluster} --resource-group {rg} --index 1 --yes')
         self.cmd('az hdinsight autoscale condition list --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check('length(@)', 1)
         ])
@@ -574,9 +574,9 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _with_load_based_autoscale():
-        return '--version 4.0 --autoscale-type Load --autoscale-min-count 4 --autoscale-max-count 5'
+        return '--version 4.0 --autoscale-type Load --autoscale-min-workernode-count 4 --autoscale-max-workernode-count 5'
 
     @staticmethod
     def _with_schedule_based_autoscale():
         return '--version 4.0 --autoscale-type Schedule --timezone "China Standard Time" --days Monday --time "09:00"' \
-               ' --autoscale-count 5'
+               ' --autoscale-workernode-count 5'
