@@ -52,10 +52,7 @@ def _register_one_provider(provider, api_version, support_list_or_not, resource_
 
 
 def _check_manually_approve_support(rp_mapping, resource_provider):
-    if resource_provider not in rp_mapping:
-        raise CLIError("Resource type must be one of {}".format(", ".join(rp_mapping.keys())))
-
-    if not rp_mapping[resource_provider]['support_manually_approve']:
+    if resource_provider in rp_mapping and not rp_mapping[resource_provider]['support_manually_approve']:
         raise CLIError("Resource provider {} currently does not support this operation".format(resource_provider))
 
 
