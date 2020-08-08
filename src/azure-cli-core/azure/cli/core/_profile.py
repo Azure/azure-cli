@@ -303,37 +303,33 @@ class Profile:
     def login_with_environment_credential(self, find_subscriptions=True):
         identity = Identity()
 
-        tenant = os.environ.get('AZURE_TENANT_ID')
+        tenant_id = os.environ.get('AZURE_TENANT_ID')
         username = os.environ.get('AZURE_USERNAME')
         client_id = os.environ.get('AZURE_CLIENT_ID')
 
+        credential = identity.get_environment_credential()
+
         if username:
             user_type = _USER
-            # If the user doesn't provide AZURE_CLIENT_ID, fill it will CLI's client ID
-            if not client_id:
-                logger.info("set AZURE_CLIENT_ID=%s", AZURE_CLI_CLIENT_ID)
-                os.environ['AZURE_CLIENT_ID'] = AZURE_CLI_CLIENT_ID
+            # For user account, credential._credential is a UsernamePasswordCredential.
+            # Login the user so that MSAL has it in cache.
+            authentication_record = credential._credential.authenticate()
+            if not tenant_id:
+                # Use home tenant ID
+                tenant_id = authentication_record.tenant_id
         else:
             user_type = _SERVICE_PRINCIPAL
 
-        credential = identity.get_environment_credential()
-
         if find_subscriptions:
             subscription_finder = SubscriptionFinder(self.cli_ctx)
-            if tenant:
-                logger.info('Finding subscriptions under tenant %s.', tenant)
-                subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
+            if tenant_id:
+                logger.info('Finding subscriptions under tenant %s.', tenant_id)
+                subscriptions = subscription_finder.find_using_specific_tenant(tenant_id, credential)
             else:
                 logger.info('Finding subscriptions under all available tenants.')
                 subscriptions = subscription_finder.find_using_common_tenant(username, credential)
         else:
-            # Build a tenant account
-            if not tenant:
-                # For user account, tenant may not be given. As credential._credential is a UsernamePasswordCredential,
-                # call `authenticate` to get the home tenant ID
-                authentication_record = credential._credential.authenticate()
-                tenant = authentication_record.tenant_id
-            subscriptions = self._build_tenant_level_accounts([tenant])
+            subscriptions = self._build_tenant_level_accounts([tenant_id])
 
         consolidated = self._normalize_properties(username or client_id, subscriptions,
                                                   is_service_principal=(user_type == _SERVICE_PRINCIPAL),

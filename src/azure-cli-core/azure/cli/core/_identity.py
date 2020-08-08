@@ -341,6 +341,14 @@ class Identity:
         raise CLIError("Secret of service principle {} not found. Please run 'az login'".format(client_id))
 
     def get_environment_credential(self):
+        username = os.environ.get('AZURE_USERNAME')
+        client_id = os.environ.get('AZURE_CLIENT_ID')
+
+        # If the user doesn't provide AZURE_CLIENT_ID, fill it will Azure CLI's client ID
+        if username and not client_id:
+            logger.info("set AZURE_CLIENT_ID=%s", AZURE_CLI_CLIENT_ID)
+            os.environ['AZURE_CLIENT_ID'] = AZURE_CLI_CLIENT_ID
+
         return EnvironmentCredential(**self.credential_kwargs)
 
     @staticmethod
