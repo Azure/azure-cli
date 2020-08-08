@@ -137,7 +137,6 @@ def _get_mgmt_service_client(cli_ctx,
                              api_version=None,
                              base_url_bound=True,
                              resource=None,
-                             scopes=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
                              aux_tenants=None,
@@ -162,9 +161,7 @@ def _get_mgmt_service_client(cli_ctx,
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
 
-    client_id = kwargs.pop('client_id', None)
-
-    profile = Profile(cli_ctx=cli_ctx, scopes=scopes, client_id=client_id)
+    profile = Profile(cli_ctx=cli_ctx)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource,
                                                              aux_subscriptions=aux_subscriptions,
                                                              aux_tenants=aux_tenants)
