@@ -79,8 +79,9 @@ def get_access_token(cmd, subscription=None, resource=None, resource_type=None, 
     # Unify to ISO `expiresOn`, like "2020-06-30 06:14:41"
     if 'expires_on' in token_entry:
         from datetime import datetime
+        from pytz import utc
         # https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
-        token_entry['expiresOn'] = datetime.fromtimestamp(int(token_entry['expires_on']))\
+        token_entry['expiresOn'] = datetime.fromtimestamp(int(token_entry['expires_on']), utc)\
             .strftime("%Y-%m-%d %H:%M:%S.%f")
 
     result = {
