@@ -108,3 +108,7 @@ def cf_gremlin_resources(cli_ctx, _):
 
 def cf_table_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).table_resources
+
+
+def cf_restorable_database_accounts(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).restorable_database_accounts

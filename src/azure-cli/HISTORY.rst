@@ -341,8 +341,11 @@ Release History
 
 **Cosmos DB**
 
-* `az cosmosdb`: Add exists command to database and container groups (#12774)
-* Allow creating fixed collections (#13950)
+* `az cosmosdb create/update` : Add --backup-policy-type, (--backup-interval and --backup-retention when backup-type is 'Periodic')
+* `az cosmosdb create` : Add `--is-restore-request` to denote a restore request.
+* `az cosmosdb create` : Add `--restore-source`, `--restore-timestamp` and `--database-to-restore` when --is-restore-request is set to true
+* New commands `az cosmosdb restore` to create a new database account by restoring an existing (live or deleted) database account to a given timestamp
+* New commands `az cosmosdb restorable-database-account list/show` to view a database account that can be restored
 
 **EventHub**
 

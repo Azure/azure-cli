@@ -16,7 +16,8 @@ from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_mongo_db_resources,
     cf_cassandra_resources,
     cf_gremlin_resources,
-    cf_table_resources
+    cf_table_resources,
+    cf_restorable_database_accounts
 )
 
 from azure.cli.command_modules.cosmosdb._format import (
@@ -70,6 +71,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.cosmosdb.operations#TableResourcesOperations.{}',
         client_factory=cf_table_resources)
 
+    cosmosdb_restorable_database_accounts_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableDatabaseAccountsOperations.{}',
+        client_factory=cf_restorable_database_accounts)
+
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command('show', 'get')
         g.command('list-keys', 'list_keys', deprecate_info=g.deprecate(redirect='cosmosdb keys list', hide=True))
@@ -82,6 +87,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_create')
         g.custom_command('update', 'cli_cosmosdb_update')
         g.custom_command('list', 'cli_cosmosdb_list')
+        g.custom_command('restore', 'cli_cosmosdb_restore')
 
     with self.command_group('cosmosdb private-endpoint-connection',
                             cosmosdb_private_endpoint_connections_sdk,
@@ -264,3 +270,7 @@ def load_command_table(self, _):
         g.cosmosdb_custom('create', 'cli_cosmosdb_collection_create', table_transformer=collection_output)
         g.cosmosdb_custom('delete', 'cli_cosmosdb_collection_delete', confirmation=True)
         g.cosmosdb_custom('update', 'cli_cosmosdb_collection_update')
+
+    with self.command_group('cosmosdb restorable-database-account', cosmosdb_restorable_database_accounts_sdk, client_factory=cf_restorable_database_accounts, is_preview=True) as g:
+        g.command('show', 'get_by_location')
+        g.command('list', 'list')
