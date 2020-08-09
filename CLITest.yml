@@ -230,7 +230,9 @@ jobs:
         #git clone https://github.com/Azure/azure-cli-extensions.git
         python -m venv env
         source env/bin/activate
-        pip install azdev
+        # pip install azdev
+        git clone https://github.com/Azure/azure-cli-dev-tools.git
+        pip install -e azure-cli-dev-tools
         pip install pytest-json-report
         pip install pytest-html
         pip install pytest-rerunfailures
@@ -239,9 +241,9 @@ jobs:
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
         # Sequential
-        azdev test $(Target) $(USER_LIVE) --xml-path test_results.sequential.xml --no-exitfirst -a "-m serial --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 -s"
+        azdev test $(Target) $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "--json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 -s"
         # Parallel
-        azdev test $(Target) $(USER_LIVE) --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) -m 'not serial' --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
+        azdev test $(Target) $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
         pwd
         ls
     - task: PublishTestResults@2
