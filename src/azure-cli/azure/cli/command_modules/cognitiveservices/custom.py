@@ -85,7 +85,9 @@ def create(
         'Microsoft offers policy controls that may be used to disable new Cognitive'\
         ' Services deployments (https://docs.microsoft.com/azure/cognitive-servic'\
         'es/cognitive-services-apis-create-account).'
-    hint = '\nPlease select'
+    terms_not_police = 'Notice\n' \
+                       'I certify that use of this service is not by or for a police department in the United States.'
+    hint = 'Please select'
     import re
     pattern = re.compile("^[Bb]ing\\..*$")
     if pattern.match(kind):
@@ -96,6 +98,15 @@ def create(
             option = prompt_y_n(hint)
             if not option:
                 raise CLIError('Operation cancelled.')
+    if kind.lower() == 'face':
+        if yes:
+            logger.warning(terms_not_police)
+        else:
+            logger.warning(terms_not_police)
+            option = prompt_y_n(hint)
+            if not option:
+                raise CLIError('Operation cancelled.')
+
     sku = Sku(name=sku_name)
 
     properties = CognitiveServicesAccountProperties()
