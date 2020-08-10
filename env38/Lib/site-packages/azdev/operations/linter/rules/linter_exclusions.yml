@@ -1,0 +1,42 @@
+---
+# this is an example linter exclusion file
+
+help-entry-name:
+    rule_exclusions:
+    - rule_name1
+    - rule_name2
+command-group-name:
+    rule_exclusions:
+    - rule_name1
+    - rule_name2
+# command with only command rule exclusions
+command-name1:
+    rule_exclusions:
+    - rule_name1
+    - rule_name2
+# command with only parameter rule exclusions
+command-name2:
+    parameters:
+        parameter_name1:
+            rule_exclusions:
+            - rule_name1
+            - rule_name2
+        parameter_name2:
+            rule_exclusions:
+            - rule_name1
+            - rule_name2
+# command with both command and parameter exclusions
+command-name3:
+    rule_exclusions:
+    - rule_name1
+    - rule_name2
+    parameters:
+        parameter_name1:
+            rule_exclusions:
+            - rule_name1
+            - rule_name2
+        parameter_name2:
+            rule_exclusions:
+            - rule_name1
+            - rule_name2
+...

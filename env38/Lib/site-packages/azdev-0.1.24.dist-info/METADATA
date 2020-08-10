@@ -1,0 +1,319 @@
+Metadata-Version: 2.1
+Name: azdev
+Version: 0.1.24
+Summary: Microsoft Azure CLI Developer Tools
+Home-page: https://github.com/Azure/azure-cli-dev-tools
+Author: Microsoft Corporation
+Author-email: azpycli@microsoft.com
+License: MIT
+Keywords: azure
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: Environment :: Console
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Requires-Python: >=3.6,<=3.9
+Requires-Dist: docutils
+Requires-Dist: flake8
+Requires-Dist: gitpython
+Requires-Dist: jinja2
+Requires-Dist: knack
+Requires-Dist: mock
+Requires-Dist: pytest (>=5.0.0)
+Requires-Dist: pytest-xdist
+Requires-Dist: pyyaml
+Requires-Dist: requests
+Requires-Dist: sphinx (==1.6.7)
+Requires-Dist: tox
+Requires-Dist: wheel (==0.30.0)
+Requires-Dist: azure-storage-blob (<2.0.0,>=1.3.1)
+Requires-Dist: isort (==4.3.21)
+Requires-Dist: pylint (==1.9.2) ; python_version<'3.0'
+Requires-Dist: futures ; python_version<'3.0'
+Requires-Dist: pylint (==2.3.0) ; python_version>='3.0'
+
+Microsoft Azure CLI Dev Tools (azdev)
+=====================================
+
+The ``azdev`` tool is designed to aid new and experienced developers in contributing to Azure CLI command modules and extensions.
+
+Setting up your development environment
++++++++++++++++++++++++++++++++++++++++
+
+1. Install Python 3.6+ from http://python.org. Please note that the version of Python that comes preinstalled on OSX is 2.7.
+
+2. Fork and clone the repository or repositories you wish to develop for.
+    - For Azure CLI: https://github.com/Azure/azure-cli
+    - For Azure CLI Extensions: https://github.com/Azure/azure-cli-extensions
+    - Any other repository that you might have access to that contains CLI extensions.
+
+3. Create a new virtual environment for Python in the root of your clone. You can do this by running:
+
+    Python 3.6+ (all platforms):
+
+    ::
+
+        python -m venv env
+
+    or:
+
+    ::
+
+        python3 -m venv env
+
+
+4. Activate the env virtual environment by running:
+
+    Windows CMD.exe:
+
+    ::
+
+        env\scripts\activate.bat
+
+    Windows Powershell:
+
+    ::
+
+        env\scripts\activate.ps1
+
+
+    OSX/Linux (bash):
+
+    ::
+
+        source env/bin/activate
+
+5. Install ``azdev`` by running:
+
+    ::
+
+        pip install azdev
+
+6. Complete setup by running:
+
+    ::
+
+        azdev setup
+
+
+    This will launch the interactive setup process. To see non-interactive options run `azdev setup -h`.
+
+Reporting issues and feedback
++++++++++++++++++++++++++++++
+
+If you encounter any bugs with the tool please file an issue in the `Issues <https://github.com/Azure/azure-cli-dev-tools/issues>`__ section of our GitHub repo.
+
+Contribute Code
++++++++++++++++
+
+This project has adopted the `Microsoft Open Source Code of Conduct <https://opensource.microsoft.com/codeofconduct/>`__.
+
+For more information see the `Code of Conduct FAQ <https://opensource.microsoft.com/codeofconduct/faq/>`__ or contact `opencode@microsoft.com <mailto:opencode@microsoft.com>`__ with any additional questions or comments.
+
+If you would like to become an active contributor to this project please
+follow the instructions provided in `Microsoft Azure Projects Contribution Guidelines <http://azure.github.io/guidelines.html>`__.
+
+License
++++++++
+
+::
+
+    Azure CLI Dev Tools (azdev)
+
+    Copyright (c) Microsoft Corporation
+    All rights reserved.
+
+    MIT License
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.::
+
+
+.. :changelog:
+
+Release History
+===============
+0.1.24
+++++++
+* [Linter] Argument must have an option whose length is less than 22.
+* [Linter] Argument cannot contain "`_`".
+
+0.1.23
+++++++
+* [Linter] Only violation of high severity rule would exit with 1.
+* Minimal pytest version requires at least 5.0.0.
+
+0.1.22
+++++++
+* Hornor the configuration of pylint and flake8 in Azure/azure-cli and Azure/azure-cli-extensions.
+* Rename test folder to make place for unittest of other commands.
+* Enable test result coverage.
+
+0.1.21
+++++++
+* Fix isort package version to 4.3.21.
+* `azdev perf benchmark`: support new command to calculate each command execution time.
+
+0.1.20
+++++++
+* `azdev setup`: Fix missing dependencies of azure-cli-testsdk
+
+0.1.19
+++++++
+* Downgrade parameter_should_not_end_in_resource_group's severity to medium.
+* Fix bug that azdev test could not work on Windows with Chinese system language.
+
+0.1.18
+++++++
+* Linter Rule Severity: Rules now have an associated severity level. Only high severity rules should be run in CI. All previous rules are annotated as HIGH severity.
+
+   * Note: HIGH severity rules are egregious and should generally be fixed, not excluded. LOW severity rules tend to be informational, and might raise false positives. Exclude them via `linter_exclusions.yml` in the CLI.
+
+* `azdev linter`: Expose `--min-severity` to support idea of rule severity. New HIGH, MEDIUM and LOW severity rules have also been added.
+
+0.1.17
+++++++
+* `azdev setup`: Add option --deps-from to allow resolving dependencies from requirements.txt or setup.py. The default changes to requirements.txt.
+
+0.1.16
+++++++
+* `azdev test`: Add option --no-exit-first to disable pytest exit once failure is detected
+
+0.1.15
+++++++
+* `sys.exit(0)` when no tests need to run instead of raising CLIError
+
+0.1.14
+++++++
+* Refine the logic of testing against different profiles with `ProfileContext`
+* pytest version limit change to pytest>=4.4.0
+* Use `AzureDevOpsContext` to apply incremental test strategy
+* Refine the main flow of azdev test to be more compact and clean
+
+0.1.13
+++++++
+* azdev verify license: fix bug that license verification will omit files while checking extensions
+
+0.1.12
+++++++
+* azdev extension publish: fix issue when --yes if not provided
+* azdev verify license: support CodeGen generated License
+* Drop Python 2 and Python 3.5 support
+
+0.1.11
+++++++
+* azdev extension build: remove --universal to respect setup.cfg
+
+0.1.10
+++++++
+* relax version limit of microsoft/Knack
+
+0.1.9
+++++++
+* azdev extension publish: add --storage-account-key and remove --storage-subscription
+* azdev extension update-index: remove unnecessary warning that will fail this command
+* CI: use `pip install -e` instead in ADO to fix fix import bug
+
+0.1.8
+++++++
+* fix: azdev test cannot be used in python 3.8.1 or later
+
+0.1.7
+++++++
+* fix: azdev test cannot find core tests
+
+0.1.6
+++++++
+* Fix bug: azdev==0.1.5 help commands' error
+
+0.1.5
+++++++
+- azdev extension add/remove:
+    - Add ability to supply wildcard (*) to install all available dev extensions.
+    - Add ability to remove all installed dev extensions.
+- azdev setup:
+    - Add ability to install all extensions using `--ext/-e *`.
+    - Add ability to install CLI edge build with `--cli/-c EDGE`.
+- azdev style/test/linter:
+    - Add special names CLI and EXT to allow running on just CLI modules or just extensions.
+      extensions which have changed based on a git diff.
+- azdev linter:
+    - Added `--include-whl-extensions` flag to permit running the linter on extensions installed using
+      the `az extension add` command.
+- azdev verify license:
+    - Command will not check any dev-installed CLI and extension repos. Previously, it only checked the CLI repo.
+- New Command:
+    - `azdev cli/extension generate-docs` to generate sphinx documentation.
+
+0.1.4
+++++++
+* `azdev linter`: Fix issue with help example rule.
+* `azdev style`: Omit namespace packages from core modules.
+* `azdev verify document-map`: Updates to work correctly on Linux.
+
+0.1.3
+++++++
+* `azdev linter`: Fix issue where certain installations would fail on `ci_exclusions.yml` not found.
+
+
+0.1.2
+++++++
+* `azdev setup`: Fix regression where azure.cli could not be run after installation.
+
+0.1.1
+++++++
+* `azdev cli/extension create`: Fix issue where supporting files were not included. Adjust generation logic.
+
+0.1.0
+++++++
+* Update for compatability with azure-cli 2.0.68's new package structure.
+* BREAKING CHANGE: Removed `azdev cli update-setup`. Package changes to azure-cli no longer require this.
+* BREAKING CHANGE: `azdev verify history` and `azdev cli check-versions` no longer accept any arguments. Since there are
+  now far fewer modules, these were deemed unnecessary.
+
+0.0.6
+++++++
+* Added new commands `azdev cli create` and `azdev extension create` to scaffold new modules/extensions.
+* `azdev setup`: Tweaks to interactive experience.
+* `azdev test`: Fix issue where using `--profile` did not use the correct index.
+                Changed the behavior to switch back to the original profile upon completion of tests.
+
+0.0.5
+++++++
+* Fix issue where `azdev cli check-versions` did not accept the short form of a module name.
+* Update `azdev cli check-versions` to allow modules as a positional argument, consistent with other azdev commands.
+* Fix issue where `azdev test --discover` could result in a stack trace when a virtual environment exists within an extensions repo.
+
+0.0.4
+++++++
+* Fix critical bug in `azdev setup`.
+
+0.0.3
+++++++
+* Adds new commands `azdev extension build` and `azdev extension publish` to simplify extension publishing.
+* Updates default exclusions for `azdev linter` when used on extensions.
+* Adds a `--ci-exclusions` flag to `azdev linter` to emulate CI mode when run locally.
+* Fix issue where `azdev test --discover` could result in a stack trace when a virtual environment exists within a cloned repo.
+* Tweaks thresholds for `azdev per load-times`.
+
+0.0.2
+++++++
+
+* Changes the behavior of `azdev test` to, by default, run tests on everything to be consistent with commands like `azdev style` and `azdev linter`.
+* Removes `azdev verify version` and splits into two commands `azdev cli check-versions` and `azdev cli update-setup`.
+* Various modifications to play nicely with azure-cli's CI build system.
+* Revamps `azdev perf load-times` to reduce spurious failures.
+
+0.0.1
+++++++
+* Initial release
+
+

@@ -1,0 +1,43 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+# Generated file, DO NOT EDIT
+# Changes may cause incorrect behavior and will be lost if the code is regenerated.
+# --------------------------------------------------------------------------------------------
+
+from .work_item_tracking_resource import WorkItemTrackingResource
+
+
+class WorkItemComment(WorkItemTrackingResource):
+    """WorkItemComment.
+
+    :param url:
+    :type url: str
+    :param _links: Link references to related REST resources.
+    :type _links: :class:`ReferenceLinks <work-item-tracking.v4_1.models.ReferenceLinks>`
+    :param revised_by: Identity of user who added the comment.
+    :type revised_by: :class:`IdentityReference <work-item-tracking.v4_1.models.IdentityReference>`
+    :param revised_date: The date of comment.
+    :type revised_date: datetime
+    :param revision: The work item revision number.
+    :type revision: int
+    :param text: The text of the comment.
+    :type text: str
+    """
+
+    _attribute_map = {
+        'url': {'key': 'url', 'type': 'str'},
+        '_links': {'key': '_links', 'type': 'ReferenceLinks'},
+        'revised_by': {'key': 'revisedBy', 'type': 'IdentityReference'},
+        'revised_date': {'key': 'revisedDate', 'type': 'iso-8601'},
+        'revision': {'key': 'revision', 'type': 'int'},
+        'text': {'key': 'text', 'type': 'str'}
+    }
+
+    def __init__(self, url=None, _links=None, revised_by=None, revised_date=None, revision=None, text=None):
+        super(WorkItemComment, self).__init__(url=url, _links=_links)
+        self.revised_by = revised_by
+        self.revised_date = revised_date
+        self.revision = revision
+        self.text = text

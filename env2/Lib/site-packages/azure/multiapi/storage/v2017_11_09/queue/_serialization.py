@@ -1,0 +1,73 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
+# --------------------------------------------------------------------------
+import sys
+
+if sys.version_info >= (3,):
+    from io import BytesIO
+else:
+    try:
+        from cStringIO import StringIO as BytesIO
+    except:
+        from StringIO import StringIO as BytesIO
+
+try:
+    from xml.etree import cElementTree as ETree
+except ImportError:
+    from xml.etree import ElementTree as ETree
+
+from ..common._common_conversion import (
+    _str,
+)
+from ._encryption import (
+    _encrypt_queue_message,
+)
+
+
+def _get_path(queue_name=None, include_messages=None, message_id=None):
+    '''
+    Creates the path to access a queue resource.
+
+    queue_name:
+        Name of queue.
+    include_messages:
+        Whether or not to include messages.
+    message_id:
+        Message id.
+    '''
+    if queue_name and include_messages and message_id:
+        return '/{0}/messages/{1}'.format(_str(queue_name), message_id)
+    if queue_name and include_messages:
+        return '/{0}/messages'.format(_str(queue_name))
+    elif queue_name:
+        return '/{0}'.format(_str(queue_name))
+    else:
+        return '/'
+
+
+def _convert_queue_message_xml(message_text, encode_function, key_encryption_key):
+    '''
+    <?xml version="1.0" encoding="utf-8"?>
+    <QueueMessage>
+        <MessageText></MessageText>
+    </QueueMessage>
+    '''
+    queue_message_element = ETree.Element('QueueMessage')
+
+    # Enabled
+    message_text = encode_function(message_text)
+    if key_encryption_key is not None:
+        message_text = _encrypt_queue_message(message_text, key_encryption_key)
+    ETree.SubElement(queue_message_element, 'MessageText').text = message_text
+
+    # Add xml declaration and serialize
+    try:
+        stream = BytesIO()
+        ETree.ElementTree(queue_message_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
+        output = stream.getvalue()
+    finally:
+        stream.close()
+
+    return output

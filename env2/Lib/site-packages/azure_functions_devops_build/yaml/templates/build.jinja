@@ -1,0 +1,24 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+# Starter template for Azure functions build -- {{language}} on {{platform}}
+trigger:
+- master
+pool:
+  vmImage: '{{ vmImage }}'
+steps:
+{%- for dependency in dependencies %}
+{{ dependency|safe }}
+{%- endfor %}
+- task: ArchiveFiles@2
+  displayName: 'Archive files'
+  inputs:
+    rootFolderOrFile: '{{package_route}}'
+    includeRootFolder: false
+    archiveFile: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+    name: 'drop'
+
