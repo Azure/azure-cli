@@ -11,10 +11,11 @@ logger = get_logger(__name__)
 def register_global_query_recommend(cli_ctx):
     '''Register --query-recommend argument, and register handler
     '''
-    def add_query_recommend_parameter(_, **kwargs):
-        arg_group = kwargs.get('arg_group')
-        arg_group.add_argument('--query-recommend', dest='_query_recommend',
-                               help="Recommend JMESPath string for you", nargs="*")
+    # origin method to register a global argument
+    # def add_query_recommend_parameter(_, **kwargs):
+    #     arg_group = kwargs.get('arg_group')
+    #     arg_group.add_argument('--query-recommend', dest='_query_recommend',
+    #                            help="Recommend JMESPath string for you", nargs="*")
 
     def handle_recommend_parameter(cli, **kwargs):
         args = kwargs['args']
@@ -40,7 +41,8 @@ def register_global_query_recommend(cli_ctx):
         preview_info = PreviewItem(cli.local_context.cli_ctx,
                                    object_type='parameter', target='_query_recommend')
         default_kwargs = {
-            'help': 'Recommend JMESPath string for you',
+            'help': 'Recommend JMESPath string for you. You can copy one of the query '
+                    'and paste it after --query parameter to see the results.',
             'arg_group': 'Global',
             'is_preview': True,
             'nargs': '*',
@@ -132,8 +134,12 @@ class TreeNode:
         :param keys: if None, select from all keys in dict
         '''
         exclude_keys = ['id', 'subscriptions']
+        suggest_keys = ['name', 'resourceGroup', 'location']
+        # we use suggest keys if keys are not provided
         if keys is None:
-            keys = self._keys
+            keys = [x for x in suggest_keys if x in self._keys]
+            if not keys:
+                keys.extend(self._keys)
         match_list = []
         for key in keys:
             if key in exclude_keys:
@@ -170,7 +176,7 @@ class TreeNode:
             trace_str = "{}.".format(self._get_trace_str())
 
         select_list = self._get_match_items(select_items)
-        for item in select_list:
+        for item in select_list[:2]:  # limit the number of output
             ret.append(Recommendation(trace_str + item,
                                       help_str="Get all {} from output".format(
                                           item),
@@ -255,7 +261,7 @@ class TreeBuilder:
         :param str data: json format data
         '''
         if isinstance(data, list):
-            if len(data) > 0:
+            if data:
                 self._root = self._do_parse('root', data, from_list=True)
                 self._root._list_length = len(data)
         elif isinstance(data, dict):
@@ -263,8 +269,9 @@ class TreeBuilder:
 
     def generate_recommend(self, keywords_list):
         recommendations = []
+        # only perform select on root node
+        recommendations.extend(self._root.get_select_string(keywords_list))
         for node in self._all_nodes.values():
-            recommendations.extend(node.get_select_string(keywords_list))
             if node._from_list:
                 recommendations.extend(node.select_specific_number_string())
                 recommendations.extend(
