@@ -3758,17 +3758,17 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
         else:
-            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
 
         license_type = 'LicenseIncluded'
-        loc = 'eastus2euap'
+        loc = 'westeurope'
         v_cores = 4
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group_1 = "DejanDuVnetRG"
+        resource_group_1 = "v-urmila"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
 
