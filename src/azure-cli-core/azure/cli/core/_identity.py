@@ -7,7 +7,7 @@ import os
 import json
 
 from ._environment import get_config_dir
-from .util import get_file_json
+from .util import get_file_json, adal_resource_to_msal_scopes
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -753,16 +753,3 @@ class MsalSecretStore:
         logger.warning("Secrets are serialized as plain text and saved to `msalSecrets.cache.json`.")
         with open(self._token_file + ".json", "w") as fd:
             fd.write(json.dumps(self._service_principal_creds))
-
-
-def adal_resource_to_msal_scopes(resource):
-    """Convert the ADAL resource ID to MSAL scopes by appending the /.default suffix and return a list.
-    For example: 'https://management.core.windows.net/' -> ['https://management.core.windows.net/.default']
-    :param resource: The ADAL resource ID
-    :return: A list of scopes
-    """
-    if 'datalake' in resource or 'batch' in resource or 'database' in resource:
-        scope = resource + '/.default'
-    else:
-        scope = resource.rstrip('/') + '/.default'
-    return [scope]

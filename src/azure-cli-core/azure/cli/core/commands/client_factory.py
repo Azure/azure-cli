@@ -7,7 +7,7 @@ import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
-from azure.cli.core.util import get_az_user_agent, is_track2
+from azure.cli.core.util import get_az_user_agent, is_track2, adal_resource_to_msal_scopes
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -137,6 +137,7 @@ def _get_mgmt_service_client(cli_ctx,
                              api_version=None,
                              base_url_bound=True,
                              resource=None,
+                             credential_scopes=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
                              aux_tenants=None,
@@ -149,8 +150,9 @@ def _get_mgmt_service_client(cli_ctx,
     :param subscription_id:
     :param api_version:
     :param base_url_bound:
-    :param resource: For track 1 SDK which uses msrest and ADAL
-    :param scopes: For track 2 SDK which uses Azure Identity and MSAL
+    :param resource: For track 1 SDK which uses msrest and ADAL. It will be passed to get_login_credentials.
+    :param credential_scopes: For track 2 SDK which uses Azure Identity and MSAL. It will be passed to the client's
+        __init__ method.
     :param sdk_profile:
     :param aux_subscriptions:
     :param aux_tenants:
@@ -159,8 +161,10 @@ def _get_mgmt_service_client(cli_ctx,
     """
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
-    resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
 
+    # Track 1 SDK doesn't maintain the `resource`. The `resource` of the token is the one passed to
+    # get_login_credentials.
+    resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource,
                                                              aux_subscriptions=aux_subscriptions,
@@ -177,6 +181,13 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
+        # Track 2 SDK maintains `scopes` and passes `scopes` to get_token. Specify `scopes` in client's
+        # __init__ method.
+        if not credential_scopes:
+            credential_scopes = adal_resource_to_msal_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+        # TODO: Test with Track 2 SDK after https://github.com/Azure/azure-sdk-for-python/issues/12947 is fixed and
+        #   new fixed SDKs are released
+        client_kwargs['credential_scopes'] = credential_scopes
         client_kwargs.update(configure_common_settings_track2(cli_ctx))
 
     if subscription_bound:

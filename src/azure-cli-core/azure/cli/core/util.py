@@ -1043,3 +1043,16 @@ def is_guid(guid):
         return True
     except ValueError:
         return False
+
+
+def adal_resource_to_msal_scopes(resource):
+    """Convert the ADAL resource ID to MSAL scopes by appending the /.default suffix and return a list.
+    For example: 'https://management.core.windows.net/' -> ['https://management.core.windows.net/.default']
+    :param resource: The ADAL resource ID
+    :return: A list of scopes
+    """
+    if 'datalake' in resource or 'batch' in resource or 'database' in resource:
+        scope = resource + '/.default'
+    else:
+        scope = resource.rstrip('/') + '/.default'
+    return [scope]

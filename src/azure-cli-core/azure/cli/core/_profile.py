@@ -15,10 +15,9 @@ from enum import Enum
 
 from knack.log import get_logger
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import in_cloud_console, can_launch_browser
+from azure.cli.core.util import in_cloud_console, can_launch_browser, adal_resource_to_msal_scopes
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, adal_resource_to_msal_scopes, \
-    AZURE_CLI_CLIENT_ID
+from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID
 
 
 logger = get_logger(__name__)
@@ -650,14 +649,12 @@ class Profile:
             raise CLIError("Tenant shouldn't be specified for MSI account")
         return Identity.get_managed_identity_credential(identity_id)
 
-    def get_login_credentials(self, resource=None, scopes=None, client_id=None, subscription_id=None, aux_subscriptions=None,
+    def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
                               aux_tenants=None):
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
 
         account = self.get_subscription(subscription_id)
-        if resource and scopes:
-            raise CLIError("resource and scopes can't be provided together.")
 
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
         external_tenants_info = []
