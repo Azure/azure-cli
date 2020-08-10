@@ -200,9 +200,95 @@ ad user update:
     force_change_password_next_login:
       rule_exclusions:
       - option_length_too_long
+aks create:
+  parameters:
+    aad_admin_group_object_ids:
+      rule_exclusions:
+      - option_length_too_long
+    aad_server_app_secret:
+      rule_exclusions:
+      - option_length_too_long
+    api_server_authorized_ip_ranges:
+      rule_exclusions:
+      - option_length_too_long
+    docker_bridge_address:
+      rule_exclusions:
+      - option_length_too_long
+    enable_cluster_autoscaler:
+      rule_exclusions:
+      - option_length_too_long
+    enable_managed_identity:
+      rule_exclusions:
+      - option_length_too_long
+    enable_node_public_ip:
+      rule_exclusions:
+      - option_length_too_long
+    enable_private_cluster:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_idle_timeout:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_managed_outbound_ip_count:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_outbound_ip_prefixes:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_outbound_ips:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_outbound_ports:
+      rule_exclusions:
+      - option_length_too_long
+    skip_subnet_role_assignment:
+      rule_exclusions:
+      - option_length_too_long
+    windows_admin_password:
+      rule_exclusions:
+      - option_length_too_long
+    windows_admin_username:
+      rule_exclusions:
+      - option_length_too_long
+    workspace_resource_id:
+      rule_exclusions:
+      - option_length_too_long
+aks enable-addons:
+  parameters:
+    workspace_resource_id:
+      rule_exclusions:
+      - option_length_too_long
 aks install-cli:
   parameters:
     kubelogin_install_location:
+      rule_exclusions:
+      - option_length_too_long
+aks nodepool add:
+  parameters:
+    enable_node_public_ip:
+      rule_exclusions:
+      - option_length_too_long
+aks update:
+  parameters:
+    aad_admin_group_object_ids:
+      rule_exclusions:
+      - option_length_too_long
+    api_server_authorized_ip_ranges:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_idle_timeout:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_managed_outbound_ip_count:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_outbound_ip_prefixes:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_outbound_ips:
+      rule_exclusions:
+      - option_length_too_long
+    load_balancer_outbound_ports:
       rule_exclusions:
       - option_length_too_long
 aks update-credentials:
@@ -1287,7 +1373,15 @@ disk create:
     gallery_image_reference_lun:
       rule_exclusions:
       - option_length_too_long
+    network_access_policy:
+      rule_exclusions:
+      - option_length_too_long
     source_storage_account_id:
+      rule_exclusions:
+      - option_length_too_long
+disk update:
+  parameters:
+    network_access_policy:
       rule_exclusions:
       - option_length_too_long
 dla account blob-storage list:
@@ -1511,6 +1605,9 @@ eventgrid event-subscription update:
     delivery_identity_endpoint_type:
       rule_exclusions:
       - option_length_too_long
+    endpoint_type:
+      rule_exclusions:
+      - no_parameter_defaults_for_update_commands
 eventgrid partner namespace create:
   parameters:
     partner_registration_id:
@@ -1524,7 +1621,7 @@ eventgrid partner namespace event-channel create:
     desination_topic_name:
       rule_exclusions:
       - option_length_too_long
-    destination_resource_group:
+    destination_resource_group_name:
       rule_exclusions:
       - option_length_too_long
     destination_subscription_id:
@@ -1597,6 +1694,11 @@ eventgrid partner topic event-subscription show:
     include_full_endpoint_url:
       rule_exclusions:
       - option_length_too_long
+eventgrid partner topic event-subscription update:
+  parameters:
+    endpoint_type:
+      rule_exclusions:
+      - no_parameter_defaults_for_update_commands
 eventgrid system-topic event-subscription create:
   parameters:
     azure_active_directory_application_id_or_uri:
@@ -1622,6 +1724,11 @@ eventgrid system-topic event-subscription show:
     include_full_endpoint_url:
       rule_exclusions:
       - option_length_too_long
+eventgrid system-topic event-subscription update:
+  parameters:
+    endpoint_type:
+      rule_exclusions:
+      - no_parameter_defaults_for_update_commands
 eventgrid topic create:
   parameters:
     input_mapping_default_values:
@@ -3015,7 +3122,15 @@ signalr update:
       - no_parameter_defaults_for_update_commands
 snapshot create:
   parameters:
+    network_access_policy:
+      rule_exclusions:
+      - option_length_too_long
     source_storage_account_id:
+      rule_exclusions:
+      - option_length_too_long
+snapshot update:
+  parameters:
+    network_access_policy:
       rule_exclusions:
       - option_length_too_long
 sql db classification list:

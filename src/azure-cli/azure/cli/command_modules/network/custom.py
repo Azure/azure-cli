@@ -3802,7 +3802,7 @@ def remove_nic_ip_config_inbound_nat_rule(
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     keep_items = \
-        [x for x in ip_config.load_balancer_inbound_nat_rules if x.id != inbound_nat_rule]
+        [x for x in ip_config.load_balancer_inbound_nat_rules or [] if x.id != inbound_nat_rule]
     ip_config.load_balancer_inbound_nat_rules = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return get_property(poller.result().ip_configurations, ip_config_name)
