@@ -3440,9 +3440,9 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
         resource_prefix = 'MIDBShortTermRetention'
 
         self.kwargs.update({
-            'loc': resource_group_location,
-            'vnet_name': 'vcCliTestVnet',
-            'subnet_name': 'vcCliTestSubnet',
+            'loc': "westeurope",
+            'vnet_name': 'MIVirtualNetwork',
+            'subnet_name': 'ManagedInsanceSubnet',
             'route_table_name': 'vcCliTestRouteTable',
             'route_name_internet': 'vcCliTestRouteInternet',
             'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
@@ -3459,19 +3459,12 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
             'retention_days_inc': 14,
-            'retention_days_dec': 7
+            'retention_days_dec': 7,
+            'rg': 'v-urmila'
         })
 
-        # Create and prepare VNet and subnet for new virtual cluster
-        self.cmd('network route-table create -g {rg} -n {route_table_name}')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
         self.kwargs.update({
-            'subnet_id': subnet['id']
+            'subnet_id': '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
         })
 
         # create sql managed_instance
@@ -3765,17 +3758,17 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
         else:
-            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
 
         license_type = 'LicenseIncluded'
-        loc = 'eastus2euap'
+        loc = 'westeurope'
         v_cores = 4
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group_1 = "DejanDuVnetRG"
+        resource_group_1 = "v-urmila"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
 
