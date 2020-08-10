@@ -152,21 +152,15 @@ class TreeNode:
                 match_list.append(key)
         return match_list
 
-    def _get_trace_str(self, number=None, filter_rules=False):
+    def _get_trace_str(self, no_brackets=False):
         '''The correct JMESPath to get to current node'''
         trace_str = ""
         if self._parent:
             trace_str += self._parent._get_trace_str()
             prefix = "" if trace_str == "" else "."
             trace_str += prefix + self._name
-        if self._from_list:
-            if number:
-                trace_str += "[:{}]".format(number)
-            elif filter_rules:
-                # do nothing
-                pass
-            else:
-                trace_str += "[]"
+        if self._from_list and not no_brackets:
+            trace_str += "[]"
         return trace_str
 
     def get_select_string(self, select_items):
@@ -183,13 +177,17 @@ class TreeNode:
                                       group_name="select"))
         return ret
 
-    def select_specific_number_string(self, number=5):
+    def select_specific_number_string(self, keywords_list, number=5):
         ret = []
         if not self._from_list:
             return ret
         number = min(self._list_length, number)
         number = random.choice(range(1, number + 1))
-        query_str = self._get_trace_str(number)
+        match_items = self._get_match_items(keywords_list)
+        trace_str = self._get_trace_str(no_brackets=True)
+        query_str = '{}[:{}]'.format(trace_str, number)
+        if match_items:
+            query_str = '{}.{}'.format(query_str, match_items[0])
         ret.append(Recommendation(
             query_str, help_str="Get first {} elements".format(number), group_name="limit_number"))
         return ret
@@ -199,7 +197,7 @@ class TreeNode:
         if not self._from_list:
             return ret
 
-        trace_str = self._get_trace_str(filter_rules=True)
+        trace_str = self._get_trace_str(no_brackets=True)
         viable_keys = []
         for key in self._keys:
             if not (isinstance(self.get_one_value(key), list) or
@@ -223,7 +221,7 @@ class TreeNode:
                                       help_str="Display {} resources only when {} equals to {}".format(
                                           field_help, item_key, item_value),
                                       group_name="condition"))
-            ret.append(Recommendation("{0}[?contains(@.{1}, 'something')==`true`].{1}".format(trace_str, item_key),
+            ret.append(Recommendation("{0}[?contains(@.{1},'something')==`true`].{1}".format(trace_str, item_key),
                                       help_str="Display all {} field that contains given string".format(
                                           item_key),
                                       group_name="condition"))
@@ -271,9 +269,10 @@ class TreeBuilder:
         recommendations = []
         # only perform select on root node
         recommendations.extend(self._root.get_select_string(keywords_list))
+        if self._root._from_list:
+            recommendations.extend(self._root.select_specific_number_string(keywords_list))
         for node in self._all_nodes.values():
             if node._from_list:
-                recommendations.extend(node.select_specific_number_string())
                 recommendations.extend(
                     node.get_condition_recommend(keywords_list))
                 recommendations.extend(node.get_function_recommend(keywords_list))
