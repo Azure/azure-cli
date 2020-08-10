@@ -428,7 +428,7 @@ def load_arguments(self, _):
 
     for command_group in ['backup', 'restore']:
         with self.argument_context('keyvault {} start'.format(command_group)) as c:
-            c.argument('token', options_list=['--storage-blob-SAS-token'], required=True,
+            c.argument('token', options_list=['--storage-container-SAS-token'], required=True,
                        help='The SAS token pointing to an Azure Blob storage container')
 
     with self.argument_context('keyvault restore start') as c:
