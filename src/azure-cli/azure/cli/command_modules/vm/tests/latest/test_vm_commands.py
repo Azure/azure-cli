@@ -75,7 +75,6 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
 class VMOpenPortTest(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_open_port')
     def test_vm_open_port(self, resource_group):
 
@@ -217,7 +216,6 @@ class VMImageShowScenarioTest(ScenarioTest):
 
 class VMGeneralizeScenarioTest(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
     def test_vm_generalize(self, resource_group):
 
@@ -240,7 +238,6 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             self.check('storageProfile.zoneResilient', None)
         ])
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
     def test_vm_capture_zone_resilient_image(self, resource_group):
 
@@ -266,7 +263,6 @@ class VMGeneralizeScenarioTest(ScenarioTest):
 
 class VMWindowsLicenseTest(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_windows_license_type')
     def test_vm_windows_license_type(self, resource_group):
         self.kwargs.update({
@@ -456,7 +452,6 @@ class VMImageWithPlanTest(ScenarioTest):
 
 class VMCreateFromUnmanagedDiskTest(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_from_unmanaged_disk')
     def test_vm_create_from_unmanaged_disk(self, resource_group):
         # create a vm with unmanaged os disk
@@ -486,7 +481,6 @@ class VMCreateFromUnmanagedDiskTest(ScenarioTest):
 
 class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk')
     def test_vm_create_with_specialized_unmanaged_disk(self, resource_group):
 
@@ -539,7 +533,6 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
 
 class VMAttachDisksOnCreate(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer()
     def test_vm_create_by_attach_os_and_data_disks(self, resource_group):
         # the testing below follow a real custom's workflow requiring the support of attaching data disks on create
@@ -573,7 +566,6 @@ class VMAttachDisksOnCreate(ScenarioTest):
             self.check('storageProfile.osDisk.diskSizeGb', 100)
         ])
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer()
     def test_vm_create_by_attach_unmanaged_os_and_data_disks(self, resource_group):
         # creating a vm
@@ -595,7 +587,6 @@ class VMAttachDisksOnCreate(ScenarioTest):
 class VMOSDiskSize(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
-    @AllowLargeResponse(99999)
     def test_vm_set_os_disk_size(self, resource_group):
         # test unmanaged disk
         self.kwargs.update({'sa': self.create_random_name(prefix='cli', length=12)})
@@ -911,7 +902,6 @@ class VMSimulateEvictionScenarioTest(ScenarioTest):
 
 class VMNoWaitScenarioTest(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_no_wait')
     def test_vm_create_no_wait(self, resource_group):
 
@@ -1030,7 +1020,6 @@ class ComputeListSkusScenarioTest(ScenarioTest):
 
 class VMExtensionScenarioTest(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension')
     def test_vm_extension(self, resource_group):
 
@@ -1091,7 +1080,6 @@ class VMExtensionScenarioTest(ScenarioTest):
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_with_id_')
-    @AllowLargeResponse(99999)
     def test_vm_extension_with_id(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1'
@@ -1151,7 +1139,6 @@ class VMExtensionImageSearchScenarioTest(LiveScenarioTest):
 
 class VMCreateUbuntuScenarioTest(ScenarioTest):
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_ubuntu')
     def test_vm_create_ubuntu(self, resource_group, resource_group_location):
 
@@ -1301,7 +1288,6 @@ class VMMonitorTestDefault(ScenarioTest):
             replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)]
         )
 
-    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
     def test_vm_create_with_monitor(self, resource_group):
 
