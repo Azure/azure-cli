@@ -706,10 +706,6 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
         size = getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None)
         size = size.lower()
 
-        # Deprecated
-        # to refresh the list, run 'az vm create --accelerated-networking --size Standard_DS1_v2' and
-        # get it from the error
-
         # Use the following code to refresh the list
         # skus = list_sku_info(cli_ctx, namespace.location)
         # aval_sizes = [x.name.lower() for x in skus if x.resource_type == 'virtualMachines' and
