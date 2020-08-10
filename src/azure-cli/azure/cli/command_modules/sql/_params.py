@@ -791,11 +791,6 @@ def load_arguments(self, _):
                    help='Auditing policy state',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
-        c.argument('log-analytics',
-                   arg_group=policy_arg_group,
-                   help='Determines if the audit logs are saved to Log Analytics',
-                   arg_type=get_enum_type(BlobAuditingPolicyState))
-
         c.argument('audit_actions_and_groups',
                    options_list=['--actions'],
                    arg_group=policy_arg_group,
