@@ -142,9 +142,7 @@ class Profile:
               use_cert_sn_issuer=None,
               find_subscriptions=True):
 
-        scopes = scopes or adal_resource_to_msal_scopes(self._ad_resource_uri)
-        if scopes and not isinstance(scopes, (list, tuple)):
-            scopes = [scopes]
+        scopes = self._prepare_authenticate_scopes(scopes)
 
         credential = None
         auth_record = None
@@ -201,7 +199,7 @@ class Profile:
                 t_list = [s.tenant_id for s in subscriptions]
                 bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
                 profile = Profile(cli_ctx=self.cli_ctx)
-                tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
+                tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)
                 subscriptions.extend(tenant_accounts)
                 if not subscriptions:
                     return []
@@ -223,15 +221,17 @@ class Profile:
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None, find_subscriptions=True):
+    def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None, find_subscriptions=True,
+                                    scopes=None):
         # pylint: disable=too-many-statements
 
         # https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
         # Managed identities for Azure resources is the new name for the service formerly known as
         # Managed Service Identity (MSI).
 
+        scopes = self._prepare_authenticate_scopes(scopes)
         identity = Identity()
-        credential, mi_info = identity.login_with_managed_identity(identity_id)
+        credential, mi_info = identity.login_with_managed_identity(scopes=scopes, identity_id=identity_id)
 
         tenant = mi_info[Identity.MANAGED_IDENTITY_TENANT_ID]
         if find_subscriptions:
@@ -274,10 +274,11 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_in_cloud_shell(self, allow_no_subscriptions=None, find_subscriptions=True):
+    def login_in_cloud_shell(self, allow_no_subscriptions=None, find_subscriptions=True, scopes=None):
         # TODO: deprecate allow_no_subscriptions
+        scopes = self._prepare_authenticate_scopes(scopes)
         identity = Identity()
-        credential, identity_info = identity.login_in_cloud_shell()
+        credential, identity_info = identity.login_in_cloud_shell(scopes)
 
         tenant = identity_info[Identity.MANAGED_IDENTITY_TENANT_ID]
         if find_subscriptions:
@@ -725,8 +726,7 @@ class Profile:
                 else:
                     # pylint: disable=protected-access
                     subscriptions = subscription_finder. \
-                        find_using_common_tenant(identity_credential._auth_record,  # pylint: disable=protected-access
-                                                 identity_credential)
+                        find_using_common_tenant(user_name, identity_credential) # pylint: disable=protected-access
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
                                "modified. You can run 'az login' later to explicitly refresh them", user_name, ex)
@@ -796,6 +796,17 @@ class Profile:
             installation_id = str(uuid.uuid1())
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
+
+    def _prepare_authenticate_scopes(self, scopes):
+        """Prepare the scopes to be sent to MSAL. If `scopes` is not a list, it will be put into a list."""
+        if scopes:
+            if not isinstance(scopes, (list, tuple)):
+                # Put scopes into a list
+                scopes = [scopes]
+        else:
+            # If scope is not provided, use the ARM resource ID
+            scopes = adal_resource_to_msal_scopes(self._ad_resource_uri)
+        return scopes
 
 
 class MsiAccountTypes:

@@ -48,23 +48,18 @@ class Identity:
 
     CLOUD_SHELL_IDENTITY_UNIQUE_NAME = "unique_name"
 
-    def __init__(self, authority=None, tenant_id=None, client_id=None, scopes=None, **kwargs):
+    def __init__(self, authority=None, tenant_id=None, client_id=None, **kwargs):
         """
 
         :param authority:
         :param tenant_id:
-        :param client_id:
-        :param scopes: Scopes for the `authenticate` method call (initial /authorize API)
-        :param kwargs:
+        :param client_id::param kwargs:
         """
         self.authority = authority
         self.tenant_id = tenant_id or "organizations"
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         self._cred_cache = kwargs.pop('cred_cache', None)
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
-        self.scopes = scopes
-        if self.scopes and not isinstance(self.scopes, (list, tuple)):
-            self.scopes = [self.scopes]
         self._msal_app_instance = None
         # Store for Service principal credential persistence
         self._msal_secret_store = MsalSecretStore(fallback_to_plaintext=self.allow_unencrypted)
@@ -99,7 +94,11 @@ class Identity:
             self._msal_app_instance = self._build_persistent_msal_app(msal_authority)
         return self._msal_app_instance
 
-    def login_with_interactive_browser(self):
+    def login_with_interactive_browser(self, scopes=None):
+        """
+        :param scopes: Scopes for the `authenticate` method call (initial /authorize API)
+        :return:
+        """
         # Use InteractiveBrowserCredential
         credential = InteractiveBrowserCredential(authority=self.authority,
                                                   tenant_id=self.tenant_id,
@@ -107,13 +106,13 @@ class Identity:
                                                   enable_persistent_cache=True,
                                                   allow_unencrypted_cache=self.allow_unencrypted,
                                                   **self.credential_kwargs)
-        auth_record = credential.authenticate(scopes=self.scopes)
+        auth_record = credential.authenticate(scopes=scopes)
         # todo: remove after ADAL token deprecation
         if self._cred_cache:
             self._cred_cache.add_credential(credential)
         return credential, auth_record
 
-    def login_with_device_code(self):
+    def login_with_device_code(self, scopes=None):
         # Use DeviceCodeCredential
         def prompt_callback(verification_uri, user_code, _):
             # expires_on is discarded
@@ -128,7 +127,7 @@ class Identity:
                                               allow_unencrypted_cache=self.allow_unencrypted,
                                               **self.credential_kwargs)
 
-            auth_record = credential.authenticate(scopes=self.scopes)
+            auth_record = credential.authenticate(scopes=scopes)
             # todo: remove after ADAL token deprecation
             if self._cred_cache:
                 self._cred_cache.add_credential(credential)
@@ -140,7 +139,7 @@ class Identity:
                                "allow fallback to plaintext if encrypt credential fail via 'az configure'.")
             raise
 
-    def login_with_username_password(self, username, password):
+    def login_with_username_password(self, username, password, scopes=None):
         # Use UsernamePasswordCredential
         credential = UsernamePasswordCredential(authority=self.authority,
                                                 tenant_id=self.tenant_id,
@@ -150,7 +149,7 @@ class Identity:
                                                 enable_persistent_cache=True,
                                                 allow_unencrypted_cache=self.allow_unencrypted,
                                                 **self.credential_kwargs)
-        auth_record = credential.authenticate(scopes=self.scopes)
+        auth_record = credential.authenticate(scopes=scopes)
 
         # todo: remove after ADAL token deprecation
         if self._cred_cache:
@@ -186,7 +185,7 @@ class Identity:
         credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
         return credential
 
-    def login_with_managed_identity(self, identity_id=None):  # pylint: disable=too-many-statements
+    def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
         from msrestazure.tools import is_valid_resource_id
         from requests import HTTPError
         from azure.core.exceptions import ClientAuthenticationError
@@ -194,20 +193,20 @@ class Identity:
         credential = None
         id_type = None
         token = None
-        # scope = resource.rstrip('/') + '/.default'
+
         # https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
         if identity_id:
             # Try resource ID
             if is_valid_resource_id(identity_id):
                 credential = ManagedIdentityCredential(identity_config={"mi_res_id": identity_id})
-                token = credential.get_token(*self.scopes)
+                token = credential.get_token(*scopes)
                 id_type = self.MANAGED_IDENTITY_RESOURCE_ID
             else:
                 authenticated = False
                 try:
                     # Try client ID
                     credential = ManagedIdentityCredential(client_id=identity_id)
-                    token = credential.get_token(*self.scopes)
+                    token = credential.get_token(*scopes)
                     id_type = self.MANAGED_IDENTITY_CLIENT_ID
                     authenticated = True
                 except ClientAuthenticationError as e:
@@ -223,7 +222,7 @@ class Identity:
                     try:
                         # Try object ID
                         credential = ManagedIdentityCredential(identity_config={"object_id": identity_id})
-                        token = credential.get_token(*self.scopes)
+                        token = credential.get_token(*scopes)
                         id_type = self.MANAGED_IDENTITY_OBJECT_ID
                         authenticated = True
                     except ClientAuthenticationError as e:
@@ -241,7 +240,7 @@ class Identity:
         else:
             # Use the default managed identity. It can be either system assigned or user assigned.
             credential = ManagedIdentityCredential()
-            token = credential.get_token(*self.scopes)
+            token = credential.get_token(*scopes)
 
         decoded = Identity._decode_managed_identity_token(token)
         resource_id = decoded.get('xms_mirid')
@@ -265,9 +264,9 @@ class Identity:
 
         return credential, managed_identity_info
 
-    def login_in_cloud_shell(self):
+    def login_in_cloud_shell(self, scopes):
         credential = ManagedIdentityCredential()
-        token = credential.get_token(*self.scopes)
+        token = credential.get_token(*scopes)
         decoded = Identity._decode_managed_identity_token(token)
 
         cloud_shell_identity_info = {
