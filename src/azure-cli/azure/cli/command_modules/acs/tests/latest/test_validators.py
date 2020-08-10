@@ -170,7 +170,7 @@ class TestLabels(unittest.TestCase):
         invalid_labels = ("label=k8s123456789012345678901234567890123456789012345678901234567890123")
 
         namespace = LabelsNamespace(invalid_labels)
-        err = ("Invalid label: %s. Label must be more than 63 chars." % invalid_labels)
+        err = ("Invalid label: %s. Label must not be more than 63 chars." % invalid_labels)
 
         with self.assertRaises(CLIError) as cm:
             validators.validate_nodepool_labels(namespace)

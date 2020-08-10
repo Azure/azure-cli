@@ -36,7 +36,7 @@ for ext in $output; do
     fi
 done
 
-az self-test
+az self-test --debug
 if [ $? != 0 ]
 then
     exit_code=1

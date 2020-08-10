@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import requests
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -22,6 +21,7 @@ TRIES = 3
 
 # pylint: disable=inconsistent-return-statements
 def get_index(index_url=None):
+    import requests
     from azure.cli.core.util import should_disable_connection_verify
     index_url = index_url or DEFAULT_INDEX_URL
 

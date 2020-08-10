@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from typing import Optional
+
 from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, ProfileUpdateParameters,
-                                   EndpointPropertiesUpdateParametersDeliveryPolicy, DeliveryRule,
+                                   MinimumTlsVersion, EndpointPropertiesUpdateParametersDeliveryPolicy, DeliveryRule,
                                    DeliveryRuleRemoteAddressCondition, RemoteAddressMatchConditionParameters,
                                    DeliveryRuleRequestMethodCondition, RequestMethodMatchConditionParameters,
                                    DeliveryRuleQueryStringCondition, QueryStringMatchConditionParameters,
@@ -28,7 +30,7 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    PolicyMode, PolicyEnabledState, CdnWebApplicationFirewallPolicy, ManagedRuleSet,
                                    ManagedRuleGroupOverride, CustomRule, RateLimitRule)
 
-from azure.mgmt.cdn.operations import (EndpointsOperations)
+from azure.mgmt.cdn.operations import (EndpointsOperations, OriginsOperations)
 
 from azure.cli.core.util import (sdk_no_wait, find_child_item)
 from azure.cli.core.commands import upsert_to_collection
@@ -134,12 +136,12 @@ def set_endpoint_waf_policy_link(client: EndpointsOperations,
                         f'/resourceGroups/{waf_policy_resource_group_name}' \
                         f'/providers/Microsoft.Cdn' \
                         f'/CdnWebApplicationFirewallPolicies/{waf_policy_name}'
-    print(waf_policy_id)
+
     endpoint.web_application_firewall_policy_link = \
         EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=waf_policy_id)
 
     result = client.create(resource_group_name, profile_name, endpoint_name, endpoint).result()
-    if result is not None:
+    if result.web_application_firewall_policy_link is not None:
         return result.web_application_firewall_policy_link
     return EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=None)
 
@@ -492,6 +494,145 @@ def create_custom_domain(client, resource_group_name, profile_name, endpoint_nam
                                         hostname)
 
 
+def enable_custom_https(client, resource_group_name, profile_name, endpoint_name,
+                        custom_domain_name, user_cert_subscription_id=None, user_cert_group_name=None,
+                        user_cert_vault_name=None, user_cert_secret_name=None, user_cert_secret_version=None,
+                        user_cert_protocol_type=None, min_tls_version=None):
+
+    from azure.mgmt.cdn.models import (CdnCertificateSourceParameters,
+                                       UserManagedHttpsParameters,
+                                       CdnManagedHttpsParameters,
+                                       KeyVaultCertificateSourceParameters,
+                                       CertificateType,
+                                       Profile,
+                                       ProtocolType)
+
+    profile: Profile = client.profiles.get(resource_group_name, profile_name)
+
+    if min_tls_version is not None and min_tls_version.casefold() == 'none'.casefold():
+        min_tls_version = MinimumTlsVersion.none
+    elif min_tls_version == '1.0':
+        min_tls_version = MinimumTlsVersion.tls10
+    elif min_tls_version == '1.2':
+        min_tls_version = MinimumTlsVersion.tls12
+
+    # Are we using BYOC?
+    if any(x is not None for x in [user_cert_subscription_id,
+                                   user_cert_group_name,
+                                   user_cert_vault_name,
+                                   user_cert_secret_name,
+                                   user_cert_secret_version,
+                                   user_cert_protocol_type]):
+
+        # If any BYOC flags are set, make sure they all are.
+        if any(x is None for x in [user_cert_group_name,
+                                   user_cert_vault_name,
+                                   user_cert_secret_name,
+                                   user_cert_secret_version,
+                                   user_cert_protocol_type]):
+            raise CLIError("--user-cert-group-name, --user-cert-vault-name, --user-cert-secret-version, ",
+                           "--user-cert-secret-version, and --user-cert-protocol-type are all required "
+                           "for user managed certificates.")
+
+        if user_cert_subscription_id is None:
+            user_cert_subscription_id = client.config.subscription_id
+
+        # All BYOC params are set, let's create the https parameters
+        if user_cert_protocol_type is None or user_cert_protocol_type.lower() == 'sni':
+            user_cert_protocol_type = ProtocolType.server_name_indication
+        elif user_cert_protocol_type.lower() == 'ip':
+            user_cert_protocol_type = ProtocolType.ip_based
+        else:
+            raise CLIError("--user-cert-protocol-type is invalid")
+
+        cert_source_params = KeyVaultCertificateSourceParameters(subscription_id=user_cert_subscription_id,
+                                                                 resource_group_name=user_cert_group_name,
+                                                                 vault_name=user_cert_vault_name,
+                                                                 secret_name=user_cert_secret_name,
+                                                                 secret_version=user_cert_secret_version)
+
+        https_params = UserManagedHttpsParameters(protocol_type=user_cert_protocol_type,
+                                                  certificate_source_parameters=cert_source_params,
+                                                  minimum_tls_version=min_tls_version)
+
+    else:
+        # We're using a CDN-managed certificate, let's create the right https
+        # parameters for the profile SKU
+
+        # Microsoft parameters
+        if profile.sku.name == SkuName.standard_microsoft:
+            cert_source_params = CdnCertificateSourceParameters(certificate_type=CertificateType.dedicated)
+            https_params = CdnManagedHttpsParameters(protocol_type=ProtocolType.server_name_indication,
+                                                     certificate_source_parameters=cert_source_params,
+                                                     minimum_tls_version=min_tls_version)
+        # Akamai parameters
+        elif profile.sku.name == SkuName.standard_akamai:
+            cert_source_params = CdnCertificateSourceParameters(certificate_type=CertificateType.shared)
+            https_params = CdnManagedHttpsParameters(protocol_type=ProtocolType.server_name_indication,
+                                                     certificate_source_parameters=cert_source_params,
+                                                     minimum_tls_version=min_tls_version)
+        # Verizon parameters
+        else:
+            cert_source_params = CdnCertificateSourceParameters(certificate_type=CertificateType.shared)
+            https_params = CdnManagedHttpsParameters(protocol_type=ProtocolType.ip_based,
+                                                     certificate_source_parameters=cert_source_params,
+                                                     minimum_tls_version=min_tls_version)
+
+    client.custom_domains.enable_custom_https(resource_group_name,
+                                              profile_name,
+                                              endpoint_name,
+                                              custom_domain_name,
+                                              https_params)
+
+    updated = client.custom_domains.get(resource_group_name,
+                                        profile_name,
+                                        endpoint_name,
+                                        custom_domain_name)
+
+    return updated
+
+
+def update_origin(client: OriginsOperations,
+                  resource_group_name: str,
+                  profile_name: str,
+                  endpoint_name: str,
+                  origin_name: str,
+                  http_port: Optional[int] = None,
+                  https_port: Optional[int] = None,
+                  private_link_resource_id: Optional[str] = None,
+                  private_link_location: Optional[str] = None,
+                  private_link_approval_message: Optional[str] = None):
+    from azure.mgmt.cdn.models import OriginUpdateParameters
+
+    existing = client.get(resource_group_name, profile_name, endpoint_name, origin_name)
+
+    if http_port is None:
+        http_port = existing.http_port
+    if https_port is None:
+        https_port = existing.https_port
+    if private_link_resource_id is None:
+        private_link_resource_id = existing.private_link_resource_id
+    if private_link_location is None:
+        private_link_location = existing.private_link_location
+    if private_link_approval_message is None:
+        private_link_approval_message = existing.private_link_approval_message
+
+    return client.update(resource_group_name,
+                         profile_name,
+                         endpoint_name,
+                         origin_name,
+                         OriginUpdateParameters(
+                             http_port=http_port,
+                             https_port=https_port,
+                             enabled=existing.enabled,
+                             origin_host_header=existing.origin_host_header,
+                             priority=existing.priority,
+                             weight=existing.weight,
+                             private_link_resource_id=private_link_resource_id,
+                             private_link_location=private_link_location,
+                             private_link_approval_message=private_link_approval_message))
+
+
 def update_profile(instance, tags=None):
     params = ProfileUpdateParameters(tags=tags)
     _update_mapper(instance, params, ['tags'])
@@ -554,7 +695,7 @@ def set_waf_policy(client,
         policy.managed_rules = existing.managed_rules
     except ErrorResponseException as e:
         # If the error isn't a 404, rethrow it.
-        props = getattr(e.inner_exception, 'additional_properties')
+        props = getattr(e.inner_exception, 'additional_properties', {})
         if not isinstance(props, dict) or not isinstance(props.get('error'), dict):
             raise e
         props = props['error']

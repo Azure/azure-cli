@@ -240,7 +240,8 @@ class TestUtils(unittest.TestCase):
         }
         test_arm_active_directory_resource_id = 'https://management.core.windows.net/'
         test_arm_endpoint = 'https://management.azure.com/'
-        arm_resource_id = '/subscriptions/01/resourcegroups/02?api-version=2019-07-01'
+        subscription_id = '00000001-0000-0000-0000-000000000000'
+        arm_resource_id = '/subscriptions/{}/resourcegroups/02?api-version=2019-07-01'.format(subscription_id)
         full_arm_rest_url = test_arm_endpoint.rstrip('/') + arm_resource_id
         test_body = '{"b1": "v1"}'
 
@@ -296,49 +297,83 @@ class TestUtils(unittest.TestCase):
                          body=test_body,
                          generated_client_request_id_name=None)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
         request = send_mock.call_args.args[1]
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
-        # Test ARM resource ID /subscriptions/01/resourcegroups/02?api-version=2019-07-01
-        send_raw_request(cli_ctx, 'GET', arm_resource_id, body=test_body,
+        # Test ARM Subscriptions - List
+        # https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+        # /subscriptions?api-version=2020-01-01
+        send_raw_request(cli_ctx, 'GET', '/subscriptions?api-version=2020-01-01', body=test_body,
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
         request = send_mock.call_args.args[1]
-        self.assertEqual(request.url, 'https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01')
+        self.assertEqual(request.url, test_arm_endpoint.rstrip('/') + '/subscriptions?api-version=2020-01-01')
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
-        # Test full ARM URL https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01
-        send_raw_request(cli_ctx, 'GET', full_arm_rest_url)
+        # Test ARM Tenants - List
+        # https://docs.microsoft.com/en-us/rest/api/resources/tenants/list
+        # /tenants?api-version=2020-01-01
+        send_raw_request(cli_ctx, 'GET', '/tenants?api-version=2020-01-01', body=test_body,
+                         generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
         request = send_mock.call_args.args[1]
-        self.assertEqual(request.url, 'https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01')
+        self.assertEqual(request.url, test_arm_endpoint.rstrip('/') + '/tenants?api-version=2020-01-01')
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
-        # Test full ARM URL with port https://management.azure.com:443/subscriptions/01/resourcegroups/02?api-version=2019-07-01
+        # Test ARM resource ID
+        # /subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01
+        send_raw_request(cli_ctx, 'GET', arm_resource_id, body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, full_arm_rest_url)
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
+
+        # Test full ARM URL
+        # https://management.azure.com/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, full_arm_rest_url)
+
+        # Test full ARM URL with port
+        # https://management.azure.com:443/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01
         test_arm_endpoint_with_port = 'https://management.azure.com:443/'
         full_arm_rest_url_with_port = test_arm_endpoint_with_port.rstrip('/') + arm_resource_id
         send_raw_request(cli_ctx, 'GET', full_arm_rest_url_with_port)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
         request = send_mock.call_args.args[1]
-        self.assertEqual(request.url, 'https://management.azure.com:443/subscriptions/01/resourcegroups/02?api-version=2019-07-01')
+        self.assertEqual(request.url, 'https://management.azure.com:443/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01')
 
-        # Test non-ARM API, such as MS Graph API https://graph.microsoft.com/beta/appRoleAssignments/01
-        send_raw_request(cli_ctx, 'PATCH', 'https://graph.microsoft.com/beta/appRoleAssignments/01',
-                         body=test_body, generated_client_request_id_name=None)
+        # Test non-ARM APIs
 
+        # Test AD Graph API https://graph.windows.net/
+        url = 'https://graph.windows.net/00000002-0000-0000-0000-000000000000/applications/00000003-0000-0000-0000-000000000000?api-version=1.6'
+        send_raw_request(cli_ctx, 'PATCH', url, body=test_body, generated_client_request_id_name=None)
+        get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.windows.net/')
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.method, 'PATCH')
+        self.assertEqual(request.url, url)
+
+        # Test MS Graph API https://graph.microsoft.com/beta/appRoleAssignments/01
+        url = 'https://graph.microsoft.com/beta/appRoleAssignments/01'
+        send_raw_request(cli_ctx, 'PATCH', url, body=test_body, generated_client_request_id_name=None)
         get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.microsoft.com/')
         request = send_mock.call_args.args[1]
         self.assertEqual(request.method, 'PATCH')
-        self.assertEqual(request.url, 'https://graph.microsoft.com/beta/appRoleAssignments/01')
+        self.assertEqual(request.url, url)
 
         # Test custom case-insensitive User-Agent
         with mock.patch.dict('os.environ', {'AZURE_HTTP_USER_AGENT': "env-ua"}):
             send_raw_request(cli_ctx, 'GET', full_arm_rest_url, headers={'user-agent=ARG-UA'})
 
-            get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+            get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
             request = send_mock.call_args.args[1]
             self.assertEqual(request.headers['User-Agent'], get_az_user_agent() + ' env-ua ARG-UA')
 

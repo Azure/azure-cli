@@ -760,39 +760,49 @@ def _private_ec_key_to_jwk(ec_key, jwk):
 
 
 def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
-    """ Import a private key. Supports importing base64 encoded private keys from PEM files.
+               not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
+               byok_string=None):
+    """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
 
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
-    if pem_file:
-        logger.info('Reading %s', pem_file)
-        with open(pem_file, 'rb') as f:
-            pem_data = f.read()
-            pem_password = str(pem_password).encode() if pem_password else None
+    if pem_file or pem_string:
+        if pem_file:
+            logger.info('Reading %s', pem_file)
+            with open(pem_file, 'rb') as f:
+                pem_data = f.read()
+        elif pem_string:
+            pem_data = pem_string.encode('UTF-8')
+        pem_password = str(pem_password).encode() if pem_password else None
 
-            try:
-                pkey = load_pem_private_key(pem_data, pem_password, default_backend())
-            except (ValueError, TypeError, UnsupportedAlgorithm) as e:
-                if str(e) == 'Could not deserialize key data.':
-                    raise CLIError('Import failed: {} The private key in the PEM file must be encrypted.'.format(e))
-                raise CLIError('Import failed: {}'.format(e))
+        try:
+            pkey = load_pem_private_key(pem_data, pem_password, default_backend())
+        except (ValueError, TypeError, UnsupportedAlgorithm) as e:
+            if str(e) == 'Could not deserialize key data.':
+                raise CLIError('Import failed: {} The private key in the PEM file must be encrypted.'.format(e))
+            raise CLIError('Import failed: {}'.format(e))
 
-            # populate key into jwk
-            if isinstance(pkey, rsa.RSAPrivateKey):
-                key_obj.kty = 'RSA'
-                _private_rsa_key_to_jwk(pkey, key_obj)
-            elif isinstance(pkey, ec.EllipticCurvePrivateKey):
-                key_obj.kty = 'EC'
-                _private_ec_key_to_jwk(pkey, key_obj)
-            else:
-                raise CLIError('Import failed: Unsupported key type, {}.'.format(type(pkey)))
-    elif byok_file:
-        with open(byok_file, 'rb') as f:
-            byok_data = f.read()
+        # populate key into jwk
+        if isinstance(pkey, rsa.RSAPrivateKey):
+            key_obj.kty = 'RSA'
+            _private_rsa_key_to_jwk(pkey, key_obj)
+        elif isinstance(pkey, ec.EllipticCurvePrivateKey):
+            key_obj.kty = 'EC'
+            _private_ec_key_to_jwk(pkey, key_obj)
+        else:
+            raise CLIError('Import failed: Unsupported key type, {}.'.format(type(pkey)))
+
+    elif byok_file or byok_string:
+        if byok_file:
+            logger.info('Reading %s', byok_file)
+            with open(byok_file, 'rb') as f:
+                byok_data = f.read()
+        elif byok_string:
+            byok_data = byok_string.encode('UTF-8')
+
         key_obj.kty = 'RSA-HSM'
         key_obj.t = byok_data
 
@@ -1076,6 +1086,11 @@ def import_certificate(cmd, client, vault_base_url, certificate_name, certificat
             secret_props['content_type'] = content_type
         elif certificate_policy and not secret_props:
             certificate_policy['secret_properties'] = SecretProperties(content_type=content_type)
+
+        attributes = certificate_policy.get('attributes')
+        if attributes:
+            attributes['created'] = None
+            attributes['updated'] = None
     else:
         certificate_policy = CertificatePolicy(
             secret_properties=SecretProperties(content_type=content_type))

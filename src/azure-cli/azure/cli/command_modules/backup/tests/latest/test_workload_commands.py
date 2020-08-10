@@ -186,6 +186,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}')
         ])
 
+        self.cmd("backup policy set -g {rg} -v {vault} --backup-management-type AzureWorkload --fix-for-inconsistent-items -n {policy_new}", checks=[
+            self.check('name', '{policy_new}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
         self.cmd('backup policy show -g {rg} -v {vault} -n {policy_new}', checks=[
             self.check('name', '{policy_new}'),
             self.check('resourceGroup', '{rg}')

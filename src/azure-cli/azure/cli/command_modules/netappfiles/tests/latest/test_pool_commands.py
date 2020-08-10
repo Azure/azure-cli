@@ -9,7 +9,7 @@ from knack.util import CLIError
 POOL_DEFAULT = "--service-level Premium --size 4"
 POOL_DEFAULT_TOO_SMALL = "--service-level 'Premium' --size 3"
 POOL_DEFAULT_STRING_SIZE = "--service-level 'Premium' --size a"
-LOCATION = "westus2stage"
+LOCATION = "westus2"
 
 # No tidy up of tests required. The resource group is automatically removed
 

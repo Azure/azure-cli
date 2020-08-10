@@ -24,7 +24,7 @@ from knack.util import CLIError, todict
 from azure.cli.core.profiles import ResourceType, get_api_version
 from azure.graphrbac.models import GraphErrorException
 
-from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, AppRole,
                                     PasswordCredential, KeyCredential, UserCreateParameters, PasswordProfile,
@@ -263,14 +263,14 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     activity_log = list(client.activity_logs.list(filter=odata_filters))
     start_events, end_events, offline_events = {}, {}, []
 
-    for l in activity_log:
-        if l.http_request:
-            if l.status.value == 'Started':
-                start_events[l.operation_id] = l
+    for item in activity_log:
+        if item.http_request:
+            if item.status.value == 'Started':
+                start_events[item.operation_id] = item
             else:
-                end_events[l.operation_id] = l
-        elif l.event_name and l.event_name.value.lower() == 'classicadministrators':
-            offline_events.append(l)
+                end_events[item.operation_id] = item
+        elif item.event_name and item.event_name.value.lower() == 'classicadministrators':
+            offline_events.append(item)
     return start_events, end_events, offline_events, client
 
 
@@ -373,7 +373,7 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
     co_admins = [x for x in co_admins if x.email_address]
     graph_client = _graph_client_factory(cli_ctx)
     if assignee:  # apply assignee filter if applicable
-        if _is_guid(assignee):
+        if is_guid(assignee):
             try:
                 result = _get_object_stubs(graph_client, [assignee])
                 if not result:
@@ -461,7 +461,10 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
 
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
     if scope:
-        assignments = list(assignments_client.list_for_scope(scope=scope, filter='atScope()'))
+        f = 'atScope()'
+        if assignee_object_id and include_groups:
+            f = f + " and assignedTo('{}')".format(assignee_object_id)
+        assignments = list(assignments_client.list_for_scope(scope=scope, filter=f))
     elif assignee_object_id:
         if include_groups:
             f = "assignedTo('{}')".format(assignee_object_id)
@@ -483,7 +486,9 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             role_id = _resolve_role_id(role, scope, definitions_client)
             assignments = [i for i in assignments if worker.get_role_property(i, 'role_definition_id') == role_id]
 
-        if assignee_object_id:
+        # filter the assignee if "include_groups" is not provided because service side
+        # does not accept filter "principalId eq and atScope()"
+        if assignee_object_id and not include_groups:
             assignments = [i for i in assignments if worker.get_role_property(i, 'principal_id') == assignee_object_id]
 
     return assignments
@@ -495,6 +500,9 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
         if resource_group_name:
             err = 'Resource group "{}" is redundant because scope is supplied'
             raise CLIError(err.format(resource_group_name))
+        from azure.mgmt.core.tools import is_valid_resource_id
+        if scope.startswith('/subscriptions/') and not is_valid_resource_id(scope):
+            raise CLIError('Invalid scope. Please use --help to view the valid format.')
     elif scope == '':
         raise CLIError('Invalid scope. Please use --help to view the valid format.')
     elif resource_group_name:
@@ -510,7 +518,7 @@ def _resolve_role_id(role, scope, definitions_client):
                 role, re.I):
         role_id = role
     else:
-        if _is_guid(role):
+        if is_guid(role):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
                 definitions_client.config.subscription_id, role)
         if not role_id:  # retrieve role id
@@ -643,7 +651,7 @@ def update_user(client, upn_or_object_id, display_name=None, force_change_passwo
 
 def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    if not _is_guid(upn_or_object_id):
+    if not is_guid(upn_or_object_id):
         upn_or_object_id = graph_client.users.get(upn_or_object_id).object_id
 
     results = list(graph_client.users.get_member_groups(
@@ -713,7 +721,7 @@ def remove_group_owner(cmd, owner_object_id, group_id):
 
 
 def _resolve_group(client, identifier):
-    if not _is_guid(identifier):
+    if not is_guid(identifier):
         res = list(list_groups(client, display_name=identifier))
         if not res:
             raise CLIError('Group {} is not found in Graph '.format(identifier))
@@ -1068,7 +1076,7 @@ def delete_application(client, identifier):
 def _resolve_application(client, identifier):
     result = list(client.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
     if not result:
-        if _is_guid(identifier):
+        if is_guid(identifier):
             # it is either app id or object id, let us verify
             result = list(client.list(filter="appId eq '{}'".format(identifier)))
         else:
@@ -1090,7 +1098,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None, key_u
         start_date = dateutil.parser.parse(start_date)
 
     if not end_date:
-        end_date = start_date + relativedelta(years=1)
+        end_date = start_date + relativedelta(years=1) - relativedelta(hours=24)
     elif isinstance(end_date, str):
         end_date = dateutil.parser.parse(end_date)
 
@@ -1121,7 +1129,7 @@ def _create_service_principal(cli_ctx, identifier, resolve_app=True):
     client = _graph_client_factory(cli_ctx)
     app_id = identifier
     if resolve_app:
-        if _is_guid(identifier):
+        if is_guid(identifier):
             result = list(client.applications.list(filter="appId eq '{}'".format(identifier)))
         else:
             result = list(client.applications.list(
@@ -1226,7 +1234,7 @@ def _resolve_service_principal(client, identifier):
     result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
     if result:
         return result[0].object_id
-    if _is_guid(identifier):
+    if is_guid(identifier):
         return identifier  # assume an object id
     error = CLIError("Service principal '{}' doesn't exist".format(identifier))
     error.status_code = 404  # Make sure CLI returns 3
@@ -1238,7 +1246,7 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
 
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
-        return str(_gen_guid()), None, None, None, None
+        return _random_password(34), None, None, None, None
 
     if password:
         # 2 - Password supplied -- no certs
@@ -1314,6 +1322,8 @@ def create_service_principal_for_rbac(
         if '://' not in name:
             prefix = "http://"
             app_display_name = name
+            # replace space, /, \ with - to make it a valid URI
+            name = name.replace(' ', '-').replace('/', '-').replace('\\', '-')
             logger.warning('Changing "%s" to a valid URI of "%s%s", which is the required format'
                            ' used for service principal names', name, prefix, name)
             name = prefix + name  # normalize be a valid graph service principal name
@@ -1342,9 +1352,11 @@ def create_service_principal_for_rbac(
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
 
+    # replace space, /, \ with - to make it a valid URI
+    homepage = 'https://' + app_display_name.replace(' ', '-').replace('/', '-').replace('\\', '-')
     aad_application = create_application(cmd,
                                          display_name=app_display_name,
-                                         homepage='https://' + app_display_name,
+                                         homepage=homepage,
                                          identifier_uris=[name],
                                          available_to_other_tenants=False,
                                          password=password,
@@ -1358,15 +1370,15 @@ def create_service_principal_for_rbac(
     # retry till server replication is done
     aad_sp = existing_sps[0] if existing_sps else None
     if not aad_sp:
-        for l in range(0, _RETRY_TIMES):
+        for retry_time in range(0, _RETRY_TIMES):
             try:
                 aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
                 break
             except Exception as ex:  # pylint: disable=broad-except
-                if l < _RETRY_TIMES and (
+                if retry_time < _RETRY_TIMES and (
                         ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
+                    logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
                 else:
                     logger.warning(
                         "Creating service principal failed for appid '%s'. Trace followed:\n%s",
@@ -1379,14 +1391,14 @@ def create_service_principal_for_rbac(
     if not skip_assignment:
         for scope in scopes:
             logger.warning('Creating a role assignment under the scope of "%s"', scope)
-            for l in range(0, _RETRY_TIMES):
+            for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
                     break
                 except Exception as ex:
-                    if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
+                    if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                         time.sleep(5)
-                        logger.warning('  Retrying role assignment creation: %s/%s', l + 1,
+                        logger.warning('  Retrying role assignment creation: %s/%s', retry_time + 1,
                                        _RETRY_TIMES)
                         continue
                     elif _error_caused_by_role_assignment_exists(ex):
@@ -1686,7 +1698,7 @@ def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
         if not result:
             result = list(client.service_principals.list(
                 filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-        if not result and _is_guid(assignee):  # assume an object id, let us verify it
+        if not result and is_guid(assignee):  # assume an object id, let us verify it
             result = _get_object_stubs(client, [assignee])
 
         # 2+ matches should never happen, so we only check 'no match' here
@@ -1697,17 +1709,9 @@ def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
 
         return result[0].object_id
     except (CloudError, GraphErrorException):
-        if fallback_to_object_id and _is_guid(assignee):
+        if fallback_to_object_id and is_guid(assignee):
             return assignee
         raise
-
-
-def _is_guid(guid):
-    try:
-        uuid.UUID(guid)
-        return True
-    except ValueError:
-        return False
 
 
 def _get_object_stubs(graph_client, assignees):
@@ -1739,6 +1743,35 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
 # for injecting test seems to produce predicatable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
+
+
+# reference: https://pynative.com/python-generate-random-string/
+def _random_password(length):
+    import random
+    import string
+    safe_punctuation = '-_.~'
+    random_source = string.ascii_letters + string.digits + safe_punctuation
+    alphanumeric = string.ascii_letters + string.digits
+
+    # make sure first character is not a punctuation like '--' which will make CLI command break
+    first_character = random.SystemRandom().choice(alphanumeric)
+
+    # make sure we have special character in the password
+    password = random.SystemRandom().choice(string.ascii_lowercase)
+    password += random.SystemRandom().choice(string.ascii_uppercase)
+    password += random.SystemRandom().choice(string.digits)
+    password += random.SystemRandom().choice(safe_punctuation)
+
+    # generate a password of the given length from the options in the random_source variable
+    for _ in range(length - 5):
+        password += random.SystemRandom().choice(random_source)
+
+    # turn it into a list for some extra shuffling
+    password_list = list(password)
+    random.SystemRandom().shuffle(password_list)
+
+    password = first_character + ''.join(password_list)
+    return password
 
 
 def list_user_assigned_identities(cmd, resource_group_name=None):

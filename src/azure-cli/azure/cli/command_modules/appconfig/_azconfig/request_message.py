@@ -6,7 +6,7 @@
 # pylint: disable=too-few-public-methods
 
 
-class RequestMessage(object):
+class RequestMessage:
 
     def __init__(self, method, headers, url, body):
         self.method = method

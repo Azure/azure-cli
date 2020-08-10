@@ -9,7 +9,7 @@ from azure.mgmt.resource.resources.models import ChangeType, PropertyChangeType
 
 from ._symbol import Symbol
 from ._color import Color, ColoredStringBuilder
-from ._utils import parse_resource_id
+from ._utils import split_resource_id
 
 _change_type_to_color = {
     ChangeType.create: Color.GREEN,
@@ -357,12 +357,12 @@ def _get_api_version(resource_change):
 
 
 def _get_scope(resource_change):
-    scope, _ = parse_resource_id(resource_change.resource_id)
+    scope, _ = split_resource_id(resource_change.resource_id)
     return scope
 
 
 def _get_relative_resource_id(resource_change):
-    _, relative_resource_id = parse_resource_id(resource_change.resource_id)
+    _, relative_resource_id = split_resource_id(resource_change.resource_id)
     return relative_resource_id
 
 
@@ -385,7 +385,7 @@ def _should_consider_property_change_path(property_change):
     if property_change_type in (PropertyChangeType.delete, PropertyChangeType.modify):
         return _is_leaf(property_change.before)
 
-    return bool(property_change.children)
+    return not property_change.children
 
 
 def format_json(value, enable_color=True):

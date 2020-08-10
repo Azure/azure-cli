@@ -133,21 +133,6 @@ examples:
         az netappfiles account update -g mygroup --name myname --tags testtag2=mytagb
 """
 
-helps['netappfiles list-mount-targets'] = """
-type: command
-short-summary: List the mount targets of an Azure NetApp Files (ANF) volume.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-  - name: --pool-name -p
-    short-summary: The name of the ANF pool
-  - name: --volume-name -v
-    short-summary: The name of the ANF pool
-examples:
-  - name: list the mount targets of an ANF volume
-    text: >
-        az netappfiles list-mount-targets -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname
-"""
 
 helps['netappfiles pool'] = """
 type: group
@@ -348,6 +333,8 @@ parameters:
     short-summary: The replication schedule, e.g. "_10minutely, hourly, daily, weekly, monthly"
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --snapshot-id
+    short-summary: Create a volume created from this snapshot. UUID v4 or resource identifier used to identify the Snapshot. example snapshot_id "9760acf5-4638-11e7-9bdb-020073ca3333"
 examples:
   - name: Create an ANF volume
     text: >
@@ -368,6 +355,25 @@ examples:
   - name: Delete an ANF volume
     text: >
         az netappfiles volume delete -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
+
+helps['netappfiles volume revert'] = """
+type: command
+short-summary: Revert a volume to one of its snapshots.
+long-summary: Revert a volume to the snapshot specified in the body.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+  - name: --snapshot-id -s
+    short-summary: Snapshot_Id of the snapshot. UUID v4 used to identify the Snapshot, example "9760acf5-4638-11e7-9bdb-020073ca3333"
+examples:
+  - name: Revert a volume to one of its snapshots.
+    text: >
+        az netappfiles volume revert -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --snapshot-id 9760acf5-4638-11e7-9bdb-020073ca3333
 """
 
 helps['netappfiles volume replication'] = """

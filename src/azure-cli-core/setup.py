@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.5.1"
+VERSION = "2.10.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -50,13 +50,13 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal~=1.2',
+    'adal~=1.2.3',
     'argcomplete~=1.8',
     'azure-cli-telemetry',
-    'colorama>=0.3.9',
+    'colorama~=0.4.1',
     'humanfriendly>=4.7,<9.0',
     'jmespath',
-    'knack==0.7.0rc4',
+    'knack==0.7.2',
     'msal~=1.0.0',
     'msal-extensions~=0.1.3',
     'msrest>=0.4.4',
@@ -64,11 +64,11 @@ DEPENDENCIES = [
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests~=2.20',
+    'requests~=2.22',
     'six~=1.12',
     'pkginfo>=1.5.0.1',
-    'azure-mgmt-resource==9.0.0',
-    'azure-mgmt-core==1.0.0'
+    'azure-mgmt-resource==10.1.0',
+    'azure-mgmt-core==1.2.0'
 ]
 
 TESTS_REQUIRE = [

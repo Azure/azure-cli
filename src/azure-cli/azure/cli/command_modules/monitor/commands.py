@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from azure.cli.core.commands import CliCommandType
 
 
@@ -12,16 +11,18 @@ def load_command_table(self, _):
     from ._client_factory import (
         cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_workspace_management_groups,
+        cf_metric_alerts, cf_log_analytics_deleted_workspaces, cf_log_analytics_workspace,
+        cf_log_analytics_workspace_tables, cf_log_analytics_workspace_management_groups,
         cf_log_analytics_workspace_usage, cf_log_analytics_workspace_schema, cf_log_analytics_workspace_shared_keys,
         cf_log_analytics_workspace_intelligence_packs, cf_log_analytics_cluster,
         cf_log_analytics_workspace_linked_service, cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
-        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage)
-    from ._exception_handler import monitor_exception_handler, missing_resource_handler
+        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage,
+        cf_log_analytics_workspace_saved_searches, cf_subscription_diagnostics,
+        cf_log_analytics_workspace_data_exports)
+    from ._exception_handler import monitor_exception_handler, missing_resource_handler, data_export_handler
     from .transformers import (action_group_list_table)
-    from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id,\
-        make_cluster_creation_as_no_wait_by_default
+    from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
 
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
@@ -111,6 +112,18 @@ def load_command_table(self, _):
         operation_group='log_profiles',
         exception_handler=monitor_exception_handler)
 
+    subscription_dianostic_settings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#SubscriptionDiagnosticSettingsOperations.{}',
+        client_factory=cf_subscription_diagnostics,
+        operation_group='subscription_diagnostic_settings',
+        exception_handler=monitor_exception_handler)
+
+    subscription_dianostic_settings_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.subscription_diagnostic_settings#{}',
+        client_factory=cf_subscription_diagnostics,
+        operation_group='subscription_diagnostic_settings',
+        exception_handler=monitor_exception_handler)
+
     alert_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
         client_factory=cf_alert_rules,
@@ -169,6 +182,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    log_analytics_deleted_workspace_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
+        client_factory=cf_log_analytics_deleted_workspaces,
+        exception_handler=monitor_exception_handler
+    )
+
     log_analytics_workspace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
         client_factory=cf_log_analytics_workspace,
@@ -205,6 +224,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    log_analytics_workspace_saved_search_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#SavedSearchesOperations.{}',
+        client_factory=cf_log_analytics_workspace_saved_searches,
+        exception_handler=monitor_exception_handler
+    )
+
     log_analytics_workspace_linked_service_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#LinkedServicesOperations.{}',
         client_factory=cf_log_analytics_workspace_linked_service,
@@ -214,6 +239,18 @@ def load_command_table(self, _):
     log_analytics_workspace_linked_service_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace_linked_service#{}',
         client_factory=cf_log_analytics_workspace_linked_service,
+        exception_handler=monitor_exception_handler
+    )
+
+    log_analytics_workspace_table_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#TablesOperations.{}',
+        client_factory=cf_log_analytics_workspace_tables,
+        exception_handler=monitor_exception_handler
+    )
+
+    log_analytics_workspace_data_exports_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#DataExportsOperations.{}',
+        client_factory=cf_log_analytics_workspace_data_exports,
         exception_handler=monitor_exception_handler
     )
 
@@ -341,23 +378,46 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
 
-    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
-        g.custom_command('create', 'create_log_analytics_workspace')
+    with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
+        g.custom_command('create', 'create_log_analytics_workspace', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_log_analytics_workspace')
+        g.custom_command('list-deleted-workspaces', 'list_deleted_log_analytics_workspaces', custom_command_type=log_analytics_deleted_workspace_custom)
+        g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
         g.command('get-schema', 'get', command_type=log_analytics_workspace_schema_sdk)
         g.command('list-usages', 'list', command_type=log_analytics_workspace_usage_sdk)
         g.command('list-management-groups', 'list', command_type=log_analytics_workspace_management_groups_sdk)
         g.command('get-shared-keys', 'get_shared_keys', command_type=log_analytics_workspace_shared_keys_sdk)
+
+    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk) as g:
+        g.command('list', 'list_by_workspace')
+        g.show_command('show', 'get')
+        g.command('update', 'update')
+
+    with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
+                            custom_command_type=log_analytics_workspace_custom, exception_handler=data_export_handler) as g:
+        g.command('list', 'list_by_workspace')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_log_analytics_workspace_data_exports',
+                         client_factory=cf_log_analytics_workspace_data_exports)
+        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_data_exports')
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_intelligence_packs_sdk) as g:
         g.command('list', 'list')
         g.command('enable', 'enable')
         g.command('disable', 'disable')
 
-    with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom, is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace saved-search', log_analytics_workspace_saved_search_sdk, custom_command_type=log_analytics_workspace_custom) as g:
+        g.custom_command('create', 'create_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
+        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches)
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_workspace')
+
+    with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_linked_service', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_linked_service', supports_no_wait=True)
         g.show_command('show', 'get')
@@ -365,15 +425,15 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom, is_preview=True) as g:
-        g.custom_command('create', 'create_log_analytics_cluster', validator=make_cluster_creation_as_no_wait_by_default)
+    with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom) as g:
+        g.custom_command('create', 'create_log_analytics_cluster', supports_no_wait=True)
         g.custom_command('update', 'update_log_analytics_cluster')
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.custom_command('list', 'list_log_analytics_clusters')
         g.wait_command('wait')
 
-    with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom, is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:
         g.command('create', 'create_or_update')
         g.custom_command('add', 'add_log_analytics_workspace_linked_storage_accounts')
         g.custom_command('remove', 'remove_log_analytics_workspace_linked_storage_accounts')
@@ -412,3 +472,10 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
                          validator=validate_private_endpoint_connection_id, confirmation=True)
+
+    with self.command_group('monitor diagnostic-settings subscription', subscription_dianostic_settings_sdk, custom_command_type=subscription_dianostic_settings_custom) as g:
+        g.custom_command('create', 'create_subscription_diagnostic_settings')
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.generic_update_command('update', custom_func_name='update_subscription_diagnostic_settings')

@@ -3,33 +3,39 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# Management Clients
+from azure.mgmt.network import NetworkManagementClient
+from azure.mgmt.web import WebSiteManagementClient
+from azure.mgmt.resource import ResourceManagementClient
+
+# Models
+from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule)
+from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployment)
+
+# Utils
+from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.client_factory import (get_mgmt_service_client, get_subscription_id)
+from azure.cli.core.commands.arm import ArmTemplateBuilder
+from azure.cli.core.util import (sdk_no_wait, random_string)
 from knack.log import get_logger
 from knack.util import CLIError
+from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
 
-from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule)
-from azure.mgmt.resource.resources.models import DeploymentProperties
-
-from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import ArmTemplateBuilder
-from azure.cli.core.util import sdk_no_wait
-
-from azure.cli.command_modules.network._client_factory import network_client_factory
-
-VERSION_2019_02_01 = "2019-02-01"
+VERSION_2019_10_01 = "2019-10-01"
+VERSION_2020_04_01 = "2020-04-01"
 
 logger = get_logger(__name__)
 
 
 def list_appserviceenvironments(cmd, resource_group_name=None):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2019_02_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         return ase_client.list()
     return ase_client.list_by_resource_group(resource_group_name)
 
 
 def show_appserviceenvironment(cmd, name, resource_group_name=None):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2019_02_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     return ase_client.get(resource_group_name, name)
@@ -59,15 +65,18 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, vne
 
     logger.info('Create App Service Environment...')
     deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
-    ase_deployment_properties = _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
-                                                                 front_end_scale_factor, front_end_sku, None)
-    deployment_client = _get_deployment_client_factory(cmd.cli_ctx)
+    ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
+                                                                 subnet_id=subnet_id, virtual_ip_type=virtual_ip_type,
+                                                                 front_end_scale_factor=front_end_scale_factor,
+                                                                 front_end_sku=front_end_sku, tags=None)
+
+    deployment_client = _get_resource_client_factory(cmd.cli_ctx).deployments
     return sdk_no_wait(no_wait, deployment_client.create_or_update,
                        resource_group_name, deployment_name, ase_deployment_properties)
 
 
 def delete_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=False):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2019_02_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
 
@@ -77,7 +86,7 @@ def delete_appserviceenvironment(cmd, name, resource_group_name=None, no_wait=Fa
 
 def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_scale_factor=None,
                                  front_end_sku=None, no_wait=False):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2019_02_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase_def = ase_client.get(resource_group_name, name)
@@ -94,44 +103,45 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2019_02_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
-    return ase_client.list_vips(resource_group_name, name)
+    return ase_client.get_vip_info(resource_group_name, name)
 
 
 def list_appserviceenvironment_plans(cmd, name, resource_group_name=None):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2019_02_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
-
     return ase_client.list_app_service_plans(resource_group_name, name)
 
 
-def _get_ase_client_factory(cli_ctx, api_version=None):
-    from azure.mgmt.web import WebSiteManagementClient
+def _get_ase_client_factory(cli_ctx):
     client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).app_service_environments
+    return client
+
+
+def _get_resource_client_factory(cli_ctx, api_version=None):
+    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
     if api_version:
         client.api_version = api_version
+    else:
+        api_version = VERSION_2019_10_01
     return client
 
 
-def _get_deployment_client_factory(cli_ctx):
-    from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient).deployments
-    return client
-
-
-def _get_network_client_factory(cli_ctx):
-    from azure.mgmt.network import NetworkManagementClient
+def _get_network_client_factory(cli_ctx, api_version=None):
     client = get_mgmt_service_client(cli_ctx, NetworkManagementClient)
+    if api_version:
+        client.api_version = api_version
+    else:
+        api_version = VERSION_2020_04_01
     return client
 
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
-    from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
-    group = client.resource_groups.get(resource_group_name)
+    resource_group_client = _get_resource_client_factory(cli_ctx).resource_groups
+    group = resource_group_client.get(resource_group_name)
     return group.location
 
 
@@ -150,14 +160,10 @@ def _get_resource_group_name_from_ase(ase_client, ase_name):
 
 
 def _validate_subnet_id(cli_ctx, subnet, vnet_name, resource_group_name):
-    from msrestazure.tools import is_valid_resource_id
     subnet_is_id = is_valid_resource_id(subnet)
-
     if subnet_is_id and not vnet_name:
         return subnet
     if subnet and not subnet_is_id and vnet_name:
-        from msrestazure.tools import resource_id
-        from azure.cli.core.commands.client_factory import get_subscription_id
         return resource_id(
             subscription=get_subscription_id(cli_ctx),
             resource_group=resource_group_name,
@@ -179,7 +185,6 @@ def _map_worker_sku(sku_name):
 
 
 def _validate_subnet_empty(cli_ctx, subnet_id):
-    from msrestazure.tools import parse_resource_id
     subnet_id_parts = parse_resource_id(subnet_id)
     vnet_resource_group = subnet_id_parts['resource_group']
     vnet_name = subnet_id_parts['name']
@@ -191,7 +196,6 @@ def _validate_subnet_empty(cli_ctx, subnet_id):
 
 
 def _validate_subnet_size(cli_ctx, subnet_id):
-    from msrestazure.tools import parse_resource_id
     subnet_id_parts = parse_resource_id(subnet_id)
     vnet_resource_group = subnet_id_parts['resource_group']
     vnet_name = subnet_id_parts['name']
@@ -205,14 +209,13 @@ def _validate_subnet_size(cli_ctx, subnet_id):
 
 
 def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet_id, force):
-    from msrestazure.tools import parse_resource_id
     subnet_id_parts = parse_resource_id(subnet_id)
     vnet_resource_group = subnet_id_parts['resource_group']
     vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
     ase_route_table_name = ase_name + '-Route-Table'
     ase_route_name = ase_name + '-route'
-    network_client = network_client_factory(cli_ctx)
+    network_client = _get_network_client_factory(cli_ctx)
 
     subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
     if subnet_obj.route_table is None or force:
@@ -254,13 +257,12 @@ def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet
 
 
 def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, location, subnet_id, force):
-    from msrestazure.tools import parse_resource_id
     subnet_id_parts = parse_resource_id(subnet_id)
     vnet_resource_group = subnet_id_parts['resource_group']
     vnet_name = subnet_id_parts['name']
     subnet_name = subnet_id_parts['resource_name']
     ase_nsg_name = ase_name + '-NSG'
-    network_client = network_client_factory(cli_ctx)
+    network_client = _get_network_client_factory(cli_ctx)
 
     subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
     subnet_address_prefix = subnet_obj.address_prefix
@@ -346,7 +348,6 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
 
 
 def _get_unique_deployment_name(prefix):
-    from azure.cli.core.util import random_string
     return prefix + random_string(16)
 
 
@@ -384,7 +385,8 @@ def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
     template = deployment_template.build()
     parameters = deployment_template.build_parameters()
 
-    deployment = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    deploymentProperties = DeploymentProperties(template=template, parameters=parameters, mode='Incremental')
+    deployment = Deployment(properties=deploymentProperties)
     return deployment
 
 
@@ -399,7 +401,7 @@ def _create_nsg_rule(cli_ctx, resource_group_name, network_security_group_name, 
                             destination_port_range=destination_port_range, priority=priority,
                             name=security_rule_name)
 
-    network_client = network_client_factory(cli_ctx)
+    network_client = _get_network_client_factory(cli_ctx)
     poller = network_client.security_rules.create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)
     LongRunningOperation(cli_ctx)(poller)

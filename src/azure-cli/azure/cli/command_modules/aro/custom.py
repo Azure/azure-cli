@@ -45,8 +45,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    random_id = ''.join(random.choice(
-        'abcdefghijklmnopqrstuvwxyz0123456789') for _ in range(8))
+    random_id = generate_random_id()
 
     aad = AADManager(cmd.cli_ctx)
     if client_id is None:
@@ -61,8 +60,8 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 
     rp_client_sp = aad.get_service_principal(rp_client_id)
 
-    assign_contributor_to_vnet(cmd.cli_ctx, vnet, client_sp.object_id, 'client')
-    assign_contributor_to_vnet(cmd.cli_ctx, vnet, rp_client_sp.object_id, 'rp_client')
+    assign_contributor_to_vnet(cmd.cli_ctx, vnet, client_sp.object_id)
+    assign_contributor_to_vnet(cmd.cli_ctx, vnet, rp_client_sp.object_id)
 
     oc = v2020_04_30.OpenShiftCluster(
         location=location,
@@ -144,3 +143,10 @@ def aro_update(client, resource_group_name, resource_name, no_wait=False):
 
 def rp_mode_development():
     return os.environ.get('RP_MODE', '').lower() == 'development'
+
+
+def generate_random_id():
+    random_id = (''.join(random.choice('abcdefghijklmnopqrstuvwxyz')) +
+                 ''.join(random.choice('abcdefghijklmnopqrstuvwxyz1234567890')
+                         for _ in range(7)))
+    return random_id

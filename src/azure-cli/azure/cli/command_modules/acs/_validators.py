@@ -127,7 +127,7 @@ def validate_nodepool_name(namespace):
             raise CLIError('--nodepool-name should contain only alphanumeric characters')
 
 
-def validate_k8s_client_version(namespace):
+def validate_kubectl_version(namespace):
     """Validates a string as a possible Kubernetes version."""
     k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*|latest)$')
     found = k8s_release_regex.findall(namespace.client_version)
@@ -136,6 +136,17 @@ def validate_k8s_client_version(namespace):
     else:
         raise CLIError('--client-version should be the full version number '
                        '(such as "1.11.8" or "1.12.6") or "latest"')
+
+
+def validate_kubelogin_version(namespace):
+    """Validates a string as a possible kubelogin version."""
+    kubelogin_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*|latest)$')
+    found = kubelogin_regex.findall(namespace.kubelogin_version)
+    if found:
+        namespace.kubelogin_version = found[0]
+    else:
+        raise CLIError('--kubelogin-version should be the full version number '
+                       '(such as "0.0.4") or "latest"')
 
 
 def validate_linux_host_name(namespace):
@@ -325,7 +336,7 @@ def validate_label(label):
 
     # validate label value
     if len(kv[1]) > 63:
-        raise CLIError("Invalid label: %s. Label must be more than 63 chars." % label)
+        raise CLIError("Invalid label: %s. Label must not be more than 63 chars." % label)
     if not value_regex.match(kv[1]):
         raise CLIError("Invalid label: %s. A valid label must be an empty string or consist of alphanumeric "
                        "characters, '-', '_' or '.', and must start and end with an alphanumeric character" % label)

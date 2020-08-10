@@ -16,6 +16,7 @@ docker run --rm \
            -v "$SYSTEM_ARTIFACTSDIRECTORY":/mnt/artifacts \
            -e CLI_VERSION=$CLI_VERSION \
            -e CLI_VERSION_REVISION=1~$DISTRO \
+           -e DEBIAN_FRONTEND=noninteractive \
            $DISTRO_BASE_IMAGE \
            /mnt/repo/scripts/release/debian/build.sh
 

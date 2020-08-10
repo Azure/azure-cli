@@ -142,6 +142,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
         logger.warning('    pattern %s', pattern)
         logger.warning(' operations')
 
+    source_sas = source_sas.lstrip('?') if source_sas else source_sas
     if source_container:
         # copy blobs for blob container
 
@@ -294,8 +295,8 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                 progress_callback.message = '{}/{}: "{}"'.format(
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
-            include, result = _upload_blob(cmd, client, destination_container_name,
-                                           normalize_blob_file_path(destination_path, dst), src,
+            include, result = _upload_blob(cmd, client, file_path=src, container_name=destination_container_name,
+                                           blob_name=normalize_blob_file_path(destination_path, dst),
                                            blob_type=blob_type, content_settings=guessed_content_settings,
                                            metadata=metadata, validate_content=validate_content,
                                            maxsize_condition=maxsize_condition, max_connections=max_connections,
@@ -330,10 +331,10 @@ def transform_blob_type(cmd, blob_type):
 
 
 # pylint: disable=too-many-locals
-def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
-                validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
-                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
-                progress_callback=None, encryption_scope=None):
+def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blob_type=None, content_settings=None,
+                metadata=None, validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None,
+                tier=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None,
+                timeout=None, progress_callback=None, encryption_scope=None):
     """Upload a blob to a container."""
 
     if encryption_scope:
@@ -602,3 +603,35 @@ def _get_datetime_from_string(dt_str):
         except ValueError:
             continue
     raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))
+
+
+def show_blob_v2(cmd, client, lease_id=None, **kwargs):
+
+    blob = client.get_blob_properties(lease=lease_id, **kwargs)
+
+    page_ranges = None
+    if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
+        page_ranges = client.get_page_ranges(lease=lease_id, **kwargs)
+
+    blob.page_ranges = page_ranges
+
+    return blob
+
+
+def set_blob_tier_v2(client, tier, blob_type='block', rehydrate_priority=None, timeout=None):
+    if blob_type == 'block':
+        return client.set_standard_blob_tier(standard_blob_tier=tier, rehydrate_priority=rehydrate_priority,
+                                             timeout=timeout)
+    if blob_type == 'page':
+        return client.set_premium_page_blob_tier(premium_page_blob_tier=tier, timeout=timeout)
+    raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def acquire_blob_lease(client, lease_duration=-1, **kwargs):
+    client.acquire(lease_duration=lease_duration, **kwargs)
+    return client.id
+
+
+def renew_blob_lease(client, **kwargs):
+    client.renew(**kwargs)
+    return client.id

@@ -44,6 +44,15 @@ def zip_contents_from_dir(dirPath, lang):
                 subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
             elif lang.lower() == PYTHON_RUNTIME_NAME:
                 subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
+
+                filtered_files = []
+                for filename in files:
+                    if filename == '.env':
+                        logger.info("Skipping file: %s/%s", dirname, filename)
+                    else:
+                        filtered_files.append(filename)
+                files[:] = filtered_files
+
             for filename in files:
                 absname = os.path.abspath(os.path.join(dirname, filename))
                 arcname = absname[len(abs_src) + 1:]
@@ -250,16 +259,11 @@ def detect_node_version_tocreate(detected_ver):
     # get major version & get the closest version from supported list
     major_ver = int(detected_ver.split('.')[0])
     node_ver = NODE_VERSION_DEFAULT
-    if major_ver < 4:
+    # TODO: Handle checking for minor versions if node major version is 10
+    if major_ver <= 11:
         node_ver = NODE_VERSION_DEFAULT
-    elif major_ver >= 4 and major_ver < 6:
-        node_ver = '4.5'
-    elif major_ver >= 6 and major_ver < 8:
-        node_ver = '6.9'
-    elif major_ver >= 8 and major_ver < 10:
-        node_ver = NODE_VERSION_DEFAULT
-    elif major_ver >= 10:
-        node_ver = '10.14'
+    else:
+        node_ver = '12.9'
     return node_ver
 
 
@@ -293,12 +297,10 @@ def should_create_new_rg(cmd, rg_name, is_linux):
     return True
 
 
-def does_app_already_exist(cmd, name):
+def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
     client = web_client_factory(cmd.cli_ctx)
-    site_availability = client.check_name_availability(name, 'Microsoft.Web/sites')
-    # check availability returns true to name_available  == site does not exist
-    return site_availability.name_available
+    return client.check_name_availability(name, 'Microsoft.Web/sites')
 
 
 def get_app_details(cmd, name):

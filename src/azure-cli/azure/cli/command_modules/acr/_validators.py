@@ -101,3 +101,14 @@ def validate_registry_name(cmd, namespace):
         if pos > 0:
             logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
             namespace.registry_name = registry[:pos]
+
+
+def validate_expiration_time(namespace):
+    import datetime
+    DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+    if namespace.expiration:
+        try:
+            namespace.expiration = datetime.datetime.strptime(namespace.expiration, DATE_TIME_FORMAT)
+        except ValueError:
+            raise CLIError("Input '{}' is not valid datetime. Valid example: 2025-12-31T12:59:59Z".format(
+                namespace.expiration))

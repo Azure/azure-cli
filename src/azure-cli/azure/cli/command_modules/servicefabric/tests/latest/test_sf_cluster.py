@@ -56,6 +56,7 @@ class ServiceFabricClusterTests(ScenarioTest):
 
         _wait_for_cluster_state_ready(self, self.kwargs)
 
+    @unittest.skip('no quota, disable temporarily')
     @ResourceGroupPreparer()
     def test_cluster(self):
         self.kwargs.update({
