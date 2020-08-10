@@ -1,24 +1,9 @@
-
-import argparse
-from collections import OrderedDict
-import copy
-import json
-import re
 import random
-from six import string_types
 
-from azure.cli.core.commands import LongRunningOperation, _is_poller, cached_get, cached_put
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import (
-    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, find_child_item)
-from azure.cli.core.profiles import ResourceType, get_sdk
-
-from knack.arguments import CLICommandArgument, ignore_type
-from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
-from knack.util import todict, CLIError
+from knack.util import todict
 from knack import events
+from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 
 logger = get_logger(__name__)
 
@@ -48,8 +33,27 @@ def register_global_query_recommend(cli_ctx):
                 events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
             cli_ctx.invocation.data['query_active'] = True
 
+    def register_query_recommend(cli, **kwargs):
+        from knack.preview import PreviewItem
+        commands_loader = kwargs.get('commands_loader')
+        cmd_tbl = commands_loader.command_table
+        preview_info = PreviewItem(cli.local_context.cli_ctx,
+                                   object_type='parameter', target='_query_recommend')
+        default_kwargs = {
+            'help': 'Recommend JMESPath string for you',
+            'arg_group': 'Global',
+            'is_preview': True,
+            'nargs': '*',
+            'preview_info': preview_info
+        }
+        for _, cmd in cmd_tbl.items():
+            cmd.add_argument('_query_recommend', *['--query-recommend'], **default_kwargs)
+
     cli_ctx.register_event(
-        events.EVENT_PARSER_GLOBAL_CREATE, add_query_recommend_parameter)
+        EVENT_INVOKER_PRE_LOAD_ARGUMENTS, register_query_recommend
+    )
+    # cli_ctx.register_event(
+    #     events.EVENT_PARSER_GLOBAL_CREATE, add_query_recommend_parameter)
     cli_ctx.register_event(
         events.EVENT_INVOKER_POST_PARSE_ARGS, handle_recommend_parameter)
 
