@@ -2095,7 +2095,7 @@ class WebappAuthenticationTest(ScenarioTest):
         # update and verify
         result = self.cmd('webapp auth update -g {} -n {} --enabled true --action LoginWithFacebook '
                           '--token-store false --token-refresh-extension-hours 7.2 --runtime-version 1.2.8 '
-                          '--aad-client-id aad_client_id --aad-client-secret aad_secret --aad-client-secret-thumbprint-certificate aad_thumbprint'
+                          '--aad-client-id aad_client_id --aad-client-secret aad_secret --aad-client-secret-certificate-thumbprint aad_thumbprint'
                           '--aad-allowed-token-audiences https://audience1 --aad-token-issuer-url https://issuer_url '
                           '--facebook-app-id facebook_id --facebook-app-secret facebook_secret '
                           '--facebook-oauth-scopes public_profile email'
