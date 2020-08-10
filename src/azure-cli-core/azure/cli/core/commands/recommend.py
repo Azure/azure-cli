@@ -200,14 +200,17 @@ class TreeNode:
                     isinstance(self.get_one_value(key), dict)):
                 viable_keys.append(key)
         match_items = self._get_match_items(select_items, keys=viable_keys)
-        if match_items is not None and len(match_items) > 0:
+        if match_items:
             item_key = match_items[0]
             item_value = self.get_one_value(item_key)
-            query_str = "{}=='{}'".format(
-                match_items[0], self.get_one_value(match_items[0]))
+            query_str = "{}=='{}'".format(item_key, item_value)
             ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
                                       help_str="Display results only when {} equals to {}".format(
-                                          match_items[0], self.get_one_value(match_items[0])),
+                                          item_key, item_value),
+                                      group_name="condition"))
+            ret.append(Recommendation("{}[?contains(@.{}, 'something')==`true`]".format(trace_str, item_key),
+                                      help_str="Display results only when {} field contains given string".format(
+                                          item_key),
                                       group_name="condition"))
             for item in match_items[1:2]:
                 query_str += " || {}=='{}'".format(item,
@@ -217,7 +220,7 @@ class TreeNode:
                                           group_name="condition"))
         return ret
 
-    def get_function_recommend(self):
+    def get_function_recommend(self, select_items):
         ret = []
         if not self._from_list:
             return None
@@ -225,6 +228,17 @@ class TreeNode:
         query_str = "length({})".format(self._get_trace_str())
         ret.append(Recommendation(
             query_str, help_str="Get the number of the results", group_name="function"))
+        trace_str = self._get_trace_str(filter_rules=True)
+        viable_keys = []
+        for key in self._keys:
+            if not (isinstance(self.get_one_value(key), list) or
+                    isinstance(self.get_one_value(key), dict)):
+                viable_keys.append(key)
+        match_items = self._get_match_items(select_items, keys=viable_keys)
+        if match_items:
+            item_key = match_items[0]
+            query_str = "{}[?contains(@.{},'something') == `true`]"
+
         return ret
 
 
@@ -256,7 +270,7 @@ class TreeBuilder:
                 recommendations.extend(node.select_specific_number_string())
                 recommendations.extend(
                     node.get_condition_recommend(keywords_list))
-                recommendations.extend(node.get_function_recommend())
+                recommendations.extend(node.get_function_recommend(keywords_list))
         recommendations.sort(key=lambda x: x._group)
         return todict(recommendations)
 
