@@ -1637,6 +1637,11 @@ examples:
         az webapp list --query "[?state=='Running']"
 """
 
+helps['webapp list-instances'] = """
+type: command
+short-summary: List all scaled out instances of a web app or web app slot.
+"""
+
 helps['webapp list-runtimes'] = """
 type: command
 short-summary: List available built-in stacks which can be used for web apps.
