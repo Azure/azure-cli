@@ -203,20 +203,30 @@ class TreeNode:
         if match_items:
             item_key = match_items[0]
             item_value = self.get_one_value(item_key)
+            if 'name' in self._keys:
+                field_suffix = '.name'
+                field_help = 'name of'
+            elif len(match_items) >= 2:
+                field_suffix = '.{}'.format(match_items[1])
+                field_help = '{} of'.format(match_items[1])
+            else:
+                field_suffix = ''
+                field_help = ''
             query_str = "{}=='{}'".format(item_key, item_value)
-            ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
-                                      help_str="Display results only when {} equals to {}".format(
-                                          item_key, item_value),
+            ret.append(Recommendation("{}[?{}]{}".format(trace_str, query_str, field_suffix),
+                                      help_str="Display {} resources only when {} equals to {}".format(
+                                          field_help, item_key, item_value),
                                       group_name="condition"))
-            ret.append(Recommendation("{}[?contains(@.{}, 'something')==`true`]".format(trace_str, item_key),
-                                      help_str="Display results only when {} field contains given string".format(
+            ret.append(Recommendation("{0}[?contains(@.{1}, 'something')==`true`].{1}".format(trace_str, item_key),
+                                      help_str="Display all {} field that contains given string".format(
                                           item_key),
                                       group_name="condition"))
             for item in match_items[1:2]:
                 query_str += " || {}=='{}'".format(item,
                                                    self.get_one_value(item))
-                ret.append(Recommendation("{}[?{}]".format(trace_str, query_str),
-                                          help_str="Display results only when satisfy one of the condition",
+                ret.append(Recommendation("{}[?{}]{}".format(trace_str, query_str, field_suffix),
+                                          help_str="Display {} resources only when satisfy one of the condition".format(
+                                              field_help),
                                           group_name="condition"))
         return ret
 
@@ -228,17 +238,6 @@ class TreeNode:
         query_str = "length({})".format(self._get_trace_str())
         ret.append(Recommendation(
             query_str, help_str="Get the number of the results", group_name="function"))
-        trace_str = self._get_trace_str(filter_rules=True)
-        viable_keys = []
-        for key in self._keys:
-            if not (isinstance(self.get_one_value(key), list) or
-                    isinstance(self.get_one_value(key), dict)):
-                viable_keys.append(key)
-        match_items = self._get_match_items(select_items, keys=viable_keys)
-        if match_items:
-            item_key = match_items[0]
-            query_str = "{}[?contains(@.{},'something') == `true`]"
-
         return ret
 
 
