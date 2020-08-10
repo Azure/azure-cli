@@ -27,6 +27,12 @@ from knack.util import CLIError
 from azure.identity import AuthenticationRecord
 
 
+class PublicClientApplicationMock(mock.MagicMock):
+
+    def get_accounts(self, username):
+        return TestProfile.msal_accounts
+
+
 class TestProfile(unittest.TestCase):
 
     @classmethod
@@ -62,18 +68,19 @@ class TestProfile(unittest.TestCase):
                                      'state': 'Enabled',
                                      'tenantId': 'microsoft.com',
                                      'user': {
-                                         'homeAccountId': '00000003-0000-0000-0000-000000000000.00000003-0000-0000-0000-000000000000',
+                                         'isEnvironmentCredential': False,
                                          'name': 'foo@foo.com',
-                                         'type': 'user'}}]
+                                         'type': 'user'
+                                     }}]
 
         # Dummy result of azure.cli.core._profile.SubscriptionFinder._find_using_specific_tenant
-        # home_tenant_id is mapped from tenant_id
-        # tenant_id denotes token tenant
+        # It has home_tenant_id which is mapped from tenant_id. tenant_id now denotes token tenant.
         cls.subscription1 = SubscriptionStub(cls.id1,
                                              cls.display_name1,
                                              cls.state1,
                                              tenant_id=cls.tenant_id,
-                                             managed_by_tenants=cls.managed_by_tenants)
+                                             managed_by_tenants=cls.managed_by_tenants,
+                                             home_tenant_id=cls.tenant_id)
         # Dummy result of azure.cli.core._profile.Profile._normalize_properties
         cls.subscription1_normalized = {
             'environmentName': 'AzureCloud',
@@ -81,6 +88,7 @@ class TestProfile(unittest.TestCase):
             'name': cls.display_name1,
             'state': cls.state1.value,
             'user': {
+                'isEnvironmentCredential': False,
                 'name': cls.user1,
                 'type': 'user'
             },
@@ -125,13 +133,15 @@ class TestProfile(unittest.TestCase):
         cls.subscription2 = SubscriptionStub(cls.id2,
                                              cls.display_name2,
                                              cls.state2,
-                                             tenant_id=cls.tenant_id)
+                                             tenant_id=cls.tenant_id,
+                                             home_tenant_id=cls.tenant_id)
         cls.subscription2_normalized = {
             'environmentName': 'AzureCloud',
             'id': '2',
             'name': cls.display_name2,
             'state': cls.state2.value,
             'user': {
+                'isEnvironmentCredential': False,
                 'name': cls.user2,
                 'type': 'user'
             },
@@ -218,6 +228,179 @@ class TestProfile(unittest.TestCase):
             }] + cls.msal_accounts
 
         cls.msal_scopes = ['https://foo/.default']
+
+    @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
+    @mock.patch('azure.identity.InteractiveBrowserCredential.authenticate', autospec=True)
+    @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
+    def test_login_with_interactive_browser(self, app, authenticate, get_token):
+        get_token.return_value = self.access_token
+        authenticate.return_value = self.authentication_record
+
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        subs = profile.login(True, None, None, False, None, use_device_code=False,
+                             allow_no_subscriptions=False, subscription_finder=finder)
+
+        # assert
+        self.assertEqual(self.subscription1_output, subs)
+
+    @mock.patch('azure.identity.UsernamePasswordCredential.get_token', autospec=True)
+    @mock.patch('azure.identity.UsernamePasswordCredential.authenticate', autospec=True)
+    @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
+    def test_login_with_username_password_for_tenant(self, app, authenticate, get_token):
+        get_token.return_value = self.access_token
+        authenticate.return_value = self.authentication_record
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.side_effect = ValueError("'tenants.list' should not occur")
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        subs = profile.login(False, '1234', 'my-secret', False, self.tenant_id, use_device_code=False,
+                             allow_no_subscriptions=False, subscription_finder=finder)
+
+        # assert
+        self.assertEqual(self.subscription1_output, subs)
+
+    @mock.patch('azure.identity.DeviceCodeCredential.get_token', autospec=True)
+    @mock.patch('azure.identity.DeviceCodeCredential.authenticate', autospec=True)
+    @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
+    def test_login_with_device_code(self, app, authenticate, get_token):
+        get_token.return_value = self.access_token
+        authenticate.return_value = self.authentication_record
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        subs = profile.login(True, None, None, False, None, use_device_code=True,
+                             allow_no_subscriptions=False, subscription_finder=finder)
+
+        # assert
+        self.assertEqual(self.subscription1_output, subs)
+
+    @mock.patch('azure.identity.DeviceCodeCredential.get_token', autospec=True)
+    @mock.patch('azure.identity.DeviceCodeCredential.authenticate', autospec=True)
+    @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
+    def test_login_with_device_code_for_tenant(self, app, authenticate, get_token):
+        def just_raise(ex):
+            raise ex
+
+        get_token.return_value = self.access_token
+        authenticate.return_value = self.authentication_record
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.tenants.list.side_effect = lambda: just_raise(
+            ValueError("'tenants.list' should not occur"))
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        subs = profile.login(True, None, None, False, self.tenant_id, use_device_code=True,
+                             allow_no_subscriptions=False, subscription_finder=finder)
+
+        # assert
+        self.assertEqual(self.subscription1_output, subs)
+
+    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
+    def test_login_with_service_principal_secret(self, get_token):
+        cli = DummyCli()
+        get_token.return_value = self.access_token
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        subs = profile.login(False, 'my app', 'my secret', True, self.tenant_id, use_device_code=True,
+                             allow_no_subscriptions=False, subscription_finder=finder)
+        output = [{'environmentName': 'AzureCloud',
+                   'homeTenantId': 'microsoft.com',
+                   'id': '1',
+                   'isDefault': True,
+                   'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
+                                        {'tenantId': '00000004-0000-0000-0000-000000000000'}],
+                   'name': 'foo account',
+                   'state': 'Enabled',
+                   'tenantId': 'microsoft.com',
+                   'user': {
+                       'isEnvironmentCredential': False,
+                       'name': 'my app',
+                       'type': 'servicePrincipal'}}]
+        # assert
+        self.assertEqual(output, subs)
+
+    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
+    def test_login_with_service_principal_cert(self, get_token):
+        cli = DummyCli()
+        get_token.return_value = self.access_token
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        subs = profile.login(False, 'my app', test_cert_file, True, self.tenant_id, use_device_code=True,
+                             allow_no_subscriptions=False, subscription_finder=finder)
+        output = [{'environmentName': 'AzureCloud',
+                   'homeTenantId': 'microsoft.com',
+                   'id': '1',
+                   'isDefault': True,
+                   'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
+                                        {'tenantId': '00000004-0000-0000-0000-000000000000'}],
+                   'name': 'foo account',
+                   'state': 'Enabled',
+                   'tenantId': 'microsoft.com',
+                   'user': {
+                       'isEnvironmentCredential': False,
+                       'name': 'my app',
+                       'type': 'servicePrincipal'}}]
+        # assert
+        self.assertEqual(output, subs)
+
+    @unittest.skip("Not supported by Azure Identity.")
+    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
+    def test_login_with_service_principal_cert_sn_issuer(self, get_token):
+        cli = DummyCli()
+        get_token.return_value = self.access_token
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        subs = profile.login(False, 'my app', test_cert_file, True, self.tenant_id, use_device_code=True,
+                             allow_no_subscriptions=False, subscription_finder=finder, use_cert_sn_issuer=True)
+        output = [{'environmentName': 'AzureCloud',
+                   'homeTenantId': 'microsoft.com',
+                   'id': '1',
+                   'isDefault': True,
+                   'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
+                                        {'tenantId': '00000004-0000-0000-0000-000000000000'}],
+                   'name': 'foo account',
+                   'state': 'Enabled',
+                   'tenantId': 'microsoft.com',
+                   'user': {
+                       'isEnvironmentCredential': False,
+                       'name': 'my app',
+                       'type': 'servicePrincipal',
+                       'useCertSNIssuerAuth': True}}]
+        # assert
+        self.assertEqual(output, subs)
 
     def test_normalize(self):
         cli = DummyCli()
@@ -569,10 +752,9 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(user, self.user1)
 
     @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
-    @mock.patch('msal.PublicClientApplication', autospec=True)
-    def test_get_login_credentials(self, public_client_application, get_token):
+    @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
+    def test_get_login_credentials(self, app, get_token):
         cli = DummyCli()
-        public_client_application.get_accounts.return_value = self.msal_accounts
         get_token.return_value = TestProfile.raw_token1
         # setup
         storage_mock = {'subscriptions': None}
@@ -806,7 +988,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._identity.MSALSecretStore.retrieve_secret_of_service_principal', autospec=True)
+    @mock.patch('azure.cli.core._identity.MsalSecretStore.retrieve_secret_of_service_principal', autospec=True)
     def test_get_raw_token_for_sp(self, retrieve_secret_of_service_principal, get_token):
         cli = DummyCli()
         retrieve_secret_of_service_principal.return_value = 'fake', 'fake'
@@ -816,7 +998,7 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties('sp1',
                                                      [self.subscription1],
-                                                     True, None, None, self.home_account_id)
+                                                     True, None, None)
         profile._set_subscriptions(consolidated)
         # action
         creds, sub, tenant = profile.get_raw_token(resource='https://foo')
@@ -1295,172 +1477,6 @@ class TestProfile(unittest.TestCase):
         self.assertEqual([self.subscription1], subs)
 
     @mock.patch('azure.identity.UsernamePasswordCredential.get_token', autospec=True)
-    @mock.patch('azure.identity.UsernamePasswordCredential.authenticate', autospec=True)
-    def test_find_subscriptions_from_particular_tenent(self, authenticate, get_token):
-        def just_raise(ex):
-            raise ex
-
-        get_token.return_value = self.access_token
-        authenticate.return_value = self.authentication_record
-        cli = DummyCli()
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.tenants.list.side_effect = lambda: just_raise(
-            ValueError("'tenants.list' should not occur"))
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
-
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(False, '1234', 'my-secret', False, self.tenant_id, use_device_code=False,
-                             allow_no_subscriptions=False, subscription_finder=finder)
-
-        # assert
-        self.assertEqual(self.subscription1_output, subs)
-
-    @mock.patch('azure.identity.DeviceCodeCredential.get_token', autospec=True)
-    @mock.patch('azure.identity.DeviceCodeCredential.authenticate', autospec=True)
-    def test_Login_through_device_code_flow(self, authenticate, get_token):
-        get_token.return_value = self.access_token
-        authenticate.return_value = self.authentication_record
-        cli = DummyCli()
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
-
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(True, None, None, False, None, use_device_code=True,
-                             allow_no_subscriptions=False, subscription_finder=finder)
-
-        # assert
-        self.assertEqual(self.subscription1_output, subs)
-
-    @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
-    @mock.patch('azure.identity.DeviceCodeCredential.get_token', autospec=True)
-    @mock.patch('azure.identity.InteractiveBrowserCredential.authenticate', autospec=True)
-    @mock.patch('azure.identity.DeviceCodeCredential.authenticate', autospec=True)
-    def test_login_through_authorization_code_flow(self, authenticate, authenticate2, get_token, get_token2):
-        get_token.return_value = self.access_token
-        authenticate.return_value = self.authentication_record
-        get_token2.return_value = self.access_token
-        authenticate2.return_value = self.authentication_record
-        cli = DummyCli()
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
-
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(True, None, None, False, None, use_device_code=False,
-                             allow_no_subscriptions=False, subscription_finder=finder)
-
-        # assert
-        self.assertEqual(self.subscription1_output, subs)
-
-    @mock.patch('azure.identity.DeviceCodeCredential.get_token', autospec=True)
-    @mock.patch('azure.identity.DeviceCodeCredential.authenticate', autospec=True)
-    def test_login_interactive_from_particular_tenent(self, authenticate, get_token):
-        def just_raise(ex):
-            raise ex
-
-        get_token.return_value = self.access_token
-        authenticate.return_value = self.authentication_record
-        cli = DummyCli()
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.tenants.list.side_effect = lambda: just_raise(
-            ValueError("'tenants.list' should not occur"))
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
-
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(True, None, None, False, self.tenant_id, use_device_code=True,
-                             allow_no_subscriptions=False, subscription_finder=finder)
-
-        # assert
-        self.assertEqual(self.subscription1_output, subs)
-
-    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
-    def test_login_from_service_principal_id(self, get_token):
-        cli = DummyCli()
-        get_token.return_value = self.access_token
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
-
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(False, 'my app', 'my secret', True, self.tenant_id, use_device_code=True,
-                             allow_no_subscriptions=False, subscription_finder=finder)
-        output = [{'environmentName': 'AzureCloud',
-                   'homeTenantId': 'microsoft.com',
-                   'id': '1',
-                   'isDefault': True,
-                   'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
-                                        {'tenantId': '00000004-0000-0000-0000-000000000000'}],
-                   'name': 'foo account',
-                   'state': 'Enabled',
-                   'tenantId': 'microsoft.com',
-                   'user': {'name': 'my app', 'type': 'servicePrincipal'}}]
-        # assert
-        self.assertEqual(output, subs)
-
-    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
-    def test_login_from_service_principal_using_cert(self, get_token):
-        cli = DummyCli()
-        get_token.return_value = self.access_token
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(False, 'my app', test_cert_file, True, self.tenant_id, use_device_code=True,
-                             allow_no_subscriptions=False, subscription_finder=finder)
-        output = [{'environmentName': 'AzureCloud',
-                   'homeTenantId': 'microsoft.com',
-                   'id': '1',
-                   'isDefault': True,
-                   'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
-                                        {'tenantId': '00000004-0000-0000-0000-000000000000'}],
-                   'name': 'foo account',
-                   'state': 'Enabled',
-                   'tenantId': 'microsoft.com',
-                   'user': {'name': 'my app', 'type': 'servicePrincipal'}}]
-        # assert
-        self.assertEqual(output, subs)
-
-    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
-    def test_login_from_service_principal_using_cert_sn_issuer(self, get_token):
-        cli = DummyCli()
-        get_token.return_value = self.access_token
-        mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
-        finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        subs = profile.login(False, 'my app', test_cert_file, True, self.tenant_id, use_device_code=True,
-                             allow_no_subscriptions=False, subscription_finder=finder, use_cert_sn_issuer=True)
-        output = [{'environmentName': 'AzureCloud',
-                   'homeTenantId': 'microsoft.com',
-                   'id': '1',
-                   'isDefault': True,
-                   'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
-                                        {'tenantId': '00000004-0000-0000-0000-000000000000'}],
-                   'name': 'foo account',
-                   'state': 'Enabled',
-                   'tenantId': 'microsoft.com',
-                   'user': {'name': 'my app', 'type': 'servicePrincipal',
-                            'useCertSNIssuerAuth': True}}]
-        # assert
-        self.assertEqual(output, subs)
-
-    @mock.patch('azure.identity.UsernamePasswordCredential.get_token', autospec=True)
     def test_refresh_accounts_one_user_account(self, get_token):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
@@ -1818,7 +1834,7 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[]):  # pylint: disable=redefined-builtin
+    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[], home_tenant_id=None):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
@@ -1833,7 +1849,8 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         self.tenant_id = tenant_id
         self.managed_by_tenants = managed_by_tenants
         # if home_tenant_id is None, this denotes a Subscription from SDK
-
+        if home_tenant_id:
+            self.home_tenant_id = home_tenant_id
 
 class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-methods
 

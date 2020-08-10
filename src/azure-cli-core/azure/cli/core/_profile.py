@@ -14,6 +14,7 @@ from copy import deepcopy
 from enum import Enum
 
 from knack.log import get_logger
+from knack.util import CLIError
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import in_cloud_console, can_launch_browser, adal_resource_to_msal_scopes
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
@@ -182,13 +183,13 @@ class Profile:
                 credential, auth_record = identity.login_with_username_password(username, password)
 
         # List tenants and find subscriptions by calling ARM
-        subscriptions = []
         if find_subscriptions:
-            if tenant and credential:
+            if tenant:
                 subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
-            elif credential and auth_record:
+            else:
                 subscriptions = subscription_finder.find_using_common_tenant(auth_record.username, credential)
-            if not allow_no_subscriptions and not subscriptions:
+
+            if not subscriptions and not allow_no_subscriptions:
                 if username:
                     msg = "No subscriptions found for {}.".format(username)
                 else:
