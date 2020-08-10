@@ -4,11 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
-import antlr4
 
 from azure.cli.command_modules.monitor.util import (
-    get_aggregation_map, get_operator_map, get_autoscale_operator_map,
-    get_autoscale_aggregation_map, get_autoscale_scale_direction_map)
+    get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
 
 from knack.util import CLIError
 
@@ -35,11 +33,11 @@ def timezone_offset_type(value):
     if hour > 14 or hour < -12:
         raise CLIError('Offset out of range: -12 to +14')
 
-    if hour >= 0 and hour < 10:
+    if 0 <= hour < 10:
         value = '+0{}'.format(hour)
     elif hour >= 10:
         value = '+{}'.format(hour)
-    elif hour < 0 and hour > -10:
+    elif -10 < hour < 0:
         value = '-0{}'.format(-1 * hour)
     else:
         value = str(hour)
@@ -63,7 +61,7 @@ def get_period_type(as_timedelta=False):
         match = re.match(regex, value.lower())
         match_len = match.span(0)
         if match_len != tuple([0, len(value)]):
-            raise ValueError
+            raise ValueError('PERIOD should be of the form "##h##m##s" or ISO8601')
         # simply return value if a valid ISO8601 string is supplied
         if match.span(1) != tuple([-1, -1]) and match.span(5) != tuple([-1, -1]):
             return value
@@ -92,7 +90,11 @@ def get_period_type(as_timedelta=False):
 class MetricAlertConditionAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.cli.command_modules.monitor.grammar import (
+        # antlr4 is not available everywhere, restrict the import scope so that commands
+        # that do not need it don't fail when it is absent
+        import antlr4
+
+        from azure.cli.command_modules.monitor.grammar.metric_alert import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
 
         usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
@@ -232,32 +234,37 @@ class AutoscaleRemoveAction(argparse._AppendAction):
 
 class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-access
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.monitor.models import MetricTrigger
-        if len(values) == 1:
-            # workaround because CMD.exe eats > character... Allows condition to be
-            # specified as a quoted expression
-            values = values[0].split(' ')
-        name_offset = 0
+        # antlr4 is not available everywhere, restrict the import scope so that commands
+        # that do not need it don't fail when it is absent
+        import antlr4
+
+        from azure.cli.command_modules.monitor.grammar.autoscale import (
+            AutoscaleConditionLexer, AutoscaleConditionParser, AutoscaleConditionValidator)
+
+        # pylint: disable=line-too-long
+        usage = 'usage error: --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD\n' \
+                '                         [where DIMENSION {==,!=} VALUE [or VALUE ...]\n' \
+                '                         [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]'
+
+        string_val = ' '.join(values)
+
+        lexer = AutoscaleConditionLexer(antlr4.InputStream(string_val))
+        stream = antlr4.CommonTokenStream(lexer)
+        parser = AutoscaleConditionParser(stream)
+        tree = parser.expression()
+
         try:
-            metric_name = ' '.join(values[name_offset:-4])
-            operator = get_autoscale_operator_map()[values[-4]]
-            threshold = int(values[-3])
-            aggregation = get_autoscale_aggregation_map()[values[-2].lower()]
-            window = get_period_type()(values[-1])
-        except (IndexError, KeyError):
-            raise CLIError('usage error: --condition METRIC {==,!=,>,>=,<,<=} '
-                           'THRESHOLD {avg,min,max,total,count} PERIOD')
-        condition = MetricTrigger(
-            metric_name=metric_name,
-            metric_resource_uri=None,  # will be filled in later
-            time_grain=None,  # will be filled in later
-            statistic=None,  # will be filled in later
-            time_window=window,
-            time_aggregation=aggregation,
-            operator=operator,
-            threshold=threshold
-        )
-        namespace.condition = condition
+            validator = AutoscaleConditionValidator()
+            walker = antlr4.ParseTreeWalker()
+            walker.walk(validator, tree)
+            autoscale_condition = validator.result()
+            for item in ['time_aggregation', 'metric_name', 'threshold', 'operator', 'time_window']:
+                if not getattr(autoscale_condition, item, None):
+                    raise CLIError(usage)
+        except (AttributeError, TypeError, KeyError):
+            raise CLIError(usage)
+
+        namespace.condition = autoscale_condition
 
 
 class AutoscaleScaleAction(argparse.Action):  # pylint: disable=protected-access

@@ -7,11 +7,12 @@
 
 from collections import OrderedDict
 
+from knack.log import get_logger
+
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
-
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_resource_links,
@@ -19,7 +20,8 @@ from azure.cli.command_modules.resource._client_factory import (
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
 
 from ._exception_handler import managementgroups_exception_handler
-from knack.log import get_logger
+
+
 logger = get_logger(__name__)
 
 
@@ -219,10 +221,11 @@ def load_command_table(self, _):
         g.custom_command('unregister', 'unregister_feature')
 
     # Tag commands
-    with self.command_group('tag', resource_tag_sdk) as g:
-        g.command('list', 'list')
-        g.command('create', 'create_or_update')
-        g.command('delete', 'delete')
+    with self.command_group('tag', resource_tag_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+        g.custom_command('list', 'get_tag_at_scope')
+        g.custom_command('create', 'create_or_update_tag_at_scope')
+        g.custom_command('delete', 'delete_tag_at_scope', confirmation=True)
+        g.custom_command('update', 'update_tag_at_scope', min_api='2019-10-01')
         g.command('add-value', 'create_or_update_value')
         g.command('remove-value', 'delete_value')
 
@@ -316,6 +319,8 @@ def load_command_table(self, _):
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_management_group', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
+        g.custom_command('what-if', 'what_if_deploy_arm_template_at_management_group', validator=process_deployment_create_namespace,
+                         exception_handler=handle_template_based_exception, is_preview=True, min_api='2019-10-01')
         g.custom_command('export', 'export_template_at_management_group')
         g.custom_wait_command('wait', 'get_deployment_at_management_group')
         g.custom_command('cancel', 'cancel_deployment_at_management_group')
@@ -333,6 +338,8 @@ def load_command_table(self, _):
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_tenant_scope', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
+        g.custom_command('what-if', 'what_if_deploy_arm_template_at_tenant_scope', validator=process_deployment_create_namespace,
+                         exception_handler=handle_template_based_exception, is_preview=True, min_api='2019-10-01')
         g.custom_command('export', 'export_template_at_tenant_scope')
         g.custom_wait_command('wait', 'get_deployment_at_tenant_scope')
         g.custom_command('cancel', 'cancel_deployment_at_tenant_scope')

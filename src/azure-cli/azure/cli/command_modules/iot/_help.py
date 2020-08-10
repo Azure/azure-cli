@@ -768,60 +768,80 @@ examples:
 
 helps['iot central'] = """
 type: group
-short-summary: Manage IoT Central assets.
+short-summary: Manage IoT Central resources.
+long-summary: |
+    IoT Central is an IoT application platform that reduces the burden and cost of developing, managing, and maintaining enterprise-grade IoT solutions. Choosing to build with IoT Central gives you the opportunity to focus time, money, and energy on transforming your business with IoT data, rather than just maintaining and updating a complex and continually evolving IoT infrastructure.
+    IoT Central documentation is available at https://aka.ms/iotcentral-documentation
+    Comprehensive IoT Central data-plane functionality is available in the Azure IoT CLI Extension. For more info on how to install visit https://github.com/Azure/azure-iot-cli-extension
 """
 
 helps['iot central app'] = """
 type: group
 short-summary: Manage IoT Central applications.
+long-summary: Create, delete, view, and update your IoT Central apps.
 """
 
 helps['iot central app create'] = """
 type: command
 short-summary: Create an IoT Central application.
 long-summary: |
-    For an introduction to IoT Central, see https://docs.microsoft.com/azure/iot-central/.
-    The F1 Sku is no longer supported. Please use the ST2 Sku (default) for app creation.
-    For more pricing information, please visit https://azure.microsoft.com/pricing/details/iot-central/.
+    An IoT Central app is a cloud-based application that you can use to manage your IoT devices.
+    For more information on deploying an IoT Central app via CLI or a list of available arguments, visit https://aka.ms/iotcentral-manage-cli
 examples:
-  - name: Create an IoT Central application in the standard pricing tier ST2, in the region of the resource group.
+  - name: Create an IoT Central application in the region of the resource group using the default pricing SKU.
     text: >
-        az iot central app create --resource-group MyResourceGroup --name my-app-resource --subdomain my-app-subdomain
-  - name: Create an IoT Central application with the standard pricing tier ST2 in the 'westus' region, with a custom display name, based on the iotc-pnp-preview template.
+        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l unitedstates
+  - name: Create an IoT Central application the in the 'United States' region with the 'ST1' pricing plan and an industry template.
     text: >
-        az iot central app create --resource-group MyResourceGroup --name my-app-resource-name --sku ST2 --location westus --subdomain my-app-subdomain --template iotc-pnp-preview --display-name 'My Custom Display Name'
+        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l unitedstates -p ST1 -t iotc-distribution
 """
 
 helps['iot central app delete'] = """
 type: command
 short-summary: Delete an IoT Central application.
+long-summary: |
+    Permanently delete your IoT Central app.
+    -Warning- This operation is irreversible. Once you've deleted your app, you cannot restore it.
 examples:
-  - name: Delete an IoT Central application.
-    text: az iot central app delete --name MyIoTCentralApplication --resource-group MyResourceGroup
+  - name: Delete an IoT Central app called 'my-first-iot-app'.
+    text: az iot central app delete -n my-first-iot-app -g MyResourceGroup
 """
 
 helps['iot central app list'] = """
 type: command
 short-summary: List IoT Central applications.
+long-summary: All of the IoT Central apps that are part of your subscription.
 examples:
-  - name: List all IoT Central applications in a subscription.
+  - name: List all IoT Central apps in my subscription.
     text: >
         az iot central app list
-  - name: List all IoT Central applications in the resource group 'MyGroup'
+  - name: List all IoT Central apps in the resource group 'MyResourceGroup' within my subscription.
     text: >
-        az iot central app list --resource-group MyGroup
+        az iot central app list -g MyResourceGroup
 """
 
 helps['iot central app show'] = """
 type: command
 short-summary: Get the details of an IoT Central application.
+long-summary: Information about your app, like app name, subdomain, pricing plan, and location.
 examples:
-  - name: Show an IoT Central application.
+  - name: Show details for an app named 'my-first-iot-app'.
     text: >
-        az iot central app show --name MyApp
+        az iot central app show -n my-first-iot-app
+  - name: Show details for an app named 'my-first-iot-app' in the resource group 'MyResourceGroup'.
+    text: >
+        az iot central app show -n my-first-iot-app -g MyResourceGroup
 """
 
 helps['iot central app update'] = """
 type: command
 short-summary: Update metadata for an IoT Central application.
+long-summary: Update metadata, like app name, subdomain, pricing plan, and location.
+examples:
+  - name: Update the SKU for 'my-first-iot-app'
+    text: >
+        az iot central app update -n my-first-iot-app -g MyResourceGroup --set sku.name=ST1
+  - name: Change the subdomain for 'my-first-iot-app'
+    text: >
+        az iot central app update -n my-first-iot-app -g MyResourceGroup --set subdomain.name=my-iot-app-new
 """

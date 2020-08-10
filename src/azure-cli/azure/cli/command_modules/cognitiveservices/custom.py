@@ -3,16 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
+
 from knack.prompting import prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
-import json
 
-from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.mgmt.cognitiveservices.models import CognitiveServicesAccount, Sku,\
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction,\
     CognitiveServicesAccountProperties, CognitiveServicesAccountApiProperties,\
     Identity, IdentityType
+from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
+
 
 logger = get_logger(__name__)
 

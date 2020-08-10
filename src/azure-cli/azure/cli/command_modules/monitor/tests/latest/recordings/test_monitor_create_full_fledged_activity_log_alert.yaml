@@ -13,15 +13,15 @@ interactions:
       ParameterSetName:
       - -n -o
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T12:06:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-20T02:58:57Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 12:06:17 GMT
+      - Mon, 20 Jul 2020 02:58:59 GMT
       expires:
       - '-1'
       pragma:
@@ -45,9 +45,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "global", "properties": {"groupShortName": "cliact2yt7jg",
+    body: '{"location": "global", "properties": {"groupShortName": "cliactqvfn2l",
       "enabled": true, "emailReceivers": [], "smsReceivers": [], "webhookReceivers":
-      []}}'
+      [], "itsmReceivers": [], "azureAppPushReceivers": [], "automationRunbookReceivers":
+      [], "voiceReceivers": [], "logicAppReceivers": [], "azureFunctionReceivers":
+      [], "armRoleReceivers": []}}'
     headers:
       Accept:
       - application/json
@@ -58,21 +60,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '155'
+      - '340'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -o
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002?api-version=2019-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002","type":"Microsoft.Insights/ActionGroups","name":"cliact000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliact2yt7jg","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliact000002","type":"Microsoft.Insights/ActionGroups","name":"cliact000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliactqvfn2l","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
     headers:
       cache-control:
       - no-cache
@@ -81,7 +83,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 12:06:23 GMT
+      - Mon, 20 Jul 2020 02:59:06 GMT
       expires:
       - '-1'
       pragma:
@@ -93,7 +95,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1178'
+      - '1171'
     status:
       code: 201
       message: Created
@@ -108,13 +110,11 @@ interactions:
       - monitor activity-log alert create
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -s --action --condition --disable -o
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -122,16 +122,17 @@ interactions:
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''microsoft.insights/activityLogAlerts/clialert000003''
-        under resource group ''clitest.rg000001'' was not found."}}'
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '248'
+      - '316'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 12:06:26 GMT
+      - Mon, 20 Jul 2020 02:59:07 GMT
       expires:
       - '-1'
       pragma:
@@ -166,8 +167,8 @@ interactions:
       ParameterSetName:
       - -n -g -s --action --condition --disable -o
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
@@ -183,7 +184,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 12:06:31 GMT
+      - Mon, 20 Jul 2020 02:59:14 GMT
       expires:
       - '-1'
       pragma:
@@ -195,7 +196,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1175'
+      - '1157'
     status:
       code: 201
       message: Created

@@ -10,7 +10,6 @@ from knack.arguments import CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.parameters import get_datetime_type
-from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
@@ -119,6 +118,9 @@ def load_arguments(self, _):
                        help='Encryption type. EncryptionAtRestWithPlatformKey: Disk is encrypted with XStore managed key at rest. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted with Customer managed key at rest.')
             c.argument('disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set that is used to encrypt the disk.')
             c.argument('location', help='Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`. If location is not specified and no default location specified, location will be automatically set as same as the resource group.')
+            operation_group = 'disks' if scope == 'disk' else 'snapshots'
+            c.argument('network_access_policy', min_api='2020-05-01', help='Policy for accessing the disk via network.', arg_type=get_enum_type(self.get_models('NetworkAccessPolicy', operation_group=operation_group)))
+            c.argument('disk_access', min_api='2020-05-01', help='Name or ID of the disk access resource for using private endpoints on disks.')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -477,6 +479,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vm host group') as c:
         c.argument('host_group_name', name_arg_type, id_part='name', help="Name of the Dedicated Host Group")
+        c.argument('automatic_placement', arg_type=get_three_state_flag(), min_api='2020-06-01',
+                   help='Specify whether virtual machines or virtual machine scale sets can be placed automatically '
+                        'on the dedicated host group. Automatic placement means resources are allocated on dedicated '
+                        'hosts, that are chosen by Azure, under the dedicated host group. The value is defaulted to '
+                        'true when not provided.')
 
     with self.argument_context('vm host group create') as c:
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
@@ -503,6 +510,8 @@ def load_arguments(self, _):
         c.argument('caching', help='Disk caching policy', arg_type=get_enum_type(CachingTypes))
         for dest in scaleset_name_aliases:
             c.argument(dest, vmss_name_type)
+        c.argument('host_group', min_api='2020-06-01',
+                   help='Name or ID of dedicated host group that the virtual machine scale set resides in')
 
     for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
         with self.argument_context(scope) as c:
@@ -666,7 +675,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
-            c.argument('admin_username', help='Username for the VM.', default=get_default_admin_username())
+            c.argument('admin_username', help='Username for the VM. Default value is current username of OS. If the default value is system reserved, then default value will be set to azureuser. Please refer to https://docs.microsoft.com/en-us/rest/api/compute/virtualmachines/createorupdate#osprofile to get a full list of reserved values.')
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', options_list=['--ssh-key-values'], completer=FilesCompleter(), type=file_type, nargs='+')
             c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key. If the file already exists, the specified key(s) are appended to the file. Destination path for SSH public keys is currently limited to its default value "/home/username/.ssh/authorized_keys" due to a known issue in Linux provisioning agent.')
@@ -941,3 +950,10 @@ def load_arguments(self, _):
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
     # endregion
+
+    # region DiskAccess
+    with self.argument_context('disk-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disk_accesses') as c:
+        c.argument('disk_access_name', arg_type=name_arg_type, help='Name of the disk access resource.', id_part='name')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+    # endRegion

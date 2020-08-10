@@ -32,6 +32,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('apim api', api_sdk, is_preview=True) as g:
+        g.custom_command('import', 'import_apim_api', supports_no_wait=True)
         g.custom_command('create', 'create_apim_api', supports_no_wait=True)
         g.custom_show_command('show', 'get_apim_api')
         g.custom_command('list', 'list_apim_api')
