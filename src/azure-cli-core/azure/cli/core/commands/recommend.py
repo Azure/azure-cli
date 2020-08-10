@@ -239,9 +239,10 @@ class TreeNode:
         if not self._from_list:
             return None
         # currently contains and length
-        query_str = "length({})".format(self._get_trace_str())
-        ret.append(Recommendation(
-            query_str, help_str="Get the number of the results", group_name="function"))
+        if self._name == 'root':
+            query_str = "length({})".format(self._get_trace_str())
+            ret.append(Recommendation(
+                query_str, help_str="Get the number of the results", group_name="function"))
         return ret
 
 
