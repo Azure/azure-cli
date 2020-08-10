@@ -160,7 +160,8 @@ def get_content(container):
 
     # summary
     print('Generating summary...')
-    items = []
+    # module -> (passed, failed)
+    data_dict = {}
     for root, dirs, files in os.walk(ARTIFACT_DIR):
         for name in files:
             if name.endswith('json'):
@@ -174,15 +175,27 @@ def get_content(container):
                             passed = result['summary']['passed']
                         if 'failed' in result['summary']:
                             failed = result['summary']['failed']
-                        total = passed + failed
-                        rate = 1 if total == 0 else passed / total
-                        rate = '{:.2%}'.format(rate)
-                        items.append((module, passed, failed, rate))
-                        print('module: {}, passed: {}, failed: {}, rate: {}'.format(module, passed, failed, rate))
-                        passed_sum += passed
-                        failed_sum += failed
+                        if module in data_dict:
+                            values = data_dict[module]
+                            data_dict[module] = (values[0] + passed, values[1] + failed)
+                        else:
+                            data_dict[module] = (passed, failed)
                 except Exception:
                     print(traceback.format_exc())
+
+    # module, passed, failed, rate
+    items = []
+    for k in data_dict:
+        v = data_dict[k]
+        passed = v[0]
+        failed = v[1]
+        total = passed + failed
+        rate = 1 if total == 0 else passed / total
+        rate = '{:.2%}'.format(rate)
+        items.append((k, passed, failed, rate))
+        print('module: {}, passed: {}, failed: {}, rate: {}'.format(k, passed, failed, rate))
+        passed_sum += passed
+        failed_sum += failed
 
     sorted(items, key=lambda x: x[0])
 
