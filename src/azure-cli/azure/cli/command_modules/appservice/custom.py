@@ -847,6 +847,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
                          client_id=None, token_store_enabled=None, runtime_version=None,  # pylint: disable=unused-argument
                          token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
+                         client_secret_certificate_thumbprint=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
                          facebook_app_secret=None, facebook_oauth_scopes=None,  # pylint: disable=unused-argument
                          twitter_consumer_key=None, twitter_consumer_secret=None,  # pylint: disable=unused-argument
