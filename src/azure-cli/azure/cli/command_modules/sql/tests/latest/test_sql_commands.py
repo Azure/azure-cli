@@ -3542,10 +3542,10 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
             self):
 
         self.kwargs.update({
-            'rg': 'clitestxj6awmetud',
-            'loc': 'westus',
-            'managed_instance_name': 'ayang-ltr-mi',
-            'database_name': 'test-4',
+            'rg': 'v-urmila',
+            'loc': 'westeurope',
+            'managed_instance_name': 'v-urmila-mi-test',
+            'database_name': 'ReportServer',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
@@ -3601,13 +3601,13 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} -g {rg}',
             checks=[
-                self.check('length(@)', 1)])
+                self.check('length(@)', 2)])
 
         # without resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name}',
             checks=[
-                self.check('length(@)', 1)])
+                self.check('length(@)', 2)])
 
         # setup for test show long term retention backup
         backup = self.cmd(
@@ -3637,7 +3637,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'cli-restore-dest'
+            'dest_database_name': 'cli-restore-ltr-backup-test'
         })
 
         self.cmd(
