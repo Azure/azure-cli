@@ -357,13 +357,16 @@ class Profile:
                 _STATE: s.state.value,
                 _USER_ENTITY: {
                     _USER_NAME: user,
-                    _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER,
-                    _IS_ENVIRONMENT_CREDENTIAL: is_environment
+                    _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
                 },
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
             }
+
+            # Add _IS_ENVIRONMENT_CREDENTIAL for environment credential accounts, but not for normal accounts.
+            if is_environment:
+                subscription_dict[_USER_ENTITY][_IS_ENVIRONMENT_CREDENTIAL] = True
 
             # for Subscriptions - List REST API 2019-06-01's subscription account
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
@@ -621,7 +624,8 @@ class Profile:
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
-        is_environment = account[_USER_ENTITY][_IS_ENVIRONMENT_CREDENTIAL]
+        # _IS_ENVIRONMENT_CREDENTIAL doesn't exist for normal account
+        is_environment = account[_USER_ENTITY].get(_IS_ENVIRONMENT_CREDENTIAL)
 
         identity = Identity(client_id=client_id, authority=self._authority, tenant_id=tenant_id,
                             cred_cache=self._adal_cache)

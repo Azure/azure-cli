@@ -68,7 +68,6 @@ class TestProfile(unittest.TestCase):
                                      'state': 'Enabled',
                                      'tenantId': 'microsoft.com',
                                      'user': {
-                                         'isEnvironmentCredential': False,
                                          'name': 'foo@foo.com',
                                          'type': 'user'
                                      }}]
@@ -88,7 +87,6 @@ class TestProfile(unittest.TestCase):
             'name': cls.display_name1,
             'state': cls.state1.value,
             'user': {
-                'isEnvironmentCredential': False,
                 'name': cls.user1,
                 'type': 'user'
             },
@@ -141,7 +139,6 @@ class TestProfile(unittest.TestCase):
             'name': cls.display_name2,
             'state': cls.state2.value,
             'user': {
-                'isEnvironmentCredential': False,
                 'name': cls.user2,
                 'type': 'user'
             },
@@ -337,7 +334,6 @@ class TestProfile(unittest.TestCase):
                    'state': 'Enabled',
                    'tenantId': 'microsoft.com',
                    'user': {
-                       'isEnvironmentCredential': False,
                        'name': 'my app',
                        'type': 'servicePrincipal'}}]
         # assert
@@ -366,7 +362,6 @@ class TestProfile(unittest.TestCase):
                    'state': 'Enabled',
                    'tenantId': 'microsoft.com',
                    'user': {
-                       'isEnvironmentCredential': False,
                        'name': 'my app',
                        'type': 'servicePrincipal'}}]
         # assert
@@ -396,7 +391,6 @@ class TestProfile(unittest.TestCase):
                    'state': 'Enabled',
                    'tenantId': 'microsoft.com',
                    'user': {
-                       'isEnvironmentCredential': False,
                        'name': 'my app',
                        'type': 'servicePrincipal',
                        'useCertSNIssuerAuth': True}}]
