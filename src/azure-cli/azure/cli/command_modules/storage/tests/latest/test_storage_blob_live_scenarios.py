@@ -5,7 +5,6 @@
 
 import os
 from datetime import datetime, timedelta
-
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
@@ -13,7 +12,6 @@ from azure.cli.core.profiles import ResourceType
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadLiveTests(LiveScenarioTest):
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_128mb_file(self, resource_group, storage_account):
