@@ -6,9 +6,6 @@
 import os
 import json
 
-from ._environment import get_config_dir
-from .util import get_file_json, adal_resource_to_msal_scopes
-
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -23,6 +20,9 @@ from azure.identity import (
     EnvironmentCredential
 )
 
+from ._environment import get_config_dir
+from .util import get_file_json, adal_resource_to_msal_scopes
+
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
 logger = get_logger(__name__)
@@ -34,7 +34,7 @@ _SERVICE_PRINCIPAL_CERT_FILE = 'certificateFile'
 _SERVICE_PRINCIPAL_CERT_THUMBPRINT = 'thumbprint'
 
 
-class Identity:
+class Identity:  # pylint: disable=too-many-instance-attributes
     """Class to interact with Azure Identity.
     """
     MANAGED_IDENTITY_TENANT_ID = "tenant_id"
@@ -371,7 +371,7 @@ class Identity:
         """Migrate ADAL token cache to MSAL."""
         logger.warning("Migrating token cache from ADAL to MSAL.")
 
-        entries = AdalCredentialCache()._load_tokens_from_file()
+        entries = AdalCredentialCache()._load_tokens_from_file()  # pylint: disable=protected-access
         if not entries:
             logger.debug("No ADAL token cache found.")
             return
@@ -388,7 +388,8 @@ class Identity:
 
                     msal_app = self._build_persistent_msal_app(authority)
                     # TODO: Not work in ADFS:
-                    # {'error': 'invalid_grant', 'error_description': "MSIS9614: The refresh token received in 'refresh_token' parameter is invalid."}
+                    # {'error': 'invalid_grant', 'error_description': "MSIS9614: The refresh token received in
+                    # 'refresh_token' parameter is invalid."}
                     logger.warning("Migrating refresh token: username: %s, authority: %s, scopes: %s",
                                    username, authority, scopes)
                     token_dict = msal_app.acquire_token_by_refresh_token(refresh_token, scopes)
@@ -592,7 +593,7 @@ class AdalCredentialCache:
         self._delete_token_file()
 
 
-class ServicePrincipalAuth(object):   # pylint: disable=too-few-public-methods
+class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
 
     def __init__(self, client_id, tenant_id, secret=None, certificate_file=None, use_cert_sn_issuer=None):
         if not (secret or certificate_file):

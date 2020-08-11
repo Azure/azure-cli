@@ -199,7 +199,7 @@ class Profile:
                 t_list = [s.tenant_id for s in subscriptions]
                 bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
                 profile = Profile(cli_ctx=self.cli_ctx)
-                tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)
+                tenant_accounts = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
                 subscriptions.extend(tenant_accounts)
                 if not subscriptions:
                     return []
@@ -315,7 +315,7 @@ class Profile:
             user_type = _USER
             # For user account, credential._credential is a UsernamePasswordCredential.
             # Login the user so that MSAL has it in cache.
-            authentication_record = credential._credential.authenticate()
+            authentication_record = credential._credential.authenticate()  # pylint: disable=protected-access
         else:
             user_type = _SERVICE_PRINCIPAL
 
@@ -592,7 +592,6 @@ class Profile:
     def get_access_token_for_resource(self, username, tenant, resource):
         """get access token for current user account, used by vsts and iot module"""
         tenant = tenant or 'common'
-        account = self.get_subscription()
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         identity = Identity(authority, tenant, cred_cache=self._adal_cache)
         identity_credential = identity.get_user_credential(username)
@@ -729,7 +728,7 @@ class Profile:
                 else:
                     # pylint: disable=protected-access
                     subscriptions = subscription_finder. \
-                        find_using_common_tenant(user_name, identity_credential) # pylint: disable=protected-access
+                        find_using_common_tenant(user_name, identity_credential)  # pylint: disable=protected-access
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
                                "modified. You can run 'az login' later to explicitly refresh them", user_name, ex)

@@ -26,6 +26,7 @@ from knack.util import CLIError
 from azure.identity import AuthenticationRecord
 
 
+@unittest.skip
 class TestProfile(unittest.TestCase):
 
     @classmethod

@@ -18,7 +18,7 @@ from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import \
     (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
-from azure.cli.core._profile import (Profile, SubscriptionFinder)
+from azure.cli.core._profile import Profile, SubscriptionFinder
 
 from azure.cli.core.mock import DummyCli
 
@@ -452,13 +452,15 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        consolidated = profile._normalize_properties(self.user1,
-                                                     [self.subscription1],
-                                                     False)
+        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
         expected = self.subscription1_normalized
         self.assertEqual(expected, consolidated[0])
         # verify serialization works
         self.assertIsNotNone(json.dumps(consolidated[0]))
+
+        # Test is_environment is mapped to user.isEnvironmentCredential
+        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False, is_environment=True)
+        self.assertEqual(consolidated[0]['user']['isEnvironmentCredential'], True)
 
     def test_normalize_with_unicode_in_subscription_name(self):
         cli = DummyCli()
@@ -1312,7 +1314,7 @@ class TestProfile(unittest.TestCase):
         from azure.core.credentials import AccessToken
         import time
         get_token_mock.return_value = AccessToken(TestProfile.test_msi_access_token,
-                                             int(self.token_entry1['expiresIn'] + time.time()))
+                                                  int(self.token_entry1['expiresIn'] + time.time()))
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
 
@@ -1343,7 +1345,7 @@ class TestProfile(unittest.TestCase):
         from azure.core.credentials import AccessToken
         import time
         get_token_mock.return_value = AccessToken(TestProfile.test_msi_access_token,
-                                             int(self.token_entry1['expiresIn'] + time.time()))
+                                                  int(self.token_entry1['expiresIn'] + time.time()))
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False, async_persist=False)
 
         subscriptions = profile.login_with_managed_identity()
@@ -1373,7 +1375,7 @@ class TestProfile(unittest.TestCase):
         from azure.core.credentials import AccessToken
         import time
         get_token_mock.return_value = AccessToken(TestProfile.test_msi_access_token,
-                                             int(self.token_entry1['expiresIn'] + time.time()))
+                                                  int(self.token_entry1['expiresIn'] + time.time()))
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False, async_persist=False)
 
         subscriptions = profile.login_with_managed_identity(allow_no_subscriptions=True)
@@ -1404,7 +1406,7 @@ class TestProfile(unittest.TestCase):
         import time
 
         get_token_mock.return_value = AccessToken(TestProfile.test_user_msi_access_token,
-                                             int(self.token_entry1['expiresIn'] + time.time()))
+                                                  int(self.token_entry1['expiresIn'] + time.time()))
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None},
                           use_global_creds_cache=False, async_persist=False)
 
@@ -1438,7 +1440,7 @@ class TestProfile(unittest.TestCase):
         import time
 
         get_token_mock.return_value = AccessToken(TestProfile.test_user_msi_access_token,
-                                             int(self.token_entry1['expiresIn'] + time.time()))
+                                                  int(self.token_entry1['expiresIn'] + time.time()))
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None},
                           use_global_creds_cache=False, async_persist=False)
 
@@ -1472,7 +1474,7 @@ class TestProfile(unittest.TestCase):
         import time
 
         get_token_mock.return_value = AccessToken(TestProfile.test_user_msi_access_token,
-                                             int(self.token_entry1['expiresIn'] + time.time()))
+                                                  int(self.token_entry1['expiresIn'] + time.time()))
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None},
                           use_global_creds_cache=False, async_persist=False)
 
@@ -1902,6 +1904,7 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         # if home_tenant_id is None, this denotes a Subscription from SDK
         if home_tenant_id:
             self.home_tenant_id = home_tenant_id
+
 
 class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-methods
 
