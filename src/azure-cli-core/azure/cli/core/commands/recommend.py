@@ -238,11 +238,9 @@ class TreeNode:
         ret = []
         if not self._from_list:
             return None
-        # currently contains and length
-        if self._name == 'root':
-            query_str = "length({})".format(self._get_trace_str())
-            ret.append(Recommendation(
-                query_str, help_str="Get the number of the results", group_name="function"))
+        query_str = "length({})".format(self._get_trace_str())
+        ret.append(Recommendation(
+            query_str, help_str="Get the number of the results", group_name="function"))
         return ret
 
 
@@ -272,11 +270,9 @@ class TreeBuilder:
         recommendations.extend(self._root.get_select_string(keywords_list))
         if self._root._from_list:
             recommendations.extend(self._root.select_specific_number_string(keywords_list))
-        for node in self._all_nodes.values():
-            if node._from_list:
-                recommendations.extend(
-                    node.get_condition_recommend(keywords_list))
-                recommendations.extend(node.get_function_recommend(keywords_list))
+            recommendations.extend(
+                self._root.get_condition_recommend(keywords_list))
+            recommendations.extend(self._root.get_function_recommend(keywords_list))
         recommendations.sort(key=lambda x: x._group)
         return todict(recommendations)
 
@@ -292,7 +288,7 @@ class TreeBuilder:
         ret = None
         for item in data:
             if hasattr(item, '__len__'):
-                if len(item) > 0:
+                if item:
                     ret = item
                     break
             elif item is not None:
