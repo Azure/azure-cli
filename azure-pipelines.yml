@@ -572,6 +572,33 @@ jobs:
 
     displayName: 'Bash Script'
 
+- job: TestHomebrewPackage
+  displayName: Test Homebrew Package
+
+  dependsOn: BuildHomebrewFormula
+  condition: succeeded()
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
+      artifactName: homebrew
+
+
+  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
+
+
+    displayName: 'Test Homebrew Package'
+
 - job: BuildYumPackage
   displayName: Build Yum Package
 
