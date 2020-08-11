@@ -227,11 +227,9 @@ class TestProfile(unittest.TestCase):
         cls.service_principal_secret = "test_secret"
         cls.service_principal_tenant_id = "00000001-0000-0000-0000-000000000000"
 
-    @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
     @mock.patch('azure.identity.InteractiveBrowserCredential.authenticate', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
-    def test_login_with_interactive_browser(self, app_mock, authenticate_mock, get_token_mock):
-        get_token_mock.return_value = self.access_token
+    def test_login_with_interactive_browser(self, app_mock, authenticate_mock):
         authenticate_mock.return_value = self.authentication_record
 
         cli = DummyCli()
@@ -248,11 +246,9 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(self.subscription1_output, subs)
 
-    @mock.patch('azure.identity.UsernamePasswordCredential.get_token', autospec=True)
     @mock.patch('azure.identity.UsernamePasswordCredential.authenticate', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
-    def test_login_with_username_password_for_tenant(self, app_mock, authenticate_mock, get_token_mock):
-        get_token_mock.return_value = self.access_token
+    def test_login_with_username_password_for_tenant(self, app_mock, authenticate_mock):
         authenticate_mock.return_value = self.authentication_record
         cli = DummyCli()
         mock_arm_client = mock.MagicMock()
@@ -268,11 +264,9 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(self.subscription1_output, subs)
 
-    @mock.patch('azure.identity.DeviceCodeCredential.get_token', autospec=True)
     @mock.patch('azure.identity.DeviceCodeCredential.authenticate', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
-    def test_login_with_device_code(self, app_mock, authenticate_mock, get_token_mock):
-        get_token_mock.return_value = self.access_token
+    def test_login_with_device_code(self, app_mock, authenticate_mock):
         authenticate_mock.return_value = self.authentication_record
         cli = DummyCli()
         mock_arm_client = mock.MagicMock()
@@ -288,19 +282,13 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(self.subscription1_output, subs)
 
-    @mock.patch('azure.identity.DeviceCodeCredential.get_token', autospec=True)
     @mock.patch('azure.identity.DeviceCodeCredential.authenticate', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
-    def test_login_with_device_code_for_tenant(self, app_mock, authenticate_mock, get_token_mock):
-        def just_raise(ex):
-            raise ex
-
-        get_token_mock.return_value = self.access_token
+    def test_login_with_device_code_for_tenant(self, app_mock, authenticate_mock):
         authenticate_mock.return_value = self.authentication_record
         cli = DummyCli()
         mock_arm_client = mock.MagicMock()
-        mock_arm_client.tenants.list.side_effect = lambda: just_raise(
-            ValueError("'tenants.list' should not occur"))
+        mock_arm_client.tenants.list.side_effect = ValueError("'tenants.list' should not occur")
         mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
 
@@ -312,10 +300,8 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(self.subscription1_output, subs)
 
-    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
-    def test_login_with_service_principal_secret(self, get_token_mock):
+    def test_login_with_service_principal_secret(self):
         cli = DummyCli()
-        get_token_mock.return_value = self.access_token
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
@@ -339,10 +325,8 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(output, subs)
 
-    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
-    def test_login_with_service_principal_cert(self, get_token_mock):
+    def test_login_with_service_principal_cert(self):
         cli = DummyCli()
-        get_token_mock.return_value = self.access_token
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
@@ -368,10 +352,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(output, subs)
 
     @unittest.skip("Not supported by Azure Identity.")
-    @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
     def test_login_with_service_principal_cert_sn_issuer(self, get_token_mock):
         cli = DummyCli()
-        get_token_mock.return_value = self.access_token
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _: mock_arm_client)
@@ -398,19 +380,17 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(output, subs)
 
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
-    @mock.patch('azure.identity.EnvironmentCredential.get_token', autospec=True)
     @mock.patch.dict('os.environ')
-    def test_login_with_environment_credential_service_principal(self, get_token_mock, get_client_mock):
+    def test_login_with_environment_credential_service_principal(self, get_client_class_mock):
         os.environ['AZURE_TENANT_ID'] = self.service_principal_tenant_id
         os.environ['AZURE_CLIENT_ID'] = self.service_principal_id
         os.environ['AZURE_CLIENT_SECRET'] = self.service_principal_secret
 
         client_mock = mock.MagicMock()
-        get_client_mock.return_value = mock.MagicMock(return_value=client_mock)
+        get_client_class_mock.return_value = mock.MagicMock(return_value=client_mock)
         client_mock.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
 
         cli = DummyCli()
-        get_token_mock.return_value = self.access_token
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
 
@@ -437,14 +417,14 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.identity.UsernamePasswordCredential.authenticate', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
     @mock.patch.dict('os.environ')
-    def test_login_with_environment_credential_username_password(self, app_mock, authenticate_mock, get_client_mock):
+    def test_login_with_environment_credential_username_password(self, app_mock, authenticate_mock, get_client_class_mock):
         os.environ['AZURE_USERNAME'] = self.user1
         os.environ['AZURE_PASSWORD'] = "test_user_password"
 
         authenticate_mock.return_value = self.authentication_record
 
         arm_client_mock = mock.MagicMock()
-        get_client_mock.return_value = mock.MagicMock(return_value=arm_client_mock)
+        get_client_class_mock.return_value = mock.MagicMock(return_value=arm_client_mock)
         arm_client_mock.tenants.list.return_value = [TenantStub(self.tenant_id)]
         arm_client_mock.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
 
