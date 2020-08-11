@@ -293,6 +293,13 @@ def _arm_to_cli_mapper(arm_dict):
             acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True)))
 
 
+def _get_resource_manager_endpoint(default_resource_manager):
+    private_geo = os.environ.get('AZURE_CLI_PRIVATE_GEO')
+    if private_geo is None or private_geo == '':
+        return default_resource_manager
+    return private_geo
+
+
 class Cloud:  # pylint: disable=too-few-public-methods
     """ Represents an Azure Cloud instance """
 
@@ -323,7 +330,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
     'AzureCloud',
     endpoints=CloudEndpoints(
         management='https://management.core.windows.net/',
-        resource_manager='https://management.azure.com/',
+        resource_manager=_get_resource_manager_endpoint('https://management.azure.com/'),
         sql_management='https://management.core.windows.net:8443/',
         batch_resource_id='https://batch.core.windows.net/',
         gallery='https://gallery.azure.com/',
