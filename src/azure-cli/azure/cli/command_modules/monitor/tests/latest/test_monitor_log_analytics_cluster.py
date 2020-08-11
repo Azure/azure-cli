@@ -20,7 +20,7 @@ class TestClusterScenarios(ScenarioTest):
             'existing_cluster_name': 'yutestcluster4'
         })
 
-        self.cmd("monitor log-analytics cluster create -g {rg1} -n {new_cluster_name} --sku-capacity {sku_capacity}",
+        self.cmd("monitor log-analytics cluster create -g {rg1} -n {new_cluster_name} --sku-capacity {sku_capacity} --no-wait",
                  checks=[])
 
         self.cmd("monitor log-analytics cluster show -g {rg1} -n {new_cluster_name}", checks=[

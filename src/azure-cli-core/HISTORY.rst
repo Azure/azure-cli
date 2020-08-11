@@ -3,6 +3,38 @@
 Release History
 ===============
 
+2.10.1
+++++++
+* Minor fixes
+
+2.10.0
+++++++
+* Minor fixes
+
+2.9.1
+++++++
+* Minor fixes
+
+2.9.0
+++++++
+* Fix get_token() issue in msi login and `expiresIn` key error in cloud shell login credentials for track 2 SDK related commands (#14187)
+
+2.8.0
+++++++
+* Add get_command_loader() entry to support to load customized CommandLoader (#13763)
+
+2.7.0
+++++++
+* Enable local context for location (#13682)
+
+2.6.0
+++++++
+* Update local context on/off status to global user level (#13277)
+
+2.5.1
+++++++
+* Minor fixes
+
 2.5.0
 ++++++
 * Fix logging file fd leaking (#13102)

@@ -24,7 +24,7 @@ class APIVersionException(Exception):
 PROFILE_TYPE = object()
 
 
-class CustomResourceType(object):  # pylint: disable=too-few-public-methods
+class CustomResourceType:  # pylint: disable=too-few-public-methods
     def __init__(self, import_prefix, client_name):
         self.import_prefix = import_prefix
         self.client_name = client_name
@@ -57,7 +57,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
-    DATA_STORAGE = ('azure.multiapi.storage', None)
+
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', None)
     MGMT_ADVISOR = ('azure.mgmt.advisor', None)
@@ -93,6 +93,11 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
+    DATA_STORAGE = ('azure.multiapi.storage', None)
+    DATA_STORAGE_BLOB = ('azure.multiapi.storagev2.blob', None)
+    DATA_STORAGE_FILEDATALAKE = ('azure.multiapi.storagev2.filedatalake', None)
+    DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
+    DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -106,7 +111,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
         self.client_name = client_name
 
 
-class SDKProfile(object):  # pylint: disable=too-few-public-methods
+class SDKProfile:  # pylint: disable=too-few-public-methods
 
     def __init__(self, default_api_version, profile=None):
         """Constructor.
@@ -126,22 +131,24 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
-        ResourceType.MGMT_NETWORK: '2020-03-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2019-07-01', {
+        ResourceType.MGMT_NETWORK: '2020-05-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2019-11-01',
-            'snapshots': '2019-07-01',
+            'disks': '2020-05-01',
+            'disk_encryption_sets': '2020-05-01',
+            'disk_accesses': '2020-05-01',
+            'snapshots': '2020-05-01',
             'galleries': '2019-12-01',
             'gallery_images': '2019-12-01',
             'gallery_image_versions': '2019-12-01',
-            'virtual_machine_scale_sets': '2019-12-01'
+            'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2019-09-01',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2019-07-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-06-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2020-06-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2019-10-01-preview',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2019-09-01',
@@ -153,8 +160,12 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-11-09',
+        ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2018-11-09',
+        ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
+        ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_EVENTHUB: '2017-04-01',
+        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
@@ -184,10 +195,11 @@ AZURE_API_PROFILES = {
             'private_link_scoped_resources': '2019-10-17-preview',
             'private_link_scope_operation_status': '2019-10-17-preview',
             'private_link_scopes': '2019-10-17-preview',
-            'private_endpoint_connections': '2019-10-17-preview'
+            'private_endpoint_connections': '2019-10-17-preview',
+            'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
-        ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
+        ResourceType.MGMT_IOTHUB: '2020-03-01',
         ResourceType.MGMT_ARO: '2020-04-30'
     },
     '2019-03-01-hybrid': {
@@ -212,12 +224,16 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
+        ResourceType.DATA_STORAGE_BLOB: '2017-11-09',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-11-09',
+        ResourceType.DATA_STORAGE_FILESHARE: '2017-11-09',
+        ResourceType.DATA_STORAGE_QUEUE: '2017-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         # Full MultiAPI support is not done in AppService, the line below is merely
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2017-04-01',
+        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22'
     },
     '2018-03-01-hybrid': {
@@ -236,6 +252,10 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
+        ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-04-17',
+        ResourceType.DATA_STORAGE_FILESHARE: '2017-04-17',
+        ResourceType.DATA_STORAGE_QUEUE: '2017-04-17',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
@@ -253,12 +273,16 @@ AZURE_API_PROFILES = {
             'classic_administrators': '2015-06-01'
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
-        ResourceType.DATA_STORAGE: '2015-04-05'
+        ResourceType.DATA_STORAGE: '2015-04-05',
+        ResourceType.DATA_STORAGE_BLOB: '2015-04-05',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2015-04-05',
+        ResourceType.DATA_STORAGE_FILESHARE: '2015-04-05',
+        ResourceType.DATA_STORAGE_QUEUE: '2015-04-05'
     }
 }
 
 
-class _ApiVersions(object):  # pylint: disable=too-few-public-methods
+class _ApiVersions:  # pylint: disable=too-few-public-methods
     def __init__(self, client_type, sdk_profile, post_process):
         self._client_type = client_type
         self._sdk_profile = sdk_profile
@@ -319,7 +343,7 @@ def get_api_version(api_profile, resource_type, as_sdk_profile=False):
 
 
 @total_ordering
-class _SemVerAPIFormat(object):
+class _SemVerAPIFormat:
     """Basic semver x.y.z API format.
     Supports x, or x.y, or x.y.z
     """
@@ -343,7 +367,7 @@ class _SemVerAPIFormat(object):
 
 
 @total_ordering  # pylint: disable=too-few-public-methods
-class _DateAPIFormat(object):
+class _DateAPIFormat:
     """ Class to support comparisons for API versions in
         YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile, YYYY-MM-DD-profile-preview
         or any string that starts with YYYY-MM-DD format. A special case is made for 'latest'.

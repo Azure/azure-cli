@@ -15,6 +15,7 @@ from ._format import (
     webhook_list_events_output_format,
     webhook_ping_output_format,
     replication_output_format,
+    endpoints_output_format,
     build_output_format,
     task_output_format,
     task_identity_format,
@@ -166,7 +167,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_delete')
         g.show_command('show', 'acr_show')
         g.command('show-usage', 'acr_show_usage', table_transformer=usage_output_format)
-        g.command('show-endpoints', 'acr_show_endpoints', is_preview=True)
+        g.command('show-endpoints', 'acr_show_endpoints', table_transformer=endpoints_output_format)
         g.generic_update_command('update',
                                  getter_name='acr_update_get',
                                  setter_name='acr_update_set',
@@ -274,7 +275,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('show', 'acr_config_retention_show')
         g.command('update', 'acr_config_retention_update')
 
-    with self.command_group('acr helm', acr_helm_util) as g:
+    def _helm_deprecate_message(self):
+        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
+        msg += " Use '{}' instead.".format(self.redirect)
+        msg += " For more information go to"
+        msg += " https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos"
+        return msg
+
+    with self.command_group('acr helm', acr_helm_util,
+                            deprecate_info=self.deprecate(redirect="helm v3",
+                                                          message_func=_helm_deprecate_message)) as g:
         g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format)
         g.command('show', 'acr_helm_show', table_transformer=helm_show_output_format)
         g.command('delete', 'acr_helm_delete')
@@ -315,22 +325,21 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('list', 'acr_agentpool_list')
         g.show_command('show', 'acr_agentpool_show')
 
-    with self.command_group('acr private-endpoint-connection', acr_private_endpoint_connection_util,
-                            is_preview=True) as g:
+    with self.command_group('acr private-endpoint-connection', acr_private_endpoint_connection_util) as g:
         g.command('delete', 'delete')
         g.show_command('show', 'show')
         g.command('list', 'list_connections')
         g.command('approve', 'approve')
         g.command('reject', 'reject')
 
-    with self.command_group('acr private-link-resource', acr_custom_util, is_preview=True) as g:
+    with self.command_group('acr private-link-resource', acr_custom_util) as g:
         g.command('list', 'list_private_link_resources')
 
-    with self.command_group('acr identity', acr_custom_util, is_preview=True) as g:
+    with self.command_group('acr identity', acr_custom_util) as g:
         g.command('show', 'show_identity')
         g.command('assign', 'assign_identity')
         g.command('remove', 'remove_identity')
 
-    with self.command_group('acr encryption', acr_custom_util, is_preview=True) as g:
+    with self.command_group('acr encryption', acr_custom_util) as g:
         g.command('show', 'show_encryption')
         g.command('rotate-key', "rotate_key")

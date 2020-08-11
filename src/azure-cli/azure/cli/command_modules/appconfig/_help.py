@@ -22,6 +22,8 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
   - name: Create an App Configuration with name, location, sku and resource group with user assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
+  - name: Create an App Configuration with name, location and resource group and enable public network access.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network
 """
 
 helps['appconfig identity'] = """
@@ -129,12 +131,14 @@ examples:
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json
   - name: Import all keys and feature flags with null label and apply new label from an App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --label ImportedKeys
-  - name: Import all keys and apply null label from an App Service appliaction.
+  - name: Import all keys and apply null label from an App Service application.
     text: az appconfig kv import -n MyAppConfiguration -s appservice --appservice-account MyAppService
   - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-label test --label test2 --src-name AnotherAppConfiguration --skip-features
   - name: Import all keys and feature flags with all labels to another App Configuration.
     text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label * --preserve-labels
+  - name: Import all keys and feature flags from a JSON file and apply JSON content type.
+    text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --separator . --content-type application/json
 """
 
 helps['appconfig kv list'] = """
@@ -143,12 +147,12 @@ short-summary: List key-values.
 examples:
   - name: List all key-values with null label.
     text: az appconfig kv list -n MyAppConfiguration --label \\0
-  - name: List a specfic key for any label start with v1. using connection string.
+  - name: List a specific key for any label start with v1. using connection string.
     text: az appconfig kv list --key color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
   - name: List all keys with any labels and query only key, value and tags.
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value tags --datetime "2019-05-01T11:24:12Z"
-  - name: List content of key vault reference with key prefix 'KVRef_'.
-    text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --key "KVRef_*" --resolve-keyvault
+  - name: List content of key vault reference with key prefix 'KVRef_' and only select key and value.
+    text: az appconfig kv list -n MyAppConfiguration --key "KVRef_*" --resolve-keyvault --query "[*].{key:key, value:value}"
   - name: List key-values with multiple labels.
     text: az appconfig kv list --label test,prod,\\0 -n MyAppConfiguration
 """
@@ -181,6 +185,12 @@ examples:
     text: az appconfig kv set -n MyAppConfiguration --key color --label MyLabel --value red
   - name: Set a key with null label using connection string.
     text: az appconfig kv set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --value red --tags key1=value1 key2=value2
+  - name: Set a key with string value and JSON content type.
+    text: az appconfig kv set -n MyAppConfiguration --key color --value \\"red\\" --content-type application/json
+  - name: Set a key with list value and JSON content type.
+    text: az appconfig kv set -n MyAppConfiguration --key options --value [1,2,3] --content-type application/activity+json;charset=utf-8
+  - name: Set a key with null value and JSON content type.
+    text: az appconfig kv set -n MyAppConfiguration --key foo --value null --content-type application/json
 """
 
 helps['appconfig kv set-keyvault'] = """
@@ -236,6 +246,8 @@ examples:
     text: az appconfig revision list -n MyAppConfiguration --key color --label test,prod,\\0
   - name: List revision history for key "color" with any labels using connection string
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --datetime "2019-05-01T11:24:12Z"
+  - name: List revision history for all items and query only key, value and last_modified.
+    text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value last_modified
 """
 
 helps['appconfig show'] = """

@@ -27,7 +27,8 @@ from ._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_id, validate_sas_definition_id,
     validate_storage_account_id, validate_storage_disabled_attribute,
-    validate_deleted_vault_name)
+    validate_deleted_vault_name, validate_encryption, validate_decryption,
+    KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
 
@@ -38,9 +39,11 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
     (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
-     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes) = self.get_models(
+     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes,
+     JsonWebKeyEncryptionAlgorithm) = self.get_models(
          'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
+         'JsonWebKeyEncryptionAlgorithm',
          resource_type=ResourceType.DATA_KEYVAULT)
 
     class CLIJsonWebKeyOperation(str, Enum):
@@ -72,12 +75,13 @@ def load_arguments(self, _):
         c.argument('spn', help='name of a service principal that will receive permissions')
         c.argument('upn', help='name of a user principal that will receive permissions')
         c.argument('tags', tags_type)
-        c.argument('enabled_for_deployment', arg_type=get_three_state_flag(), help='Allow Virtual Machines to retrieve certificates stored as secrets from the vault.')
-        c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
-        c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
-        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), help='Enable RBAC authorization for the vault, and all contained entities.')
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
-        c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
+        c.argument('enabled_for_deployment', arg_type=get_three_state_flag())
+        c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag())
+        c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag())
+        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(),
+                   deprecate_info=c.deprecate(expiration='2.11.0', hide='2.11.0'))
+        c.argument('enable_purge_protection', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), help='Bypass traffic for space-separated uses.')
@@ -89,19 +93,19 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
         c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help="Enable 'soft delete' functionality for this key vault and all contained entities. If omitted, it will be set to true by default. Once set to true, it cannot be reverted to false.")
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,
                    help='Network ACLs. It accepts a JSON filename or a JSON string. JSON format: '
-                        '{\\"ip\\":[<ip1>, <ip2>...],\\"vnet\\":[<vnet_name_1>/<subnet_name_1>,<subnet_id2>...]}')
+                        '`{\\"ip\\":[<ip1>, <ip2>...],\\"vnet\\":[<vnet_name_1>/<subnet_name_1>,<subnet_id2>...]}`')
         c.argument('network_acls_ips', nargs='*', help='Network ACLs IP rules. Space-separated list of IP addresses.')
         c.argument('network_acls_vnets', nargs='*', help='Network ACLS VNet rules. Space-separated list of '
                                                          'Vnet/subnet pairs or subnet resource ids.')
 
     with self.argument_context('keyvault update') as c:
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help="Enable 'soft delete' functionality for this key vault and all contained entities. Once set to true, it cannot be reverted to false.")
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(),
+                   deprecate_info=c.deprecate(expiration='2.11.0', hide='2.11.0'))
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault recover') as c:
@@ -161,10 +165,10 @@ def load_arguments(self, _):
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
             c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
 
-        for cmd in ['backup', 'delete', 'download', 'list-versions', 'set-attributes', 'show']:
+        for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 try:
-                    c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
+                    c.extra('identifier', options_list=['--id'], help='Id of the {}. If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
                 except ValueError:
                     pass
                 c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
@@ -197,13 +201,17 @@ def load_arguments(self, _):
             c.argument('not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
     with self.argument_context('keyvault key create') as c:
-        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type)
-        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName))
+        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
+                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeytype')
+        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName),
+                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
+        c.argument('pem_string', type=file_type, help='PEM string containing the key to be imported.', validator=validate_key_import_source)
         c.argument('pem_password', help='Password of PEM file.')
-        c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter())
+        c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter(), validator=validate_key_import_source)
+        c.argument('byok_string', type=file_type, help='BYOK string containing the key to be imported. Must not be password protected.', validator=validate_key_import_source)
 
     with self.argument_context('keyvault key backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store key backup.')
@@ -217,6 +225,22 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
+
+    for scope in ['encrypt', 'decrypt']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
+
+    with self.argument_context('keyvault key encrypt') as c:
+        c.argument('value', help='The value to be encrypted. Default data type is Base64 encoded string.',
+                   validator=validate_encryption)
+        c.extra('data_type', help='The type of the original data.', arg_type=get_enum_type(KeyEncryptionDataType),
+                default='base64')
+
+    with self.argument_context('keyvault key decrypt') as c:
+        c.argument('value', help='The value to be decrypted, which should be the result of "az keyvault encrypt"',
+                   validator=validate_decryption)
+        c.extra('data_type', help='The type of the original data.', arg_type=get_enum_type(KeyEncryptionDataType),
+                default='base64')
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:

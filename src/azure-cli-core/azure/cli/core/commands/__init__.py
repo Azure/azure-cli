@@ -21,13 +21,13 @@ import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
-    BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
+    BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
-from azure.cli.core.local_context import GET
+from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
 
 
@@ -118,7 +118,7 @@ def _pre_command_table_create(cli_ctx, args):
 
 
 # pylint: disable=too-many-instance-attributes
-class CacheObject(object):
+class CacheObject:
 
     def path(self, args, kwargs):
         from azure.cli.core._environment import get_config_dir
@@ -293,9 +293,9 @@ class AzCliCommand(CLICommand):
         self._resolve_default_value_from_local_context(arg, overrides)
 
     def _resolve_default_value_from_local_context(self, arg, overrides):
-        if self.cli_ctx.local_context.is_on():
+        if self.cli_ctx.local_context.is_on:
             lca = overrides.settings.get('local_context_attribute', None)
-            if not lca or not lca.actions or GET not in lca.actions:
+            if not lca or not lca.actions or LocalContextAction.GET not in lca.actions:
                 return
             if lca.name:
                 local_context = self.cli_ctx.local_context
@@ -304,6 +304,7 @@ class AzCliCommand(CLICommand):
                     logger.debug("local context '%s' for arg %s", value, arg.name)
                     overrides.settings['default'] = DefaultStr(value)
                     overrides.settings['required'] = False
+                    overrides.settings['default_value_source'] = 'Local Context'
 
     def load_arguments(self):
         super(AzCliCommand, self).load_arguments()
@@ -348,7 +349,7 @@ class AzCliCommand(CLICommand):
                                    operation_group=operation_group)
 
     def update_context(self, obj_inst):
-        class UpdateContext(object):
+        class UpdateContext:
             def __init__(self, instance):
                 self.instance = instance
 
@@ -578,6 +579,28 @@ class AzCliCommandInvoker(CommandInvoker):
         parsed_args = self.parser.parse_args(args)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
 
+        # print local context warning
+        if self.cli_ctx.local_context.is_on and command and command in self.commands_loader.command_table:
+            local_context_args = []
+            arguments = self.commands_loader.command_table[command].arguments
+            specified_arguments = self.parser.subparser_map[command].specified_arguments \
+                if command in self.parser.subparser_map else []
+            for name, argument in arguments.items():
+                default_value_source = argument.type.settings.get('default_value_source', None)
+                dest_name = argument.type.settings.get('dest', None)
+                options = argument.type.settings.get('options_list', None)
+                if default_value_source == 'Local Context' and dest_name not in specified_arguments and options:
+                    value = getattr(parsed_args, name)
+                    local_context_args.append((options[0], value))
+            if local_context_args:
+                logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
+                               'run `az local-context off` to turn it off.',
+                               self.cli_ctx.local_context.effective_working_directory())
+                args_str = []
+                for name, value in local_context_args:
+                    args_str.append('{}: {}'.format(name, value))
+                logger.warning('Command argument values from local context: %s', ', '.join(args_str))
+
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
 
@@ -643,7 +666,7 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
 
         # save to local context if it is turned on after command executed successfully
-        if self.cli_ctx.local_context.is_on() and command and command in self.commands_loader.command_table and \
+        if self.cli_ctx.local_context.is_on and command and command in self.commands_loader.command_table and \
                 command in self.parser.subparser_map and self.parser.subparser_map[command].specified_arguments:
             self.cli_ctx.save_local_context(parsed_args, self.commands_loader.command_table[command].arguments,
                                             self.parser.subparser_map[command].specified_arguments)
@@ -804,11 +827,13 @@ class AzCliCommandInvoker(CommandInvoker):
 
     @staticmethod
     def remove_additional_prop_layer(obj, converted_dic):
-        from msrest.serialization import Model
-        if isinstance(obj, Model):
-            # let us make sure this is the additional properties auto-generated by SDK
-            if ('additionalProperties' in converted_dic and isinstance(obj.additional_properties, dict)):
+        # Follow EAFP to flatten `additional_properties` auto-generated by SDK
+        # See https://docs.python.org/3/glossary.html#term-eafp
+        try:
+            if 'additionalProperties' in converted_dic and isinstance(obj.additional_properties, dict):
                 converted_dic.update(converted_dic.pop('additionalProperties'))
+        except AttributeError:
+            pass
         return converted_dic
 
     def _validate_cmd_level(self, ns, cmd_validator):  # pylint: disable=no-self-use
@@ -820,12 +845,14 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
-        from msrest.exceptions import ValidationError
         for validator in getattr(ns, '_argument_validators', []):
             try:
                 validator(**self._build_kwargs(validator, ns))
-            except ValidationError:
-                logger.debug('Validation error in %s.', str(validator))
+            except Exception as ex:
+                # Delay the import and mimic an exception handler
+                from msrest.exceptions import ValidationError
+                if isinstance(ex, ValidationError):
+                    logger.debug('Validation error in %s.', str(validator))
                 raise
         try:
             delattr(ns, '_argument_validators')
@@ -833,7 +860,7 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
 
-class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
+class LongRunningOperation:  # pylint: disable=too-few-public-methods
     def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
 
         self.cli_ctx = cli_ctx
@@ -987,6 +1014,13 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 def _load_command_loader(loader, args, name, prefix):
     module = import_module(prefix + name)
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
+    if not loader_cls:
+        try:
+            get_command_loader = getattr(module, 'get_command_loader', None)
+            loader_cls = get_command_loader(loader.cli_ctx)
+        except (ImportError, AttributeError, TypeError):
+            logger.debug("Module '%s' is missing `get_command_loader` entry.", name)
+
     command_table = {}
 
     if loader_cls:
@@ -1014,7 +1048,7 @@ def _load_module_command_loader(loader, args, mod):
     return _load_command_loader(loader, args, mod, 'azure.cli.command_modules.')
 
 
-class ExtensionCommandSource(object):
+class ExtensionCommandSource:
     """ Class for commands contributed by an extension """
 
     def __init__(self, overrides_command=False, extension_name=None, preview=False, experimental=False):
@@ -1095,7 +1129,7 @@ def _merge_kwargs(patch_kwargs, base_kwargs, supported_kwargs=None):
 
 
 # pylint: disable=too-few-public-methods
-class CliCommandType(object):
+class CliCommandType:
 
     def __init__(self, overrides=None, **kwargs):
         if isinstance(overrides, str):

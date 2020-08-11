@@ -19,7 +19,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test',
-            'workspace': 'workspace042403',
+            'workspace': self.create_random_name('clitest', 20),
         })
 
         # enable network watcher
@@ -68,7 +68,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace32897502',
+            'workspace': self.create_random_name('clitest', 20),
         })
 
         # enable network watcher
@@ -119,7 +119,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace042104',
+            'workspace': self.create_random_name('clitest', 20),
         })
 
         # enable network watcher
@@ -185,7 +185,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace089504',
+            'workspace': self.create_random_name('clitest', 20),
         })
 
         # enable network watcher

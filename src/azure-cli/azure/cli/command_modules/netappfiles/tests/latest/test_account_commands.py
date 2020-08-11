@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "westus2stage"
+LOCATION = "westus2"
 
 # No tidy up of tests required. The resource group is automatically removed
 

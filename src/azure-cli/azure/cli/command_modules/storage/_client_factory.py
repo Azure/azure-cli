@@ -23,18 +23,19 @@ Missing credentials to access storage service. The following variations are acce
 
 
 def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
-                                    socket_timeout=None, token_credential=None):
+                                    socket_timeout=None, token_credential=None, location_mode=None):
     return get_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
                                    socket_timeout=socket_timeout,
                                    token_credential=token_credential,
-                                   endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint)
+                                   endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint,
+                                   location_mode=location_mode)
 
 
 def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
-                                 socket_timeout=None, token_credential=None):
+                                 socket_timeout=None, token_credential=None, location_mode=None):
     try:
         return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
-                                               socket_timeout, token_credential)
+                                               socket_timeout, token_credential, location_mode=location_mode)
     except ValueError as val_exception:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')
@@ -67,6 +68,8 @@ def page_blob_service_factory(cli_ctx, kwargs):
 
 
 def blob_data_service_factory(cli_ctx, kwargs):
+    if 'encryption_scope' in kwargs and kwargs['encryption_scope']:
+        return cf_blob_client(cli_ctx, kwargs)
     from azure.cli.command_modules.storage.sdkutil import get_blob_service_by_type
     blob_type = kwargs.get('blob_type')
     blob_service = get_blob_service_by_type(cli_ctx, blob_type) or get_blob_service_by_type(cli_ctx, 'block')
@@ -76,7 +79,8 @@ def blob_data_service_factory(cli_ctx, kwargs):
                                         connection_string=kwargs.pop('connection_string', None),
                                         sas_token=kwargs.pop('sas_token', None),
                                         socket_timeout=kwargs.pop('socket_timeout', None),
-                                        token_credential=kwargs.pop('token_credential', None))
+                                        token_credential=kwargs.pop('token_credential', None),
+                                        location_mode=kwargs.pop('location_mode', None))
 
 
 def table_data_service_factory(cli_ctx, kwargs):
@@ -159,6 +163,10 @@ def cf_mgmt_blob_services(cli_ctx, _):
     return storage_client_factory(cli_ctx).blob_services
 
 
+def cf_mgmt_file_services(cli_ctx, _):
+    return storage_client_factory(cli_ctx).file_services
+
+
 def cf_mgmt_file_shares(cli_ctx, _):
     return storage_client_factory(cli_ctx).file_shares
 
@@ -177,3 +185,76 @@ def cf_private_endpoint(cli_ctx, _):
 
 def cf_mgmt_encryption_scope(cli_ctx, _):
     return storage_client_factory(cli_ctx).encryption_scopes
+
+
+def get_account_url(cli_ctx, account_name, service):
+    from knack.util import CLIError
+    if account_name is None:
+        raise CLIError("Please provide storage account name or connection string.")
+    storage_endpoint = cli_ctx.cloud.suffixes.storage_endpoint
+    return "https://{}.{}.{}".format(account_name, service, storage_endpoint)
+
+
+def cf_blob_service(cli_ctx, kwargs):
+    from knack.util import CLIError
+    t_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                             '_blob_service_client#BlobServiceClient')
+    connection_string = kwargs.pop('connection_string', None)
+    account_name = kwargs.pop('account_name', None)
+    account_key = kwargs.pop('account_key', None)
+    token_credential = kwargs.pop('token_credential', None)
+    sas_token = kwargs.pop('sas_token', None)
+    if connection_string:
+        return t_blob_service.from_connection_string(conn_str=connection_string)
+
+    account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
+    credential = account_key or sas_token or token_credential
+
+    if account_url and credential:
+        return t_blob_service(account_url=account_url, credential=credential)
+    raise CLIError("Please provide valid connection string, or account name with account key, "
+                   "sas token or login auth mode.")
+
+
+def cf_blob_client(cli_ctx, kwargs):
+    return cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs.pop('container_name'),
+                                                            blob=kwargs.pop('blob_name'),
+                                                            snapshot=kwargs.pop('snapshot', None))
+
+
+def cf_blob_lease_client(cli_ctx, kwargs):
+    t_lease_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_lease#BlobLeaseClient')
+    blob_client = cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs.pop('container_name', None),
+                                                                   blob=kwargs.pop('blob_name', None))
+    return t_lease_service(client=blob_client, lease_id=kwargs.pop('lease_id', None))
+
+
+def cf_adls_service(cli_ctx, kwargs):
+    t_adls_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
+                             '_data_lake_service_client#DataLakeServiceClient')
+    connection_string = kwargs.pop('connection_string', None)
+    account_key = kwargs.pop('account_key', None)
+    token_credential = kwargs.pop('token_credential', None)
+    sas_token = kwargs.pop('sas_token', None)
+    if connection_string:
+        return t_adls_service.from_connection_string(connection_string=connection_string)
+
+    account_url = get_account_url(cli_ctx, account_name=kwargs.pop('account_name', None), service='dfs')
+    credential = account_key or sas_token or token_credential
+
+    if account_url and credential:
+        return t_adls_service(account_url=account_url, credential=credential)
+    return None
+
+
+def cf_adls_file_system(cli_ctx, kwargs):
+    return cf_adls_service(cli_ctx, kwargs).get_file_system_client(file_system=kwargs.pop('file_system_name'))
+
+
+def cf_adls_directory(cli_ctx, kwargs):
+    return cf_adls_file_system(cli_ctx, kwargs).get_directory_client(directory=kwargs.pop('directory_path'))
+
+
+def cf_adls_file(cli_ctx, kwargs):
+    return cf_adls_service(cli_ctx, kwargs).get_file_client(file_system=kwargs.pop('file_system_name', None),
+                                                            file_path=kwargs.pop('path', None))

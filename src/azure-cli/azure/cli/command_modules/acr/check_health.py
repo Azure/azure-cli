@@ -223,7 +223,8 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
 
     try:
         registry_ip = socket.gethostbyname(login_server)
-    except socket.gaierror:
+    except (socket.gaierror, UnicodeError):
+        # capture UnicodeError for https://github.com/Azure/azure-cli/issues/12936
         pass
 
     if not registry_ip:

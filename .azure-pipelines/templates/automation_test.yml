@@ -7,18 +7,7 @@ steps:
     inputs:
       versionSpec: ${{ parameters.pythonVersion }}
       displayName: "Use Python ${{ parameters.pythonVersion }}"
-  - bash: |
-      set -ev
-
-      python -m venv env
-      chmod +x env/bin/activate
-      source env/bin/activate
-
-      pip install -q azdev
-      azdev --version
-
-      azdev setup -c ./
-    displayName: Setup Env
+  - template: ./azdev_setup.yml
   - bash: |
       set -ev
 

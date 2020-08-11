@@ -122,9 +122,24 @@ az storage account encryption-scope update \
 *Examples:*
 ##### Set default encryption scope when creating storage container
 ```
-az storage container create -n testcontainer \
+az storage container create \
+    -n testcontainer \
     --account-name mystorageaccount \
     -g MyResourceGroup \
     --default-encryption-scope myencryption \
     --prevent-encryption-scope-override false
+```
+
+#### Manage encryption scope for blob
+
+*Examples:*
+##### Set default encryption scope when uploading storage blob
+```
+az storage blob upload
+    -n blobname \
+    -f <filepath> \
+    -c testcontainer \
+    --encryption-scope myencryption \
+    --account-name mystorageaccount \
+    --account-key 0000-0000
 ```

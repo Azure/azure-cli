@@ -853,6 +853,91 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(TransparentDataEncryptionStatus))
 
     ###############################################
+    #                sql db ltr                   #
+    ###############################################
+    with self.argument_context('sql db ltr-policy set') as c:
+        create_args_for_complex_type(
+            c, 'parameters', Database, [
+                'weekly_retention',
+                'monthly_retention',
+                'yearly_retention',
+                'week_of_year'])
+
+        c.argument('weekly_retention',
+                   help='Retention for the weekly backup. '
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
+
+        c.argument('monthly_retention',
+                   help='Retention for the monthly backup. '
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
+
+        c.argument('yearly_retention',
+                   help='Retention for the yearly backup. '
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
+
+        c.argument('week_of_year',
+                   help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
+
+    with self.argument_context('sql db ltr-backup') as c:
+        c.argument('location_name',
+                   required=True,
+                   arg_type=get_location_type(self.cli_ctx),
+                   help='The location of the desired backups.')
+
+        c.argument('backup_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the LTR backup. '
+                   'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup name.')
+
+        c.argument('long_term_retention_server_name',
+                   options_list=['--server', '-s'],
+                   help='Name of the Azure SQL Server. '
+                   'If specified, retrieves all requested backups under this server.')
+
+        c.argument('long_term_retention_database_name',
+                   options_list=['--database', '-d'],
+                   help='Name of the Azure SQL Database. '
+                   'If specified (along with server name), retrieves all requested backups under this database.')
+
+    with self.argument_context('sql db ltr-backup list') as c:
+        c.argument('database_state',
+                   required=False,
+                   options_list=['--database-state', '--state'],
+                   help='\'All\', \'Live\', or \'Deleted\'. '
+                   'Will fetch backups only from databases of specified state. '
+                   'If no state provied, defaults to \'All\'.')
+
+        c.argument('only_latest_per_database',
+                   options_list=['--only-latest-per-database', '--latest'],
+                   required=False,
+                   help='If true, will only return the latest backup for each database')
+
+    with self.argument_context('sql db ltr-backup restore') as c:
+        c.argument('target_database_name',
+                   options_list=['--dest-database'],
+                   required=True,
+                   help='Name of the database that will be created as the restore destination.')
+
+        c.argument('target_server_name',
+                   options_list=['--dest-server'],
+                   required=True,
+                   help='Name of the server to restore database to.')
+
+        c.argument('target_resource_group_name',
+                   options_list=['--dest-resource-group'],
+                   required=True,
+                   help='Name of the resource group of the server to restore database to.')
+
+        c.argument('long_term_retention_backup_resource_id',
+                   options_list=['--backup-id'],
+                   required=True,
+                   help='The resource id of the long term retention backup to be restored. '
+                   'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
+
+    ###############################################
     #                sql dw                       #
     ###############################################
     with self.argument_context('sql dw') as c:
@@ -1358,6 +1443,8 @@ def load_arguments(self, _):
                    help='The time zone id for the instance to set. '
                    'A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
 
+        c.argument('tags', arg_type=tags_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1376,6 +1463,7 @@ def load_arguments(self, _):
                 'proxy_override',
                 'public_data_endpoint_enabled',
                 'timezone_id',
+                'tags',
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1417,6 +1505,7 @@ def load_arguments(self, _):
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
                 'administrator_login_password',
+                'tags',
             ])
 
         c.argument('administrator_login_password',

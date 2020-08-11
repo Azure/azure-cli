@@ -16,7 +16,7 @@ def load_arguments(self, _):
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
         get_enum_type, get_three_state_flag)
     from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.local_context import LocalContextAttribute, SET, ALL
+    from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
     from knack.arguments import ignore_type, CLIArgumentType
 
@@ -26,8 +26,9 @@ def load_arguments(self, _):
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
         validate_msi)
+    from azure.cli.command_modules.resource.parameters import TagUpdateOperation
 
-    DeploymentMode, WhatIfResultFormat = self.get_models('DeploymentMode', 'WhatIfResultFormat', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -62,8 +63,17 @@ def load_arguments(self, _):
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
-                                                           help='Instruct the command to run deployment What-If before excuting the deployment. It then prompts you to acknowledge resource changes before it continues.',
+                                                           help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
                                                            is_preview=True, min_api='2019-07-01')
+    deployment_what_if_exclude_change_types_type = CLIArgumentType(nargs="+", options_list=['--exclude-change-types', '-x'],
+                                                                   arg_type=get_enum_type(ChangeType),
+                                                                   help='Space-separated list of resource change types to be excluded from What-If results.',
+                                                                   is_preview=True, min_api='2019-07-01')
+    tag_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The tag name.')
+    tag_value_type = CLIArgumentType(options_list='--value', help='The tag value.')
+    tag_resource_id_type = CLIArgumentType(options_list='--resource-id',
+                                           help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.',
+                                           min_api='2019-10-01')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -245,6 +255,9 @@ def load_arguments(self, _):
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
                    arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -269,12 +282,16 @@ def load_arguments(self, _):
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
                    arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
 
     with self.argument_context('deployment sub validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -302,7 +319,11 @@ def load_arguments(self, _):
                    help='Auxiliary tenants which will be used during deployment across tenants.')
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
-        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'], arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -311,6 +332,7 @@ def load_arguments(self, _):
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
         c.ignore("rollback_on_error")
 
     with self.argument_context('deployment group validate') as c:
@@ -331,6 +353,20 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
+                   min_api="2019-10-01")
+
+    with self.argument_context('deployment mg what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
 
     with self.argument_context('deployment mg validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -352,6 +388,20 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
+                   min_api="2019-10-01")
+
+    with self.argument_context('deployment tenant what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
 
     with self.argument_context('deployment tenant validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -365,17 +415,28 @@ def load_arguments(self, _):
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')
         c.argument('include_parameter_default_value', action='store_true')
+        c.argument('skip_resource_name_params', action='store_true')
+        c.argument('skip_all_params', action='store_true')
+        c.argument('resource_ids', nargs='+', options_list='--resource-ids')
 
     with self.argument_context('group create') as c:
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
                    help='name of the new resource group', completer=None,
                    local_context_attribute=LocalContextAttribute(
-                       name='resource_group_name', actions=[SET], scopes=[ALL]))
+                       name='resource_group_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
 
+    with self.argument_context('group delete') as c:
+        c.argument('resource_group_name', resource_group_name_type,
+                   options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
+
     with self.argument_context('tag') as c:
-        c.argument('tag_name', options_list=['--name', '-n'])
-        c.argument('tag_value', options_list='--value')
+        c.argument('tag_name', tag_name_type)
+        c.argument('tag_value', tag_value_type)
+        c.argument('resource_id', tag_resource_id_type)
+        c.argument('tags', tags_type)
+        c.argument('operation', arg_type=get_enum_type([item.value for item in list(TagUpdateOperation)]),
+                   help='The update operation: options include Merge, Replace and Delete.')
 
     with self.argument_context('lock') as c:
         c.argument('lock_name', options_list=['--name', '-n'], validator=validate_lock_parameters)
@@ -414,6 +475,7 @@ def load_arguments(self, _):
     with self.argument_context('managedapp') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application', id_part='resource_group')
         c.argument('application_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('tags', tags_type)
 
     with self.argument_context('managedapp definition') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application definition', id_part='resource_group')
@@ -428,7 +490,7 @@ def load_arguments(self, _):
 
     with self.argument_context('managedapp definition create') as c:
         c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
-        c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
+        c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
         c.argument('createUiDefinition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
         c.argument('mainTemplate', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
 
@@ -450,20 +512,3 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
-
-    with self.argument_context('rest') as c:
-        c.argument('method', options_list=['--method', '-m'], arg_type=get_enum_type(['head', 'get', 'put', 'post', 'delete', 'options', 'patch'], default='get'),
-                   help='HTTP request method')
-        c.argument('uri', options_list=['--url', '--uri', '-u'], help='Request URL. If it doesn\'t start with a host, '
-                   'CLI assumes it as an Azure resource ID and prefixes it with the ARM endpoint of the current '
-                   'cloud shown by `az cloud show --query endpoints.resourceManager`. Common token {subscriptionId} '
-                   'will be replaced with the current subscription ID specified by `az account set`')
-        c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
-        c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
-        c.argument('skip_authorization_header', action='store_true', help='Do not auto-append Authorization header')
-        c.argument('body', options_list=['--body', '-b'], help='Request body. Use @{file} to load from a file. For quoting issues in different terminals, see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
-        c.argument('output_file', help='save response payload to a file')
-        c.argument('resource', help='Resource url for which CLI should acquire a token from AAD in order to access '
-                   'the service. The token will be placed in the Authorization header. By default, '
-                   'CLI can figure this out based on --url argument, unless you use ones not in the list '
-                   'of "az cloud show --query endpoints"')

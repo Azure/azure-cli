@@ -435,7 +435,7 @@ def parse_actions_from_repositories(allow_or_remove_repository):
     return actions
 
 
-def prepare_source_location(source_location, client_registries, registry_name, resource_group_name):
+def prepare_source_location(cmd, source_location, client_registries, registry_name, resource_group_name):
     if not source_location or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
     elif os.path.exists(source_location):
@@ -448,7 +448,7 @@ def prepare_source_location(source_location, client_registries, registry_name, r
 
         try:
             source_location = upload_source_code(
-                client_registries, registry_name, resource_group_name,
+                cmd, client_registries, registry_name, resource_group_name,
                 source_location, tar_file_path, "", "")
         except Exception as err:
             raise CLIError(err)

@@ -53,15 +53,19 @@ def _is_greater_than_cur_version(cur_version):
     return filter_func
 
 
-def resolve_from_index(extension_name, cur_version=None, index_url=None):
+def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None):
     """
     Gets the download Url and digest for the matching extension
+
+    :param cur_version: threshold verssion to filter out extensions.
     """
     candidates = get_index_extensions(index_url=index_url).get(extension_name, [])
+
     if not candidates:
         raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
 
     filters = [_is_not_platform_specific, _is_compatible_with_cli_version, _is_greater_than_cur_version(cur_version)]
+
     for f in filters:
         logger.debug("Candidates %s", [c['filename'] for c in candidates])
         candidates = list(filter(f, candidates))
@@ -71,7 +75,15 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None):
     candidates_sorted = sorted(candidates, key=lambda c: parse_version(c['metadata']['version']), reverse=True)
     logger.debug("Candidates %s", [c['filename'] for c in candidates_sorted])
     logger.debug("Choosing the latest of the remaining candidates.")
-    chosen = candidates_sorted[0]
+
+    if target_version:
+        try:
+            chosen = [c for c in candidates_sorted if c['metadata']['version'] == target_version][0]
+        except IndexError:
+            raise NoExtensionCandidatesError('Extension with version {} not found'.format(target_version))
+    else:
+        chosen = candidates_sorted[0]
+
     logger.debug("Chosen %s", chosen)
     download_url, digest = chosen.get('downloadUrl'), chosen.get('sha256Digest')
     if not download_url:

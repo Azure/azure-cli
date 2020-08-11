@@ -12,6 +12,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_hdinsight_locations
     from ._client_factory import cf_hdinsight_script_execution_history
     from ._client_factory import cf_hdinsight_script_actions
+    from ._client_factory import cf_hdinsight_virtual_machines
 
     hdinsight_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.hdinsight.operations#ClustersOperations.{}',
@@ -41,6 +42,11 @@ def load_command_table(self, _):
     hdinsight_script_execution_history_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.hdinsight.operations#ScriptExecutionHistoryOperations.{}',
         client_factory=cf_hdinsight_script_execution_history
+    )
+
+    hdinsight_virtual_machines_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.hdinsight.operations#VirtualMachinesOperations.{}',
+        client_factory=cf_hdinsight_virtual_machines
     )
 
     # cluster operations
@@ -92,3 +98,9 @@ def load_command_table(self, _):
         g.show_command('show', 'get_monitoring_status')
         g.custom_command('enable', 'enable_hdi_monitoring')
         g.command('disable', 'disable_monitoring')
+
+    # VirtualMachine operations
+    with self.command_group('hdinsight host', hdinsight_virtual_machines_sdk,
+                            client_factory=cf_hdinsight_virtual_machines) as g:
+        g.command('list', 'list_hosts')
+        g.command('restart', 'restart_hosts', confirmation=True)

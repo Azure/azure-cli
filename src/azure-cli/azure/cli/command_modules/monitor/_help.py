@@ -667,7 +667,11 @@ parameters:
   - name: --condition
     short-summary: The condition which triggers the scaling action.
     long-summary: >
-        The form of a condition is "METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD".
+        Usage:  --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD
+                            [where DIMENSION {==,!=} VALUE [or VALUE ...]
+                            [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]
+
+        Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
         Values for METRIC and appropriate THRESHOLD values can be obtained from the `az monitor metric` command.
         Format of PERIOD is "##h##m##s".
   - name: --scale
@@ -864,6 +868,59 @@ examples:
     crafted: true
 """
 
+helps['monitor diagnostic-settings subscription'] = """
+type: group
+short-summary: Manage diagnostic settings for subscription.
+"""
+
+helps['monitor diagnostic-settings subscription create'] = """
+type: command
+short-summary: Create diagnostic settings for a subscription
+examples:
+  - name: Create diagnostic settings for a subscription with EventHub.
+    text: |
+        az monitor diagnostic-settings subscription create -n {name} --location westus --event-hub-auth-rule {eventHubRuleID} --storage-account {storageAccount} \\
+        --logs '[
+           {
+             "category": "Security",
+             "enabled": true,
+           },
+           {
+             "category": "Administrative",
+             "enabled": true,
+           },
+           {
+             "category": "ServiceHealth",
+             "enabled": true,
+           },
+           {
+             "category": "Alert",
+             "enabled": true,
+           },
+           {
+             "category": "Recommendation",
+             "enabled": true,
+           },
+           {
+             "category": "Policy",
+             "enabled": true,
+           },
+           {
+             "category": "Autoscale",
+             "enabled": true,
+           },
+           {
+             "category": "ResourceHealth",
+             "enabled": true,
+           }
+           ]'
+"""
+
+helps['monitor diagnostic-settings subscription update'] = """
+type: command
+short-summary: Update diagnostic settings for a subscription.
+"""
+
 helps['monitor log-analytics'] = """
 type: group
 short-summary: Manage Azure log analytics.
@@ -978,6 +1035,24 @@ type: command
 short-summary: Get a list of workspaces under a resource group or a subscription.
 """
 
+helps['monitor log-analytics workspace list-deleted-workspaces'] = """
+type: command
+short-summary: Get a list of deleted workspaces that can be recovered in a subscription or a resource group.
+examples:
+  - name: Get a list of deleted workspaces that can be recovered in a resource group
+    text: |
+        az monitor log-analytics workspace list-deleted-workspaces --resource-group MyResourceGroup
+"""
+
+helps['monitor log-analytics workspace recover'] = """
+type: command
+short-summary: Recover a workspace in a soft-delete state within 14 days.
+examples:
+  - name: Recover a workspace in a soft-delete state within 14 days
+    text: |
+        az monitor log-analytics workspace recover --resource-group MyResourceGroup -n MyWorkspace
+"""
+
 helps['monitor log-analytics workspace list-management-groups'] = """
 type: command
 short-summary: Get a list of management groups connected to a workspace.
@@ -996,6 +1071,38 @@ examples:
     text: |
         az monitor log-analytics workspace list-usages --resource-group MyResourceGroup --subscription MySubscription --workspace-name MyWorkspace
     crafted: true
+"""
+
+helps['monitor log-analytics workspace table'] = """
+type: group
+short-summary: Manage tables for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace table list'] = """
+type: command
+short-summary: List all the tables for the given Log Analytics workspace.
+examples:
+  - name: List all the tables for the given Log Analytics workspace
+    text: |
+        az monitor log-analytics workspace table list --resource-group MyResourceGroup --workspace-name MyWorkspace
+"""
+
+helps['monitor log-analytics workspace table show'] = """
+type: command
+short-summary: Get a Log Analytics workspace table.
+examples:
+  - name: Get a Log Analytics workspace table
+    text: |
+        az monitor log-analytics workspace table show --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable
+"""
+
+helps['monitor log-analytics workspace table update'] = """
+type: command
+short-summary: Update the properties of a Log Analytics workspace table, currently only support updating retention time.
+examples:
+  - name: Update the retention time of a Log Analytics workspace table
+    text: |
+        az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
 """
 
 helps['monitor log-analytics workspace pack'] = """
@@ -1046,6 +1153,8 @@ short-summary: Update a workspace instance
 helps['monitor log-analytics workspace linked-service'] = """
 type: group
 short-summary: Manage linked service for log analytics workspace.
+long-summary: |
+    Linked services is used to defined a relation from the workspace to another Azure resource. Log Analytics and Azure resources then leverage this connection in their operations. Example uses of Linked Services in Log Analytics workspace are Automation account and workspace association to CMK.
 """
 
 helps['monitor log-analytics workspace linked-service create'] = """
@@ -1157,6 +1266,81 @@ examples:
     text: az monitor log-analytics workspace linked-storage show --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace
 """
 
+helps['monitor log-analytics workspace saved-search'] = """
+type: group
+short-summary: Manage saved search for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace saved-search create'] = """
+type: command
+short-summary: Create a saved search for a given workspace.
+examples:
+  - name: Create a saved search for a given workspace.
+    text: az monitor log-analytics workspace saved-search create -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa myfun --fp "a:string = value"
+"""
+
+helps['monitor log-analytics workspace saved-search update'] = """
+type: command
+short-summary: Update a saved search for a given workspace.
+examples:
+  - name: Update a saved search for a given workspace.
+    text: az monitor log-analytics workspace saved-search update -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa myfun --fp "a:string = value"
+"""
+
+helps['monitor log-analytics workspace saved-search list'] = """
+type: command
+short-summary: List all saved searches for a given workspace.
+"""
+
+helps['monitor log-analytics workspace saved-search show'] = """
+type: command
+short-summary: Show a saved search for a given workspace.
+"""
+
+helps['monitor log-analytics workspace saved-search delete'] = """
+type: command
+short-summary: Delete a saved search for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export'] = """
+type: group
+short-summary: Manage data export ruls for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace data-export create'] = """
+type: command
+short-summary: Create a data export rule for a given workspace.
+examples:
+  - name: Create a data export rule for a given workspace.
+    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable -t {table_name}
+  - name: Create a data export rule for a given workspace with all tables.
+    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable --all
+
+"""
+
+helps['monitor log-analytics workspace data-export update'] = """
+type: command
+short-summary: Update a data export rule for a given workspace.
+examples:
+  - name: Update a data export rule for a given workspace.
+    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} --all --enable false
+"""
+
+helps['monitor log-analytics workspace data-export list'] = """
+type: command
+short-summary: List all data export ruleses for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export show'] = """
+type: command
+short-summary: Show a data export rule for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export delete'] = """
+type: command
+short-summary: Delete a data export rule for a given workspace.
+"""
+
 helps['monitor log-profiles'] = """
 type: group
 short-summary: Manage log profiles.
@@ -1230,22 +1414,35 @@ parameters:
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
+        Due to server limitation, when an alert rule contains multiple criterias, the use of dimensions is limited to one value per dimension within each criterion.
+
         Multiple conditions can be specified by using more than one `--condition` argument.
 examples:
-  - name: Create a high CPU usage alert on a VM with no actions.
+  - name: Create a high CPU usage alert on a VM with no action.
     text: >
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} --condition "avg Percentage CPU > 90" --description "High CPU"
   - name: Create a high CPU usage alert on a VM with email and webhook actions.
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} \\
             --condition "avg Percentage CPU > 90" --window-size 5m --evaluation-frequency 1m \\
-            --action {actionGroupId} apiKey={APIKey} type=HighCPU --description "High CPU"
+            --action "/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Insights/actionGroups/<actionGroupName>" apiKey={APIKey} type=HighCPU \\
+            --description "High CPU"
   - name: Create an alert when a storage account shows a high number of slow transactions, using multi-dimensional filters.
     text: |
         az monitor metrics alert create -g {ResourceGroup} -n alert1 --scopes {StorageAccountId} \\
             --description "Storage Slow Transactions" \\
             --condition "total transactions > 5 where ResponseType includes Success" \\
-            --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"
+            --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"
+  - name: Create a metric-based alert rule that monitors a custom metric.
+    text: |
+        az monitor metrics alert create -n "metric alert rule on a custom metric" -g "Demos" --scopes {VirtualMachineID} \\
+            --condition "max Azure.VM.Windows.GuestMetrics.Memory\\Available Bytes > 90" \\
+            --window-size 5m --evaluation-frequency 1m
+  - name: Create a high CPU usage alert on several VMs with no actions.
+    text: |
+        az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
+            --condition "avg Percentage CPU > 90" --description "High CPU"
+
 """
 
 helps['monitor metrics alert delete'] = """
@@ -1293,6 +1490,8 @@ parameters:
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
+        Due to server limitation, when an alert rule contains multiple criterias, the use of dimensions is limited to one value per dimension within each criterion.
+
         Multiple conditions can be specified by using more than one `--condition` argument.
   - name: --remove-conditions
     short-summary: Space-separated list of condition names to remove.
@@ -1309,6 +1508,9 @@ examples:
     text: |
         az monitor metrics alert update --enabled true --name MyAlertRule --resource-group MyResourceGroup
     crafted: true
+  - name: Disable/Enable a metric-based alert rule.
+    text: |
+        az monitor metrics alert update --enabled false --name MyAlertRule --resource-group MyResourceGroup
 """
 
 helps['monitor metrics list'] = """
@@ -1492,6 +1694,11 @@ parameters:
 example:
     - name: Approve a private endpoint connection.
       text: az monitor private-link-scope private-endpoint-connection approve --scope-name MyScope -g MyRG --name PrivateEndpointConnection
+examples:
+  - name: Approve a private endpoint connection of a private link scope resource. (autogenerated)
+    text: |
+        az monitor private-link-scope private-endpoint-connection approve --name MyPrivateEndpointConnection --resource-group MyResourceGroup --scope-name MyScope
+    crafted: true
 """
 
 helps['monitor private-link-scope private-endpoint-connection reject'] = """
@@ -1502,6 +1709,11 @@ parameters:
     populator-commands:
       - az monitor private-link-scope show
 short-summary: Reject a private endpoint connection of a private link scope resource.
+examples:
+  - name: Reject a private endpoint connection of a private link scope resource. (autogenerated)
+    text: |
+        az monitor private-link-scope private-endpoint-connection reject --name MyPrivateEndpointConnection --resource-group MyResourceGroup --scope-name MyScope
+    crafted: true
 """
 
 helps['monitor private-link-scope private-endpoint-connection show'] = """

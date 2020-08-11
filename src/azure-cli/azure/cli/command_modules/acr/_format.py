@@ -78,6 +78,17 @@ def token_credential_output_format(result):
     return _output_format(result, _token_password_format_group)
 
 
+def endpoints_output_format(result):
+    info = []
+    for e in result['dataEndpoints']:
+        info.append(OrderedDict([
+            ('loginServer', _get_value(result, 'loginServer')),
+            ('region', _get_value(e, 'region')),
+            ('endpoint', _get_value(e, 'endpoint'))
+        ]))
+    return info
+
+
 def agentpool_output_format(result):
     return _output_format(result, _agentpool_format_group)
 

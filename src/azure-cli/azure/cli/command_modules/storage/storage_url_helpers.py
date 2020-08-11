@@ -10,7 +10,7 @@ container and/or blob URL.
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
-class StorageResourceIdentifier(object):
+class StorageResourceIdentifier:
     def __init__(self, cloud, moniker):
         self.is_valid = False
         self.account_name = None

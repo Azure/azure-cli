@@ -7,7 +7,7 @@ from __future__ import print_function
 import json
 import os
 
-from knack.config import get_config_parser
+import configparser
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -101,7 +101,7 @@ def _handle_global_configuration(config, cloud_forbid_telemetry):
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(config.config_path))
     # set up the config parsers
-    file_config = get_config_parser()
+    file_config = configparser.ConfigParser()
     config_exists = file_config.read([config.config_path])
     should_modify_global_config = False
     if config_exists:
@@ -250,15 +250,36 @@ def purge_cache_contents():
 
 
 def turn_local_context_on(cmd):
-    cmd.cli_ctx.local_context.turn_on()
-
-
-def turn_local_context_off(cmd, yes=False):
-    if cmd.cli_ctx.local_context.is_on():
-        from azure.cli.core.util import user_confirmation
-        dir_path = cmd.cli_ctx.local_context.current_turn_on_dir()
-        user_confirmation('Local context in {} will be removed and can\'t be recovered. Are you sure you want to '
-                          'continue this operation ?'.format(dir_path), yes)
-        cmd.cli_ctx.local_context.turn_off()
+    if not cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.turn_on()
+        logger.warning('Local context is turned on, you can run `az local-context off` to turn it off.')
     else:
-        raise CLIError('local context is not turned on in {} and all its parent directories'.format(os.getcwd()))
+        raise CLIError('Local context is on already.')
+
+
+def turn_local_context_off(cmd):
+    if cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.turn_off()
+        logger.warning('Local context is turned off, you can run `az local-context on` to turn it on.')
+    else:
+        raise CLIError('Local context is off already.')
+
+
+def show_local_context(cmd, name=None):
+    return cmd.cli_ctx.local_context.get_value(name)
+
+
+def delete_local_context(cmd, name=None, all=False, yes=False, purge=False, recursive=False):  # pylint: disable=redefined-builtin
+    if name:
+        return cmd.cli_ctx.local_context.delete(name)
+
+    if all:
+        from azure.cli.core.util import user_confirmation
+        if purge:
+            user_confirmation('You are going to delete local context persistence file. '
+                              'Are you sure you want to continue this operation ?', yes)
+            cmd.cli_ctx.local_context.delete_file(recursive)
+        else:
+            user_confirmation('You are going to clear all local context value. '
+                              'Are you sure you want to continue this operation ?', yes)
+            cmd.cli_ctx.local_context.clear(recursive)
