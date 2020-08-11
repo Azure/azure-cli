@@ -226,6 +226,10 @@ class TestProfile(unittest.TestCase):
 
         cls.msal_scopes = ['https://foo/.default']
 
+        cls.service_principal_id = "00000001-0000-0000-0000-000000000000"
+        cls.service_principal_secret = "test_secret"
+        cls.service_principal_tenant_id = "00000001-0000-0000-0000-000000000000"
+
     @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
     @mock.patch('azure.identity.InteractiveBrowserCredential.authenticate', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
@@ -398,6 +402,45 @@ class TestProfile(unittest.TestCase):
                        'useCertSNIssuerAuth': True}}]
         # assert
         self.assertEqual(output, subs)
+
+    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.identity.EnvironmentCredential.get_token', autospec=True)
+    @mock.patch.dict('os.environ')
+    def test_login_with_environment_credential_service_principal(self, get_token, mock_get_client_class):
+        os.environ['AZURE_TENANT_ID'] = self.service_principal_tenant_id
+        os.environ['AZURE_CLIENT_ID'] = self.service_principal_id
+        os.environ['AZURE_CLIENT_SECRET'] = self.service_principal_secret
+
+        client_mock = mock.MagicMock()
+        mock_get_client_class.return_value = mock.MagicMock(return_value=client_mock)
+        client_mock.subscriptions.list.return_value = [deepcopy(TestProfile.subscription1_raw)]
+
+        cli = DummyCli()
+        get_token.return_value = self.access_token
+        mock_arm_client = mock.MagicMock()
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        subs = profile.login_with_environment_credential()
+        output = [{'environmentName': 'AzureCloud',
+                   'homeTenantId': 'microsoft.com',
+                   'id': '1',
+                   'isDefault': True,
+                   'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
+                                        {'tenantId': '00000004-0000-0000-0000-000000000000'}],
+                   'name': 'foo account',
+                   'state': 'Enabled',
+                   'tenantId': self.service_principal_tenant_id,
+                   'user': {
+                       'isEnvironmentCredential': True,
+                       'name': self.service_principal_id,
+                       'type': 'servicePrincipal'}}]
+        # assert
+        self.assertEqual(output, subs)
+
+    def test_login_with_environment_credential_username_password(self, get_token):
+        pass
 
     def test_normalize(self):
         cli = DummyCli()
