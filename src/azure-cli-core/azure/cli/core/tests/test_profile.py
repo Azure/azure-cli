@@ -14,17 +14,13 @@ import datetime
 
 from copy import deepcopy
 
-from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import \
     (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
-
 from azure.cli.core._profile import Profile, SubscriptionFinder
-
 from azure.cli.core.mock import DummyCli
+from azure.identity import AuthenticationRecord
 
 from knack.util import CLIError
-
-from azure.identity import AuthenticationRecord
 
 
 class PublicClientApplicationMock(mock.MagicMock):
@@ -229,7 +225,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.identity.InteractiveBrowserCredential.authenticate', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
-    def test_login_with_interactive_browser(self, app_mock, authenticate_mock):
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_login_with_interactive_browser(self, can_launch_browser_mock, app_mock, authenticate_mock):
         authenticate_mock.return_value = self.authentication_record
 
         cli = DummyCli()
@@ -1103,11 +1100,10 @@ class TestProfile(unittest.TestCase):
         with self.assertRaisesRegexp(CLIError, "MSI"):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
+    @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True, return_value=True)
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
-    @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    def test_get_raw_token_in_cloud_console(self, get_token_mock, mock_in_cloud_console):
+    def test_get_raw_token_in_cloud_console(self, mock_in_cloud_console, get_token_mock):
         get_token_mock.return_value = self.access_token
-        mock_in_cloud_console.return_value = True
 
         # setup an existing msi subscription
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,

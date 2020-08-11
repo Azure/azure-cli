@@ -4,7 +4,7 @@ Release History
 ===============
 
 2.10.10
-++++++
++++++++
 * Migrate authentication from ADAL to MSAL
 
 2.10.0
