@@ -4886,5 +4886,20 @@ class VMCrossTenantUpdateScenarioTest(ScenarioTest):
         self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
 
 
+class VMAutoUpdateScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_auto_update_')
+    def test_vm_auto_update(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image Win2019Datacenter --enable-agent --enable-auto-update --patch-mode AutomaticByOS --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('osProfile.windowsConfiguration.enableAutomaticUpdates', True),
+            self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'AutomaticByOS')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
