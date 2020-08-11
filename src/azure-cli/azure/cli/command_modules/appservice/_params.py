@@ -143,6 +143,10 @@ def load_arguments(self, _):
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
 
+    with self.argument_context('webapp list-instances') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
+
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps')
 
@@ -537,6 +541,8 @@ def load_arguments(self, _):
                    help='Application ID to integrate AAD organization account Sign-in into your web app')
         c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory',
                    help='AAD application secret')
+        c.argument('client_secret_certificate_thumbprint', options_list=['--aad-client-secret-certificate-thumbprint', '--thumbprint'], arg_group='Azure Active Directory',
+                   help='Alternative to AAD Client Secret, thumbprint of a certificate used for signing purposes')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'],
                    arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
@@ -612,11 +618,13 @@ def load_arguments(self, _):
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp create-remote-connection') as c:
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

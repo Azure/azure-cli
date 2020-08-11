@@ -135,7 +135,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
-                               "Please invoke 'list-runtimes' to cross check".format(runtime))
+                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -163,7 +163,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                            "only appliable on linux webapp")
         match = helper.resolve(runtime)
         if not match:
-            raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+            raise CLIError("Runtime '{}' is not supported. Please invoke 'az webapp list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
 
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
@@ -847,6 +847,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
                          client_id=None, token_store_enabled=None, runtime_version=None,  # pylint: disable=unused-argument
                          token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
+                         client_secret_certificate_thumbprint=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
                          facebook_app_secret=None, facebook_oauth_scopes=None,  # pylint: disable=unused-argument
                          twitter_consumer_key=None, twitter_consumer_secret=None,  # pylint: disable=unused-argument
@@ -877,6 +878,12 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
             setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_auth_settings', slot, auth_settings)
+
+
+def list_instances(cmd, resource_group_name, name, slot=None):
+    # API Version 2019-08-01 (latest as of writing this code) does not return slot instances, however 2018-02-01 does
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot,
+                                   api_version="2018-02-01")
 
 
 # Currently using hardcoded values instead of this function. This function calls the stacks API;
@@ -1037,6 +1044,8 @@ def _format_fx_version(custom_image_name, container_config_type=None):
 def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None):
     fx_version = _format_fx_version(custom_image_name)
     web_app = get_webapp(cmd, resource_group_name, name, slot)
+    if not web_app:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     linux_fx = fx_version if web_app.reserved else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
@@ -3558,7 +3567,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
         _is_linux = os_name.lower() == 'linux'
         _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
-        plan = get_plan_to_use(cmd, user, os_name, loc, sku, rg_name, _create_new_rg, plan)
+        plan = get_plan_to_use(cmd=cmd,
+                               user=user,
+                               os_name=os_name,
+                               loc=loc,
+                               sku=sku,
+                               create_rg=_create_new_rg,
+                               resource_group_name=rg_name,
+                               plan=plan)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",
@@ -3635,7 +3651,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     return create_json
 
 
-def _ping_scm_site(cmd, resource_group, name):
+def _ping_scm_site(cmd, resource_group, name, instance=None):
     from azure.cli.core.util import should_disable_connection_verify
     #  wake up kudu, by making an SCM call
     import requests
@@ -3644,14 +3660,18 @@ def _ping_scm_site(cmd, resource_group, name):
     scm_url = _get_scm_url(cmd, resource_group, name)
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
-    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify())
+    cookies = {}
+    if instance is not None:
+        cookies['ARRAffinity'] = instance
+    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify(),
+                 cookies=cookies)
 
 
 def is_webapp_up(tunnel_server):
     return tunnel_server.is_webapp_up()
 
 
-def get_tunnel(cmd, resource_group_name, name, port=None, slot=None):
+def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=None):
     webapp = show_webapp(cmd, resource_group_name, name, slot)
     is_linux = webapp.reserved
     if not is_linux:
@@ -3665,17 +3685,26 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None):
         port = 0  # Will auto-select a free port from 1024-65535
         logger.info('No port defined, creating on random free port')
 
+    # Validate that we have a known instance (case-sensitive)
+    if instance is not None:
+        instances = list_instances(cmd, resource_group_name, name, slot=slot)
+        instance_names = set(i.name for i in instances)
+        if instance not in instance_names:
+            if slot is not None:
+                raise CLIError("The provided instance '{}' is not valid for this webapp and slot.".format(instance))
+            raise CLIError("The provided instance '{}' is not valid for this webapp.".format(instance))
+
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password)
-    _ping_scm_site(cmd, resource_group_name, name)
+    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password, instance)
+    _ping_scm_site(cmd, resource_group_name, name, instance=instance)
 
     _wait_for_webapp(tunnel_server)
     return tunnel_server
 
 
-def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
-    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot)
+def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot, instance)
 
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
@@ -3700,8 +3729,8 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
             time.sleep(5)
 
 
-def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
-    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot)
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot, instance)
 
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
@@ -3770,7 +3799,7 @@ def _start_ssh_session(hostname, port, username, password):
         c.close()
 
 
-def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None):  # pylint: disable=too-many-statements
+def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
@@ -3778,7 +3807,7 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
     config = get_site_configs(cmd, resource_group_name, name, slot)
     if config.remote_debugging_enabled:
         raise CLIError('remote debugging is enabled, please disable')
-    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
+    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
 
 
 def create_devops_pipeline(
