@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
-    (KeyType, AccessRights, SkuName) = self.get_models('KeyType', 'AccessRights', 'SkuName', resource_type=ResourceType.MGMT_EVENTHUB)
+    (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -44,6 +44,21 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
         c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
                    help='Default Action for Network Rule Set.')
+        c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
+                   help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
+        c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Managed Identity is enabled.')
+
+    with self.argument_context('eventhubs namespace create', min_api='2018-01-01-preview') as c:
+        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='luster ARM ID of the Namespace')
+
+    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2018-01-01-preview') as c:
+        c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
+                   help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
+        c.argument('key_name', is_preview=True, help='The name of the KeyVault key.', )
+        c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
+        c.argument('key_version', is_preview=True,
+                   help='The version of the KeyVault key to use.')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:

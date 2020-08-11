@@ -17,7 +17,7 @@ from knack.arguments import CLIArgumentType
 from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
-    validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
+    validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
@@ -221,6 +221,7 @@ def load_arguments(self, _):
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
+        c.argument('uptime_sla', action='store_true')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
@@ -244,8 +245,10 @@ def load_arguments(self, _):
 
     for scope in ['aks', 'acs kubernetes', 'acs dcos']:
         with self.argument_context('{} install-cli'.format(scope)) as c:
-            c.argument('client_version', validator=validate_k8s_client_version, help='Version of the client to install.')
+            c.argument('client_version', validator=validate_kubectl_version, help='Version of kubectl to install.')
             c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install kubectl.')
+            c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
+            c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin.')
 
     with self.argument_context('aks install-connector') as c:
         c.argument('aci_resource_group', help='The resource group to create the ACI container groups')

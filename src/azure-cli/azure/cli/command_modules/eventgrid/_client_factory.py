@@ -22,6 +22,38 @@ def domain_topics_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).domain_topics
 
 
+def system_topics_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).system_topics
+
+
+def system_topic_event_subscriptions_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).system_topic_event_subscriptions
+
+
+def extension_topics_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).extension_topics
+
+
+def partner_registrations_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).partner_registrations
+
+
+def partner_namespaces_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).partner_namespaces
+
+
+def event_channels_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).event_channels
+
+
+def partner_topics_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).partner_topics
+
+
+def partner_topic_event_subscriptions_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).partner_topic_event_subscriptions
+
+
 def event_subscriptions_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).event_subscriptions
 

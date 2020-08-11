@@ -28,7 +28,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_security_partner_providers)
+    cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
+    cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -203,6 +204,12 @@ def load_command_table(self, _):
         client_factory=cf_load_balancers
     )
 
+    network_lb_backend_pool_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#LoadBalancerBackendAddressPoolsOperations.{}',
+        client_factory=cf_load_balancer_backend_pools,
+        min_api='2020-04-01'
+    )
+
     network_lgw_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#LocalNetworkGatewaysOperations.{}',
         client_factory=cf_local_network_gateways
@@ -365,6 +372,24 @@ def load_command_table(self, _):
         min_api='2020-03-01'
     )
 
+    network_virtual_appliances_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#NetworkVirtualAppliancesOperations.{}',
+        client_factory=cf_network_virtual_appliances,
+        min_api='2020-05-01'
+    )
+
+    virtual_appliance_skus_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualApplianceSkusOperations.{}',
+        client_factory=cf_virtual_appliance_skus,
+        min_api='2020-05-01'
+    )
+
+    virtual_appliance_sites_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#VirtualApplianceSitesOperations.{}',
+        client_factory=cf_virtual_appliance_sites,
+        min_api='2020-05-01'
+    )
+
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
 
     # endregion
@@ -381,7 +406,12 @@ def load_command_table(self, _):
 
     # region ApplicationGateways
     with self.command_group('network application-gateway', network_ag_sdk) as g:
-        g.custom_command('create', 'create_application_gateway', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_ag_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'create_application_gateway',
+                         transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
+                         supports_no_wait=True,
+                         table_transformer=deployment_validate_table_format,
+                         validator=process_ag_create_namespace,
+                         exception_handler=handle_template_based_exception)
         g.command('delete', 'delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_application_gateways')
@@ -494,6 +524,26 @@ def load_command_table(self, _):
         g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
         g.custom_command('remove', 'remove_ag_identity', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_identity')
+
+    with self.command_group('network application-gateway private-link',
+                            command_type=network_ag_sdk,
+                            min_api='2020-05-01',
+                            is_preview=True) as g:
+        g.custom_command('add', 'add_ag_private_link', supports_no_wait=True)
+        g.custom_command('remove', 'remove_ag_private_link', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'show_ag_private_link')
+        g.custom_command('list', 'list_ag_private_link')
+        g.wait_command('wait')
+
+    with self.command_group('network application-gateway private-link ip-config',
+                            command_type=network_ag_sdk,
+                            min_api='2020-05-01',
+                            is_preview=True) as g:
+        g.custom_command('add', 'add_ag_private_link_ip', supports_no_wait=True)
+        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'show_ag_private_link_ip')
+        g.custom_command('list', 'list_ag_private_link_ip')
+        g.wait_command('wait')
     # endregion
 
     # region ApplicationGatewayWAFPolicy
@@ -751,7 +801,6 @@ def load_command_table(self, _):
         'frontend_ip_configurations': 'frontend-ip',
         'inbound_nat_rules': 'inbound-nat-rule',
         'inbound_nat_pools': 'inbound-nat-pool',
-        'backend_address_pools': 'address-pool',
         'load_balancing_rules': 'rule',
         'probes': 'probe',
     }
@@ -777,8 +826,24 @@ def load_command_table(self, _):
         g.generic_update_command('update', child_collection_prop_name='inbound_nat_pools',
                                  custom_func_name='set_lb_inbound_nat_pool')
 
-    with self.command_group('network lb address-pool', network_lb_sdk) as g:
+    with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
         g.custom_command('create', 'create_lb_backend_address_pool')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('delete', 'delete_lb_backend_address_pool')
+
+    with self.command_group('network lb address-pool', network_lb_sdk, max_api='2020-03-01') as g:
+        g.custom_command('create', 'create_lb_backend_address_pool')
+
+    with self.command_group('network lb address-pool', network_util, max_api='2020-03-01') as g:
+        g.command('list', list_network_resource_property('load_balancers', 'backend_address_pools'))
+        g.show_command('show', get_network_resource_property_entry('load_balancers', 'backend_address_pools'))
+        g.command('delete', delete_network_resource_property_entry('load_balancers', 'backend_address_pools'))
+
+    with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
+        g.custom_command('add', 'add_lb_backend_address_pool_address')
+        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
+        g.custom_command('list', 'list_lb_backend_address_pool_address')
 
     with self.command_group('network lb rule', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_rule')
@@ -1187,6 +1252,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_security_partner_provider')
         g.command('delete', 'delete')
+    # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
     plr_and_pec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom#{}')
@@ -1198,4 +1264,24 @@ def load_command_table(self, _):
         g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
+    # endregion
+
+    # region Network Virtual Appliance
+    with self.command_group('network virtual-appliance', network_virtual_appliances_sdk, client_factory=cf_network_virtual_appliances, is_preview=True) as g:
+        g.custom_command('create', 'create_network_virtual_appliance')
+        g.generic_update_command('update', custom_func_name='update_network_virtual_appliance')
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_network_virtual_appliance')
+        g.command('delete', 'delete', confirmation=True)
+
+    with self.command_group('network virtual-appliance site', virtual_appliance_sites_sdk, client_factory=cf_virtual_appliance_sites, is_preview=True) as g:
+        g.custom_command('create', 'create_network_virtual_appliance_site')
+        g.generic_update_command('update', custom_func_name='update_network_virtual_appliance_site')
+        g.show_command('show', 'get')
+        g.command('delete', 'delete', confirmation=True)
+        g.command('list', 'list')
+
+    with self.command_group('network virtual-appliance sku', virtual_appliance_skus_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
     # endregion

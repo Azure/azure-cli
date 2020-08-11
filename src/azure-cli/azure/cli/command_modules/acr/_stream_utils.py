@@ -6,6 +6,7 @@ from io import BytesIO
 import time
 from random import uniform
 import colorama
+import requests
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
@@ -26,13 +27,19 @@ def stream_logs(cmd, client,
                 no_format=False,
                 raise_error_on_failure=False):
     log_file_sas = None
+    artifact = False
     error_msg = "Could not get logs for ID: {}".format(run_id)
 
     try:
-        log_file_sas = client.get_log_sas_url(
+        response = client.get_log_sas_url(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
-            run_id=run_id).log_link
+            run_id=run_id)
+        if not response.log_artifact_link:
+            log_file_sas = response.log_link
+        else:
+            log_file_sas = response.log_artifact_link
+            artifact = True
     except (AttributeError, CloudError) as e:
         logger.debug("%s Exception: %s", error_msg, e)
         raise CLIError(error_msg)
@@ -41,19 +48,23 @@ def stream_logs(cmd, client,
         logger.debug("%s Empty SAS URL.", error_msg)
         raise CLIError(error_msg)
 
-    account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
-        log_file_sas)
-    AppendBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#AppendBlobService')
-    _stream_logs(no_format,
-                 DEFAULT_CHUNK_SIZE,
-                 DEFAULT_LOG_TIMEOUT_IN_SEC,
-                 AppendBlobService(
-                     account_name=account_name,
-                     sas_token=sas_token,
-                     endpoint_suffix=endpoint_suffix),
-                 container_name,
-                 blob_name,
-                 raise_error_on_failure)
+    if not artifact:
+        account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
+            log_file_sas)
+        AppendBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#AppendBlobService')
+        _stream_logs(no_format,
+                     DEFAULT_CHUNK_SIZE,
+                     DEFAULT_LOG_TIMEOUT_IN_SEC,
+                     AppendBlobService(
+                         account_name=account_name,
+                         sas_token=sas_token,
+                         endpoint_suffix=endpoint_suffix),
+                     container_name,
+                     blob_name,
+                     raise_error_on_failure)
+    else:
+        _stream_artifact_logs(log_file_sas,
+                              no_format)
 
 
 def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
@@ -189,6 +200,24 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
             raise CLIError("Run timed out")
         if build_status == 'canceled':
             raise CLIError("Run was canceled")
+
+
+def _stream_artifact_logs(log_file_sas,
+                          no_format):
+
+    if not no_format:
+        colorama.init()
+
+    try:
+        response = requests.get(log_file_sas, timeout=3, verify=False, stream=True)
+        response.raise_for_status()
+    except KeyboardInterrupt:
+        return
+    except Exception as err:
+        raise CLIError(err)
+
+    for line in response.iter_lines():
+        print(line.decode('utf-8', errors='ignore'))
 
 
 def _blob_is_not_complete(metadata):

@@ -11,26 +11,26 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku --https-only
+      - -n -g --sku --https-only --kind
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clistorage000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clistorage000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001","name":"clistorage000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-04-27T08:12:43Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001","name":"clistorage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2020-07-14T14:38:27Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '472'
+      - '433'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 27 Apr 2020 08:13:14 GMT
+      - Tue, 14 Jul 2020 14:38:57 GMT
       expires:
       - '-1'
       pragma:
@@ -45,8 +45,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"sku": {"name": "Standard_GZRS"}, "kind": "StorageV2", "location": "westus2",
-      "properties": {"supportsHttpsTrafficOnly": true}}'
+    body: '{"sku": {"name": "Standard_GZRS"}, "kind": "StorageV2", "location": "eastus2euap",
+      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"},
+      "supportsHttpsTrafficOnly": true}}'
     headers:
       Accept:
       - application/json
@@ -57,14 +58,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '128'
+      - '208'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g --sku --https-only
+      - -n -g --sku --https-only --kind
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
@@ -80,11 +81,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Mon, 27 Apr 2020 08:13:23 GMT
+      - Tue, 14 Jul 2020 14:39:05 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus2/asyncoperations/987c2296-7072-4b1e-ba1b-3c4abc430ca0?monitor=true&api-version=2019-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/36ef642b-ee24-4f3a-bec1-23eed555860e?monitor=true&api-version=2019-06-01
       pragma:
       - no-cache
       server:
@@ -94,7 +95,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1193'
     status:
       code: 202
       message: Accepted
@@ -110,24 +111,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku --https-only
+      - -n -g --sku --https-only --kind
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus2/asyncoperations/987c2296-7072-4b1e-ba1b-3c4abc430ca0?monitor=true&api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/36ef642b-ee24-4f3a-bec1-23eed555860e?monitor=true&api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_GZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/cligzrs000003","name":"cligzrs000003","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:13:23.1577907Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:13:23.1577907Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-27T08:13:23.0952579Z","primaryEndpoints":{"dfs":"https://cligzrs000003.dfs.core.windows.net/","web":"https://cligzrs000003.z5.web.core.windows.net/","blob":"https://cligzrs000003.blob.core.windows.net/","queue":"https://cligzrs000003.queue.core.windows.net/","table":"https://cligzrs000003.table.core.windows.net/","file":"https://cligzrs000003.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available","secondaryLocation":"westcentralus","statusOfSecondary":"available"}}'
+      string: '{"sku":{"name":"Standard_GZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/cligzrs000003","name":"cligzrs000003","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:39:06.0382698Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:39:06.0382698Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T14:39:05.9914934Z","primaryEndpoints":{"dfs":"https://cligzrs000003.dfs.core.windows.net/","web":"https://cligzrs000003.z3.web.core.windows.net/","blob":"https://cligzrs000003.blob.core.windows.net/","queue":"https://cligzrs000003.queue.core.windows.net/","table":"https://cligzrs000003.table.core.windows.net/","file":"https://cligzrs000003.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1461'
+      - '1469'
       content-type:
       - application/json
       date:
-      - Mon, 27 Apr 2020 08:13:40 GMT
+      - Tue, 14 Jul 2020 14:39:23 GMT
       expires:
       - '-1'
       pragma:
@@ -159,24 +160,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_ZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002","name":"clistoragesku000002","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:12:55.1548240Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:12:55.1548240Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-27T08:12:55.1079390Z","primaryEndpoints":{"dfs":"https://clistoragesku000002.dfs.core.windows.net/","web":"https://clistoragesku000002.z5.web.core.windows.net/","blob":"https://clistoragesku000002.blob.core.windows.net/","queue":"https://clistoragesku000002.queue.core.windows.net/","table":"https://clistoragesku000002.table.core.windows.net/","file":"https://clistoragesku000002.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_ZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002","name":"clistoragesku000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:38:38.1244076Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:38:38.1244076Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T14:38:38.0618874Z","primaryEndpoints":{"dfs":"https://clistoragesku000002.dfs.core.windows.net/","web":"https://clistoragesku000002.z3.web.core.windows.net/","blob":"https://clistoragesku000002.blob.core.windows.net/","queue":"https://clistoragesku000002.queue.core.windows.net/","table":"https://clistoragesku000002.table.core.windows.net/","file":"https://clistoragesku000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1413'
+      - '1400'
       content-type:
       - application/json
       date:
-      - Mon, 27 Apr 2020 08:13:42 GMT
+      - Tue, 14 Jul 2020 14:39:24 GMT
       expires:
       - '-1'
       pragma:
@@ -208,24 +209,24 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_ZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002","name":"clistoragesku000002","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:12:55.1548240Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:12:55.1548240Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-27T08:12:55.1079390Z","primaryEndpoints":{"dfs":"https://clistoragesku000002.dfs.core.windows.net/","web":"https://clistoragesku000002.z5.web.core.windows.net/","blob":"https://clistoragesku000002.blob.core.windows.net/","queue":"https://clistoragesku000002.queue.core.windows.net/","table":"https://clistoragesku000002.table.core.windows.net/","file":"https://clistoragesku000002.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_ZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002","name":"clistoragesku000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:38:38.1244076Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:38:38.1244076Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T14:38:38.0618874Z","primaryEndpoints":{"dfs":"https://clistoragesku000002.dfs.core.windows.net/","web":"https://clistoragesku000002.z3.web.core.windows.net/","blob":"https://clistoragesku000002.blob.core.windows.net/","queue":"https://clistoragesku000002.queue.core.windows.net/","table":"https://clistoragesku000002.table.core.windows.net/","file":"https://clistoragesku000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1413'
+      - '1400'
       content-type:
       - application/json
       date:
-      - Mon, 27 Apr 2020 08:13:43 GMT
+      - Tue, 14 Jul 2020 14:39:25 GMT
       expires:
       - '-1'
       pragma:
@@ -265,24 +266,24 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_GZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002","name":"clistoragesku000002","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:12:55.1548240Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:12:55.1548240Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-27T08:12:55.1079390Z","primaryEndpoints":{"dfs":"https://clistoragesku000002.dfs.core.windows.net/","web":"https://clistoragesku000002.z5.web.core.windows.net/","blob":"https://clistoragesku000002.blob.core.windows.net/","queue":"https://clistoragesku000002.queue.core.windows.net/","table":"https://clistoragesku000002.table.core.windows.net/","file":"https://clistoragesku000002.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available","secondaryLocation":"westcentralus","statusOfSecondary":"available"}}'
+      string: '{"sku":{"name":"Standard_GZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002","name":"clistoragesku000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:38:38.1244076Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:38:38.1244076Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T14:38:38.0618874Z","primaryEndpoints":{"dfs":"https://clistoragesku000002.dfs.core.windows.net/","web":"https://clistoragesku000002.z3.web.core.windows.net/","blob":"https://clistoragesku000002.blob.core.windows.net/","queue":"https://clistoragesku000002.queue.core.windows.net/","table":"https://clistoragesku000002.table.core.windows.net/","file":"https://clistoragesku000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1482'
+      - '1469'
       content-type:
       - application/json
       date:
-      - Mon, 27 Apr 2020 08:13:49 GMT
+      - Tue, 14 Jul 2020 14:39:34 GMT
       expires:
       - '-1'
       pragma:
@@ -298,7 +299,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1176'
     status:
       code: 200
       message: OK
@@ -316,24 +317,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_GZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002","name":"clistoragesku000002","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:12:55.1548240Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-27T08:12:55.1548240Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-27T08:12:55.1079390Z","primaryEndpoints":{"dfs":"https://clistoragesku000002.dfs.core.windows.net/","web":"https://clistoragesku000002.z5.web.core.windows.net/","blob":"https://clistoragesku000002.blob.core.windows.net/","queue":"https://clistoragesku000002.queue.core.windows.net/","table":"https://clistoragesku000002.table.core.windows.net/","file":"https://clistoragesku000002.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available","secondaryLocation":"westcentralus","statusOfSecondary":"available"}}'
+      string: '{"sku":{"name":"Standard_GZRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/clistoragesku000002","name":"clistoragesku000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:38:38.1244076Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T14:38:38.1244076Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T14:38:38.0618874Z","primaryEndpoints":{"dfs":"https://clistoragesku000002.dfs.core.windows.net/","web":"https://clistoragesku000002.z3.web.core.windows.net/","blob":"https://clistoragesku000002.blob.core.windows.net/","queue":"https://clistoragesku000002.queue.core.windows.net/","table":"https://clistoragesku000002.table.core.windows.net/","file":"https://clistoragesku000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1482'
+      - '1469'
       content-type:
       - application/json
       date:
-      - Mon, 27 Apr 2020 08:13:50 GMT
+      - Tue, 14 Jul 2020 14:39:35 GMT
       expires:
       - '-1'
       pragma:
@@ -367,8 +368,8 @@ interactions:
       ParameterSetName:
       - -n -g -y
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: DELETE
@@ -384,7 +385,7 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Mon, 27 Apr 2020 08:13:55 GMT
+      - Tue, 14 Jul 2020 14:39:46 GMT
       expires:
       - '-1'
       pragma:
@@ -396,7 +397,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14991'
     status:
       code: 200
       message: OK

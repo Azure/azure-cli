@@ -8,11 +8,12 @@ import unittest
 import shutil
 import hashlib
 import mock
+import sys
 
 from azure.cli.core.util import CLIError
-from azure.cli.core.extension import build_extension_path
-from azure.cli.core.extension.operations import (list_extensions, add_extension, show_extension,
-                                                 remove_extension, update_extension,
+from azure.cli.core.extension import get_extension, build_extension_path
+from azure.cli.core.extension.operations import (add_extension_to_path, list_extensions, add_extension,
+                                                 show_extension, remove_extension, update_extension,
                                                  list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION,
                                                  OUT_KEY_METADATA, OUT_KEY_PATH)
 from azure.cli.core.extension._resolve import NoExtensionCandidatesError
@@ -423,6 +424,56 @@ class TestExtensionCommands(unittest.TestCase):
             update_extension(self.cmd, MY_EXT_NAME, pip_extra_index_urls=extra_index_urls)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')
+
+    def test_add_extension_to_path(self):
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
+        num_exts = len(list_extensions())
+        self.assertEqual(num_exts, 1)
+        ext = get_extension('myfirstcliextension')
+        old_path = sys.path[:]
+        try:
+            add_extension_to_path(ext.name)
+            self.assertSequenceEqual(old_path, sys.path[:-1])
+            self.assertEqual(ext.path, sys.path[-1])
+        finally:
+            sys.path[:] = old_path
+
+    def test_add_extension_azure_to_path(self):
+        import azure
+        import azure.mgmt
+        old_path_0 = list(sys.path)
+        old_path_1 = list(azure.__path__)
+        old_path_2 = list(azure.mgmt.__path__)
+
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
+        ext = get_extension('myfirstcliextension')
+        azure_dir = os.path.join(ext.path, "azure")
+        azure_mgmt_dir = os.path.join(azure_dir, "mgmt")
+        os.mkdir(azure_dir)
+        os.mkdir(azure_mgmt_dir)
+
+        try:
+            add_extension_to_path(ext.name)
+            new_path_1 = list(azure.__path__)
+            new_path_2 = list(azure.mgmt.__path__)
+        finally:
+            sys.path.remove(ext.path)
+            remove_extension(ext.name)
+            if isinstance(azure.__path__, list):
+                azure.__path__[:] = old_path_1
+            else:
+                list(azure.__path__)
+            if isinstance(azure.mgmt.__path__, list):
+                azure.mgmt.__path__[:] = old_path_2
+            else:
+                list(azure.mgmt.__path__)
+        self.assertSequenceEqual(old_path_1, new_path_1[:-1])
+        self.assertSequenceEqual(old_path_2, new_path_2[:-1])
+        self.assertEqual(azure_dir, new_path_1[-1])
+        self.assertEqual(azure_mgmt_dir, new_path_2[-1])
+        self.assertSequenceEqual(old_path_0, list(sys.path))
+        self.assertSequenceEqual(old_path_1, list(azure.__path__))
+        self.assertSequenceEqual(old_path_2, list(azure.mgmt.__path__))
 
     def _setup_cmd(self):
         cmd = mock.MagicMock()

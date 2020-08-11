@@ -3,7 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.security.models import SecurityContact, AutoProvision
+from azure.mgmt.security.models import (SecurityContact,
+                                        AutoProvision,
+                                        SecurityAssessment,
+                                        SecurityAssessmentMetadata,
+                                        AzureResourceDetails,
+                                        AssessmentStatus,
+                                        IoTSecuritySolutionModel,
+                                        UpdateIotSecuritySolutionData)
+from msrestazure.tools import resource_id
+from msrestazure.azure_exceptions import CloudError
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -249,7 +258,7 @@ def get_security_pricing(client, resource_name, resource_group_name=None):
     if resource_group_name:
         return client.get_resource_group_pricing(resource_group_name, resource_name)
 
-    return client.get_subscription_pricing(resource_name)
+    return client.get(resource_name)
 
 
 def create_security_pricing(client, resource_name, tier, resource_group_name=None):
@@ -257,7 +266,7 @@ def create_security_pricing(client, resource_name, tier, resource_group_name=Non
     if resource_group_name:
         return client.create_or_update_resource_group_pricing(resource_group_name, resource_name, tier)
 
-    return client.update_subscription_pricing(resource_name, tier)
+    return client.update(resource_name, tier)
 
 
 # --------------------------------------------------------------------------------------------
@@ -282,7 +291,7 @@ def get_security_topology(client, resource_name, resource_group_name):
 
 
 # --------------------------------------------------------------------------------------------
-# Security Topology
+# Security Workspace
 # --------------------------------------------------------------------------------------------
 
 
@@ -324,10 +333,347 @@ def update_atp_setting(client, resource_group_name, storage_account_name, is_ena
 
 def _construct_resource_id(client, resource_group_name, storage_account_name):
 
-    from msrestazure.tools import resource_id
     return resource_id(
         subscription=client.config.subscription_id,
         resource_group=resource_group_name,
         namespace='Microsoft.Storage',
         type='storageAccounts',
         name=storage_account_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Assessments
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_assessments(client):
+
+    return client.list(scope='/subscriptions/' + client.config.subscription_id)
+
+
+def get_security_assessment(client, resource_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + client.config.subscription_id
+
+    return client.get(assessed_resource_id,
+                      assessment_name=resource_name)
+
+
+def create_security_assessment(client,
+                               resource_name,
+                               status_code,
+                               status_cause=None,
+                               status_description=None,
+                               additional_data=None,
+                               assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = resource_id(subscription=client.config.subscription_id)
+
+    resource_details = AzureResourceDetails(source="Azure")
+
+    status = AssessmentStatus(code=status_code,
+                              cause=status_cause,
+                              description=status_description)
+
+    new_assessment = SecurityAssessment(resource_details=resource_details,
+                                        status=status,
+                                        additional_data=additional_data,
+                                        assessed_resource_id=assessed_resource_id)
+
+    return client.create_or_update(resource_id=assessed_resource_id,
+                                   assessment_name=resource_name,
+                                   assessment=new_assessment)
+
+
+def delete_security_assessment(client, resource_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = resource_id(subscription=client.config.subscription_id)
+
+    return client.delete(assessment_name=resource_name,
+                         resource_id=assessed_resource_id)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Assessment Metadata
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_assessment_metadata(client):
+
+    return client.list_by_subscription()
+
+
+def get_security_assessment_metadata(client, resource_name):
+
+    try:
+        return client.get(resource_name)
+    except CloudError:
+        return client.get_in_subscription(resource_name)
+
+
+def create_security_assessment_metadata(client, resource_name,
+                                        display_name,
+                                        severity,
+                                        description,
+                                        remediation_description=None):
+
+    new_assessment_metadata = SecurityAssessmentMetadata(display_name=display_name,
+                                                         severity=severity,
+                                                         assessment_type="CustomerManaged",
+                                                         remediation_description=remediation_description,
+                                                         description=description)
+
+    return client.create_in_subscription(assessment_metadata_name=resource_name,
+                                         assessment_metadata=new_assessment_metadata)
+
+
+def delete_security_assessment_metadata(client, resource_name):
+
+    return client.delete_in_subscription(resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Sub Assessment
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_sub_assessments(client, assessment_name=None, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + client.config.subscription_id
+        return client.list_all(scope=assessed_resource_id)
+
+    return client.list(scope=assessed_resource_id, assessment_name=assessment_name)
+
+
+def get_security_sub_assessment(client, resource_name, assessment_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + client.config.subscription_id
+
+    return client.get(sub_assessment_name=resource_name,
+                      assessment_name=assessment_name,
+                      scope=assessed_resource_id)
+
+
+# --------------------------------------------------------------------------------------------
+# Adaptive Application Controls
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_adaptive_application_controls(client):
+
+    return client.list()
+
+
+def get_security_adaptive_application_controls(client, group_name):
+
+    return client.get(group_name=group_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Adaptive Network Hardenings
+# --------------------------------------------------------------------------------------------
+
+
+def get_security_adaptive_network_hardenings(client,
+                                             adaptive_network_hardenings_resource_name,
+                                             resource_name,
+                                             resource_type,
+                                             resource_namespace,
+                                             resource_group_name):
+
+    return client.get(resource_group_name,
+                      resource_namespace,
+                      resource_type,
+                      resource_name,
+                      adaptive_network_hardenings_resource_name)
+
+
+def list_security_adaptive_network_hardenings(client,
+                                              resource_name,
+                                              resource_type,
+                                              resource_namespace,
+                                              resource_group_name):
+
+    return client.list_by_extended_resource(resource_group_name,
+                                            resource_namespace,
+                                            resource_type,
+                                            resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Allowed Connections
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_allowed_connections(client):
+
+    for loc in client.locations.list():
+        client.config.asc_location = loc.name
+
+    return client.allowed_connections.list()
+
+
+def get_security_allowed_connections(client, resource_name, resource_group_name):
+
+    for loc in client.locations.list():
+        client.config.asc_location = loc.name
+
+    return client.allowed_connections.get(resource_group_name, resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security IoT Solution
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_iot_solution(client, resource_group_name=None):
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    return client.list_by_subscription()
+
+
+def show_security_iot_solution(client, resource_group_name, iot_solution_name):
+
+    return client.get(resource_group_name=resource_group_name, solution_name=iot_solution_name)
+
+
+def delete_security_iot_solution(client, resource_group_name, iot_solution_name):
+
+    return client.delete(resource_group_name=resource_group_name, solution_name=iot_solution_name)
+
+
+def create_security_iot_solution(client, resource_group_name, iot_solution_name,
+                                 iot_solution_display_name, iot_solution_iot_hubs, location):
+
+    iot_security_solution_data = IoTSecuritySolutionModel(display_name=iot_solution_display_name,
+                                                          iot_hubs=iot_solution_iot_hubs.split(","),
+                                                          location=location)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        iot_security_solution_data=iot_security_solution_data)
+
+
+def update_security_iot_solution(client, resource_group_name, iot_solution_name,
+                                 iot_solution_display_name=None, iot_solution_iot_hubs=None):
+
+    return client.update(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        update_iot_security_solution_data=UpdateIotSecuritySolutionData(
+            displayName=iot_solution_display_name,
+            iotHubs=iot_solution_iot_hubs))
+
+
+# --------------------------------------------------------------------------------------------
+# Security IoT Analytics
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_iot_analytics(client, resource_group_name, iot_solution_name):
+
+    return client.list(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
+
+
+def show_security_iot_analytics(client, resource_group_name, iot_solution_name):
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security IoT Alerts
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_iot_alerts(client, resource_group_name, iot_solution_name):
+
+    return client.list(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
+
+
+def show_security_iot_alerts(client, resource_group_name, iot_solution_name, resource_name):
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_alert_name=resource_name)
+
+
+def dismiss_security_iot_alerts(client, resource_group_name, iot_solution_name, resource_name):
+
+    return client.dismiss(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_alert_name=resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security IoT Recommendations
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_iot_recommendations(client, resource_group_name, iot_solution_name):
+
+    return client.list(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
+
+
+def show_security_iot_recommendations(client, resource_group_name, iot_solution_name, resource_name):
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_recommendation_name=resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Regulatory Compliance
+# --------------------------------------------------------------------------------------------
+
+
+def list_regulatory_compliance_standards(client):
+
+    return client.list()
+
+
+def get_regulatory_compliance_standard(client, resource_name):
+
+    return client.get(regulatory_compliance_standard_name=resource_name)
+
+
+def list_regulatory_compliance_controls(client, standard_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name)
+
+
+def get_regulatory_compliance_control(client, resource_name, standard_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=resource_name)
+
+
+def list_regulatory_compliance_assessments(client, standard_name, control_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name,
+                       regulatory_compliance_control_name=control_name)
+
+
+def get_regulatory_compliance_assessment(client, resource_name, standard_name, control_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=control_name,
+                      regulatory_compliance_assessment_name=resource_name)

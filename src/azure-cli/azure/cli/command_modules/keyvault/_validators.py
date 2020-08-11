@@ -9,6 +9,7 @@ import binascii
 from datetime import datetime
 import re
 
+from enum import Enum
 from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -17,6 +18,11 @@ from azure.cli.core.commands.validators import validate_tags
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
+
+
+class KeyEncryptionDataType(str, Enum):
+    BASE64 = 'base64'
+    PLAINTEXT = 'plaintext'
 
 
 def _extract_version(item_id):
@@ -382,3 +388,15 @@ def validate_storage_disabled_attribute(attr_arg_name, attr_type):
         attr_arg = attr_type(enabled=(not disabled))
         setattr(ns, attr_arg_name, attr_arg)
     return _validate
+
+
+def validate_encryption(ns):
+    if ns.data_type == KeyEncryptionDataType.BASE64:
+        ns.value = base64.b64decode(ns.value.encode('utf-8'))
+    else:
+        ns.value = ns.value.encode('utf-8')
+    del ns.data_type
+
+
+def validate_decryption(ns):
+    ns.value = base64.b64decode(ns.value)

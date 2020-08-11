@@ -100,10 +100,11 @@ def load_command_table(self, _):
         g.show_command('list', 'list_by_database_account', transform=gen_dict_to_list_transform(key='values'))
 
     # SQL api
-    with self.command_group('cosmosdb sql', is_preview=True):
+    with self.command_group('cosmosdb sql'):
         pass
     with self.command_group('cosmosdb sql database', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_database_create')
+        g.custom_command('exists', 'cli_cosmosdb_sql_database_exists')
         g.command('list', 'list_sql_databases')
         g.command('show', 'get_sql_database')
         g.command('delete', 'delete_sql_database', confirmation=True)
@@ -111,6 +112,7 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb sql container', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_container_create')
         g.custom_command('update', 'cli_cosmosdb_sql_container_update')
+        g.custom_command('exists', 'cli_cosmosdb_sql_container_exists')
         g.command('list', 'list_sql_containers')
         g.command('show', 'get_sql_container')
         g.command('delete', 'delete_sql_container', confirmation=True)
@@ -137,10 +139,11 @@ def load_command_table(self, _):
         g.command('delete', 'delete_sql_user_defined_function', confirmation=True)
 
     # MongoDB api
-    with self.command_group('cosmosdb mongodb', is_preview=True):
+    with self.command_group('cosmosdb mongodb'):
         pass
     with self.command_group('cosmosdb mongodb database', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_mongodb_database_create')
+        g.custom_command('exists', 'cli_cosmosdb_mongodb_database_exists')
         g.command('list', 'list_mongo_db_databases')
         g.command('show', 'get_mongo_db_database')
         g.command('delete', 'delete_mongo_db_database', confirmation=True)
@@ -148,15 +151,17 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb mongodb collection', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_mongodb_collection_create')
         g.custom_command('update', 'cli_cosmosdb_mongodb_collection_update')
+        g.custom_command('exists', 'cli_cosmosdb_mongodb_collection_exists')
         g.command('list', 'list_mongo_db_collections')
         g.command('show', 'get_mongo_db_collection')
         g.command('delete', 'delete_mongo_db_collection', confirmation=True)
 
     # Cassandra api
-    with self.command_group('cosmosdb cassandra', is_preview=True):
+    with self.command_group('cosmosdb cassandra'):
         pass
     with self.command_group('cosmosdb cassandra keyspace', cosmosdb_cassandra_sdk, client_factory=cf_cassandra_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_cassandra_keyspace_create')
+        g.custom_command('exists', 'cli_cosmosdb_cassandra_keyspace_exists')
         g.command('list', 'list_cassandra_keyspaces')
         g.command('show', 'get_cassandra_keyspace')
         g.command('delete', 'delete_cassandra_keyspace', confirmation=True)
@@ -164,15 +169,17 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb cassandra table', cosmosdb_cassandra_sdk, client_factory=cf_cassandra_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_cassandra_table_create')
         g.custom_command('update', 'cli_cosmosdb_cassandra_table_update')
+        g.custom_command('exists', 'cli_cosmosdb_cassandra_table_exists')
         g.command('list', 'list_cassandra_tables')
         g.command('show', 'get_cassandra_table')
         g.command('delete', 'delete_cassandra_table', confirmation=True)
 
     # Gremlin api
-    with self.command_group('cosmosdb gremlin', is_preview=True):
+    with self.command_group('cosmosdb gremlin'):
         pass
     with self.command_group('cosmosdb gremlin database', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_gremlin_database_create')
+        g.custom_command('exists', 'cli_cosmosdb_gremlin_database_exists')
         g.command('list', 'list_gremlin_databases')
         g.command('show', 'get_gremlin_database')
         g.command('delete', 'delete_gremlin_database', confirmation=True)
@@ -180,13 +187,15 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb gremlin graph', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_gremlin_graph_create')
         g.custom_command('update', 'cli_cosmosdb_gremlin_graph_update')
+        g.custom_command('exists', 'cli_cosmosdb_gremlin_graph_exists')
         g.command('list', 'list_gremlin_graphs')
         g.command('show', 'get_gremlin_graph')
         g.command('delete', 'delete_gremlin_graph', confirmation=True)
 
     # Table api
-    with self.command_group('cosmosdb table', cosmosdb_table_sdk, client_factory=cf_table_resources, is_preview=True) as g:
+    with self.command_group('cosmosdb table', cosmosdb_table_sdk, client_factory=cf_table_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_table_create')
+        g.custom_command('exists', 'cli_cosmosdb_table_exists')
         g.command('list', 'list_tables')
         g.command('show', 'get_table')
         g.command('delete', 'delete_table', confirmation=True)

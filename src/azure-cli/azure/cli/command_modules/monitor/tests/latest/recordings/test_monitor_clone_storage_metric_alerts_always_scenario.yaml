@@ -21,8 +21,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
@@ -38,7 +38,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 02 Mar 2020 06:58:06 GMT
+      - Fri, 17 Jul 2020 08:27:41 GMT
       expires:
       - '-1'
       pragma:
@@ -50,7 +50,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1172'
     status:
       code: 201
       message: Created
@@ -83,8 +83,8 @@ interactions:
       ParameterSetName:
       - -g -n --scopes --action --description --condition --condition
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
@@ -121,7 +121,7 @@ interactions:
         \     }\r\n    ]\r\n  }\r\n}"
     headers:
       api-supported-versions:
-      - 2017-09-01-preview, 2018-03-01
+      - 1.0, 2.0, 2017-09-01-preview, 2018-03-01
       cache-control:
       - no-cache
       content-length:
@@ -129,7 +129,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 02 Mar 2020 06:58:18 GMT
+      - Fri, 17 Jul 2020 08:27:56 GMT
       expires:
       - '-1'
       pragma:
@@ -167,8 +167,8 @@ interactions:
       ParameterSetName:
       - --source-resource --target-resource --always-clone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -176,8 +176,74 @@ interactions:
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"location\": \"global\",\r\n
-        \     \"type\": \"Microsoft.Insights/metricAlerts\",\r\n      \"name\": \"alert1\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
+        \     \"type\": \"Microsoft.Insights/metricAlerts\",\r\n      \"name\": \"logic-app-test-la
+        failed\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/microsoft.insights/metricAlerts/logic-app-test-la
+        failed\",\r\n      \"tags\": {},\r\n      \"properties\": {\r\n        \"description\":
+        \"\",\r\n        \"severity\": 3,\r\n        \"enabled\": true,\r\n        \"scopes\":
+        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Compute/virtualMachines/zhoxing-test\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"templateType\": 8,\r\n        \"criteria\": {\r\n          \"allOf\":
+        [\r\n            {\r\n              \"threshold\": 100.0,\r\n              \"name\":
+        \"Metric1\",\r\n              \"metricNamespace\": \"Microsoft.Compute/virtualMachines\",\r\n
+        \             \"metricName\": \"Percentage CPU\",\r\n              \"dimensions\":
+        [],\r\n              \"operator\": \"GreaterThan\",\r\n              \"timeAggregation\":
+        \"Average\",\r\n              \"monitorTemplateType\": 8,\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"autoMitigate\": true,\r\n        \"targetResourceType\": \"Microsoft.Compute/virtualMachines\",\r\n
+        \       \"targetResourceRegion\": \"centralus\",\r\n        \"actions\": []\r\n
+        \     }\r\n    },\r\n    {\r\n      \"location\": \"global\",\r\n      \"type\":
+        \"Microsoft.Insights/metricAlerts\",\r\n      \"name\": \"eg-extendedrange-init-la
+        failed\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/microsoft.insights/metricAlerts/eg-extendedrange-init-la
+        failed\",\r\n      \"tags\": {},\r\n      \"properties\": {\r\n        \"description\":
+        \"\",\r\n        \"severity\": 3,\r\n        \"enabled\": true,\r\n        \"scopes\":
+        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Compute/virtualMachines/zhoxing-test\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"templateType\": 8,\r\n        \"criteria\": {\r\n          \"allOf\":
+        [\r\n            {\r\n              \"threshold\": 100.0,\r\n              \"name\":
+        \"Metric1\",\r\n              \"metricNamespace\": \"Microsoft.Compute/virtualMachines\",\r\n
+        \             \"metricName\": \"Disk Read Bytes\",\r\n              \"dimensions\":
+        [],\r\n              \"operator\": \"GreaterThan\",\r\n              \"timeAggregation\":
+        \"Total\",\r\n              \"monitorTemplateType\": 8,\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"autoMitigate\": true,\r\n        \"targetResourceType\": \"Microsoft.Compute/virtualMachines\",\r\n
+        \       \"targetResourceRegion\": \"centralus\",\r\n        \"actions\": []\r\n
+        \     }\r\n    },\r\n    {\r\n      \"location\": \"global\",\r\n      \"type\":
+        \"Microsoft.Insights/metricAlerts\",\r\n      \"name\": \"Alert on Exceptions\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Insights/metricAlerts/Alert
+        on Exceptions\",\r\n      \"properties\": {\r\n        \"description\": \"All
+        exceptions\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n
+        \       \"scopes\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/microsoft.insights/components/zhoxing-test\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"templateType\": 8,\r\n        \"criteria\": {\r\n          \"allOf\":
+        [\r\n            {\r\n              \"threshold\": 1.0,\r\n              \"name\":
+        \"cond0\",\r\n              \"metricNamespace\": \"microsoft.insights/components\",\r\n
+        \             \"metricName\": \"exceptions/count\",\r\n              \"dimensions\":
+        [],\r\n              \"operator\": \"GreaterThanOrEqual\",\r\n              \"timeAggregation\":
+        \"Count\",\r\n              \"criterionType\": \"StaticThresholdCriterion\"\r\n
+        \           }\r\n          ],\r\n          \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \       },\r\n        \"targetResourceType\": \"microsoft.insights/components\",\r\n
+        \       \"actions\": [\r\n          {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure-cli-test-rg/providers/microsoft.insights/actionGroups/test-ag-yu\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"location\":
+        \"global\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n      \"name\":
+        \"Alert on Exceptions1\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Insights/metricAlerts/Alert
+        on Exceptions1\",\r\n      \"properties\": {\r\n        \"description\": \"All
+        exceptions\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n
+        \       \"scopes\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/microsoft.insights/components/zhoxing-test\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"templateType\": 8,\r\n        \"criteria\": {\r\n          \"allOf\":
+        [\r\n            {\r\n              \"threshold\": 1.0,\r\n              \"name\":
+        \"cond0\",\r\n              \"metricNamespace\": \"microsoft.insights/components\",\r\n
+        \             \"metricName\": \"exceptions/count\",\r\n              \"dimensions\":
+        [],\r\n              \"operator\": \"GreaterThanOrEqual\",\r\n              \"timeAggregation\":
+        \"Count\",\r\n              \"criterionType\": \"StaticThresholdCriterion\"\r\n
+        \           }\r\n          ],\r\n          \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \       },\r\n        \"targetResourceType\": \"microsoft.insights/components\",\r\n
+        \       \"actions\": [\r\n          {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/microsoft.insights/actionGroups/test-ag-yu\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"location\":
+        \"global\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n      \"name\":
+        \"alert1\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
         \     \"properties\": {\r\n        \"description\": \"Test\",\r\n        \"severity\":
         2,\r\n        \"enabled\": true,\r\n        \"scopes\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\r\n
         \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
@@ -206,15 +272,15 @@ interactions:
         \         }\r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"
     headers:
       api-supported-versions:
-      - 2017-09-01-preview, 2018-03-01
+      - 1.0, 2.0, 2017-09-01-preview, 2018-03-01
       cache-control:
       - no-cache
       content-length:
-      - '2754'
+      - '8796'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 02 Mar 2020 06:58:19 GMT
+      - Fri, 17 Jul 2020 08:27:57 GMT
       expires:
       - '-1'
       pragma:
@@ -250,8 +316,8 @@ interactions:
       ParameterSetName:
       - --source-resource --target-resource --always-clone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -267,7 +333,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 02 Mar 2020 06:58:20 GMT
+      - Fri, 17 Jul 2020 08:27:57 GMT
       expires:
       - '-1'
       pragma:
@@ -307,8 +373,8 @@ interactions:
       ParameterSetName:
       - --source-resource --target-resource --always-clone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
@@ -324,7 +390,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 02 Mar 2020 06:58:23 GMT
+      - Fri, 17 Jul 2020 08:28:00 GMT
       expires:
       - '-1'
       pragma:
@@ -336,7 +402,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1162'
     status:
       code: 201
       message: Created
@@ -371,8 +437,8 @@ interactions:
       ParameterSetName:
       - --source-resource --target-resource --always-clone
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.7.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
@@ -410,7 +476,7 @@ interactions:
         \     }\r\n    ]\r\n  }\r\n}"
     headers:
       api-supported-versions:
-      - 2017-09-01-preview, 2018-03-01
+      - 1.0, 2.0, 2017-09-01-preview, 2018-03-01
       cache-control:
       - no-cache
       content-length:
@@ -418,7 +484,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 02 Mar 2020 06:58:31 GMT
+      - Fri, 17 Jul 2020 08:28:09 GMT
       expires:
       - '-1'
       pragma:

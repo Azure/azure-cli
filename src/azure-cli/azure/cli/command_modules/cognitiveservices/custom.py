@@ -3,14 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
+
 from knack.prompting import prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.mgmt.cognitiveservices.models import CognitiveServicesAccount, Sku,\
-    VirtualNetworkRule, IpRule, NetworkRuleSet,\
-    CognitiveServicesAccountProperties, CognitiveServicesAccountApiProperties
+    VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction,\
+    CognitiveServicesAccountProperties, CognitiveServicesAccountApiProperties,\
+    Identity, IdentityType
+from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
+
 
 logger = get_logger(__name__)
 
@@ -66,7 +70,7 @@ def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_n
 
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, custom_domain=None,
-        tags=None, api_properties=None, yes=None):
+        tags=None, api_properties=None, assign_identity=False, storage=None, encryption=None, yes=None):
 
     terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
         ' to improve Microsoft products and services.'\
@@ -102,12 +106,20 @@ def create(
         properties.custom_sub_domain_name = custom_domain
     params = CognitiveServicesAccount(sku=sku, kind=kind, location=location,
                                       properties=properties, tags=tags)
+    if assign_identity:
+        params.identity = Identity(type=IdentityType.system_assigned)
+
+    if storage is not None:
+        params.properties.user_owned_storage = json.loads(storage)
+
+    if encryption is not None:
+        params.properties.encryption = json.loads(encryption)
 
     return client.create(resource_group_name, account_name, params)
 
 
 def update(client, resource_group_name, account_name, sku_name=None, custom_domain=None,
-           tags=None, api_properties=None):
+           tags=None, api_properties=None, storage=None, encryption=None):
 
     if sku_name is None:
         sa = client.get_properties(resource_group_name, account_name)
@@ -123,12 +135,18 @@ def update(client, resource_group_name, account_name, sku_name=None, custom_doma
         properties.custom_sub_domain_name = custom_domain
     params = CognitiveServicesAccount(sku=sku, properties=properties, tags=tags)
 
+    if storage is not None:
+        params.properties.user_owned_storage = json.loads(storage)
+
+    if encryption is not None:
+        params.properties.encryption = json.loads(encryption)
+
     return client.update(resource_group_name, account_name, params)
 
 
 def default_network_acls():
     rules = NetworkRuleSet()
-    rules.default_action = 'Deny'
+    rules.default_action = NetworkRuleAction.deny
     rules.ip_rules = []
     rules.virtual_network_rules = []
     return rules
@@ -139,7 +157,6 @@ def list_network_rules(client, resource_group_name, account_name):
     rules = sa.properties.network_acls
     if rules is None:
         rules = default_network_acls()
-    delattr(rules, 'default_action')
     return rules
 
 
@@ -189,3 +206,21 @@ def remove_network_rule(client, resource_group_name, account_name, ip_address=No
     params = CognitiveServicesAccount(properties=properties)
 
     return client.update(resource_group_name, account_name, params)
+
+
+def identity_assign(client, resource_group_name, account_name):
+    params = CognitiveServicesAccount()
+    params.identity = Identity(type=IdentityType.system_assigned)
+    sa = client.update(resource_group_name, account_name, params)
+    return sa.identity if sa.identity else {}
+
+
+def identity_remove(client, resource_group_name, account_name):
+    params = CognitiveServicesAccount()
+    params.identity = Identity(type=IdentityType.none)
+    client.update(resource_group_name, account_name, params)
+
+
+def identity_show(client, resource_group_name, account_name):
+    sa = client.get_properties(resource_group_name, account_name)
+    return sa.identity if sa.identity else {}

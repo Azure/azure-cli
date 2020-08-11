@@ -9,7 +9,7 @@ def add_tags(command, tags):
 
 
 # pylint: disable=too-many-public-methods
-class CdnScenarioMixin(object):
+class CdnScenarioMixin:
     def profile_create_cmd(self, group, name, tags=None, checks=None, options=None, sku=None):
         command = 'cdn profile create -g {} -n {}'.format(group, name)
         if tags:
@@ -30,20 +30,28 @@ class CdnScenarioMixin(object):
         command = 'cdn profile list -g {}'.format(group)
         return self.cmd(command, checks)
 
+    def profile_show_cmd(self, group, name, checks=None):
+        command = f'cdn profile show -g {group} -n {name}'
+        return self.cmd(command, checks)
+
     def profile_delete_cmd(self, group, name, checks=None):
         command = 'cdn profile delete -g {} -n {}'.format(group, name)
         return self.cmd(command, checks)
 
-    def endpoint_create_cmd(self, group, name, profile_name, origin, tags=None, checks=None):
-        cmd_txt = 'cdn endpoint create -g {} -n {} --profile-name {} --origin {}'
-        command = cmd_txt.format(group,
-                                 name,
-                                 profile_name,
-                                 origin)
-        if tags:
-            command = add_tags(command, tags)
+    def endpoint_create_cmd(self, group, name, profile_name, origin, private_link_id=None, private_link_location=None,
+                            private_link_message=None, tags=None, checks=None):
+        cmd = f'cdn endpoint create -g {group} -n {name} --profile-name {profile_name} --origin {origin} 80 443 '
 
-        return self.cmd(command, checks)
+        if private_link_id:
+            cmd += f' \'{private_link_id}\''
+        if private_link_location:
+            cmd += f' \'{private_link_location}\''
+        if private_link_message:
+            cmd += f' \'{private_link_message}\''
+        if tags:
+            cmd = add_tags(cmd, tags)
+
+        return self.cmd(cmd, checks)
 
     def endpoint_update_cmd(self, group, name, profile_name, tags=None, checks=None, options=None):
         command = 'cdn endpoint update -g {} -n {} --profile-name {}'.format(group,
@@ -156,6 +164,23 @@ class CdnScenarioMixin(object):
                                                                              profile_name)
         return self.cmd(command, checks)
 
+    def origin_update_cmd(self, group, origin_name, endpoint_name, profile_name, http_port='80', https_port='443',
+                          private_link_id=None, private_link_location=None, private_link_message=None, tags=None,
+                          checks=None):
+
+        cmd = f'cdn origin update -g {group} --endpoint-name {endpoint_name} --profile-name {profile_name} ' \
+              f'-n {origin_name} --http-port={http_port} --https-port={https_port}'
+
+        if private_link_id:
+            cmd += f' --private-link-resource-id={private_link_id}'
+        if private_link_location:
+            cmd += f' --private-link-location={private_link_location}'
+        if private_link_message:
+            cmd += f' \'--private-link-approval-message={private_link_message}\''
+        if tags:
+            cmd = add_tags(cmd, tags)
+        return self.cmd(cmd, checks)
+
     def origin_list_cmd(self, group, endpoint_name, profile_name, checks=None):
         msg = 'cdn origin list -g {} --endpoint-name {} --profile-name {}'
         command = msg.format(group,
@@ -254,3 +279,6 @@ class CdnScenarioMixin(object):
 
     def byoc_get_keyvault_cert_versions(self, key_vault_name, cert_name):
         return self.cmd(f'keyvault certificate list-versions --vault-name {key_vault_name} -n {cert_name}')
+
+    def is_playback_mode(self):
+        return self.get_subscription_id() == '00000000-0000-0000-0000-000000000000'

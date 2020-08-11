@@ -77,6 +77,8 @@ def load_command_table(self, _):
 
     appservice_environment = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_environment#{}')
 
+    staticsite_sdk = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.static_sites#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
@@ -89,6 +91,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('restart', 'restart_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('browse', 'view_in_browser')
+        g.custom_command('list-instances', 'list_instances', validator=validate_app_or_slot_exists_in_rg)
         # Move back to using list_runtimes function once Available Stacks API is updated (it's updated with Antares deployments)
         g.custom_command('list-runtimes', 'list_runtimes_hardcoded')
         g.custom_command('identity assign', 'assign_identity', validator=validate_app_or_slot_exists_in_rg)
@@ -184,6 +187,14 @@ def load_command_table(self, _):
         g.custom_command('download', 'download_historical_logs')
         g.custom_command('config', 'config_diagnostics', validator=validate_app_or_slot_exists_in_rg)
         g.custom_show_command('show', 'show_diagnostic_settings', validator=validate_app_or_slot_exists_in_rg)
+
+    with self.command_group('webapp log deployment', is_preview=True) as g:
+        g.custom_show_command('show', 'show_deployment_log')
+        g.custom_command('list', 'list_deployment_logs')
+
+    with self.command_group('functionapp log deployment', is_preview=True) as g:
+        g.custom_show_command('show', 'show_deployment_log')
+        g.custom_command('list', 'list_deployment_logs')
 
     with self.command_group('webapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
@@ -358,3 +369,31 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_appserviceenvironment_arm', supports_no_wait=True)
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
+
+    with self.command_group('staticwebapp', custom_command_type=staticsite_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_staticsites')
+        g.custom_command('browse', 'show_staticsite')
+        g.custom_command('create', 'create_staticsites', supports_no_wait=True)
+        g.custom_command('delete', 'delete_staticsite', supports_no_wait=True, confirmation=True)
+        g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
+        g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
+
+    with self.command_group('staticwebapp environment', custom_command_type=staticsite_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_staticsite_environments')
+        g.custom_show_command('show', 'show_staticsite_environment')
+        g.custom_command('functions', 'list_staticsite_functions')
+
+    with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_staticsite_domains')
+        g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
+        g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
+
+    with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_staticsite_function_app_settings')
+        g.custom_command('set', 'set_staticsite_function_app_settings')
+        g.custom_command('delete', 'delete_staticsite_function_app_settings')
+
+    with self.command_group('staticwebapp users', custom_command_type=staticsite_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_staticsite_users')
+        g.custom_command('invite', 'invite_staticsite_users')
+        g.custom_command('update', 'update_staticsite_users')

@@ -6,7 +6,6 @@
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
 from ._client_factory import iot_hub_service_factory
 from ._client_factory import iot_service_provisioning_factory
-from ._client_factory import iot_pnp_service_factory
 from ._client_factory import iot_central_service_factory
 
 JOB_DEPRECATION_INFO = 'IoT Extension (azure-cli-iot-ext) Job commands'
@@ -125,13 +124,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'iot_hub_policy_delete', transform=PolicyUpdateResultTransform(self.cli_ctx))
         g.custom_command('renew-key', 'iot_hub_policy_key_renew', supports_no_wait=True)
 
-    # iot hub job commands
-    with self.command_group('iot hub job', deprecate_info=self.deprecate(redirect=JOB_DEPRECATION_INFO),
-                            client_factory=iot_hub_service_factory) as g:
-        g.custom_command('list', 'iot_hub_job_list')
-        g.custom_command('show', 'iot_hub_job_get')
-        g.custom_command('cancel', 'iot_hub_job_cancel')
-
     # iot hub routing endpoint commands
     with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_hub_routing_endpoint_create',
@@ -162,22 +154,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory,
                             min_api="2019-07-01-preview") as g:
         g.custom_command('show', 'iot_hub_devicestream_show')
-
-    # iot pnp commands
-    with self.command_group('iot pnp repository', client_factory=iot_pnp_service_factory, is_preview=True) as g:
-        g.custom_command('list', 'pnp_list_repository')
-        g.custom_show_command('show', 'pnp_get_repository')
-        g.custom_command('create', 'pnp_create_repository')
-        g.custom_command('delete', 'pnp_delete_repository')
-        g.custom_command('update', 'pnp_update_repository')
-        g.custom_command('get-provision-status', 'pnp_track_provision_status')
-
-    with self.command_group('iot pnp key', client_factory=iot_pnp_service_factory, is_preview=True) as g:
-        g.custom_command('list', 'pnp_list_key')
-        g.custom_show_command('show', 'pnp_get_key')
-        g.custom_command('create', 'pnp_create_key')
-        g.custom_command('delete', 'pnp_delete_key')
-        g.custom_command('update', 'pnp_update_key')
 
     with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory,
                             is_preview=True) as g:

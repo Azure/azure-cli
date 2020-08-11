@@ -26,7 +26,8 @@ def load_arguments(self, _):
     from ._completers import subnet_completion_list, cluster_admin_account_completion_list, \
         cluster_user_group_completion_list, get_resource_name_completion_list_under_subscription
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm
+    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, PublicNetworkAccess, \
+        OutboundOnlyPublicNetworkAccessType
     from argcomplete.completers import FilesCompleter
     node_size_type = CLIArgumentType(arg_group='Node',
                                      help='The size of the node. See also: https://docs.microsoft.com/azure/'
@@ -34,7 +35,6 @@ def load_arguments(self, _):
 
     # cluster
     with self.argument_context('hdinsight') as c:
-
         # Cluster
         c.argument('cluster_name', arg_type=name_type,
                    completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
@@ -178,62 +178,80 @@ def load_arguments(self, _):
                        'Microsoft.ManagedIdentity/userAssignedIdentities'),
                    help="The name or ID of user assigned identity.")
 
-    # resize
-    with self.argument_context('hdinsight resize') as c:
-        c.argument('target_instance_count', options_list=['--workernode-count', '-c'],
-                   help='The target worker node instance count for the operation.', required=True)
+        # Private Link Network Settings
+        c.argument('public_network_access_type', arg_group='Private Link Network Settings',
+                   arg_type=get_enum_type(PublicNetworkAccess), help='The public network access type.')
+        c.argument('outbound_public_network_access_type', arg_group='Private Link Network Settings',
+                   arg_type=get_enum_type(OutboundOnlyPublicNetworkAccessType),
+                   help='The outbound only public network access type.')
 
-    # application
-    with self.argument_context('hdinsight application') as c:
-        c.argument('cluster_name', options_list=['--cluster-name'],
-                   completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
-                   help='The name of the cluster.')
-        c.argument('application_name', arg_type=name_type,
-                   help='The constant value for the application name.')
-        c.argument('application_type', options_list=['--type', '-t'],
-                   arg_type=get_enum_type(['CustomApplication', 'RServer']),
-                   help='The application type.')
-        c.argument('marketplace_identifier', options_list=['--marketplace-id'],
-                   help='The marketplace identifier.')
-        c.argument('https_endpoint_access_mode', arg_group='HTTPS Endpoint',
-                   options_list=['--access-mode'],
-                   help='The access mode for the application.')
-        c.argument('https_endpoint_destination_port', arg_group='HTTPS Endpoint',
-                   options_list=['--destination-port'],
-                   help='The destination port to connect to.')
-        c.argument('sub_domain_suffix', arg_group='HTTPS Endpoint', help='The subdomain suffix of the application.')
-        c.argument('disable_gateway_auth', arg_group='HTTPS Endpoint', arg_type=get_three_state_flag(),
-                   help='Indicates whether to disable gateway authentication. '
-                        'Default is to enable gateway authentication. Default: false. ')
-        c.argument('tags', tags_type)
-        c.argument('ssh_password', options_list=['--ssh-password', '-P'], arg_group='SSH',
-                   help='SSH password for the cluster nodes.')
+        # Encryption In Transit
+        c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),
+                   help='Indicates whether enable encryption in transit.')
 
-    # script action
-    with self.argument_context('hdinsight script-action') as c:
-        c.argument('cluster_name', options_list=['--cluster-name'],
-                   completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
-                   help='The name of the cluster.')
-        c.argument('roles', nargs='+', completer=get_generic_completion_list(known_role_types),
-                   help='A space-delimited list of roles (nodes) where the script will be executed. '
-                        'Valid roles are {}.'.format(', '.join(known_role_types)))
-        c.argument('persist_on_success', help='If the scripts needs to be persisted.')
-        c.argument('script_action_name', arg_type=name_type, arg_group=None,
-                   help='The name of the script action.')
-        c.argument('script_uri', arg_group=None, help='The URI to the script.')
-        c.argument('script_parameters', arg_group=None, help='The parameters for the script.')
-        c.argument('script_execution_id', options_list=['--execution-id'], arg_group=None,
-                   help='The script execution id')
+        # resize
+        with self.argument_context('hdinsight resize') as c:
+            c.argument('target_instance_count', options_list=['--workernode-count', '-c'],
+                       help='The target worker node instance count for the operation.', required=True)
 
-    with self.argument_context('hdinsight script-action delete') as c:
-        c.argument('script_name', arg_type=name_type, arg_group=None, help='The name of the script.')
+        # application
+        with self.argument_context('hdinsight application') as c:
+            c.argument('cluster_name', options_list=['--cluster-name'],
+                       completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                       help='The name of the cluster.')
+            c.argument('application_name', arg_type=name_type,
+                       help='The constant value for the application name.')
+            c.argument('application_type', options_list=['--type', '-t'],
+                       arg_type=get_enum_type(['CustomApplication', 'RServer']),
+                       help='The application type.')
+            c.argument('marketplace_identifier', options_list=['--marketplace-id'],
+                       help='The marketplace identifier.')
+            c.argument('https_endpoint_access_mode', arg_group='HTTPS Endpoint',
+                       options_list=['--access-mode'],
+                       help='The access mode for the application.')
+            c.argument('https_endpoint_destination_port', arg_group='HTTPS Endpoint',
+                       options_list=['--destination-port'],
+                       help='The destination port to connect to.')
+            c.argument('sub_domain_suffix', arg_group='HTTPS Endpoint', help='The subdomain suffix of the application.')
+            c.argument('disable_gateway_auth', arg_group='HTTPS Endpoint', arg_type=get_three_state_flag(),
+                       help='Indicates whether to disable gateway authentication. '
+                            'Default is to enable gateway authentication. Default: false. ')
+            c.argument('tags', tags_type)
+            c.argument('ssh_password', options_list=['--ssh-password', '-P'], arg_group='SSH',
+                       help='SSH password for the cluster nodes.')
 
-    # Monitoring
-    with self.argument_context('hdinsight monitor') as c:
-        c.argument('workspace', validator=validate_workspace,
-                   completer=get_resource_name_completion_list_under_subscription(
-                       'Microsoft.OperationalInsights/workspaces'),
-                   help='The name, resource ID or workspace ID of Log Analytics workspace.')
-        c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
-                                       'Required when workspace ID is provided.')
-        c.ignore('workspace_type')
+        # script action
+        with self.argument_context('hdinsight script-action') as c:
+            c.argument('cluster_name', options_list=['--cluster-name'],
+                       completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                       help='The name of the cluster.')
+            c.argument('roles', nargs='+', completer=get_generic_completion_list(known_role_types),
+                       help='A space-delimited list of roles (nodes) where the script will be executed. '
+                            'Valid roles are {}.'.format(', '.join(known_role_types)))
+            c.argument('persist_on_success', help='If the scripts needs to be persisted.')
+            c.argument('script_action_name', arg_type=name_type, arg_group=None,
+                       help='The name of the script action.')
+            c.argument('script_uri', arg_group=None, help='The URI to the script.')
+            c.argument('script_parameters', arg_group=None, help='The parameters for the script.')
+            c.argument('script_execution_id', options_list=['--execution-id'], arg_group=None,
+                       help='The script execution id')
+
+        with self.argument_context('hdinsight script-action delete') as c:
+            c.argument('script_name', arg_type=name_type, arg_group=None, help='The name of the script.')
+
+        # Monitoring
+        with self.argument_context('hdinsight monitor') as c:
+            c.argument('workspace', validator=validate_workspace,
+                       completer=get_resource_name_completion_list_under_subscription(
+                           'Microsoft.OperationalInsights/workspaces'),
+                       help='The name, resource ID or workspace ID of Log Analytics workspace.')
+            c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
+                                           'Required when workspace ID is provided.')
+            c.ignore('workspace_type')
+
+        with self.argument_context('hdinsight host') as c:
+            c.argument('cluster_name', options_list=['--cluster-name'],
+                       completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                       help='The name of the cluster.')
+            c.argument('hosts', options_list=['--host-names'], nargs='+',
+                       help='A space-delimited list of host names that need to be restarted.')
