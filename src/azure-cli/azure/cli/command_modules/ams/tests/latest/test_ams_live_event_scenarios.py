@@ -51,7 +51,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('input.keyFrameIntervalDuration', '{keyFrameIntervalDuration}'),
             self.check('length(streamOptions)', 2),
             self.check('description', '{description}'),
-            self.check('input.accessToken', str(access_token).replace("-", "")),
+            self.check('input.accessToken', access_token),
             self.check('vanityUrl', True),
             self.check('input.accessControl.ip.allow[2].address', '192.168.0.0'),
             self.check('input.accessControl.ip.allow[2].subnetPrefixLength', '28'),
