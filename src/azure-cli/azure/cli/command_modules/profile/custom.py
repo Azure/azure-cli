@@ -113,7 +113,7 @@ def account_clear(cmd, clear_credential=False):
     profile.logout_all(clear_credential)
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
           identity=False, use_device_code=False, use_cert_sn_issuer=None, tenant_access=False, environment=False):
     """Log in to access Azure subscriptions"""

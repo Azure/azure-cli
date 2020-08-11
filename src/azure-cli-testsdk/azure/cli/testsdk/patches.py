@@ -45,7 +45,6 @@ def patch_load_cached_subscriptions(unit_test):
             "user": {
                 # TODO: Azure Identity may remove homeAccountId in the future, since it is internal to MSAL and
                 #   may not be absolutely necessary
-                "homeAccountId": "00000003-0000-0000-0000-000000000000.00000003-0000-0000-0000-000000000000",
                 "name": MOCKED_USER_NAME,
                 "type": "user"
             },
@@ -60,6 +59,22 @@ def patch_load_cached_subscriptions(unit_test):
 
 
 def patch_retrieve_token_for_user(unit_test):
+
+    class PublicClientApplicationMock:
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def get_accounts(self, username):
+            return [{
+                'home_account_id': '182c0000-0000-0000-0000-000000000000.54820000-0000-0000-0000-000000000000',
+                'environment': 'login.microsoftonline.com',
+                'realm': 'organizations',
+                'local_account_id': '182c0000-0000-0000-0000-000000000000',
+                'username': MOCKED_USER_NAME,
+                'authority_type': 'MSSTS'
+            }]
+
     def _mock_get_token(*args, **kwargs):  # pylint: disable=unused-argument
         from azure.core.credentials import AccessToken
         import time
@@ -68,9 +83,9 @@ def patch_retrieve_token_for_user(unit_test):
         # Mock sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:230
         return AccessToken(fake_raw_token, now + 3600)
 
-    mock_in_unit_test(unit_test,
-                      'azure.identity.InteractiveBrowserCredential.get_token',
-                      _mock_get_token)
+    # Creating a PublicClientApplication will trigger an HTTP request to validate the tenant. Patch it!
+    mock_in_unit_test(unit_test, 'msal.PublicClientApplication', PublicClientApplicationMock)
+    mock_in_unit_test(unit_test, 'azure.identity.InteractiveBrowserCredential.get_token', _mock_get_token)
 
 
 def patch_long_run_operation_delay(unit_test):
