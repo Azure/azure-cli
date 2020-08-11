@@ -310,14 +310,12 @@ class Profile:
 
         credential = identity.get_environment_credential()
 
+        authentication_record = None
         if username:
             user_type = _USER
             # For user account, credential._credential is a UsernamePasswordCredential.
             # Login the user so that MSAL has it in cache.
             authentication_record = credential._credential.authenticate()
-            if not tenant_id:
-                # Use home tenant ID
-                tenant_id = authentication_record.tenant_id
         else:
             user_type = _SERVICE_PRINCIPAL
 
@@ -330,7 +328,8 @@ class Profile:
                 logger.info('Finding subscriptions under all available tenants.')
                 subscriptions = subscription_finder.find_using_common_tenant(username, credential)
         else:
-            subscriptions = self._build_tenant_level_accounts([tenant_id])
+            # Use home tenant ID if tenant_id is not given
+            subscriptions = self._build_tenant_level_accounts([tenant_id or authentication_record.tenant_id])
 
         consolidated = self._normalize_properties(username or client_id, subscriptions,
                                                   is_service_principal=(user_type == _SERVICE_PRINCIPAL),
