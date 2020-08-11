@@ -196,9 +196,13 @@ def load_arguments(self, _):
         # Autoscale Configuration
         c.argument('autoscale_type', arg_group='Autoscale Configuration', arg_type=get_enum_type(known_autoscale_types),
                    help='The autoscale type.')
-        c.argument('autoscale_min_workernode_count', arg_group='Autoscale Configuration',
+        c.argument('autoscale_min_workernode_count', type=int,
+                   options_list=['--autoscale-min-workernode-count', '--autoscale-min-count'],
+                   arg_group='Autoscale Configuration',
                    help='The minimal workernode count for Load-based atuoscale.')
-        c.argument('autoscale_max_workernode_count', arg_group='Autoscale Configuration',
+        c.argument('autoscale_max_workernode_count', type=int,
+                   options_list=['--autoscale-max-workernode-count', '--autoscale-max-count'],
+                   arg_group='Autoscale Configuration',
                    help='The max workernode count for Load-based atuoscale.')
         c.argument('timezone', arg_group='Autoscale Configuration', validator=validate_timezone_name,
                    completer=get_generic_completion_list(AUTOSCALE_TIMEZONES),
@@ -208,7 +212,9 @@ def load_arguments(self, _):
                    help='A space-delimited list of schedule day. Valid days are {}.'.format(', '.join(week_days)))
         c.argument('time', arg_group='Autoscale Configuration', validator=validate_time,
                    help='The 24-hour time in the form of xx:xx in days.')
-        c.argument('autoscale_workernode_count', arg_group='Autoscale Configuration',
+        c.argument('autoscale_workernode_count', type=int,
+                   options_list=['--autoscale-workernode-count', '--autoscale-count'],
+                   arg_group='Autoscale Configuration',
                    help='The scheduled workernode count.')
 
         # resize
@@ -288,9 +294,9 @@ def load_arguments(self, _):
 
         for command in ['create', 'update']:
             with self.argument_context('hdinsight autoscale ' + command) as c:
-                c.argument('min_workernode_count', arg_group='Load-based Autoscale',
+                c.argument('min_workernode_count', type=int, arg_group='Load-based Autoscale',
                            help='The minimal workernode count for Load-based atuoscale.')
-                c.argument('max_workernode_count', arg_group='Load-based Autoscale',
+                c.argument('max_workernode_count', type=int, arg_group='Load-based Autoscale',
                            help='The max workernode count for Load-based atuoscale.')
                 c.argument('timezone', arg_group='Schedule-based Autoscale', validator=validate_timezone_name,
                            completer=get_generic_completion_list(AUTOSCALE_TIMEZONES),
@@ -304,7 +310,8 @@ def load_arguments(self, _):
                        help='A space-delimited list of schedule day. Valid days are {}.'.format(', '.join(week_days)))
             c.argument('time', arg_group='Schedule-based Autoscale', validator=validate_time,
                        help='The 24-hour time in the form xx:xx in days.')
-            c.argument('workernode_count', options_list=['--workernode-count'], arg_group='Schedule-based Autoscale',
+            c.argument('workernode_count', type=int, options_list=['--workernode-count'],
+                       arg_group='Schedule-based Autoscale',
                        help='The schedule workernode count.')
             c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
@@ -323,7 +330,7 @@ def load_arguments(self, _):
                                 'Valid days are {}.'.format(', '.join(week_days)))
                 c.argument('time', arg_group=None, validator=validate_time,
                            help='The 24-hour time in the form xx:xx in days.')
-                c.argument('workernode_count', options_list=['--workernode-count'], arg_group=None,
+                c.argument('workernode_count', type=int, options_list=['--workernode-count'], arg_group=None,
                            help='The schedule workernode count.')
         for command in ['create', 'update']:
             with self.argument_context('hdinsight autoscale condition ' + command) as c:
@@ -331,4 +338,4 @@ def load_arguments(self, _):
 
         with self.argument_context('hdinsight autoscale condition delete') as c:
             c.argument('index', nargs='+', type=int,
-                       help='The Space-separated list of condition indices which start with 0 to delete.')
+                       help='The Space-separated list of condition indices which starts with 0 to delete.')

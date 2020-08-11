@@ -699,30 +699,12 @@ def delete_autoscale_condition(cmd, client, resource_group_name, cluster_name, i
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
     _validate_schedule_configuration(autoscale_configuration)
 
-    # convert index from list to set to remove duplicate
-    unique_index = set(index)
-    if len(unique_index) != len(index):
-        raise CLIError('There are duplicate indices in the value of --index.')
-
-    if len(unique_index) >= len(autoscale_configuration.recurrence.schedule):
-        raise CLIError('Deleting all conditions is not allowed.'
-                       'If you want to disable autoscale please use `az hdinsight autoscale delete`')
-
     conditions_count = len(autoscale_configuration.recurrence.schedule)
-
-    # convert set to list to sort
-    unique_index = list(unique_index)
-    unique_index.sort()
-
-    delete_count = 0
-    for i in unique_index:
-        if i >= conditions_count:
-            raise CLIError(
-                'This cluster only has {} conditions. Please specify a correct index which starts with 0.'.format(
-                    len(autoscale_configuration.recurrence.schedule)))
-        autoscale_configuration.recurrence.schedule.pop(i - delete_count)
-        delete_count = delete_count + 1
-
+    if len(index) >= conditions_count:
+        raise CLIError('Deleting all conditions is not allowed.'
+                       'If you want to disable autoscale please use `az hdinsight autoscale delete`.')
+    autoscale_configuration.recurrence.schedule = [autoscale_configuration.recurrence.schedule[i] for i in
+                                                   range(conditions_count) if i not in index]
     if no_wait:
         return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
                            autoscale_configuration)
@@ -734,12 +716,6 @@ def list_autoscale_condition(cmd, client, resource_group_name, cluster_name):
     cluster = client.get(resource_group_name, cluster_name)
     autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
     _validate_schedule_configuration(autoscale_configuration)
-
-    index = 0
-    # we artificially add indices to the conditions so the user can target them with the remove command
-    for condition in autoscale_configuration.recurrence.schedule:
-        setattr(condition, 'index', index)
-        index += 1
     return autoscale_configuration.recurrence.schedule
 
 
