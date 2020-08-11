@@ -11,8 +11,8 @@ echo == Install azure-cli.rb formula ==
 brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 
 AZ_BASE=/usr/local/Cellar/azure-cli/$CLI_VERSION/libexec
-ln -s $AZ_BASE/bin/python /usr/bin/python
-ln -s $AZ_BASE/bin/pip /usr/bin/pip
+export PATH=$AZ_BASE/bin:$PATH
+echo $PATH
 pip install wheel
 ./scripts/ci/build.sh
 pip install pytest --prefix $AZ_BASE
