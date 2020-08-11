@@ -1946,7 +1946,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'ns':
                 record_obj.update({'host': record.nsdname.rstrip('.') + '.'})
             elif record_type == 'ptr':
-                record_obj.update({'host': record.ptrdname.rstrip('.') + '.'}})
+                record_obj.update({'host': record.ptrdname.rstrip('.') + '.'})
             elif record_type == 'soa':
                 record_obj.update({
                     'mname': record.host.rstrip('.') + '.',
