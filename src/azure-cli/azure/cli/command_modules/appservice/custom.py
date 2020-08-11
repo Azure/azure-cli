@@ -72,7 +72,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
-                  using_webapp_up=False, language=None):
+                  using_webapp_up=False, language=None, assign_identities=None,
+                  role='Contributor', scope=None):
     SiteConfig, SkuDescription, Site, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'Site', 'NameValuePair')
     if deployment_source_url and deployment_local_git:
@@ -134,7 +135,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
-                               "Please invoke 'list-runtimes' to cross check".format(runtime))
+                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -162,7 +163,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                            "only appliable on linux webapp")
         match = helper.resolve(runtime)
         if not match:
-            raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+            raise CLIError("Runtime '{}' is not supported. Please invoke 'az webapp list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
 
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
@@ -201,6 +202,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
                                   deployment_container_image_name, docker_registry_server_user,
                                   docker_registry_server_password=docker_registry_server_password)
+
+    if assign_identities is not None:
+        identity = assign_identity(cmd, resource_group_name, name, assign_identities,
+                                   role, None, scope)
+        webapp.identity = identity
 
     return webapp
 
@@ -704,14 +710,55 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     return result
 
 
-def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def _build_identities_info(identities):
+    from ._appservice_utils import MSI_LOCAL_ID
+    identities = identities or []
+    identity_types = []
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_types.append('SystemAssigned')
+    external_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if external_identities:
+        identity_types.append('UserAssigned')
+    identity_types = ','.join(identity_types)
+    info = {'type': identity_types}
+    if external_identities:
+        info['userAssignedIdentities'] = {e: {} for e in external_identities}
+    return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
+
+
+def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
+    ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
+                                                                  'ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        if webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned and external_identities:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif webapp.identity and webapp.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities:
+            identity_types = ResourceIdentityType.user_assigned
+        else:
+            identity_types = ResourceIdentityType.system_assigned
+
+        if webapp.identity:
+            webapp.identity.type = identity_types
+        else:
+            webapp.identity = ManagedServiceIdentity(type=identity_types)
+        if external_identities:
+            if not webapp.identity.user_assigned_identities:
+                webapp.identity.user_assigned_identities = {}
+            for identity in external_identities:
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -724,14 +771,46 @@ def show_identity(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
 
 
-def remove_identity(cmd, resource_group_name, name, slot=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
+    IdentityType = cmd.get_models('ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='None')
+        if webapp.identity is None:
+            return webapp
+        to_remove = []
+        existing_identities = {x.lower() for x in list((webapp.identity.user_assigned_identities or {}).keys())}
+        if external_identities:
+            to_remove = {x.lower() for x in external_identities}
+            non_existing = to_remove.difference(existing_identities)
+            if non_existing:
+                raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+            if not list(existing_identities - to_remove):
+                if webapp.identity.type == IdentityType.user_assigned:
+                    webapp.identity.type = IdentityType.none
+                elif webapp.identity.type == IdentityType.system_assigned_user_assigned:
+                    webapp.identity.type = IdentityType.system_assigned
+
+        webapp.identity.user_assigned_identities = None
+        if remove_local_identity:
+            webapp.identity.type = (IdentityType.none
+                                    if webapp.identity.type == IdentityType.system_assigned or
+                                    webapp.identity.type == IdentityType.none
+                                    else IdentityType.user_assigned)
+
+        if webapp.identity.type not in [IdentityType.none, IdentityType.system_assigned]:
+            webapp.identity.user_assigned_identities = {}
+        if to_remove:
+            for identity in list(existing_identities - to_remove):
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+        else:
+            for identity in list(existing_identities):
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -958,6 +1037,8 @@ def _format_fx_version(custom_image_name, container_config_type=None):
 def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None):
     fx_version = _format_fx_version(custom_image_name)
     web_app = get_webapp(cmd, resource_group_name, name, slot)
+    if not web_app:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     linux_fx = fx_version if web_app.reserved else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
@@ -3479,7 +3560,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
         _is_linux = os_name.lower() == 'linux'
         _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
-        plan = get_plan_to_use(cmd, user, os_name, loc, sku, rg_name, _create_new_rg, plan)
+        plan = get_plan_to_use(cmd=cmd,
+                               user=user,
+                               os_name=os_name,
+                               loc=loc,
+                               sku=sku,
+                               create_rg=_create_new_rg,
+                               resource_group_name=rg_name,
+                               plan=plan)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",

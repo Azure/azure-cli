@@ -3,6 +3,31 @@
 Release History
 ===============
 
+2.10.1
+++++++
+
+**App Service**
+
+* Fix # 9887 webapp and functionapp, support assigning/removing user managed identity (#14233)
+* Fix #1382, #14055: Update error messages for az webapp create and az webapp config container set (#14633)
+* `az webapp up`: Fix default ASP selection logic when --plan parameter is not provided (#14673)
+
+**AppConfig**
+
+* Support enabling/disabling PublicNetworkAccess during store creation (#14554)
+
+**Compute**
+
+* Support associating disk and snapshot with a disk-access resource (#14624)
+
+**Lab**
+
+* Fix for issue #7904 date validation bug in lab vm creation (#13486)
+
+**Storage**
+
+* `az storage blob upload-batch`: Fix issue #14660 with unpositional arguments (#14669)
+
 2.10.0
 ++++++
 
