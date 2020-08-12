@@ -27,8 +27,8 @@ class ConfigTest(ScenarioTest):
         original_path = os.getcwd()
         os.chdir(tempdir)
         print("Using temp dir: {}".format(tempdir))
-
-        global_test_args = {"source": os.path.expanduser(os.path.join('~', '.azure', 'config')), "flag": ""}
+        os.getenv('AZURE_CONFIG_DIR', None) or os.path.expanduser(os.path.join('~', '.azure'))
+        global_test_args = {"source": config, "flag": ""}
         local_test_args = {"source": os.path.join(tempdir, '.azure', 'config'), "flag": " --local"}
 
         for args in (global_test_args, local_test_args):
