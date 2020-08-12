@@ -20,7 +20,7 @@ class TestIdentity(unittest.TestCase):
     @mock.patch('azure.cli.core._identity.Identity._build_persistent_msal_app', autospec=True)
     @mock.patch('azure.cli.core._identity.AdalCredentialCache._load_tokens_from_file', autospec=True)
     def test_migrate_tokens(self, load_tokens_from_file_mock, build_persistent_msal_app_mock,
-                                  save_service_principal_cred_mock):
+                            save_service_principal_cred_mock):
         adal_tokens = [
             {
                 "tokenType": "Bearer",
