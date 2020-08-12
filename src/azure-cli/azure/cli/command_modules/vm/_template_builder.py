@@ -254,7 +254,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
-        encryption_at_host=None, dedicated_host_group=None):
+        encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -299,6 +299,14 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
         if secrets:
             os_profile['secrets'] = secrets
+
+        if enable_auto_update is not None and custom_image_os_type.lower() == 'windows':
+            os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
+
+        if patch_mode is not None and custom_image_os_type.lower() == 'windows':
+            os_profile['windowsConfiguration']['patchSettings'] = {
+                'patchMode': patch_mode
+            }
 
         return os_profile
 
