@@ -130,7 +130,6 @@ Release History
 **SQL**
 
 * `az sql db ltr-policy/ltr-backup`: update/show long term retention policy, show/delete long term retention backups, restore long term retention backup (#12897)
-* Added new commands `az sql server audit-policy show` and `az sql server audit-policy update` to view and manage audit policy for sql server.
 
 **Storage**
 
