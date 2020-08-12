@@ -822,6 +822,29 @@ class TestProfile(unittest.TestCase):
         token = cred.get_token()
         self.assertEqual(token, self.raw_token1)
 
+    @mock.patch('azure.cli.core._identity.Identity.migrate_tokens', autospec=True)
+    @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
+    def test_get_login_credentials_with_token_migration(self, app_mock, migrate_tokens_mock):
+        # Mimic an old subscription storage without 'useMsalTokenCache'
+        adal_storage_mock = {
+            'subscriptions': [{
+                'id': '12345678-1bf0-4dda-aec3-cb9272f09590',
+                'name': 'MSI-DEV-INC',
+                'state': 'Enabled',
+                'user': {'name': 'foo@foo.com', 'type': 'user'},
+                'isDefault': True,
+                'tenantId': '12345678-38d6-4fb2-bad9-b7b93a3e1234',
+                'environmentName': 'AzureCloud',
+                'managedByTenants': []
+            }]
+        }
+
+        cli = DummyCli()
+        profile = Profile(cli_ctx=cli, storage=adal_storage_mock)
+        cred, subscription_id, _ = profile.get_login_credentials()
+        # make sure migrate_tokens_mock is called
+        migrate_tokens_mock.assert_called()
+
     @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
     def test_get_login_credentials_aux_subscriptions(self, app_mock, get_token_mock):

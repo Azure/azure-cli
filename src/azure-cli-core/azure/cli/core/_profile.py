@@ -42,8 +42,7 @@ _CLIENT_ID = 'clientId'
 _CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
-_TOKEN_CACHE_PROVIDER = 'tokenCacheProvider'
-_TOKEN_CACHE_PROVIDER_MSAL = 'MSAL'
+_USE_MSAL_TOKEN_CACHE = 'useMsalTokenCache'
 _ENVIRONMENT_NAME = 'environmentName'
 _STATE = 'state'
 _USER_TYPE = 'type'
@@ -456,7 +455,7 @@ class Profile:
 
             set_cloud_subscription(self.cli_ctx, active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
-        self._storage[_TOKEN_CACHE_PROVIDER] = _TOKEN_CACHE_PROVIDER_MSAL
+        self._storage[_USE_MSAL_TOKEN_CACHE] = True
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
@@ -609,15 +608,6 @@ class Profile:
         return None, None
 
     def _create_identity_credential(self, account, aux_tenant_id=None, client_id=None):
-        # Check if the token has been migrated to MSAL by checking "tokenCacheProvider": "MSAL"
-        # If not yet, do it now
-        provider = self._storage.get(_TOKEN_CACHE_PROVIDER)
-        if provider != _TOKEN_CACHE_PROVIDER_MSAL:
-            identity = Identity()
-            identity.migrate_adal_to_msal()
-            # "tokenCacheProvider": "MSAL"
-            self._storage[_TOKEN_CACHE_PROVIDER] = _TOKEN_CACHE_PROVIDER_MSAL
-
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
@@ -655,6 +645,14 @@ class Profile:
 
     def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
                               aux_tenants=None):
+        # Check if the token has been migrated to MSAL by checking "useMsalTokenCache": true
+        # If not yet, do it now.
+        use_msal = self._storage.get(_USE_MSAL_TOKEN_CACHE)
+        if not use_msal:
+            identity = Identity()
+            identity.migrate_tokens()
+            self._storage[_USE_MSAL_TOKEN_CACHE] = True
+
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
 

@@ -74,7 +74,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.credential_kwargs.update(change_ssl_cert_verification_track2())
 
     def _build_persistent_msal_app(self, authority):
-        # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
+        # Initialize _msal_app for logout, token migration which Azure Identity doesn't support
         from msal import PublicClientApplication
         # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
         from azure.identity._internal.persistent_cache import load_user_cache
@@ -367,7 +367,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         decoded = json.loads(decoded_str)
         return decoded
 
-    def migrate_adal_to_msal(self):
+    def migrate_tokens(self):
         """Migrate ADAL token cache to MSAL."""
         logger.warning("Migrating token cache from ADAL to MSAL.")
 
