@@ -947,12 +947,12 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 def create_key(cmd, client, key_name=None, vault_base_url=None,
                hsm_base_url=None, protection=None, identifier=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None, release_policy=None):
+               not_before=None, tags=None, kty=None, curve=None, release_policy=None, exportable=None):
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
 
-    if key_ops and 'export' in key_ops:
-        key_attrs.exportable = True
+    if exportable is not None:
+        key_attrs.exportable = exportable
 
     """
     if release_policy:
@@ -1045,13 +1045,17 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,
                hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, release_policy=None):
+               byok_string=None, release_policy=None, exportable=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+
+    if exportable is not None:
+        key_attrs.exportable = exportable
+
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
         if pem_file:
@@ -1225,7 +1229,7 @@ def get_policy_template():
         'anyOf': [{
             'authority': '<issuer>',
             'allOf': [{
-                'name': '<claim name>',
+                'claim': '<claim name>',
                 'condition': 'equals',
                 'value': '<value to match>'
             }]

@@ -372,6 +372,9 @@ def load_arguments(self, _):
             c.argument('release_policy', options_list=['--policy'],
                        help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                        type=get_json_object, is_preview=True)
+            c.argument('exportable', arg_type=get_three_state_flag(),
+                       is_preview=True,
+                       help='If true, the key will be marked as exportable for Secure Key Release (SKR).')
     # endregion
 
     # region KeyVault Secret
