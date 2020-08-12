@@ -37,12 +37,9 @@ def show_cloud(cmd, cloud_name=None):
 def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
     from msrestazure.azure_cloud import _populate_from_metadata_endpoint, MetadataEndpointError
     from azure.cli.core.cloud import CloudEndpointNotSetException
-
     if cloud_config:
         # Using JSON format so convert the keys to snake case
-        for key in cloud_config:
-            cloud_config[to_snake_case(key)] = cloud_config.pop(key)
-        cloud_args = cloud_config
+        cloud_args = {to_snake_case(k): v for k, v in cloud_config.items()}
     c = Cloud(cloud_name)
     c.profile = cloud_args.get('profile', None)
     try:
