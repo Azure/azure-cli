@@ -402,7 +402,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         raise CLIError('Key-based authentication requires a connection string.')
     if identity_based_file_upload and not fileupload_storage_container_uri:
         raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
-    _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
@@ -437,12 +436,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                                         properties=properties)
 
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
-
-
-def _check_name_availability(iot_hub_resource, hub_name):
-    name_availability = iot_hub_resource.check_name_availability(hub_name)
-    if name_availability is not None and not name_availability.name_available:
-        raise CLIError(name_availability.message)
 
 
 def iot_hub_get(cmd, client, hub_name, resource_group_name=None):

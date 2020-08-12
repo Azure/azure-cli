@@ -12,6 +12,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
                                                 get_three_state_flag, get_enum_type, tags_type)
 from azure.cli.core.util import get_file_json
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
+from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
@@ -142,6 +143,10 @@ def load_arguments(self, _):
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
 
+    with self.argument_context('webapp list-instances') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
+
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps')
 
@@ -204,6 +209,10 @@ def load_arguments(self, _):
             c.argument('deployment_source_branch', options_list=['--deployment-source-branch', '-b'],
                        help='the branch to deploy')
             c.argument('tags', arg_type=tags_type)
+            c.argument('assign_identities', nargs='*', options_list=['--assign-identity'],
+                       help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
+            c.argument('scope', options_list=['--scope'], help="Scope that the system assigned identity can access")
+            c.argument('role', options_list=['--role'], help="Role name or id the system assigned identity will have")
 
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
@@ -270,6 +279,10 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' identity') as c:
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")
+        with self.argument_context(scope + ' identity assign') as c:
+            c.argument('assign_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
+        with self.argument_context(scope + ' identity remove') as c:
+            c.argument('remove_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
@@ -364,6 +377,8 @@ def load_arguments(self, _):
                    configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
+    with self.argument_context('webapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -526,6 +541,8 @@ def load_arguments(self, _):
                    help='Application ID to integrate AAD organization account Sign-in into your web app')
         c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory',
                    help='AAD application secret')
+        c.argument('client_secret_certificate_thumbprint', options_list=['--aad-client-secret-certificate-thumbprint', '--thumbprint'], arg_group='Azure Active Directory',
+                   help='Alternative to AAD Client Secret, thumbprint of a certificate used for signing purposes')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'],
                    arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
@@ -601,11 +618,13 @@ def load_arguments(self, _):
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp create-remote-connection') as c:
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -738,6 +757,8 @@ def load_arguments(self, _):
         c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)",
                    required=False)
 
+    with self.argument_context('functionapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('functionapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         # This is set to webapp to simply reuse webapp functions, without rewriting same functions for function apps.

@@ -233,10 +233,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_three_state_flag(),
                    help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
                    'platform managed keys for data at rest.')
-        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default interpretation is true for this property.')
-        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version), is_preview=True,
+                   'The default value for this property is null, which is equivalent to true. When true, containers '
+                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'not enable anonymous access to any data in the account. The additional step of configuring the '
+                   'public access setting for a container is required to enable anonymous access.')
+        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
 
@@ -279,10 +282,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
-        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default interpretation is true for this property.')
-        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version), is_preview=True,
+                   'The default value for this property is null, which is equivalent to true. When true, containers '
+                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'not enable anonymous access to any data in the account. The additional step of configuring the '
+                   'public access setting for a container is required to enable anonymous access.')
+        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
 
@@ -872,8 +878,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'update']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
-            t_enabled_protocols, t_root_squash = self.get_models('EnabledProtocols', 'RootSquashType',
-                                                                 resource_type=ResourceType.MGMT_STORAGE)
+            t_enabled_protocols, t_root_squash, t_access_tier = \
+                self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',
+                                resource_type=ResourceType.MGMT_STORAGE)
             c.argument('share_quota', type=int, options_list=['--quota', '-q'],
                        help='The maximum size of the share in gigabytes. Must be greater than 0, and less than or '
                             'equal to 5TB (5120). For Large File Shares, the maximum size is 102400.')
@@ -886,6 +893,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        'only available for premium file shares (file shares in the FileStorage account type).')
             c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
                        min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
+            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), is_preview=True, min_api='2019-06-01',
+                       help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
+                       '(default), Hot, and Cool. FileStorage account can choose Premium.')
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)

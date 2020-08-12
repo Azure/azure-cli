@@ -142,6 +142,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
         logger.warning('    pattern %s', pattern)
         logger.warning(' operations')
 
+    source_sas = source_sas.lstrip('?') if source_sas else source_sas
     if source_container:
         # copy blobs for blob container
 
@@ -294,8 +295,8 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                 progress_callback.message = '{}/{}: "{}"'.format(
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
-            include, result = _upload_blob(cmd, client, destination_container_name,
-                                           normalize_blob_file_path(destination_path, dst), src,
+            include, result = _upload_blob(cmd, client, file_path=src, container_name=destination_container_name,
+                                           blob_name=normalize_blob_file_path(destination_path, dst),
                                            blob_type=blob_type, content_settings=guessed_content_settings,
                                            metadata=metadata, validate_content=validate_content,
                                            maxsize_condition=maxsize_condition, max_connections=max_connections,
