@@ -1731,7 +1731,7 @@ def delete_deployment_script(cmd, resource_group_name, name):
     rcf.deployment_scripts.delete(resource_group_name, name)
 
 
-def show_template_spec(cmd, resource_group_name=None, name=None, version=None, template_spec=None):
+def get_template_spec(cmd, resource_group_name=None, name=None, version=None, template_spec=None):
     if template_spec:
         id_parts = parse_resource_id(template_spec)
         resource_group_name = id_parts.get('resource_group')
