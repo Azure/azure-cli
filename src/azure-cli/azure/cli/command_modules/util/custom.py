@@ -32,14 +32,13 @@ def show_version(cmd):  # pylint: disable=unused-argument
     return versions
 
 
-def upgrade_version(cmd, _all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member
+def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member
     import subprocess
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.util import CLI_PACKAGE_NAME, _get_local_versions, _update_latest_from_pypi
     from distutils.version import LooseVersion
     from knack.util import CLIError
     import azure.cli.core.telemetry as telemetry
-
     update_cli = True
     versions = _get_local_versions()
     local = versions[CLI_PACKAGE_NAME]['local']
@@ -52,7 +51,7 @@ def upgrade_version(cmd, _all=None, yes=None):  # pylint: disable=too-many-local
         update_cli = False
         if not _all:
             return
-
+    exit_code = 0
     if update_cli:
         logger.warning("Your current Azure CLI version is %s. Latest version is %s.", local, pypi)
         from knack.prompting import prompt_y_n
@@ -65,12 +64,17 @@ def upgrade_version(cmd, _all=None, yes=None):  # pylint: disable=too-many-local
         import os
         import platform
         installer = os.getenv(_ENV_AZ_INSTALLER)
-        shell = platform.system() == 'Windows'
-        exit_code = 0
         if installer == 'DEB':
-            apt_update = 'apt-get install --only-upgrade -y azure-cli'
-            update_cmd = 'apt-get update && {}'.format(apt_update) if os.geteuid() == 0 else 'sudo apt-get update && sudo {}'.format(apt_update)  # pylint: disable=no-member, line-too-long
-            exit_code = subprocess.call(update_cmd, shell=shell)
+            from azure.cli.core.util import in_cloud_console
+            if in_cloud_console():
+                raise CLIError("az upgrade is not supported in Cloud Shell.")
+            apt_update_cmd = 'apt-get update'.split()
+            az_update_cmd = 'apt-get install --only-upgrade -y azure-cli'.split()
+            if os.geteuid() != 0:  # pylint: disable=no-member
+                apt_update_cmd.insert(0, 'sudo')
+                az_update_cmd.insert(0, 'sudo')
+            subprocess.call(apt_update_cmd)
+            exit_code = subprocess.call(az_update_cmd)
         elif installer == 'RPM':
             from azure.cli.core.util import get_linux_distro
             distname, _ = get_linux_distro()
@@ -79,41 +83,38 @@ def upgrade_version(cmd, _all=None, yes=None):  # pylint: disable=too-many-local
             else:
                 distname = distname.lower().strip()
                 if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
-                    update_cmd = 'yum update -y azure-cli'
+                    update_cmd = 'yum update -y azure-cli'.split()
                     if os.geteuid() != 0:  # pylint: disable=no-member
-                        update_cmd = 'sudo {}'.format(update_cmd)
-                    exit_code = subprocess.call(update_cmd, shell=shell)
+                        update_cmd.insert(0, 'sudo')
+                    exit_code = subprocess.call(update_cmd)
                 elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
-                    update_cmd = 'zypper update -y azure-cli'
+                    update_cmd = 'zypper update -y azure-cli'.split()
                     if os.geteuid() != 0:  # pylint: disable=no-member
-                        update_cmd = 'sudo {}'.format(update_cmd)
-                    exit_code = subprocess.call(update_cmd, shell=shell)
+                        update_cmd.insert(0, 'sudo')
+                    exit_code = subprocess.call(update_cmd)
                 else:
                     logger.warning(UPGRADE_MSG)
         elif installer == 'HOMEBREW':
-            exit_code = subprocess.call('brew update && brew upgrade -y azure-cli', shell=shell)
+            exit_code = subprocess.call('brew update && brew upgrade -y azure-cli'.split())
         elif installer == 'PIP':
             import sys
             pip_args = [sys.executable, '-m', 'pip', 'install', '--upgrade', 'azure-cli', '-vv',
                         '--disable-pip-version-check', '--no-cache-dir']
             logger.debug('Executing pip with args: %s', pip_args)
-            exit_code = subprocess.call(pip_args, shell=shell)
+            exit_code = subprocess.call(pip_args, shell=platform.system() == 'Windows')
             return
         elif installer == 'DOCKER':
-            logger.warning('Exit the container to pull latest image with docker pull mcr.microsoft.com/azure-cli '
-                           'or pip install --upgrade azure-cli in this container')
+            logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
+                           "or 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
-            logger.warning('Update with the latest MSI https://aka.ms/installazurecliwindows')
-            ps_path = os.path.abspath(os.path.join(os.path.abspath(__file__), '../upgrade.ps1'))
-            exit_code = subprocess.call('powershell.exe "{}"'.format(ps_path.replace('\\', '\\\\')), shell=shell)
+            exit_code = subprocess.call(['powershell.exe', 'Start-Process powershell -Verb runAs -ArgumentList "Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi;Start-Process msiexec.exe -Wait -ArgumentList \'/I AzureCLI.msi\';Remove-Item .\AzureCLI.msi"'])
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
         telemetry.set_failure("CLI upgrade failed.")
         sys.exit(exit_code)
-
     ext_sources = []
-    if _all:
+    if update_all:
         from azure.cli.core.extension import get_extensions, WheelExtension
         from azure.cli.core.extension._resolve import resolve_from_index, NoExtensionCandidatesError
         from azure.cli.core.extension.operations import update_extension
