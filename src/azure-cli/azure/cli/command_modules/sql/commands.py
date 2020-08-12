@@ -586,6 +586,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'managed_instance_list')
         g.generic_update_command('update', custom_func_name='managed_instance_update', supports_no_wait=True)
+        g.command('failover', 'failover', supports_no_wait=True)
 
     managed_instance_keys_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceKeysOperations.{}',

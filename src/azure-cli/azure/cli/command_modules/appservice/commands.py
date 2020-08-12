@@ -91,6 +91,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('restart', 'restart_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('browse', 'view_in_browser')
+        g.custom_command('list-instances', 'list_instances', validator=validate_app_or_slot_exists_in_rg)
         # Move back to using list_runtimes function once Available Stacks API is updated (it's updated with Antares deployments)
         g.custom_command('list-runtimes', 'list_runtimes_hardcoded')
         g.custom_command('identity assign', 'assign_identity', validator=validate_app_or_slot_exists_in_rg)
@@ -187,11 +188,11 @@ def load_command_table(self, _):
         g.custom_command('config', 'config_diagnostics', validator=validate_app_or_slot_exists_in_rg)
         g.custom_show_command('show', 'show_diagnostic_settings', validator=validate_app_or_slot_exists_in_rg)
 
-    with self.command_group('webapp log deployment') as g:
+    with self.command_group('webapp log deployment', is_preview=True) as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
 
-    with self.command_group('functionapp log deployment') as g:
+    with self.command_group('functionapp log deployment', is_preview=True) as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
 
@@ -347,6 +348,20 @@ def load_command_table(self, _):
         g.custom_command('auto-swap', 'config_slot_auto_swap')
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())
+
+    with self.command_group('functionapp keys') as g:
+        g.custom_command('set', 'update_host_key')
+        g.custom_command('list', 'list_host_keys')
+        g.custom_command('delete', 'delete_host_key')
+
+    with self.command_group('functionapp function') as g:
+        g.custom_command('show', 'show_function')
+        g.custom_command('delete', 'delete_function')
+
+    with self.command_group('functionapp function keys') as g:
+        g.custom_command('set', 'update_function_key')
+        g.custom_command('list', 'list_function_keys')
+        g.custom_command('delete', 'delete_function_key')
 
     with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
         g.custom_command('show', 'show_webapp_access_restrictions')

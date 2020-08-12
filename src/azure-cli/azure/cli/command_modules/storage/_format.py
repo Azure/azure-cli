@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+"""Table transformer for storage commands"""
 
 from azure.cli.core.profiles import get_sdk, ResourceType
 from knack.log import get_logger
@@ -153,11 +154,3 @@ def transform_file_directory_result(cli_ctx):
 
         return return_list
     return transformer
-
-
-def transform_immutability_policy(result):
-    # service returns policy with period value of "0" after it has been deleted
-    # this only shows the policy if the property value is greater than 0
-    if result.immutability_period_since_creation_in_days:
-        return result
-    return None

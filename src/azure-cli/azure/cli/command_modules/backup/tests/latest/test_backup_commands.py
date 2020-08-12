@@ -22,11 +22,10 @@ def _get_vm_version(vm_type):
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    @record_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location="southeastasia")
     def test_backup_scenario(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -143,7 +142,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @record_only()
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
@@ -178,8 +176,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{vm1}'])", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
-    @record_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
     @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
@@ -249,7 +246,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
-    @record_only()
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
@@ -334,8 +330,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
-    @record_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -368,8 +363,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_name.lower(), rp2_json['id'].lower())
         self.assertIn(vm_name.lower(), rp2_json['id'].lower())
 
-    @record_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
     def test_backup_protection(self, resource_group, vault_name, vm_name):
@@ -423,14 +417,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
         self.assertTrue(protection_check == '')
 
-    @record_only()
-    @ResourceGroupPreparer()
-    @ResourceGroupPreparer(parameter_name="target_resource_group")
+    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location="southeastasia")
     def test_backup_restore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -487,13 +480,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @record_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location="southeastasia")
     def test_backup_job(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -525,7 +517,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
-    @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -567,7 +558,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.isScheduledForDeferredDelete", None)
         ])
 
-    @record_only()
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()

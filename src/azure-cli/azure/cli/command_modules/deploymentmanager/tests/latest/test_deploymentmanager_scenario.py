@@ -430,7 +430,7 @@ class DeploymentManagerTests(ScenarioTest):
         with open(healthcheck_file_path) as f:
             json_obj = json.load(f)
 
-        self.cmd('deploymentmanager step create -g {rg} --step {rest_health_check_file}', checks=[
+        self.cmd('deploymentmanager step create -g {rg} --step "{rest_health_check_file}"', checks=[
             self.check('type', 'Microsoft.DeploymentManager/steps'),
             self.check('name', step_name),
             self.check('properties.stepType', 'HealthCheck'),
@@ -537,7 +537,7 @@ class DeploymentManagerTests(ScenarioTest):
             'failed_rollout_name': failed_rollout_name
         }
 
-        self.cmd('group deployment create -g {rg} --template-file {t_path}', checks=[
+        self.cmd('group deployment create -g {rg} --template-file "{t_path}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('deploymentmanager rollout show -g {rg} -n {rollout_name}', checks=[
@@ -560,7 +560,7 @@ class DeploymentManagerTests(ScenarioTest):
 
         self.assertEqual('Canceled', rollout['status'])
 
-        self.cmd('group deployment create -g {rg} --template-file {invalid_t_path}', checks=[
+        self.cmd('group deployment create -g {rg} --template-file "{invalid_t_path}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('deploymentmanager rollout show -g {rg} -n {failed_rollout_name}', checks=[

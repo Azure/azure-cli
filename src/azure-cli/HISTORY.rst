@@ -3,6 +3,262 @@
 Release History
 ===============
 
+2.10.1
+++++++
+
+**App Service**
+
+* Fix # 9887 webapp and functionapp, support assigning/removing user managed identity (#14233)
+* Fix #1382, #14055: Update error messages for az webapp create and az webapp config container set (#14633)
+* `az webapp up`: Fix default ASP selection logic when --plan parameter is not provided (#14673)
+
+**AppConfig**
+
+* Support enabling/disabling PublicNetworkAccess during store creation (#14554)
+
+**Compute**
+
+* Support associating disk and snapshot with a disk-access resource (#14624)
+
+**Lab**
+
+* Fix for issue #7904 date validation bug in lab vm creation (#13486)
+
+**Storage**
+
+* `az storage blob upload-batch`: Fix issue #14660 with unpositional arguments (#14669)
+
+2.10.0
+++++++
+
+**AKS**
+
+* `az aks update`: Change --enable-aad argument to migrate a RBAC-enabled non-AAD cluster to a AKS-managed AAD cluster (#14420)
+* `az aks install-cli`: Add --kubelogin-version and --kubelogin-install-location arguments to install kubelogin (#14441)
+* Add az aks nodepool get-upgrades command (#14516)
+
+**AMS**
+
+* Fix #14021: az ams account sp is not idempotent (#14429)
+
+**APIM**
+
+* apim api import: support API import and enchance other api level cli commands (#14363)
+
+**App Service**
+
+* Fix #13035: Add validation for az webapp config access-restriction to avoid adding duplicates (#14486)
+
+**AppConfig**
+
+* Default to standard sku if not specified (#14398)
+* [BREAKING CHANGE] Support settings with JSON content type (#14170)
+
+**ARM**
+
+* `az resource tag`: Fix the bug of managedApp tagging and some related test issues (#14381)
+* `az deployment mg/tenant what-if`: Add support to management group and tenant level deployment What-If (#14568)
+* `az deployment mg/tenant create`: Add --confirm-with-what-if/-c parameter. (#14568)
+* `az deployment mg/tenant create`: Add --what-if-result-format/-r parameter. (#14568)
+* `az deployment mg/tenant create`: Add --what-if-exclude-change-types/-x parameter. (#14568)
+* `az tag`: az tag support for resource id parameter (#14558)
+
+**Backup**
+
+* Trigger AFS container/item discovery only when needed (#14479)
+
+**CDN**
+
+* Add private link fields to origin (#14520)
+
+**Compute**
+
+* `az vm/vmss create`: Select a valid username for user if the default username is invalid (#14346)
+* `az vm update`: support cross tenant image (#14532)
+* `az disk-access`: Add new command group to operate disk access resource (#14460)
+* Support dedicated host group automatic placement (#14439)
+* Support ppg and spg in VMSS orchestration mode (#14443)
+
+**Config**
+
+* `az config`: Add new `config` command module (#14436)
+
+**Extension**
+
+* Support automatically installing an extension if the extension of a command is not installed (#14478)
+
+**HDInsight**
+
+* Add 3 parameters to the command `az hdinsight create` to support private link and encryption in transit feature: (#14504)
+
+**Iot Hub**
+
+* Fix #7792: IoT Hub Create is not idempotent (#14449)
+
+**IoT Central**
+
+* Add paramater option list for iot central (#14471)
+
+**KeyVault**
+
+* `az keyvault key encrypt/decrypt`: add parameter `--data-type` for explicitly specifing the type of original data (#14386)
+
+**Monitor**
+
+* `az monitor log-analytics workspace data-export`: support event hub namespace as the destination. (#14434)
+* `az monitor autoscale`: support namespace and dimensions for --condition (#14255)
+
+**NetAppFiles**
+
+* `az volume revert`:  Add Volume Revert to revert a volume to one of its snapshots. (#14424)
+* [BREAKING CHANGE] Remove `az netappfiles mount-target`. (#14424)
+* `az volume show`: Add site to Active Directory Properties (#14424)
+
+**Network**
+
+* `az application-gateway private-link add`: support to specify an existing subnet by ID (#14463)
+* `az network application-gateway waf-policy create`: support version and type (#14531)
+
+**Storage**
+
+* Fix #10302: Support guess content-type when synchronizing files (#14353)
+* `az storage blob lease`: Apply new api version for blob lease operations (#14231)
+* `az storage fs access`: Support AAD credential in managing access control for ADLS Gen2 account (#14506)
+* `az storage share-rm create/update`: add --access-tier to support access tier (#14148)
+
+2.9.1
+++++++
+
+**AKS**
+
+* Remove explicit setting of VMSS in Windows example command since it is now default (#14324)
+
+**IoT**
+
+* [BREAKING CHANGE] `az iot pnp`: Remove IoT PNP preview commands from core CLI (#14117)
+
+**REST**
+
+* Fix #14152: `az rest`: Accept ARM URLs without subscription ID (#14370)
+
+**Storage**
+
+* Fix #14138: Make some permissions optional (#14385)
+
+2.9.0
+++++++
+
+**ACR**
+
+* Handle log artifact link from Registry to stream logs (#14038)
+* Deprecate helm2 commands (#14143)
+
+**AKS**
+
+* `az aks create`: add --enable-aad argument (#14068)
+* `az aks update`: add --enable-aad argument (#14217)
+
+**APIM**
+
+* Added general az apim api commands (#13953)
+
+**AppConfig**
+
+* Add example for using --fields in appconfig revision (#14081)
+
+**AppService**
+
+* `az functionapp create`: Added support for Java 11 and Powershell 7. Added Stacks API Support. (#14063)
+* Fix #14208 multi-container app creation fails (#14262)
+* Fix az webapp create - use hardcoded runtime stacks (#14284)
+
+**ARM**
+
+* `az resource tag`: Fix the problem of tagging resources with resource type `Microsoft.ContainerInstance/containerGroups` (#14046)
+
+**Compute**
+
+* Bump version disks 2020-05-01, compute 2020-06-01 (#14212)
+* Double encryption of disk encryption set (#14212)
+* `az vmss update`: support specify cross tenant image. (#14206)
+* `az sig image-version create`: support specify cross tenant image. (#14206)
+* vm/vmss create: Encryption of cache & data-in-transit for OS/Data disks and temp disks for VM & VMSS (#13919)
+* Add simulate-eviction operation for VM and VMSS (#14133)
+
+**CosmosDB**
+
+* Recent features: Autoscale, IpRules, EnableFreeTier and EnableAnalyticalStorage (#13985)
+
+**EventGrid**
+
+* Add CLI support for 2020-04-01-preview and mark preview features with is_Preview=True (#14027)
+
+**Find**
+
+* Fix #14094 az find Fix Queries failing when not logged in and when telemetry is disabled (#14243)
+
+**HDInsight**
+
+* Add two commands to support hdinsight node reboot feature (#14005)
+
+**Monitor**
+
+* Remove preview flag for commands under Log Analytics workspace (#14064)
+* `az monitor diagnostic-settings subscription`: Support diagnositc settings for subscription (#14157)
+* `az monitor metrics`: support ',' and '|' in metric name (#14254)
+* `az monitor log-analytics workspace data-export`: support log analytics data export (#14155)
+
+**Network**
+
+* `az network application-gateway frontend-ip update`: Deprecating the --public-ip-address parameter (#13891)
+* Bump azure-mgmt-network to 11.0.0 (#13957)
+* `az network express-route gateway connection`: support routing configuration (#14256)
+* `az network virtual-appliance`: Support Azure network virtual appliance. (#14224)
+* Application Gateway support private link feature (#14185)
+
+**PolicyInsights**
+
+* `az policy state`: add trigger-scan command to trigger policy compliance evaluations (#12910)
+* `az policy state list`: expose versions of policy entities in each compliance record (#12910)
+
+**Profile**
+
+* `az account get-access-token`: Show expiresOn for Managed Identity (#14128)
+
+**RDBMS**
+
+* Support Minimum TLS version (#14166)
+* Add Infrastructure Encryption for Azure Postgres and MySQL (#14097)
+
+**Security**
+
+* Add allowed_connections commands (#14190)
+* Add Adaptive network hardeningss commands (#14260)
+* Add adaptive_application_controls commands (#14278)
+* Addition of az security iot-solution/ iot-alerts/iot-recommendations/iot-analytics REST to Azure CLI (#14124)
+* Add regulatory compliance CLI (#14103)
+
+**SignalR**
+
+* Add features including managing private endpoint connections, network rules and upstream (#14008)
+
+**SQL**
+
+* `az sql mi create`, `az sql mi update`: Add `--tags` parameter to support resource tagging (#13479)
+* `az sql mi failover`: Support failover from primary or secondary point (#14242)
+
+**Storage**
+
+* `az storage account create/update`: Add --allow-blob-public-access to allow or disallow public access for blob and containers (#13986)
+* `az storage account create/update`: Add `--min-tls-version` to support setting the minimum TLS version to be permitted on requests to storage. (#14131)
+* Remove check in token credential (#14134)
+* Fix the storage account name in examples (#14062)
+
+**Webapp**
+
+* Bugfix: az webapp log deployment show - return deployment logs instead of log metadata (#14146)
+* Bugfix: az webapp vnet-integration add - fix error handling if bad vnet name, support vnet resource ID (#14101)
+
 2.8.0
 ++++++
 

@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
 
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 resource_group_name_type)
@@ -54,6 +56,24 @@ assessment_metadata_severity_arg_type = CLIArgumentType(options_list=('--severit
 # Sub Assessment
 sub_assessment_assessment_name_arg_type = CLIArgumentType(options_list=('--assessment-name'), metavar='ASSESSMENTNAME', help='Name of the assessment resource')
 
+# IoT Solution
+iot_solution_name_arg_type = CLIArgumentType(options_list=('--solution-name'), metavar='SOLUTIONNAME', help='Name of the IoT Security solution')
+iot_solution_display_name_arg_type = CLIArgumentType(options_list=('--display-name'), metavar='DISPLAYNAME', help='Resource display name')
+iot_solution_iot_hubs_arg_type = CLIArgumentType(options_list=('--iot-hubs'), metavar='IOTHUBS', help='IoT Hub resource IDs')
+
+# Regulatory Compliance
+regulatory_compliance_standard_name = CLIArgumentType(option_list=('--standard-name'), metave='STANDARDNAME', help='The compliance standard name')
+regulatory_compliance_control_name = CLIArgumentType(option_list=('--control-name'), metave='CONTROLNAME', help='The compliance control name')
+
+# Adaptive Network hardenings
+adaptive_network_hardenings_resource_namespace = CLIArgumentType(option_list=('--resource_namespace'), metave='RESOURCENAMESPACE', help='The Namespace of the resource')
+adaptive_network_hardenings_resource_resource_type = CLIArgumentType(option_list=('--resource_type'), metave='RESOURCETYPE', help='The type of the resource')
+adaptive_network_hardenings_resource_resource_name = CLIArgumentType(option_list=('--resource_name'), metave='RESOURCENAME', help='Name of the resource')
+adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name = CLIArgumentType(option_list=('--adaptive_network_hardenings_resource_name'), metave='ADAPTIVENETWORKHARDENINGSRESOURCENAME', help='Adaptive Network Hardening resource name')
+
+# Adaptive Application Controls
+adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
+
 
 def load_arguments(self, _):
     for scope in ['alert',
@@ -71,7 +91,17 @@ def load_arguments(self, _):
                   'workspace-setting',
                   'assessment',
                   'assessment-metadata',
-                  'sub-assessment']:
+                  'sub-assessment',
+                  'iot-solution',
+                  'iot-analytics',
+                  'iot-alerts',
+                  'iot-recommendations',
+                  'regulatory-compliance-standards',
+                  'regulatory-compliance-controls',
+                  'regulatory-compliance-assessments',
+                  'adaptive-application-controls',
+                  'adaptive_network_hardenings',
+                  'allowed_connections']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',
@@ -86,6 +116,21 @@ def load_arguments(self, _):
             c.argument(
                 'storage_account_name',
                 arg_type=storage_account_arg_type)
+
+    for scope in ['regulatory-compliance-controls']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'standard_name',
+                arg_type=regulatory_compliance_standard_name)
+
+    for scope in ['regulatory-compliance-assessments']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'standard_name',
+                arg_type=regulatory_compliance_standard_name)
+            c.argument(
+                'control_name',
+                arg_type=regulatory_compliance_control_name)
 
     for scope in ['alert update']:
         with self.argument_context('security {}'.format(scope)) as c:
@@ -178,3 +223,54 @@ def load_arguments(self, _):
             c.argument(
                 'assessment_name',
                 arg_type=sub_assessment_assessment_name_arg_type)
+
+    for scope in ['adaptive_network_hardenings']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'resource_namespace',
+                arg_type=adaptive_network_hardenings_resource_namespace)
+            c.argument(
+                'resource_type',
+                arg_type=adaptive_network_hardenings_resource_resource_type)
+            c.argument(
+                'resource_name',
+                arg_type=adaptive_network_hardenings_resource_resource_name)
+            c.argument(
+                'adaptive_network_hardenings_resource_name',
+                arg_type=adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name)
+
+    for scope in ['iot-solution']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'iot_solution_name',
+                arg_type=iot_solution_name_arg_type)
+            c.argument(
+                'iot_solution_display_name',
+                arg_type=iot_solution_display_name_arg_type)
+            c.argument(
+                'iot_solution_iot_hubs',
+                arg_type=iot_solution_iot_hubs_arg_type)
+
+    for scope in ['iot-analytics']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'iot_solution_name',
+                arg_type=iot_solution_name_arg_type)
+
+    for scope in ['iot-alerts']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'iot_solution_name',
+                arg_type=iot_solution_name_arg_type)
+
+    for scope in ['iot-recommendations']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'iot_solution_name',
+                arg_type=iot_solution_name_arg_type)
+
+    for scope in ['adaptive-application-controls']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'group_name',
+                arg_type=adaptive_application_controls_group_name)
