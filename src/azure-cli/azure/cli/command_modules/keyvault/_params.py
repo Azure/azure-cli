@@ -70,7 +70,7 @@ def load_arguments(self, _):
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
          'SkuName', 'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
-         'NetworkRuleBypassOptions', 'NetworkRuleAction')
+         'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
@@ -305,17 +305,26 @@ def load_arguments(self, _):
                 c.argument('vault_base_url', vault_name_type, required=False)
             c.extra('hsm_base_url', data_plane_hsm_name_type)
 
-    for item in ['create', 'import']:
+    for item in ['create', 'import', 'set-attributes']:
         with self.argument_context('keyvault key {}'.format(item)) as c:
-            c.argument('protection', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'],
-                       help='Specifies the type of key protection.')
-            c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
-            c.argument('key_size', options_list=['--size'], type=int,
-                       help='The key size in bits. For example: 2048, 3072, or 4096 for RSA. 128, 192, or 256 for oct.')
-            c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
-                       type=datetime_type)
-            c.argument('not_before', default=None, type=datetime_type,
-                       help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+            if item != 'set-attributes':
+                c.argument('protection', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'],
+                           help='Specifies the type of key protection.')
+                c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
+                c.argument('key_size', options_list=['--size'], type=int,
+                           help='The key size in bits. For example: 2048, 3072, or 4096 for RSA. 128, 192, or 256 for oct.')
+                c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
+                           type=datetime_type)
+                c.argument('not_before', default=None, type=datetime_type,
+                           help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+                c.argument('exportable', arg_type=get_three_state_flag(),
+                           is_preview=True,
+                           help='Indicates if the private key can be exported.')
+
+            c.argument('release_policy', options_list=['--policy'],
+                       help='The policy rules under which the key can be exported encoded with JSON. '
+                            'Use @{file} to load from a file(e.g. @my_policy.json).',
+                       type=get_json_object, is_preview=True)
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
@@ -366,15 +375,6 @@ def load_arguments(self, _):
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
-
-    for scope in ['create', 'set-attributes', 'import']:
-        with self.argument_context('keyvault key {}'.format(scope)) as c:
-            c.argument('release_policy', options_list=['--policy'],
-                       help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
-                       type=get_json_object, is_preview=True)
-            c.argument('exportable', arg_type=get_three_state_flag(),
-                       is_preview=True,
-                       help='If true, the key will be marked as exportable for Secure Key Release (SKR).')
     # endregion
 
     # region KeyVault Secret
