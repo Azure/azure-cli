@@ -13,6 +13,7 @@ import os.path
 import platform
 import random
 import re
+import shutil
 import ssl
 import stat
 import string
@@ -88,7 +89,8 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 
-from ._helpers import _populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type
+from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
+                       _parse_comma_separated_list)
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
@@ -276,6 +278,17 @@ def _urlretrieve(url, filename):
         f.write(req.read())
 
 
+def _unzip(src, dest):
+    logger.debug('Extracting %s to %s.', src, dest)
+    system = platform.system()
+    if system in ('Linux', 'Darwin', 'Windows'):
+        import zipfile
+        with zipfile.ZipFile(src, 'r') as zipObj:
+            zipObj.extractall(dest)
+    else:
+        raise CLIError('The current system is not supported.')
+
+
 def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
     """
     Downloads the dcos command line from Mesosphere
@@ -306,8 +319,16 @@ def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 
-def k8s_install_cli(cmd, client_version='latest', install_location=None):
-    """Install kubectl, a command-line interface for Kubernetes clusters."""
+def k8s_install_cli(cmd, client_version='latest', install_location=None,
+                    kubelogin_version='latest', kubelogin_install_location=None):
+    k8s_install_kubectl(cmd, client_version, install_location)
+    k8s_install_kubelogin(cmd, kubelogin_version, kubelogin_install_location)
+
+
+def k8s_install_kubectl(cmd, client_version='latest', install_location=None):
+    """
+    Install kubectl, a command-line interface for Kubernetes clusters.
+    """
 
     source_url = "https://storage.googleapis.com/kubernetes-release/release"
     cloud_name = cmd.cli_ctx.cloud.name
@@ -347,6 +368,73 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as ex:
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
+
+    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
+        env_paths = os.environ['PATH'].split(';')
+        found = next((x for x in env_paths if x.lower().rstrip('\\') == install_dir.lower()), None)
+        if not found:
+            # pylint: disable=logging-format-interpolation
+            logger.warning('Please add "{0}" to your search PATH so the `{1}` can be found. 2 options: \n'
+                           '    1. Run "set PATH=%PATH%;{0}" or "$env:path += \'{0}\'" for PowerShell. '
+                           'This is good for the current command session.\n'
+                           '    2. Update system PATH environment variable by following '
+                           '"Control Panel->System->Advanced->Environment Variables", and re-open the command window. '
+                           'You only need to do it once'.format(install_dir, cli))
+    else:
+        logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
+                       install_dir, cli)
+
+
+def k8s_install_kubelogin(cmd, client_version='latest', install_location=None):
+    """
+    Install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
+    """
+
+    source_url = 'https://github.com/Azure/kubelogin/releases/download'
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == 'azurechinacloud':
+        source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
+
+    if client_version == 'latest':
+        context = _ssl_context()
+        latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+        if cloud_name.lower() == 'azurechinacloud':
+            latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
+        latest_release = urlopen(latest_release_url, context=context).read()
+        client_version = json.loads(latest_release)['tag_name'].strip()
+    else:
+        client_version = "v%s" % client_version
+
+    base_url = source_url + '/{}/kubelogin.zip'
+    file_url = base_url.format(client_version)
+
+    # ensure installation directory exists
+    install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)
+
+    system = platform.system()
+    if system == 'Windows':
+        sub_dir, binary_name = 'windows_amd64', 'kubelogin.exe'
+    elif system == 'Linux':
+        # TODO: Support ARM CPU here
+        sub_dir, binary_name = 'linux_amd64', 'kubelogin'
+    elif system == 'Darwin':
+        sub_dir, binary_name = 'darwin_amd64', 'kubelogin'
+    else:
+        raise CLIError('Proxy server ({}) does not exist on the cluster.'.format(system))
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        try:
+            download_path = os.path.join(tmp_dir, 'kubelogin.zip')
+            logger.warning('Downloading client to "%s" from "%s"', download_path, file_url)
+            _urlretrieve(file_url, download_path)
+        except IOError as ex:
+            raise CLIError('Connection error while attempting to download client ({})'.format(ex))
+        _unzip(download_path, tmp_dir)
+        download_path = os.path.join(tmp_dir, 'bin', sub_dir, binary_name)
+        shutil.move(download_path, install_location)
+    os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
     if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
         env_paths = os.environ['PATH'].split(';')
@@ -998,7 +1086,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            return _invoke_deployment(cmd.cli_ctx, resource_group_name, deployment_name,
+            return _invoke_deployment(cmd, resource_group_name, deployment_name,
                                       template, params, validate, no_wait)
         except CloudError as ex:
             retry_exception = ex
@@ -1049,18 +1137,29 @@ def load_service_principals(config_path):
         return None
 
 
-def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
+def _invoke_deployment(cmd, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
 
-    from azure.cli.core.profiles import ResourceType, get_sdk
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
+    from azure.cli.core.profiles import ResourceType
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+    smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                   subscription_id=subscription_id).deployments
     if validate:
         logger.info('==== BEGIN TEMPLATE ====')
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            validation_poller = smc.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, deployment)
+
+    if validate:
         return smc.validate(resource_group_name, deployment_name, properties)
     return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, properties)
 
@@ -1692,6 +1791,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_private_cluster=False,
                enable_managed_identity=False,
                attach_acr=None,
+               enable_aad=False,
+               aad_admin_group_object_ids=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1852,17 +1953,27 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
 
     aad_profile = None
-    if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
-        if aad_tenant_id is None:
-            profile = Profile(cli_ctx=cmd.cli_ctx)
-            _, _, aad_tenant_id = profile.get_login_credentials()
-
+    if enable_aad:
+        if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret]):
+            raise CLIError('"--enable-aad" cannot be used together with '
+                           '"--aad-client-app-id/--aad-server-app-id/--aad-server-app-secret"')
         aad_profile = ManagedClusterAADProfile(
-            client_app_id=aad_client_app_id,
-            server_app_id=aad_server_app_id,
-            server_app_secret=aad_server_app_secret,
+            managed=True,
+            admin_group_object_ids=_parse_comma_separated_list(aad_admin_group_object_ids),
             tenant_id=aad_tenant_id
         )
+    else:
+        if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
+            if aad_tenant_id is None:
+                profile = Profile(cli_ctx=cmd.cli_ctx)
+                _, _, aad_tenant_id = profile.get_login_credentials()
+
+            aad_profile = ManagedClusterAADProfile(
+                client_app_id=aad_client_app_id,
+                server_app_id=aad_server_app_id,
+                server_app_secret=aad_server_app_secret,
+                tenant_id=aad_tenant_id
+            )
 
     api_server_access_profile = None
     if enable_private_cluster and load_balancer_sku.lower() != "standard":
@@ -2098,10 +2209,11 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
         raise CLIError('There are more than one node pool in the cluster. '
                        'Please specify nodepool name or use az aks nodepool command to scale node pool')
 
-    if node_count == 0:
-        raise CLIError("Can't scale down to 0 nodes.")
     for agent_profile in instance.agent_pool_profiles:
         if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
+            if agent_profile.enable_auto_scaling:
+                raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
+
             agent_profile.count = int(node_count)  # pylint: disable=no-member
             # null out the SP and AAD profile because otherwise validation complains
             instance.service_principal_profile = None
@@ -2125,6 +2237,9 @@ def aks_update(cmd, client, resource_group_name, name,
                attach_acr=None,
                detach_acr=None,
                api_server_authorized_ip_ranges=None,
+               enable_aad=False,
+               aad_tenant_id=None,
+               aad_admin_group_object_ids=None,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2132,13 +2247,15 @@ def aks_update(cmd, client, resource_group_name, name,
                                                           load_balancer_outbound_ip_prefixes,
                                                           load_balancer_outbound_ports,
                                                           load_balancer_idle_timeout)
-
+    update_aad_profile = not (aad_tenant_id is None and aad_admin_group_object_ids is None)
     # pylint: disable=too-many-boolean-expressions
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
             not detach_acr and
             not uptime_sla and
-            api_server_authorized_ip_ranges is None):
+            api_server_authorized_ip_ranges is None and
+            not enable_aad and
+            not update_aad_profile):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2149,7 +2266,10 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-idle-timeout" or'
                        '"--attach-acr" or "--detach-acr" or'
                        '"--uptime-sla" or'
-                       '"--"api-server-authorized-ip-ranges')
+                       '"--api-server-authorized-ip-ranges" or '
+                       '"--enable-aad" or '
+                       '"--aad-tenant-id" or '
+                       '"--aad-admin-group-object-ids"')
 
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
@@ -2233,6 +2353,21 @@ def aks_update(cmd, client, resource_group_name, name,
     if api_server_authorized_ip_ranges is not None:
         instance.api_server_access_profile = \
             _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=instance)
+
+    if enable_aad:
+        if instance.aad_profile is not None and instance.aad_profile.managed:
+            raise CLIError('Cannot specify "--enable-aad" if managed AAD is already enabled')
+        instance.aad_profile = ManagedClusterAADProfile(
+            managed=True
+        )
+    if update_aad_profile:
+        if instance.aad_profile is None or not instance.aad_profile.managed:
+            raise CLIError('Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids"'
+                           ' if managed AAD is not enabled')
+        if aad_tenant_id is not None:
+            instance.aad_profile.tenant_id = aad_tenant_id
+        if aad_admin_group_object_ids is not None:
+            instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(aad_admin_group_object_ids)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -2626,7 +2761,8 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         workspace_region = AzureFairfaxRegionToOmsRegionMap.get(rg_location, "usgovvirginia")
         workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(workspace_region, "USGV")
     else:
-        logger.error("AKS Monitoring addon not supported in cloud : %s", cloud_name)
+        workspace_region = rg_location
+        workspace_region_code = rg_location.upper()
 
     default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
     default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_region_code)
@@ -2778,7 +2914,7 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
 
     deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
     # publish the Container Insights solution to the Log Analytics workspace
-    return _invoke_deployment(cmd.cli_ctx, resource_group, deployment_name, template, params,
+    return _invoke_deployment(cmd, resource_group, deployment_name, template, params,
                               validate=False, no_wait=False, subscription_id=subscription_id)
 
 
@@ -2893,8 +3029,8 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
                         no_wait=False):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     new_node_count = int(node_count)
-    if new_node_count == 0:
-        raise CLIError("Can't scale down to 0 nodes.")
+    if instance.enable_auto_scaling:
+        raise CLIError("Cannot scale cluster autoscaler enabled node pool.")
     if new_node_count == instance.count:
         raise CLIError("The new node count is the same as the current node count.")
     instance.count = new_node_count  # pylint: disable=no-member
@@ -2987,6 +3123,10 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
 
     return sdk_no_wait(no_wait, client.delete, resource_group_name, cluster_name, nodepool_name)
+
+
+def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_name, nodepool_name):
+    return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
 
 
 def _ensure_aks_acr_role_assignment(cli_ctx,

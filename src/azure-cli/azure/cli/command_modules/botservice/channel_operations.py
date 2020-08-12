@@ -196,7 +196,7 @@ def slack_create(client, resource_group_name, resource_name, client_id, client_s
     return create_channel(client, channel, 'SlackChannel', resource_group_name, resource_name)
 
 
-class ChannelOperations(object):  # pylint: disable=too-few-public-methods
+class ChannelOperations:  # pylint: disable=too-few-public-methods
     def __init__(self):
         for channel in ['facebook', 'email', 'msTeams', 'skype', 'kik', 'webChat', 'directLine', 'telegram', 'sms', 'slack']:  # pylint: disable=line-too-long
             channelName = '{}Channel'.format(channel)

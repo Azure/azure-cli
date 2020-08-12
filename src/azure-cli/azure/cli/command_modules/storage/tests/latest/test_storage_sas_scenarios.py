@@ -108,9 +108,27 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob upload -c {container} -f "{local_file}" -n {blob} '
                  '--account-name {account} --sas-token "{container_sas}"')
 
-        # test sas-token for a file
-        sas = self.cmd('storage blob generate-sas -c {container} -n {blob} --https-only --permissions acdrw '
-                       '--expiry {expiry} --connection-string {con_str} -otsv').output.strip()
+        # test sas-token for a blob
+        sas = self.cmd('storage blob generate-sas -c {container} -n {blob} --account-name {account} --https-only '
+                       '--permissions acdrw --expiry {expiry} -otsv').output.strip()
         self.kwargs['blob_sas'] = sas
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}') \
             .assert_with_checks(JMESPathCheck('name', blob_name))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_queue_sas_scenario(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        account_info = self.get_account_info(resource_group, storage_account)
+        queue = self.create_random_name('queue', 24)
+
+        self.storage_cmd('storage queue create -n {} --fail-on-exist --metadata a=b c=d', account_info, queue)\
+            .assert_with_checks(JMESPathCheck('created', True))
+
+        sas = self.storage_cmd('storage queue generate-sas -n {} --permissions r --expiry {}',
+                               account_info, queue, expiry).output
+        self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
+
+        self.cmd('storage queue exists -n {} --account-name {} --sas-token {}'.format(queue, storage_account, sas),
+                 checks=JMESPathCheck('exists', True))

@@ -86,12 +86,11 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
             self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
                              'The download file size is not right.')
 
-    @ResourceGroupPreparer(name_prefix="storage_blob_restore")
-    @StorageAccountPreparer(name_prefix="storageblobrestore", kind="StorageV2", location="eastus2euap",
-                            sku='Standard_LRS')
+    @ResourceGroupPreparer(name_prefix="storage_blob_restore", location="centraluseuap")
+    @StorageAccountPreparer(name_prefix="restore", kind="StorageV2", sku='Standard_LRS', location="centraluseuap")
     def test_storage_blob_restore(self, resource_group, storage_account):
         import time
-        self.cmd('storage account blob-service-properties update --enable-change-feed --enable-delete-retention --delete-retention-days 2 -n {sa}')\
+        self.cmd('storage account blob-service-properties update --enable-change-feed --enable-delete-retention --delete-retention-days 2 --enable-versioning -n {sa}')\
             .assert_with_checks(JMESPathCheck('changeFeed.enabled', True),
                                 JMESPathCheck('deleteRetentionPolicy.enabled', True),
                                 JMESPathCheck('deleteRetentionPolicy.days', 2))
@@ -129,7 +128,7 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
                 container, storage_account, account_key)) \
                 .assert_with_checks(JMESPathCheck('deleted', True))
 
-        time.sleep(10)
+        time.sleep(30)
 
         # Restore blobs, with specific ranges
         time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
@@ -158,6 +157,6 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
             JMESPathCheck('parameters.blobRanges[0].startRange', start_range),
             JMESPathCheck('parameters.blobRanges[0].endRange', end_range)])
 
-        time.sleep(90)
+        time.sleep(120)
         self.cmd('storage blob restore -t {} --account-name {} -g {} --no-wait'.format(
             time_to_restore, storage_account, resource_group))

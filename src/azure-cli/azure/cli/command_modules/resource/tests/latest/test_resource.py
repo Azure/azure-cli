@@ -275,7 +275,7 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'plan': 'cli_res_create_plan',
-            'app': 'clirescreateweb',
+            'app': 'clirescreateweb2',
             'loc': resource_group_location
         })
 
@@ -304,10 +304,10 @@ class TagScenarioTest(ScenarioTest):
             'tag': 'cli_test_tag'
         })
 
-        tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
-        for tag in tags:
-            self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
-        self.cmd('tag delete -n {tag}')
+        tag_values = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
+        for tag_value in tag_values:
+            self.cmd('tag remove-value --value {} -n {{tag}}'.format(tag_value))
+        self.cmd('tag delete -n {tag} -y')
 
         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
         self.cmd('tag create -n {tag}', checks=[
@@ -325,7 +325,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
-        self.cmd('tag delete -n {tag}')
+        self.cmd('tag delete -n {tag} -y')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
@@ -352,7 +352,7 @@ class TagScenarioTest(ScenarioTest):
 
         # Test Microsoft.Resources/resourceGroups
         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
-                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'}))
+                 checks=self.check('tags', {'cli-test': 'test'}))
 
         # Test Microsoft.ContainerRegistry/registries/webhooks
         self.kwargs.update({
@@ -373,6 +373,18 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
 
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
+
+        # Test Microsoft.ContainerInstance/containerGroups
+        self.kwargs.update({
+            'container_group_name': self.create_random_name('clicontainer', 16),
+            'image': 'nginx:latest',
+        })
+
+        container = self.cmd('container create -g {rg} -n {container_group_name} --image {image}',
+                             checks=self.check('name', '{container_group_name}')).get_output_in_json()
+        self.kwargs['container_id'] = container['id']
+        self.cmd('resource tag --ids {container_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {container_id} --tags', checks=self.check('tags', {}))
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
@@ -450,6 +462,156 @@ class TagScenarioTest(ScenarioTest):
 
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
 
+    def test_tag_create_or_update_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_create_or_update_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_create_or_update_resourcegroup', location='westus')
+    def test_tag_create_or_update_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_create_or_update_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_create_or_update_resource', location='westus')
+    def test_tag_create_or_update_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_create_or_update_scope(resource_id=resource['id'])
+
+    # Utility method to test CreateOrUpdate for Tags within subscription, resource group, and tracked resources.
+    def utility_tag_create_or_update_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'expected_tags1': 'cliName1=cliValue1 cliName2=cliValue2',
+            'expected_tags2': 'cliName1=cliValue1 cliName2='
+        })
+
+        # 1. pass in an empty tag set, should throw error
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('tag create --resource-id {resource_id} --tags', checks=self.check('tags', {}))
+
+        # 2. pass in a complete tag string
+        tag_dict1 = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2'}
+        self.cmd('tag create --resource-id {resource_id} --tags {expected_tags1}', checks=[
+            self.check('properties.tags', tag_dict1)
+        ])
+
+        # 3. pass in one incomplete tag string
+        tag_dict2 = {'cliName1': 'cliValue1', 'cliName2': ''}
+        self.cmd('tag create --resource-id {resource_id} --tags {expected_tags2}', checks=[
+            self.check('properties.tags', tag_dict2)
+        ])
+
+        # 4. clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id} -y', checks=self.is_empty())
+
+    def test_tag_update_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_update_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_update_resourcegroup', location='westus')
+    def test_tag_update_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_update_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_update_resource', location='westus')
+    def test_tag_update_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_update_scope(resource_id=resource['id'])
+
+    # Utility method to test updating tags on subscription, resource group and tracked resource, including Merge, Replace, and Delete Operation.
+    def utility_tag_update_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'original_tags': 'cliName1=cliValue1 cliName2=cliValue2',
+            'merge_tags': 'cliName1=cliValue1 cliName3=cliValue3',
+            'replace_tags': 'cliName1=cliValue1 cliName4=cliValue4',
+            'delete_tags': 'cliName4=cliValue4',
+            'merge_operation': 'merge',
+            'replace_operation': 'replace',
+            'delete_operation': 'delete'
+        })
+
+        # setup original
+        self.cmd('tag create --resource-id {resource_id} --tags {original_tags}')
+
+        # 1. test merge operation
+        after_merge_tags_dict = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2', 'cliName3': 'cliValue3'}
+        self.cmd('tag update --resource-id {resource_id} --operation {merge_operation} --tags {merge_tags}', checks=[
+            self.check('properties.tags', after_merge_tags_dict)
+        ])
+
+        # 2. test replace operation
+        after_replace_tags_dict = {'cliName1': 'cliValue1', 'cliName4': 'cliValue4'}
+        self.cmd('tag update --resource-id {resource_id} --operation {replace_operation} --tags {replace_tags}',
+                 checks=[
+                     self.check('properties.tags', after_replace_tags_dict)
+                 ])
+
+        # 3. test delete operation
+        after_delete_tags_dict = {'cliName1': 'cliValue1'}
+        self.cmd('tag update --resource-id {resource_id} --operation {delete_operation} --tags {delete_tags}', checks=[
+            self.check('properties.tags', after_delete_tags_dict)
+        ])
+
+        # 4. clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id} -y', checks=self.is_empty())
+
+    def test_tag_get_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_get_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_get_resourcegroup', location='westus')
+    def test_tag_get_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_get_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_get_resource', location='westus')
+    def test_tag_get_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_get_scope(resource_id=resource['id'])
+
+    # Utility method to test Get for Tags within subscription, resource group and tracked resource.
+    def utility_tag_get_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'original_tags': 'cliName1=cliValue1 cliName2=cliValue2'
+        })
+
+        # setup original
+        self.cmd('tag create --resource-id {resource_id} --tags {original_tags}')
+
+        # test get operation
+        expected_tags_dict = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2'}
+        self.cmd('tag list --resource-id {resource_id}', checks=[
+            self.check('properties.tags', expected_tags_dict)
+        ])
+
+        # clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id} -y', checks=self.is_empty())
+
 
 class ProviderRegistrationTest(ScenarioTest):
 
@@ -508,15 +670,15 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60)
         })
 
-        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment sub create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment sub create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -539,7 +701,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
-        self.cmd('deployment sub create -n {dn2} --location WestUS --template-file {tf} --parameters @"{params}" --no-wait')
+        self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" --no-wait')
 
         self.cmd('deployment sub cancel -n {dn2}')
 
@@ -559,15 +721,15 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60)
         })
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -588,7 +750,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
-        self.cmd('deployment create -n {dn2} --location WestUS --template-file {tf} --parameters @"{params}" --no-wait')
+        self.cmd('deployment create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" --no-wait')
 
         self.cmd('deployment cancel -n {dn2}')
 
@@ -613,58 +775,58 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\')
         })
 
-        self.cmd('deployment group validate --resource-group {rg} --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment group validate --resource-group {rg} --template-file {Japanese-characters-tf}', checks=[
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{Japanese-characters-tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt true')
+            self.cmd('deployment group validate --resource-group {rg} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt true')
             self.assertTrue("Deployment template validation failed" in str(err.exception))
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}"')
+            self.cmd('deployment group validate --resource-group {rg} --template-file "{extra_param_tf}" --parameters @"{params}"')
             self.assertTrue("Missing input parameters" in str(err.exception))
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt false')
+            self.cmd('deployment group validate --resource-group {rg} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt false')
             self.assertTrue("Missing input parameters" in str(err.exception))
 
-        self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt true')
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt true')
             self.assertTrue("Deployment template validation failed" in str(err.exception))
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}"')
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{extra_param_tf}" --parameters @"{params}"')
             self.assertTrue("Missing input parameters" in str(err.exception))
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt false')
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt false')
             self.assertTrue("Missing input parameters" in str(err.exception))
 
         json_invalid_info = "Failed to parse '{}', please check whether it is a valid JSON format"
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate -g {rg} -f {tf_invalid} -p @"{params}"')
+            self.cmd('deployment group validate -g {rg} -f "{tf_invalid}" -p @"{params}"')
             self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group validate -g {rg} -f {tf} -p @"{params_invalid}"')
+            self.cmd('deployment group validate -g {rg} -f "{tf}" -p @"{params_invalid}"')
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create -g {rg} -n {dn} -f {tf_invalid} -p @"{params}"')
+            self.cmd('deployment group create -g {rg} -n {dn} -f "{tf_invalid}" -p @"{params}"')
             self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('deployment group create -g {rg} -n {dn} -f {tf} -p @"{params_invalid}"')
+            self.cmd('deployment group create -g {rg} -n {dn} -f "{tf}" -p @"{params_invalid}"')
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         self.cmd('deployment group list --resource-group {rg}', checks=[
@@ -686,7 +848,7 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.check('length([])', 2)
         ])
 
-        self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {tf} --parameters @"{params}" --no-wait')
+        self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --no-wait')
 
         self.cmd('deployment group cancel -n {dn2} -g {rg}')
 
@@ -703,19 +865,22 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
-            'mg': 'azure-cli-management-group3bxh',
+            'mg': self.create_random_name('azure-cli-management', 30),
             'sub-rg': self.create_random_name('azure-cli-sub-resource-group', 60),
-            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
+            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file {tf} '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+        self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file "{tf}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
-        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file {tf} '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file "{tf}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
                  checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
         self.cmd('deployment mg list --management-group-id {mg}', checks=[
@@ -737,8 +902,9 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             self.check('length([])', 4)
         ])
 
-        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file {tf} '
-                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" --no-wait')
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment mg cancel -n {dn2} --management-group-id {mg}')
 
@@ -750,6 +916,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('account management-group delete -n {mg}')
 
 
+# TODO
 class DeploymentTestAtTenantScope(ScenarioTest):
 
     def test_tenant_level_deployment(self):
@@ -763,11 +930,11 @@ class DeploymentTestAtTenantScope(ScenarioTest):
 
         self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('deployment tenant validate --location WestUS --template-file {tf} --parameters targetMG="{mg}"', checks=[
+        self.cmd('deployment tenant validate --location WestUS --template-file "{tf}" --parameters targetMG="{mg}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment tenant create --location WestUS -n {dn} --template-file {tf} --parameters targetMG="{mg}"', checks=[
+        self.cmd('deployment tenant create --location WestUS -n {dn} --template-file "{tf}" --parameters targetMG="{mg}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -790,7 +957,7 @@ class DeploymentTestAtTenantScope(ScenarioTest):
             self.check('length([])', 4)
         ])
 
-        self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file {tf} --parameters targetMG="{mg}" --no-wait')
+        self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file "{tf}" --parameters targetMG="{mg}" --no-wait')
 
         self.cmd('deployment tenant cancel -n {dn2}')
 
@@ -814,7 +981,7 @@ class DeploymentTest(ScenarioTest):
             'dn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -836,18 +1003,18 @@ class DeploymentTest(ScenarioTest):
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
-        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
         with self.assertRaises(CLIError):
-            self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{error_params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
+            self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters @"{error_params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -874,22 +1041,22 @@ class DeploymentTest(ScenarioTest):
         json_invalid_info = "Failed to parse '{}', please check whether it is a valid JSON format"
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('group deployment validate -g {rg} -f {tf_invalid} -p @"{params}"')
+            self.cmd('group deployment validate -g {rg} -f "{tf_invalid}" -p @"{params}"')
             self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('group deployment validate -g {rg} -f {tf} -p @"{params_invalid}"')
+            self.cmd('group deployment validate -g {rg} -f "{tf}" -p @"{params_invalid}"')
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('group deployment create -g {rg} -n {dn} -f {tf_invalid} -p @"{params}"')
+            self.cmd('group deployment create -g {rg} -n {dn} -f "{tf_invalid}" -p @"{params}"')
             self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
 
         with self.assertRaises(CLIError) as err:
-            self.cmd('group deployment create -g {rg} -n {dn} -f {tf} -p @"{params_invalid}"')
+            self.cmd('group deployment create -g {rg} -n {dn} -f "{tf}" -p @"{params_invalid}"')
             self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
-        self.cmd('group deployment create -g {rg} -n {dn2} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}" --no-wait')
+        self.cmd('group deployment create -g {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}" --no-wait')
 
         self.cmd('group deployment cancel -n {dn2} -g {rg}')
 
@@ -907,20 +1074,20 @@ class DeploymentTest(ScenarioTest):
             'app_name': self.create_random_name('cli', 30)
         })
 
-        self.cmd('group deployment validate -g {rg} --template-file {large_tf} --parameters @"{large_params}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{large_tf}" --parameters @"{large_params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment validate -g {rg} --template-file {large_tf} --parameters "{large_params}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{large_tf}" --parameters "{large_params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment create -g {rg} --template-file {large_tf} --parameters @"{large_params}" --parameters function-app-name="{app_name}"', checks=[
+        self.cmd('group deployment create -g {rg} --template-file "{large_tf}" --parameters @"{large_params}" --parameters function-app-name="{app_name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
 
-        self.cmd('group deployment create -g {rg} --template-file {large_tf} --parameters "{large_params}" --parameters function-app-name="{app_name}"', checks=[
+        self.cmd('group deployment create -g {rg} --template-file "{large_tf}" --parameters "{large_params}" --parameters function-app-name="{app_name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -936,13 +1103,13 @@ class DeploymentTest(ScenarioTest):
             'sdn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment', None)
         ])
 
-        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --rollback-on-error', checks=[
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file "{tf}" --rollback-on-error', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
@@ -960,13 +1127,13 @@ class DeploymentTest(ScenarioTest):
             'sdn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment', None)
         ])
 
-        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --rollback-on-error {dn}', checks=[
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file "{tf}" --rollback-on-error {dn}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
@@ -990,7 +1157,7 @@ class DeploymentLiveTest(LiveScenarioTest):
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
         with force_progress_logging() as test_io:
-            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
+            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
         # very the progress
         lines = test_io.getvalue().splitlines()
@@ -1011,7 +1178,7 @@ class DeploymentNoWaitTest(ScenarioTest):
             'dn': 'azure-cli-deployment'
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @{params} --no-wait',
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --no-wait',
                  checks=self.is_empty())
 
         self.cmd('group deployment wait -g {rg} -n {dn} --created',
@@ -1032,7 +1199,7 @@ class DeploymentThruUriTest(ScenarioTest):
             'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
         })
-        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.templateLink.uri', '{tf}'),
@@ -1045,7 +1212,7 @@ class DeploymentThruUriTest(ScenarioTest):
         self.cmd('group deployment list -g {rg}',
                  checks=self.is_empty())
 
-        self.kwargs['dn'] = self.cmd('deployment group create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+        self.kwargs['dn'] = self.cmd('deployment group create -g {rg} --template-uri "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.templateLink.uri', '{tf}'),
@@ -1068,10 +1235,10 @@ class DeploymentWhatIfAtResourceGroupScopeTest(ScenarioTest):
             'params': os.path.join(curr_dir, 'storage_account_deploy_parameters.json').replace('\\', '\\\\'),
         })
 
-        deployment_output = self.cmd('deployment group create --resource-group {rg} --template-file {tf}').get_output_in_json()
+        deployment_output = self.cmd('deployment group create --resource-group {rg} --template-file "{tf}"').get_output_in_json()
         self.kwargs['storage_account_id'] = deployment_output['properties']['outputs']['storageAccountId']['value']
 
-        self.cmd('deployment group what-if --resource-group {rg} --template-file {tf} --parameters {params} --no-pretty-print', checks=[
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --parameters "{params}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("changes[?resourceId == '{storage_account_id}'].changeType | [0]", 'Modify'),
             self.check("changes[?resourceId == '{storage_account_id}'] | [0].delta[?path == 'sku.name'] | [0].propertyChangeType", 'Modify'),
@@ -1088,15 +1255,62 @@ class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
             'params': os.path.join(curr_dir, 'policy_definition_deploy_parameters.json').replace('\\', '\\\\'),
         })
 
-        deployment_output = self.cmd('deployment sub create --location westus --template-file {tf}').get_output_in_json()
+        deployment_output = self.cmd('deployment sub create --location westus --template-file "{tf}"').get_output_in_json()
         self.kwargs['policy_definition_id'] = deployment_output['properties']['outputs']['policyDefinitionId']['value']
 
-        self.cmd('deployment sub what-if --location westus --template-file {tf} --parameters {params} --no-pretty-print', checks=[
+        self.cmd('deployment sub what-if --location westus --template-file "{tf}" --parameters "{params}" --no-pretty-print', checks=[
             self.check('status', 'Succeeded'),
             self.check("changes[?resourceId == '{policy_definition_id}'].changeType | [0]", 'Modify'),
             self.check("changes[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].propertyChangeType", 'Modify'),
             self.check("changes[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].before", 'northeurope'),
             self.check("changes[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].after", 'westeurope'),
+        ])
+
+
+class DeploymentWhatIfAtManagementGroupTest(ScenarioTest):
+    def test_management_group_level_what_if(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
+            'mg': self.create_random_name('azure-cli-management', 30),
+            'sub-rg': self.create_random_name('azure-cli-sub-resource-group', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg what-if --management-group-id {mg} --location WestUS --template-file "{tf}" --no-pretty-print '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
+                 checks=[
+                     self.check('status', 'Succeeded'),
+                     self.check("length(changes)", 4),
+                     self.check("changes[0].changeType", "Create"),
+                     self.check("changes[1].changeType", "Create"),
+                     self.check("changes[2].changeType", "Create"),
+                     self.check("changes[3].changeType", "Create"),
+                 ])
+
+
+class DeploymentWhatIfAtTenantScopeTest(ScenarioTest):
+    def test_tenant_level_what_if(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60),
+            'mg': self.create_random_name('azure-cli-management-group', 40),
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --parameters targetMG="{mg}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+            self.check("length(changes)", 3),
+            self.check("changes[0].changeType", "Create"),
+            self.check("changes[1].changeType", "Create"),
+            self.check("changes[2].changeType", "Create"),
         ])
 
 
@@ -1241,7 +1455,7 @@ class PolicyScenarioTest(ScenarioTest):
             'padn': self.create_random_name('test_assignment', 20)
         })
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params {params}', checks=[
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params "{params}"', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
@@ -1258,7 +1472,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
         self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks'.format(**self.kwargs)
 
-        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params {params} --sku standard', checks=[
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params "{params}" --sku standard', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A1'),
@@ -1301,7 +1515,7 @@ class PolicyScenarioTest(ScenarioTest):
             'em': enforcementMode
         })
 
-        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params {params} --scope {scope} --enforcement-mode {em}', checks=[
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params "{params}" --scope {scope} --enforcement-mode {em}', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
@@ -1337,7 +1551,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.kwargs.update({'sub': subscription})
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category={metadata}', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc} --mode {mode} --metadata category={metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}'),
@@ -1361,7 +1575,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
         self.kwargs['rf'] = os.path.join(curr_dir, 'sample_policy_rule_2.json').replace('\\', '\\\\')
 
-        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2 --params {pdf} --rules {rf}', management_group, subscription)
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2 --params "{pdf}" --rules "{rf}"', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{desc}'),
             self.check('displayName', '{pdn}'),
@@ -1428,11 +1642,11 @@ class PolicyScenarioTest(ScenarioTest):
         time.sleep(60)
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
         policy = self.cmd(cmd).get_output_in_json()
 
         # create a data policy
-        cmd = self.cmdstring('policy definition create -n {dpn} --rules {dprf} --mode {dp_mode} --display-name {dpdn} --description {dp_desc}', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {dpn} --rules "{dprf}" --mode {dp_mode} --display-name {dpdn} --description {dp_desc}', management_group, subscription)
         datapolicy = self.cmd(cmd).get_output_in_json()
 
         # create a policy set
@@ -1508,7 +1722,7 @@ class PolicyScenarioTest(ScenarioTest):
         with open(os.path.join(curr_dir, 'sample_policy_set_parameterized.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
-        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params {pdf} --metadata category={updated_metadata}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params "{pdf}" --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}'),
@@ -1521,7 +1735,7 @@ class PolicyScenarioTest(ScenarioTest):
         # update the parameters on the policy set
         self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
 
-        cmd = self.cmdstring('policy set-definition update -n {psn} --params {pdf} --metadata category={updated_metadata}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition update -n {psn} --params "{pdf}" --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
             self.check('metadata.category', '{updated_metadata}')
@@ -1707,7 +1921,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -1724,7 +1938,7 @@ class PolicyScenarioTest(ScenarioTest):
         })
 
         # create a policy
-        policy = self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn}').get_output_in_json()
+        policy = self.cmd('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn}').get_output_in_json()
 
         # create a policy set
         policyset = get_file_json(self.kwargs['psf'])
@@ -1803,9 +2017,9 @@ class PolicyScenarioTest(ScenarioTest):
             'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\')
         })
 
-        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
+        self.cmd('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
 
-        self.kwargs['pan_random'] = self.cmd('policy assignment create --policy {pn} --display-name {padn} -g {rg} --params {params}', checks=[
+        self.kwargs['pan_random'] = self.cmd('policy assignment create --policy {pn} --display-name {padn} -g {rg} --params "{params}"', checks=[
             self.check('displayName', '{padn}'),
             self.check('sku.name', 'A0'),
             self.check('sku.tier', 'Free'),
@@ -1823,8 +2037,26 @@ class PolicyScenarioTest(ScenarioTest):
 
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_managedappdef(self, resource_group):
+
+        self.kwargs.update({
+            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'sub': self.get_subscription_id()
+        })
+
+        user_principal = self.cmd(
+            'ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+        principal_id = user_principal['objectId']
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd(
+                'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
+        from msrestazure.tools import parse_resource_id
+        role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
             'loc': 'eastus',
@@ -1832,7 +2064,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
             'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
-            'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'auth': principal_id + ':' + role_definition_id,
             'lock': 'None'
         })
 
@@ -1841,8 +2073,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
             self.check('description', '{ad_desc}'),
-            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
@@ -1856,8 +2088,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
             self.check('description', '{ad_desc}'),
-            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
@@ -1867,16 +2099,36 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition delete -g {rg} -n {adn}')
         self.cmd('managedapp definition list -g {rg}', checks=self.is_empty())
 
+        self.cmd('role assignment delete --assignee {upn} --role contributor ')
+        self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_managedappdef_inline(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'sub': self.get_subscription_id()
+        })
+
+        user_principal = self.cmd(
+            'ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+        principal_id = user_principal['objectId']
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd(
+                'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
+        from msrestazure.tools import parse_resource_id
+        role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
             'loc': 'eastus',
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
-            'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'auth': principal_id + ':' + role_definition_id,
             'lock': 'None',
             'ui_file': os.path.join(curr_dir, 'sample_create_ui_definition.json').replace('\\', '\\\\'),
             'main_file': os.path.join(curr_dir, 'sample_main_template.json').replace('\\', '\\\\')
@@ -1887,8 +2139,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
             self.check('description', '{ad_desc}'),
-            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
@@ -1902,8 +2154,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('name', '{adn}'),
             self.check('displayName', '{addn}'),
             self.check('description', '{ad_desc}'),
-            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('authorizations[0].principalId', principal_id),
+            self.check('authorizations[0].roleDefinitionId', role_definition_id),
             self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
@@ -1913,10 +2165,28 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition delete -g {rg} -n {adn}')
         self.cmd('managedapp definition list -g {rg}', checks=self.is_empty())
 
+        self.cmd('role assignment delete --assignee {upn} --role contributor ')
+        self.cmd('ad user delete --upn-or-object-id {upn}')
+
 
 class ManagedAppScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
+
+        self.kwargs.update({
+            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'sub': self.get_subscription_id()
+        })
+
+        user_principal = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd('role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
+        from msrestazure.tools import parse_resource_id
+        role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
             'loc': 'westcentralus',
@@ -1924,9 +2194,8 @@ class ManagedAppScenarioTest(ScenarioTest):
             'addn': 'test_appdef_123',
             'ad_desc': 'test_appdef_123',
             'uri': 'https://github.com/Azure/azure-managedapp-samples/raw/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
-            'auth': '872b463c-9606-4c8c-92a2-571a4d018650:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'auth': user_principal['objectId'] + ':' + role_definition_id,
             'lock': 'None',
-            'sub': self.get_subscription_id(),
             'rg': resource_group
         })
 
@@ -1942,11 +2211,12 @@ class ManagedAppScenarioTest(ScenarioTest):
         })
         self.kwargs['ma_rg_id'] = '/subscriptions/{sub}/resourceGroups/{ma_rg}'.format(**self.kwargs)
 
-        self.kwargs['ma_id'] = self.cmd('managedapp create -n {man} -g {rg} -l {ma_loc} --kind {ma_kind} -m {ma_rg_id} -d {ad_id} --parameters {param}', checks=[
+        self.kwargs['ma_id'] = self.cmd('managedapp create -n {man} -g {rg} -l {ma_loc} --kind {ma_kind} -m {ma_rg_id} -d {ad_id} --parameters {param} --tags "key=val" ', checks=[
             self.check('name', '{man}'),
             self.check('type', 'Microsoft.Solutions/applications'),
             self.check('kind', 'servicecatalog'),
-            self.check('managedResourceGroupId', '{ma_rg_id}')
+            self.check('managedResourceGroupId', '{ma_rg_id}'),
+            self.check('tags', {'key': 'val'})
         ]).get_output_in_json()['id']
 
         self.cmd('managedapp list -g {rg}', checks=self.check('[0].name', '{man}'))
@@ -1960,6 +2230,9 @@ class ManagedAppScenarioTest(ScenarioTest):
 
         self.cmd('managedapp delete -g {rg} -n {man}')
         self.cmd('managedapp list -g {rg}', checks=self.is_empty())
+
+        self.cmd('role assignment delete --assignee {upn} --role contributor ')
+        self.cmd('ad user delete --upn-or-object-id {upn}')
 
 
 class CrossRGDeploymentScenarioTest(ScenarioTest):
@@ -1983,7 +2256,7 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         ])
 
         with self.assertRaises(CLIError):
-            self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg=test StorageAccountName1={sa1} StorageAccountName2={sa2}')
+            self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg=SomeRandomRG StorageAccountName1={sa1} StorageAccountName2={sa2}')
 
         self.cmd('group deployment create -g {rg1} -n {dn} --template-file "{tf}" --parameters CrossRg={rg2}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
@@ -2032,7 +2305,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
@@ -2155,7 +2428,7 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
             'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
@@ -2262,7 +2535,7 @@ class InvokeActionTest(ScenarioTest):
             'pass': self.create_random_name('Longpassword#1', 30)
         })
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
         self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')

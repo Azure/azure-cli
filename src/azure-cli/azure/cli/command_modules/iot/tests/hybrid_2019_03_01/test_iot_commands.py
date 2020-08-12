@@ -14,10 +14,10 @@ class IoTHubTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
-        hub = 'iot-hub-for-test-12'
+        hub = 'iot-hub-for-test-20190301'
         rg = resource_group
         location = resource_group_location
-        containerName = 'iothubcontainer2'
+        containerName = 'iothubcontainer20190301'
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         ehConnectionString = self._get_eventhub_connectionstring(rg)
         subscription_id = self._get_current_subscription()
@@ -380,7 +380,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest2'
+        ehNamespace = 'ehNamespaceiothubfortest20190301'
         eventHub = 'eventHubiothubfortest'
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'

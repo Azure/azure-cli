@@ -9,15 +9,18 @@
 import unittest
 import os
 
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, record_only)
+    ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 
 
 class WebAppUpE2ETests(ScenarioTest):
     @live_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_node_e2e(self, resource_group):
         plan = self.create_random_name('up-nodeplan', 24)
         webapp_name = self.create_random_name('up-nodeapp', 24)
@@ -84,7 +87,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_python_e2e(self, resource_group):
         plan = self.create_random_name('up-pythonplan', 24)
         webapp_name = self.create_random_name('up-pythonapp', 24)
@@ -152,7 +155,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_up_dotnetcore_e2e(self, resource_group):
         plan = self.create_random_name('up-dotnetcoreplan', 24)
         webapp_name = self.create_random_name('up-dotnetcoreapp', 24)
@@ -177,7 +180,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertTrue(result['runtime_version'] == 'dotnetcore|2.2')
+        self.assertTrue(result['runtime_version'] == 'dotnetcore|3.1')
         self.assertTrue(result['os'].lower() == 'windows')
         self.assertNotEqual(result['location'], 'None')
 
@@ -222,7 +225,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_up_statichtml_e2e(self, resource_group):
         plan = self.create_random_name('up-statichtmlplan', 24)
         webapp_name = self.create_random_name('up-statichtmlapp', 24)
@@ -290,7 +293,7 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_invalid_name(self, resource_group):
         webapp_name = self.create_random_name('invalid_name', 40)
         zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
@@ -320,8 +323,54 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
-    @record_only()
-    @ResourceGroupPreparer()
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_webapp_up_different_skus(self, resource_group):
+        webapp_name = self.create_random_name('up-different-skus', 40)
+        webapp_name_2 = self.create_random_name('up-different-skus-2', 40)
+        webapp_name_3 = self.create_random_name('up-different-skus-3', 40)
+        plan = self.create_random_name('up-different-skus-plan', 40)
+        plan_2 = self.create_random_name('up-different-skus-plan-2', 40)
+
+        zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'python-docs-hello-world')
+        os.chdir(up_working_dir)
+
+        result = self.cmd(
+            'webapp up -n {} --sku S1 -g {} --plan {}'.format(webapp_name, resource_group, plan)).get_output_in_json()
+        self.assertTrue(result['name'] == webapp_name)
+        self.assertTrue(result['sku'].lower() == 'standard')
+
+        # Creating an app with new ASP with free sku should work
+        result = self.cmd(
+            'webapp up -n {} --sku F1 -g {} --plan {}'.format(webapp_name_2, resource_group, plan_2)).get_output_in_json()
+        self.assertTrue(result['name'] == webapp_name_2)
+        self.assertTrue(result['sku'].lower() == 'free')
+
+        # Creating an app with existing ASP that isn't free should not work
+        from azure.cli.core.util import CLIError
+        with self.assertRaises(CLIError):
+            self.cmd('webapp up -n {} --sku F1 -g {} --plan {}'.format(webapp_name_3, resource_group, plan))
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_name_exists_not_in_subscription(self, resource_group):
         # Make sure webapp_name is the name of an existing web app and is not in your subscription
         webapp_name = 'helloworld'
@@ -353,7 +402,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_name_exists_in_subscription(self, resource_group):
         plan = self.create_random_name('up-name-exists-plan', 40)
         webapp_name = self.create_random_name('up-name-exists-app', 40)

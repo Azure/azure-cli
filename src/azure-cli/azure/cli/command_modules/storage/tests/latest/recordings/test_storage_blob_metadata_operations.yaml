@@ -32,7 +32,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 11 Jun 2020 09:20:34 GMT
+      - Thu, 18 Jun 2020 03:58:18 GMT
       expires:
       - '-1'
       pragma:
@@ -48,7 +48,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11991'
     status:
       code: 200
       message: OK
@@ -62,7 +62,7 @@ interactions:
       User-Agent:
       - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Thu, 11 Jun 2020 09:20:35 GMT
+      - Thu, 18 Jun 2020 03:58:19 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -74,11 +74,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 11 Jun 2020 09:20:38 GMT
+      - Thu, 18 Jun 2020 03:58:19 GMT
       etag:
-      - '"0x8D80DE8B479A8D9"'
+      - '"0x8D8133BD6EBAA96"'
       last-modified:
-      - Thu, 11 Jun 2020 09:20:38 GMT
+      - Thu, 18 Jun 2020 03:58:20 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -303,8 +303,10 @@ interactions:
       \\\r\n            .assert_with_checks(JMESPathCheck('properties.lease.duration',
       None),\r\n                                JMESPathCheck('properties.lease.state',
       'available'),\r\n                                JMESPathCheck('properties.lease.status',
-      'unlocked'))\r\n\r\n        self.assertIn('sig=', self.storage_cmd('storage
-      container generate-sas -n {}', account_info,\r\n                                               c).output)\r\n\r\n
+      'unlocked'))\r\n\r\n        from datetime import datetime, timedelta\r\n        expiry
+      = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')\r\n        self.assertIn('sig=',
+      self.storage_cmd('storage container generate-sas -n {} --permissions r --expiry
+      {}',\r\n                                               account_info, c, expiry).output)\r\n\r\n
       \       # verify delete operation\r\n        self.storage_cmd('storage container
       delete --name {} --fail-not-exist', account_info, c) \\\r\n            .assert_with_checks(JMESPathCheck('deleted',
       True))\r\n        self.storage_cmd('storage container exists -n {}', account_info,
@@ -429,7 +431,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '29053'
+      - '29226'
       User-Agent:
       - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.7.0
       x-ms-blob-content-type:
@@ -437,7 +439,7 @@ interactions:
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Thu, 11 Jun 2020 09:20:38 GMT
+      - Thu, 18 Jun 2020 03:58:20 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -449,13 +451,13 @@ interactions:
       content-length:
       - '0'
       content-md5:
-      - 0H2gVt8qq8/A3wia8EarCA==
+      - wTffUXKIVAJLJD2o29yzHA==
       date:
-      - Thu, 11 Jun 2020 09:20:40 GMT
+      - Thu, 18 Jun 2020 03:58:21 GMT
       etag:
-      - '"0x8D80DE8B5811313"'
+      - '"0x8D8133BD7DADDDC"'
       last-modified:
-      - Thu, 11 Jun 2020 09:20:40 GMT
+      - Thu, 18 Jun 2020 03:58:21 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -475,7 +477,7 @@ interactions:
       User-Agent:
       - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Thu, 11 Jun 2020 09:20:40 GMT
+      - Thu, 18 Jun 2020 03:58:22 GMT
       x-ms-meta-a:
       - b
       x-ms-meta-c:
@@ -491,11 +493,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 11 Jun 2020 09:20:41 GMT
+      - Thu, 18 Jun 2020 03:58:22 GMT
       etag:
-      - '"0x8D80DE8B63BAB57"'
+      - '"0x8D8133BD89686AC"'
       last-modified:
-      - Thu, 11 Jun 2020 09:20:41 GMT
+      - Thu, 18 Jun 2020 03:58:23 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -513,7 +515,7 @@ interactions:
       User-Agent:
       - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Thu, 11 Jun 2020 09:20:41 GMT
+      - Thu, 18 Jun 2020 03:58:23 GMT
       x-ms-version:
       - '2018-11-09'
     method: GET
@@ -525,11 +527,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 11 Jun 2020 09:20:42 GMT
+      - Thu, 18 Jun 2020 03:58:24 GMT
       etag:
-      - '"0x8D80DE8B63BAB57"'
+      - '"0x8D8133BD89686AC"'
       last-modified:
-      - Thu, 11 Jun 2020 09:20:41 GMT
+      - Thu, 18 Jun 2020 03:58:23 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-meta-a:
@@ -551,7 +553,7 @@ interactions:
       User-Agent:
       - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Thu, 11 Jun 2020 09:20:42 GMT
+      - Thu, 18 Jun 2020 03:58:24 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -563,11 +565,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 11 Jun 2020 09:20:43 GMT
+      - Thu, 18 Jun 2020 03:58:25 GMT
       etag:
-      - '"0x8D80DE8B7DA8B7F"'
+      - '"0x8D8133BDA524037"'
       last-modified:
-      - Thu, 11 Jun 2020 09:20:44 GMT
+      - Thu, 18 Jun 2020 03:58:25 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -585,7 +587,7 @@ interactions:
       User-Agent:
       - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.7; Windows 10) AZURECLI/2.7.0
       x-ms-date:
-      - Thu, 11 Jun 2020 09:20:44 GMT
+      - Thu, 18 Jun 2020 03:58:26 GMT
       x-ms-version:
       - '2018-11-09'
     method: GET
@@ -597,11 +599,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 11 Jun 2020 09:20:45 GMT
+      - Thu, 18 Jun 2020 03:58:26 GMT
       etag:
-      - '"0x8D80DE8B7DA8B7F"'
+      - '"0x8D8133BDA524037"'
       last-modified:
-      - Thu, 11 Jun 2020 09:20:44 GMT
+      - Thu, 18 Jun 2020 03:58:25 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:

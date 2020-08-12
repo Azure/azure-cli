@@ -13,6 +13,10 @@ from .exceptions import CliTestError
 from .reverse_dependency import get_dummy_cli
 from .utilities import StorageAccountKeyReplacer, GraphClientPasswordReplacer
 
+KEY_RESOURCE_GROUP = 'rg'
+KEY_VIRTUAL_NETWORK = 'vnet'
+KEY_VNET_NIC = 'nic'
+
 
 # This preparer's traffic is not recorded.
 # As a result when tests are run in record mode, sdk calls cannot be made to return the prepared resource group.
@@ -258,6 +262,112 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_app_name:
             self.execute(self.cli_ctx, 'az ad app delete --id {}'.format(self.result['appId']))
+
+
+# pylint: disable=too-many-instance-attributes
+class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest.vn',
+                 parameter_name='virtual_network',
+                 resource_group_parameter_name=None,
+                 resource_group_key=KEY_RESOURCE_GROUP,
+                 dev_setting_name='AZURE_CLI_TEST_DEV_VIRTUAL_NETWORK_NAME',
+                 random_name_length=24, key=KEY_VIRTUAL_NETWORK):
+        if ' ' in name_prefix:
+            raise CliTestError(
+                'Error: Space character in name prefix \'%s\'' % name_prefix)
+        super(VirtualNetworkPreparer, self).__init__(
+            name_prefix, random_name_length)
+        self.cli_ctx = get_dummy_cli()
+        self.parameter_name = parameter_name
+        self.key = key
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.resource_group_key = resource_group_key
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+
+    def create_resource(self, name, **kwargs):
+        if self.dev_setting_name:
+            self.test_class_instance.kwargs[self.key] = name
+            return {self.parameter_name: self.dev_setting_name, }
+
+        tags = {'product': 'azurecli', 'cause': 'automation',
+                'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+        if 'ENV_JOB_NAME' in os.environ:
+            tags['job'] = os.environ['ENV_JOB_NAME']
+        tags = ' '.join(['{}={}'.format(key, value)
+                         for key, value in tags.items()])
+        template = 'az network vnet create --resource-group {} --name {} --subnet-name default --tag ' + tags
+        self.live_only_execute(self.cli_ctx, template.format(self._get_resource_group(**kwargs), name))
+
+        self.test_class_instance.kwargs[self.key] = name
+        return {self.parameter_name: name}
+
+    def remove_resource(self, name, **kwargs):
+        if not self.dev_setting_name:
+            self.live_only_execute(
+                self.cli_ctx,
+                'az network vnet delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create a VirtualNetwork a resource group is required. Please add ' \
+                       'decorator @{} in front of this VirtualNetwork preparer.'
+            raise CliTestError(template.format(VirtualNetworkPreparer.__name__))
+
+
+# pylint: disable=too-many-instance-attributes
+class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+    def __init__(self, name_prefix='clitest.nic',
+                 parameter_name='subnet',
+                 resource_group_parameter_name=KEY_RESOURCE_GROUP,
+                 vnet_parameter_name=KEY_VIRTUAL_NETWORK,
+                 dev_setting_name='AZURE_CLI_TEST_DEV_VNET_NIC_NAME',
+                 key=KEY_VNET_NIC):
+        if ' ' in name_prefix:
+            raise CliTestError(
+                'Error: Space character in name prefix \'%s\'' % name_prefix)
+        super(VnetNicPreparer, self).__init__(name_prefix, 15)
+        self.cli_ctx = get_dummy_cli()
+        self.parameter_name = parameter_name
+        self.key = key
+        self.resource_group_parameter_name = resource_group_parameter_name
+        self.vnet_parameter_name = vnet_parameter_name
+        self.dev_setting_name = os.environ.get(dev_setting_name, None)
+
+    def create_resource(self, name, **kwargs):
+        if self.dev_setting_name:
+            self.test_class_instance.kwargs[self.key] = name
+            return {self.parameter_name: self.dev_setting_name, }
+
+        template = 'az network nic create --resource-group {} --name {} --vnet-name {} --subnet default '
+        self.live_only_execute(self.cli_ctx, template.format(
+            self._get_resource_group(**kwargs), name, self._get_virtual_network(**kwargs)))
+
+        self.test_class_instance.kwargs[self.key] = name
+        return {self.parameter_name: name}
+
+    def remove_resource(self, name, **kwargs):
+        if not self.dev_setting_name:
+            self.live_only_execute(
+                self.cli_ctx,
+                'az network nic delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
+
+    def _get_resource_group(self, **kwargs):
+        try:
+            return kwargs.get(self.resource_group_parameter_name)
+        except KeyError:
+            template = 'To create a VirtualNetworkNic a resource group is required. Please add ' \
+                       'decorator @{} in front of this VirtualNetworkNic preparer.'
+            raise CliTestError(template.format(VnetNicPreparer.__name__))
+
+    def _get_virtual_network(self, **kwargs):
+        try:
+            return kwargs.get(self.vnet_parameter_name)
+        except KeyError:
+            template = 'To create a VirtualNetworkNic a virtual network is required. Please add ' \
+                       'decorator @{} in front of this VirtualNetworkNic preparer.'
+            raise CliTestError(template.format(VnetNicPreparer.__name__))
 
 # Utility
 

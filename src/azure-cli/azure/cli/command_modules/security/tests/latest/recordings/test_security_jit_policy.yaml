@@ -2,29 +2,51 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [security jit-policy list]
-      Connection: [keep-alive]
-      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
-          azure-mgmt-security/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.54]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security jit-policy list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-security/0.4.1 Azure-SDK-For-Python
+        AZURECLI/2.9.1
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/jitNetworkAccessPolicies?api-version=2015-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/jitNetworkAccessPolicies?api-version=2020-01-01
   response:
-    body: {string: '{"value":[{"kind":"Basic","properties":{"virtualMachines":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myService1/providers/Microsoft.Compute/virtualMachines/testService","ports":[{"number":22,"protocol":"TCP","allowedSourceAddressPrefix":"127.0.0.1","maxRequestAccessDuration":"PT3H"}]}],"requests":[],"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myService1/providers/Microsoft.Security/locations/centralus/jitNetworkAccessPolicies/default","name":"default","type":"Microsoft.Security/locations/jitNetworkAccessPolicies","location":"centralus"},{"kind":"Basic","properties":{"virtualMachines":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myService1/providers/Microsoft.Compute/virtualMachines/testService","ports":[{"number":22,"protocol":"*","allowedSourceAddressPrefix":"*","maxRequestAccessDuration":"PT3H"},{"number":3389,"protocol":"*","allowedSourceAddressPrefix":"*","maxRequestAccessDuration":"PT3H"},{"number":5985,"protocol":"*","allowedSourceAddressPrefix":"*","maxRequestAccessDuration":"PT3H"},{"number":5986,"protocol":"*","allowedSourceAddressPrefix":"*","maxRequestAccessDuration":"PT3H"}]}],"requests":[],"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myService1/providers/Microsoft.Security/locations/northeurope/jitNetworkAccessPolicies/default","name":"default","type":"Microsoft.Security/locations/jitNetworkAccessPolicies","location":"northeurope"}]}'}
+    body:
+      string: '{"value":[{"kind":"Basic","properties":{"virtualMachines":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest3/providers/Microsoft.Compute/virtualMachines/vm1","ports":[{"number":22,"protocol":"*","allowedSourceAddressPrefix":"*","maxRequestAccessDuration":"PT3H"}]}],"requests":[],"provisioningState":"Succeeded","appendMode":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest3/providers/Microsoft.Security/locations/westus/jitNetworkAccessPolicies/default","name":"default","type":"Microsoft.Security/locations/jitNetworkAccessPolicies","location":"westus"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1553']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 26 Dec 2018 23:49:47 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-original-request-ids: [dcd9587c-7cf3-4912-b571-3bf72ea325b2, c9ed9ed4-11cb-4743-8cf4-84b456cebeee,
-        16afbb8a-7262-483d-bb4f-55ddc392dc80]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['749']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '627'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 12:24:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - ''
+      - ''
+      - ''
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
 version: 1

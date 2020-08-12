@@ -116,7 +116,7 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
                 tar.addfile(docker_file_tarinfo, f)
 
 
-class IgnoreRule(object):  # pylint: disable=too-few-public-methods
+class IgnoreRule:  # pylint: disable=too-few-public-methods
     def __init__(self, rule):
 
         self.rule = rule

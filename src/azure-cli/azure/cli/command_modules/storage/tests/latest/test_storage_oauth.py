@@ -4,13 +4,12 @@
 # --------------------------------------------------------------------------------------------
 import os
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint, record_only)
+                               StorageAccountPreparer, api_version_constraint)
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
-@record_only()
 @api_version_constraint(ResourceType.DATA_STORAGE, min_api='2017-11-09')
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
     def oauth_cmd(self, cmd, *args, **kwargs):

@@ -191,7 +191,7 @@ class AzCliLogging(CLILogging):
             self.command_metadata_logger = None
 
 
-class CommandLoggerContext(object):
+class CommandLoggerContext:
     def __init__(self, module_logger):
         self.logger = module_logger
         self.hdlr = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)  # pylint: disable=protected-access
