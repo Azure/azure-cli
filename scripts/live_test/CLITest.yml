@@ -22,195 +22,133 @@ jobs:
   strategy:
     maxParallel: 20
     matrix:
-    
       aro:
         Target: aro
-    
       dla:
         Target: dla
-    
       policyinsights:
         Target: policyinsights
-    
       keyvault:
         Target: keyvault
-    
       appservice:
         Target: appservice
-    
       dls:
         Target: dls
-    
       cosmosdb:
         Target: cosmosdb
-    
       batchai:
         Target: batchai
-    
       apim:
         Target: apim
-    
       natgateway:
         Target: natgateway
-    
       maps:
         Target: maps
-    
       cognitiveservices:
         Target: cognitiveservices
-    
       privatedns:
         Target: privatedns
-    
       advisor:
         Target: advisor
-    
       eventhubs:
         Target: eventhubs
-    
       relay:
         Target: relay
-    
       ams:
         Target: ams
-    
       configure:
         Target: configure
-    
       iot:
         Target: iot
-    
       redis:
         Target: redis
-    
       # interactive:
       #   Target: interactive
-    
       search:
         Target: search
-    
       cloud:
         Target: cloud
-    
       reservations:
         Target: reservations
-    
       backup:
         Target: backup
-    
       rdbms:
         Target: rdbms
-    
       appconfig:
         Target: appconfig
-    
       resource:
         Target: resource
-    
       billing:
         Target: billing
-    
       acs:
         Target: acs
-    
       signalr:
         Target: signalr
-    
       profile:
         Target: profile
-    
       storage:
         Target: storage
-    
       deploymentmanager:
         Target: deploymentmanager
-    
       lab:
         Target: lab
-    
       vm:
         Target: vm
-    
       util:
         Target: util
-    
       consumption:
         Target: consumption
-    
       netappfiles:
         Target: netappfiles
-    
       network:
         Target: network
-    
       iotcentral:
         Target: iotcentral
-    
       managedservices:
         Target: managedservices
-    
       acr:
         Target: acr
-    
       kusto:
         Target: kusto
-    
       servicefabric:
         Target: servicefabric
-    
       find:
         Target: find
-    
       dms:
         Target: dms
-    
       sqlvm:
         Target: sqlvm
-    
       cdn:
         Target: cdn
-    
       botservice:
         Target: botservice
-    
       container:
         Target: container
-    
       monitor:
         Target: monitor
-    
       batch:
         Target: batch
-    
       security:
         Target: security
-    
       feedback:
         Target: feedback
-    
       sql:
         Target: sql
-    
       servicebus:
         Target: servicebus
-    
       hdinsight:
         Target: hdinsight
-    
       role:
         Target: role
-    
       extension:
         Target: extension
-    
       eventgrid:
         Target: eventgrid
-    
   pool:
-    vmImage: 'Ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   steps:
     - task: UsePythonVersion@0
-      condition: succeededOrFailed()
+      condition: or(containsValue(variables['USER_TARGET'], '${{ Target }}'), eq(variables['USER_TARGET'], ''))
       inputs:
         versionSpec: '3.8'
         addToPath: true
@@ -247,32 +185,32 @@ jobs:
         pwd
         ls
     - task: PublishTestResults@2
-      condition: succeededOrFailed()
+      # condition: succeededOrFailed()
       inputs:
         testResultsFiles: '/home/vsts/work/1/test_results.*.xml'
         testRunTitle: 'Azure CLI live test results of $(Target)'
         mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
-      condition: succeededOrFailed()
+      # condition: succeededOrFailed()
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
         ArtifactName: '$(Target).report.sequential.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: succeededOrFailed()
+      # condition: succeededOrFailed()
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
         ArtifactName: '$(Target).report.sequential.html'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: succeededOrFailed()
+      # condition: succeededOrFailed()
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
         ArtifactName: '$(Target).report.parallel.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: succeededOrFailed()
+      # condition: succeededOrFailed()
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
         ArtifactName: '$(Target).report.parallel.html'
