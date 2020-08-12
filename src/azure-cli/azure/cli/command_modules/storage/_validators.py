@@ -168,6 +168,11 @@ def validate_client_parameters(cmd, namespace):
     if n.sas_token:
         n.sas_token = n.sas_token.lstrip('?')
 
+    # account name with secondary
+    if n.account_name and n.account_name.endswith('-secondary'):
+        n.location_mode = 'secondary'
+        n.account_name = n.account_name[:-10]
+
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
         logger.warning('There is no credential provided in your command and environment, we will query account key '

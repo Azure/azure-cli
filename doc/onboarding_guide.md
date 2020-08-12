@@ -14,7 +14,7 @@ One of the key decisions you will need to make is whether to create your command
 | Release separate from the CLI release schedule | Requires dedicated installation (az extension add …) |
 | Higher velocity fixes possible                 | Can be broken by changes to the azure-cli-core       |
 | Experimental UX is permissible                 |                                                      |
-| Leverage CLI code generator to genreate code   |                                                      |
+| Leverage CLI code generator to generate code   |                                                      |
 
 #### CLI Modules
 

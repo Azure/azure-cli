@@ -1014,3 +1014,25 @@ def get_linux_distro():
             release_info[k.lower()] = v.strip('"')
 
     return release_info.get('name', None), release_info.get('version_id', None)
+
+
+def roughly_parse_command(args):
+    # Roughly parse the command part: <az vm create> --name vm1
+    # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but we don't need to bother with
+    # positional args
+    nouns = []
+    for arg in args:
+        if arg and arg[0] != '-':
+            nouns.append(arg)
+        else:
+            break
+    return ' '.join(nouns).lower()
+
+
+def is_guid(guid):
+    import uuid
+    try:
+        uuid.UUID(guid)
+        return True
+    except ValueError:
+        return False

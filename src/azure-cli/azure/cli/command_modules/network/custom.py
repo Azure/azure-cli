@@ -1441,7 +1441,9 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 
 # region ApplicationGatewayWAFPolicy
-def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location=None, tags=None):
+def create_ag_waf_policy(cmd, client, resource_group_name, policy_name,
+                         location=None, tags=None, rule_set_type='OWASP',
+                         rule_set_version='3.0'):
     WebApplicationFirewallPolicy, ManagedRulesDefinition, \
         ManagedRuleSet = cmd.get_models('WebApplicationFirewallPolicy',
                                         'ManagedRulesDefinition',
@@ -1449,7 +1451,7 @@ def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location
     #  https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
 
     # mandatory default rule with empty rule sets
-    managed_rule_set = ManagedRuleSet(rule_set_type='OWASP', rule_set_version='3.0')
+    managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type, rule_set_version=rule_set_version)
     managed_rule_definition = ManagedRulesDefinition(managed_rule_sets=[managed_rule_set])
     waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags, managed_rules=managed_rule_definition)
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
@@ -3800,7 +3802,7 @@ def remove_nic_ip_config_inbound_nat_rule(
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     keep_items = \
-        [x for x in ip_config.load_balancer_inbound_nat_rules if x.id != inbound_nat_rule]
+        [x for x in ip_config.load_balancer_inbound_nat_rules or [] if x.id != inbound_nat_rule]
     ip_config.load_balancer_inbound_nat_rules = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return get_property(poller.result().ip_configurations, ip_config_name)
