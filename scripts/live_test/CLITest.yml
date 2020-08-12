@@ -185,32 +185,32 @@ jobs:
         ls
       condition: or(containsValue(variables['USER_TARGET'], variables['Target']), eq(variables['USER_TARGET'], ''))
     - task: PublishTestResults@2
-      # condition: succeededOrFailed()
+      condition: or(containsValue(variables['USER_TARGET'], variables['Target']), eq(variables['USER_TARGET'], ''))
       inputs:
         testResultsFiles: '/home/vsts/work/1/test_results.*.xml'
         testRunTitle: 'Azure CLI live test results of $(Target)'
         mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
-      # condition: succeededOrFailed()
+      condition: or(containsValue(variables['USER_TARGET'], variables['Target']), eq(variables['USER_TARGET'], ''))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
         ArtifactName: '$(Target).report.sequential.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      # condition: succeededOrFailed()
+      condition: or(containsValue(variables['USER_TARGET'], variables['Target']), eq(variables['USER_TARGET'], ''))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
         ArtifactName: '$(Target).report.sequential.html'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      # condition: succeededOrFailed()
+      condition: or(containsValue(variables['USER_TARGET'], variables['Target']), eq(variables['USER_TARGET'], ''))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
         ArtifactName: '$(Target).report.parallel.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      # condition: succeededOrFailed()
+      condition: or(containsValue(variables['USER_TARGET'], variables['Target']), eq(variables['USER_TARGET'], ''))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
         ArtifactName: '$(Target).report.parallel.html'
