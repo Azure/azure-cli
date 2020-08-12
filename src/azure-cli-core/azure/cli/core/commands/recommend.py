@@ -35,21 +35,22 @@ def register_global_query_recommend(cli_ctx):
             cli_ctx.invocation.data['query_active'] = True
 
     def register_query_recommend(cli, **kwargs):
-        from knack.preview import PreviewItem
+        from knack.experimental import ExperimentalItem
         commands_loader = kwargs.get('commands_loader')
         cmd_tbl = commands_loader.command_table
-        preview_info = PreviewItem(cli.local_context.cli_ctx,
-                                   object_type='parameter', target='_query_recommend')
+        experimental_info = ExperimentalItem(cli.local_context.cli_ctx,
+                                             object_type='parameter', target='_query_recommend')
         default_kwargs = {
             'help': 'Recommend JMESPath string for you. You can copy one of the query '
                     'and paste it after --query parameter to see the results.',
             'arg_group': 'Global',
-            'is_preview': True,
+            'is_experimental': True,
             'nargs': '*',
-            'preview_info': preview_info
+            'experimental_info': experimental_info
         }
         for _, cmd in cmd_tbl.items():
-            cmd.add_argument('_query_recommend', *['--query-recommend'], **default_kwargs)
+            cmd.add_argument('_query_recommend', *
+                             ['--query-recommend'], **default_kwargs)
 
     cli_ctx.register_event(
         EVENT_INVOKER_PRE_LOAD_ARGUMENTS, register_query_recommend
@@ -61,7 +62,7 @@ def register_global_query_recommend(cli_ctx):
 
 
 class Recommendation:
-    def __init__(self, query_str, help_str="", group_name="default", max_length=40):
+    def __init__(self, query_str, help_str="", group_name="default", max_length=80):
         self._query_str = query_str
         self._help_str = help_str
         self._group = group_name
@@ -73,7 +74,7 @@ class Recommendation:
             query_str = query_str[:self._max_length] + '...'
         help_str = self._help_str
         if len(help_str) > 2 * self._max_length:
-            help_str = help_str[: 2 * self._max_length] + '...'
+            help_str = help_str[: 1 * self._max_length] + '...'
         return {"query string": query_str, "help": help_str}
 
     def __str__(self):
@@ -91,28 +92,40 @@ class TreeNode:
         self._from_list = False
         self._list_length = 5  # valid only when from_list is true
 
-    def _get_data(self, key):
-        '''Return all key values with given key'''
+    def update_node_data(self, data, from_list):
+        self._keys = list(data[0].keys())
+        self._data = data
+        self._from_list = from_list
+        for item in self._data:
+            if isinstance(item, dict):
+                for key, value in item.items():
+                    if isinstance(value, list):
+                        self._list_keys.add(key)
+
+    def get_values(self, key):
+        '''Get all values with given key'''
         values = []
         if isinstance(self._data, list):
             for item in self._data:
                 if item.get(key, None) is not None:
                     if isinstance(item[key], list):
                         values.extend(item[key])
-                        self._list_keys.add(key)
                     else:
                         values.append(item[key])
         else:
             values.append(self._data[key])
         return values
 
+    def from_list(self):
+        return self._from_list
+
     def get_one_value(self, key):
-        '''Return only one value'''
-        values = self._get_data(key)
-        if len(values) > 0:
-            return values[0]
-        else:
-            return None
+        '''Return only one value, return None only if all values are None'''
+        values = self.get_values(key)
+        for item in values:
+            if item is not None:
+                return item
+        return None
 
     def is_list(self, key):
         '''Determine whether the key refer to a list'''
@@ -268,33 +281,15 @@ class TreeBuilder:
         recommendations = []
         # only perform select on root node
         recommendations.extend(self._root.get_select_string(keywords_list))
-        if self._root._from_list:
-            recommendations.extend(self._root.select_specific_number_string(keywords_list))
+        if self._root.from_list():
+            recommendations.extend(
+                self._root.select_specific_number_string(keywords_list))
             recommendations.extend(
                 self._root.get_condition_recommend(keywords_list))
-            recommendations.extend(self._root.get_function_recommend(keywords_list))
+            recommendations.extend(
+                self._root.get_function_recommend(keywords_list))
         recommendations.sort(key=lambda x: x._group)
         return todict(recommendations)
-
-    def _get_from_list(self, data):
-        '''Try to get not None item from input list
-
-        :param list data:
-            input list
-
-        :return:
-            An item from in this list. Return None if all items are None
-        '''
-        ret = None
-        for item in data:
-            if hasattr(item, '__len__'):
-                if item:
-                    ret = item
-                    break
-            elif item is not None:
-                ret = item
-                break
-        return ret
 
     def _do_parse(self, name, data, from_list=False):
         '''do parse for a single node
@@ -307,15 +302,12 @@ class TreeBuilder:
             a list node or a dict node
         '''
         node = TreeNode(name)
-        node._keys = list(data[0].keys())
-        node._data = data
-        node._from_list = from_list
+        node.update_node_data(data, from_list)
         for key in data[0].keys():
             child_node = None
-            child_node_data = node._get_data(key)
-            child_item = self._get_from_list(child_node_data)
+            child_node_data = node.get_values(key)
+            child_item = node.get_one_value(key)
             if child_item is None:
-                node._keys.remove(key)  # remove key which has only null value
                 continue
             if node.is_list(key):
                 if isinstance(child_item, dict):
@@ -329,14 +321,3 @@ class TreeBuilder:
 
         self._all_nodes[name] = node
         return node
-
-
-def handle_escape_char(raw_str):
-    def escape_char(raw_str, ch):
-        return raw_str.replace(ch, '\\{}'.format(ch))
-    # handle quotes
-    ret = escape_char(raw_str, '"')
-    # handle brackets
-    ret = escape_char(ret, '[')
-    ret = escape_char(ret, ']')
-    return ret
