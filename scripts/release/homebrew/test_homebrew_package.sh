@@ -12,6 +12,7 @@ brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.r
 
 AZ_BASE=/usr/local/Cellar/azure-cli/$CLI_VERSION/libexec
 export PATH=$AZ_BASE/bin:$PATH
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 echo $PATH
 pip install wheel
 ./scripts/ci/build.sh
