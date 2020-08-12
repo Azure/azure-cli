@@ -64,14 +64,9 @@ def get_access_token(cmd, subscription=None, resource=None, scopes=None, resourc
     get AAD token to access to a specified resource.
     Use 'az cloud show' command for other Azure resources
     """
-    if resource is None and resource_type is not None:
+    if resource is None and resource_type:
         endpoints_attr_name = cloud_resource_type_mappings[resource_type]
         resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
-
-    if resource and scopes:
-        raise CLIError("resource and scopes can't be provided at the same time.")
-
-    resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,

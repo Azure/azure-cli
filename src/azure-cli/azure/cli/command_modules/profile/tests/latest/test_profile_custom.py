@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.command_modules.profile.custom import list_subscriptions, get_access_token, login
 from azure.cli.core.mock import DummyCli
@@ -42,7 +42,7 @@ class ProfileCommandTest(unittest.TestCase):
         result = get_access_token(cmd)
 
         # assert
-        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, None)
+        get_raw_token_mock.assert_called_with(mock.ANY, None, None, None, None)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
@@ -58,7 +58,7 @@ class ProfileCommandTest(unittest.TestCase):
         get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], subscription_id,
                                            'tenant123')
         result = get_access_token(cmd, subscription=subscription_id, resource=resource)
-        get_raw_token_mock.assert_called_with(mock.ANY, resource, subscription_id, None)
+        get_raw_token_mock.assert_called_with(mock.ANY, resource, None, subscription_id, None)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
@@ -72,7 +72,7 @@ class ProfileCommandTest(unittest.TestCase):
         tenant_id = '00000000-0000-0000-0000-000000000000'
         get_raw_token_mock.return_value = (['bearer', 'token123', {'expiresOn': '2100-01-01'}], None, tenant_id)
         result = get_access_token(cmd, tenant=tenant_id)
-        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, tenant_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, None, None, None, tenant_id)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
@@ -81,10 +81,12 @@ class ProfileCommandTest(unittest.TestCase):
         }
         self.assertEqual(result, expected_result)
 
-        # test get token with Managed Identity
+        # test get token with Managed Identity.
+        # This test can only pass on a system that uses UTC as the time zone. Change your system's time zone
+        #   before running this test.
         get_raw_token_mock.return_value = (['bearer', 'token123', {'expires_on': '1593497681'}], None, tenant_id)
         result = get_access_token(cmd, tenant=tenant_id)
-        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, tenant_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, None, None, None, tenant_id)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
@@ -92,6 +94,10 @@ class ProfileCommandTest(unittest.TestCase):
             'tenant': tenant_id
         }
         self.assertEqual(result, expected_result)
+
+        get_access_token(cmd, scopes='https://graph.microsoft.com/.default')
+        get_raw_token_mock.assert_called_with(mock.ANY, None, scopes='https://graph.microsoft.com/.default',
+                                              subscription=None, tenant=None)
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
     def test_get_login(self, profile_mock):
