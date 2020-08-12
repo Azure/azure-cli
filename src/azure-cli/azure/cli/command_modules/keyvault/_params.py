@@ -80,17 +80,13 @@ def load_arguments(self, _):
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag())
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag())
         c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(),
-                   deprecate_info=Deprecated(
-                       cli_ctx=c.command_loader.cli_ctx,
-                       object_type='option',
-                       message_func=lambda x:
-                       'Warning! The ability to create new key vaults with soft delete disabled '
-                       'will be deprecated by December 2020. All key vaults will be required to '
-                       'have soft delete enabled. Please see the following documentation for '
-                       'additional guidance. \n'
-                       'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'
-                   ))
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=Deprecated(
+            cli_ctx=c.command_loader.cli_ctx,
+            object_type='option',
+            message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
+                                   'deprecated by December 2020. All key vaults will be required to have soft delete '
+                                   'enabled. Please see the following documentation for additional guidance.\n'
+                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'))
         c.argument('enable_purge_protection', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
@@ -114,17 +110,13 @@ def load_arguments(self, _):
                                                          'Vnet/subnet pairs or subnet resource ids.')
 
     with self.argument_context('keyvault update') as c:
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(),
-                   deprecate_info=Deprecated(
-                       cli_ctx=c.command_loader.cli_ctx,
-                       object_type='option',
-                       message_func=lambda x:
-                       'Warning! The ability to create new key vaults with soft delete disabled '
-                       'will be deprecated by December 2020. All key vaults will be required to '
-                       'have soft delete enabled. Please see the following documentation for '
-                       'additional guidance. \n'
-                       'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'
-                   ))
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=Deprecated(
+            cli_ctx=c.command_loader.cli_ctx,
+            object_type='option',
+            message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
+                                   'deprecated by December 2020. All key vaults will be required to have soft delete '
+                                   'enabled. Please see the following documentation for additional guidance.\n'
+                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'))
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault recover') as c:
