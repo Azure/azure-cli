@@ -20,6 +20,7 @@ import ssl
 import sys
 import uuid
 from functools import reduce
+from http import HTTPStatus
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
@@ -35,6 +36,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
+from azure.mgmt.web.models import KeyInfo, DefaultErrorResponseException
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
@@ -72,7 +74,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
-                  using_webapp_up=False, language=None):
+                  using_webapp_up=False, language=None, assign_identities=None,
+                  role='Contributor', scope=None):
     SiteConfig, SkuDescription, Site, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'Site', 'NameValuePair')
     if deployment_source_url and deployment_local_git:
@@ -134,7 +137,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
-                               "Please invoke 'list-runtimes' to cross check".format(runtime))
+                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -162,7 +165,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                            "only appliable on linux webapp")
         match = helper.resolve(runtime)
         if not match:
-            raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+            raise CLIError("Runtime '{}' is not supported. Please invoke 'az webapp list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
 
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
@@ -201,6 +204,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
                                   deployment_container_image_name, docker_registry_server_user,
                                   docker_registry_server_password=docker_registry_server_password)
+
+    if assign_identities is not None:
+        identity = assign_identity(cmd, resource_group_name, name, assign_identities,
+                                   role, None, scope)
+        webapp.identity = identity
 
     return webapp
 
@@ -704,14 +712,55 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     return result
 
 
-def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def _build_identities_info(identities):
+    from ._appservice_utils import MSI_LOCAL_ID
+    identities = identities or []
+    identity_types = []
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_types.append('SystemAssigned')
+    external_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if external_identities:
+        identity_types.append('UserAssigned')
+    identity_types = ','.join(identity_types)
+    info = {'type': identity_types}
+    if external_identities:
+        info['userAssignedIdentities'] = {e: {} for e in external_identities}
+    return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
+
+
+def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
+    ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
+                                                                  'ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        if webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned and external_identities:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif webapp.identity and webapp.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities:
+            identity_types = ResourceIdentityType.user_assigned
+        else:
+            identity_types = ResourceIdentityType.system_assigned
+
+        if webapp.identity:
+            webapp.identity.type = identity_types
+        else:
+            webapp.identity = ManagedServiceIdentity(type=identity_types)
+        if external_identities:
+            if not webapp.identity.user_assigned_identities:
+                webapp.identity.user_assigned_identities = {}
+            for identity in external_identities:
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -724,14 +773,46 @@ def show_identity(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
 
 
-def remove_identity(cmd, resource_group_name, name, slot=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
+    IdentityType = cmd.get_models('ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
+    _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='None')
+        if webapp.identity is None:
+            return webapp
+        to_remove = []
+        existing_identities = {x.lower() for x in list((webapp.identity.user_assigned_identities or {}).keys())}
+        if external_identities:
+            to_remove = {x.lower() for x in external_identities}
+            non_existing = to_remove.difference(existing_identities)
+            if non_existing:
+                raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+            if not list(existing_identities - to_remove):
+                if webapp.identity.type == IdentityType.user_assigned:
+                    webapp.identity.type = IdentityType.none
+                elif webapp.identity.type == IdentityType.system_assigned_user_assigned:
+                    webapp.identity.type = IdentityType.system_assigned
+
+        webapp.identity.user_assigned_identities = None
+        if remove_local_identity:
+            webapp.identity.type = (IdentityType.none
+                                    if webapp.identity.type == IdentityType.system_assigned or
+                                    webapp.identity.type == IdentityType.none
+                                    else IdentityType.user_assigned)
+
+        if webapp.identity.type not in [IdentityType.none, IdentityType.system_assigned]:
+            webapp.identity.user_assigned_identities = {}
+        if to_remove:
+            for identity in list(existing_identities - to_remove):
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+        else:
+            for identity in list(existing_identities):
+                webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -768,6 +849,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
                          client_id=None, token_store_enabled=None, runtime_version=None,  # pylint: disable=unused-argument
                          token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
+                         client_secret_certificate_thumbprint=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
                          facebook_app_secret=None, facebook_oauth_scopes=None,  # pylint: disable=unused-argument
                          twitter_consumer_key=None, twitter_consumer_secret=None,  # pylint: disable=unused-argument
@@ -798,6 +880,12 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
             setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_auth_settings', slot, auth_settings)
+
+
+def list_instances(cmd, resource_group_name, name, slot=None):
+    # API Version 2019-08-01 (latest as of writing this code) does not return slot instances, however 2018-02-01 does
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot,
+                                   api_version="2018-02-01")
 
 
 # Currently using hardcoded values instead of this function. This function calls the stacks API;
@@ -958,6 +1046,8 @@ def _format_fx_version(custom_image_name, container_config_type=None):
 def _add_fx_version(cmd, resource_group_name, name, custom_image_name, slot=None):
     fx_version = _format_fx_version(custom_image_name)
     web_app = get_webapp(cmd, resource_group_name, name, slot)
+    if not web_app:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     linux_fx = fx_version if web_app.reserved else None
     windows_fx = fx_version if web_app.is_xenon else None
     return update_site_configs(cmd, resource_group_name, name,
@@ -1655,8 +1745,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
                            frequency=None, keep_at_least_one_backup=None,
                            retention_period_in_days=None, db_name=None,
                            db_connection_string=None, db_type=None, backup_name=None, slot=None):
-    DefaultErrorResponseException, BackupSchedule, BackupRequest = cmd.get_models(
-        'DefaultErrorResponseException', 'BackupSchedule', 'BackupRequest')
+    BackupSchedule, BackupRequest = cmd.get_models('BackupSchedule', 'BackupRequest')
     configuration = None
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
@@ -3479,7 +3568,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
         _is_linux = os_name.lower() == 'linux'
         _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
-        plan = get_plan_to_use(cmd, user, os_name, loc, sku, rg_name, _create_new_rg, plan)
+        plan = get_plan_to_use(cmd=cmd,
+                               user=user,
+                               os_name=os_name,
+                               loc=loc,
+                               sku=sku,
+                               create_rg=_create_new_rg,
+                               resource_group_name=rg_name,
+                               plan=plan)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",
@@ -3556,7 +3652,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     return create_json
 
 
-def _ping_scm_site(cmd, resource_group, name):
+def _ping_scm_site(cmd, resource_group, name, instance=None):
     from azure.cli.core.util import should_disable_connection_verify
     #  wake up kudu, by making an SCM call
     import requests
@@ -3565,14 +3661,18 @@ def _ping_scm_site(cmd, resource_group, name):
     scm_url = _get_scm_url(cmd, resource_group, name)
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
-    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify())
+    cookies = {}
+    if instance is not None:
+        cookies['ARRAffinity'] = instance
+    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify(),
+                 cookies=cookies)
 
 
 def is_webapp_up(tunnel_server):
     return tunnel_server.is_webapp_up()
 
 
-def get_tunnel(cmd, resource_group_name, name, port=None, slot=None):
+def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=None):
     webapp = show_webapp(cmd, resource_group_name, name, slot)
     is_linux = webapp.reserved
     if not is_linux:
@@ -3586,17 +3686,26 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None):
         port = 0  # Will auto-select a free port from 1024-65535
         logger.info('No port defined, creating on random free port')
 
+    # Validate that we have a known instance (case-sensitive)
+    if instance is not None:
+        instances = list_instances(cmd, resource_group_name, name, slot=slot)
+        instance_names = set(i.name for i in instances)
+        if instance not in instance_names:
+            if slot is not None:
+                raise CLIError("The provided instance '{}' is not valid for this webapp and slot.".format(instance))
+            raise CLIError("The provided instance '{}' is not valid for this webapp.".format(instance))
+
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password)
-    _ping_scm_site(cmd, resource_group_name, name)
+    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password, instance)
+    _ping_scm_site(cmd, resource_group_name, name, instance=instance)
 
     _wait_for_webapp(tunnel_server)
     return tunnel_server
 
 
-def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
-    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot)
+def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot, instance)
 
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
@@ -3621,8 +3730,8 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
             time.sleep(5)
 
 
-def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
-    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot)
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot, instance)
 
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
@@ -3691,7 +3800,7 @@ def _start_ssh_session(hostname, port, username, password):
         c.close()
 
 
-def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None):  # pylint: disable=too-many-statements
+def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
@@ -3699,7 +3808,7 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
     config = get_site_configs(cmd, resource_group_name, name, slot)
     if config.remote_debugging_enabled:
         raise CLIError('remote debugging is enabled, please disable')
-    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
+    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
 
 
 def create_devops_pipeline(
@@ -3780,3 +3889,113 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
             verified_hostname_found = True
 
     return verified_hostname_found
+
+
+def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_value=None, slot=None):
+    # pylint: disable=protected-access
+    KeyInfo._attribute_map = {
+        'name': {'key': 'properties.name', 'type': 'str'},
+        'value': {'key': 'properties.value', 'type': 'str'},
+    }
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.create_or_update_host_secret_slot(resource_group_name,
+                                                                 name,
+                                                                 key_type,
+                                                                 key_name,
+                                                                 slot,
+                                                                 name1=key_name,
+                                                                 value=key_value)
+    return client.web_apps.create_or_update_host_secret(resource_group_name,
+                                                        name,
+                                                        key_type,
+                                                        key_name,
+                                                        name1=key_name,
+                                                        value=key_value)
+
+
+def list_host_keys(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_host_keys_slot(resource_group_name, name, slot)
+    return client.web_apps.list_host_keys(resource_group_name, name)
+
+
+def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        result = client.web_apps.delete_host_secret_slot(resource_group_name, name, key_type, key_name, slot, raw=True)
+    result = client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name, raw=True)
+
+    if result.response.status_code == HTTPStatus.NO_CONTENT:
+        return "Successfully deleted key '{}' of type '{}' from function app '{}'".format(key_name, key_type, name)
+    if result.response.status_code == HTTPStatus.NOT_FOUND:
+        return "Key '{}' of type '{}' does not exist in function app '{}'".format(key_name, key_type, name)
+    return result
+
+
+def show_function(cmd, resource_group_name, name, function_name):
+    client = web_client_factory(cmd.cli_ctx)
+    result = client.web_apps.get_function(resource_group_name, name, function_name)
+    if result is None:
+        return "Function '{}' does not exist in app '{}'".format(function_name, name)
+    return result
+
+
+def delete_function(cmd, resource_group_name, name, function_name):
+    client = web_client_factory(cmd.cli_ctx)
+    result = client.web_apps.delete_function(resource_group_name, name, function_name, raw=True)
+
+    if result.response.status_code == HTTPStatus.NO_CONTENT:
+        return "Successfully deleted function '{}' from app '{}'".format(function_name, name)
+    if result.response.status_code == HTTPStatus.NOT_FOUND:
+        return "Function '{}' does not exist in app '{}'".format(function_name, name)
+    return result
+
+
+def update_function_key(cmd, resource_group_name, name, function_name, key_name, key_value=None, slot=None):
+    # pylint: disable=protected-access
+    KeyInfo._attribute_map = {
+        'name': {'key': 'properties.name', 'type': 'str'},
+        'value': {'key': 'properties.value', 'type': 'str'},
+    }
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.create_or_update_function_secret_slot(resource_group_name,
+                                                                     name,
+                                                                     function_name,
+                                                                     key_name,
+                                                                     slot,
+                                                                     name1=key_name,
+                                                                     value=key_value)
+    return client.web_apps.create_or_update_function_secret(resource_group_name,
+                                                            name,
+                                                            function_name,
+                                                            key_name,
+                                                            name1=key_name,
+                                                            value=key_value)
+
+
+def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
+    return client.web_apps.list_function_keys(resource_group_name, name, function_name)
+
+
+def delete_function_key(cmd, resource_group_name, name, key_name, function_name=None, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        result = client.web_apps.delete_function_secret_slot(resource_group_name,
+                                                             name,
+                                                             function_name,
+                                                             key_name,
+                                                             slot,
+                                                             raw=True)
+    result = client.web_apps.delete_function_secret(resource_group_name, name, function_name, key_name, raw=True)
+
+    if result.response.status_code == HTTPStatus.NO_CONTENT:
+        return "Successfully deleted key '{}' from function '{}'".format(key_name, function_name)
+    if result.response.status_code == HTTPStatus.NOT_FOUND:
+        return "Key '{}' does not exist in function '{}'".format(key_name, function_name)
+    return result
