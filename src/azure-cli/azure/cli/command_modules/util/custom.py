@@ -33,12 +33,16 @@ def show_version(cmd):  # pylint: disable=unused-argument
 
 
 def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member
+    import os
+    import platform
+    import sys
     import subprocess
+    import azure.cli.core.telemetry as telemetry
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.util import CLI_PACKAGE_NAME, _get_local_versions, _update_latest_from_pypi
     from distutils.version import LooseVersion
     from knack.util import CLIError
-    import azure.cli.core.telemetry as telemetry
+
     update_cli = True
     versions = _get_local_versions()
     local = versions[CLI_PACKAGE_NAME]['local']
@@ -61,9 +65,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             if not confirmation:
                 telemetry.set_success("Upgrade stopped by user")
                 return
-        import os
-        import platform
-        installer = 'MSI'  # os.getenv(_ENV_AZ_INSTALLER)
+        installer = os.getenv(_ENV_AZ_INSTALLER)
         if installer == 'DEB':
             from azure.cli.core.util import in_cloud_console
             if in_cloud_console():
@@ -95,9 +97,9 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 else:
                     logger.warning(UPGRADE_MSG)
         elif installer == 'HOMEBREW':
-            exit_code = subprocess.call('brew update && brew upgrade -y azure-cli'.split())
+            subprocess.call(['brew', 'update'])
+            exit_code = subprocess.call(['brew', 'upgrade', 'azure-cli'])
         elif installer == 'PIP':
-            import sys
             pip_args = [sys.executable, '-m', 'pip', 'install', '--upgrade', 'azure-cli', '-vv',
                         '--disable-pip-version-check', '--no-cache-dir']
             logger.debug('Executing pip with args: %s', pip_args)
