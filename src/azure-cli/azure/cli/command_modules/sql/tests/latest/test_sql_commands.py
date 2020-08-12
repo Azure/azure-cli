@@ -1247,7 +1247,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1259,7 +1259,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1271,7 +1271,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_disabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1325,7 +1325,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_disabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
