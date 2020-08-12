@@ -148,7 +148,7 @@ jobs:
     vmImage: 'ubuntu-18.04'
   steps:
     - task: UsePythonVersion@0
-      condition: or(containsValue(variables['USER_TARGET'], '${{ Target }}'), eq(variables['USER_TARGET'], ''))
+      condition: or(containsValue(variables['USER_TARGET'], variables['Target']), eq(variables['USER_TARGET'], ''))
       inputs:
         versionSpec: '3.8'
         addToPath: true
