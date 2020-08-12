@@ -7,6 +7,7 @@ from enum import Enum
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
+from knack.deprecation import Deprecated
 
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_file_or_dict
@@ -80,7 +81,16 @@ def load_arguments(self, _):
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag())
         c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(),
-                   deprecate_info=c.deprecate(expiration='2.11.0', hide='2.11.0'))
+                   deprecate_info=Deprecated(
+                       cli_ctx=c.command_loader.cli_ctx,
+                       object_type='option',
+                       message_func=lambda x:
+                       'Warning! The ability to create new key vaults with soft delete disabled '
+                       'will be deprecated by December 2020. All key vaults will be required to '
+                       'have soft delete enabled. Please see the following documentation for '
+                       'additional guidance. \n'
+                       'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'
+                   ))
         c.argument('enable_purge_protection', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
@@ -105,7 +115,16 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault update') as c:
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(),
-                   deprecate_info=c.deprecate(expiration='2.11.0', hide='2.11.0'))
+                   deprecate_info=Deprecated(
+                       cli_ctx=c.command_loader.cli_ctx,
+                       object_type='option',
+                       message_func=lambda x:
+                       'Warning! The ability to create new key vaults with soft delete disabled '
+                       'will be deprecated by December 2020. All key vaults will be required to '
+                       'have soft delete enabled. Please see the following documentation for '
+                       'additional guidance. \n'
+                       'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'
+                   ))
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault recover') as c:
