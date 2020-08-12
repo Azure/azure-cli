@@ -58,6 +58,9 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         update_cli = False
         if not update_all:
             return
+
+    exts = [ext.name for ext in get_extensions(ext_type=WheelExtension)] if update_all else []
+        
     exit_code = 0
     if update_cli:
         logger.warning("Your current Azure CLI version is %s. Latest version is %s.", local, pypi)
@@ -118,20 +121,11 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     if exit_code:
         telemetry.set_failure("CLI upgrade failed.")
         sys.exit(exit_code)
-    ext_sources = []
-    if update_all:
-        extensions = get_extensions(ext_type=WheelExtension)
-        if extensions:
-            for ext in extensions:
-                try:
-                    download_url, _ = resolve_from_index(ext.name, cur_version=ext.version)
-                    ext_sources.append((ext.name, download_url))
-                except NoExtensionCandidatesError:
-                    pass
-    try:
-        for name, download_url in ext_sources:
-            logger.warning("Update extension: %s", name)
-            update_extension(cli_ctx=cmd.cli_ctx, extension_name=name, source=download_url)
-    except CLIError as ex:
-        telemetry.set_failure("Extension update failed during upgrade. {}".format(str(ex)))
-        raise ex
+
+    for ext_name in exts:
+        try:
+            logger.warning("Checking update for %s", ext_name)
+            subprocess.call(['az', 'extension', 'update', '-n', ext_name], shell=platform.system() == 'Windows')
+        except CLIError as ex:
+            telemetry.set_failure("Extension update failed during az upgrade. {}".format(str(ex)))
+            raise ex

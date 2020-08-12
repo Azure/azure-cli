@@ -289,7 +289,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd=None, source=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None, source=None):
     try:
         ext_sha256 = None
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
@@ -300,7 +300,8 @@ def update_extension(cmd=None, source=None, extension_name=None, index_url=None,
                 source, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
             except NoExtensionCandidatesError as err:
                 logger.debug(err)
-                raise CLIError("No updates available for '{}'. Use --debug for more information.".format(extension_name))
+                logger.warning("No updates available for '{}'. Use --debug for more information.".format(extension_name))
+                return
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.
         backup_dir = os.path.join(tempfile.mkdtemp(), extension_name)
         extension_path = ext.path
