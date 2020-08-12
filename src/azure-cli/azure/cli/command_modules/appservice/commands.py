@@ -349,6 +349,20 @@ def load_command_table(self, _):
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())
 
+    with self.command_group('functionapp keys') as g:
+        g.custom_command('set', 'update_host_key')
+        g.custom_command('list', 'list_host_keys')
+        g.custom_command('delete', 'delete_host_key')
+
+    with self.command_group('functionapp function') as g:
+        g.custom_command('show', 'show_function')
+        g.custom_command('delete', 'delete_function')
+
+    with self.command_group('functionapp function keys') as g:
+        g.custom_command('set', 'update_function_key')
+        g.custom_command('list', 'list_function_keys')
+        g.custom_command('delete', 'delete_function_key')
+
     with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
         g.custom_command('show', 'show_webapp_access_restrictions')
         g.custom_command('add', 'add_webapp_access_restriction')
