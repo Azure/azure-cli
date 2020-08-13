@@ -161,12 +161,16 @@ def validate_timezone_name(namespace):
 
 def validate_time(namespace):
     if namespace.time:
+        message = 'The time is 24-hour time and exactly in the form of xx:xx. ' \
+                  'For example it should be 09:00 instead of 9:00.'
+        if ':' not in namespace.time:
+            raise CLIError(message)
         hour, minute = namespace.time.split(':')
         if len(hour) != 2 or len(minute) != 2:
-            raise CLIError(
-                'The time is 24-hour time and exactly in the form of xx:xx. '
-                'For example it should be 09:00 instead of 9:00')
+            raise CLIError(message)
+        if not hour.isdigit() or not minute.isdigit():
+            raise CLIError('The hour part or minute part is not digit.')
         if int(hour) > 23 or int(hour) < 0:
-            raise CLIError('The hour of time should be 00-23')
+            raise CLIError('The hour of time should be 00-23.')
         if int(minute) > 59 or int(minute) < 0:
-            raise CLIError('The minute of time should be 00-59')
+            raise CLIError('The minute of time should be 00-59.')

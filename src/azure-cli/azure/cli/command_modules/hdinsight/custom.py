@@ -576,11 +576,9 @@ def create_autoscale(cmd, client, resource_group_name, cluster_name, type, min_w
     user_confirmation(
         "This operation will override previous autoscale configuration. "
         "Are you sure you want to perform this operation", yes)
-    if no_wait:
-        return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                           autoscale_configuration)
 
-    return client.update_auto_scale_configuration(resource_group_name, cluster_name, autoscale_configuration)
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
 
 
 def update_autoscale(cmd, client, resource_group_name, cluster_name, min_workernode_count=None,
@@ -611,11 +609,8 @@ def update_autoscale(cmd, client, resource_group_name, cluster_name, min_workern
         elif not autoscale_configuration.recurrence:
             autoscale_configuration.recurrence = AutoscaleRecurrence(time_zone=timezone)
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                           autoscale_configuration)
-
-    return client.update_auto_scale_configuration(resource_group_name, cluster_name, autoscale_configuration)
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
 
 
 def show_autoscale(cmd, client, resource_group_name, cluster_name):
@@ -628,11 +623,9 @@ def delete_autoscale(cmd, client, resource_group_name, cluster_name, no_wait=Fal
     cluster = client.get(resource_group_name, cluster_name)
     _extract_and_validate_autoscale_configuration(cluster)
     autoscale_configuration = None
-    if no_wait:
-        return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                           autoscale_configuration)
 
-    return client.update_auto_scale_configuration(resource_group_name, cluster_name, autoscale_configuration)
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
 
 
 def list_timezones(cmd, client):
@@ -660,11 +653,9 @@ def create_autoscale_condition(cmd, client, resource_group_name, cluster_name, d
         autoscale_configuration.recurrence = AutoscaleRecurrence(
             schedule=[condition]
         )
-    if no_wait:
-        return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                           autoscale_configuration)
 
-    return client.update_auto_scale_configuration(resource_group_name, cluster_name, autoscale_configuration)
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
 
 
 def update_autoscale_condition(cmd, client, resource_group_name, cluster_name, index, days=None, time=None,
@@ -687,11 +678,8 @@ def update_autoscale_condition(cmd, client, resource_group_name, cluster_name, i
         autoscale_configuration.recurrence.schedule[index].time_and_capacity.min_instance_count = workernode_count
         autoscale_configuration.recurrence.schedule[index].time_and_capacity.max_instance_count = workernode_count
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                           autoscale_configuration)
-
-    return client.update_auto_scale_configuration(resource_group_name, cluster_name, autoscale_configuration)
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
 
 
 def delete_autoscale_condition(cmd, client, resource_group_name, cluster_name, index, no_wait=False):
@@ -705,11 +693,8 @@ def delete_autoscale_condition(cmd, client, resource_group_name, cluster_name, i
                        'If you want to disable autoscale please use `az hdinsight autoscale delete`.')
     autoscale_configuration.recurrence.schedule = [autoscale_configuration.recurrence.schedule[i] for i in
                                                    range(conditions_count) if i not in index]
-    if no_wait:
-        return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
-                           autoscale_configuration)
-
-    return client.update_auto_scale_configuration(resource_group_name, cluster_name, autoscale_configuration)
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
 
 
 def list_autoscale_condition(cmd, client, resource_group_name, cluster_name):
