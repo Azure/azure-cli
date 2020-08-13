@@ -1,5 +1,3 @@
-import random
-
 from knack.log import get_logger
 from knack.util import todict
 from knack import events
