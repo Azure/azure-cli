@@ -41,7 +41,7 @@ def load_command_table(self, _):
 
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
-                            custom_command_type=get_custom_sdk('workspace', cf_synapse_client_ipfirewallrules_factory),
+                            custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
                             client_factory=cf_synapse_client_workspace_factory) as g:
         g.show_command('show', 'get')
         g.custom_command('list', 'list_workspaces')
@@ -55,7 +55,7 @@ def load_command_table(self, _):
 
     # Management Plane Commands --SparkPool
     with self.command_group('synapse spark pool', command_type=synapse_bigdatapool_sdk,
-                            custom_command_type=get_custom_sdk('sparkpool', cf_synapse_client_ipfirewallrules_factory),
+                            custom_command_type=get_custom_sdk('sparkpool', cf_synapse_client_bigdatapool_factory),
                             client_factory=cf_synapse_client_bigdatapool_factory) as g:
         g.custom_show_command('show', 'get_spark_pool')
         g.command('list', 'list_by_workspace')
@@ -66,7 +66,7 @@ def load_command_table(self, _):
 
     # Management Plane Commands --SqlPool
     with self.command_group('synapse sql pool', command_type=synapse_sqlpool_sdk,
-                            custom_command_type=get_custom_sdk('sqlpool', cf_synapse_client_ipfirewallrules_factory),
+                            custom_command_type=get_custom_sdk('sqlpool', cf_synapse_client_sqlpool_factory),
                             client_factory=cf_synapse_client_sqlpool_factory) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_workspace')
