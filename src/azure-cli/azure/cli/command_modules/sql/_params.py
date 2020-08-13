@@ -1313,7 +1313,6 @@ def load_arguments(self, _):
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
 
-
     #####
     #           sql server conn-policy
     #####

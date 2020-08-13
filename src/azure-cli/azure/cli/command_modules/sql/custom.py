@@ -1499,7 +1499,7 @@ def db_audit_policy_update(
         instance.state = BlobAuditingPolicyState[state.lower()]
 
     enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
-    
+
     # Set storage-related properties
     _db_security_policy_update(
         cmd.cli_ctx,
@@ -1546,7 +1546,7 @@ def server_audit_policy_update(
         instance.state = BlobAuditingPolicyState[state.lower()]
 
     enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
-    
+
     # Set storage-related properties
     _db_security_policy_update(
         cmd.cli_ctx,

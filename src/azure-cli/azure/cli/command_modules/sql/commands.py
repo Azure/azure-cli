@@ -251,7 +251,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.generic_update_command('update',
                                  custom_func_name='db_audit_policy_update')
-    
+
     server_blob_auditing_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerBlobAuditingPoliciesOperations.{}',
         client_factory=get_sql_server_blob_auditing_policies_operations)
