@@ -2,11 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from knack.util import CLIError
-from .._client_factory import cf_synapse_client_workspace_factory
+# pylint: disable=unused-argument, line-too-long
 from azure.cli.core.util import sdk_no_wait, read_file_content
 from azure.mgmt.synapse.models import BigDataPoolResourceInfo, AutoScaleProperties, AutoPauseProperties, LibraryRequirements, NodeSizeFamily
+from .._client_factory import cf_synapse_client_workspace_factory
 
 
 # Synapse sparkpool

@@ -2,17 +2,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from knack.util import CLIError
-from .._client_factory import cf_synapse_client_workspace_factory
-from azure.cli.core.util import sdk_no_wait, read_file_content
+# pylint: disable=unused-argument
+from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
-    DataLakeStorageAccountDetails \
-
+    DataLakeStorageAccountDetails
 
 
 # Synapse workspace
-def list_workspaces(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
+def list_workspaces(cmd, client, resource_group_name=None):
     return client.list_by_resource_group(
         resource_group_name=resource_group_name) if resource_group_name else client.list()
 
@@ -28,7 +25,8 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
         default_data_lake_storage=default_data_lake_storage,
         sql_administrator_login=sql_admin_login_user,
         sql_administrator_login_password=sql_admin_login_password,
-        location=location
+        location=location,
+        tags=tags
     )
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, workspace_info)
 
