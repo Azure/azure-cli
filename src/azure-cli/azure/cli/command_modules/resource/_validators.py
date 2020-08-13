@@ -28,6 +28,7 @@ def _validate_template_spec(namespace):
                            'a resource group and resource name or a resource ID for --template-spec')
     else:
         from azure.mgmt.core.tools import is_valid_resource_id
+        namespace.template_spec = namespace.template_spec.strip("\"")
         if not is_valid_resource_id(namespace.template_spec):
             raise CLIError('--template-spec is not a valid resource ID.')
 
