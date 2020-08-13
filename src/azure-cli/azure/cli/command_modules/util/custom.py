@@ -32,42 +32,42 @@ def show_version(cmd):  # pylint: disable=unused-argument
     return versions
 
 
-def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member
+def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
     import os
     import platform
+    import requests
     import sys
     import subprocess
     import azure.cli.core.telemetry as telemetry
+    from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
-    from azure.cli.core.util import CLI_PACKAGE_NAME, _get_local_versions, _update_latest_from_pypi
     from azure.cli.core.extension import get_extensions, WheelExtension
-    from azure.cli.core.extension._resolve import resolve_from_index, NoExtensionCandidatesError
-    from azure.cli.core.extension.operations import update_extension
     from distutils.version import LooseVersion
     from knack.util import CLIError
 
     update_cli = True
-    versions = _get_local_versions()
-    local = versions[CLI_PACKAGE_NAME]['local']
-    versions, success = _update_latest_from_pypi(versions)
-    if not success:
-        raise CLIError("Failed to fetch the latest version. Please check your network connectivity.")
-    pypi = versions[CLI_PACKAGE_NAME].get('pypi', None)
-    if pypi and LooseVersion(pypi) <= LooseVersion(local):
-        logger.warning("You already have the latest %s: %s", CLI_PACKAGE_NAME, local)
+    git_release_url = "https://api.github.com/repos/Azure/azure-cli/releases/latest"
+    response = requests.get(git_release_url)
+    if response.status_code != 200:
+        raise CLIError("Failed to fetch the latest version from '{}' with status code '{}' and reason '{}'".format(
+            git_release_url, response.status_code, response.reason))
+    latest_version = response.json()['tag_name'].replace('azure-cli-', '')
+
+    if latest_version and LooseVersion(latest_version) <= LooseVersion(local_version):
+        logger.warning("You already have the latest azure-cli version: %s", local_version)
         update_cli = False
         if not update_all:
             return
-
     exts = [ext.name for ext in get_extensions(ext_type=WheelExtension)] if update_all else []
-        
+
     exit_code = 0
     if update_cli:
-        logger.warning("Your current Azure CLI version is %s. Latest version is %s.", local, pypi)
+        logger.warning("Your current Azure CLI version is %s. Latest version available is %s.",
+                       local_version, latest_version)
         from knack.prompting import prompt_y_n
         if not yes:
             confirmation = prompt_y_n("Please check the release notes first: https://docs.microsoft.com/"
-                                      "cli/azure/release-notes-azure-cli\nWould you like to proceed?", default='y')
+                                      "cli/azure/release-notes-azure-cli\nDo you wnat to continue?", default='y')
             if not confirmation:
                 telemetry.set_success("Upgrade stopped by user")
                 return
@@ -96,13 +96,17 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                         update_cmd.insert(0, 'sudo')
                     exit_code = subprocess.call(update_cmd)
                 elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
-                    update_cmd = 'zypper update -y azure-cli'.split()
+                    zypper_refresh_cmd = ['zypper', 'refresh']
+                    az_update_cmd = 'zypper update -y azure-cli'.split()
                     if os.geteuid() != 0:  # pylint: disable=no-member
-                        update_cmd.insert(0, 'sudo')
-                    exit_code = subprocess.call(update_cmd)
+                        zypper_refresh_cmd.insert(0, 'sudo')
+                        az_update_cmd.insert(0, 'sudo')
+                    subprocess.call(zypper_refresh_cmd)
+                    exit_code = subprocess.call(az_update_cmd)
                 else:
                     logger.warning(UPGRADE_MSG)
         elif installer == 'HOMEBREW':
+            logger.warning("Update homebrew formulae")
             subprocess.call(['brew', 'update'])
             exit_code = subprocess.call(['brew', 'upgrade', 'azure-cli'])
         elif installer == 'PIP':
@@ -110,7 +114,6 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                         '--disable-pip-version-check', '--no-cache-dir']
             logger.debug('Executing pip with args: %s', pip_args)
             exit_code = subprocess.call(pip_args, shell=platform.system() == 'Windows')
-            return
         elif installer == 'DOCKER':
             logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
                            "or 'pip install --upgrade azure-cli' in this container")
