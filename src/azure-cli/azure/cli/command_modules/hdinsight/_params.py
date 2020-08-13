@@ -208,8 +208,9 @@ def load_arguments(self, _):
                    completer=get_generic_completion_list(AUTOSCALE_TIMEZONES),
                    help='The timezone for schedule autoscale type. Values from `az hdinsight autoscale list-timezones`')
         c.argument('days', nargs='+', arg_group='Autoscale Configuration',
+                   arg_type=get_enum_type(week_days),
                    completer=get_generic_completion_list(week_days),
-                   help='A space-delimited list of schedule day. Valid days are {}.'.format(', '.join(week_days)))
+                   help='A space-delimited list of schedule day.')
         c.argument('time', arg_group='Autoscale Configuration', validator=validate_time,
                    help='The 24-hour time in the form of xx:xx in days.')
         c.argument('autoscale_workernode_count', type=int,
@@ -306,8 +307,9 @@ def load_arguments(self, _):
         with self.argument_context('hdinsight autoscale create') as c:
             c.argument('type', arg_type=get_enum_type(known_autoscale_types), help='The autoscale type.')
             c.argument('days', nargs='+', arg_group='Schedule-based Autoscale',
+                       arg_type=get_enum_type(week_days),
                        completer=get_generic_completion_list(week_days),
-                       help='A space-delimited list of schedule day. Valid days are {}.'.format(', '.join(week_days)))
+                       help='A space-delimited list of schedule day.')
             c.argument('time', arg_group='Schedule-based Autoscale', validator=validate_time,
                        help='The 24-hour time in the form xx:xx in days.')
             c.argument('workernode_count', type=int, options_list=['--workernode-count'],
@@ -325,9 +327,9 @@ def load_arguments(self, _):
 
         for command in ['create', 'update']:
             with self.argument_context('hdinsight autoscale condition ' + command) as c:
-                c.argument('days', nargs='+', arg_group=None, completer=get_generic_completion_list(week_days),
-                           help='A space-delimited list of schedule day. '
-                                'Valid days are {}.'.format(', '.join(week_days)))
+                c.argument('days', nargs='+', arg_group=None, arg_type=get_enum_type(week_days),
+                           completer=get_generic_completion_list(week_days),
+                           help='A space-delimited list of schedule day.')
                 c.argument('time', arg_group=None, validator=validate_time,
                            help='The 24-hour time in the form xx:xx in days.')
                 c.argument('workernode_count', type=int, options_list=['--workernode-count'], arg_group=None,
