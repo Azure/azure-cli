@@ -8,7 +8,7 @@ from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 logger = get_logger(__name__)
 
 
-def register_global_query_recommend(cli_ctx):
+def register_global_query_recommend_argument(cli_ctx):
     '''Register --query-recommend argument, and register handler
     '''
     # origin method to register a global argument
