@@ -15,6 +15,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ApimScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
+    @AllowLargeResponse()
     def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
         service_name = self.create_random_name('cli-test-apim-', 50)
 
@@ -57,8 +58,6 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim update -n {service_name} -g {rg} --publisher-name {publisher_name} --set publisherEmail={publisher_email}',
                  checks=[self.check('publisherName', '{publisher_name}'), self.check('publisherEmail', '{publisher_email}')])
 
-        count = len(self.cmd('apim list').get_output_in_json())
-
         self.cmd('apim show -g {rg} -n {service_name}', checks=[
             # recheck properties from create
             self.check('name', '{service_name}'),
@@ -87,28 +86,36 @@ class ApimScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
+        # TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
         # api operations
         self.kwargs.update({
             'api_id': self.create_random_name('az-cli', 10),
-            'api_revision': None,
             'api_type': 'http',
-            'api_version': None,
             'description': 'Contoso API Description',
             'display_name': 'Contoso API',
-            'is_current': True,
             'path': 'test',
+            'path2': 'test2',
             'protocols': 'https',
             'service_url': 'https://contoso.com',
-            'subscription_key_parameter_names': None,
+            'subscription_key_header_name': 'header',
+            'subscription_key_query_param_name': 'query',
+            'api_id2': '48242ec7f53745de9cbb800757a4204a',
             'subscription_required': True,
-            'tags': "foo=baz"
+            'specification_url': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.json',
+            'specification_format': 'OpenApi'
         })
 
         # create api
-        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}" --tags "{tags}"', checks=[
+        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}" --subscription-key-header-name "{subscription_key_header_name}" --subscription-key-query-param-name "{subscription_key_query_param_name}"', checks=[
             self.check('displayName', '{display_name}'),
             self.check('path', '{path}'),
             self.check('serviceUrl', '{service_url}')
+        ])
+
+        # import api
+        self.cmd('apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}"', checks=[
+            self.check('displayName', 'Swagger Petstore'),
+            self.check('path', '{path2}')
         ])
 
         # get api
@@ -124,12 +131,14 @@ class ApimScenarioTest(ScenarioTest):
 
         # list apis
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
-        self.assertEqual(api_count, 2)
+        self.assertEqual(api_count, 3)
 
         # api delete command
         self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {api_id} -y')
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
-        self.assertEqual(api_count, 1)
+        self.assertEqual(api_count, 2)
+
+        count = len(self.cmd('apim list').get_output_in_json())
 
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')

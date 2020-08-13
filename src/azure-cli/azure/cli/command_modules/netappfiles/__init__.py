@@ -18,13 +18,11 @@ class NetAppFilesCommandsLoader(AzCommandsLoader):
                                                         custom_command_type=netappfiles_custom)
 
     def load_command_table(self, args):
-        super(NetAppFilesCommandsLoader, self).load_command_table(args)
         from azure.cli.command_modules.netappfiles.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        super(NetAppFilesCommandsLoader, self).load_arguments(command)
         from azure.cli.command_modules.netappfiles._params import load_arguments
         load_arguments(self, command)
 
