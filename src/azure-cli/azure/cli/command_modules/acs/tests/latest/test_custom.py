@@ -665,6 +665,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    @unittest.skip('skip')
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_emit_warnings(self, logger_mock, mock_url_retrieve):
@@ -679,6 +680,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    @unittest.skip('skip')
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_create_installation_dir(self, logger_mock, mock_url_retrieve):
