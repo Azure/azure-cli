@@ -126,7 +126,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
