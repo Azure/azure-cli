@@ -20,3 +20,7 @@ def cf_api(cli_ctx, *_):
 
 def cf_product(cli_ctx, *_):
     return cf_apim(cli_ctx).product
+
+
+def cf_nv(cli_ctx, *_):
+    return cf_apim(cli_ctx).named_value

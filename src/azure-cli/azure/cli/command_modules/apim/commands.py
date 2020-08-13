@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
-from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product)
+from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv)
 
 
 def load_command_table(self, _):
@@ -22,6 +22,11 @@ def load_command_table(self, _):
     product_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ProductOperations.{}',
         client_factory=cf_product
+    )
+
+    nv_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#NamedValueOperations.{}',
+        client_factory=cf_nv
     )
 
     # pylint: disable=line-too-long
@@ -57,3 +62,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_product', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_product', supports_no_wait=True)
         g.custom_command('delete', 'delete_product', confirmation=True, supports_no_wait=True)
+
+    with self.command_group('apim nv', nv_sdk, is_preview=True) as g:
+        g.custom_command('create', 'create_apim_nv')
+        g.custom_show_command('show', 'get_apim_nv')
+        g.custom_command('list', 'list_apim_nv')
+        g.custom_command('delete', 'delete_apim_nv', confirmation=True)
+        g.generic_update_command('update', custom_func_name='update_apim_nv')

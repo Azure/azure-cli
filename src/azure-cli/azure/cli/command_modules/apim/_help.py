@@ -27,6 +27,11 @@ type: group
 short-summary: Manage Azure API Management Product's.
 """
 
+helps['apim nv'] = """
+type: group
+short-summary: Manage Azure API Management Named Values.
+"""
+
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
@@ -237,4 +242,64 @@ examples:
   - name: Delete product with all subscriptions to this product.
     text: |-
         az apim product delete --resource-group MyResourceGroup  --service-name MyServiceName --product-id MyProductID --delete-subscriptions true
+"""
+
+helps['apim nv list'] = """
+type: command
+short-summary: List API Management Named Values.
+"""
+
+helps['apim nv show'] = """
+type: command
+short-summary: Show details of an API Management Named Value.
+"""
+
+helps['apim nv delete'] = """
+type: command
+short-summary: Delete an API Management Named Value.
+"""
+
+helps['apim nv create'] = """
+type: command
+short-summary: Create an API Management Named Value.
+parameters:
+  - name: --service-name
+    type: string
+    short-summary: name of the service instance
+  - name: --named-value-id
+    type: string
+    short-summary: unique name for the Named Value to be created
+    long-summary: |
+        Must be unique in the current API Management service instance.
+  - name: --display-name
+    type: string
+    short-summary: The Display name of the Named Value.
+  - name: --value
+    type: string
+    short-summary: The value of the Named Value.
+examples:
+  - name: Create a Named Value.
+    text: |-
+        az apim nv create --service-name MyApim -g MyResourceGroup --named-value-id MyNamedValue --display-name 'My Named Value' --value 'foo'
+"""
+
+helps['apim nv update'] = """
+type: command
+short-summary: Update an API Management Named Value.
+parameters:
+  - name: --service-name
+    type: string
+    short-summary: name of the service instance
+  - name: --named-value-id
+    type: string
+    short-summary: unique name of the api to be created
+    long-summary: |
+        Must be unique in the current API Management service instance.
+  - name: --value
+    type: string
+    short-summary: The value of the Named Value.
+examples:
+  - name: Create a basic API.
+    text: |-
+        az apim nv update --service-name MyApim -g MyResourceGroup --named-value-id MyNamedValue --value foo
 """
