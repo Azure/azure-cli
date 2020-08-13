@@ -753,7 +753,7 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_pending')
     def test_keyvault_pending_certificate(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-cr-pe-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-pe-', 24),
             'loc': 'westus',
             'policy_path': os.path.join(TEST_DIR, 'policy_pending.json')
         })
