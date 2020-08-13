@@ -49,6 +49,7 @@ def _validate_deployment_name_with_template_specs(namespace):
             template_filename = urlsplit(namespace.template_uri).path
         if namespace.template_spec:
             from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
+            namespace.template_spec = namespace.template_spec.strip("\"")
             if not is_valid_resource_id(namespace.template_spec):
                 raise CLIError('--template-spec is not a valid resource ID.')
             template_filename = parse_resource_id(namespace.template_spec).get('resource_name')
