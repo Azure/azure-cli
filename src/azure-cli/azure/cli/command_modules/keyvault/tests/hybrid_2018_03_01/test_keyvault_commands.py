@@ -504,7 +504,7 @@ class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
 class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_default_policy')
-    def test_keyvault_certificate_get_default_policy(self, resource_group):
+    def test_keyvault_certificate_get_default_policy(self):
         result = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
         self.assertEqual(result['keyProperties']['keyType'], 'RSA')
         self.assertEqual(result['issuerParameters']['name'], 'Self')

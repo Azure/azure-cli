@@ -31,15 +31,14 @@ logger = get_logger(__name__)
 
 
 def _azure_stack_wrapper(cmd, client, function_name, *args, **kwargs):
+    no_wait = False
+    if 'no_wait' in kwargs:
+        no_wait = kwargs.pop('no_wait')
+
     if cmd.cli_ctx.cloud.profile == 'latest':
         function_name = 'begin_' + function_name
-        no_wait = False
-        if 'no_wait' in kwargs:
-            no_wait = kwargs.pop('no_wait')
         return sdk_no_wait(no_wait, getattr(client, function_name), *args, **kwargs)
 
-    if 'no_wait' in kwargs:
-        kwargs.pop('no_wait')
     return getattr(client, function_name)(*args, **kwargs)
 
 
