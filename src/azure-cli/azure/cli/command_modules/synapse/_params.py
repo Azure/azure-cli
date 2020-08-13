@@ -3,13 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.arguments import CLIArgumentType
-from argcomplete import FilesCompleter
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type
 from ._validators import validate_storage_account
 
 
-def load_arguments(self, _):
+def load_arguments(self, _):  # pylint: disable=too-many-statements
     # synapse workspace
     for scope in ['show', 'create', 'update', 'delete']:
         with self.argument_context('synapse workspace ' + scope) as c:
@@ -62,12 +60,12 @@ def load_arguments(self, _):
         c.argument('delay', arg_group='AutoPause', help='The delay time whose unit is minute.')
 
         # Environment Configuration
-        c.argument('library_requirements_file', arg_group='Environment Configuration',
+        c.argument('library_requirements', arg_group='Environment Configuration',
                    help='The library requirements file.')
 
         # Default Folder
         c.argument('spark_events_folder', arg_group='Default Folder', help='The Spark events folder.')
-        c.argument('default_spark_log_folder', arg_group='Default Folder', help='The default Spark log folder.')
+        c.argument('spark_log_folder', arg_group='Default Folder', help='The default Spark log folder.')
 
         # Component Version
         c.argument('spark_version', arg_group='Component Version', help='The supported Spark version is 2.4 now.')
@@ -94,7 +92,7 @@ def load_arguments(self, _):
         c.argument('delay', arg_group='AutoPause', help='The delay time whose unit is minute.')
 
         # Environment Configuration
-        c.argument('library_requirements_file', arg_group='Environment Configuration',
+        c.argument('library_requirements', arg_group='Environment Configuration',
                    help='The library requirements file.')
         c.argument('force', arg_type=get_three_state_flag(), help='The flag of force operation.')
 

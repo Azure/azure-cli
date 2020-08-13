@@ -7,6 +7,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.command_modules.synapse._help import helps  # pylint: disable=unused-import
 
 
+# pylint: disable=line-too-long
 class SynapseCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType

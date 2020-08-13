@@ -223,7 +223,7 @@ class SynapseScenarioTests(ScenarioTest):
             'file-system': 'testfilesystem',
             'storage-account': 'adlsgen2account',
             'login-user': 'cliuser1',
-            'login-password': 'Password123!'
+            'login-password': 'password'
         })
 
         # Wait some time to improve robustness

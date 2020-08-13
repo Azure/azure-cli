@@ -2,25 +2,22 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.synapse._client_factory import cf_synapse
 
 
-def get_custom_sdk(custom_module, client_factory):
-    return CliCommandType(
-        operations_tmpl='azure.cli.command_modules.synapse.operations.{}#'.format(custom_module) + '{}',
-        client_factory=client_factory,
-    )
-
-
+# pylint: disable=line-too-long
 def load_command_table(self, _):
-    from azure.cli.core.commands import CliCommandType
     from ._client_factory import cf_synapse_client_workspace_factory
     from ._client_factory import cf_synapse_client_operations_factory
     from ._client_factory import cf_synapse_client_bigdatapool_factory
     from ._client_factory import cf_synapse_client_sqlpool_factory
     from ._client_factory import cf_synapse_client_ipfirewallrules_factory
+
+    def get_custom_sdk(custom_module, client_factory):
+        return CliCommandType(
+            operations_tmpl='azure.cli.command_modules.synapse.operations.{}#'.format(custom_module) + '{}',
+            client_factory=client_factory,
+        )
 
     synapse_workspace_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#WorkspacesOperations.{}',
