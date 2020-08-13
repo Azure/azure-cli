@@ -49,6 +49,7 @@ class AzCli(CLI):
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX
+        from azure.cli.core.commands.recommend import register_global_query_recommend
 
         from knack.util import ensure_dir
 
@@ -70,6 +71,7 @@ class AzCli(CLI):
         self.local_context = AzCLILocalContext(self)
         register_global_transforms(self)
         register_global_subscription_argument(self)
+        register_global_query_recommend(self)
         register_ids_argument(self)  # global subscription must be registered first!
         register_cache_arguments(self)
 
