@@ -52,6 +52,8 @@ def _validate_deployment_name_with_template_specs(namespace):
             namespace.template_spec = namespace.template_spec.strip("\"")
             if not is_valid_resource_id(namespace.template_spec):
                 raise CLIError('--template-spec is not a valid resource ID.')
+            if namespace.template_spec.__contains__("versions") is False:
+                raise CLIError('Please enter a valid template spec version ID.')
             template_filename = parse_resource_id(namespace.template_spec).get('resource_name')
         if template_filename:
             template_filename = os.path.basename(template_filename)
