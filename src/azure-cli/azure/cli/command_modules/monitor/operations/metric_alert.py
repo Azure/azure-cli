@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
-
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -222,32 +221,38 @@ def _parse_resource_type(scopes):
     from azure.mgmt.core.tools import parse_resource_id
     from azure.cli.core import CLIError
 
-    namespace = None
-    resource_type = None
+    if not scopes:
+        raise CLIError('scopes cannot be null.')
+
+    namespace = ''
+    resource_type = ''
     scope_type = None
 
-    def set_fields(item_namespace, item_resource_type, item_scope_type):
+    def validate_scope(item_namespace, item_resource_type, item_scope_type):
+        if namespace != item_namespace or resource_type != item_resource_type or scope_type != item_scope_type:
+            raise CLIError('Multiple scopes should be the same resource type.')
+
+    def store_scope(item_namespace, item_resource_type, item_scope_type):
         nonlocal namespace
         nonlocal resource_type
         nonlocal scope_type
-        if namespace is None and resource_type is None and scope_type is None:
-            namespace = item_namespace
-            resource_type = item_resource_type
-            scope_type = item_scope_type
-        else:
-            if namespace != item_namespace or resource_type != item_resource_type or scope_type != item_scope_type:
-                raise CLIError('Multiple scopes should be the same resource type.')
+        namespace = item_namespace
+        resource_type = item_resource_type
+        scope_type = item_scope_type
 
-    for item in scopes:
-        result = parse_resource_id(item)
+    def parse_scope(scope, operation_on_scope):
+        result = parse_resource_id(scope)
         if 'namespace' in result and 'resource_type' in result:
-            item_namespace = result['namespace']
-            item_resource_type = result['resource_type']
-            set_fields(item_namespace, item_resource_type, 'resource')
+            operation_on_scope(result['namespace'], result['resource_type'], 'resource')
         elif 'resource_group' in result:
-            set_fields('', '', 'resource_group')
+            operation_on_scope('', '', 'resource_group')
         elif 'subscription' in result:
-            set_fields('', '', 'subscription')
+            operation_on_scope('', '', 'subscription')
         else:
             raise CLIError('Scope must be a valid resource id.')
+
+    parse_scope(scopes[0], operation_on_scope=store_scope)
+    for item in scopes:
+        parse_scope(item, operation_on_scope=validate_scope)
+
     return namespace + '/' + resource_type, scope_type
