@@ -17,6 +17,16 @@ type: group
 short-summary: Manage Azure API Management API's.
 """
 
+helps['apim productapi'] = """
+type: group
+short-summary: Manage Azure API Management Product's APIs.
+"""
+
+helps['apim product'] = """
+type: group
+short-summary: Manage Azure API Management Product's.
+"""
+
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
@@ -146,4 +156,85 @@ examples:
 helps['apim api import'] = """
 type: command
 short-summary: Import an API Management service instance.
+"""
+
+helps['apim productapi list'] = """
+type: command
+short-summary: Lists a collection of the APIs associated with a product.
+examples:
+  - name: List all APIs associated with a product.
+    text: |-
+        az apim productapi list --resource-group MyResourceGroup  --service-name MyServiceName  --product-id MyProductID
+"""
+
+helps['apim productapi check'] = """
+type: command
+short-summary: Checks that API entity specified by identifier is associated with the Product entity.
+examples:
+  - name: Check if the API is associated with the Product.
+    text: |-
+        az apim productapi check --resource-group MyResourceGroup  --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
+"""
+
+helps['apim productapi add'] = """
+type: command
+short-summary: Adds an API to the specified product.
+examples:
+  - name: Adds an API to the specified product.
+    text: |-
+        az apim productapi add --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
+"""
+
+helps['apim productapi delete'] = """
+type: command
+short-summary: Deletes the specified API from the specified product.
+examples:
+  - name: Deletes the specified API from the specified product.
+    text: |-
+        az apim productapi add --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
+"""
+
+helps['apim product list'] = """
+type: command
+short-summary: Lists a collection of products in the specified service instance.
+examples:
+  - name: List all products for this APIM instance.
+    text: |-
+        az apim product list --resource-group MyResourceGroup --service-name MyServiceName
+"""
+
+helps['apim product get'] = """
+type: command
+short-summary: Gets the details of the product specified by its identifier.
+examples:
+  - name: Gets the details of the product specified by its identifier.
+    text: |-
+        az apim product get --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID
+"""
+
+helps['apim product create'] = """
+type: command
+short-summary: Creates or Updates a product.
+examples:
+  - name: Creates or Updates a product.
+    text: |-
+        az apim product create --resource-group MyResourceGroup  --service-name MyServiceName --product-id MyProductID --product-name MyProductName --description MyDescription --legal-terms MyTerms --subscription-required true --approval-required true --subscriptions-limit 8 --state "published"
+"""
+
+helps['apim product update'] = """
+type: command
+short-summary: Update existing product details.
+examples:
+  - name: Update existing product details.
+    text: |-
+        az apim product update --resource-group MyResourceGroup  --service-name MyServiceName --product-id MyProductID --product-name MyNewProductName --description MyNewDescription --legal-terms MyNewTerms --subscription-required false --state "notPublished"
+"""
+
+helps['apim product delete'] = """
+type: command
+short-summary: Delete product.
+examples:
+  - name: Delete product with all subscriptions to this product.
+    text: |-
+        az apim product delete --resource-group MyResourceGroup  --service-name MyServiceName --product-id MyProductID --delete-subscriptions true
 """

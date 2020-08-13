@@ -14,7 +14,7 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              VirtualNetworkType, SkuType, ApiCreateOrUpdatePropertiesWsdlSelector,
                                              SoapApiType, ContentFormat, SubscriptionKeyParameterNamesContract,
                                              OAuth2AuthenticationSettingsContract, AuthenticationSettingsContract,
-                                             OpenIdAuthenticationSettingsContract)
+                                             OpenIdAuthenticationSettingsContract, ProductContract, ProductState)
 
 # Service Operations
 
@@ -317,3 +317,116 @@ def get_subscription_key_parameter_names(subscription_key_header_name=None, subs
         raise CLIError("Please specify 'subscription_key_query_param_name' and 'subscription_key_header_name' at the same time.")
 
     return None
+
+
+def list_product_api(client, resource_group_name, service_name, product_id):
+
+    return client.product_api.list_by_product(resource_group_name, service_name, product_id)
+
+
+def check_product_exists(client, resource_group_name, service_name, product_id, api_id):
+
+    return client.product_api.check_entity_exists(resource_group_name, service_name, product_id, api_id)
+
+
+def add_product_api(client, resource_group_name, service_name, product_id, api_id, no_wait=False):
+
+    return sdk_no_wait(
+        no_wait,
+        client.product_api.create_or_update,
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        product_id=product_id,
+        api_id=api_id)
+
+
+def delete_product_api(client, resource_group_name, service_name, product_id, api_id, no_wait=False):
+
+    return sdk_no_wait(
+        no_wait,
+        client.product_api.delete,
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        product_id=product_id,
+        api_id=api_id)
+
+
+def list_products(client, resource_group_name, service_name):
+
+    return client.product.list_by_service(resource_group_name, service_name)
+
+
+def get_product(client, resource_group_name, service_name, product_id):
+
+    return client.product.get(resource_group_name, service_name, product_id)
+
+
+def create_product(client, resource_group_name, service_name, product_id, product_name, description=None, legal_terms=None, subscription_required=None, approval_required=None, subscriptions_limit=None, state=None, no_wait=False):
+
+    parameters = ProductContract(
+        description=description,
+        terms=legal_terms,
+        subscription_required=subscription_required,
+        display_name=product_name,
+        approval_required=approval_required,
+        subscriptions_limit=subscriptions_limit
+    )
+
+    #Possible values include: 'notPublished', 'published'
+    if state is not None:
+        if state == ProductState.not_published:
+            parameters.state = ProductState.not_published
+        elif state == ProductState.published:
+            parameters.state = ProductState.published
+        else:
+            raise CLIError("State " + state + " is not supported.")
+
+    return sdk_no_wait(
+        no_wait,
+        client.product.create_or_update,
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        product_id=product_id,
+        parameters=parameters)
+
+
+def update_product(instance, product_name=None, description=None, legal_terms=None, subscription_required=None, approval_required=None, subscriptions_limit=None, state=None):
+    if product_name is not None:
+        instance.display_name = product_name
+
+    if description is not None:
+        instance.description = description
+
+    if legal_terms is not None:
+        instance.legal_terms = legal_terms
+
+    if subscription_required is not None:
+        instance.subscription_required = subscription_required
+
+    if approval_required is not None:
+        instance.approval_required = approval_required
+
+    if subscriptions_limit is not None:
+        instance.subscriptions_limit = subscriptions_limit
+
+    if state is not None:
+        if state == ProductState.not_published:
+            instance.state = ProductState.not_published
+        elif state == ProductState.published:
+            instance.state = ProductState.published
+        else:
+            raise CLIError("State " + state + " is not supported.")
+
+    return instance
+
+
+def delete_product(client, resource_group_name, service_name, product_id, delete_subscriptions=None, if_match=None, no_wait=False):
+
+    return sdk_no_wait(
+        no_wait,
+        client.product.delete,
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        product_id=product_id,
+        delete_subscriptions=delete_subscriptions,
+        if_match="*" if if_match is None else if_match)

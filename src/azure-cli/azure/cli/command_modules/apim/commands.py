@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
-from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api)
+from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product)
 
 
 def load_command_table(self, _):
@@ -17,6 +17,11 @@ def load_command_table(self, _):
     api_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiOperations.{}',
         client_factory=cf_api
+    )
+
+    product_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#ProductOperations.{}',
+        client_factory=cf_product
     )
 
     # pylint: disable=line-too-long
@@ -39,3 +44,16 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_apim_api', confirmation=True, supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_apim_api', supports_no_wait=True)
         g.wait_command('wait')
+
+    with self.command_group('apim productapi', api_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_product_api')
+        g.custom_command('check', 'check_product_exists')
+        g.custom_command('add', 'add_product_api')
+        g.custom_command('delete', 'delete_product_api')
+
+    with self.command_group('apim product', product_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_products')
+        g.custom_command('get', 'get_product')
+        g.custom_command('create', 'create_product', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_product', supports_no_wait=True)
+        g.custom_command('delete', 'delete_product', confirmation=True, supports_no_wait=True)
