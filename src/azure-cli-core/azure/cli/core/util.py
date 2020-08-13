@@ -173,15 +173,12 @@ def _update_latest_from_pypi(versions):
 
 def get_cached_latest_versions(versions=None):
     """ Get the latest versions from a cached file"""
-    import os
     import datetime
-    from azure.cli.core._environment import get_config_dir
     from azure.cli.core._session import VERSIONS
 
     if not versions:
         versions = _get_local_versions()
 
-    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
     if VERSIONS[_VERSION_UPDATE_TIME]:
         version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
         if datetime.datetime.now() < version_update_time + datetime.timedelta(days=1):
@@ -286,12 +283,9 @@ def get_az_version_json():
 
 
 def show_updates_available(new_line_before=False, new_line_after=False):
-    import os
     from azure.cli.core._session import VERSIONS
     import datetime
-    from azure.cli.core._environment import get_config_dir
 
-    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
     if VERSIONS[_VERSION_CHECK_TIME]:
         version_check_time = datetime.datetime.strptime(VERSIONS[_VERSION_CHECK_TIME], '%Y-%m-%d %H:%M:%S.%f')
         if datetime.datetime.now() < version_check_time + datetime.timedelta(days=7):
@@ -1036,3 +1030,20 @@ def is_guid(guid):
         return True
     except ValueError:
         return False
+
+
+def handle_version_update():
+    """Clean up information in local file that may be invalidated
+    because of a version update of Azure CLI
+    """
+    try:
+        from azure.cli.core._session import VERSIONS
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from azure.cli.core import __version__
+        if not VERSIONS['versions']:
+            get_cached_latest_versions()
+        elif LooseVersion(VERSIONS['versions']['core']['local']) != LooseVersion(__version__):
+            VERSIONS['versions'] = {}
+            VERSIONS['update_time'] = ''
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning(ex)

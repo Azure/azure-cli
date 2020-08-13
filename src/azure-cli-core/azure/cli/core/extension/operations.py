@@ -300,7 +300,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
                 source, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
             except NoExtensionCandidatesError as err:
                 logger.debug(err)
-                logger.warning("No updates available for '{}'. Use --debug for more information.".format(extension_name))
+                logger.warning("No updates available for '%s'. Use --debug for more information.", extension_name)
                 return
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.
         backup_dir = os.path.join(tempfile.mkdtemp(), extension_name)

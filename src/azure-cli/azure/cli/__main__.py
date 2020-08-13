@@ -74,3 +74,25 @@ finally:
     telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
     telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
     telemetry.conclude()
+    try:
+        if sys.argv[1] != 'upgrade' and az_cli.config.getboolean('auto-upgrade', 'enable', False):
+            from azure.cli.core._session import VERSIONS
+            from azure.cli.core.util import get_cached_latest_versions, _VERSION_UPDATE_TIME
+            if VERSIONS[_VERSION_UPDATE_TIME]:
+                import datetime
+                version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
+                if datetime.datetime.now() > version_update_time + datetime.timedelta(days=10):
+                    get_cached_latest_versions()
+                from distutils.version import LooseVersion
+                if LooseVersion(VERSIONS['versions']['core']['local']) < LooseVersion(VERSIONS['versions']['core']['pypi']):  # pylint: disable=line-too-long
+                    import subprocess
+                    import platform
+                    logger.warning("New Azure CLI version available. Running 'az upgrade' to update automatically.")
+                    update_all = az_cli.config.getboolean('auto-upgrade', 'all', True)
+                    prompt = az_cli.config.getboolean('auto-upgrade', 'prompt', True)
+                    cmd = ['az', 'upgrade', '--all', str(update_all)]
+                    if not prompt:
+                        cmd.append('-y')
+                    subprocess.call(cmd, shell=platform.system() == 'Windows')
+    except Exception:  # pylint: disable=broad-except
+        pass

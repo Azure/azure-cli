@@ -67,7 +67,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         from knack.prompting import prompt_y_n
         if not yes:
             confirmation = prompt_y_n("Please check the release notes first: https://docs.microsoft.com/"
-                                      "cli/azure/release-notes-azure-cli\nDo you wnat to continue?", default='y')
+                                      "cli/azure/release-notes-azure-cli\nDo you want to continue?", default='y')
             if not confirmation:
                 telemetry.set_success("Upgrade stopped by user")
                 return
