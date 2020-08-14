@@ -24,7 +24,7 @@ if [ "$target_profile" != "latest" ]; then
     # example: hybrid-2019-03-01. Python module name can't begin with a digit.
     target_profile=hybrid_${target_profile//-/_}
 fi
-echo Pick up profile: $target_profile 
+echo Pick up profile: $target_profile
 
 ##############################################
 # Define colored output func
@@ -47,6 +47,9 @@ title 'Build Azure CLI and its command modules'
 for setup_file in $(find src -name 'setup.py'); do
     pushd $(dirname ${setup_file}) >/dev/null
     echo "Building module at $(pwd) ..."
+
+    cp ../../NOTICE.txt .
+
     python setup.py -q bdist_wheel -d $output_dir
     python setup.py -q sdist -d $sdist_dir
     popd >/dev/null
