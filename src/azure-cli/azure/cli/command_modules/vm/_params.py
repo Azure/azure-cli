@@ -501,10 +501,6 @@ def load_arguments(self, _):
             custom_location_type = CLIArgumentType(overrides=location_type,
                                                    help=location_type.settings["help"] + custom_location_msg)
             c.argument('location', arg_type=custom_location_type)
-
-    with self.argument_context('vm assess-patch') as c:
-        c.argument()
-        c.argument()
     # endregion
 
     # region VMSS
