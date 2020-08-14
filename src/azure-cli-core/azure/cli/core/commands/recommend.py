@@ -10,16 +10,16 @@ def register_global_query_recommend_argument(cli_ctx):
     '''Register --query-recommend argument, and register handler
     '''
 
-    def handle_recommend_parameter(cli, **kwargs):
+    def handle_recommend_parameter(cli, **kwargs):  # pylint: disable=unused-argument
         args = kwargs['args']
-        if args._query_recommend is not None:
+        if args._query_recommend is not None:  # pylint: disable=protected-access
             cli_ctx.invocation.data['output'] = 'table'
 
             def analyze_output(cli_ctx, **kwargs):
                 tree_builder = TreeBuilder()
                 tree_builder.build(kwargs['event_data']['result'])
                 kwargs['event_data']['result'] = tree_builder.generate_recommend(
-                    args._query_recommend)
+                    args._query_recommend)  # pylint: disable=protected-access
                 cli_ctx.unregister_event(
                     events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
 
@@ -65,6 +65,6 @@ class TreeBuilder:
         '''
         self._data = data
 
-    def generate_recommend(self, keywords_list):
+    def generate_recommend(self, keywords_list):  # pylint: disable=unused-argument, no-self-use
         recommendations = []
         return todict(recommendations)
