@@ -286,9 +286,6 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100].
-  - name: --cluster-autoscaler-profile
-    type: list
-    short-summary: Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.
   - name: --vm-set-type
     type: string
     short-summary: Agent pool vm set type. VirtualMachineScaleSets or AvailabilitySet.
@@ -415,9 +412,6 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
-  - name: --cluster-autoscaler-profile
-    type: list
-    short-summary: Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.
   - name: --uptime-sla
     type: bool
     short-summary: Enable a paid managed cluster service with a financially backed SLA.
