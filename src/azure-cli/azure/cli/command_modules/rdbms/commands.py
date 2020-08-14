@@ -40,8 +40,12 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_private_endpoint_connections_operations,
     cf_postgres_private_link_resources_operations,
     cf_postgres_server_keys_operations,
-    cf_postgres_server_ad_administrators_operations)
+    cf_postgres_server_ad_administrators_operations,
+    cf_mysql_flexible_servers,
+    cf_postgres_flexible_servers)
 
+# from .transformers import table_transform_connection_string
+# from .validators import db_up_namespace_processor
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_command_table(self, _):
@@ -58,8 +62,18 @@ def load_command_table(self, _):
         client_factory=cf_mysql_servers
     )
 
+    mysql_flexible_servers_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#ServersOperations.{}',
+        client_factory=cf_mysql_servers
+    )
+
     postgres_servers_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServersOperations.{}',
+        client_factory=cf_postgres_servers
+    )
+
+    postgres_flexible_servers_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.flexibleservers.operations#ServersOperations.{}',
         client_factory=cf_postgres_servers
     )
 
@@ -212,6 +226,9 @@ def load_command_table(self, _):
         client_factory=cf_postgres_server_ad_administrators_operations,
         resource_type=ResourceType.MGMT_RDBMS
     )
+
+    # not using this currently 
+    flexible_server_custom_commands = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom#{}')
 
     with self.command_group('mariadb server', mariadb_servers_sdk, client_factory=cf_mariadb_servers) as g:
         g.custom_command('create', '_server_create')
@@ -455,3 +472,24 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.wait_command('wait')
+
+    ## Meru Commands
+    with self.command_group('postgres flexible-server', postgres_flexible_servers_sdk, client_factory=cf_postgres_flexible_servers) as g:
+        g.custom_command('create', '_flexible_server_create')
+        g.custom_command('restore', '_server_restore', supports_no_wait=True)
+        g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.custom_command('list', '_server_list_custom_func')
+        g.generic_update_command('update',
+                                 getter_name='_server_update_get', getter_type=rdbms_custom,
+                                 setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
+                                 custom_func_name='_server_update_custom_func')
+        g.custom_wait_command('wait', '_server_postgresql_get')
+        g.command('restart', 'restart')
+
+    # with self.command_group('postgres flexible-server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
+    #     g.custom_command('create', '_server_create_without_args_pg', validator=db_up_namespace_processor('postgres'),
+    #                      table_transformer=table_transform_connection_string,
+    #                      command_type=flexible_server_custom_commands)
+

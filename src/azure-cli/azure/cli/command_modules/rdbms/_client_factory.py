@@ -69,6 +69,33 @@ def get_mysql_management_client(cli_ctx, **_):
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
+def get_mysql_flexible_management_client(cli_ctx, **_):
+    from os import getenv
+    from azure.mgmt.rdbms.mysql.flexibleservers import MySQLManagementClient
+
+    # Allow overriding resource manager URI using environment variable
+    # for testing purposes. Subscription id is also determined by environment
+    # variable.
+    rm_uri_override = getenv(RM_URI_OVERRIDE)
+    if rm_uri_override:
+        client_id = getenv(CLIENT_ID)
+        if client_id:
+            from azure.common.credentials import ServicePrincipalCredentials
+            credentials = ServicePrincipalCredentials(
+                client_id=client_id,
+                secret=getenv(CLIENT_SECRET),
+                tenant=getenv(TENANT_ID))
+        else:
+            from msrest.authentication import Authentication    # pylint: disable=import-error
+            credentials = Authentication()
+
+        return MySQLManagementClient(
+            subscription_id=getenv(SUB_ID_OVERRIDE),
+            base_url=rm_uri_override,
+            credentials=credentials)
+    # Normal production scenario.
+    return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
+
 
 def get_postgresql_management_client(cli_ctx, **_):
     from os import getenv
@@ -97,6 +124,34 @@ def get_postgresql_management_client(cli_ctx, **_):
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
+def get_postgresql_flexible_management_client(cli_ctx, **_):
+    from os import getenv
+    from azure.mgmt.rdbms.postgresql.flexibleservers import PostgreSQLManagementClient
+
+    # Allow overriding resource manager URI using environment variable
+    # for testing purposes. Subscription id is also determined by environment
+    # variable.
+    rm_uri_override = getenv(RM_URI_OVERRIDE)
+    if rm_uri_override:
+        client_id = getenv(CLIENT_ID)
+        if client_id:
+            from azure.common.credentials import ServicePrincipalCredentials
+            credentials = ServicePrincipalCredentials(
+                client_id=client_id,
+                secret=getenv(CLIENT_SECRET),
+                tenant=getenv(TENANT_ID))
+        else:
+            from msrest.authentication import Authentication    # pylint: disable=import-error
+            credentials = Authentication()
+
+        return PostgreSQLManagementClient(
+            subscription_id=getenv(SUB_ID_OVERRIDE),
+            base_url=rm_uri_override,
+            credentials=credentials)
+    # Normal production scenario.
+    return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
+
+
 
 def cf_mariadb_servers(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).servers
@@ -105,14 +160,17 @@ def cf_mariadb_servers(cli_ctx, _):
 def cf_mysql_servers(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).servers
 
+def cf_mysql_flexible_servers(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).servers
 
 def cf_postgres_servers(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).servers
 
+def cf_postgres_flexible_servers(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).servers
 
 def cf_mariadb_firewall_rules(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).firewall_rules
-
 
 def cf_mysql_firewall_rules(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).firewall_rules
