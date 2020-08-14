@@ -377,7 +377,7 @@ def create_product(client, resource_group_name, service_name, product_id, produc
         subscriptions_limit=subscriptions_limit
     )
 
-    #Possible values include: 'notPublished', 'published'
+    # Possible values include: 'notPublished', 'published'
     if state is not None:
         if state == ProductState.not_published:
             parameters.state = ProductState.not_published

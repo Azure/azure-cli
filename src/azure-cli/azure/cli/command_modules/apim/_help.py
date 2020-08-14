@@ -196,7 +196,7 @@ short-summary: Deletes the specified API from the specified product.
 examples:
   - name: Deletes the specified API from the specified product.
     text: |-
-        az apim productapi add --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
+        az apim productapi delete --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
 """
 
 helps['apim product list'] = """

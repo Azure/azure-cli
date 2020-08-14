@@ -147,65 +147,62 @@ class ApimScenarioTest(ScenarioTest):
         self.assertEqual(api_count, 3)
 
         # product operations
-        initial_product_count = len(self.cmd('apim product list -g {rg} -n {service_name}').get_output_in_json()))
-        
+        initial_product_count = len(self.cmd('apim product list -g {rg} -n {service_name}').get_output_in_json())
+
         # add product
-        self.cmd('apim product create -g {rg} -n {service_name} --product-id {product_id1} --product-name {product_name1} --description {product_description} --legal-terms {legal_terms} --subscription-required true --approval-required true --subscriptions-limit {subscription_limit} --state {state}', checks=[
-            self.check('description', '{product_description}')
-            self.check('terms', '{legal_terms}')
-            self.check('subscription_required', True)
-            self.check('approval_required', True)
-            self.check('subscriptions_limit', '{subscription_limit}')
-            self.check('display_name'，'{product_name1}')
+        self.cmd('apim product create -g {rg} -n {service_name} --product-id {product_id1} --product-name {product_name1} --legal-terms {legal_terms} --subscription-required true --approval-required true --subscriptions-limit {subscription_limit} --state {state}', checks=[
+            self.check('terms', '{legal_terms}'),
+            self.check('subscriptionRequired', True),
+            self.check('approvalRequired', True),
+            self.check('subscriptionsLimit', '{subscription_limit}'),
+            self.check('displayName', '{product_name1}'),
             self.check('state', '{state}')
-        ] )
-        
-        current_product_count = len(self.cmd('apim product list -g {rg} -n {service_name}').get_output_in_json()))
+        ])
+
+        current_product_count = len(self.cmd('apim product list -g {rg} -n {service_name}').get_output_in_json())
         self.assertEqual(current_product_count, initial_product_count + 1)
 
         # get product
         self.cmd('apim product get -g {rg} -n {service_name} --product-id {product_id1}', checks=[
-            self.check('description', '{description}')
-            self.check('terms', '{legal_terms}')
-            self.check('subscription_required', True)
-            self.check('approval_required', True)
-            self.check('subscriptions_limit', '{subscription_limit}')
-            self.check('display_name'，'{product_name1}')
+            self.check('terms', '{legal_terms}'),
+            self.check('subscriptionRequired', True),
+            self.check('approvalRequired', True),
+            self.check('subscriptionsLimit', '{subscription_limit}'),
+            self.check('displayName', '{product_name1}'),
             self.check('state', '{state}')
         ])
 
         # update product
-        self.cmd('apim product update -g {rg} -n {service_name} --product-id {product_id1} --description {product_description} --product-name {product_name2} --legal-terms {new_legal_terms} --state {new_state} --subscriptions_limit {new_subscription_limit}', checks=[
-            self.check('description', '{new_product_description}')
-            self.check('terms', '{new_legal_terms}')
-            self.check('subscription_required', True)
-            self.check('approval_required', True)
-            self.check('subscriptions_limit', '{new_subscription_limit}')
-            self.check('display_name'，'{product_name2}')
+        self.cmd('apim product update -g {rg} -n {service_name} --product-id {product_id1} --product-name {product_name2} --legal-terms {new_legal_terms} --state {new_state} --subscriptions_limit {new_subscription_limit}', checks=[
+            self.check('terms', '{new_legal_terms}'),
+            self.check('subscriptionRequired', True),
+            self.check('approvalRequired', True),
+            self.check('subscriptionsLimit', '{new_subscription_limit}'),
+            self.check('displayName', '{product_name2}'),
             self.check('state', '{new_state}')
-        ] )
+        ])
 
         # productApis operations
 
         # list APIs in a product
-        initial_productapi_count = len(self.cmd('apim productapi list -g {rg} -n {service_name} --product-id {product_id1}').get_output_in_json()))
+        initial_productapi_count = len(self.cmd('apim productapi list -g {rg} -n {service_name} --product-id {product_id1}').get_output_in_json())
 
         # add API to product
         self.cmd('apim productapi add -g {rg} -n {service_name} --product-id {product_id1} --api-id {api_id}')
-        current_productapi_count = len(self.cmd('apim productapi list -g {rg} -n {service_name} --product-id {product_id1}').get_output_in_json()))
+        current_productapi_count = len(self.cmd('apim productapi list -g {rg} -n {service_name} --product-id {product_id1}').get_output_in_json())
         self.assertEqual(initial_productapi_count, current_productapi_count - 1)
-        
+
         # check API exists in product
         self.cmd('apim productapi check -g {rg} -n {service_name} --product-id {product_id1} --api-id {api_id}')
 
         # delete API from product
         self.cmd('apim productapi delete -g {rg} -n {service_name} --product-id {product_id1} --api-id {api_id}')
-        final_productapi_count = len(self.cmd('apim productapi list -g {rg} -n {service_name} --product-id {product_id1}').get_output_in_json()))
+        final_productapi_count = len(self.cmd('apim productapi list -g {rg} -n {service_name} --product-id {product_id1}').get_output_in_json())
         self.assertEqual(initial_productapi_count, final_productapi_count)
 
         # delete product
         self.cmd('apim product delete -g {rg} -n {service_name} --product-id {product_id1} --delete-subscriptions true')
-        final_product_count = len(self.cmd(self.cmd('apim product list -g {rg} -n {service_name}').get_output_in_json())))
+        final_product_count = len(self.cmd('apim product list -g {rg} -n {service_name}').get_output_in_json())
         self.assertEqual(final_product_count, initial_product_count)
 
         # api delete command
@@ -251,7 +248,6 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim nv delete -g {rg} --service-name {service_name} --named-value-id {nv_id} -y')
         nv_count = len(self.cmd('apim nv list -g {rg} --service-name {service_name}').get_output_in_json())
         self.assertEqual(nv_count, 0)
-
 
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
