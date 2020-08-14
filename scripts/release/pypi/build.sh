@@ -19,9 +19,6 @@ pip list
 
 for setup_file in $(find src -name 'setup.py' | grep -v azure-cli-testsdk); do
     pushd `dirname $setup_file`
-
-    cp ../../../NOTICE.txt .
-
     python setup.py bdist_wheel -d $BUILD_STAGINGDIRECTORY
     python setup.py sdist -d $BUILD_STAGINGDIRECTORY
     popd
