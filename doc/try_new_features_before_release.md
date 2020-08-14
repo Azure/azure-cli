@@ -52,5 +52,3 @@ python -m venv env
 # Activate it
 env\Scripts\activate.ps1
 ```
-
-Unfortunately, `.msi` and `.deb` files are not available since Azure Python SDK is not released and cannot be found.
