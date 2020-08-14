@@ -10,7 +10,6 @@ import mock
 
 
 from knack.log import get_logger
-from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.checkers import StringContainCheck
 
@@ -19,7 +18,6 @@ logger = get_logger(__name__)
 
 class AroScenarioTests(ScenarioTest):
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_create', location='eastus')
     def test_aro_create(self, resource_group):
         from msrestazure.tools import resource_id
@@ -55,7 +53,6 @@ class AroScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ])
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_list_cred', location='eastus')
     def test_aro_list_credentials(self, resource_group):
         from msrestazure.tools import resource_id
@@ -87,7 +84,6 @@ class AroScenarioTests(ScenarioTest):
 
         self.cmd('aro list-credentials -g {rg} -n {name} --subscription {subscription}', checks=[self.check('kubeadminUsername', 'kubeadmin')])
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_show', location='eastus')
     def test_aro_show(self, resource_group):
         from msrestazure.tools import resource_id
@@ -125,7 +121,6 @@ class AroScenarioTests(ScenarioTest):
             StringContainCheck('Succeeded'),
         ])
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_list', location='eastus')
     def test_aro_list(self, resource_group):
         from msrestazure.tools import resource_id
@@ -161,7 +156,6 @@ class AroScenarioTests(ScenarioTest):
             self.check_pattern('[0].id', '.*{name}')
         ])
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_delete', location='eastus')
     def test_aro_delete(self, resource_group):
         from msrestazure.tools import resource_id
@@ -193,7 +187,6 @@ class AroScenarioTests(ScenarioTest):
 
         self.cmd('aro delete -y -g {rg} -n {name} --subscription {subscription}', expect_failure=False)
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_update', location='eastus')
     def test_aro_update(self, resource_group):
         from msrestazure.tools import resource_id
