@@ -886,12 +886,32 @@ def add_permission(cmd, identifier, api, api_permissions):
                    'change effective', identifier, api)
 
 
-def delete_permission(cmd, identifier, api):
+def delete_permission(cmd, identifier, api, api_permissions=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
-    existing_accesses = application.required_resource_access
-    existing_accesses = [e for e in existing_accesses if e.resource_app_id != api]
-    update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
+    required_resource_access = application.required_resource_access
+    # required_resource_access (list of RequiredResourceAccess)
+    #   RequiredResourceAccess
+    #     resource_app_id
+    #     resource_access (list of ResourceAccess)
+    #       ResourceAccess
+    #         id
+    #         type
+
+    # Get the RequiredResourceAccess object whose resource_app_id == api
+    access = next((a for a in required_resource_access if a.resource_app_id == api), None)
+
+    if api_permissions:
+        # Remove specified ResourceAccess under RequiredResourceAccess.resource_access
+        access.resource_access = [a for a in access.resource_access if a.id not in api_permissions]
+        # Remove the RequiredResourceAccess if empty
+        if not access.resource_access:
+            required_resource_access.remove(access)
+    else:
+        # Remove the whole RequiredResourceAccess
+        required_resource_access.remove(access)
+
+    update_parameter = ApplicationUpdateParameters(required_resource_access=required_resource_access)
     return graph_client.applications.patch(application.object_id, update_parameter)
 
 
