@@ -118,7 +118,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
                            "or 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
-            exit_code = subprocess.call(['powershell.exe', 'Start-Process powershell -Verb runAs -ArgumentList "Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile AzureCLI.msi;Start-Process msiexec.exe -Wait -ArgumentList \'/I AzureCLI.msi\';Remove-Item AzureCLI.msi"'])  # pylint: disable=line-too-long
+            exit_code = subprocess.call(['powershell.exe', 'Start-Process powershell -Wait -Verb runAs -ArgumentList "Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile AzureCLI.msi;Start-Process msiexec.exe -Wait -ArgumentList \'/I AzureCLI.msi\';Remove-Item AzureCLI.msi"'])  # pylint: disable=line-too-long
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
