@@ -43,5 +43,5 @@ short-summary: Show the versions of Azure CLI modules and extensions in JSON for
 
 helps['upgrade'] = """
 type: command
-short-summary: Upgrade to the latest Azure CLI version
+short-summary: Upgrade Azure CLI and extensions
 """

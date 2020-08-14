@@ -289,19 +289,17 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None, source=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None):
     try:
-        ext_sha256 = None
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
-        if not source:
-            try:
-                source, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
-            except NoExtensionCandidatesError as err:
-                logger.debug(err)
-                logger.warning("No updates available for '%s'. Use --debug for more information.", extension_name)
-                return
+        try:
+            source, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
+        except NoExtensionCandidatesError as err:
+            logger.debug(err)
+            logger.warning("No updates available for '%s'. Use --debug for more information.", extension_name)
+            return
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.
         backup_dir = os.path.join(tempfile.mkdtemp(), extension_name)
         extension_path = ext.path
@@ -373,12 +371,12 @@ def list_versions(extension_name, index_url=None):
         installed_ext = None
 
     results = []
-    latest_compatible_version = '0.0.0'
+    latest_compatible_version = None
 
     for ext in sorted(exts, key=lambda c: parse_version(c['metadata']['version']), reverse=True):
         compatible = ext_compat_with_cli(ext['metadata'])[0]
         ext_version = ext['metadata']['version']
-        if compatible and latest_compatible_version == '0.0.0':
+        if latest_compatible_version is None and compatible:
             latest_compatible_version = ext_version
         installed = ext_version == installed_ext.version if installed_ext else False
         if installed and parse_version(latest_compatible_version) > parse_version(installed_ext.version):
