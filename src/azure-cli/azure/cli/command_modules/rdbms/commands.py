@@ -227,9 +227,6 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RDBMS
     )
 
-    # not using this currently 
-    flexible_server_custom_commands = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom#{}')
-
     with self.command_group('mariadb server', mariadb_servers_sdk, client_factory=cf_mariadb_servers) as g:
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
@@ -473,23 +470,53 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.wait_command('wait')
 
-    ## Meru Commands
-    with self.command_group('postgres flexible-server', postgres_flexible_servers_sdk, client_factory=cf_postgres_flexible_servers) as g:
-        g.custom_command('create', '_flexible_server_create')
-        g.custom_command('restore', '_server_restore', supports_no_wait=True)
-        g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func')
-        g.generic_update_command('update',
-                                 getter_name='_server_update_get', getter_type=rdbms_custom,
-                                 setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
-                                 custom_func_name='_server_update_custom_func')
-        g.custom_wait_command('wait', '_server_postgresql_get')
-        g.command('restart', 'restart')
+    ### MERU COMMANDS
+    flexible_servers_custom_postgres = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_postgres#{}')
+    flexible_servers_custom_mysql = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_mysql#{}')
+    flexible_servers_custom_mariadb = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_mariadb#{}')
 
-    # with self.command_group('postgres flexible-server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
-    #     g.custom_command('create', '_server_create_without_args_pg', validator=db_up_namespace_processor('postgres'),
-    #                      table_transformer=table_transform_connection_string,
-    #                      command_type=flexible_server_custom_commands)
+
+    with self.command_group('postgres flexible-server', postgres_flexible_servers_sdk, custom_command_type=flexible_servers_custom_postgres, client_factory=cf_postgres_flexible_servers) as g:
+        g.custom_command('create', '_flexible_server_create')
+        g.custom_command('restore', '_flexible_server_restore', supports_no_wait=True)
+        # g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
+        # g.command('delete', 'delete', confirmation=True)
+        # g.show_command('show', 'get')
+        # g.custom_command('list', '_server_list_custom_func')
+        # g.generic_update_command('update',
+        #                          getter_name='_server_update_get', getter_type=rdbms_custom,
+        #                          setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
+        #                          custom_func_name='_server_update_custom_func')
+        # g.custom_wait_command('wait', '_server_postgresql_get')
+        # g.command('restart', 'restart')
+
+    with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk, custom_command_type=flexible_servers_custom_mysql, client_factory=cf_mysql_flexible_servers) as g:
+        g.custom_command('create', '_flexible_server_create')
+        # g.custom_command('restore', '_server_restore', supports_no_wait=True)
+        # g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
+        # g.command('delete', 'delete', confirmation=True)
+        # g.show_command('show', 'get')
+        # g.custom_command('list', '_server_list_custom_func')
+        # g.generic_update_command('update',
+        #                          getter_name='_server_update_get', getter_type=rdbms_custom,
+        #                          setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
+        #                          custom_func_name='_server_update_custom_func')
+        # g.custom_wait_command('wait', '_server_mysql_get')
+        # g.command('restart', 'restart')
+
+    # MARIADB flex servers don't exist yet
+
+    # with self.command_group('mariadb flexible-server', mariadb_flexible_servers_sdk, client_factory=cf_mariadb_servers) as g:
+    #     g.custom_command('create', '_server_create')
+    #     g.custom_command('restore', '_server_restore', supports_no_wait=True)
+    #     g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
+    #     g.command('delete', 'delete', confirmation=True)
+    #     g.show_command('show', 'get')
+    #     g.custom_command('list', '_server_list_custom_func')
+    #     g.generic_update_command('update',
+    #                              getter_name='_server_update_get', getter_type=rdbms_custom,
+    #                              setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
+    #                              custom_func_name='_server_update_custom_func')
+    #     g.custom_wait_command('wait', '_server_mariadb_get')
+    #     g.command('restart', 'restart')
 
