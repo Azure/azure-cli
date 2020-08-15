@@ -11,7 +11,7 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
-from ._client_factory import get_mariadb_management_client, get_mysql_flexible_management_client, get_postgresql_flexible_management_client, cf_postgres_firewall_rules, cf_postgres_db, cf_postgres_config
+from ._client_factory import get_postgresql_flexible_management_client
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
@@ -81,3 +81,78 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
+# Update commands
+def _flexible_server_update_get(client, resource_group_name, server_name):
+    return client.get(resource_group_name, server_name)
+
+def _flexible_server_update_set(client, resource_group_name, server_name, parameters):
+    return client.update(resource_group_name, server_name, parameters)
+
+def _flexible_server_update_custom_func(instance,
+                               version=None,
+                               sku_name=None,
+                               v_cores=None,
+                               server_edition=None,
+                               storage_mb=None,
+                               backup_retention=None,
+                               administrator_login_password=None,
+                               ssl_enforcement=None,
+                               tags=None,
+                               auto_grow=None,
+                               assign_identity=False,
+                               public_network_access=None,
+                               minimal_tls_version=None):
+    from importlib import import_module
+    server_module_path = instance.__module__
+    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    ServerPropertiesForUpdate = getattr(module, 'ServerPropertiesForUpdate')
+
+    if sku_name:
+        instance.sku.name = sku_name
+        instance.sku.capacity = None
+        instance.sku.family = None
+        instance.sku.tier = None
+    else:
+        instance.sku = None
+
+    if storage_mb:
+        instance.storage_profile.storage_mb = storage_mb
+
+    if backup_retention:
+        instance.storage_profile.backup_retention_days = backup_retention
+
+    if auto_grow:
+        instance.storage_profile.storage_autogrow = auto_grow
+
+    if server_edition:
+        instance.server_edition = server_edition
+    else:
+        server_edition = "GeneralPurpose" # default if not provided
+
+    params = ServerPropertiesForUpdate(storage_profile=instance.storage_profile,
+                                    administrator_login_password=administrator_login_password,
+                                    version=None,
+                                    server_edition = server_edition,
+                                    v_cores = v_cores)
+
+    if assign_identity:
+        from azure.mgmt.rdbms import postgresql
+        if instance.identity is None:
+            instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
+        params.identity = instance.identity
+    return params
+
+
+
+# Wait command
+def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
+    client = get_postgresql_flexible_management_client(cmd.cli_ctx)
+    return client.servers.get(resource_group_name, server_name)
+
+# Common between sterling and meru
+# Custom functions for list servers
+def _server_list_custom_func(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()

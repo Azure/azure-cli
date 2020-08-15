@@ -104,3 +104,11 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
+
+# Common between sterling and meru
+# Custom functions for list servers
+def _server_list_custom_func(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()

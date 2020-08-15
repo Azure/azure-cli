@@ -480,15 +480,15 @@ def load_command_table(self, _):
         g.custom_command('create', '_flexible_server_create')
         g.custom_command('restore', '_flexible_server_restore', supports_no_wait=True)
         # g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
-        # g.command('delete', 'delete', confirmation=True)
-        # g.show_command('show', 'get')
-        # g.custom_command('list', '_server_list_custom_func')
-        # g.generic_update_command('update',
-        #                          getter_name='_server_update_get', getter_type=rdbms_custom,
-        #                          setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
-        #                          custom_func_name='_server_update_custom_func')
-        # g.custom_wait_command('wait', '_server_postgresql_get')
-        # g.command('restart', 'restart')
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.custom_command('list', '_server_list_custom_func')
+        g.generic_update_command('update',
+                                 getter_name='_flexible_server_update_get', getter_type=flexible_servers_custom_postgres,
+                                 setter_name='_flexible_server_update_set', setter_type=flexible_servers_custom_postgres, setter_arg_name='parameters',
+                                 custom_func_name='_flexible_server_update_custom_func')
+        g.custom_wait_command('wait', '_flexible_server_postgresql_get')
+        g.command('restart', 'restart')
 
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk, custom_command_type=flexible_servers_custom_mysql, client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', '_flexible_server_create')
