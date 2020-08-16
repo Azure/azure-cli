@@ -161,6 +161,40 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
+def get_latest_from_github(package_path='azure-cli'):
+    try:
+        import requests
+        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/master/src/{}/setup.py".format(package_path)
+        response = requests.get(git_url, timeout=10)
+        if response.status_code != 200:
+            logger.info("Failed to fetch the latest version from '%s' with status code '%s' and reason '%s'",
+                        git_url, response.status_code, response.reason)
+            return None
+        for line in response.iter_lines():
+            txt = line.decode('utf-8', errors='ignore')
+            if txt.startswith('VERSION'):
+                match = re.search(r'VERSION = \"(.*)\"$', txt)
+                if match:
+                    return match.group(1)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info("Failed to get the latest version from '%s'. %s", git_url, str(ex))
+        return None
+
+
+def _update_latest_from_github(versions):
+    if not check_connectivity(max_retries=0):
+        return versions, False
+    success = True
+    for pkg in ['azure-cli-core', 'azure-cli-telemetry']:
+        version = get_latest_from_github(pkg)
+        if not version:
+            success = False
+        else:
+            versions[pkg.replace(COMPONENT_PREFIX, '')]['pypi'] = version
+    versions[CLI_PACKAGE_NAME]['pypi'] = versions['core']['pypi']
+    return versions, success
+
+
 def get_cached_latest_versions(versions=None):
     """ Get the latest versions from a cached file"""
     import datetime
@@ -176,7 +210,7 @@ def get_cached_latest_versions(versions=None):
             if cache_versions and cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
                 return cache_versions.copy(), True
 
-    versions, success = _update_latest_from_pypi(versions)
+    versions, success = _update_latest_from_github(versions)
     if success:
         VERSIONS['versions'] = versions
         VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())

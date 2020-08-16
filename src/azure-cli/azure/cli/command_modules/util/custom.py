@@ -34,7 +34,6 @@ def show_version(cmd):  # pylint: disable=unused-argument
 def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
     import os
     import platform
-    import requests
     import sys
     import subprocess
     import azure.cli.core.telemetry as telemetry
@@ -45,21 +44,16 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     from knack.util import CLIError
 
     update_cli = True
+    from azure.cli.core.util import get_latest_from_github
     try:
-        git_release_url = "https://api.github.com/repos/Azure/azure-cli/releases/latest"
-        response = requests.get(git_release_url)
-        if response.status_code != 200:
-            raise CLIError("Failed to fetch the latest version from '{}' with status code '{}' and reason '{}'".format(
-                git_release_url, response.status_code, response.reason))
-        latest_version = response.json()['tag_name'].replace('azure-cli-', '')
-
+        latest_version = get_latest_from_github()
         if latest_version and LooseVersion(latest_version) <= LooseVersion(local_version):
             logger.warning("You already have the latest azure-cli version: %s", local_version)
             update_cli = False
             if not update_all:
                 return
     except Exception as ex:  # pylint: disable=broad-except
-        logger.warning('Failed to check against the latest version, will try to upgrade directly.')
+        pass
     exts = [ext.name for ext in get_extensions(ext_type=WheelExtension)] if update_all else []
 
     exit_code = 0
