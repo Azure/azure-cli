@@ -71,6 +71,32 @@ def _apply_format(result, format_group):
     # Apply format function to list
     return [format_group(item) for item in obj_list]
 
+###############################################
+#                sql instance-pool            #
+###############################################
+
+
+def instance_pool_table_format(result):
+    '''
+    Formats an instance pool or list of instance pools as summary results for display with "-o table".
+    '''
+    def _instance_pool_table_format(result):
+        '''
+        Formats an instance pool or list of instance pools as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+        sku = result['sku']
+        return OrderedDict([
+            ('name', result['name']),
+            ('resourceGroup', result['resourceGroup']),
+            ('location', result['location']),
+            ('Capacity', result['vCores']),
+            ('SKU Family', sku['family']),
+            ('SKU Tier', sku['tier']),
+            ('Tags', str(result['tags']) if result['tags'] else '')
+        ])
+
+    return _apply_format(result, _instance_pool_table_format)
 
 ###############################################
 #                sql server                   #

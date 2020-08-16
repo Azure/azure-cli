@@ -10,7 +10,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def create_metric_alert(client, resource_group_name, rule_name, scopes, description, condition, disabled=False,
+def create_metric_alert(client, resource_group_name, rule_name, scopes, condition, disabled=False, description=None,
                         tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
                         auto_mitigate=None):
     from azure.mgmt.monitor.models import (MetricAlertResource,

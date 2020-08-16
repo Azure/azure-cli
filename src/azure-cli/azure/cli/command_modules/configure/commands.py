@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
+from azure.cli.command_modules.configure._validators import validate_local_context, validate_local_context_for_delete
 
 
 def load_command_table(self, _):
@@ -18,3 +19,9 @@ def load_command_table(self, _):
         g.command('show', 'show_cache_contents')
         g.command('delete', 'delete_cache_contents')
         g.command('purge', 'purge_cache_contents')
+
+    with self.command_group('local-context', configure_custom, is_experimental=True) as g:
+        g.command('on', 'turn_local_context_on')
+        g.command('off', 'turn_local_context_off')
+        g.command('show', 'show_local_context', validator=validate_local_context)
+        g.command('delete', 'delete_local_context', validator=validate_local_context_for_delete)

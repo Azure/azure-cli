@@ -3,11 +3,33 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 
+from azure.cli.core.util import parse_proxy_resource_id
+
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
+
+
+def _get_resource_group_from_server_name(cli_ctx, server_name):
+    """
+    Fetch resource group from server name
+    :param str server_name: name of the server
+    :return: resource group name or None
+    :rtype: str
+    """
+    from azure.cli.core.profiles import ResourceType
+    from msrestazure.tools import parse_resource_id
+
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RDBMS).servers
+    for server in client.list():
+        id_comps = parse_resource_id(server.id)
+        if id_comps['name'] == server_name:
+            return id_comps['resource_group']
+    return None
 
 
 def get_combined_validator(validators):
@@ -31,6 +53,12 @@ def configuration_value_validator(ns):
     if val is None or not val.strip():
         ns.value = None
         ns.source = 'system-default'
+
+
+def tls_validator(ns):
+    if ns.minimal_tls_version:
+        if ns.ssl_enforcement is not None and ns.ssl_enforcement != 'Enabled':
+            raise CLIError('Cannot specify TLS version when ssl_enforcement is explicitly Disabled')
 
 
 def password_validator(ns):
@@ -71,3 +99,18 @@ def validate_subnet(cmd, namespace):
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')
+
+
+def validate_private_endpoint_connection_id(cmd, namespace):
+    if namespace.connection_id:
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.private_endpoint_connection_name = result['child_name_1']
+        namespace.server_name = result['name']
+        namespace.resource_group_name = result['resource_group']
+    if namespace.server_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, namespace.server_name)
+
+    if not all([namespace.server_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --server-name NAME]')
+
+    del namespace.connection_id

@@ -74,9 +74,37 @@ def cf_cosmosdb_document(cli_ctx, kwargs):
 
 def cf_cosmosdb(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.cosmosdb import CosmosDB
-    return get_mgmt_service_client(cli_ctx, CosmosDB)
+    from azure.mgmt.cosmosdb import CosmosDBManagementClient
+    return get_mgmt_service_client(cli_ctx, CosmosDBManagementClient)
+
+
+def cf_db_private_endpoint_connections(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).private_endpoint_connections
+
+
+def cf_db_private_link_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).private_link_resources
 
 
 def cf_db_accounts(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).database_accounts
+
+
+def cf_sql_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).sql_resources
+
+
+def cf_mongo_db_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).mongo_db_resources
+
+
+def cf_cassandra_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).cassandra_resources
+
+
+def cf_gremlin_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).gremlin_resources
+
+
+def cf_table_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).table_resources

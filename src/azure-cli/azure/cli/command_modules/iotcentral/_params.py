@@ -30,7 +30,7 @@ def load_arguments(self, _):
         c.argument('location', get_location_type(self.cli_ctx),
                    help='Location of your IoT Central application. Default is the location of target resource group.')
         c.argument('sku', arg_type=get_enum_type(AppSku),
-                   help='Pricing tier for IoT Central applications. Default value is S1.')
+                   help='Pricing tier for IoT Central applications. Default value is ST2.')
         c.argument(
             'subdomain', help='Subdomain for the IoT Central URL. Each application must have a unique subdomain.')
         c.argument(

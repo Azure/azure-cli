@@ -23,7 +23,8 @@ def transform_item(result):
     columns.append(('Type', result['properties']['workloadType']))
     columns.append(('Last Backup Status', result['properties']['lastBackupStatus']))
     columns.append(('Last Recovery Point', result['properties']['lastRecoveryPoint']))
-    columns.append(('Protection Status', result['properties']['protectionStatus']))
+    if 'protectionStatus' in result['properties']:
+        columns.append(('Protection Status', result['properties']['protectionStatus']))
     if 'healthStatus' in result['properties']:
         columns.append(('Health Status', result['properties']['healthStatus']))
 
@@ -48,6 +49,8 @@ def transform_job(result):
         columns.append(('Duration', result['properties']['duration']))
     elif result['properties']['backupManagementType'] == 'AzureStorage':
         columns.append(('Duration', result['properties']['additionalProperties']['duration']))
+    elif result['properties']['backupManagementType'] == 'AzureWorkload':
+        columns.append(('Duration', result['properties']['duration']))
 
     return OrderedDict(columns)
 

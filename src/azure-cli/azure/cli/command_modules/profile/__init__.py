@@ -8,8 +8,9 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.parameters import get_enum_type
 
 from azure.cli.command_modules.profile._format import transform_account_list
-from ._validators import validate_tenant
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
+
+from ._validators import validate_tenant
 
 cloud_resource_types = ["oss-rdbms", "arm", "aad-graph", "ms-graph", "batch", "media", "data-lake"]
 
@@ -75,6 +76,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('account get-access-token') as c:
             c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='', help='Type of well-known resource.')
+            c.argument('tenant', options_list=['--tenant', '-t'], is_preview=True, help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader

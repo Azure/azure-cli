@@ -31,6 +31,9 @@ examples:
   - name: Create a SQL virtual machine with AHUB billing tag.
     text: >
         az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type AHUB
+  - name: Create a SQL virtual machine with DR billing tag.
+    text: >
+        az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type DR
   - name: Create a SQL virtual machine with specific sku type and license type.
     text: >
         az sql vm create -n sqlvm -g myresourcegroup -l eastus --image-sku Enterprise --license-type AHUB
@@ -143,4 +146,7 @@ examples:
   - name: Update a SQL virtual machine billing tag to AHUB.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --license-type AHUB
+  - name: Update a SQL virtual machine billing tag to DR.
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --license-type DR
 """

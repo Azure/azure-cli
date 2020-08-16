@@ -11,7 +11,7 @@ class AzureCli < Formula
 {{ bottle_hash }}
 
   depends_on "openssl@1.1"
-  depends_on "python"
+  depends_on "python@3.8"
 
 {{ resources }}
 
@@ -41,7 +41,7 @@ class AzureCli < Formula
 
     (bin/"az").write <<~EOS
       #!/usr/bin/env bash
-      #{libexec}/bin/python -m azure.cli \"$@\"
+      AZ_INSTALLER=HOMEBREW #{libexec}/bin/python -m azure.cli \"$@\"
     EOS
 
     bash_completion.install "az.completion" => "az"

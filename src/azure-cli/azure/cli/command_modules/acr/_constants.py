@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
+from azure.cli.core.profiles import ResourceType
+
 ACR_RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
 REGISTRY_RESOURCE_TYPE = ACR_RESOURCE_PROVIDER + '/registries'
 WEBHOOK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/webhooks'
@@ -12,6 +14,8 @@ REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
 TASK_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ContainerRegistry/registries/{reg}/tasks/{name}'
+
+TASKRUN_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/taskruns'
 
 ACR_TASK_YAML_DEFAULT_NAME = 'acb.yaml'
 
@@ -64,6 +68,18 @@ def get_succeeded_run_status(cmd):
     return [RunStatus.succeeded.value]
 
 
-def get_acr_models(cmd):
-    from azure.cli.core.profiles import ResourceType, get_sdk
+def get_acr_task_models(cmd):
+    from azure.cli.core.profiles import get_sdk
     return get_sdk(cmd.cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, 'models')
+
+
+def get_succeeded_agentpool_status(cmd):
+    AgentPoolStatus = cmd.get_models('ProvisioningState')
+    return [AgentPoolStatus.succeeded.value]
+
+
+def get_finished_agentpool_status(cmd):
+    AgentPoolStatus = cmd.get_models('ProvisioningState')
+    return [AgentPoolStatus.succeeded.value,
+            AgentPoolStatus.failed.value,
+            AgentPoolStatus.canceled.value]

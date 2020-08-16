@@ -198,8 +198,10 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
                       self.storage_cmd('storage file list -s {} --query "[].name"',
                                        account_info, share).get_output_in_json())
 
-        self.storage_cmd('storage file generate-sas -s {} -p {}', account_info, share, filename) \
-            .assert_with_checks(StringContainCheck('sig='))
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        self.storage_cmd('storage file generate-sas -s {} -p {} --permissions r --expiry {}', account_info, share,
+                         filename, expiry).assert_with_checks(StringContainCheck('sig='))
 
         self.storage_cmd('storage file update -s {} -p {} --content-type "test/type"', account_info,
                          share, filename)

@@ -190,26 +190,14 @@ class TestEncryptionValidators(unittest.TestCase):
 
     def test_validate_encryption_source(self):
         with self.assertRaises(ValueError):
-            validate_encryption_source(MockCmd(self.cli),
-                                       Namespace(encryption_key_source='Microsoft.Keyvault', _cmd=MockCmd(self.cli)))
+            validate_encryption_source(
+                Namespace(encryption_key_source='Microsoft.Keyvault', encryption_key_name=None,
+                          encryption_key_version=None, encryption_key_vault=None, _cmd=MockCmd(self.cli)))
 
         with self.assertRaises(ValueError):
             validate_encryption_source(
-                MockCmd(self.cli),
                 Namespace(encryption_key_source='Microsoft.Storage', encryption_key_name='key_name',
                           encryption_key_version='key_version', encryption_key_vault='https://example.com/key_uri'))
-
-        ns = Namespace(encryption_key_source='Microsoft.Keyvault', encryption_key_name='key_name',
-                       encryption_key_version='key_version', encryption_key_vault='https://example.com/key_uri')
-        validate_encryption_source(MockCmd(self.cli), ns)
-        self.assertFalse(hasattr(ns, 'encryption_key_name'))
-        self.assertFalse(hasattr(ns, 'encryption_key_version'))
-        self.assertFalse(hasattr(ns, 'encryption_key_uri'))
-
-        properties = ns.encryption_key_vault_properties
-        self.assertEqual(properties.key_name, 'key_name')
-        self.assertEqual(properties.key_version, 'key_version')
-        self.assertEqual(properties.key_vault_uri, 'https://example.com/key_uri')
 
 
 class TestGetSourceClientValidator(unittest.TestCase):

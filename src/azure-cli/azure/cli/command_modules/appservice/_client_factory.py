@@ -29,10 +29,16 @@ def ex_handler_factory(creating_plan=False, no_throw=False):
     return _polish_bad_errors
 
 
-def web_client_factory(cli_ctx, **_):
-    from azure.mgmt.web import WebSiteManagementClient
+def web_client_factory(cli_ctx, api_version=None, **_):
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, WebSiteManagementClient)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_APPSERVICE, api_version=api_version)
+
+
+def providers_client_factory(cli_ctx):
+    from azure.mgmt.resource import ResourceManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ResourceManagementClient).providers
 
 
 def cf_plans(cli_ctx, _):

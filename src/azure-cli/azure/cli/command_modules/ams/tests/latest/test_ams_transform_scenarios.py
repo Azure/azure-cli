@@ -165,9 +165,11 @@ class AmsTransformTests(ScenarioTest):
         self.kwargs.update({
             'presetName': 'AudioAnalyzer',
             'presetName2': 'VideoAnalyzer',
+            'presetName3': 'FaceDetector',
             'audioLanguage': 'es-ES',
             'audioLanguage2': 'en-US',
-            'insightsToExtract': 'AudioInsightsOnly'
+            'insightsToExtract': 'AudioInsightsOnly',
+            'resolution': 'SourceResolution'
         })
 
         self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName} --audio-language {audioLanguage}', checks=[
@@ -177,4 +179,8 @@ class AmsTransformTests(ScenarioTest):
         self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName2} --audio-language {audioLanguage2} --insights-to-extract {insightsToExtract}', checks=[
             self.check('outputs[3].preset.audioLanguage', '{audioLanguage2}'),
             self.check('outputs[3].preset.insightsToExtract', '{insightsToExtract}')
+        ])
+
+        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName3} --resolution {resolution}', checks=[
+            self.check('outputs[4].preset.resolution', '{resolution}')
         ])

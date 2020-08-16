@@ -34,6 +34,12 @@ def _resource_links_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_LINKS)
 
 
+def _resource_deploymentscripts_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS)
+
+
 def _authorization_management_client(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -94,6 +100,10 @@ def cf_management_locks(cli_ctx, _):
 
 def cf_resource_links(cli_ctx, _):
     return _resource_links_client_factory(cli_ctx).resource_links
+
+
+def cf_resource_deploymentscripts(cli_ctx, _):
+    return _resource_deploymentscripts_client_factory(cli_ctx).deployment_scripts
 
 
 def cf_resource_managedapplications(cli_ctx, _):

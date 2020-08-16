@@ -9,7 +9,7 @@ from msrest import Deserializer
 from msrest.polling import PollingMethod, LROPoller
 from msrestazure.azure_exceptions import CloudError
 
-from ._constants import get_acr_models, get_finished_run_status, get_succeeded_run_status
+from ._constants import get_acr_task_models, get_finished_run_status, get_succeeded_run_status
 
 
 def get_run_with_polling(cmd,
@@ -18,7 +18,7 @@ def get_run_with_polling(cmd,
                          registry_name,
                          resource_group_name):
     deserializer = Deserializer(
-        {k: v for k, v in get_acr_models(cmd).__dict__.items() if isinstance(v, type)})
+        {k: v for k, v in get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
 
     def deserialize_run(response):
         return deserializer('Run', response)

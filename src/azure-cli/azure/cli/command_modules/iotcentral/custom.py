@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 
 def iotcentral_app_create(
-        cmd, client, app_name, resource_group_name, subdomain, sku="S1",
+        cmd, client, app_name, resource_group_name, subdomain, sku="ST2",
         location=None, template=None, display_name=None
 ):
     cli_ctx = cmd.cli_ctx
@@ -56,9 +56,11 @@ def iotcentral_app_update(client, app_name, parameters, resource_group_name):
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):
-    """Search the current subscription for an app with the given name.
-    :param object client: IoTCentralClient
-    :param str app_name: App name to search for
+    """Check to see if a location was provided. If not,
+        fall back to the resource group location.
+    :param object cli_ctx: CLI Context
+    :param str resource_group_name: Resource group name
+    :param str location: Location to create the resource
     """
     if location is None:
         resource_group_client = resource_service_factory(

@@ -15,6 +15,7 @@ from knack.log import get_logger
 from msrest.serialization import TZ_UTC
 from msrestazure.azure_exceptions import CloudError
 from azure.graphrbac.models import (ApplicationCreateParameters,
+                                    ApplicationUpdateParameters,
                                     GraphErrorException,
                                     ServicePrincipalCreateParameters)
 
@@ -50,26 +51,28 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
     _assign_role(cmd, role, sp_oid, ams.id)
 
     return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
-                            tenant, app_id, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+                            tenant, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
                             cmd.cli_ctx.cloud.endpoints.active_directory,
-                            cmd.cli_ctx.cloud.endpoints.resource_manager, xml)
+                            cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
 
 
-def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
-                                     role='Contributor', sp_password=None, xml=False, years=None):
+def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
+                                               new_sp_name=None, role='Contributor', sp_password=None,
+                                               xml=False, years=None):
     ams = client.get(resource_group_name, account_name)
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     sp_name = _create_sp_name(account_name, sp_name)
-    sp_password = _create_sp_password(sp_password)
 
     app_display_name = sp_name.replace('http://', '')
 
     aad_sp = _get_service_principal(graph_client, sp_name)
     if aad_sp:
-        raise CLIError("Service principal '{}' already exists.".format(app_display_name))
+        return _update_sp(cmd, client, graph_client, aad_sp, ams, account_name, resource_group_name,
+                          app_display_name, new_sp_name, role, years, sp_password, xml)
 
+    sp_password = _create_sp_password(sp_password)
     aad_application = create_application(graph_client.applications,
                                          display_name=app_display_name,
                                          homepage=sp_name,
@@ -86,9 +89,32 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
     _assign_role(cmd, role, sp_oid, ams.id)
 
     return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
-                            tenant, app_id, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+                            tenant, app_id, app_display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
                             cmd.cli_ctx.cloud.endpoints.active_directory,
-                            cmd.cli_ctx.cloud.endpoints.resource_manager, xml)
+                            cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
+
+
+def _update_sp(cmd, client, graph_client, aad_sp, ams, account_name, resource_group_name, display_name,
+               new_sp_name, role, years, sp_password, xml):
+    tenant = graph_client.config.tenant_id
+    sp_oid = aad_sp.object_id
+    app_id = aad_sp.app_id
+    app_object_id = _get_application_object_id(graph_client.applications, app_id)
+
+    if sp_password or years:
+        raise CLIError("To update the credentials please use the reset-credentials command.")
+
+    if new_sp_name:
+        display_name = new_sp_name.replace('http://', '')
+        update_application(graph_client.applications, app_object_id, display_name)
+
+    if role:
+        _assign_role(cmd, role, sp_oid, ams.id)
+
+    return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
+                            tenant, app_id, display_name, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+                            cmd.cli_ctx.cloud.endpoints.active_directory,
+                            cmd.cli_ctx.cloud.endpoints.resource_manager, role, xml)
 
 
 def _update_password_credentials(client, app_object_id, sp_password, years):
@@ -217,16 +243,16 @@ def _create_service_principal(
         graph_client, name, app_id):
     _RETRY_TIMES = 36
     # retry till server replication is done
-    for l in range(0, _RETRY_TIMES):
+    for retry_time in range(0, _RETRY_TIMES):
         try:
             aad_sp = graph_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id,
                                                                                              account_enabled=True))
             break
         except Exception as ex:  # pylint: disable=broad-except
-            if l < _RETRY_TIMES and (
+            if retry_time < _RETRY_TIMES and (
                     ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
                 time.sleep(5)
-                logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
+                logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
             else:
                 logger.warning(
                     "Creating service principal failed for appid '%s'. Trace followed:\n%s",
@@ -246,7 +272,6 @@ def create_application(client, display_name, homepage, years, password, identifi
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    password_credentials=[password_credential])
-
     try:
         return client.create(app_create_param)
     except GraphErrorException as ex:
@@ -258,6 +283,18 @@ def create_application(client, display_name, homepage, years, password, identifi
         raise
 
 
+def update_application(client, app_object_id, display_name):
+    app_update_param = ApplicationUpdateParameters(display_name=display_name)
+
+    try:
+        return client.patch(app_object_id, app_update_param)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning(
+            "Updating service principal failed for appid '%s'. Trace followed:\n%s",
+            app_object_id, ex.response.headers if hasattr(ex, 'response') else ex)   # pylint: disable=no-member
+        raise
+
+
 def _search_role_assignments(assignments_client, assignee_object_id):
     f = "principalId eq '{}'".format(assignee_object_id)
     assignments = list(assignments_client.list(filter=f))
@@ -266,18 +303,19 @@ def _search_role_assignments(assignments_client, assignee_object_id):
 
 def _assign_role(cmd, role, sp_oid, scope):
     assignments = list_role_assignments(cmd, sp_oid, scope)
+
     if assignments and list(filter(lambda x: x['roleDefinitionName'] == role, assignments)):
         return
 
     _RETRY_TIMES = 36
-    for l in range(0, _RETRY_TIMES):
+    for retry_time in range(0, _RETRY_TIMES):
         try:
             _create_role_assignment(cmd.cli_ctx, role, sp_oid, scope)
             break
         except Exception as ex:  # pylint: disable=broad-except
-            if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
+            if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                 time.sleep(5)
-                logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
                                _RETRY_TIMES)
                 continue
             else:
@@ -290,12 +328,17 @@ def _assign_role(cmd, role, sp_oid, scope):
 
 
 def _build_sp_result(subscription_id, location, resource_group_name, account_name,
-                     tenant, app_id, sp_password, management_endpoint,
-                     active_directory_endpoint, resource_manager_endoint, xml):
+                     tenant, app_id, sp_name, sp_password, management_endpoint,
+                     active_directory_endpoint, resource_manager_endoint, role, xml):
+    if not sp_password:
+        sp_password = "Cannot redisplay secret. Please use reset-credentials to generate a new secret."
+
     result = {
         'SubscriptionId': subscription_id,
+        'ServicePrincipalName': sp_name,
         'Region': location,
         'ResourceGroup': resource_group_name,
+        'Role': role,
         'AccountName': account_name,
         'AadTenantId': tenant,
         'AadClientId': app_id,

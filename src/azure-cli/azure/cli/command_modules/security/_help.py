@@ -59,6 +59,37 @@ examples:
         az security alert update -g "myRg" --location "centralus" -n "alertName" --status "activate"
 """
 
+helps['security atp'] = """
+type: group
+short-summary: View and manage Advanced Threat Protection settings.
+"""
+
+helps['security atp storage'] = """
+type: group
+short-summary: View and manage Advanced Threat Protection settings for storage accounts.
+"""
+
+helps['security atp storage show'] = """
+type: command
+short-summary: Display Advanced Threat Protection settings for a storage account.
+examples:
+  - name: Retrieve Advanced Threat Protection settings for a storage account on a subscription scope.
+    text: >
+        az security atp storage show --resource-group MyResourceGroup --storage-account MyStorageAccount
+"""
+
+helps['security atp storage update'] = """
+type: command
+short-summary: Toggle status of Advanced Threat Protection for a storage account.
+examples:
+  - name: Enable Advanced Threat Protection for a storage account on a subscription scope.
+    text: >
+        az security atp storage update --resource-group MyResourceGroup --storage-account MyStorageAccount --is-enabled true
+  - name: Disable Advanced Threat Protection for a storage account on a subscription scope.
+    text: >
+        az security atp storage update --resource-group MyResourceGroup --storage-account MyStorageAccount --is-enabled false
+"""
+
 helps['security auto-provisioning-setting'] = """
 type: group
 short-summary: View your auto provisioning settings.
@@ -380,4 +411,375 @@ examples:
   - name: Shows the workspace settings in your subscription - these settings let you control which workspace will hold your security data
     text: >
         az security workspace-setting show -n default
+"""
+
+helps['security assessment'] = """
+type: group
+short-summary: View your security assessment results.
+"""
+
+helps['security assessment create'] = """
+type: command
+short-summary: Creates a customer managed security assessment.
+examples:
+  - name: Creates a security assessment.
+    text: >
+        az security assessment create -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' --status-code  'unhealthy'
+"""
+
+helps['security assessment delete'] = """
+type: command
+short-summary: Deletes a security assessment.
+examples:
+  - name: Deletes a security assessment.
+    text: >
+        az security assessment delete -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d'
+"""
+
+helps['security assessment list'] = """
+type: command
+short-summary: List all security assessment results.
+examples:
+  - name: Get security assessments.
+    text: >
+        az security assessment list
+"""
+
+helps['security assessment show'] = """
+type: command
+short-summary: Shows a security assessment.
+examples:
+  - name: Get a security assessment.
+    text: >
+        az security assessment show -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d'
+"""
+
+helps['security assessment-metadata'] = """
+type: group
+short-summary: View your security assessment metadata.
+"""
+
+helps['security assessment-metadata create'] = """
+type: command
+short-summary: Creates a customer managed security assessment type.
+examples:
+  - name: Creates a security assessment type.
+    text: >
+        az security assessment-metadata create -n "4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d" --display-name  "Resource should be secured" --severity "high" --description "The resource should be secured according to my company security policy"
+"""
+
+helps['security assessment-metadata delete'] = """
+type: command
+short-summary: Deletes a security assessment type and all it's assessment results.
+examples:
+  - name: Deletes a security assessment type.
+    text: >
+        az security assessment-metadata delete -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d'
+"""
+
+helps['security assessment-metadata list'] = """
+type: command
+short-summary: List all security assessment results.
+examples:
+  - name: Get security assessment metadata.
+    text: >
+        az security assessment-metadata list
+"""
+
+helps['security assessment-metadata show'] = """
+type: command
+short-summary: Shows a security assessment.
+examples:
+  - name: Get a security assessment metadata.
+    text: >
+        az security assessment-metadata show -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d'
+"""
+
+helps['security sub-assessment'] = """
+type: group
+short-summary: View your security sub assessments.
+"""
+
+helps['security sub-assessment list'] = """
+type: command
+short-summary: List all security sub assessment results.
+examples:
+  - name: Get security sub assessments.
+    text: >
+        az security sub-assessment list
+"""
+
+helps['security sub-assessment show'] = """
+type: command
+short-summary: Shows a security sub assessment.
+examples:
+  - name: Get a security sub assessment.
+    text: >
+        az security sub-assessment show --assessed-resource-id '/subscriptions/f8b197db-3b2b-4404-a3a3-0dfec293d0d0/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1' --assessment-name '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' -n 'd7c4d9ec-227c-4fb3-acf9-25fdd97c1bf1'
+"""
+
+helps['security adaptive-application-controls'] = """
+type: group
+short-summary: Enable control which applications can run on your Azure and non-Azure machines (Windows and Linux)
+"""
+
+helps['security adaptive-application-controls list'] = """
+type: command
+short-summary: Adaptive Application Controls - List
+examples:
+  - name: list all application control VM/server groups.
+    text: >
+        az security adaptive-application-controls list
+"""
+
+helps['security adaptive-application-controls show'] = """
+type: command
+short-summary: Adaptive Application Controls - Get
+examples:
+  - name: Get a single application control VM/server group.
+    text: >
+        az security adaptive-application-controls show --group-name GROUP1
+"""
+
+helps['security allowed_connections'] = """
+type: group
+short-summary: View all possible traffic between resources for the subscription and location, based on connection type.
+"""
+
+helps['security allowed_connections list'] = """
+type: command
+short-summary: list of all possible traffic between resources for the subscription.
+examples:
+  - name: Get possible traffic between resources at the subscription level.
+    text: >
+        az security allowed_connections list
+"""
+
+helps['security allowed_connections show'] = """
+type: command
+short-summary: List all possible traffic between resources for the subscription and location, based on connection type.
+examples:
+  - name: Get all possible traffic between resources for the subscription and location, based on connection type.
+    text: >
+        az security allowed_connections show --name Internal --resource-group mygroup
+"""
+
+helps['security adaptive_network_hardenings'] = """
+type: group
+short-summary: View all Adaptive Network Hardening resources
+"""
+
+helps['security adaptive_network_hardenings list'] = """
+type: command
+short-summary: Gets a list of Adaptive Network Hardenings resources in scope of an extended resource.
+examples:
+  - name: Adaptive Network Hardenings - List By Extended Resource
+    text: >
+        az security adaptive_network_hardenings list --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1'
+"""
+
+helps['security adaptive_network_hardenings show'] = """
+type: command
+short-summary: Gets a single Adaptive Network Hardening resource.
+examples:
+  - name: Adaptive Network Hardenings - Get.
+    text: >
+        az security adaptive_network_hardenings show --resource-group 'RG1' --resource-type 'virtualMachines' --resource-namespace 'Microsoft.Compute' --resource-name 'VM1' --adaptive-network-hardenings-resource-name 'default'
+"""
+
+helps['security iot-solution'] = """
+type: group
+short-summary: Manage your IoT Security solution.
+"""
+
+helps['security iot-solution create'] = """
+type: command
+short-summary: Create your IoT Security solution.
+examples:
+  - name: create an IoT Security solution on existing IoT Hub.
+    text: >
+        az security iot-solution create --solution-name 'IoT-Hub1' --resource-group 'rg1' --iot-hubs /subscriptions/subscriptionId/resourcegroups/rg1/providers/Microsoft.Devices/IotHubs/IoT-Hub1 --display-name "Solution Default" --location "eastus"
+"""
+
+helps['security iot-solution update'] = """
+type: command
+short-summary: Update your IoT Security solution.
+examples:
+  - name: Update your IoT Security solution.
+    text: >
+        az security iot-solution update --solution-name 'IoT-Hub1' --resource-group 'rg1' --iot-hubs /subscriptions/subscriptionId/resourcegroups/rg1/providers/Microsoft.Devices/IotHubs/IoT-Hub1 --display-name "Solution Default"
+"""
+
+helps['security iot-solution delete'] = """
+type: command
+short-summary: Delete your IoT Security solution.
+examples:
+  - name: Delete an IoT Security solutions.
+    text: >
+        az security iot-solution delete --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-solution show'] = """
+type: command
+short-summary: Shows a IoT Security solution.
+examples:
+  - name: Get an IoT Security solutions.
+    text: >
+        az security iot-solution show --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-solution list'] = """
+type: command
+short-summary: List all IoT Security solutions.
+examples:
+  - name: Get List of all IoT Security solutions in subscription.
+    text: >
+        az security iot-solution list
+"""
+
+helps['security iot-analytics'] = """
+type: group
+short-summary:  View IoT Security Analytics metrics.
+"""
+
+helps['security iot-analytics show'] = """
+type: command
+short-summary: Shows IoT Security Analytics metrics.
+examples:
+  - name: Get an IoT Security Analytics metrics.
+    text: >
+        az security iot-analytics show --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-analytics list'] = """
+type: command
+short-summary: List all IoT security Analytics metrics.
+examples:
+  - name: Get List of all IoT security Analytics metrics.
+    text: >
+        az security iot-analytics list --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-alerts'] = """
+type: group
+short-summary: View IoT Security aggregated alerts.
+"""
+
+helps['security iot-alerts delete'] = """
+type: command
+short-summary: Dismiss an aggregated IoT Security Alert.
+examples:
+  - name: Dismiss an aggregated IoT Security Alert.
+    text: >
+       az security iot-alerts delete --solution-name 'IoT-Hub1' --resource-group 'rg1' --name 'IoT_CryptoMiner/2020-06-24'
+"""
+
+helps['security iot-alerts show'] = """
+type: command
+short-summary: Shows a single aggregated alert of yours IoT Security solution.
+examples:
+  - name:  Get an IoT Security solution aggregated alert.
+    text: >
+        az security iot-alerts show --solution-name 'IoT-Hub1' --resource-group 'rg1' --name 'IoT_CryptoMiner/2020-06-24'
+"""
+
+helps['security iot-alerts list'] = """
+type: command
+short-summary: List all yours IoT Security solution aggregated alerts.
+examples:
+  - name: Get list of all IoT Security solution aggregated alerts.
+    text: >
+        az security iot-alerts list --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security iot-recommendations'] = """
+type: group
+short-summary: View IoT Security aggregated recommendations.
+"""
+
+helps['security iot-recommendations show'] = """
+type: command
+short-summary: Shows a single aggregated recommendation of yours IoT Security solution.
+examples:
+  - name: Get an IoT Security solution aggregated recommendation.
+    text: >
+        az security iot-recommendations show --solution-name 'IoT-Hub1' --resource-group 'rg1' --name 'IoT_PermissiveFirewallPolicy'
+"""
+
+helps['security iot-recommendations list'] = """
+type: command
+short-summary: List all yours IoT Security solution aggregated recommendations.
+examples:
+  - name: Get list of all IoT Security solution aggregated recommendations.
+    text: >
+        az security iot-recommendations list --solution-name 'IoT-Hub1' --resource-group 'rg1'
+"""
+
+helps['security regulatory-compliance-standards'] = """
+type: group
+short-summary: regulatory compliance standards.
+"""
+
+helps['security regulatory-compliance-standards list'] = """
+type: command
+short-summary: List supported regulatory compliance standards details and state results.
+examples:
+  - name: Get regulatory compliance standards list.
+    text: >
+        az security regulatory-compliance-standards list
+"""
+
+helps['security regulatory-compliance-standards show'] = """
+type: command
+short-summary: Shows a regulatory compliance details state for selected standard.
+examples:
+  - name: Get regulatory compliance standard details.
+    text: >
+        az security regulatory-compliance-standards show -n 'Azure-CIS-1.1.0'
+"""
+
+helps['security regulatory-compliance-controls'] = """
+type: group
+short-summary: regulatory compliance controls.
+"""
+
+helps['security regulatory-compliance-controls list'] = """
+type: command
+short-summary: List supported of regulatory compliance controls details and state for selected standard.
+examples:
+  - name: Get regulatory compliance controls list.
+    text: >
+        az security regulatory-compliance-controls list --standard-name 'Azure-CIS-1.1.0'
+"""
+
+helps['security regulatory-compliance-controls show'] = """
+type: command
+short-summary: Shows a regulatory compliance details state for selected standard.
+examples:
+  - name: Get selected regulatory compliance control details and state.
+    text: >
+        az security regulatory-compliance-controls show --standard-name 'Azure-CIS-1.1.0' -n '1.1'
+"""
+
+helps['security regulatory-compliance-assessments'] = """
+type: group
+short-summary: regulatory compliance assessments.
+"""
+
+helps['security regulatory-compliance-assessments list'] = """
+type: command
+short-summary: Get details and state of assessments mapped to selected regulatory compliance control.
+examples:
+  - name: Get state of mapped assessments.
+    text: >
+        az security regulatory-compliance-assessments list --standard-name 'Azure-CIS-1.1.0' --control-name '1.1'
+"""
+
+helps['security regulatory-compliance-assessments show'] = """
+type: command
+short-summary: Shows supported regulatory compliance details and state for selected assessment.
+examples:
+  - name: Get selected regulatory compliance control details and state.
+    text: >
+        az security regulatory-compliance-assessments show --standard-name 'Azure-CIS-1.1.0' --control-name '1.1' -n '94290b00-4d0c-d7b4-7cea-064a9554e681'
 """

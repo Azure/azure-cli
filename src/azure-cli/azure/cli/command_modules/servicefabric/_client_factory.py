@@ -10,8 +10,28 @@ def servicefabric_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ServiceFabricManagementClient)
 
 
-def servicefabric_fabric_client_factory(cli_ctx, kwargs):
+def servicefabric_client_factory_all(cli_ctx, kwargs):
+    return servicefabric_client_factory(cli_ctx, **kwargs)
+
+
+def servicefabric_clusters_client_factory(cli_ctx, kwargs):
     return servicefabric_client_factory(cli_ctx, **kwargs).clusters
+
+
+def servicefabric_application_type_client_factory(cli_ctx, kwargs):
+    return servicefabric_client_factory(cli_ctx, **kwargs).application_types
+
+
+def servicefabric_application_type_version_client_factory(cli_ctx, kwargs):
+    return servicefabric_client_factory(cli_ctx, **kwargs).application_type_versions
+
+
+def servicefabric_application_client_factory(cli_ctx, kwargs):
+    return servicefabric_client_factory(cli_ctx, **kwargs).applications
+
+
+def servicefabric_service_client_factory(cli_ctx, kwargs):
+    return servicefabric_client_factory(cli_ctx, **kwargs).services
 
 
 def resource_client_factory(cli_ctx, **_):

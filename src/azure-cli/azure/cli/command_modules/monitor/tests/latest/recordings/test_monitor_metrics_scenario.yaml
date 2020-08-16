@@ -13,24 +13,24 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/4.2.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-10-23T02:57:07.6689544Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-10-23T02:57:07.6689544Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-10-23T02:57:07.6064797Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-17T08:29:05.4211747Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-17T08:29:05.4211747Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-07-17T08:29:05.3430450Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1240'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:57:27 GMT
+      - Fri, 17 Jul 2020 08:29:24 GMT
       expires:
       - '-1'
       pragma:
@@ -59,13 +59,11 @@ interactions:
       - monitor metrics list-definitions
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource --namespace
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -73,7 +71,10 @@ interactions:
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/UsedCapacity","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Capacity","name":{"value":"UsedCapacity","localizedValue":"Used
-        capacity"},"displayDescription":"Account used capacity","isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Average","supportedAggregationTypes":["Average"],"metricAvailabilities":[{"timeGrain":"PT1H","retention":"P93D"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Transactions","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Transactions","localizedValue":"Transactions"},"displayDescription":"The
+        capacity"},"displayDescription":"The amount of storage used by the storage
+        account. For standard storage accounts, it''s the sum of capacity used by
+        blob, table, file, and queue. For premium storage accounts and Blob storage
+        accounts, it is the same as BlobCapacity or FileCapacity.","isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Average","supportedAggregationTypes":["Average"],"metricAvailabilities":[{"timeGrain":"PT1H","retention":"P93D"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Transactions","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Transactions","localizedValue":"Transactions"},"displayDescription":"The
         number of requests made to a storage service or the specified API operation.
         This number includes successful and failed requests, as well as requests which
         produced errors. Use ResponseType dimension for the number of different type
@@ -83,13 +84,13 @@ interactions:
         amount of ingress data, in bytes. This number includes ingress from an external
         client into Azure Storage as well as ingress within Azure.","isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Total","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
         type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/Egress","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.","isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Total","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.","isDimensionRequired":false,"unit":"Bytes","primaryAggregationType":"Total","supportedAggregationTypes":["Total","Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
         type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/SuccessServerLatency","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"SuccessServerLatency","localizedValue":"Success
-        Server Latency"},"displayDescription":"The average latency used by Azure Storage
-        to process a successful request, in milliseconds. This value does not include
-        the network latency specified in AverageE2ELatency.","isDimensionRequired":false,"unit":"MilliSeconds","primaryAggregationType":"Average","supportedAggregationTypes":["Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
+        Server Latency"},"displayDescription":"The average time used to process a
+        successful request by Azure Storage. This value does not include the network
+        latency specified in SuccessE2ELatency.","isDimensionRequired":false,"unit":"MilliSeconds","primaryAggregationType":"Average","supportedAggregationTypes":["Average","Minimum","Maximum"],"metricAvailabilities":[{"timeGrain":"PT1M","retention":"P93D"},{"timeGrain":"PT5M","retention":"P93D"},{"timeGrain":"PT15M","retention":"P93D"},{"timeGrain":"PT30M","retention":"P93D"},{"timeGrain":"PT1H","retention":"P93D"},{"timeGrain":"PT6H","retention":"P93D"},{"timeGrain":"PT12H","retention":"P93D"},{"timeGrain":"P1D","retention":"P93D"}],"dimensions":[{"value":"GeoType","localizedValue":"Geo
         type"},{"value":"ApiName","localizedValue":"API name"},{"value":"Authentication","localizedValue":"Authentication"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/microsoft.insights/metricdefinitions/SuccessE2ELatency","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","namespace":"Microsoft.Storage/storageAccounts","category":"Transaction","name":{"value":"SuccessE2ELatency","localizedValue":"Success
         E2E Latency"},"displayDescription":"The average end-to-end latency of successful
         requests made to a storage service or the specified API operation, in milliseconds.
@@ -106,11 +107,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '10319'
+      - '10511'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:57:28 GMT
+      - Fri, 17 Jul 2020 08:29:25 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -139,13 +140,11 @@ interactions:
       - monitor metrics list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource --namespace --metrics --start-time --end-time
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -154,19 +153,19 @@ interactions:
     body:
       string: '{"cost":0,"timespan":"2998-12-01T00:00:00Z/2999-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
-        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.","unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
+        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1326'
+      - '1355'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:58:15 GMT
+      - Fri, 17 Jul 2020 08:29:27 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -195,13 +194,11 @@ interactions:
       - monitor metrics list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource --metrics --start-time --offset
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -210,19 +207,19 @@ interactions:
     body:
       string: '{"cost":0,"timespan":"2031-08-10T00:00:00Z/2031-09-10T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
-        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.","unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
+        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1326'
+      - '1355'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:58:16 GMT
+      - Fri, 17 Jul 2020 08:29:27 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -251,13 +248,11 @@ interactions:
       - monitor metrics list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --resource --metrics --end-time --offset
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -266,19 +261,19 @@ interactions:
     body:
       string: '{"cost":0,"timespan":"2024-12-01T00:00:00Z/2025-01-01T00:00:00Z","interval":"PT1M","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Ingress","type":"Microsoft.Insights/metrics","name":{"value":"Ingress","localizedValue":"Ingress"},"displayDescription":"The
         amount of ingress data, in bytes. This number includes ingress from an external
-        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.","unit":"Bytes","timeseries":[]}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
+        client into Azure Storage as well as ingress within Azure.","unit":"Bytes","timeseries":[],"errorCode":"Success"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/providers/Microsoft.Insights/metrics/Egress","type":"Microsoft.Insights/metrics","name":{"value":"Egress","localizedValue":"Egress"},"displayDescription":"The
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.","unit":"Bytes","timeseries":[],"errorCode":"Success"}],"namespace":"Microsoft.Storage/storageAccounts","resourceregion":"westus"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1326'
+      - '1355'
       content-type:
       - application/json
       date:
-      - Wed, 23 Oct 2019 02:58:17 GMT
+      - Fri, 17 Jul 2020 08:29:28 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:

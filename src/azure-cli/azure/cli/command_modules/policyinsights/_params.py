@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.parameters import resource_group_name_type
+from azure.cli.core.commands.parameters import (resource_group_name_type, get_enum_type)
 
 from azure.cli.command_modules.resource._completers import (
     get_policy_set_completion_list, get_policy_completion_list,
@@ -11,7 +11,7 @@ from azure.cli.command_modules.resource._completers import (
 
 from ._validators import (validate_resource, validate_expand)
 
-from ._completers import get_policy_remediation_completion_list
+from ._completers import get_policy_remediation_completion_list, get_policy_metadata_completion_list
 
 
 def load_arguments(self, _):
@@ -139,3 +139,21 @@ def load_arguments(self, _):
             'definition_reference_id',
             options_list=['--definition-reference-id'],
             help='Policy definition reference ID inside the policy set definition. Only required when the policy assignment is assigning a policy set definition.')  # pylint: disable=line-too-long
+        c.argument(
+            'resource_discovery_mode',
+            arg_type=get_enum_type(['ExistingNonCompliant', 'ReEvaluateCompliance']),
+            help='The way resources to remediate are discovered. Defaults to ExistingNonCompliant if not specified.')
+
+    with self.argument_context('policy metadata show') as c:
+        c.argument(
+            'resource_name',
+            options_list=['--name', '-n'],
+            completer=get_policy_metadata_completion_list,
+            help='The name of the metadata resource.')
+
+    with self.argument_context('policy metadata list') as c:
+        c.argument(
+            'top_value',
+            options_list=['--top'],
+            type=int,
+            help='Maximum number of records to return.')

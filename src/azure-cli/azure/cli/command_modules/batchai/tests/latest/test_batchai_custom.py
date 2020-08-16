@@ -928,7 +928,7 @@ class TestBatchAICustom(unittest.TestCase):
                 setup_task=SetupTask(
                     command_line='true',
                     std_out_err_path_prefix='$AZ_BATCHAI_MOUNT_ROOT/bfs')))
-        cluster.node_setup.setup_task.std_out_err_path_suffix = 'path/segment'
+        cluster.node_setup.setup_task.std_out_err_path_suffix = os.path.join('path', 'segment')
         cluster.node_setup.mount_volumes = MountVolumes(
             azure_blob_file_systems=[
                 AzureBlobFileSystemReference(
@@ -945,7 +945,7 @@ class TestBatchAICustom(unittest.TestCase):
                 relative_mount_path='bfs',
                 container_name='container',
                 credentials=None),
-            os.path.join('path/segment/', '.'), 60)
+            os.path.join('path', 'segment', '.'), 60)
 
     def test_generate_auto_storage_account_name(self):
         names = {_generate_auto_storage_account_name() for i in range(100)}

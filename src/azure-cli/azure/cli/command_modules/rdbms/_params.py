@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (
     tags_type, get_location_type,
     get_enum_type,
     get_three_state_flag)
-from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator
+from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 
@@ -32,6 +32,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
+            c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
             c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
             c.argument('version', help='Server major version.')
@@ -39,6 +41,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server update'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
             c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the source server to restore from.')
@@ -80,13 +83,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login', options_list=['--admin-user', '-u'], help='Administrator username for the server. Once set, it cannot be changed.')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
+            c.argument('minimal_tls_version', arg_type=get_enum_type(['TLS1_0', 'TLS1_1', 'TLS1_2', 'TLSEnforcementDisabled']), options_list=['--minimal-tls-version'], help='Set the minimal TLS version for connections to server when SSL is enabled. Default is TLSEnforcementDisabled.', validator=tls_validator)
+            c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--public-network-access'], help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
             c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('capacity', options_list=['--vcore'], type=int, help='Number of vcore.')
             c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), help='Hardware generation.')
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
             c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
+            c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
             c.argument('tags', tags_type)
+
+            if scope == 'mariadb server':
+                c.ignore('minimal_tls_version')
+                c.ignore('assign_identity')
+                c.ignore('infrastructure_encryption')
 
     for scope in ['mariadb server-logs', 'mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:
@@ -125,3 +137,33 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     for scope in ['mariadb server replica list', 'mysql server replica list', 'postgres server replica list']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
+
+    for item in ['approve', 'reject', 'delete', 'show']:
+        for scope in ['mariadb server private-endpoint-connection {}', 'mysql server private-endpoint-connection {}', 'postgres server private-endpoint-connection {}']:
+            with self.argument_context(scope.format(item)) as c:
+                c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                           help='The name of the private endpoint connection associated with the Server. '
+                                'Required if --id is not specified')
+                c.extra('connection_id', options_list=['--id'], required=False,
+                        help='The ID of the private endpoint connection associated with the Server. '
+                             'If specified --server-name/-s and --name/-n, this should be omitted.')
+                c.argument('server_name', options_list=['--server-name', '-s'], required=False,
+                           help='Name of the Server. Required if --id is not specified')
+                c.argument('resource_group_name', help='The resource group name of specified server.',
+                           required=False)
+                c.argument('description', help='Comments for {} operation.'.format(item))
+
+    for scope in ['mariadb server private-link-resource', 'mysql server private-link-resource', 'postgres server private-link-resource']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], required=True, help='Name of the Server.')
+
+    for scope in ['mysql server key', 'postgres server key']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--name', '-s'])
+            c.argument('kid', options_list=['--kid', '-k'], help='The Azure Key Vault key identifier of the server key. An example key identifier is "https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+    for scope in ['mysql server ad-admin', 'postgres server ad-admin']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'])
+            c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
+            c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')

@@ -6,11 +6,7 @@ import unittest
 import mock
 
 from msrestazure.azure_exceptions import CloudError
-from azure.mgmt.web.models import (SourceControl, HostNameBinding, Site, SiteConfig,
-                                   HostNameSslState, SslState, Certificate,
-                                   AddressResponse, HostingEnvironmentProfile,
-                                   DeletedAppRestoreRequest, SnapshotRecoverySource,
-                                   SnapshotRestoreRequest)
+
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.adal_authentication import AdalAuthentication
 from knack.util import CLIError
@@ -30,10 +26,24 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          validate_container_app_create_options,
                                                          restore_deleted_webapp,
                                                          list_snapshots,
-                                                         restore_snapshot)
+                                                         restore_snapshot,
+                                                         create_managed_ssl_cert)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
+from azure.cli.core.profiles import ResourceType
+
+
+def _get_test_cmd():
+    from azure.cli.core.mock import DummyCli
+    from azure.cli.core import AzCommandsLoader
+    from azure.cli.core.commands import AzCliCommand
+    cli_ctx = DummyCli()
+    loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_APPSERVICE)
+    cmd = AzCliCommand(loader, 'test', None)
+    cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
+    cmd.cli_ctx = cli_ctx
+    return cmd
 
 
 class TestWebappMocked(unittest.TestCase):
@@ -50,7 +60,7 @@ class TestWebappMocked(unittest.TestCase):
         client_factory_mock.return_value = MockClient()
 
         # action
-        user = set_deployment_user(mock.MagicMock(), 'admin', 'verySecret1')
+        user = set_deployment_user(_get_test_cmd(), 'admin', 'verySecret1')
 
         # assert things get wired up with a result returned
         assert user.publishing_user_name == 'admin'
@@ -58,26 +68,29 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_source_control_token(self, client_factory_mock):
-        client_factory_mock.return_value = self.client
-        self.client._client = mock.MagicMock()
+        client = mock.Mock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        SourceControl = cmd_mock.get_models('SourceControl')
         sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token='veryNiceToken')
-        self.client._client.send.return_value = FakedResponse(200)
-        self.client._deserialize = mock.MagicMock()
-        self.client._deserialize.return_value = sc
+        client.update_source_control.return_value = sc
 
         # action
-        result = update_git_token(mock.MagicMock(), 'veryNiceToken')
+        result = update_git_token(cmd_mock, 'veryNiceToken')
 
         # assert things gets wired up
         self.assertEqual(result.token, 'veryNiceToken')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_domain_name(self, client_factory_mock):
-        client_factory_mock.return_value = self.client
+        client = mock.Mock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
         # set up the return value for getting a webapp
+        Site, HostNameBinding = cmd_mock.get_models('Site', 'HostNameBinding')
         webapp = Site(location='westus')
         webapp.name = 'veryNiceWebApp'
-        self.client.web_apps.get = lambda _, _1: webapp
+        client.web_apps.get.return_value = webapp
 
         # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
@@ -85,12 +98,9 @@ class TestWebappMocked(unittest.TestCase):
                                   domain_id=domain,
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
-        self.client.web_apps._client = mock.MagicMock()
-        self.client.web_apps._client.send.return_value = FakedResponse(200)
-        self.client.web_apps._deserialize = mock.MagicMock()
-        self.client.web_apps._deserialize.return_value = binding
+        client.web_apps.create_or_update_host_name_binding.return_value = binding
         # action
-        result = add_hostname(mock.MagicMock(), 'g1', webapp.name, domain)
+        result = add_hostname(cmd_mock, 'g1', webapp.name, domain)
 
         # assert
         self.assertEqual(result.domain_id, domain)
@@ -99,11 +109,15 @@ class TestWebappMocked(unittest.TestCase):
     def test_get_external_ip_from_ase(self, client_factory_mock):
         client = mock.Mock()
         client_factory_mock.return_value = client
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         # set up the web inside a ASE, with an ip based ssl binding
+        HostingEnvironmentProfile = cmd_mock.get_models('HostingEnvironmentProfile')
         host_env = HostingEnvironmentProfile(id='id11')
         host_env.name = 'ase1'
         host_env.resource_group = 'myRg'
+
+        HostNameSslState, SslState, Site, AddressResponse = \
+            cmd_mock.get_models('HostNameSslState', 'SslState', 'Site', 'AddressResponse')
 
         host_ssl_state = HostNameSslState(ssl_state=SslState.ip_based_enabled, virtual_ip='1.2.3.4')
         client.web_apps.get.return_value = Site(name='antarctica', hosting_environment_profile=host_env,
@@ -145,8 +159,9 @@ class TestWebappMocked(unittest.TestCase):
     def test_get_external_ip_from_dns(self, resolve_hostname_mock, client_factory_mock):
         client = mock.Mock()
         client_factory_mock.return_value = client
-
+        cmd_mock = _get_test_cmd()
         # set up the web inside a ASE, with an ip based ssl binding
+        Site = cmd_mock.get_models('Site')
         site = Site(name='antarctica', location='westus')
         site.default_host_name = 'myweb.com'
         client.web_apps.get.return_value = site
@@ -179,6 +194,8 @@ class TestWebappMocked(unittest.TestCase):
         # Mock the client and set the location
         client = mock.Mock()
         client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        Site = cmd_mock.get_models('Site')
         site = Site(name='antarctica', location='westus')
         site.default_host_name = 'myweb.com'
         client.web_apps.get.return_value = site
@@ -200,11 +217,12 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):
+        cmd_mock = _get_test_cmd()
+        SiteConfig = cmd_mock.get_models('SiteConfig')
         site_config = SiteConfig(name='antarctica')
         site_op_mock.side_effect = [site_config, None]
-        cmd = mock.MagicMock()
         # action
-        update_site_configs(cmd, 'myRG', 'myweb', java_version='1.8')
+        update_site_configs(cmd_mock, 'myRG', 'myweb', java_version='1.8')
         # assert
         config_for_set = site_op_mock.call_args_list[1][0][5]
         self.assertEqual(config_for_set.java_version, '1.8')
@@ -225,6 +243,8 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.get_streaming_log', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.open_page_in_browser', autospec=True)
     def test_browse_with_trace(self, webbrowser_mock, log_mock, site_op_mock):
+        cmd_mock = _get_test_cmd()
+        Site, HostNameSslState, SslState = cmd_mock.get_models('Site', 'HostNameSslState', 'SslState')
         site = Site(location='westus', name='antarctica')
         site.default_host_name = 'haha.com'
         site.enabled_host_names = [site.default_host_name]
@@ -296,6 +316,7 @@ class TestWebappMocked(unittest.TestCase):
         cmd_mock = mock.MagicMock()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
+        DeletedAppRestoreRequest = cmd_mock.get_models('DeletedAppRestoreRequest')
         request = DeletedAppRestoreRequest(deleted_site_id='12345', recover_configuration=False)
 
         # action
@@ -318,7 +339,7 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_restore_snapshot(self, client_factory_mock):
-        cmd_mock = mock.MagicMock()
+        cmd_mock = _get_test_cmd()
         cli_ctx_mock = mock.MagicMock()
         cli_ctx_mock.data = {'subscription_id': 'sub1'}
         cmd_mock.cli_ctx = cli_ctx_mock
@@ -328,6 +349,8 @@ class TestWebappMocked(unittest.TestCase):
         client.web_apps.restore_snapshot = mock.MagicMock()
         client_factory_mock.return_value = client
 
+        SnapshotRecoverySource, SnapshotRestoreRequest = \
+            cmd_mock.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
         source = SnapshotRecoverySource(id='/subscriptions/sub1/resourceGroups/src_rg/providers/Microsoft.Web/sites/src_web/slots/src_slot')
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time='2018-12-07T02:01:31.4708832Z',
                                          recovery_source=source, recover_configuration=False)
@@ -380,6 +403,38 @@ class TestWebappMocked(unittest.TestCase):
         self.assertFalse(validate_container_app_create_options(some_runtime, test_docker_image, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, None, None))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_create_managed_ssl_cert(self, generic_site_op_mock, client_factory_mock, verify_binding_mock):
+        webapp_name = 'someWebAppName'
+        rg_name = 'someRgName'
+        farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
+        host_name = 'www.contoso.com'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+        Site, Certificate = cmd_mock.get_models('Site', 'Certificate')
+        site = Site(name=webapp_name, location='westeurope')
+        site.server_farm_id = farm_id
+        generic_site_op_mock.return_value = site
+
+        verify_binding_mock.return_value = False
+        with self.assertRaises(CLIError):
+            create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None)
+
+        verify_binding_mock.return_value = True
+        create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None)
+
+        cert_def = Certificate(location='westeurope', canonical_name=host_name,
+                               server_farm_id=farm_id, password='')
+        client.certificates.create_or_update.assert_called_once_with(name=host_name, resource_group_name=rg_name,
+                                                                     certificate_envelope=cert_def)
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods

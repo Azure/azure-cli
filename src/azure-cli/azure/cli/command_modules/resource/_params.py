@@ -8,7 +8,6 @@
 def load_arguments(self, _):
     from argcomplete.completers import FilesCompleter
 
-    from azure.mgmt.resource.resources.models import DeploymentMode
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
 
@@ -17,6 +16,7 @@ def load_arguments(self, _):
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
         get_enum_type, get_three_state_flag)
     from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
     from knack.arguments import ignore_type, CLIArgumentType
 
@@ -26,6 +26,9 @@ def load_arguments(self, _):
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
         validate_msi)
+    from azure.cli.command_modules.resource.parameters import TagUpdateOperation
+
+    DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -39,8 +42,38 @@ def load_arguments(self, _):
     management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition.')
     identity_scope_type = CLIArgumentType(help="Scope that the system assigned identity can access")
     identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
-    extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true', is_preview=True,
+    extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true',
                                                 help='Support to handle extended template content including multiline and comments in deployment')
+    deployment_name_type = CLIArgumentType(options_list=['--name', '-n'], required=True, help='The deployment name.')
+    deployment_create_name_type = CLIArgumentType(options_list=['--name', '-n'], required=False, help='The deployment name. Default to template file base name')
+    management_group_id_type = CLIArgumentType(options_list=['--management-group-id', '-m'], required=True, help='The management group id.')
+    deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
+                                                    help="a template file path in the file system")
+    deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
+    deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
+    filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
+                                  help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
+                                       'To get more information, please visit https://docs.microsoft.com/en-us/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
+    no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
+                                'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
+
+    deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
+                                                            arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
+                                                            is_preview=True, min_api='2019-07-01')
+    deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
+                                                              help='Disable pretty-print for What-If results. When set, the output format type will be used.')
+    deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
+                                                           help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
+                                                           is_preview=True, min_api='2019-07-01')
+    deployment_what_if_exclude_change_types_type = CLIArgumentType(nargs="+", options_list=['--exclude-change-types', '-x'],
+                                                                   arg_type=get_enum_type(ChangeType),
+                                                                   help='Space-separated list of resource change types to be excluded from What-If results.',
+                                                                   is_preview=True, min_api='2019-07-01')
+    tag_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The tag name.')
+    tag_value_type = CLIArgumentType(options_list='--value', help='The tag value.')
+    tag_resource_id_type = CLIArgumentType(options_list='--resource-id',
+                                           help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.',
+                                           min_api='2019-10-01')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -79,6 +112,10 @@ def load_arguments(self, _):
         c.argument('notes', help='Notes for the link.')
         c.argument('scope', help='Fully-qualified scope for retrieving links.')
         c.argument('filter_string', options_list=['--filter', c.deprecate(target='--filter-string', redirect='--filter', hide=True)], help='Filter string for limiting results.')
+
+    with self.argument_context('resource tag') as c:
+        c.argument('is_incremental', action='store_true', options_list=['--is-incremental', '-i'],
+                   help='The option to add tags incrementally without deleting the original tags. If the key of new tag and original tag are duplicated, the original value will be overwritten.')
 
     with self.argument_context('provider') as c:
         c.ignore('top')
@@ -136,7 +173,7 @@ def load_arguments(self, _):
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
@@ -172,59 +209,234 @@ def load_arguments(self, _):
 
     with self.argument_context('group deployment') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
-        c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
-        c.argument('template_file', completer=FilesCompleter(), type=file_type,
-                   help="The template file path in the file system")
-        c.argument('template_uri', help='The URI to a remote template file')
+        c.argument('deployment_name', arg_type=deployment_name_type)
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('template_uri', arg_type=deployment_template_uri_type)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'),
-                   help='Incremental (only add resources to resource group) or Complete '
-                        '(remove extra resources from resource group)')
-        c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+                   help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+        c.argument('parameters', arg_type=deployment_parameters_type)
         c.argument('rollback_on_error', nargs='?', action=RollbackAction,
-                   help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last '
-                        'successful deployment.')
+                   help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
 
     with self.argument_context('group deployment create') as c:
-        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
-                   help='The deployment name. Default to template file base name')
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
-        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
-                   help='Auxiliary subscriptions which will be used during deployment across tenants.')
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('group deployment validate') as c:
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+
+    with self.argument_context('group deployment list') as c:
+        c.argument('filter_string', arg_type=filter_type)
 
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
     with self.argument_context('deployment') as c:
-        c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
+        c.argument('deployment_name', arg_type=deployment_name_type)
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="The template file path in the file system")
-        c.argument('template_uri', help='The URI to a remote template file')
-        c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('parameters', arg_type=deployment_parameters_type)
 
     with self.argument_context('deployment create') as c:
-        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
-                   help='The deployment name. Default to template file base name')
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
 
     with self.argument_context('deployment validate') as c:
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
-    with self.argument_context('deployment operation show') as c:
+    with self.argument_context('deployment operation') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
+
+    with self.argument_context('deployment list') as c:
+        c.argument('filter_string', arg_type=filter_type)
+
+    with self.argument_context('deployment sub') as c:
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment sub create') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+
+    with self.argument_context('deployment sub what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+
+    with self.argument_context('deployment sub validate') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+
+    with self.argument_context('deployment sub list') as c:
+        c.argument('filter_string', arg_type=filter_type)
+
+    with self.argument_context('deployment group') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list, required=True)
+        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+        c.argument('rollback_on_error', nargs='?', action=RollbackAction,
+                   help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
+
+    with self.argument_context('deployment group create') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
+
+    with self.argument_context('deployment group what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+        c.ignore("rollback_on_error")
+
+    with self.argument_context('deployment group validate') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+
+    with self.argument_context('deployment group list') as c:
+        c.argument('filter_string', arg_type=filter_type)
+
+    with self.argument_context('deployment mg') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment mg create') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
+                   min_api="2019-10-01")
+
+    with self.argument_context('deployment mg what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+
+    with self.argument_context('deployment mg validate') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+
+    with self.argument_context('deployment mg list') as c:
+        c.argument('filter_string', arg_type=filter_type)
+
+    with self.argument_context('deployment operation mg') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+
+    with self.argument_context('deployment tenant') as c:
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment tenant create') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
+                   min_api="2019-10-01")
+
+    with self.argument_context('deployment tenant what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+
+    with self.argument_context('deployment tenant validate') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
+
+    with self.argument_context('deployment tenant list') as c:
+        c.argument('filter_string', arg_type=filter_type)
 
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')
         c.argument('include_parameter_default_value', action='store_true')
+        c.argument('skip_resource_name_params', action='store_true')
+        c.argument('skip_all_params', action='store_true')
+        c.argument('resource_ids', nargs='+', options_list='--resource-ids')
 
     with self.argument_context('group create') as c:
-        c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'], help='name of the new resource group', completer=None)
+        c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
+                   help='name of the new resource group', completer=None,
+                   local_context_attribute=LocalContextAttribute(
+                       name='resource_group_name', actions=[LocalContextAction.SET], scopes=[ALL]))
+        c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
+
+    with self.argument_context('group delete') as c:
+        c.argument('resource_group_name', resource_group_name_type,
+                   options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
 
     with self.argument_context('tag') as c:
-        c.argument('tag_name', options_list=['--name', '-n'])
-        c.argument('tag_value', options_list='--value')
+        c.argument('tag_name', tag_name_type)
+        c.argument('tag_value', tag_value_type)
+        c.argument('resource_id', tag_resource_id_type)
+        c.argument('tags', tags_type)
+        c.argument('operation', arg_type=get_enum_type([item.value for item in list(TagUpdateOperation)]),
+                   help='The update operation: options include Merge, Replace and Delete.')
 
     with self.argument_context('lock') as c:
         c.argument('lock_name', options_list=['--name', '-n'], validator=validate_lock_parameters)
@@ -263,6 +475,7 @@ def load_arguments(self, _):
     with self.argument_context('managedapp') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application', id_part='resource_group')
         c.argument('application_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('tags', tags_type)
 
     with self.argument_context('managedapp definition') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group of the managed application definition', id_part='resource_group')
@@ -277,7 +490,7 @@ def load_arguments(self, _):
 
     with self.argument_context('managedapp definition create') as c:
         c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
-        c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
+        c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
         c.argument('createUiDefinition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
         c.argument('mainTemplate', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
 
@@ -299,18 +512,3 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
-
-    with self.argument_context('rest') as c:
-        c.argument('method', options_list=['--method', '-m'], arg_type=get_enum_type(['head', 'get', 'put', 'post', 'delete', 'options', 'patch'], default='get'),
-                   help='HTTP request method')
-        c.argument('uri', options_list=['--uri', '-u'], help='request uri. For uri without host, CLI will assume "https://management.azure.com/". '
-                   "Common token '{subscriptionId}' will be replaced with the current subscription ID specified by 'az account set'")
-        c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
-        c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
-        c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
-        c.argument('body', options_list=['--body', '-b'], help='request body. Use @{file} to load from a file')
-        c.argument('output_file', help='save response payload to a file')
-        c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
-                   'the service. The token will be placed in the "Authorization" header. By default, '
-                   'CLI can figure this out based on "--url" argument, unless you use ones not in the list '
-                   'of "az cloud show --query endpoints"')

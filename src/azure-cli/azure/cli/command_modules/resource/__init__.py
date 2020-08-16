@@ -13,8 +13,10 @@ class ResourceCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core import ModExtensionSuppress
+        from azure.cli.core.profiles import ResourceType
         resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
         super(ResourceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                     resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
                                                      custom_command_type=resource_custom,
                                                      suppress_extension=ModExtensionSuppress(
                                                          __name__, 'managementgroups', '0.1.0',

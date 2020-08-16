@@ -33,6 +33,10 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles account ad list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
+    load_additionalArguments(self, account_name_type, pool_name_type, volume_name_type)
+
+
+def load_additionalArguments(self, account_name_type, pool_name_type, volume_name_type):
     with self.argument_context('netappfiles pool') as c:
         c.argument('account_name', id_part='name')
         c.argument('pool_name', pool_name_type, options_list=['--pool-name', '-p', '--name', '-n'])
@@ -49,10 +53,22 @@ def load_arguments(self, _):
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('pool_name', options_list=['--pool-name', '-p'], help='Name of the ANF pool.', id_part=None)
 
+    with self.argument_context('netappfiles volume revert') as c:
+        c.argument('account_name', id_part=None)
+        c.argument('pool_name', pool_name_type, id_part=None)
+        c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
+        c.argument('snapshot_id', options_list=['--snapshot-id', '-s'], help='Resource id of the snapshot', id_part=None)
+
     with self.argument_context('netappfiles volume export-policy list') as c:
         c.argument('account_name', id_part=None)
         c.argument('pool_name', pool_name_type, id_part=None)
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
+
+    with self.argument_context('netappfiles volume replication approve') as c:
+        c.argument('account_name', id_part=None)
+        c.argument('pool_name', pool_name_type, id_part=None)
+        c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
+        c.argument('remote_volume_resource_id', options_list=['--remote-volume-resource-id', '-d'], help='The id of the destination replication volume', id_part=None)
 
     with self.argument_context('netappfiles volume export-policy add') as c:
         c.argument('unix_read_only', help="Indication of read only access", arg_type=get_three_state_flag())

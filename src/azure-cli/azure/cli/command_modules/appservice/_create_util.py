@@ -44,6 +44,15 @@ def zip_contents_from_dir(dirPath, lang):
                 subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
             elif lang.lower() == PYTHON_RUNTIME_NAME:
                 subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
+
+                filtered_files = []
+                for filename in files:
+                    if filename == '.env':
+                        logger.info("Skipping file: %s/%s", dirname, filename)
+                    else:
+                        filtered_files.append(filename)
+                files[:] = filtered_files
+
             for filename in files:
                 absname = os.path.abspath(os.path.join(dirname, filename))
                 arcname = absname[len(abs_src) + 1:]
@@ -110,7 +119,7 @@ def get_num_apps_in_asp(cmd, rg_name, asp_name):
 
 
 # pylint:disable=unexpected-keyword-arg
-def get_lang_from_content(src_path):
+def get_lang_from_content(src_path, html=False):
     # NODE: package.json should exist in the application root dir
     # NETCORE & DOTNET: *.csproj should exist in the application dir
     # NETCORE: <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -118,6 +127,7 @@ def get_lang_from_content(src_path):
     runtime_details_dict = dict.fromkeys(['language', 'file_loc', 'default_sku'])
     package_json_file = os.path.join(src_path, 'package.json')
     package_python_file = os.path.join(src_path, 'requirements.txt')
+    static_html_file = ""
     package_netcore_file = ""
     runtime_details_dict['language'] = ''
     runtime_details_dict['file_loc'] = ''
@@ -125,11 +135,23 @@ def get_lang_from_content(src_path):
     import fnmatch
     for _dirpath, _dirnames, files in os.walk(src_path):
         for file in files:
-            if fnmatch.fnmatch(file, "*.csproj"):
+            if html and (fnmatch.fnmatch(file, "*.html") or fnmatch.fnmatch(file, "*.htm") or
+                         fnmatch.fnmatch(file, "*shtml.")):
+                static_html_file = os.path.join(src_path, file)
+                break
+            elif fnmatch.fnmatch(file, "*.csproj"):
                 package_netcore_file = os.path.join(src_path, file)
                 break
 
-    if os.path.isfile(package_python_file):
+    if html:
+        if static_html_file:
+            runtime_details_dict['language'] = STATIC_RUNTIME_NAME
+            runtime_details_dict['file_loc'] = static_html_file
+            runtime_details_dict['default_sku'] = 'F1'
+        else:
+            raise CLIError("The html flag was passed, but could not find HTML files, "
+                           "see 'https://go.microsoft.com/fwlink/?linkid=2109470' for more information")
+    elif os.path.isfile(package_python_file):
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_python_file
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
@@ -237,16 +259,11 @@ def detect_node_version_tocreate(detected_ver):
     # get major version & get the closest version from supported list
     major_ver = int(detected_ver.split('.')[0])
     node_ver = NODE_VERSION_DEFAULT
-    if major_ver < 4:
+    # TODO: Handle checking for minor versions if node major version is 10
+    if major_ver <= 11:
         node_ver = NODE_VERSION_DEFAULT
-    elif major_ver >= 4 and major_ver < 6:
-        node_ver = '4.5'
-    elif major_ver >= 6 and major_ver < 8:
-        node_ver = '6.9'
-    elif major_ver >= 8 and major_ver < 10:
-        node_ver = NODE_VERSION_DEFAULT
-    elif major_ver >= 10:
-        node_ver = '10.14'
+    else:
+        node_ver = '12.9'
     return node_ver
 
 
@@ -280,12 +297,10 @@ def should_create_new_rg(cmd, rg_name, is_linux):
     return True
 
 
-def does_app_already_exist(cmd, name):
+def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
     client = web_client_factory(cmd.cli_ctx)
-    site_availability = client.check_name_availability(name, 'Microsoft.Web/sites')
-    # check availability returns true to name_available  == site does not exist
-    return site_availability.name_available
+    return client.check_name_availability(name, 'Microsoft.Web/sites')
 
 
 def get_app_details(cmd, name):
@@ -305,7 +320,8 @@ def get_rg_to_use(cmd, user, loc, os_name, rg_name=None):
             return rg_name
         raise CLIError("The ResourceGroup '{}' cannot be used with the os '{}'. Use a different RG".format(rg_name,
                                                                                                            os_name))
-    rg_name = default_rg
+    if rg_name is None:
+        rg_name = default_rg
     return rg_name
 
 
@@ -318,21 +334,21 @@ def get_profile_username():
     return user
 
 
-def get_sku_to_use(src_dir, sku=None):
+def get_sku_to_use(src_dir, html=False, sku=None):
     if sku is None:
-        lang_details = get_lang_from_content(src_dir)
+        lang_details = get_lang_from_content(src_dir, html)
         return lang_details.get("default_sku")
     logger.info("Found sku argument, skipping use default sku")
     return sku
 
 
-def set_language(src_dir):
-    lang_details = get_lang_from_content(src_dir)
+def set_language(src_dir, html=False):
+    lang_details = get_lang_from_content(src_dir, html)
     return lang_details.get('language')
 
 
-def detect_os_form_src(src_dir):
-    lang_details = get_lang_from_content(src_dir)
+def detect_os_form_src(src_dir, html=False):
+    lang_details = get_lang_from_content(src_dir, html)
     language = lang_details.get('language')
     return "Linux" if language is not None and language.lower() == NODE_RUNTIME_NAME \
         or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT

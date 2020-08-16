@@ -318,6 +318,14 @@ examples:
     text: az backup protection resume --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem --policy-name MyPolicy
 """
 
+helps['backup protection update-for-vm'] = """
+type: command
+short-summary: Update disk exclusion settings associated with a backed up VM item.
+examples:
+  - name: Update disk exclusion settings associated with a backed up VM item.
+    text: az backup protection update-for-vm --vault-name MyVault --resource-group MyResourceGroup --container-name MyContainer --item-name MyItem --disk-list-setting exclude --diskslist 1
+"""
+
 helps['backup recoveryconfig'] = """
 type: group
 short-summary: Manage recovery configuration of an Azure workload backed up item.
@@ -401,18 +409,18 @@ examples:
 
 helps['backup restore restore-azurefileshare'] = """
 type: command
-short-summary: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
+short-summary: Restore backed up Azure file shares to the same file-share or another file-share in registered storage accounts.
 examples:
-  - name: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
+  - name: Restore backed up Azure file shares to the same file-share or another file-share in registered storage accounts.
     text: az backup restore restore-azurefileshare --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation
 """
 
 helps['backup restore restore-azurefiles'] = """
 type: command
-short-summary: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
+short-summary: Restore backed up Azure files within a file-share to the same file-share or another file-share in registered storage accounts.
 examples:
-  - name: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
-    text: az backup restore restore-azurefiles --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path MyPath
+  - name: Restore backed up Azure files within a file-share to the same file-share or another file-share in registered storage accounts.
+    text: az backup restore restore-azurefiles --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path Filepath1 Filepath2
 """
 
 helps['backup restore restore-azurewl'] = """

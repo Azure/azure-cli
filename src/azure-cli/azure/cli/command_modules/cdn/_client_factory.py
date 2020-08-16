@@ -32,3 +32,11 @@ def cf_resource_usage(cli_ctx, _):
 
 def cf_edge_nodes(cli_ctx, _):
     return cf_cdn(cli_ctx).edge_nodes
+
+
+def cf_waf_policy(cli_ctx, _):
+    return cf_cdn(cli_ctx).policies
+
+
+def cf_waf_rule_set(cli_ctx, _):
+    return cf_cdn(cli_ctx).managed_rule_sets

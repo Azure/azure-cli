@@ -7,16 +7,39 @@ from __future__ import print_function
 
 import os
 from datetime import datetime
+
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import sdk_no_wait
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
                                                     create_short_lived_share_sas,
                                                     create_short_lived_container_sas,
-                                                    filter_none, collect_blobs, collect_files,
+                                                    filter_none, collect_blobs, collect_blob_objects, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
 from knack.log import get_logger
 from knack.util import CLIError
+
+
+def create_container(cmd, container_name, resource_group_name=None, account_name=None,
+                     metadata=None, public_access=None, fail_on_exist=False, timeout=None,
+                     default_encryption_scope=None, prevent_encryption_scope_override=None, **kwargs):
+    if default_encryption_scope is not None or prevent_encryption_scope_override is not None:
+        from .._client_factory import storage_client_factory
+        client = storage_client_factory(cmd.cli_ctx).blob_containers
+        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+        blob_container = BlobContainer(default_encryption_scope=default_encryption_scope,
+                                       deny_encryption_scope_override=prevent_encryption_scope_override)
+        container = client.create(resource_group_name=resource_group_name, account_name=account_name,
+                                  container_name=container_name, blob_container=blob_container)
+        return container is not None
+
+    from .._client_factory import blob_data_service_factory
+    kwargs['account_name'] = account_name
+    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
+    return client.create_container(container_name, metadata=metadata, public_access=public_access,
+                                   fail_on_exist=fail_on_exist, timeout=timeout)
 
 
 def delete_container(client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
@@ -27,6 +50,17 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
     return client.delete_container(
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
+
+
+def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_restore, blob_ranges=None,
+                        no_wait=False):
+
+    if blob_ranges is None:
+        BlobRestoreRange = cmd.get_models("BlobRestoreRange")
+        blob_ranges = [BlobRestoreRange(start_range="", end_range="")]
+
+    return sdk_no_wait(no_wait, client.restore_blob_ranges, resource_group_name=resource_group_name,
+                       account_name=account_name, time_to_restore=time_to_restore, blob_ranges=blob_ranges)
 
 
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):
@@ -108,6 +142,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
         logger.warning('    pattern %s', pattern)
         logger.warning(' operations')
 
+    source_sas = source_sas.lstrip('?') if source_sas else source_sas
     if source_container:
         # copy blobs for blob container
 
@@ -260,8 +295,8 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                 progress_callback.message = '{}/{}: "{}"'.format(
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
-            include, result = _upload_blob(cmd, client, destination_container_name,
-                                           normalize_blob_file_path(destination_path, dst), src,
+            include, result = _upload_blob(cmd, client, file_path=src, container_name=destination_container_name,
+                                           blob_name=normalize_blob_file_path(destination_path, dst),
                                            blob_type=blob_type, content_settings=guessed_content_settings,
                                            metadata=metadata, validate_content=validate_content,
                                            maxsize_condition=maxsize_condition, max_connections=max_connections,
@@ -280,11 +315,68 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
     return results
 
 
-def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
-                validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
-                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
-                progress_callback=None):
+def transform_blob_type(cmd, blob_type):
+    """
+    get_blob_types() will get ['block', 'page', 'append']
+    transform it to BlobType in track2
+    """
+    BlobType = cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if blob_type == 'block':
+        return BlobType.BlockBlob
+    if blob_type == 'page':
+        return BlobType.PageBlob
+    if blob_type == 'append':
+        return BlobType.AppendBlob
+    return None
+
+
+# pylint: disable=too-many-locals
+def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blob_type=None, content_settings=None,
+                metadata=None, validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None,
+                tier=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None,
+                timeout=None, progress_callback=None, encryption_scope=None):
     """Upload a blob to a container."""
+
+    if encryption_scope:
+        count = os.path.getsize(file_path)
+        with open(file_path, 'rb') as stream:
+            data = stream.read(count)
+        from azure.core import MatchConditions
+        upload_args = {
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'timeout': timeout,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'blob_type': transform_blob_type(cmd, blob_type),
+            'validate_content': validate_content,
+            'lease': lease_id,
+            'max_concurrency': max_connections,
+        }
+
+        if cmd.supported_api_version(min_api='2017-04-17') and tier:
+            upload_args['premium_page_blob_tier'] = tier
+        if maxsize_condition:
+            upload_args['maxsize_condition'] = maxsize_condition
+        if cmd.supported_api_version(min_api='2016-05-31'):
+            upload_args['validate_content'] = validate_content
+
+        # Precondition Check
+        if if_match:
+            if if_match == '*':
+                upload_args['match_condition'] = MatchConditions.IfPresent
+            else:
+                upload_args['etag'] = if_match
+                upload_args['match_condition'] = MatchConditions.IfNotModified
+
+        if if_none_match:
+            upload_args['etag'] = if_none_match
+            upload_args['match_condition'] = MatchConditions.IfModified
+        response = client.upload_blob(data=data, length=count, encryption_scope=encryption_scope, **upload_args)
+        if response['content_md5'] is not None:
+            from msrest import Serializer
+            response['content_md5'] = Serializer.serialize_bytearray(response['content_md5'])
+        return response
 
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
     content_settings = guess_content_type(file_path, content_settings, t_content_settings)
@@ -398,23 +490,27 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         return client.delete_blob(**delete_blob_args)
 
     logger = get_logger(__name__)
-    source_blobs = list(collect_blobs(client, source_container_name, pattern))
+    source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
-        if if_modified_since:
-            logger.warning('--if-modified-since argument is ignored when using --dry-run.')
-        if if_unmodified_since:
-            logger.warning('--if-unmodified-since argument is ignored when using --dry-run.')
+        from datetime import timezone
+        delete_blobs = []
+        if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
+        if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None
+        for blob in source_blobs:
+            if not if_modified_since or blob[1].properties.last_modified >= if_modified_since_utc:
+                if not if_unmodified_since or blob[1].properties.last_modified <= if_unmodified_since_utc:
+                    delete_blobs.append(blob[0])
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
-        logger.warning('      total %d', len(source_blobs))
+        logger.warning('      total %d', len(delete_blobs))
         logger.warning(' operations')
-        for blob in source_blobs:
+        for blob in delete_blobs:
             logger.warning('  - %s', blob)
         return []
 
-    results = [result for include, result in (_delete_blob(blob) for blob in source_blobs) if include]
+    results = [result for include, result in (_delete_blob(blob[0]) for blob in source_blobs) if include]
     num_failures = len(source_blobs) - len(results)
     if num_failures:
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
@@ -439,7 +535,8 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
             protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
             content_encoding=content_encoding, content_language=content_language, content_type=content_type)
     if full_uri:
-        return client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token)
+        from ..url_quote_util import encode_url_path
+        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token))
     return sas_token
 
 
@@ -506,3 +603,35 @@ def _get_datetime_from_string(dt_str):
         except ValueError:
             continue
     raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))
+
+
+def show_blob_v2(cmd, client, lease_id=None, **kwargs):
+
+    blob = client.get_blob_properties(lease=lease_id, **kwargs)
+
+    page_ranges = None
+    if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
+        page_ranges = client.get_page_ranges(lease=lease_id, **kwargs)
+
+    blob.page_ranges = page_ranges
+
+    return blob
+
+
+def set_blob_tier_v2(client, tier, blob_type='block', rehydrate_priority=None, timeout=None):
+    if blob_type == 'block':
+        return client.set_standard_blob_tier(standard_blob_tier=tier, rehydrate_priority=rehydrate_priority,
+                                             timeout=timeout)
+    if blob_type == 'page':
+        return client.set_premium_page_blob_tier(premium_page_blob_tier=tier, timeout=timeout)
+    raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def acquire_blob_lease(client, lease_duration=-1, **kwargs):
+    client.acquire(lease_duration=lease_duration, **kwargs)
+    return client.id
+
+
+def renew_blob_lease(client, **kwargs):
+    client.renew(**kwargs)
+    return client.id

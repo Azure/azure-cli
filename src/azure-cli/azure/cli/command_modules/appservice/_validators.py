@@ -30,6 +30,8 @@ def validate_site_create(cmd, namespace):
             plan_info = client.app_service_plans.get(parsed_result['resource_group'], parsed_result['name'])
         else:
             plan_info = client.app_service_plans.get(resource_group_name, plan)
+        if not plan_info:
+            raise CLIError("The plan '{}' doesn't exist in the resource group '{}'".format(plan, resource_group_name))
         # verify that the name is available for create
         validation_payload = {
             "name": namespace.name,
@@ -117,7 +119,7 @@ def validate_add_vnet(cmd, namespace):
 
     vnet_loc = ''
     for v in list_all_vnets:
-        if v.name == vnet:
+        if vnet in (v.name, v.id):
             vnet_loc = v.location
             break
 
@@ -162,3 +164,42 @@ def validate_asp_sku(cmd, namespace):
         if res.get('properties').get('hostingEnvironment') is not None:
             raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+
+
+def validate_ip_address(cmd, namespace):
+    if namespace.ip_address is not None:
+        _validate_ip_address_format(namespace)
+        _validate_ip_address_existance(cmd, namespace)
+
+
+def _validate_ip_address_format(namespace):
+    if namespace.ip_address is not None:
+        # IPv6
+        if ':' in namespace.ip_address:
+            if namespace.ip_address.count(':') > 1:
+                if '/' not in namespace.ip_address:
+                    namespace.ip_address = namespace.ip_address + '/128'
+                    return
+                return
+        # IPv4
+        elif '.' in namespace.ip_address:
+            if namespace.ip_address.count('.') == 3:
+                if '/' not in namespace.ip_address:
+                    namespace.ip_address = namespace.ip_address + '/32'
+                    return
+                return
+
+        raise CLIError('Invalid IP address')
+
+
+def _validate_ip_address_existance(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    from ._appservice_utils import _generic_site_operation
+    configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    access_rules = configs.ip_security_restrictions
+    is_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
+    if True in is_exists:
+        raise CLIError('IP address ' + namespace.ip_address + ' already exists.'
+                       'Cannot add duplicate IP address values.')

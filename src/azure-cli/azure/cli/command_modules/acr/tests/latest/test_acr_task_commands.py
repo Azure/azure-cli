@@ -98,7 +98,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded')])
 
         # test task delete
-        self.cmd('acr task delete -n {task_name} -r {registry_name}')
+        self.cmd('acr task delete -n {task_name} -r {registry_name} -y')
 
         # test acr delete
-        self.cmd('acr delete -n {registry_name} -g {rg}')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')

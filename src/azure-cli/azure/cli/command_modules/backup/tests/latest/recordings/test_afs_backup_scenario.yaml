@@ -56,8 +56,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
-      CommandName:
+      - gzip, deflate CommandName:
       - storage account show-connection-string
       Connection:
       - keep-alive
@@ -71,7 +70,7 @@ interactions:
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003/listKeys?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003/listKeys?api-version=2019-06-01
   response:
     body:
       string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
@@ -158,7 +157,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2019-11-27T18:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2019-11-27T18:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}}'
@@ -218,7 +217,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","name":"clitest-item000005","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureStorage","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2019-11-27T18:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2019-11-27T18:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":0}}'
@@ -1744,7 +1743,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005","name":"clitest-item000005","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureStorage","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2019-11-27T18:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2019-11-27T18:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"timeZone":"UTC","protectedItemsCount":0}}'
@@ -3782,7 +3781,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/azurefileshare%3Bclitest-item000004?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/storagecontainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/azurefileshare%3Bclitest-item000004?api-version=2019-06-15
   response:
     body:
       string: ''
@@ -5718,7 +5717,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/24e5c8c2-a84b-4307-ae4d-0b10129dcbec?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/24e5c8c2-a84b-4307-ae4d-0b10129dcbec?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/24e5c8c2-a84b-4307-ae4d-0b10129dcbec","name":"24e5c8c2-a84b-4307-ae4d-0b10129dcbec","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT43.3888802S","storageAccountName":"clitest000003","storageAccountVersion":"Storage","extendedInfo":{"tasksList":[],"propertyBag":{"File
@@ -5772,7 +5771,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureStorage%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureStorage%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;clitest-item000004","name":"AzureFileShare;clitest-item000004","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005"}}]}'
@@ -5979,7 +5978,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366","name":"517555bd-2740-4d66-a8a5-32cd462e1366","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT1.9726999S","storageAccountName":"clitest000003","storageAccountVersion":"MicrosoftStorage","extendedInfo":{"tasksList":[{"taskId":"Take
@@ -6033,7 +6032,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366","name":"517555bd-2740-4d66-a8a5-32cd462e1366","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT2.7344671S","storageAccountName":"clitest000003","storageAccountVersion":"MicrosoftStorage","extendedInfo":{"tasksList":[{"taskId":"Take
@@ -6087,7 +6086,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366","name":"517555bd-2740-4d66-a8a5-32cd462e1366","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT2.9335729S","storageAccountName":"clitest000003","storageAccountVersion":"MicrosoftStorage","extendedInfo":{"tasksList":[{"taskId":"Take
@@ -6141,7 +6140,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/517555bd-2740-4d66-a8a5-32cd462e1366","name":"517555bd-2740-4d66-a8a5-32cd462e1366","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT31.4164765S","storageAccountName":"clitest000003","storageAccountVersion":"MicrosoftStorage","extendedInfo":{"tasksList":[{"taskId":"Take
@@ -6195,7 +6194,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureStorage%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureStorage%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;clitest-item000004","name":"AzureFileShare;clitest-item000004","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-11-27T08:13:47.5537442Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005"}}]}'
@@ -6246,7 +6245,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3Bclitest-item000004/recoveryPoints?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3Bclitest-item000004/recoveryPoints?api-version=2019-06-15
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;clitest-item000004/recoveryPoints/24846742269114","name":"24846742269114","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureFileShareRecoveryPoint","recoveryPointType":"FileSystemConsistent","recoveryPointTime":"2019-11-27T08:14:17Z","fileShareSnapshotUri":"https://clitest000003.file.core.windows.net/clitest-item000004?sharesnapshot=2019-11-27T08:14:17.0000000Z","recoveryPointSizeInGB":0}}]}'
@@ -6297,7 +6296,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureStorage%27%20and%20itemType%20eq%20%27AzureFileShare%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureStorage%27%20and%20itemType%20eq%20%27AzureFileShare%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;clitest-item000004","name":"AzureFileShare;clitest-item000004","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-11-27T08:13:47.5537442Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005"}}]}'
@@ -6449,7 +6448,7 @@ interactions:
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3Bclitest-item000004/recoveryPoints/24846742269114/restore?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3Bclitest-item000004/recoveryPoints/24846742269114/restore?api-version=2019-06-15
   response:
     body:
       string: ''
@@ -6600,7 +6599,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9","name":"3b9b5c43-4f15-4727-8e1f-f190f01489b9","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT2.1937925S","actionsInfo":[1],"storageAccountName":"clitest000003","storageAccountVersion":"ClassicCompute","extendedInfo":{"tasksList":[],"propertyBag":{"Source
@@ -6656,7 +6655,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9","name":"3b9b5c43-4f15-4727-8e1f-f190f01489b9","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT2.7645007S","actionsInfo":[1],"storageAccountName":"clitest000003","storageAccountVersion":"ClassicCompute","extendedInfo":{"tasksList":[],"propertyBag":{"Source
@@ -6712,7 +6711,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9","name":"3b9b5c43-4f15-4727-8e1f-f190f01489b9","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT2.9961072S","actionsInfo":[1],"storageAccountName":"clitest000003","storageAccountVersion":"ClassicCompute","extendedInfo":{"tasksList":[],"propertyBag":{"Source
@@ -6768,7 +6767,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9","name":"3b9b5c43-4f15-4727-8e1f-f190f01489b9","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT33.2220888S","actionsInfo":[1],"storageAccountName":"clitest000003","storageAccountVersion":"ClassicCompute","extendedInfo":{"tasksList":[],"propertyBag":{"Source
@@ -6824,7 +6823,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/3b9b5c43-4f15-4727-8e1f-f190f01489b9","name":"3b9b5c43-4f15-4727-8e1f-f190f01489b9","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT50.6446938S","actionsInfo":[1],"storageAccountName":"clitest000003","storageAccountVersion":"ClassicCompute","extendedInfo":{"tasksList":[],"propertyBag":{"Source
@@ -6880,7 +6879,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureStorage%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureStorage%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer;storage;clitest.rg000001;clitest000003/protectedItems/AzureFileShare;clitest-item000004","name":"AzureFileShare;clitest-item000004","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-item000004","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Completed","lastBackupTime":"2019-11-27T08:13:47.5537442Z","protectedItemType":"AzureFileShareProtectedItem","backupManagementType":"AzureStorage","workloadType":"AzureFileShare","containerName":"StorageContainer;storage;clitest.rg000001;clitest000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.storage/storageAccounts/clitest000003","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/clitest-item000005"}}]}'
@@ -6933,7 +6932,7 @@ interactions:
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3Bclitest-item000004?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/StorageContainer%3Bstorage%3Bclitest.rg000001%3Bclitest000003/protectedItems/AzureFileShare%3Bclitest-item000004?api-version=2019-06-15
   response:
     body:
       string: ''
@@ -8359,7 +8358,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/93946f00-77b1-4041-8dec-3296b45bf176?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/93946f00-77b1-4041-8dec-3296b45bf176?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/93946f00-77b1-4041-8dec-3296b45bf176","name":"93946f00-77b1-4041-8dec-3296b45bf176","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureStorageJob","duration":"PT31.6763426S","storageAccountName":"clitest000003","storageAccountVersion":"Storage","extendedInfo":{"tasksList":[],"propertyBag":{"File
