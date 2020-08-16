@@ -53,7 +53,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             if not update_all:
                 return
     except Exception as ex:  # pylint: disable=broad-except
-        pass
+        logger.debug("Failed to get the latest version. %s", str(ex))
     exts = [ext.name for ext in get_extensions(ext_type=WheelExtension)] if update_all else []
 
     exit_code = 0
