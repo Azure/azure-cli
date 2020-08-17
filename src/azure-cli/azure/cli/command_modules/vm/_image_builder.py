@@ -377,19 +377,19 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 
 # region Custom Commands
 
-def create_image_template(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+def create_image_template(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements, unused-argument
         cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
-        source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
+        source=None, scripts=None, checksum=None, managed_image_destinations=None,
         shared_image_destinations=None, no_wait=False, image_template=None, identity=None,
-        vm_size=None, os_disk_size=None, vnet=None, subnet=None):  # pylint: disable=unused-argument, too-many-locals
+        vm_size=None, os_disk_size=None, vnet=None, subnet=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
-                                                ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
+                                                ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor,
                                                 ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
                                                 ImageTemplateIdentityUserAssignedIdentitiesValue,
-                                                ImageTemplateVmProfile, VirtualNetworkConfig)  # pylint: disable=line-too-long
+                                                ImageTemplateVmProfile, VirtualNetworkConfig)
 
     if image_template is not None:
         logger.warning('You are using --image-template. All other parameters will be ignored.')

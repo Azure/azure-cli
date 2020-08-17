@@ -137,10 +137,11 @@ class ImageTemplateTest(ScenarioTest):
             'vhd_out': "my_vhd_output",
         })
 
-        subnet_id = self.cmd('az network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
+        subnet_id = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
+        self.cmd('network vnet subnet update -g {rg} -n {subnet} --vnet-name {vnet} --disable-private-link-service-network-policies true')
 
         # test template creation works. use cache
-        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --identity {ide} --vm-size Standard_D1_v2 --os-disk-size 20 --defer',
+        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --identity {ide} --vnet {vnet} --subnet {subnet} --vm-size Standard_D1_v2 --os-disk-size 20 --defer',
                  checks=[
                      self.check('properties.source.offer', 'UbuntuServer'), self.check('properties.source.publisher', 'Canonical'),
                      self.check('properties.source.sku', '18.04-LTS'), self.check('properties.source.version', '18.04.201808140'),
@@ -154,7 +155,7 @@ class ImageTemplateTest(ScenarioTest):
 
                      self.check('properties.vmProfile.vmSize', 'Standard_D1_v2'),
                      self.check('properties.vmProfile.osDiskSizeGB', 20),
-                     # self.check('properties.vmProfile.vnetConfig.subnetId', subnet_id, False)
+                     self.check('properties.vmProfile.vnetConfig.subnetId', subnet_id, False)
                  ])
 
         self.kwargs.update({
