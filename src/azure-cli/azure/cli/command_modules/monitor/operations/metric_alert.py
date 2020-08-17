@@ -20,7 +20,7 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
     for i, cond in enumerate(condition):
         cond.name = 'cond{}'.format(i)
     criteria = None
-    resource_type, scope_type = _parse_resource_type(scopes)
+    resource_type, scope_type = _parse_resource_and_scope_type(scopes)
     if scope_type in ['resource_group', 'subscription']:
         if target_resource_type is None or target_resource_region is None:
             raise CLIError('--target-resource-type and --target-resource-region must be provided.')
@@ -217,9 +217,9 @@ def _parse_action_removals(actions):
     return emails, webhooks
 
 
-def _parse_resource_type(scopes):
+def _parse_resource_and_scope_type(scopes):
     from azure.mgmt.core.tools import parse_resource_id
-    from azure.cli.core import CLIError
+    from knack.util import CLIError
 
     if not scopes:
         raise CLIError('scopes cannot be null.')
@@ -240,19 +240,21 @@ def _parse_resource_type(scopes):
         resource_type = item_resource_type
         scope_type = item_scope_type
 
-    def parse_scope(scope, operation_on_scope):
+    def parse_one_scope_with_action(scope, operation_on_scope):
         result = parse_resource_id(scope)
         if 'namespace' in result and 'resource_type' in result:
             operation_on_scope(result['namespace'], result['resource_type'], 'resource')
-        elif 'resource_group' in result:
+        elif 'resource_group' in result:  # It's a resource group.
             operation_on_scope('', '', 'resource_group')
-        elif 'subscription' in result:
+        elif 'subscription' in result:  # It's a subscription.
             operation_on_scope('', '', 'subscription')
         else:
             raise CLIError('Scope must be a valid resource id.')
 
-    parse_scope(scopes[0], operation_on_scope=store_scope)
+    # Store the resource type and scope type from first scope
+    parse_one_scope_with_action(scopes[0], operation_on_scope=store_scope)
+    # Validate the following scopes
     for item in scopes:
-        parse_scope(item, operation_on_scope=validate_scope)
+        parse_one_scope_with_action(item, operation_on_scope=validate_scope)
 
     return namespace + '/' + resource_type, scope_type
