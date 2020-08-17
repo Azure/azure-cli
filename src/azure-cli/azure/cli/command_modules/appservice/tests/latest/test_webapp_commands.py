@@ -145,9 +145,10 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].value', '10.14'),
         ])
 
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_runtime(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
+        webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|10.15"'.format(
@@ -157,6 +158,9 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheck('[0].value', '10.15'),
         ])
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "DOTNETCORE|3.1"'.format(
+            resource_group, webapp_name_2, plan)).get_output_in_json()
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_cd(self, resource_group):
