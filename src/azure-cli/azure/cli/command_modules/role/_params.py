@@ -11,6 +11,7 @@ from azure.graphrbac.models import ConsentType
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag, get_location_type, tags_type
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
@@ -211,5 +212,9 @@ def load_arguments(self, _):
         c.argument('resource_name', arg_type=name_arg_type, id_part='name')
 
     with self.argument_context('identity create') as c:
+        c.argument('resource_name', local_context_attribute=LocalContextAttribute(name='identity_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('tags', tags_type)
+
+    with self.argument_context('identity show') as c:
+        c.argument('resource_name', local_context_attribute=LocalContextAttribute(name='identity_name', actions=[LocalContextAction.GET]))

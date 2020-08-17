@@ -315,6 +315,9 @@ vnet_name_type = CLIArgumentType(
 subnet_name_type = CLIArgumentType(
     local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
+assign_identity_type = CLIArgumentType(
+    local_context_attribute=LocalContextAttribute(name='identity_name', actions=[LocalContextAction.GET]))
+
 
 def patch_arg_make_required(argument):
     argument.settings['required'] = True
