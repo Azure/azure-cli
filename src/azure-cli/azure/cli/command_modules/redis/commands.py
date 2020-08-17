@@ -36,24 +36,24 @@ def load_command_table(self, _):
         g.custom_command('list', 'cli_redis_list_cache')
         g.command('list-keys', 'list_keys')
         g.command('regenerate-keys', 'regenerate_key')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.generic_update_command('update', setter_name='update', custom_func_name='cli_redis_update')
 
     with self.command_group('redis patch-schedule', redis_patch) as g:
         g.command('create', 'create_or_update')
         g.command('update', 'create_or_update')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
 
     with self.command_group('redis firewall-rules', redis_firewall_rules) as g:
         g.command('create', 'create_or_update')
         g.command('update', 'create_or_update')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_redis_resource')
 
     with self.command_group('redis server-link', redis_linked_server) as g:
         g.custom_command('create', 'cli_redis_create_server_link', client_factory=cf_linked_server)
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
