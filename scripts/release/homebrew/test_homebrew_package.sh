@@ -22,5 +22,8 @@ pip install pytest-xdist --prefix $AZ_BASE
 find ./artifacts/build -name "azure_cli_testsdk*" | xargs pip install --prefix $AZ_BASE --upgrade --ignore-installed
 find ./artifacts/build -name "azure_cli_fulltest*" | xargs pip install --prefix $AZ_BASE --upgrade --ignore-installed --no-deps
 
+# workaround for this bug (https://github.com/microsoft/azure-devops-python-api/issues/354)
+mkdir -p ~/.vsts/python-sdk/cache
+
 PYTHON_VERSION=`ls $AZ_BASE/lib/ | head -n 1`
 python ./scripts/release/homebrew/test_homebrew_package.py $AZ_BASE $PYTHON_VERSION
