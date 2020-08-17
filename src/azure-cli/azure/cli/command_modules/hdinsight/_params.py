@@ -12,13 +12,17 @@ from ._validators import (validate_component_version,
                           validate_storage_msi,
                           validate_subnet,
                           validate_domain_service,
-                          validate_workspace)
+                          validate_workspace,
+                          validate_timezone_name, validate_time)
+from .util import AUTOSCALE_TIMEZONES
 
 # Cluster types may be added in the future. Therefore, this list can be used for completion, but not input validation.
 known_cluster_types = ["hadoop", "interactivehive", "hbase", "kafka", "storm", "spark", "rserver", "mlservices"]
 
 # Known role (node) types.
 known_role_types = ["headnode", "workernode", "zookeepernode", "edgenode"]
+week_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+known_autoscale_types = ["Load", "Schedule"]
 
 
 # pylint: disable=too-many-statements
@@ -189,6 +193,31 @@ def load_arguments(self, _):
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),
                    help='Indicates whether enable encryption in transit.')
 
+        # Autoscale Configuration
+        c.argument('autoscale_type', arg_group='Autoscale Configuration', arg_type=get_enum_type(known_autoscale_types),
+                   help='The autoscale type.')
+        c.argument('autoscale_min_workernode_count', type=int,
+                   options_list=['--autoscale-min-workernode-count', '--autoscale-min-count'],
+                   arg_group='Autoscale Configuration',
+                   help='The minimal workernode count for Load-based atuoscale.')
+        c.argument('autoscale_max_workernode_count', type=int,
+                   options_list=['--autoscale-max-workernode-count', '--autoscale-max-count'],
+                   arg_group='Autoscale Configuration',
+                   help='The max workernode count for Load-based atuoscale.')
+        c.argument('timezone', arg_group='Autoscale Configuration', validator=validate_timezone_name,
+                   completer=get_generic_completion_list(AUTOSCALE_TIMEZONES),
+                   help='The timezone for schedule autoscale type. Values from `az hdinsight autoscale list-timezones`')
+        c.argument('days', nargs='+', arg_group='Autoscale Configuration',
+                   arg_type=get_enum_type(week_days),
+                   completer=get_generic_completion_list(week_days),
+                   help='A space-delimited list of schedule day.')
+        c.argument('time', arg_group='Autoscale Configuration', validator=validate_time,
+                   help='The 24-hour time in the form of xx:xx in days.')
+        c.argument('autoscale_workernode_count', type=int,
+                   options_list=['--autoscale-workernode-count', '--autoscale-count'],
+                   arg_group='Autoscale Configuration',
+                   help='The scheduled workernode count.')
+
         # resize
         with self.argument_context('hdinsight resize') as c:
             c.argument('target_instance_count', options_list=['--workernode-count', '-c'],
@@ -255,3 +284,60 @@ def load_arguments(self, _):
                        help='The name of the cluster.')
             c.argument('hosts', options_list=['--host-names'], nargs='+',
                        help='A space-delimited list of host names that need to be restarted.')
+
+        # autoscale
+        autoscale_commands = ['create', 'update', 'delete', 'show']
+        for command in autoscale_commands:
+            with self.argument_context('hdinsight autoscale ' + command) as c:
+                c.argument('cluster_name', options_list=['--cluster-name'],
+                           completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                           help='The name of the cluster.')
+
+        for command in ['create', 'update']:
+            with self.argument_context('hdinsight autoscale ' + command) as c:
+                c.argument('min_workernode_count', type=int, arg_group='Load-based Autoscale',
+                           help='The minimal workernode count for Load-based atuoscale.')
+                c.argument('max_workernode_count', type=int, arg_group='Load-based Autoscale',
+                           help='The max workernode count for Load-based atuoscale.')
+                c.argument('timezone', arg_group='Schedule-based Autoscale', validator=validate_timezone_name,
+                           completer=get_generic_completion_list(AUTOSCALE_TIMEZONES),
+                           help='The timezone for schedule autoscale type. '
+                                'Values from `az hdinsight autoscale list-timezones`')
+
+        with self.argument_context('hdinsight autoscale create') as c:
+            c.argument('type', arg_type=get_enum_type(known_autoscale_types), help='The autoscale type.')
+            c.argument('days', nargs='+', arg_group='Schedule-based Autoscale',
+                       arg_type=get_enum_type(week_days),
+                       completer=get_generic_completion_list(week_days),
+                       help='A space-delimited list of schedule day.')
+            c.argument('time', arg_group='Schedule-based Autoscale', validator=validate_time,
+                       help='The 24-hour time in the form xx:xx in days.')
+            c.argument('workernode_count', type=int, options_list=['--workernode-count'],
+                       arg_group='Schedule-based Autoscale',
+                       help='The schedule workernode count.')
+            c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+
+        # autoscale condition
+        autoscale_condition_commands = ['create', 'update', 'delete', 'list']
+        for command in autoscale_condition_commands:
+            with self.argument_context('hdinsight autoscale condition ' + command) as c:
+                c.argument('cluster_name', options_list=['--cluster-name'],
+                           completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                           help='The name of the cluster.')
+
+        for command in ['create', 'update']:
+            with self.argument_context('hdinsight autoscale condition ' + command) as c:
+                c.argument('days', nargs='+', arg_group=None, arg_type=get_enum_type(week_days),
+                           completer=get_generic_completion_list(week_days),
+                           help='A space-delimited list of schedule day.')
+                c.argument('time', arg_group=None, validator=validate_time,
+                           help='The 24-hour time in the form xx:xx in days.')
+                c.argument('workernode_count', type=int, options_list=['--workernode-count'], arg_group=None,
+                           help='The schedule workernode count.')
+        for command in ['create', 'update']:
+            with self.argument_context('hdinsight autoscale condition ' + command) as c:
+                c.argument('index', type=int, help='The schedule condition index which starts with 0.')
+
+        with self.argument_context('hdinsight autoscale condition delete') as c:
+            c.argument('index', nargs='+', type=int,
+                       help='The Space-separated list of condition indices which starts with 0 to delete.')
