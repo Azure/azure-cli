@@ -13,7 +13,6 @@ from knack.util import CLIError
 
 class ConfigTest(ScenarioTest):
 
-    @unittest.skip('skip')
     def test_config(self):
 
         # [test_section1]
@@ -25,6 +24,7 @@ class ConfigTest(ScenarioTest):
 
         # C:\Users\{username}\AppData\Local\Temp
         tempdir = tempfile.gettempdir()
+        tempdir = os.path.realpath(tempdir)
         original_path = os.getcwd()
         os.chdir(tempdir)
         print("Using temp dir: {}".format(tempdir))
