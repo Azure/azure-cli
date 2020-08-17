@@ -69,6 +69,12 @@ def load_arguments(self, _):
                                                                    help='Space-separated list of resource change types to be excluded from What-If results.',
                                                                    is_preview=True, min_api='2019-07-01')
 
+    latest_include_preview_type = CLIArgumentType(options_list=['--latest-include-preview', '-v'], is_preview=True,
+                                                  action='store_true', arg_group='Resource Id',
+                                                  help='Indicate that the latest api-version will be used regardless of whether it is preview version (like 2020-01-01-preview) or not. '
+                                                       'For example, if the supported api-version of resource provider is 2020-01-01-preview and 2019-01-01: '
+                                                       'when passing in this parameter it will take the latest version 2020-01-01-preview, otherwise it will take the latest stable version 2019-01-01 without passing in this parameter')
+
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
     with self.argument_context('resource') as c:
@@ -76,7 +82,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type, arg_group='Resource Id')
         c.ignore('resource_id')
         c.argument('resource_name', resource_name_type, arg_group='Resource Id')
-        c.argument('api_version', help='The api version of the resource (omit for latest)', required=False, arg_group='Resource Id')
+        c.argument('api_version', help='The api version of the resource (omit for the latest stable version)', required=False, arg_group='Resource Id')
         c.argument('resource_provider_namespace', resource_namespace_type, arg_group='Resource Id')
         c.argument('resource_type', arg_type=resource_type_type, completer=get_resource_types_completion_list, arg_group='Resource Id')
         c.argument('parent_resource_path', resource_parent_type, arg_group='Resource Id')
@@ -84,6 +90,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('resource_ids', nargs='+', options_list=['--ids'], help='One or more resource IDs (space-delimited). If provided, no other "Resource Id" arguments should be specified.', arg_group='Resource Id')
         c.argument('include_response_body', arg_type=get_three_state_flag(), help='Use if the default command output doesn\'t capture all of the property data.')
+        c.argument('latest_include_preview', latest_include_preview_type)
 
     with self.argument_context('resource list') as c:
         c.argument('name', resource_name_type)
@@ -98,7 +105,7 @@ def load_arguments(self, _):
     with self.argument_context('resource create') as c:
         c.argument('resource_id', options_list=['--id'], help='Resource ID.', action=None)
         c.argument('properties', options_list=['--properties', '-p'], help='a JSON-formatted string containing resource properties')
-        c.argument('is_full_object', action='store_true', help='Indicates that the properties object includes other options such as location, tags, sku, and/or plan.')
+        c.argument('is_full_object', action='store_true', help='Indicate that the properties object includes other options such as location, tags, sku, and/or plan.')
 
     with self.argument_context('resource link') as c:
         c.argument('target_id', options_list=['--target', c.deprecate(target='--target-id', redirect='--target', hide=True)], help='Fully-qualified resource ID of the resource link target.')
@@ -111,6 +118,9 @@ def load_arguments(self, _):
         c.argument('is_incremental', action='store_true', options_list=['--is-incremental', '-i'],
                    help='The option to add tags incrementally without deleting the original tags. If the key of new tag and original tag are duplicated, the original value will be overwritten.')
 
+    with self.argument_context('resource wait') as c:
+        c.ignore('latest_include_preview')
+
     with self.argument_context('provider') as c:
         c.ignore('top')
         c.argument('resource_provider_namespace', options_list=['--namespace', '-n'], completer=get_providers_completion_list, help=_PROVIDER_HELP_TEXT)
@@ -122,7 +132,7 @@ def load_arguments(self, _):
         c.argument('wait', action='store_true', help='wait for unregistration to finish')
 
     with self.argument_context('provider operation') as c:
-        c.argument('api_version', help="The api version of the 'Microsoft.Authorization/providerOperations' resource (omit for latest)")
+        c.argument('api_version', help="The api version of the 'Microsoft.Authorization/providerOperations' resource (omit for the latest stable version)")
 
     with self.argument_context('feature') as c:
         c.argument('resource_provider_namespace', options_list='--namespace', required=True, help=_PROVIDER_HELP_TEXT)
