@@ -114,30 +114,26 @@ def load_arguments(self, _):
         c.argument('subscription_required', arg_group='API', arg_type=get_three_state_flag(), help='If true, the API requires a subscription key on requests.')
         c.argument('tags', tags_type)
 
-    with self.argument_context('apim nv create') as c:
+    with self.argument_context('apim nv') as c:
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
-        c.argument('named_value_id', help='The id of the API Management Named Value.')
+
+    with self.argument_context('apim nv create') as c:
+        c.argument('named_value_id', help='The unique identifier of the API Management Named Value.')
         c.argument('display_name', help='The display name of the API Management Named Value.')
         c.argument('value', help='The value of the API Management Named Value.')
         c.argument('secret', arg_type=get_three_state_flag(), help='If true, the Named Value is a secret.')
         c.argument('tags', tags_type)
 
     with self.argument_context('apim nv update') as c:
-        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
         c.argument('value', help='The value of the API Management Named Value.')
         c.argument('secret', arg_type=get_three_state_flag(), help='If true, the Named Value is a secret.')
         c.argument('tags', tags_type)
 
     with self.argument_context('apim nv delete') as c:
-        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
-        c.argument('named_value_id', help='The id of the API Management Named Value.')
+        c.argument('named_value_id', help='The unique identifier of the API Management Named Value.')
 
     with self.argument_context('apim nv show') as c:
-        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
-        c.argument('named_value_id', help='The id of the API Management Named Value.')
-
-    with self.argument_context('apim nv list') as c:
-        c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
+        c.argument('named_value_id', help='The unique identifier of the API Management Named Value.')
 
     with self.argument_context('apim api import') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
