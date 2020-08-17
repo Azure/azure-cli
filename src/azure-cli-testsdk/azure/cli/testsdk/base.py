@@ -164,7 +164,6 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
-        print(command)
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
 
     def get_subscription_id(self):
