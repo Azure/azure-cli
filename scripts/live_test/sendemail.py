@@ -67,7 +67,7 @@ def main():
     }
     if REQUESTED_FOR_EMAIL != '':
         data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
-    if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
+    if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
     print(data)
     try:
@@ -83,13 +83,17 @@ def main():
 
 def get_container_name():
     date = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    name = date
     if USER_LIVE == '--live':
         mode = 'live'
     elif USER_LIVE == '':
         mode = 'replay'
     else:
         mode = ''
-    return date + mode
+    name += '_' + mode
+    if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
+        name += '_archive'
+    return name
 
 
 def upload_files(container):
