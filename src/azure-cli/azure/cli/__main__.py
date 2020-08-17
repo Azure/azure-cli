@@ -76,8 +76,8 @@ finally:
     telemetry.conclude()
     try:
         if sys.argv[1] != 'upgrade' and az_cli.config.getboolean('auto-upgrade', 'enable', False):
-            from azure.cli.core._session import VERSIONS
-            from azure.cli.core.util import get_cached_latest_versions, _VERSION_UPDATE_TIME
+            from azure.cli.core._session import VERSIONS  # pylint: disable=ungrouped-imports
+            from azure.cli.core.util import get_cached_latest_versions, _VERSION_UPDATE_TIME  # pylint: disable=ungrouped-imports
             if VERSIONS[_VERSION_UPDATE_TIME]:
                 import datetime
                 version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')

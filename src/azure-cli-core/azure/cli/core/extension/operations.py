@@ -295,7 +295,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             msg = "No updates available for '{}'. Use --debug for more information.".format(extension_name)
@@ -310,7 +310,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
+            _add_whl_ext(cli_ctx=cmd_cli_ctx, source=download_url, ext_sha256=ext_sha256,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)

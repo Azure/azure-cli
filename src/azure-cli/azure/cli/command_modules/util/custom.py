@@ -78,6 +78,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 apt_update_cmd.insert(0, 'sudo')
                 az_update_cmd.insert(0, 'sudo')
             subprocess.call(apt_update_cmd)
+            logger.debug("Update azure cli with '%s'", " ".join(apt_update_cmd))
             exit_code = subprocess.call(az_update_cmd)
         elif installer == 'RPM':
             from azure.cli.core.util import get_linux_distro
@@ -90,6 +91,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                     update_cmd = 'yum update -y azure-cli'.split()
                     if os.geteuid() != 0:  # pylint: disable=no-member
                         update_cmd.insert(0, 'sudo')
+                    logger.debug("Update azure cli with '%s'", " ".join(update_cmd))
                     exit_code = subprocess.call(update_cmd)
                 elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
                     zypper_refresh_cmd = ['zypper', 'refresh']
@@ -98,22 +100,26 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                         zypper_refresh_cmd.insert(0, 'sudo')
                         az_update_cmd.insert(0, 'sudo')
                     subprocess.call(zypper_refresh_cmd)
+                    logger.debug("Update azure cli with '%s'", " ".join(az_update_cmd))
                     exit_code = subprocess.call(az_update_cmd)
                 else:
                     logger.warning(UPGRADE_MSG)
         elif installer == 'HOMEBREW':
             logger.warning("Update homebrew formulae")
             subprocess.call(['brew', 'update'])
-            exit_code = subprocess.call(['brew', 'upgrade', 'azure-cli'])
+            update_cmd = ['brew', 'upgrade', 'azure-cli']
+            logger.debug("Update azure cli with '%s'", " ".join(update_cmd))
+            exit_code = subprocess.call(update_cmd)
         elif installer == 'PIP':
             pip_args = [sys.executable, '-m', 'pip', 'install', '--upgrade', 'azure-cli', '-vv',
                         '--disable-pip-version-check', '--no-cache-dir']
-            logger.debug('Executing pip with args: %s', pip_args)
+            logger.debug("Update azure cli with '%s'", " ".join(pip_args))
             exit_code = subprocess.call(pip_args, shell=platform.system() == 'Windows')
         elif installer == 'DOCKER':
             logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
-                           "or 'pip install --upgrade azure-cli' in this container")
+                           "or run 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
+            logger.debug("Update azure cli with MSI from https://aka.ms/installazurecliwindows")
             exit_code = subprocess.call(['powershell.exe', 'Start-Process powershell -Wait -Verb runAs -ArgumentList "Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile AzureCLI.msi;Start-Process msiexec.exe -Wait -ArgumentList \'/I AzureCLI.msi\';Remove-Item AzureCLI.msi"'])  # pylint: disable=line-too-long
         else:
             logger.warning(UPGRADE_MSG)
