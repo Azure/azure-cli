@@ -25,7 +25,8 @@ DEPENDENCIES = [
     'jmespath',
     'mock',
     'vcrpy>=1.10.3',
-    'azure-devtools==1.2.0'
+    'azure-devtools==1.2.0',
+    'pytest'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

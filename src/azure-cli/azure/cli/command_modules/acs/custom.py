@@ -1748,6 +1748,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                kubernetes_version='',
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
+               node_osdisk_diskencryptionset_id='',
                node_count=3,
                nodepool_name="nodepool1",
                nodepool_tags=None,
@@ -1938,6 +1939,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 load_balancer_profile=load_balancer_profile,
                 outbound_type=outbound_type,
             )
+        if load_balancer_sku.lower() == "basic":
+            network_profile = ContainerServiceNetworkProfile(
+                load_balancer_sku=load_balancer_sku.lower(),
+            )
 
     addon_profiles = _handle_addons_args(
         cmd,
@@ -2007,7 +2012,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         addon_profiles=addon_profiles,
         aad_profile=aad_profile,
         api_server_access_profile=api_server_access_profile,
-        identity=identity
+        identity=identity,
+        disk_encryption_set_id=node_osdisk_diskencryptionset_id
     )
 
     if uptime_sla:

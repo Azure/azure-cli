@@ -120,6 +120,7 @@ DEPENDENCIES = [
     'azure-mgmt-storage~=11.1.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.47.0',
+    'azure-mgmt-synapse~=0.3.0',
     'azure-multiapi-storage~=0.3.6',
     'azure-loganalytics~=0.1.0',
     'azure-storage-common~=1.4',

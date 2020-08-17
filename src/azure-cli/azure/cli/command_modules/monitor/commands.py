@@ -375,7 +375,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_metric_alert', custom_command_type=alert_custom)
         g.command('delete', 'delete')
         g.custom_command('list', 'list_metric_alerts', custom_command_type=alert_custom)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
 
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:

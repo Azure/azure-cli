@@ -56,7 +56,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete_configstore')
         g.command('update', 'update_configstore')
         g.command('list', 'list_configstore')
-        g.command('show', 'show_configstore')
+        g.show_command('show', 'show_configstore')
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:
         g.command('list', 'list_credential')
@@ -65,7 +65,7 @@ def load_command_table(self, _):
     with self.command_group('appconfig identity', configstore_identity_util, is_preview=True) as g:
         g.command('assign', 'assign_managed_identity')
         g.command('remove', 'remove_managed_identity')
-        g.command('show', 'show_managed_identity')
+        g.show_command('show', 'show_managed_identity')
 
     with self.command_group('appconfig revision', configstore_keyvalue_util) as g:
         g.command('list', 'list_revision')
@@ -74,7 +74,7 @@ def load_command_table(self, _):
     with self.command_group('appconfig kv', configstore_keyvalue_util) as g:
         g.command('set', 'set_key')
         g.command('delete', 'delete_key')
-        g.command('show', 'show_key')
+        g.show_command('show', 'show_key')
         g.command('list', 'list_key')
         g.command('lock', 'lock_key')
         g.command('unlock', 'unlock_key')
@@ -91,7 +91,7 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('set', 'set_feature')
         g.custom_command('delete', 'delete_feature')
-        g.custom_command('show', 'show_feature')
+        g.custom_show_command('show', 'show_feature')
         g.custom_command('list', 'list_feature')
         g.custom_command('lock', 'lock_feature')
         g.custom_command('unlock', 'unlock_feature')
@@ -104,5 +104,5 @@ def load_command_table(self, _):
                                                                featurefilter_entry_format)) as g:
         g.custom_command('add', 'add_filter')
         g.custom_command('delete', 'delete_filter')
-        g.custom_command('show', 'show_filter')
+        g.custom_show_command('show', 'show_filter')
         g.custom_command('list', 'list_filter')
