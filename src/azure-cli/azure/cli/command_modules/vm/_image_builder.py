@@ -377,17 +377,19 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 
 # region Custom Commands
 
-def create_image_template(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+def create_image_template(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements, unused-argument
         cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
-        source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
-        shared_image_destinations=None, no_wait=False, image_template=None, identity=None):  # pylint: disable=unused-argument, too-many-locals
+        source=None, scripts=None, checksum=None, managed_image_destinations=None,
+        shared_image_destinations=None, no_wait=False, image_template=None, identity=None,
+        vm_size=None, os_disk_size=None, vnet=None, subnet=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
-                                                ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
+                                                ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor,
                                                 ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
-                                                ImageTemplateIdentityUserAssignedIdentitiesValue)  # pylint: disable=line-too-long
+                                                ImageTemplateIdentityUserAssignedIdentitiesValue,
+                                                ImageTemplateVmProfile, VirtualNetworkConfig)
 
     if image_template is not None:
         logger.warning('You are using --image-template. All other parameters will be ignored.')
@@ -474,9 +476,19 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             user_assigned_identities[ide] = ImageTemplateIdentityUserAssignedIdentitiesValue()
         identity_body = ImageTemplateIdentity(type='UserAssigned', user_assigned_identities=user_assigned_identities)
 
+    # VM profile
+    vnet_config = None
+    if vnet or subnet:
+        if not is_valid_resource_id(subnet):
+            subnet = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                                 namespace='Microsoft.Network', type='virtualNetworks', name=vnet,
+                                 child_type_1='subnets', child_name_1=subnet)
+        vnet_config = VirtualNetworkConfig(subnet_id=subnet)
+    vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, vnet_config=vnet_config)
+
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
                                    location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}),
-                                   identity=identity_body)
+                                   identity=identity_body, vm_profile=vm_profile)
 
     return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
