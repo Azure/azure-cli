@@ -392,15 +392,15 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             base_dir = os.path.abspath(os.curdir)
 
             try:
-                temp_dir = self.create_temp_dir()
+                temp_dir = os.path.realpath(self.create_temp_dir())
                 os.chdir(temp_dir)
                 self.cmd('configure --default group={rg} --scope local')
-                local_defaults_config = self.cmd('configure --list-defaults --scope local', checks=[
-                    self.check('length([])', 1),
-                    self.check('[0].name', 'group'),
-                    self.check('[0].value', '{rg}')
-                ]).get_output_in_json()
-                self.assertTrue(temp_dir.lower() in local_defaults_config[0]['source'].lower())
+                local_defaults_config = self.cmd('configure --list-defaults --scope local').get_output_in_json()
+
+                self.assertGreaterEqual(len(local_defaults_config), 1)
+                actual = set([(x['name'], x['resource'], x['value']) for x in local_defaults_config if x['name'] == 'group'])
+                expected = set([('group', temp_dir.lower(), self.kwargs['rg'])])
+                self.assertTrue(actual == expected)
 
                 # test role assignments on a resource group
                 rg_id = self.cmd('group show -n {rg}').get_output_in_json()['id']
