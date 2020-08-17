@@ -46,8 +46,8 @@ def register_global_query_recommend_argument(cli_ctx):
                                              object_type='parameter', target='_query_recommend')
         default_kwargs = {
             'help': 'Recommend JMESPath string for you. You can copy one of the query '
-                    'and paste it after --query parameter within double quotation marks'
-                    'to see the results. You can add one or more positional keywords so'
+                    'and paste it after --query parameter within double quotation marks '
+                    'to see the results. You can add one or more positional keywords so '
                     'that we can give suggestions based on these key words.',
             'arg_group': 'Global',
             'is_experimental': True,
