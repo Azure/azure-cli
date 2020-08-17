@@ -179,7 +179,8 @@ def _get_mgmt_service_client(cli_ctx,
 
 
 def get_data_service_client(cli_ctx, service_type, account_name, account_key, connection_string=None,
-                            sas_token=None, socket_timeout=None, token_credential=None, endpoint_suffix=None):
+                            sas_token=None, socket_timeout=None, token_credential=None, endpoint_suffix=None,
+                            location_mode=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
         client_kwargs = {'account_name': account_name,
@@ -193,6 +194,8 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
+        if location_mode:
+            client.location_mode = location_mode
     except ValueError as exc:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')

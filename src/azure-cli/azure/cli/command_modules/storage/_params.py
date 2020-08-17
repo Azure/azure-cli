@@ -878,8 +878,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'update']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
-            t_enabled_protocols, t_root_squash = self.get_models('EnabledProtocols', 'RootSquashType',
-                                                                 resource_type=ResourceType.MGMT_STORAGE)
+            t_enabled_protocols, t_root_squash, t_access_tier = \
+                self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',
+                                resource_type=ResourceType.MGMT_STORAGE)
             c.argument('share_quota', type=int, options_list=['--quota', '-q'],
                        help='The maximum size of the share in gigabytes. Must be greater than 0, and less than or '
                             'equal to 5TB (5120). For Large File Shares, the maximum size is 102400.')
@@ -892,6 +893,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        'only available for premium file shares (file shares in the FileStorage account type).')
             c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
                        min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
+            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), is_preview=True, min_api='2019-06-01',
+                       help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
+                       '(default), Hot, and Cool. FileStorage account can choose Premium.')
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
