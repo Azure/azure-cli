@@ -13,6 +13,7 @@ from knack.util import CLIError
 
 class ConfigTest(ScenarioTest):
 
+    @unittest.skip('skip')
     def test_config(self):
 
         # [test_section1]
