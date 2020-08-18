@@ -352,7 +352,6 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     if not source_sas:
         # generate a sas token even in the same account when the source and destination are not the same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
-            import os
             dir_name, file_name = os.path.split(path) if path else (None, '')
             source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                      dir_name, file_name)
@@ -557,7 +556,6 @@ def get_file_path_validator(default_file_param=None):
     Allows another path-type parameter to be named which can supply a default filename. """
 
     def validator(namespace):
-        import os
         if not hasattr(namespace, 'path'):
             return
 
@@ -790,8 +788,6 @@ def process_container_delete_parameters(cmd, namespace):
 
 def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
@@ -805,8 +801,6 @@ def process_blob_download_batch_parameters(cmd, namespace):
 
 def process_blob_upload_batch_parameters(cmd, namespace):
     """Process the source and destination of storage blob upload command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.source) or not os.path.isdir(namespace.source):
         raise ValueError('incorrect usage: source must be an existing directory')
@@ -879,8 +873,6 @@ def _process_blob_batch_container_parameters(cmd, namespace, source=True):
 
 def process_file_upload_batch_parameters(cmd, namespace):
     """Process the parameters of storage file batch upload command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.source):
         raise ValueError('incorrect usage: source {} does not exist'.format(namespace.source))
@@ -905,8 +897,6 @@ def process_file_upload_batch_parameters(cmd, namespace):
 
 def process_file_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage file batch download command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
@@ -929,8 +919,6 @@ def process_file_batch_source_parameters(cmd, namespace):
 
 
 def process_file_download_namespace(namespace):
-    import os
-
     get_file_path_validator()(namespace)
 
     dest = namespace.file_path
@@ -1144,7 +1132,6 @@ def validate_azcopy_remove_arguments(cmd, namespace):
         namespace.target = url
 
     if valid_file:
-        import os
         client = file_data_service_factory(cmd.cli_ctx, {
             'account_name': namespace.account_name,
             'account_key': namespace.account_key})
