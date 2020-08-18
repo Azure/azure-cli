@@ -169,7 +169,8 @@ def validate_asp_sku(cmd, namespace):
 def validate_ip_address(cmd, namespace):
     if namespace.ip_address is not None:
         _validate_ip_address_format(namespace)
-        _validate_ip_address_existance(cmd, namespace)
+        if 'add' in cmd.name:
+            _validate_ip_address_existance(cmd, namespace)
 
 
 def _validate_ip_address_format(namespace):
