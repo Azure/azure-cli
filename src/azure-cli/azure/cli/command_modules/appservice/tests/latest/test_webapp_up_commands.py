@@ -402,6 +402,7 @@ class WebAppUpE2ETests(ScenarioTest):
         shutil.rmtree(temp_dir)
 
     @live_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_name_exists_in_subscription(self, resource_group):
         plan = self.create_random_name('up-name-exists-plan', 40)
