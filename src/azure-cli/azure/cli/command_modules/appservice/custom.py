@@ -2693,7 +2693,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
-                    deployment_container_image_name=None, tags=None):
+                    deployment_container_image_name=None, tags=None, assign_identities=None,
+                    role='Contributor', scope=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 2. In the future, specifying a version will "
@@ -2876,6 +2877,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
                                               deployment_container_image_name, docker_registry_server_user,
                                               docker_registry_server_password)
+
+    if assign_identities is not None:
+        identity = assign_identity(cmd, resource_group_name, name, assign_identities,
+                                   role, None, scope)
+        functionapp.identity = identity
 
     return functionapp
 

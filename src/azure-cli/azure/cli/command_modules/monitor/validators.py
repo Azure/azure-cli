@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
 from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
+from knack.util import CLIError
 
 
 def process_autoscale_create_namespace(cmd, namespace):

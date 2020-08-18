@@ -229,7 +229,7 @@ def load_command_table(self, _):
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
         g.custom_command('list', 'list_image_templates')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.generic_update_command('update', 'create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
         g.wait_command('wait')
@@ -288,6 +288,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
+        g.command('assess-patches', 'assess_patches', min_api='2020-06-01')
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
@@ -459,7 +460,7 @@ def load_command_table(self, _):
 
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('list', 'list_image_galleries')
         g.command('delete', 'delete')
         g.generic_update_command('update', setter_arg_name='gallery')
@@ -467,13 +468,13 @@ def load_command_table(self, _):
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
         g.command('list', 'list_by_gallery')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.generic_update_command('update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.command('delete', 'delete')
-        g.command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), ReplicationState:replicationStatus.aggregatedState}')
+        g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), ReplicationState:replicationStatus.aggregatedState}')
         g.command('list', 'list_by_gallery_image')
         g.custom_command('create', 'create_image_version', supports_no_wait=True)
         g.generic_update_command('update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, supports_no_wait=True)
