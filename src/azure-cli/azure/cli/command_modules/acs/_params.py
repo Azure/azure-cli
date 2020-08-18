@@ -17,7 +17,7 @@ from knack.arguments import CLIArgumentType
 from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
-    validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
+    validate_cluster_autoscaler_profile, validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
@@ -183,6 +183,7 @@ def load_arguments(self, _):
         c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                                                             CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
         c.argument('enable_cluster_autoscaler', action='store_true')
+        c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile, help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('vm_set_type', type=str, validator=validate_vm_set_type)
@@ -220,6 +221,7 @@ def load_arguments(self, _):
         c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
         c.argument('disable_cluster_autoscaler', options_list=["--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
+        c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile, help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('uptime_sla', action='store_true')
