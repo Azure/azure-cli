@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=protected-access
-
+import os
 import argparse
 
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
@@ -1307,3 +1308,48 @@ def validate_match_condition(namespace):
     if namespace.if_none_match:
         namespace = _if_none_match(if_none_match=namespace.if_none_match, **namespace)
         del namespace.if_none_match
+
+
+def validate_or_policy(namespace):
+    error_elements = []
+    if namespace.properties is None:
+        error_msg = "Please provide --policy in JSON format or the following arguments: "
+        if namespace.source_account is None:
+            error_elements.append("--source-account")
+
+        if namespace.destination_account is None:
+            namespace.destination_account = namespace.account_name
+
+        if error_elements:
+            error_msg += ", ".join(error_elements)
+            error_msg += " to initialize or Policy for storage account."
+            raise ValueError(error_msg)
+    else:
+        if os.path.exists(namespace.properties):
+            or_policy = get_file_json(namespace.properties)
+        else:
+            or_policy = shell_safe_json_parse(namespace.properties)
+
+        try:
+            namespace.source_account = or_policy["sourceAccount"]
+        except KeyError:
+            namespace.source_account = or_policy["source_account"]
+        if namespace.source_account is None:
+            error_elements.append("source_account")
+
+        try:
+            namespace.destination_account = or_policy["destinationAccount"]
+        except KeyError:
+            namespace.destination_account = or_policy["destination_account"]
+
+        if "rules" not in or_policy.keys() or not or_policy["rules"]:
+            error_elements.append("rules")
+        error_msg = "Missing input parameters: "
+        if error_elements:
+            error_msg += ", ".join(error_elements)
+            error_msg += " in properties to initialize or Policy for storage account."
+            raise ValueError(error_msg)
+        namespace.properties = or_policy
+
+        if "policyId" in or_policy.keys() and or_policy["policyId"]:
+            namespace.policy_id = or_policy['policyId']
