@@ -30,5 +30,5 @@ for mod_name in mod_list:
     elif exit_code != 0:
         sys.exit(exit_code)
 
-exit_code = subprocess.call(['{} --junit-xml ./azure_cli_test_result/azure-cli-core.xml --pyargs azure.cli.core'.format(pytest_parallel_cmd)], shell=True)
+exit_code = subprocess.call(['{} --junit-xml ./azure_cli_test_result/azure-cli-core.xml --pyargs azure.cli.core'.format(pytest_base_cmd)], shell=True)
 sys.exit(exit_code)
