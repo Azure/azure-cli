@@ -6,8 +6,6 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
-from knack.deprecation import Deprecated
-
 
 from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_client_private_endpoint_connections_factory,
@@ -68,9 +66,7 @@ def load_command_table(self, _):
         g.custom_command('recover', 'recover_keyvault')
         g.custom_command('list', 'list_keyvault')
         g.show_command('show', 'get')
-        g.command('delete', 'delete', deprecate_info=Deprecated(
-            cli_ctx=g.command_loader.cli_ctx,
-            object_type='option',
+        g.command('delete', 'delete', deprecate_info=g.deprecate(
             tag_func=lambda x: '',
             message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, you will '
                                    'not be able to reuse this key vault name until the key vault has been purged from '
@@ -126,9 +122,7 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
-        g.keyvault_command('delete', 'delete_key', deprecate_info=Deprecated(
-            cli_ctx=g.command_loader.cli_ctx,
-            object_type='option',
+        g.keyvault_command('delete', 'delete_key', deprecate_info=g.deprecate(
             tag_func=lambda x: '',
             message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this key '
                                    'will be moved to the soft deleted state. You will not be able to create a key with '
@@ -155,9 +149,7 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_secret', transform=extract_subresource_name())
         g.keyvault_command('show', 'get_secret', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_secret', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name(), deprecate_info=Deprecated(
-            cli_ctx=g.command_loader.cli_ctx,
-            object_type='option',
+        g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name(), deprecate_info=g.deprecate(
             tag_func=lambda x: '',
             message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this secret '
                                    'will be moved to the soft deleted state. You will not be able to create a secret '
@@ -181,9 +173,7 @@ def load_command_table(self, _):
         g.keyvault_command('list-deleted', 'get_deleted_certificates', transform=extract_subresource_name())
         g.keyvault_command('show', 'get_certificate', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_certificate', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_certificate', deprecate_info=Deprecated(
-            cli_ctx=g.command_loader.cli_ctx,
-            object_type='option',
+        g.keyvault_command('delete', 'delete_certificate', deprecate_info=g.deprecate(
             tag_func=lambda x: '',
             message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this '
                                    'certificate will be moved to the soft deleted state. You will not be able to '

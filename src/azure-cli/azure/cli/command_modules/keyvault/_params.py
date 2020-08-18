@@ -7,7 +7,6 @@ from enum import Enum
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
-from knack.deprecation import Deprecated
 
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_file_or_dict
@@ -80,9 +79,7 @@ def load_arguments(self, _):
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag())
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag())
         c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=Deprecated(
-            cli_ctx=c.command_loader.cli_ctx,
-            object_type='option',
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=c.deprecate(
             message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
                                    'deprecated by December 2020. All key vaults will be required to have soft delete '
                                    'enabled. Please see the following documentation for additional guidance.\n'
@@ -110,9 +107,7 @@ def load_arguments(self, _):
                                                          'Vnet/subnet pairs or subnet resource ids.')
 
     with self.argument_context('keyvault update') as c:
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=Deprecated(
-            cli_ctx=c.command_loader.cli_ctx,
-            object_type='option',
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=c.deprecate(
             message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
                                    'deprecated by December 2020. All key vaults will be required to have soft delete '
                                    'enabled. Please see the following documentation for additional guidance.\n'
