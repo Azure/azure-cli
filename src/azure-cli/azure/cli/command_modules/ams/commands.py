@@ -13,9 +13,9 @@ from ._client_factory import (get_mediaservices_client, get_transforms_client,
 from ._exception_handler import ams_exception_handler
 
 
-# pylint: disable=line-too-long, disable=too-many-locals, too-many-statements
+# pylint: disable=line-too-long
 
-def load_command_table(self, _):
+def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-statements
     def get_sdk(operation, client_factory):
         return CliCommandType(
             operations_tmpl='azure.mgmt.media.operations#{}Operations.'.format(operation) + '{}',
