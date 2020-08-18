@@ -4899,7 +4899,7 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
             self.check('osProfile.windowsConfiguration.enableAutomaticUpdates', True),
             self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'AutomaticByOS')
         ])
-        self.cmd('vm assess-patch -g {rg} -n {vm}', checks=[
+        self.cmd('vm assess-patches -g {rg} -n {vm}', checks=[
             self.check('status', 'Succeeded')
         ])
 
