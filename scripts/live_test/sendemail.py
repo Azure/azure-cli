@@ -82,6 +82,10 @@ def main():
 
 
 def get_container_name():
+    """
+    Generate container name in storage account
+    :return:
+    """
     date = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     name = date
     if USER_LIVE == '--live':
@@ -97,6 +101,11 @@ def get_container_name():
 
 
 def upload_files(container):
+    """
+    Upload html and json files to container
+    :param container:
+    :return:
+    """
     # Create container
     cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {}'
     os.popen(cmd.format(container, ACCOUNT_KEY))
