@@ -18,7 +18,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
-                          validate_fs_public_access, validate_logging_version)
+                          validate_fs_public_access, validate_logging_version, validate_or_policy)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -460,12 +460,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account or-policy') as c:
         c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('object_replication_policy_id', policy_id_type)
         c.argument('policy_id', policy_id_type)
         c.argument('source_account', options_list=['--source-account', '-s'],
                    help='The source storage account name. Required when no --policy provided.')
         c.argument('destination_account', options_list=['--destination-account', '-d'],
-                   help='The destination storage account name. Required when no --policy provided.')
+                   help='The destination storage account name. Apply --account-name value as destination account '
+                   'when there is no destination account provided in --policy and --destination-account.')
         c.argument('properties', or_policy_type)
         c.argument('prefix_match', prefix_math_type)
         c.argument('min_creation_time', min_creation_time_type)
@@ -480,9 +482,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('destination_container', options_list=['--destination-container', '--dcont'],
                        help='The destination storage container name. Required when no --policy provided.')
 
-    with self.argument_context('storage account or-policy update') as c:
-        c.argument('account_name', acct_name_type, id_part=None)
-        c.argument('properties', or_policy_type)
+    with self.argument_context('storage account or-policy create') as c:
+        c.argument('properties', or_policy_type, validator=validate_or_policy)
 
     with self.argument_context('storage account or-policy rule') as c:
         c.argument('policy_id', policy_id_type)

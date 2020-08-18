@@ -1304,6 +1304,7 @@ def validate_or_policy(namespace):
         if namespace.source_account is None:
             error_elements.append("--source-account")
 
+        # Apply account name when there is no destination account provided
         if namespace.destination_account is None:
             namespace.destination_account = namespace.account_name
 

@@ -203,10 +203,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account or-policy', or_policy_sdk, is_preview=True,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01',
                             custom_command_type=or_policy_custom_type) as g:
-        from ._validators import validate_or_policy
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.custom_command('create', 'create_or_policy', validator=validate_or_policy)
+        g.custom_command('create', 'create_or_policy')
         g.generic_update_command('update', setter_name='update_or_policy', setter_type=or_policy_custom_type)
         g.command('delete', 'delete')
 

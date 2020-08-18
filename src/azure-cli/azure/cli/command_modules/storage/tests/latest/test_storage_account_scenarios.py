@@ -1157,13 +1157,14 @@ class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('storage account delete -n {account_name} -y')
 
 
-class StorageAccountORSScenarioTest(StorageScenarioMixin, ScenarioTest):
+class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
+    @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2euap')
-    @StorageAccountPreparer(parameter_name='source_account', location='eastus2euap', kind='StorageV2')
-    @StorageAccountPreparer(parameter_name='destination_account', location='eastus2euap', kind='StorageV2')
-    @StorageAccountPreparer(parameter_name='new_account', location='eastus2euap', kind='StorageV2')
-    def test_storage_account_ors(self, resource_group, source_account, destination_account, new_account):
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
+    @StorageAccountPreparer(parameter_name='source_account', location='eastus2', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='destination_account', location='eastus2', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='new_account', location='eastus2', kind='StorageV2')
+    def test_storage_account_or_policy(self, resource_group, source_account, destination_account, new_account):
         src_account_info = self.get_account_info(resource_group, source_account)
         src_container = self.create_container(src_account_info)
         dest_account_info = self.get_account_info(resource_group, destination_account)
@@ -1189,8 +1190,8 @@ class StorageAccountORSScenarioTest(StorageScenarioMixin, ScenarioTest):
                  JMESPathCheck('isVersioningEnabled', True)])
 
         # Create ORS policy on destination account
-        result = self.cmd('storage account or-policy create -g {rg} -n {dest_sc} -s {src_sc} --destination-container {dcont} --source-container {scont} -t "2020-02-19T16:05:00Z"')\
-            .get_output_in_json()
+        result = self.cmd('storage account or-policy create -n {dest_sc} -s {src_sc} --dcont {dcont} '
+                          '--scont {scont} -t "2020-02-19T16:05:00Z"').get_output_in_json()
         self.assertIn('policyId', result)
         self.assertIn('ruleId', result['rules'][0])
         self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
