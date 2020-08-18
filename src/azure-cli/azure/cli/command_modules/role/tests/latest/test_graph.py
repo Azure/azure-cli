@@ -666,21 +666,21 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             # ]
 
             ad_target_api_object = {
-                    "additionalProperties": None,
-                    "id": self.kwargs['ad_target_api'],
-                    "type": "Scope"}
+                "additionalProperties": None,
+                "id": self.kwargs['ad_target_api'],
+                "type": "Scope"}
             ad_target_api2_object = {
-                    "additionalProperties": None,
-                    "id": self.kwargs['ad_target_api2'],
-                    "type": "Scope"}
+                "additionalProperties": None,
+                "id": self.kwargs['ad_target_api2'],
+                "type": "Scope"}
             ms_target_api_object = {
-                    "additionalProperties": None,
-                    "id": self.kwargs['ms_target_api'],
-                    "type": "Scope"}
+                "additionalProperties": None,
+                "id": self.kwargs['ms_target_api'],
+                "type": "Scope"}
             ms_target_api2_object = {
-                    "additionalProperties": None,
-                    "id": self.kwargs['ms_target_api2'],
-                    "type": "Scope"}
+                "additionalProperties": None,
+                "id": self.kwargs['ms_target_api2'],
+                "type": "Scope"}
 
             def get_required_resource_access(required_resource_access_list, resource_app_id):
                 """Search for the RequiredResourceAccess from required_resource_access(list) by resourceAppId."""

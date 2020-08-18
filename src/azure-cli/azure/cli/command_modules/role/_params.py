@@ -58,10 +58,12 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        c.argument('api_permissions', nargs='+', help='space separated list of `<resource-access-id>=<type>`')
+        # https://github.com/Azure/azure-rest-api-specs/blob/32e56f061668a1bf1eeca6209000fad4c09afca8/specification/graphrbac/data-plane/Microsoft.GraphRbac/stable/1.6/graphrbac.json#L2817
+        c.argument('api', help='Specify `RequiredResourceAccess.resourceAppId` - The unique identifier for the resource that the application requires access to. This should be equal to the appId declared on the target resource application.')
+        # https://github.com/Azure/azure-rest-api-specs/blob/32e56f061668a1bf1eeca6209000fad4c09afca8/specification/graphrbac/data-plane/Microsoft.GraphRbac/stable/1.6/graphrbac.json#L2833
+        c.argument('api_permissions', nargs='+', help='Specify `ResourceAccess.id` - The unique identifier for one of the OAuth2Permission or AppRole instances that the resource application exposes. Space-separated list of `<resource-access-id>=<type>`')
         c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
         c.argument('scope', help='Specifies the value of the scope claim that the resource application should expect in the OAuth 2.0 access token, e.g. User.Read')
-        c.argument('api', help='the target API to access')
         c.argument('consent_type', arg_type=get_enum_type(ConsentType), default=ConsentType.all_principals.value,
                    help="Indicates if consent was provided by the administrator (on behalf of the organization) or by an individual.")
         c.argument('principal_id', help='If --consent-type is "Principal", this argument specifies the object of the user that granted consent and applies only for that user.')
