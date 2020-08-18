@@ -708,6 +708,16 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             # ms_graph_resource (RequiredResourceAccess) is removed automatically
             self.assertIsNone(ms_api)
 
+            # Add ms_target_api and ms_target_api2 back
+            self.cmd('ad app permission add --id {app_id} --api {ms_graph_resource} '
+                     '--api-permissions {ms_target_api}=Scope {ms_target_api2}=Scope')
+            # Delete both ms_target_api and ms_target_api2 at the same time
+            self.cmd('ad app permission delete --id {app_id} --api {ms_graph_resource} --api-permissions {ms_target_api} {ms_target_api2}')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            ms_api = get_required_resource_access(permissions, self.kwargs['ms_graph_resource'])
+            # ms_graph_resource (RequiredResourceAccess) is removed automatically
+            self.assertIsNone(ms_api)
+
             # Test delete 1 api ad_graph_resource (RequiredResourceAccess)
             self.cmd('ad app permission delete --id {app_id} --api {ad_graph_resource}')
             permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
