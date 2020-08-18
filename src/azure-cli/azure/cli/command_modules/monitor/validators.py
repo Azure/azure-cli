@@ -354,7 +354,7 @@ def process_workspace_data_export_destination(namespace):
     if namespace.destination:
         from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
         if not is_valid_resource_id(namespace.destination):
-            raise CLIError('usage error: --destination should be a storage account or an event hub resource id.')
+            raise CLIError('usage error: --destination should be a storage account, an evenhug namespace or an event hub resource id.')
         result = parse_resource_id(namespace.destination)
         if result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
             namespace.data_export_type = 'StorageAccount'
@@ -370,4 +370,4 @@ def process_workspace_data_export_destination(namespace):
             if 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
                 namespace.event_hub_name = result['child_name_1']
         else:
-            raise CLIError('usage error: --destination should be a storage account or an event hub resource id.')
+            raise CLIError('usage error: --destination should be a storage account, an evenhug namespace or an event hub resource id.')
