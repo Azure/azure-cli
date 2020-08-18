@@ -5,6 +5,8 @@
 
 # pylint: disable=line-too-long
 
+from knack.arguments import CLIArgumentType
+
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     tags_type, get_location_type,
@@ -12,6 +14,9 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
+from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
+                                                get_resource_name_completion_list)
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
@@ -167,3 +172,65 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
             c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
+
+
+    # Flexible-server
+    server_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--server-name', '-s'], metavar='NAME',
+                                           help="",
+                                           local_context_attribute=LocalContextAttribute(name='server_name', actions=[
+                                               LocalContextAction.GET, LocalContextAction.SET], scopes=['postgres', 'mysql', 'mariadb']))
+
+    def _flexible_server_params(command_group):
+        with self.argument_context('{} flexible-server create'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16. ')
+            c.argument('server_name', arg_type=server_name_arg_type)
+            c.argument('administrator_login', required=True, arg_group='Authentication')
+            c.argument('administrator_login_password', required=True, arg_group='Authentication')
+
+            c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
+            c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
+            c.argument('storage_mb', options_list=['--storage-mb'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
+            c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
+            c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+            c.argument('version', help='Server major version.')
+
+        with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('server_name', arg_type=server_name_arg_type)
+            c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the source server to restore from.')
+            c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+        
+        with self.argument_context('{} flexible-server update'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('server_name', arg_type=server_name_arg_type)
+            c.ignore('family', 'capacity', 'tier')
+            c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+
+        with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('server_name', arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server list'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('server_name', arg_type=server_name_arg_type)
+        
+        with self.argument_context('{} flexible-server wait'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('server_name', arg_type=server_name_arg_type)
+        
+        with self.argument_context('{} flexible-server show'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('server_name', arg_type=server_name_arg_type)
+        
+        with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('server_name', arg_type=server_name_arg_type)
+
+    _flexible_server_params('postgres')
+    
+
