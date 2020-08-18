@@ -35,10 +35,6 @@ header = copyright_header + b"""from msrest.serialization import Model
 from msrest.exceptions import HttpOperationError
 """
 
-track2_header = copyright_header + b"""import msrest.serialization
-from msrest.exceptions import HttpOperationError
-"""
-
 paging_header = copyright_header + b"""from msrest.paging import Paged
 """
 
@@ -128,10 +124,7 @@ def solve_one_model(models_module, output_folder, track2=False):
 
 def write_model_file(output_file_path, classes_to_write, track2=False):
     with open(output_file_path, "bw") as write_fd:
-        if track2:
-            write_fd.write(track2_header)
-        else:
-            write_fd.write(header)
+        write_fd.write(header)
 
         for model in classes_to_write:
             _, model_file_path, _ = model
@@ -140,6 +133,8 @@ def write_model_file(output_file_path, classes_to_write, track2=False):
                 lines = read_fd.readlines()
                 # Skip until it's "class XXXX"
                 while lines:
+                    if track2:
+                        lines[0] = lines[0].replace(b'(msrest.serialization.Model)', b'(Model)')
                     if lines[0].startswith(b"class "):
                         break
                     lines.pop(0)
