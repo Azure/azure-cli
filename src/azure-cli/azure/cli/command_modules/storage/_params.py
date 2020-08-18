@@ -449,7 +449,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'for put policy on source account.'
     )
     prefix_math_type = CLIArgumentType(
-        nargs='+', arg_group='Filters',
+        nargs='+', arg_group='Filters', options_list=['--prefix-match', '--prefix'],
         help='Optional. Filter the results to replicate only blobs whose names begin with the specified '
              'prefix.'
     )
@@ -475,9 +475,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                    arg_group="Object Replication Policy Rule") as c:
             c.argument('rule_id', help='Rule Id is auto-generated for each new rule on destination account. It is '
                                        'required for put policy on source account.')
-            c.argument('source_container', options_list=['--source-container'],
+            c.argument('source_container', options_list=['--source-container', '--scont'],
                        help='The source storage container name. Required when no --policy provided.')
-            c.argument('destination_container', options_list=['--destination-container'],
+            c.argument('destination_container', options_list=['--destination-container', '--dcont'],
                        help='The destination storage container name. Required when no --policy provided.')
 
     with self.argument_context('storage account or-policy update') as c:
