@@ -28,3 +28,28 @@ def cf_synapse_client_ipfirewallrules_factory(cli_ctx, *_):
 
 def cf_synapse_client_operations_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).operations
+
+
+def synapse_spark_factory(cli_ctx, workspace_name, sparkpool_name):
+    from azure.synapse.spark import SparkClient
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
+    cred, _, _ = profile.get_login_credentials(
+        resource=cli_ctx.cloud.endpoints.synapse_analytics_resource_id,
+        subscription_id=subscription_id
+    )
+    return SparkClient(
+        credential=cred,
+        endpoint='{}{}{}'.format("https://", workspace_name, cli_ctx.cloud.suffixes.synapse_analytics_endpoint),
+        spark_pool_name=sparkpool_name
+    )
+
+
+def cf_synapse_spark_batch(cli_ctx, workspace_name, sparkpool_name):
+    return synapse_spark_factory(cli_ctx, workspace_name, sparkpool_name).spark_batch
+
+
+def cf_synapse_spark_session(cli_ctx, workspace_name, sparkpool_name):
+    return synapse_spark_factory(cli_ctx, workspace_name, sparkpool_name).spark_session
