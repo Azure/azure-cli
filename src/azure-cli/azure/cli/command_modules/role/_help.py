@@ -165,6 +165,8 @@ long-summary: Invoking "az ad app permission grant" is needed to activate it
 examples:
   - name: Add Azure Active Directory Graph delegated permission User.Read (Sign in and read user profile).
     text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
+  - name: Add Azure Active Directory Graph application permission Application.ReadWrite.All (Read and write all applications).
+    text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 1cda74f2-2616-4834-b122-5cb1b07f8a59=Role
 """
 
 helps['ad app permission admin-consent'] = """

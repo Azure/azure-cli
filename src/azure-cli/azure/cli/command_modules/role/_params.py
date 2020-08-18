@@ -70,6 +70,10 @@ def load_arguments(self, _):
         c.argument('show_resource_name', options_list=['--show-resource-name', '-r'],
                    arg_type=get_three_state_flag(), help="show resource's display name")
 
+    with self.argument_context('ad app permission delete') as c:
+        # `=<type>` is not needed.
+        c.argument('api_permissions', nargs='+', help='Specify `ResourceAccess.id` - The unique identifier for one of the OAuth2Permission or AppRole instances that the resource application exposes.')
+
     with self.argument_context('ad app permission list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
 
