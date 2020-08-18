@@ -13,6 +13,7 @@ import shutil
 import sys
 import tempfile
 
+import msrest.serialization  # pylint: disable=unused-import
 from msrest.serialization import Model
 from msrest.paging import Paged
 
