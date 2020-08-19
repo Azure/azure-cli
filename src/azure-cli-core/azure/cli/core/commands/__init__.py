@@ -845,19 +845,36 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
+        from azure.cli.core.util import AzCLIErrorType
+        from azure.cli.core.util import AzCLIError
         for validator in getattr(ns, '_argument_validators', []):
             try:
                 validator(**self._build_kwargs(validator, ns))
+            except AzCLIError:
+                raise
             except Exception as ex:
                 # Delay the import and mimic an exception handler
                 from msrest.exceptions import ValidationError
                 if isinstance(ex, ValidationError):
                     logger.debug('Validation error in %s.', str(validator))
-                raise
+                raise AzCLIError(AzCLIErrorType.ValidationError, getattr(ex, 'message', str(ex)))
         try:
             delattr(ns, '_argument_validators')
         except AttributeError:
             pass
+
+    def _validation(self, parsed_ns):
+        try:
+            cmd_validator = getattr(parsed_ns, '_command_validator', None)
+            if cmd_validator:
+                self._validate_cmd_level(parsed_ns, cmd_validator)
+            else:
+                self._validate_arg_level(parsed_ns)
+        except CLIError:
+            raise
+        except Exception:  # pylint: disable=broad-except
+            err = sys.exc_info()[1]
+            getattr(parsed_ns, '_parser', self.parser).validation_error(str(err))
 
 
 class LongRunningOperation:  # pylint: disable=too-few-public-methods

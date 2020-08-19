@@ -401,7 +401,7 @@ class TestHandleException(unittest.TestCase):
         ex_result = handle_exception(keyboard_interrupt_ex)
 
         # test behavior
-        self.assertFalse(mock_logger_error.called)
+        self.assertTrue(mock_logger_error.called)
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
@@ -417,7 +417,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(err_msg), mock_logger_error.call_args)
+        self.assertIn(err_msg, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
@@ -435,8 +435,8 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(mock_cloud_error.args[0]), mock_logger_error.call_args)
-        self.assertEqual(ex_result, mock_cloud_error.args[1])
+        self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args.args[0])
+        self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_typical_response_error(self, mock_logger_error):
@@ -447,14 +447,13 @@ class TestHandleException(unittest.TestCase):
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 
-        expected_call = mock.call("%s%s", "{} - ".format(err_code), err_msg)
-
         # call handle_exception
         ex_result = handle_exception(mock_http_error)
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(expected_call, mock_logger_error.call_args)
+        self.assertIn(err_msg, mock_logger_error.call_args.args[0])
+        self.assertIn(err_code, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
@@ -474,7 +473,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(expected_message), mock_logger_error.call_args)
+        self.assertIn(expected_message, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
@@ -492,7 +491,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
+        self.assertIn(str(mock.call(mock_http_error).args[0]), mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.util.logger.error', autospec=True)
@@ -509,7 +508,7 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
+        self.assertIn(str(mock.call(mock_http_error).args[0]), mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
     @staticmethod

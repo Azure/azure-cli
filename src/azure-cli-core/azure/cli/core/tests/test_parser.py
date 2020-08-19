@@ -239,13 +239,13 @@ class TestParser(unittest.TestCase):
         # assert the right type of error msg is logged for command vs argument parsing
         self.assertEqual(len(logger_msgs), 5)
         for msg in logger_msgs[:3]:
-            self.assertIn("not in the", msg)
-            self.assertIn("command group", msg)
+            self.assertIn("CommandNotFoundError", msg)
         for msg in logger_msgs[3:]:
             self.assertIn("not a valid value for '--opt'.", msg)
 
         # assert the right choices are matched as "close".
         # If these don't hold, matching algorithm should be deemed flawed.
+        choice_lists = [choice_lists[index] for index in range(len(choice_lists)) if not index % 2]
         for choices in choice_lists[:2]:
             self.assertEqual(len(choices), 1)
         self.assertEqual(len(choice_lists[2]), 0)

@@ -17,12 +17,23 @@ from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
+from azure.cli.core.util import AzCLIErrorType
+from azure.cli.core.util import AzCLIError
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
 from knack.util import CLIError
 
 logger = get_logger(__name__)
+
+EXTENSION_REFERENCE = ("If the command is from an extension, "
+                       "please make sure the corresponding extension is installed. "
+                       "To learn more about extensions, please visit "
+                       "'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'")
+
+OVERVIEW_REFERENCE = ("Still stuck? Run '{command} --help' to view all commands or go to "
+                      "'https://docs.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest' "
+                      "to learn more")
 
 
 class IncorrectUsageError(CLIError):
@@ -48,6 +59,185 @@ class AzCompletionFinder(argcomplete.CompletionFinder):
                                                                                        cword_prefix,
                                                                                        cword_prequote,
                                                                                        last_wordbreak_pos)
+
+
+class CommandRecommender():
+    """Recommend a command for user when user's command fails.
+    It combines alladin recommendations and examples in help files."""
+
+    def __init__(self, command, parameters, extension, cli_ctx):
+        """
+        :param command: The command name in user's input, which should be corrected if misspelled.
+        :type command: str
+        :param parameters: The parameter arguments in users input.
+        :type parameters: list
+        :param extension: The extension name in user's input if the command comes from an extension.
+        :type extension: str
+        :param cli_ctx: CLI context when parser fails.
+        :type cli_ctx: knack.cli.CLI
+        """
+        self.command = command.strip()
+        self.extension = extension
+        self.cli_ctx = cli_ctx
+
+        self.parameters = self._normalize_parameters(parameters)
+        self.help_examples = []
+        self.aladdin_recommendations = []
+
+    def set_help_examples(self, examples):
+        """Set recommendations from help files"""
+
+        self.help_examples.extend(examples)
+
+    def _set_aladdin_recommendations(self):
+        """Set recommendations from aladdin service.
+        Call the aladdin service API, parse the response and set the recommendations.
+        """
+
+        import json
+        import requests
+        from requests import RequestException
+        from http import HTTPStatus
+        from azure.cli.core import __version__ as version
+
+        api_url = 'https://app.aladdin.microsoft.com/api/v1.0/suggestions'
+        headers = {'Content-Type': 'application/json'}
+        correlation_id = telemetry._session.correlation_id  # pylint: disable=protected-access
+        subscription_id = telemetry._get_azure_subscription_id()  # pylint: disable=protected-access
+
+        context = {
+            'versionNumber': version
+        }
+        if telemetry.is_telemetry_enabled():
+            if correlation_id:
+                context['correlationId'] = correlation_id
+            if subscription_id:
+                context['subscriptionId'] = subscription_id
+
+        parameters = [item for item in self.parameters if item not in ['--debug', '--verbose']]
+        query = {
+            "command": self.command,
+            "parameters": ','.join(parameters)
+        }
+
+        response = None
+        try:
+            response = requests.get(
+                api_url,
+                params={
+                    'query': json.dumps(query),
+                    'clientType': 'AzureCli',
+                    'context': json.dumps(context)
+                },
+                headers=headers)
+        except RequestException as ex:
+            logger.debug('Recommendation requests.get() exception: %s', ex)
+
+        recommendations = []
+        if response and response.status_code == HTTPStatus.OK:
+            for result in response.json():
+                # parse the reponse and format the recommendation
+                command, parameters, placeholders = result['SuccessCommand'],\
+                    result['SuccessCommand_Parameters'].split(','),\
+                    result['SuccessCommand_ArgumentPlaceholders'].split('♠')
+                recommendation = 'az {} '.format(command)
+                for parameter, placeholder in zip(parameters, placeholders):
+                    recommendation += '{} {} '.format(parameter, placeholder)
+                recommendations.append(recommendation.strip())
+
+        self.aladdin_recommendations.extend(recommendations)
+
+    def recommend_a_command(self):
+        """Recommend a command for user when user's command fails.
+        The recommended command will be the best matched one from
+        both the help files and the aladdin recommendations.
+        """
+        self._set_aladdin_recommendations()
+        # all the recommended commands from help examples and aladdin
+        all_commands = self.help_examples + self.aladdin_recommendations
+        all_commands.sort(key=len)
+
+        filtered_commands = []
+        filtered_choices = []
+        target = ''.join(self.parameters)
+
+        for command in all_commands:
+            # filter out the commands which begins with a different command group
+            if command.startswith('az {}'.format(self.command)):
+                parameters = self._get_parameter_list(command)
+                normalized_parameters = self._normalize_parameters(parameters)
+                filtered_choices.append(''.join(normalized_parameters))
+                filtered_commands.append(command)
+
+        # sort the commands by argument matches
+        candidates = difflib.get_close_matches(target, filtered_choices, cutoff=0)
+
+        recommend_command = ''
+        if candidates:
+            index = filtered_choices.index(candidates[0])
+            recommend_command = filtered_commands[index]
+
+        return recommend_command
+
+    def _get_parameter_list(self, raw_command):  # pylint: disable=no-self-use
+        """Get the paramter list from a raw command string
+        An example: 'az group create -n test -l eastus' ==> ['-n', '-l']
+        """
+        contents = raw_command.split(' ')
+        return [item for item in contents if item.startswith('-')]
+
+    def _normalize_parameters(self, parameters):
+        """Normalize a parameter list.
+        Get the standard form of a parameter list, which includes:
+            1. Use long options to replace short options
+            2. Remove the unrecognized parameters
+            3. Sort the result parameter list
+        An example: ['-g', '-n'] ==> ['--name', '--resource-group']
+        """
+
+        from knack.deprecation import Deprecated
+
+        normalized_parameters = []
+        try:
+            cmd_table = self.cli_ctx.invocation.commands_loader.command_table.get(self.command, None)
+            parameter_table = cmd_table.arguments if cmd_table else None
+        except AttributeError:
+            parameter_table = None
+
+        if parameters:
+            rules = {
+                '-h': '--help',
+                '-o': '--output',
+                '--only-show-errors': None,
+                '--help': None,
+                '--output': None,
+                '--query': None,
+                '--debug': None,
+                '--verbose': None
+            }
+
+            if parameter_table:
+                for argument in parameter_table.values():
+                    options = argument.type.settings['options_list']
+                    options = (option for option in options if not isinstance(option, Deprecated))
+                    try:
+                        sorted_options = sorted(options, key=len, reverse=True)
+                        standard_form = sorted_options[0]
+
+                        for option in sorted_options[1:]:
+                            rules[option] = standard_form
+                        rules[standard_form] = None
+                    except TypeError:
+                        logger.debug('Unexpected argument options `%s` of type `%s`.', options, type(options).__name__)
+
+            for parameter in parameters:
+                if parameter in rules:
+                    normalized_form = rules.get(parameter, None) or parameter
+                    normalized_parameters.append(normalized_form)
+                else:
+                    logger.debug('"%s" is an invalid parameter for command "%s".', parameter, self.command)
+
+        return sorted(normalized_parameters)
 
 
 class AzCliCommandParser(CLICommandParser):
@@ -143,18 +333,29 @@ class AzCliCommandParser(CLICommandParser):
                 _parser=command_parser)
 
     def validation_error(self, message):
-        telemetry.set_user_fault('validation error: {}'.format(message))
-        return super(AzCliCommandParser, self).error(message)
+        az_error = AzCLIError(AzCLIErrorType.ValidationError, message, command=self.prog)
+        az_error.print_error()
+        az_error.send_telemetry()
+        self.exit(2)
 
     def error(self, message):
-        telemetry.set_user_fault('parse error: {}'.format(message))
-        args = {'prog': self.prog, 'message': message}
-        with CommandLoggerContext(logger):
-            logger.error('%(prog)s: error: %(message)s', args)
-        self.print_usage(sys.stderr)
-        # Manual recommendations
-        self._set_manual_recommendations(args['message'])
-        # AI recommendations
+        # Get a recommended command from the CommandRecommender
+        command_arguments = self._get_failure_recovery_arguments()
+        recommender = CommandRecommender(*command_arguments, self.cli_ctx)
+        recommender.set_help_examples(self.get_examples(self.prog))
+        recommendation = recommender.recommend_a_command()
+
+        az_error = AzCLIError(AzCLIErrorType.ArgumentParseError, message, command=self.prog)
+        if '--query' in message:
+            from azure.cli.core.util import QUERY_REFERENCE
+            az_error.set_recommendation(QUERY_REFERENCE)
+        elif recommendation:
+            az_error.set_recommendation("Try this: '{}'".format(recommendation))
+            az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
+        az_error.print_error()
+        az_error.send_telemetry()
+
+        # For ai-did-you-mean-this
         failure_recovery_recommendations = self._get_failure_recovery_recommendations()
         self._suggestion_msg.extend(failure_recovery_recommendations)
         self._print_suggestion_msg(sys.stderr)
@@ -177,18 +378,18 @@ class AzCliCommandParser(CLICommandParser):
         telemetry.set_success(summary='show help')
         super(AzCliCommandParser, self).format_help()
 
+    def get_examples(self, command):
+        if not self.cli_help:
+            return []
+        is_group = self.is_group()
+        return self.cli_help.get_examples(command,
+                                          self._actions[-1] if is_group else self,
+                                          is_group)
+
     def enable_autocomplete(self):
         argcomplete.autocomplete = AzCompletionFinder()
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
                                  default_completer=lambda _: ())
-
-    def _set_manual_recommendations(self, error_msg):
-        recommendations = []
-        # recommendation for --query value error
-        if '--query' in error_msg:
-            recommendations.append('To learn more about [--query JMESPATH] usage in AzureCLI, '
-                                   'visit https://aka.ms/CLIQuery')
-        self._suggestion_msg.extend(recommendations)
 
     def _get_failure_recovery_arguments(self, action=None):
         # Strip the leading "az " and any extraneous whitespace.
@@ -349,13 +550,21 @@ class AzCliCommandParser(CLICommandParser):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:  # pylint: disable=too-many-nested-blocks
+            # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
+            # use cli_ctx from cli_help which is not lost.
+            cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+
             caused_by_extension_not_installed = False
+            command_name_inferred = self.prog
             if not self.command_source:
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                if candidates:
+                    # use the most likely candidate to replace the misspelled command
+                    args = self.prog.split() + self._raw_arguments
+                    args_inferred = [item if item != value else candidates[0] for item in args]
+                    command_name_inferred = ' '.join(args_inferred).split('-')[0]
+
                 error_msg = None
-                # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
-                # use cli_ctx from cli_help which is not lost.
-                cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
                 use_dynamic_install = self._get_extension_use_dynamic_install_config()
                 if use_dynamic_install != 'no' and not candidates:
                     # Check if the command is from an extension
@@ -400,46 +609,50 @@ class AzCliCommandParser(CLICommandParser):
                                 import subprocess
                                 import platform
                                 exit_code = subprocess.call(cmd_list, shell=platform.system() == 'Windows')
-                                telemetry.set_user_fault("Extension {} dynamically installed and commands will be "
-                                                         "rerun automatically.".format(ext_name))
                                 self.exit(exit_code)
                             else:
-                                error_msg = 'Extension {} installed. Please rerun your command.'.format(ext_name)
+                                with CommandLoggerContext(logger):
+                                    reminder = 'Extension {} installed. Please rerun your command.'.format(ext_name)
+                                    logger.error(reminder)
+                                self.exit(2)
                         else:
                             error_msg = "The command requires the extension {ext_name}. " \
                                 "To install, run 'az extension add -n {ext_name}'.".format(ext_name=ext_name)
                 if not error_msg:
                     # parser has no `command_source`, value is part of command itself
-                    error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'." \
-                        .format(prog=self.prog, value=value)
-                    if use_dynamic_install.lower() == 'no':
-                        extensions_link = 'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'
-                        error_msg = ("{msg} "
-                                     "If the command is from an extension, "
-                                     "please make sure the corresponding extension is installed. "
-                                     "To learn more about extensions, please visit "
-                                     "{extensions_link}").format(msg=error_msg, extensions_link=extensions_link)
+                    error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
+                az_error = AzCLIError(AzCLIErrorType.CommandNotFoundError, error_msg, command=self.prog)
+
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest
-                error_msg = "{prog}: '{value}' is not a valid value for '{param}'. See '{prog} --help'.".format(
+                error_msg = "{prog}: '{value}' is not a valid value for '{param}'.".format(
                     prog=self.prog, value=value, param=parameter)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                az_error = AzCLIError(AzCLIErrorType.ArgumentParseError, error_msg, command=self.prog)
 
-            telemetry.set_user_fault(error_msg)
-            with CommandLoggerContext(logger):
-                logger.error(error_msg)
+            _, params, extension = self._get_failure_recovery_arguments()
+            if candidates:
+                az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
+
+            # recommand a command for user
+            recommender = CommandRecommender(command_name_inferred[3:].strip(), params, extension, cli_ctx)
+            recommender.set_help_examples(self.get_examples(command_name_inferred))
+            recommended_command = recommender.recommend_a_command()
+            if recommended_command:
+                az_error.set_recommendation("Try this: '{}'".format(recommended_command))
+
+            # remind user to check extensions if we can not find a command to recommend
+            if az_error.error_type == AzCLIErrorType.CommandNotFoundError \
+                    and not az_error.recommendations and self.prog == 'az':
+                az_error.set_recommendation(EXTENSION_REFERENCE)
+
+            az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
+
+            az_error.print_error()
+            az_error.send_telemetry()
+
             if not caused_by_extension_not_installed:
-                if candidates:
-                    print_args = {
-                        's': 's' if len(candidates) > 1 else '',
-                        'verb': 'are' if len(candidates) > 1 else 'is',
-                        'value': value
-                    }
-                    self._suggestion_msg.append("\nThe most similar choice{s} to '{value}' {verb}:"
-                                                .format(**print_args))
-                    self._suggestion_msg.append('\n'.join(['\t' + candidate for candidate in candidates]))
-
                 failure_recovery_recommendations = self._get_failure_recovery_recommendations(action)
                 self._suggestion_msg.extend(failure_recovery_recommendations)
                 self._print_suggestion_msg(sys.stderr)

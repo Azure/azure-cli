@@ -44,17 +44,13 @@ try:
 
     exit_code = cli_main(az_cli, sys.argv[1:])
 
-    if exit_code and exit_code != 0:
-        if az_cli.result.error is not None and not telemetry.has_exceptions():
-            telemetry.set_exception(az_cli.result.error, fault_type='')
-        telemetry.set_failure()
-    else:
+    if exit_code == 0:
         telemetry.set_success()
 
     sys.exit(exit_code)
 
 except KeyboardInterrupt:
-    telemetry.set_user_fault('keyboard interrupt')
+    telemetry.set_user_fault('Keyboard interrupt is captured.')
     sys.exit(1)
 except SystemExit as ex:  # some code directly call sys.exit, this is to make sure command metadata is logged
     exit_code = ex.code if ex.code is not None else 1
