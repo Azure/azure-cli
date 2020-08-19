@@ -19,9 +19,6 @@ from knack.log import get_logger
 __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2.10.1"
 
-# Log the start time
-# TODO: Disable E402 "Module level import not at top of file" so that imports can also be timed
-start_time = timeit.default_timer()
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
 # If uuid1 raises ValueError, use uuid4 instead.

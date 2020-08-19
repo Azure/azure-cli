@@ -97,8 +97,6 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-tel
 
 if %errorlevel% neq 0 goto ERROR
 
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall urllib3==1.24.2
-
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
 popd
