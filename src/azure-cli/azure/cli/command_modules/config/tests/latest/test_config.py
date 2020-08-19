@@ -23,8 +23,7 @@ class ConfigTest(ScenarioTest):
         # test_option22 = test_value22
 
         # C:\Users\{username}\AppData\Local\Temp
-        tempdir = tempfile.gettempdir()
-        tempdir = os.path.realpath(tempdir)
+        tempdir = os.path.realpath(tempfile.gettempdir())  # call realpath to handle soft link problem on MAC
         original_path = os.getcwd()
         os.chdir(tempdir)
         print("Using temp dir: {}".format(tempdir))
