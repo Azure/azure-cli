@@ -249,6 +249,40 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('name', 'webInOtherRG')
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name="resource_group_one", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(parameter_name="resource_group_two", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_create_names_are_substrings(self, resource_group_one, resource_group_two):
+        webapp_name_one = "test-webapp-name-on"
+        webapp_name_two = "test-webapp-name-one"
+        webapp_name_three = "test-webapp-nam"
+        plan_name_one = "webapp-plan-one"
+        plan_name_two = "webapp-plan-two"
+        plan_id_one = self.cmd('appservice plan create -g {} -n {}'.format(
+            resource_group_one, plan_name_one)).get_output_in_json()['id']
+        plan_id_two = self.cmd('appservice plan create -g {} -n {}'.format(
+            resource_group_two, plan_name_two)).get_output_in_json()['id']
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_one, webapp_name_one, plan_id_one), checks=[
+            JMESPathCheck('name', webapp_name_one)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_two, webapp_name_two, plan_id_two), checks=[
+            JMESPathCheck('name', webapp_name_two)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_one, webapp_name_three, plan_id_one), checks=[
+            JMESPathCheck('name', webapp_name_three)
+        ])
+
+        # Re running webapp create to make sure there are no mix ups with existing apps that have names that are substrings of each other.
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_one, webapp_name_one, plan_id_one), checks=[
+            JMESPathCheck('name', webapp_name_one)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_two, webapp_name_two, plan_id_two), checks=[
+            JMESPathCheck('name', webapp_name_two)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_one, webapp_name_three, plan_id_one), checks=[
+            JMESPathCheck('name', webapp_name_three)
+        ])
+
 
 class BackupWithName(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)

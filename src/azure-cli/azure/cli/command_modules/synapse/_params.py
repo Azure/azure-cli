@@ -2,12 +2,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=too-many-statements, line-too-long
+from argcomplete import FilesCompleter
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type
-from ._validators import validate_storage_account
+from azure.cli.core.util import get_json_object
+from ._validators import validate_storage_account, validate_statement_language
+from .constant import SparkBatchLanguage, SparkStatementLanguage
 
 
-def load_arguments(self, _):  # pylint: disable=too-many-statements
+def load_arguments(self, _):
     # synapse workspace
     for scope in ['show', 'create', 'update', 'delete']:
         with self.argument_context('synapse workspace ' + scope) as c:
@@ -132,3 +135,64 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('start_ip_address', help='The start IP address of the firewall rule. Must be IPv4 format.')
         c.argument('end_ip_address', help='The end IP address of the firewall rule. Must be IPv4 format. '
                                           'Must be greater than or equal to startIpAddress.')
+
+    # synapse spark job
+    for scope in ['job', 'session', 'statement']:
+        with self.argument_context('synapse spark ' + scope) as c:
+            c.argument('workspace_name', help='The name of the workspace.')
+            c.argument('spark_pool_name', help='The name of the Spark pool.')
+
+    for scope in ['synapse spark job', 'synapse spark session']:
+        with self.argument_context(scope + ' list') as c:
+            c.argument('from_index', help='Optional parameter specifying which index the list should begin from.')
+            c.argument('size',
+                       help='The size of the returned list.By default it is 20 and that is the maximum.')
+
+    with self.argument_context('synapse spark job submit') as c:
+        c.argument('main_definition_file', help='The main file used for the job.')
+        c.argument('main_class_name',
+                   help='The fully-qualified identifier or the main class that is in the main definition file.')
+        c.argument('command_line_arguments', options_list=['--arguments'], nargs='+',
+                   help='Optional arguments to the job (Note: please use storage URIs for file arguments).')
+        c.argument('archives', nargs='+', help='The array of archives.')
+        c.argument('job_name', arg_type=name_type, help='The Spark job name.')
+        c.argument('reference_files', nargs='+',
+                   help='Additional files used for reference in the main definition file.')
+        c.argument('configuration', type=get_json_object, help='The configuration of Spark job.')
+        c.argument('executors', help='The number of executors.')
+        c.argument('executor_size', arg_type=get_enum_type(['Small', 'Medium', 'Large']), help='The executor size')
+        c.argument('tags', arg_type=tags_type)
+        c.argument('language', arg_type=get_enum_type(SparkBatchLanguage, default=SparkBatchLanguage.Scala),
+                   help='The Spark job language.')
+
+    for scope in ['show', 'cancel']:
+        with self.argument_context('synapse spark job ' + scope) as c:
+            c.argument('job_id', options_list=['--livy-id'], arg_group='Spark job',
+                       help='The id of the Spark job.')
+
+    with self.argument_context('synapse spark session create') as c:
+        c.argument('job_name', arg_type=name_type, help='The Spark session name.')
+        c.argument('reference_files', nargs='+',
+                   help='Additional files used for reference in the main definition file.')
+        c.argument('configuration', type=get_json_object, help='The configuration of Spark session.')
+        c.argument('executors', help='The number of executors.')
+        c.argument('executor_size', arg_type=get_enum_type(['Small', 'Medium', 'Large']), help='The executor size')
+        c.argument('tags', arg_type=tags_type)
+
+    for scope in ['show', 'cancel', 'reset-timeout']:
+        with self.argument_context('synapse spark session ' + scope) as c:
+            c.argument('session_id', options_list=['--livy-id'], arg_group='Spark Session',
+                       help='The id of the Spark session job.')
+
+    with self.argument_context('synapse spark statement') as c:
+        c.argument('session_id', help='The id of Spark session.')
+
+    for scope in ['show', 'cancel']:
+        with self.argument_context('synapse spark statement ' + scope) as c:
+            c.argument('statement_id', options_list=['--livy-id'], arg_group="Spark statement",
+                       help='The id of the statement.')
+
+    with self.argument_context('synapse spark statement invoke') as c:
+        c.argument('code', completer=FilesCompleter(),
+                   help='The code of Spark statement. This is either the code contents or use `@<file path>` to load the content from a file')
+        c.argument('language', arg_type=get_enum_type(SparkStatementLanguage), validator=validate_statement_language, help='The language of Spark statement.')
