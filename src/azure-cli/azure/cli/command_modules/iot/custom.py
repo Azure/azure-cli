@@ -9,6 +9,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import sdk_no_wait
 
 from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
@@ -1061,7 +1062,7 @@ def iot_central_app_create(
               template=template)
 
     if no_wait:
-        return client.apps.create_or_update(resource_group_name, app_name, app)
+        return sdk_no_wait(no_wait, client.apps.create_or_update, resource_group_name, app_name, app)
     return LongRunningOperation(cmd.cli_ctx)(client.apps.create_or_update(resource_group_name, app_name, app))
 
 
