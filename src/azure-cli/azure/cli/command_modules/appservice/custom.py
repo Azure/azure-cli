@@ -60,7 +60,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_VERSION_DEFAULT, RUNTIME_STACKS)
+                         NODE_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
 
 logger = get_logger(__name__)
 
@@ -2737,6 +2737,10 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         is_linux = plan_info.reserved
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
+
+    if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
+        raise CLIError("2.x functions are not supported in this region. To create a 3.x function, "
+                       "pass in the flag '--functions-version 3'")
 
     if is_linux and not runtime and (consumption_plan_location or not deployment_container_image_name):
         raise CLIError(
