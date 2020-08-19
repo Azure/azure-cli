@@ -13,7 +13,7 @@ from ._client_factory import (
 
 from ._transformers import (
     extract_subresource_name, filter_out_managed_resources,
-    multi_transformers)
+    multi_transformers, transform_key_decryption_output)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -66,7 +66,13 @@ def load_command_table(self, _):
         g.custom_command('recover', 'recover_keyvault')
         g.custom_command('list', 'list_keyvault')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', deprecate_info=g.deprecate(
+            tag_func=lambda x: '',
+            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, you will '
+                                   'not be able to reuse this key vault name until the key vault has been purged from '
+                                   'the soft deleted state. Please see the following documentation for additional '
+                                   'guidance.\n'
+                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
         g.command('purge', 'purge_deleted')
         g.custom_command('set-policy', 'set_policy')
         g.custom_command('delete-policy', 'delete_policy')
@@ -116,7 +122,14 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
-        g.keyvault_command('delete', 'delete_key')
+        g.keyvault_command('delete', 'delete_key', deprecate_info=g.deprecate(
+            tag_func=lambda x: '',
+            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this key '
+                                   'will be moved to the soft deleted state. You will not be able to create a key with '
+                                   'the same name within this key vault until the key has been purged from the '
+                                   'soft-deleted state. Please see the following documentation for additional '
+                                   'guidance.\n'
+                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key', doc_string_source=data_doc_string.format('backup_key'))
@@ -124,7 +137,7 @@ def load_command_table(self, _):
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
         g.keyvault_command('encrypt', 'encrypt', is_preview=True)
-        g.keyvault_command('decrypt', 'decrypt', is_preview=True)
+        g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 
     with self.command_group('keyvault secret', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_secrets',
@@ -136,7 +149,13 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_secret', transform=extract_subresource_name())
         g.keyvault_command('show', 'get_secret', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_secret', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name())
+        g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name(), deprecate_info=g.deprecate(
+            tag_func=lambda x: '',
+            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this secret '
+                                   'will be moved to the soft deleted state. You will not be able to create a secret '
+                                   'with the same name within this key vault until the secret has been purged from the '
+                                   'soft-deleted state. Please see the following documentation for additional guidance.'
+                                   '\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_secret')
@@ -154,7 +173,15 @@ def load_command_table(self, _):
         g.keyvault_command('list-deleted', 'get_deleted_certificates', transform=extract_subresource_name())
         g.keyvault_command('show', 'get_certificate', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_certificate', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_certificate', transform=extract_subresource_name())
+        g.keyvault_command('delete', 'delete_certificate', deprecate_info=g.deprecate(
+            tag_func=lambda x: '',
+            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this '
+                                   'certificate will be moved to the soft deleted state. You will not be able to '
+                                   'create a certificate with the same name within this key vault until the '
+                                   'certificate has been purged from the soft-deleted state. Please see the following '
+                                   'documentation for additional guidance.\n'
+                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+                           transform=extract_subresource_name())
         g.keyvault_command('purge', 'purge_deleted_certificate')
         g.keyvault_command('recover', 'recover_deleted_certificate', transform=extract_subresource_name())
         g.keyvault_command('set-attributes', 'update_certificate', transform=extract_subresource_name())

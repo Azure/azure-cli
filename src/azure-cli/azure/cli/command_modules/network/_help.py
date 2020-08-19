@@ -164,6 +164,11 @@ type: command
 short-summary: List all the Private Link
 """
 
+helps['network application-gateway private-link wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the condition of corresponding application gateway is met
+"""
+
 helps['network application-gateway private-link ip-config'] = """
 type: group
 short-summary: Manage IP configuration of a Private Link to configure its capability
@@ -187,6 +192,11 @@ short-summary: Show an IP configuration of a Private Link
 helps['network application-gateway private-link ip-config list'] = """
 type: command
 short-summary: List all the IP configuration of a Private Link
+"""
+
+helps['network application-gateway private-link ip-config wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the condition of corresponding application gateway is met
 """
 
 helps['network application-gateway frontend-ip'] = """
@@ -3750,7 +3760,7 @@ examples:
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags \\
             --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage \\
-            --destination-port-ranges * --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
+            --destination-port-ranges '*' --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
   - name: Create a security rule using application security groups. https://aka.ms/applicationsecuritygroups
     text: |
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg \\

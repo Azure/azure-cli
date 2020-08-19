@@ -4,17 +4,22 @@
 # --------------------------------------------------------------------------------------------
 
 import datetime
+import time
 import uuid
 
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import configure_common_settings
 from azure.graphrbac import GraphRbacManagementClient
 from azure.graphrbac.models import ApplicationCreateParameters
+from azure.graphrbac.models import GraphErrorException
 from azure.graphrbac.models import PasswordCredential
 from azure.graphrbac.models import ServicePrincipalCreateParameters
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
-class AADManager(object):
+class AADManager:
     MANAGED_APP_PREFIX = 'https://az.aro.azure.com/'
 
     def __init__(self, cli_ctx):
@@ -56,6 +61,15 @@ class AADManager(object):
         return None
 
     def create_service_principal(self, app_id):
-        return self.client.service_principals.create(ServicePrincipalCreateParameters(
-            app_id=app_id,
-        ))
+        max_retries = 3
+        retries = 0
+        while True:
+            try:
+                return self.client.service_principals.create(
+                    ServicePrincipalCreateParameters(app_id=app_id))
+            except GraphErrorException as ex:
+                if retries >= max_retries:
+                    raise
+                retries += 1
+                logger.warning("%s; retry %d of %d", ex, retries, max_retries)
+                time.sleep(10)

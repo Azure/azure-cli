@@ -69,7 +69,7 @@ The `.whl` is the artifact that can be installed with the `az extension add` com
 
 ### Trying out your extension
 
-Normally, you will have you extension installed in dev mode and your code changes will be immediately testable. However, if you want to test a generated WHL file specfically, follow these directions.
+Normally, you will have you extension installed in dev mode and your code changes will be immediately testable. However, if you want to test a generated WHL file specifically, follow these directions.
 
 **(Step 1)** Build the extension to generate a WHL file.
 

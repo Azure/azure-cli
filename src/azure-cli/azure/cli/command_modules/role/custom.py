@@ -24,7 +24,7 @@ from knack.util import CLIError, todict
 from azure.cli.core.profiles import ResourceType, get_api_version
 from azure.graphrbac.models import GraphErrorException
 
-from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, AppRole,
                                     PasswordCredential, KeyCredential, UserCreateParameters, PasswordProfile,
@@ -99,7 +99,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         if not role_name:
             raise CLIError("please provide role name")
 
-    if not for_update and 'assignableScopes' not in role_definition:
+    if not for_update and not role_definition.get('assignableScopes', None):
         raise CLIError("please provide 'assignableScopes'")
 
     return worker.create_role_definition(definitions_client, role_name, role_id, role_definition)
@@ -373,7 +373,7 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
     co_admins = [x for x in co_admins if x.email_address]
     graph_client = _graph_client_factory(cli_ctx)
     if assignee:  # apply assignee filter if applicable
-        if _is_guid(assignee):
+        if is_guid(assignee):
             try:
                 result = _get_object_stubs(graph_client, [assignee])
                 if not result:
@@ -518,7 +518,7 @@ def _resolve_role_id(role, scope, definitions_client):
                 role, re.I):
         role_id = role
     else:
-        if _is_guid(role):
+        if is_guid(role):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
                 definitions_client.config.subscription_id, role)
         if not role_id:  # retrieve role id
@@ -651,7 +651,7 @@ def update_user(client, upn_or_object_id, display_name=None, force_change_passwo
 
 def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    if not _is_guid(upn_or_object_id):
+    if not is_guid(upn_or_object_id):
         upn_or_object_id = graph_client.users.get(upn_or_object_id).object_id
 
     results = list(graph_client.users.get_member_groups(
@@ -664,7 +664,7 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
 
 
-def create_group(cmd, display_name, mail_nickname, force=None):
+def create_group(cmd, display_name, mail_nickname, force=None, description=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     # workaround to ensure idempotent even AAD graph service doesn't support it
@@ -678,8 +678,10 @@ def create_group(cmd, display_name, mail_nickname, force=None):
                 raise CLIError(err.format(', '.join([x.object_id for x in matches])))
             logger.warning('A group with the same display name and mail nickname already exists, returning.')
             return matches[0]
-    group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
-                                                             mail_nickname=mail_nickname))
+        group_create_parameters = GroupCreateParameters(display_name=display_name, mail_nickname=mail_nickname)
+        if description is not None:
+            group_create_parameters.additional_properties = {'description': description}
+    group = graph_client.groups.create(group_create_parameters)
 
     return group
 
@@ -721,7 +723,7 @@ def remove_group_owner(cmd, owner_object_id, group_id):
 
 
 def _resolve_group(client, identifier):
-    if not _is_guid(identifier):
+    if not is_guid(identifier):
         res = list(list_groups(client, display_name=identifier))
         if not res:
             raise CLIError('Group {} is not found in Graph '.format(identifier))
@@ -1076,7 +1078,7 @@ def delete_application(client, identifier):
 def _resolve_application(client, identifier):
     result = list(client.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
     if not result:
-        if _is_guid(identifier):
+        if is_guid(identifier):
             # it is either app id or object id, let us verify
             result = list(client.list(filter="appId eq '{}'".format(identifier)))
         else:
@@ -1129,7 +1131,7 @@ def _create_service_principal(cli_ctx, identifier, resolve_app=True):
     client = _graph_client_factory(cli_ctx)
     app_id = identifier
     if resolve_app:
-        if _is_guid(identifier):
+        if is_guid(identifier):
             result = list(client.applications.list(filter="appId eq '{}'".format(identifier)))
         else:
             result = list(client.applications.list(
@@ -1234,7 +1236,7 @@ def _resolve_service_principal(client, identifier):
     result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
     if result:
         return result[0].object_id
-    if _is_guid(identifier):
+    if is_guid(identifier):
         return identifier  # assume an object id
     error = CLIError("Service principal '{}' doesn't exist".format(identifier))
     error.status_code = 404  # Make sure CLI returns 3
@@ -1499,6 +1501,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
         with open(cert_file, "rt") as f:
             cert_string = f.read()
             cf.write(cert_string)
+    os.chmod(creds_file, 0o600)  # make the file readable/writable only for current user
 
     # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
     cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
@@ -1698,7 +1701,7 @@ def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
         if not result:
             result = list(client.service_principals.list(
                 filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-        if not result and _is_guid(assignee):  # assume an object id, let us verify it
+        if not result and is_guid(assignee):  # assume an object id, let us verify it
             result = _get_object_stubs(client, [assignee])
 
         # 2+ matches should never happen, so we only check 'no match' here
@@ -1709,17 +1712,9 @@ def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
 
         return result[0].object_id
     except (CloudError, GraphErrorException):
-        if fallback_to_object_id and _is_guid(assignee):
+        if fallback_to_object_id and is_guid(assignee):
             return assignee
         raise
-
-
-def _is_guid(guid):
-    try:
-        uuid.UUID(guid)
-        return True
-    except ValueError:
-        return False
 
 
 def _get_object_stubs(graph_client, assignees):

@@ -462,7 +462,7 @@ def load_command_table(self, _):
 
     with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_rewrite_rule', supports_no_wait=True)
-        g.custom_command('show', 'show_ag_rewrite_rule')
+        g.custom_show_command('show', 'show_ag_rewrite_rule')
         g.custom_command('list', 'list_ag_rewrite_rules')
         g.custom_command('delete', 'delete_ag_rewrite_rule', supports_no_wait=True)
         g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
@@ -473,7 +473,7 @@ def load_command_table(self, _):
 
     with self.command_group('network application-gateway rewrite-rule condition', network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_rewrite_rule_condition', supports_no_wait=True)
-        g.custom_command('show', 'show_ag_rewrite_rule_condition')
+        g.custom_show_command('show', 'show_ag_rewrite_rule_condition')
         g.custom_command('list', 'list_ag_rewrite_rule_conditions')
         g.custom_command('delete', 'delete_ag_rewrite_rule_condition', supports_no_wait=True)
         g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
@@ -529,19 +529,21 @@ def load_command_table(self, _):
                             command_type=network_ag_sdk,
                             min_api='2020-05-01',
                             is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link')
-        g.custom_command('remove', 'remove_ag_private_link', confirmation=True)
+        g.custom_command('add', 'add_ag_private_link', supports_no_wait=True)
+        g.custom_command('remove', 'remove_ag_private_link', confirmation=True, supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_private_link')
         g.custom_command('list', 'list_ag_private_link')
+        g.wait_command('wait')
 
     with self.command_group('network application-gateway private-link ip-config',
                             command_type=network_ag_sdk,
                             min_api='2020-05-01',
                             is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link_ip')
-        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True)
+        g.custom_command('add', 'add_ag_private_link_ip', supports_no_wait=True)
+        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True, supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_private_link_ip')
         g.custom_command('list', 'list_ag_private_link_ip')
+        g.wait_command('wait')
     # endregion
 
     # region ApplicationGatewayWAFPolicy
@@ -1196,7 +1198,7 @@ def load_command_table(self, _):
 
     with self.command_group('network vnet-gateway aad', network_vgw_sdk, min_api='2019-04-01') as g:
         g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
-        g.custom_command('show', 'show_vnet_gateway_aad')
+        g.custom_show_command('show', 'show_vnet_gateway_aad')
         g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
     # endregion
 
