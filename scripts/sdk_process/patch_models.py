@@ -69,8 +69,11 @@ def solve_mro(models, track2=False):
         models_path = models_module.__path__[0]
         _LOGGER.info("Working on %s", models_path)
         if Path(models_path, "models_py3.py").exists():
-            _LOGGER.info("Skipping since already patched")
-            return
+            if track2 and Path(models_path, '_models_py3.py').exists():
+                _LOGGER.info('Overwrite models for track2 module')
+            else:
+                _LOGGER.info("Skipping since already patched")
+                return
 
         # Build the new files in a temp folder
         with tempfile.TemporaryDirectory() as temp_folder:
