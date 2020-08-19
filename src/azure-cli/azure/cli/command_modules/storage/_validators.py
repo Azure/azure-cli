@@ -1310,7 +1310,7 @@ def validate_or_policy(namespace):
 
         if error_elements:
             error_msg += ", ".join(error_elements)
-            error_msg += " to initialize or Policy for storage account."
+            error_msg += " to initialize Object Replication Policy for storage account."
             raise ValueError(error_msg)
     else:
         if os.path.exists(namespace.properties):
@@ -1335,7 +1335,7 @@ def validate_or_policy(namespace):
         error_msg = "Missing input parameters: "
         if error_elements:
             error_msg += ", ".join(error_elements)
-            error_msg += " in properties to initialize or Policy for storage account."
+            error_msg += " in properties to initialize Object Replication Policy for storage account."
             raise ValueError(error_msg)
         namespace.properties = or_policy
 
