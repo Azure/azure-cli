@@ -29,3 +29,16 @@ def example_name_or_id_validator(cmd, namespace):
                 type='storageAccounts',
                 name=namespace.storage_account
             )
+
+
+def validate_statement_language(namespace):
+    statement_language = {
+        'spark': 'spark',
+        'scala': 'spark',
+        'pyspark': 'pyspark',
+        'python': 'pyspark',
+        'sparkdotnet': 'sparkdotnet',
+        'csharp': 'sparkdotnet',
+        'sql': 'sql'
+    }
+    namespace.language = statement_language.get(namespace.language.lower())

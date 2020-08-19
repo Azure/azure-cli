@@ -186,6 +186,19 @@ class HDInsightClusterTests(ScenarioTest):
                 [5])
         ])
 
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_cluster_with_encryption_at_host(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._with_encryption_at_host()
+        )
+
+        self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
+            self.check('properties.diskEncryptionProperties.encryptionAtHost', True),
+            self.check('properties.clusterState', 'Running')
+        ])
+
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -580,3 +593,8 @@ class HDInsightClusterTests(ScenarioTest):
     def _with_schedule_based_autoscale():
         return '--version 4.0 --autoscale-type Schedule --timezone "China Standard Time" --days Monday --time "09:00"' \
                ' --autoscale-workernode-count 5'
+
+    @staticmethod
+    def _with_encryption_at_host():
+        return '--workernode-size Standard_DS14_V2 --headnode-size Standard_DS14_V2 ' \
+               '--zookeepernode-size Standard_DS14_V2 --encryption-at-host true'
