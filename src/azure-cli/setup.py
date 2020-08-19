@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 import sys
 
 try:
-    from azure_bdist_wheel import cmdclass
+    from azure_cli_bdist_wheel import cmdclass
 except ImportError:
     from distutils import log as logger
 
@@ -22,7 +22,7 @@ VERSION = "2.10.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
-    with open('azure/cli/__init__.py', 'r', encoding='utf-8') as f:
+    with open('azure/cli/__main__.py', 'r', encoding='utf-8') as f:
         content = f.read()
 except OSError:
     pass
@@ -31,7 +31,7 @@ else:
 
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
-        print('Could not find __version__ in azure/cli/__init__.py')
+        print('Could not find __version__ in azure/cli/__main__.py')
         sys.exit(1)
     if m.group(1) != VERSION:
         print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
@@ -52,9 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-batch~=9.0',
-    'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}.*'.format(VERSION),
-    'azure-cli-nspkg~=3.0,>=3.0.3',
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.48',
     'azure-functions-devops-build~=0.0.22',
@@ -85,7 +83,7 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid==3.0.0rc7',
     'azure-mgmt-eventhub~=4.0.0',
-    'azure-mgmt-hdinsight~=1.6.0',
+    'azure-mgmt-hdinsight~=1.7.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.12.0',
@@ -166,10 +164,9 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     package_data={
-        'azure.cli.core': ['auth_landing_pages/*.html'],
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],

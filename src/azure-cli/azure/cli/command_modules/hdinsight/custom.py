@@ -36,7 +36,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    outbound_public_network_access_type=None, encryption_in_transit=None,
                    autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
-                   esp=False, no_validation_timeout=False):
+                   encryption_at_host=None, esp=False, no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
@@ -315,6 +315,12 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         encryption_algorithm=encryption_algorithm,
         msi_resource_id=assign_identity
     )
+
+    if encryption_at_host:
+        if disk_encryption_properties:
+            disk_encryption_properties.encryption_at_host = encryption_at_host
+        else:
+            disk_encryption_properties = DiskEncryptionProperties(encryption_at_host=encryption_at_host)
 
     kafka_rest_properties = (kafka_client_group_id and kafka_client_group_name) and KafkaRestProperties(
         client_group_info=ClientGroupInfo(
