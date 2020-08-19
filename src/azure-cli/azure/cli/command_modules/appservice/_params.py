@@ -598,7 +598,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name of the appserviceplan associated with the webapp",
