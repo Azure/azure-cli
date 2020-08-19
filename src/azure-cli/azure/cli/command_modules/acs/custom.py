@@ -56,20 +56,20 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterIdentity
-from azure.mgmt.containerservice.v2020_03_01.models import AgentPool
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterSKU
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterWindowsProfile
+from azure.mgmt.containerservice.v2020_07_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2020_07_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2020_07_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2020_07_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2020_07_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2020_07_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2020_07_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2020_07_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2020_07_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2020_07_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2020_07_01.models import ManagedClusterIdentity
+from azure.mgmt.containerservice.v2020_07_01.models import AgentPool
+from azure.mgmt.containerservice.v2020_07_01.models import ManagedClusterSKU
+from azure.mgmt.containerservice.v2020_07_01.models import ManagedClusterWindowsProfile
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
