@@ -26,6 +26,12 @@ FUNCTIONS_STACKS_API_JSON_PATHS = {
 }
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
+FUNCTIONS_NO_V2_REGIONS = {
+    "USNat West",
+    "USNat East",
+    "USSec West",
+    "USSec East"
+}
 
 
 class FUNCTIONS_STACKS_API_KEYS():
@@ -43,6 +49,7 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.SITE_CONFIG_DICT = 'siteConfigPropertiesDictionary'
         self.APP_SETTINGS_DICT = 'appSettingsDictionary'
         self.LINUX_FX_VERSION = 'linuxFxVersion'
+        self.FUNCTIONS_WORKER_RUNTIME = "FUNCTIONS_WORKER_RUNTIME"
         self.APPLICATION_INSIGHTS = 'applicationInsights'
         self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
 
