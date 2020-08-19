@@ -27,7 +27,9 @@ CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
-                     'that intercepts traffic with a self-signed certificate. ')
+                     'that intercepts traffic with a self-signed certificate. '
+                     # pylint: disable=line-too-long
+                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#work-behind-a-proxy. ')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
                    "'https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest'")
@@ -38,7 +40,6 @@ _PROXYID_RE = re.compile(
 
 _CHILDREN_RE = re.compile('(?i)/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
-# pylint: disable=line-too-long
 _PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliYum"),
                                  "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliZypper"),
                                  "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://aka.ms/doc/UpdateAzureCliApt"),
