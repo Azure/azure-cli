@@ -22,7 +22,10 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 logger = get_logger(__name__)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 954cba082... add list interface
 
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
@@ -53,17 +56,25 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
 
+def list_blobs(client, delimiter=None, include=None, marker=None, num_results=None, prefix=None,
+               show_next_marker=None, **kwargs):
+    from ..track2_util import list_generator
 
-def list_blobs(client, container_name, prefix=None, num_results=None, include=None, delimiter=None, marker=None,
-               timeout=None):
+    if delimiter:
+        generator = client.walk_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
+    else:
+        generator = client.list_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
 
-    generator = client.list_blobs(container_name=container_name, prefix=prefix, num_results=num_results,
-                                  include=include, delimiter=delimiter, marker=marker, timeout=timeout)
-    result = list(generator)
+    pages = generator.by_page(continuation_token=marker)  # BlobPropertiesPaged
+    result = list_generator(pages=pages, num_results=num_results)
 
-    if getattr(generator, 'next_marker', None):
-        logger.warning('Next Marker:')
-        logger.warning(generator.next_marker)
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
 
     return result
 

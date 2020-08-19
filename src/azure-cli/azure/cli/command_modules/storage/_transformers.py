@@ -181,6 +181,16 @@ def _transform_page_ranges(page_ranges):
     return None
 
 
+def transform_blob_list_output(result):
+    for i, item in enumerate(result):
+        if isinstance(item, dict) and 'nextMarker' in item:
+            continue
+        try:
+            result[i] = transform_blob_json_output(item)
+        except KeyError:  # Deal with BlobPrefix object when there is delimiter specified
+            result[i] = {"name": item.name}
+    return result
+
 def transform_blob_json_output(result):
     result = todict(result)
     new_result = {

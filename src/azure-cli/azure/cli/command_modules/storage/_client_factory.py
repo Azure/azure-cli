@@ -229,6 +229,9 @@ def cf_blob_lease_client(cli_ctx, kwargs):
     return t_lease_service(client=blob_client, lease_id=kwargs.pop('lease_id', None))
 
 
+def cf_container_client(cli_ctx, kwargs):
+    return cf_blob_service(cli_ctx, kwargs).get_container_client(container=kwargs.pop('container_name', None))
+
 def cf_adls_service(cli_ctx, kwargs):
     t_adls_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                              '_data_lake_service_client#DataLakeServiceClient')
