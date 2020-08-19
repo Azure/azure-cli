@@ -5,9 +5,9 @@ This documentation is for building an easy and clear way to onboard new resource
 
 ## Prerequisite
 
-#### Service Tree Link
+#### PLR (Product Launch Readiness)
 
-Contact `@Carl Shipley (cashiple@microsoft.com)` to provide your service tree link.
+Contact `@Carl Shipley (cashiple@microsoft.com)` for [PLR](http://aka.ms/plrcriteria) process.
 
 #### Azure CLI Dev Contact
 
