@@ -160,7 +160,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
+        ResourceType.DATA_STORAGE_BLOB: '2019-12-12',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2018-11-09',
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
