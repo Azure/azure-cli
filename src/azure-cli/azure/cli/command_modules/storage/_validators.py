@@ -599,7 +599,6 @@ def validate_included_datasets_validator(include_class):
 
     def validator(namespace):
         if namespace.include:
-            short_include = namespace.include
             if set(namespace.include) - set(allowed_string):
                 help_string = get_include_help_string(include_class)
                 raise ValueError(
