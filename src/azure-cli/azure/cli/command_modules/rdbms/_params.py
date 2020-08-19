@@ -175,15 +175,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
 
     # Flexible-server
-    server_name_setter_arg_type = CLIArgumentType(configured_default='web', options_list=['--server-name', '-s'], metavar='NAME',
+    postgres_server_name_setter_arg_type = CLIArgumentType(configured_default='web', options_list=['--server-name', '-s'], metavar='NAME',
                                            help="",
                                            local_context_attribute=LocalContextAttribute(name='server_name', actions=[
-                                               LocalContextAction.SET], scopes=['postgres flexible-server', 'mysql flexible-server', 'mariadb flexible-server']))
+                                               LocalContextAction.SET], scopes=['postgres flexible-server']))
 
-    server_name_getter_arg_type = CLIArgumentType(configured_default='web', options_list=['--server-name', '-s'], metavar='NAME',
+    postgres_server_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--server-name', '-s'], metavar='NAME',
                                            help="",
                                            local_context_attribute=LocalContextAttribute(name='server_name', actions=[
-                                               LocalContextAction.GET], scopes=['postgres flexible-server', 'mysql flexible-server', 'mariadb flexible-server']))
+                                               LocalContextAction.SET, LocalContextAction.GET], scopes=['postgres flexible-server']))
 
 
 
@@ -191,7 +191,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server create'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16. ')
-            c.argument('server_name', arg_type=server_name_setter_arg_type)
+            c.argument('server_name', arg_type=postgres_server_name_setter_arg_type)
             c.argument('administrator_login', required=True, arg_group='Authentication')
             c.argument('administrator_login_password', required=True, arg_group='Authentication')
 
@@ -207,36 +207,36 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=server_name_getter_arg_type)
+            c.argument('server_name', arg_type=postgres_server_name_arg_type)
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
         
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=server_name_getter_arg_type)
+            c.argument('server_name', arg_type=postgres_server_name_arg_type)
             c.ignore('family', 'capacity', 'tier')
             c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
             c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=server_name_getter_arg_type)
+            c.argument('server_name', arg_type=postgres_server_name_arg_type)
 
         with self.argument_context('{} flexible-server list'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=server_name_getter_arg_type)
+            c.argument('server_name', arg_type=postgres_server_name_arg_type)
         
         with self.argument_context('{} flexible-server wait'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=server_name_getter_arg_type)
+            c.argument('server_name', arg_type=postgres_server_name_arg_type)
         
         with self.argument_context('{} flexible-server show'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=server_name_getter_arg_type)
+            c.argument('server_name', arg_type=postgres_server_name_arg_type)
         
         with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=server_name_getter_arg_type)
+            c.argument('server_name', arg_type=postgres_server_name_arg_type)
 
     _flexible_server_params('postgres')
     
