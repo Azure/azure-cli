@@ -49,7 +49,6 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.SITE_CONFIG_DICT = 'siteConfigPropertiesDictionary'
         self.APP_SETTINGS_DICT = 'appSettingsDictionary'
         self.LINUX_FX_VERSION = 'linuxFxVersion'
-        self.FUNCTIONS_WORKER_RUNTIME = "FUNCTIONS_WORKER_RUNTIME"
         self.APPLICATION_INSIGHTS = 'applicationInsights'
         self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
 
