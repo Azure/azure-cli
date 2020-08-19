@@ -16,6 +16,9 @@ from azure.cli.core import get_default_cli
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
+__author__ = "Microsoft Corporation <python@microsoft.com>"
+__version__ = "2.10.1"
+
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
 # If uuid1 raises ValueError, use uuid4 instead.
