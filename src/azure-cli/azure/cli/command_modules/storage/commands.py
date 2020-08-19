@@ -15,7 +15,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
                                                                cf_adls_file_system, cf_adls_directory,
                                                                cf_adls_file, cf_adls_service,
-                                                               cf_blob_client, cf_blob_lease_client)
+                                                               cf_blob_client, cf_blob_lease_client,
+                                                               cf_or_policy)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -190,12 +191,39 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('list', 'list_network_rules')
         g.custom_command('remove', 'remove_network_rule')
 
+    or_policy_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#ObjectReplicationPoliciesOperations.{}',
+        client_factory=cf_or_policy,
+        resource_type=ResourceType.MGMT_STORAGE)
+
+    or_policy_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_or_policy)
+
+    with self.command_group('storage account or-policy', or_policy_sdk, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01',
+                            custom_command_type=or_policy_custom_type) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('create', 'create_or_policy')
+        g.generic_update_command('update', setter_name='update_or_policy', setter_type=or_policy_custom_type)
+        g.command('delete', 'delete')
+
+    with self.command_group('storage account or-policy rule', or_policy_sdk, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01',
+                            custom_command_type=or_policy_custom_type) as g:
+        g.custom_show_command('show', 'get_or_rule')
+        g.custom_command('list', 'list_or_rules')
+        g.custom_command('add', 'add_or_rule')
+        g.custom_command('update', 'update_or_rule')
+        g.custom_command('remove', 'remove_or_rule')
+
     with self.command_group('storage account private-endpoint-connection', private_endpoint_sdk,
                             custom_command_type=private_endpoint_custom_type, is_preview=True,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
         from ._validators import validate_private_endpoint_connection_id
         g.command('delete', 'delete', confirmation=True, validator=validate_private_endpoint_connection_id)
-        g.command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
         g.custom_command('approve', 'approve_private_endpoint_connection',
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection',
