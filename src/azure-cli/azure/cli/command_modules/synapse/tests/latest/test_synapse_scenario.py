@@ -6,7 +6,7 @@
 
 import os
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -53,6 +53,7 @@ class SynapseScenarioTests(ScenarioTest):
         time.sleep(120)
         self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}', expect_failure=True)
 
+    @record_only()
     def test_spark_pool(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -99,6 +100,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse spark pool show --name {spark-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
+    @record_only()
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -171,6 +173,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql pool show --name {sql-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_ip_firewall_rules(self, resource_group):
         self.kwargs.update({
@@ -216,6 +219,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse workspace firewall-rule show --name {ruleName} --workspace-name {workspace} '
                  '--resource-group {rg}', expect_failure=True)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_job(self, resource_group):
         self.kwargs.update({
@@ -265,6 +269,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('result', 'Cancelled')
                  ])
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_session_and_statements(self, resource_group):
         self.kwargs.update({
@@ -354,6 +359,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'killed')
                  ])
 
+    @record_only()
     def test_access_control(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspace',
