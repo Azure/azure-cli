@@ -629,8 +629,8 @@ jobs:
 
     displayName: 'Test Yum Package'
 
-- job: BuildUbuntuPackages
-  displayName: Build Ubuntu Packages
+- job: BuildDebPackages
+  displayName: Build Deb Packages
 
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
@@ -639,52 +639,29 @@ jobs:
   strategy:
     matrix:
       Xenial:
+        deb_system: ubuntu
         distro: xenial
       Trusty:
+        deb_system: ubuntu
         distro: trusty
       Bionic:
+        deb_system: ubuntu
         distro: bionic
       Eoan:
+        deb_system: ubuntu
         distro: eoan
       Focal:
+        deb_system: ubuntu
         distro: focal
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-  - task: Bash@3
-    displayName: 'Build Ubuntu $(distro) Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: $(distro)
-      DISTRO_BASE_IMAGE: ubuntu:$(distro)
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: ubuntu-$(distro)
-
-- job: BuildDebianPackages
-  displayName: Build Debian Packages
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  strategy:
-    matrix:
       Jessie:
+        deb_system: debian
         distro: jessie
       Stretch:
+        deb_system: debian
         distro: stretch
       Buster:
-        distro: buster
+        deb_system: debian
+        distro: buster 
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -692,29 +669,53 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
-
   - task: Bash@3
-    displayName: 'Build Debian $(distro) Package'
+    displayName: 'Build $(deb_system) $(distro) Package'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/debian/pipeline.sh
     env:
       DISTRO: $(distro)
-      DISTRO_BASE_IMAGE: debian:$(distro)
+      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian-$(distro)
+      ArtifactName: $(deb_system)-$(distro)
 
 - job: TestDebPackages
   displayName: Test Deb Packages
 
   dependsOn:
-   - BuildUbuntuPackages
-   - BuildDebianPackages
+   - BuildDebPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  strategy:
+    matrix:
+      Xenial:
+        deb_system: ubuntu
+        distro: xenial
+      Trusty:
+        deb_system: ubuntu
+        distro: trusty
+      Bionic:
+        deb_system: ubuntu
+        distro: bionic
+      Eoan:
+        deb_system: ubuntu
+        distro: eoan
+      Focal:
+        deb_system: ubuntu
+        distro: focal
+      Jessie:
+        deb_system: debian
+        distro: jessie
+      Stretch:
+        deb_system: debian
+        distro: stretch
+      Buster:
+        deb_system: debian
+        distro: buster      
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -725,86 +726,27 @@ jobs:
       artifactName: metadata
 
   - task: DownloadPipelineArtifact@1
-    displayName: 'Download Debian:Stretch Build'
+    displayName: 'Download $(deb_system):$(distro) Build'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: debian-stretch
+      artifactName: $(deb_system)-$(distro)
 
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Debian:Buster Build'
+  - task: Bash@3
+    displayName: 'Test $(deb_system) $(distro) Package'
+    env:
+      DISTRO: $(distro)
+      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
     inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: debian-buster
+      targetType: inline
+      script: |
+        set -exv
 
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Debian:Jessie Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: debian-jessie
+        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Bionic Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-bionic
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Xenial Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-xenial
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Trusty Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-trusty
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Eoan Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-eoan
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Focal Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-focal
-
-  - bash: |
-       set -exv
-
-       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-
-       DISTROS=(jessie stretch xenial trusty)
-       BASE_IMAGES=(debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
-
-       # Distros that don't require libssl1.1
-       for i in ${!DISTROS[@]}; do
-           echo "== Test debian package on ${DISTROS[$i]} =="
-
-           DEB_FILE=$SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb
-
-           docker pull ${BASE_IMAGES[$i]}
-
-           docker run --rm -e DISTRO=${DISTROS[$i]} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y apt-transport-https && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
-       done
-
-       # Distros that do require libssl1.1
-       DISTROS=(bionic buster eoan focal)
-       BASE_IMAGES=(ubuntu:bionic debian:buster ubuntu:eoan ubuntu:focal)
-
-       for i in ${!DISTROS[@]}; do
-           echo "== Test debian package on ${DISTROS[$i]} =="
-
-           DEB_FILE=$SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb
-
-           docker pull ${BASE_IMAGES[$i]}
-
-           docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
-       done
-    displayName: 'Bash Script'
+        echo "== Test debian package on ${DISTRO} =="
+        docker pull ${DISTRO_BASE_IMAGE}
+        docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
+      displayName: 'Test $(deb_system) $(distro) Package'
 
 - job: CheckStyle
   displayName: "Check CLI Style"
