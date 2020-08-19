@@ -1,6 +1,8 @@
 Onboarding Best Practices
 =========================
 
+<b>* If you want to onboard a new resource provider, please feel free to refer to [here](https://github.com/Azure/azure-cli/blob/dev/doc/onboarding_guide_for_new_resource_providers.md) to try our new process.</b>
+
 Reach out to `azpycli@microsoft.com` to get the process started. You'll be assigned a dev contact on the CLI team. Early and frequent communication with this contact is essential to ensuring a smooth onboarding.
 
 ## Extension vs. Module
