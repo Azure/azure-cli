@@ -741,7 +741,7 @@ jobs:
   dependsOn:
    - BuildUbuntuPackages
    - BuildDebianPackages
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
