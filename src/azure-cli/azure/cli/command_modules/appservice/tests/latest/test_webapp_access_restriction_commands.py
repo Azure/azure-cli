@@ -184,20 +184,6 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
-        self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200', checks=[
-            JMESPathCheck('length(@)', 2),
-            JMESPathCheck('[0].name', 'developers'),
-            JMESPathCheck('[0].action', 'Allow'),
-            JMESPathCheck('[1].name', 'Deny all'),
-            JMESPathCheck('[1].action', 'Deny')
-        ])
-
-        self.cmd('webapp config access-restriction remove -g {rg} -n {app_name} --ip-address 130.220.0.0/27', checks=[
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', 'Allow all'),
-            JMESPathCheck('[0].action', 'Allow')
-        ])
-
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_scm(self, resource_group):
         self.kwargs.update({
