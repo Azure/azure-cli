@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements, line-too-long
 from argcomplete import FilesCompleter
-from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type
+from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, get_resource_name_completion_list
 from azure.cli.core.util import get_json_object
 from ._validators import validate_storage_account, validate_statement_language
+from ._completers import get_role_definition_name_completion_list
 from .constant import SparkBatchLanguage, SparkStatementLanguage
 
 
@@ -196,3 +197,28 @@ def load_arguments(self, _):
         c.argument('code', completer=FilesCompleter(),
                    help='The code of Spark statement. This is either the code contents or use `@<file path>` to load the content from a file')
         c.argument('language', arg_type=get_enum_type(SparkStatementLanguage), validator=validate_statement_language, help='The language of Spark statement.')
+
+    # synapse workspace access-control
+    for scope in ['create', 'list']:
+        with self.argument_context('synapse role assignment ' + scope) as c:
+            c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
+            c.argument('role', help='The role name/id that is assigned to the principal.', completer=get_role_definition_name_completion_list)
+            c.argument('assignee', help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
+
+    with self.argument_context('synapse role assignment show') as c:
+        c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
+        c.argument('role_assignment_id', options_list=['--id'], help='Id of the role that is assigned to the principal.')
+
+    with self.argument_context('synapse role assignment delete') as c:
+        c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
+        c.argument('role', help='The role name/id that is assigned to the principal.', completer=get_role_definition_name_completion_list)
+        c.argument('assignee', help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
+        c.argument('ids', nargs='+', help='space-separated role assignment ids')
+        c.argument('delete_all', options_list=['--all', '-a'], action='store_true', help='Delete all assignments under the workspace.')
+
+    with self.argument_context('synapse role definition show') as c:
+        c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
+        c.argument('role', help='Id of the role that is assigned to the principal.', completer=get_role_definition_name_completion_list)
+
+    with self.argument_context('synapse role definition list') as c:
+        c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))

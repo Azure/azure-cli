@@ -124,6 +124,7 @@ DEPENDENCIES = [
     'azure-mgmt-web~=0.47.0',
     'azure-mgmt-synapse~=0.3.0',
     'azure-synapse-spark~=0.2.0',
+    'azure-synapse-accesscontrol~=0.2.0',
     'azure-multiapi-storage~=0.3.2',
     'azure-loganalytics~=0.1.0',
     'azure-storage-common~=1.4',

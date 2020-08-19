@@ -53,3 +53,32 @@ def cf_synapse_spark_batch(cli_ctx, workspace_name, sparkpool_name):
 
 def cf_synapse_spark_session(cli_ctx, workspace_name, sparkpool_name):
     return synapse_spark_factory(cli_ctx, workspace_name, sparkpool_name).spark_session
+
+
+def cf_synapse_client_accesscontrol_factory(cli_ctx, workspace_name):
+    from azure.synapse.accesscontrol import AccessControlClient
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
+    cred, _, _ = profile.get_login_credentials(
+        resource=cli_ctx.cloud.endpoints.synapse_analytics_resource_id,
+        subscription_id=subscription_id
+    )
+    return AccessControlClient(
+        credential=cred,
+        endpoint='{}{}{}'.format("https://", workspace_name, cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
+    )
+
+
+def cf_graph_client_factory(cli_ctx, **_):
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import configure_common_settings
+    from azure.graphrbac import GraphRbacManagementClient
+    profile = Profile(cli_ctx=cli_ctx)
+    cred, _, tenant_id = profile.get_login_credentials(
+        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    client = GraphRbacManagementClient(cred, tenant_id,
+                                       base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    configure_common_settings(cli_ctx, client)
+    return client
