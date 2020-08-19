@@ -11,6 +11,8 @@ import datetime
 
 from sendgrid import SendGridAPIClient
 
+from scripts.live_test import test_data
+
 SENDGRID_KEY = sys.argv[1]
 BUILD_ID = sys.argv[2]
 USER_REPO = sys.argv[3]
@@ -34,51 +36,23 @@ def main():
     print(REQUESTED_FOR_EMAIL)
     print(ACCOUNT_KEY)
 
+    # Upload results to storage account, container
     container = ''
     try:
         print('Uploading test results to storage account...')
         container = get_container_name()
         upload_files(container)
     except Exception:
-        pass
+        print(traceback.format_exc())
 
-    print('Sending email...')
-    # message = Mail(
-    #     from_email='azclibot@microsoft.com',
-    #     to_emails='AzPyCLI@microsoft.com',
-    #     subject='Test results of Azure CLI',
-    #     html_content=get_content())
-    data = {
-        "personalizations": [
-            {
-                "to": [],
-                "subject": "Test results of Azure CLI"
-            }
-        ],
-        "from": {
-            "email": "azclibot@microsoft.com"
-        },
-        "content": [
-            {
-                "type": "text/html",
-                "value": get_content(container)
-            }
-        ]
-    }
-    if REQUESTED_FOR_EMAIL != '':
-        data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
-    if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
-        data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
-    print(data)
-    try:
-        sendgrid_key = sys.argv[1]
-        sg = SendGridAPIClient(sendgrid_key)
-        response = sg.send(data)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        traceback.print_exc()
+    # Collect statistics
+    testdata = test_data.TestData(ARTIFACT_DIR)
+    testdata.collect()
+
+    # Write database
+
+    # Send email
+    send_email(container, testdata)
 
 
 def get_container_name():
@@ -95,8 +69,8 @@ def get_container_name():
     else:
         mode = ''
     name += '_' + mode
-    if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
-        name += '_archive'
+    # if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
+    #     name += '_archive'
     return name
 
 
@@ -121,7 +95,47 @@ def upload_files(container):
                 os.popen(cmd)
 
 
-def get_content(container):
+def send_email(container, testdata):
+    print('Sending email...')
+    # message = Mail(
+    #     from_email='azclibot@microsoft.com',
+    #     to_emails='AzPyCLI@microsoft.com',
+    #     subject='Test results of Azure CLI',
+    #     html_content=get_content())
+    data = {
+        "personalizations": [
+            {
+                "to": [],
+                "subject": "Test results of Azure CLI"
+            }
+        ],
+        "from": {
+            "email": "azclibot@microsoft.com"
+        },
+        "content": [
+            {
+                "type": "text/html",
+                "value": get_content(container, testdata)
+            }
+        ]
+    }
+    if REQUESTED_FOR_EMAIL != '':
+        data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
+    if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
+        data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
+    print(data)
+    try:
+        sendgrid_key = sys.argv[1]
+        sg = SendGridAPIClient(sendgrid_key)
+        response = sg.send(data)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        traceback.print_exc()
+
+
+def get_content(container, testdata):
     """
     Compose content of email
     :return:
@@ -158,8 +172,6 @@ def get_content(container):
         </p>
         """.format(container)
 
-    passed_sum = failed_sum = 0
-
     table = """
     <p>Test results summary</p>
     <table>
@@ -171,48 +183,7 @@ def get_content(container):
       </tr>
     """
 
-    # summary
-    print('Generating summary...')
-    # module -> (passed, failed)
-    data_dict = {}
-    for root, dirs, files in os.walk(ARTIFACT_DIR):
-        for name in files:
-            if name.endswith('json'):
-                try:
-                    print('Reading {}'.format(name))
-                    module = name.split('.')[0]
-                    with open(os.path.join(root, name)) as f:
-                        result = json.loads(f.read())
-                        passed = failed = 0
-                        if 'passed' in result['summary']:
-                            passed = result['summary']['passed']
-                        if 'failed' in result['summary']:
-                            failed = result['summary']['failed']
-                        if module in data_dict:
-                            values = data_dict[module]
-                            data_dict[module] = (values[0] + passed, values[1] + failed)
-                        else:
-                            data_dict[module] = (passed, failed)
-                except Exception:
-                    print(traceback.format_exc())
-
-    # module, passed, failed, rate
-    items = []
-    for k in data_dict:
-        v = data_dict[k]
-        passed = v[0]
-        failed = v[1]
-        total = passed + failed
-        rate = 1 if total == 0 else passed / total
-        rate = '{:.2%}'.format(rate)
-        items.append((k, passed, failed, rate))
-        print('module: {}, passed: {}, failed: {}, rate: {}'.format(k, passed, failed, rate))
-        passed_sum += passed
-        failed_sum += failed
-
-    sorted(items, key=lambda x: x[0])
-
-    for module, passed, failed, rate in items:
+    for module, passed, failed, rate in testdata.modules:
         table += """
           <tr>
             <td>{}</td>
@@ -222,9 +193,6 @@ def get_content(container):
           </tr>
         """.format(module, passed, failed, rate)
 
-    total_sum = passed_sum + failed_sum
-    rate_sum = 1 if total_sum == 0 else passed_sum / total_sum
-    rate_sum = '{:.2%}'.format(rate_sum)
     table += """
       <tr>
         <td>Total</td>
@@ -233,8 +201,7 @@ def get_content(container):
         <td>{}</td>
       </tr>
     </table>
-    """.format(passed_sum, failed_sum, rate_sum)
-    print('module: Total, passed: {}, failed: {}, rate: {}'.format(passed_sum, failed_sum, rate_sum))
+    """.format(testdata.total[1], testdata.total[2], testdata.total[3])
 
     content += table
 
