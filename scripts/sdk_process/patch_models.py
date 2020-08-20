@@ -75,7 +75,10 @@ def solve_mro(models, track2=False):
         ]
         if track2:
             for p in p_list:
+                _LOGGER.info('Processing {}'.format(p))
                 if p.exists():
+
+                    _LOGGER.info('Deleting {}'.format(p))
                     shutil.rmtree(p)
             return
 
