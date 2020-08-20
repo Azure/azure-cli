@@ -12,7 +12,7 @@ import os
 import sys
 
 try:
-    from azure_bdist_wheel import cmdclass
+    from azure_cli_bdist_wheel import cmdclass
 except ImportError:
     from distutils import log as logger
 
@@ -23,7 +23,7 @@ VERSION = "2.10.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
-    with open('azure/cli/__init__.py', 'r', encoding='utf-8') as f:
+    with open('azure/cli/__main__.py', 'r', encoding='utf-8') as f:
         content = f.read()
 except OSError:
     pass
@@ -32,7 +32,7 @@ else:
 
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
-        print('Could not find __version__ in azure/cli/__init__.py')
+        print('Could not find __version__ in azure/cli/__main__.py')
         sys.exit(1)
     if m.group(1) != VERSION:
         print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
@@ -53,9 +53,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-batch~=9.0',
-    'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}.*'.format(VERSION),
-    'azure-cli-nspkg~=3.0,>=3.0.3',
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.48',
     'azure-functions-devops-build~=0.0.22',
@@ -101,7 +99,7 @@ DEPENDENCIES = [
     'azure-mgmt-media~=2.1,>=2.1.0',
     'azure-mgmt-monitor~=0.11.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=0.11.0',
+    'azure-mgmt-netapp~=0.12.0',
     'azure-mgmt-network~=11.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
@@ -124,10 +122,10 @@ DEPENDENCIES = [
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.47.0',
     'azure-mgmt-synapse~=0.3.0',
-    'azure-synapse-spark~=0.2.0',
-    'azure-multiapi-storage~=0.3.2',
+    'azure-multiapi-storage~=0.4.1',
     'azure-loganalytics~=0.1.0',
     'azure-storage-common~=1.4',
+    'azure-synapse-spark~= 0.2.0',
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'jsmin~=2.2.2',
@@ -169,10 +167,9 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     package_data={
-        'azure.cli.core': ['auth_landing_pages/*.html'],
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],

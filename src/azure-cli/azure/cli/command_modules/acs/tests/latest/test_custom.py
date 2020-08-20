@@ -670,7 +670,7 @@ class AcsCustomCommandTest(unittest.TestCase):
     def test_k8s_install_kubelogin_emit_warnings(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = create_kubelogin_zip
         try:
-            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+            temp_dir = os.path.realpath(tempfile.mkdtemp())  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'kubelogin')
             k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
@@ -696,9 +696,16 @@ def create_kubelogin_zip(file_url, download_path):
     import zipfile
     try:
         cwd = os.getcwd()
-        temp_dir = tempfile.mkdtemp()
+        temp_dir = os.path.realpath(tempfile.mkdtemp())
         os.chdir(temp_dir)
-        bin_dir = 'bin/linux_amd64'
+        bin_dir = 'bin'
+        system = platform.system()
+        if system == 'Windows':
+            bin_dir += '/windows_amd64'
+        elif system == 'Linux':
+            bin_dir += '/linux_amd64'
+        elif system == 'Darwin':
+            bin_dir += '/darwin_amd64'
         os.makedirs(bin_dir)
         bin_location = os.path.join(bin_dir, 'kubelogin')
         open(bin_location, 'a').close()
