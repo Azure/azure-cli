@@ -50,7 +50,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_apim_api', supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('apim productapi', api_sdk, is_preview=True) as g:
+    with self.command_group('apim product api', api_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_product_api')
         g.custom_command('check', 'check_product_exists')
         g.custom_command('add', 'add_product_api')
@@ -58,7 +58,7 @@ def load_command_table(self, _):
 
     with self.command_group('apim product', product_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_products')
-        g.custom_command('get', 'get_product')
+        g.custom_command('show', 'show_product')
         g.custom_command('create', 'create_product', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_product', supports_no_wait=True)
         g.custom_command('delete', 'delete_product', confirmation=True, supports_no_wait=True)

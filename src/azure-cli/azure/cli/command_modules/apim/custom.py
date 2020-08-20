@@ -361,7 +361,7 @@ def list_products(client, resource_group_name, service_name):
     return client.product.list_by_service(resource_group_name, service_name)
 
 
-def get_product(client, resource_group_name, service_name, product_id):
+def show_product(client, resource_group_name, service_name, product_id):
 
     return client.product.get(resource_group_name, service_name, product_id)
 
@@ -396,6 +396,7 @@ def create_product(client, resource_group_name, service_name, product_id, produc
 
 
 def update_product(instance, product_name=None, description=None, legal_terms=None, subscription_required=None, approval_required=None, subscriptions_limit=None, state=None):
+
     if product_name is not None:
         instance.display_name = product_name
 
@@ -403,7 +404,7 @@ def update_product(instance, product_name=None, description=None, legal_terms=No
         instance.description = description
 
     if legal_terms is not None:
-        instance.legal_terms = legal_terms
+        instance.terms = legal_terms
 
     if subscription_required is not None:
         instance.subscription_required = subscription_required

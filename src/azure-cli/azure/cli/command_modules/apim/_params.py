@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type,
                                                 get_three_state_flag)
 
-from azure.mgmt.apimanagement.models import (SkuType, VirtualNetworkType, Protocol, ApiType)
+from azure.mgmt.apimanagement.models import (SkuType, VirtualNetworkType, Protocol, ApiType, ProductState)
 
 
 SKU_TYPES = SkuType
@@ -134,21 +134,21 @@ def load_arguments(self, _):
         c.argument('wsdl_service_name', help='Local name of WSDL Service to be imported.')
         c.argument('wsdl_endpoint_name', help='Local name of WSDL Endpoint (port) to be imported.')
 
-    with self.argument_context('apim productapi list') as c:
+    with self.argument_context('apim product api list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
 
-    with self.argument_context('apim productapi check') as c:
-        c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
-        c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
-
-    with self.argument_context('apim productapi add') as c:
+    with self.argument_context('apim product api check') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
         c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
-    with self.argument_context('apim productapi delete') as c:
+    with self.argument_context('apim product api add') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
+        c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
+        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+
+    with self.argument_context('apim product api delete') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
         c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
@@ -156,14 +156,14 @@ def load_arguments(self, _):
     with self.argument_context('apim product list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
 
-    with self.argument_context('apim product get') as c:
+    with self.argument_context('apim product show') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
 
     with self.argument_context('apim product create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
-        c.argument('product_name', help="Required. Product name.")
+        c.argument('product_name', help="Product name.")
         c.argument('description', help="Product description. May include HTML formatting tags.")
         c.argument('legal_terms', help="Product terms of use. Developers trying to subscribe to the product will be presented and required to accept these terms before they can complete the subscription process.")
         c.argument('subscription_required', help="Whether a product subscription is required for accessing APIs included in this product.")
@@ -180,7 +180,7 @@ def load_arguments(self, _):
         c.argument('subscription_required', help="Whether a product subscription is required for accessing APIs included in this product.")
         c.argument('approval_required', help="whether subscription approval is required. If false, new subscriptions will be approved automatically enabling developers to call the product’s APIs immediately after subscribing. If true, administrators must manually approve the subscription before the developer can any of the product’s APIs. Can be present only if subscriptionRequired property is present and has a value of false.")
         c.argument('subscriptions_limit', help="Whether the number of subscriptions a user can have to this product at the same time. Set to null or omit to allow unlimited per user subscriptions. Can be present only if subscriptionRequired property is present and has a value of false.")
-        c.argument('state', help="whether product is published or not. Published products are discoverable by users of developer portal. Non published products are visible only to administrators. Default state of Product is notPublished. Possible values include: 'notPublished', 'published'")
+        c.argument('state', arg_type=get_enum_type(ProductState), help="whether product is published or not. Published products are discoverable by users of developer portal. Non published products are visible only to administrators. Default state of Product is notPublished. Possible values include: 'notPublished', 'published'")
 
     with self.argument_context('apim product delete') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)

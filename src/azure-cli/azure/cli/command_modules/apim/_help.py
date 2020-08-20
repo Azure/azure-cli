@@ -17,7 +17,7 @@ type: group
 short-summary: Manage Azure API Management API's.
 """
 
-helps['apim productapi'] = """
+helps['apim product api'] = """
 type: group
 short-summary: Manage Azure API Management Product's APIs.
 """
@@ -163,40 +163,40 @@ type: command
 short-summary: Import an API Management service instance.
 """
 
-helps['apim productapi list'] = """
+helps['apim product api list'] = """
 type: command
 short-summary: Lists a collection of the APIs associated with a product.
 examples:
   - name: List all APIs associated with a product.
     text: |-
-        az apim productapi list --resource-group MyResourceGroup  --service-name MyServiceName  --product-id MyProductID
+        az apim product api list --resource-group MyResourceGroup  --service-name MyServiceName  --product-id MyProductID
 """
 
-helps['apim productapi check'] = """
+helps['apim product api check'] = """
 type: command
 short-summary: Checks that API entity specified by identifier is associated with the Product entity.
 examples:
   - name: Check if the API is associated with the Product.
     text: |-
-        az apim productapi check --resource-group MyResourceGroup  --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
+        az apim product api check --resource-group MyResourceGroup  --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
 """
 
-helps['apim productapi add'] = """
+helps['apim product api add'] = """
 type: command
-short-summary: Adds an API to the specified product.
+short-summary: Add an API to the specified product.
 examples:
-  - name: Adds an API to the specified product.
+  - name: Add an API to the specified product.
     text: |-
-        az apim productapi add --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
+        az apim product api add --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
 """
 
-helps['apim productapi delete'] = """
+helps['apim product api delete'] = """
 type: command
 short-summary: Deletes the specified API from the specified product.
 examples:
   - name: Deletes the specified API from the specified product.
     text: |-
-        az apim productapi delete --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
+        az apim product api delete --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID --api-id MyAPIID
 """
 
 helps['apim product list'] = """
@@ -208,20 +208,20 @@ examples:
         az apim product list --resource-group MyResourceGroup --service-name MyServiceName
 """
 
-helps['apim product get'] = """
+helps['apim product show'] = """
 type: command
 short-summary: Gets the details of the product specified by its identifier.
 examples:
   - name: Gets the details of the product specified by its identifier.
     text: |-
-        az apim product get --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID
+        az apim product show --resource-group MyResourceGroup --service-name MyServiceName  --product-id MyProductID
 """
 
 helps['apim product create'] = """
 type: command
-short-summary: Creates or Updates a product.
+short-summary: Creates a product.
 examples:
-  - name: Creates or Updates a product.
+  - name: Creates a product.
     text: |-
         az apim product create --resource-group MyResourceGroup  --service-name MyServiceName --product-id MyProductID --product-name MyProductName --description MyDescription --legal-terms MyTerms --subscription-required true --approval-required true --subscriptions-limit 8 --state "published"
 """
