@@ -69,8 +69,15 @@ def solve_mro(models, track2=False):
         models_path = models_module.__path__[0]
         _LOGGER.info("Working on %s", models_path)
 
-        if track2 and Path(models_path, "models_py3.py").exists():
-            shutil.rmtree(Path(models_path))
+        p_list = [
+            Path('/opt/hostedtoolcache/Python/3.6.11/x64/lib/python3.6/site-packages/azure/mgmt/keyvault/'),
+            Path('/opt/hostedtoolcache/Python/3.8.5/x64/lib/python3.6/site-packages/azure/mgmt/keyvault/')
+        ]
+        if track2:
+            for p in p_list:
+                if p.exists():
+                    shutil.rmtree(p)
+            return
 
         if Path(models_path, "models_py3.py").exists():
             _LOGGER.info("Skipping since already patched")
