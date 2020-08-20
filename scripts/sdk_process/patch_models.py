@@ -69,11 +69,6 @@ def solve_mro(models, track2=False):
         models_path = models_module.__path__[0]
         _LOGGER.info("Working on %s", models_path)
 
-        if track2:
-            _LOGGER.info('Deleting {}'.format(models_path))
-            shutil.rmtree(models_path)
-            return
-
         if Path(models_path, "models_py3.py").exists():
             _LOGGER.info("Skipping since already patched")
             return
@@ -235,7 +230,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     track2_packages = [
-        'azure.mgmt.keyvault.'
+        'azure.mgmt.keyvault'
     ]
     prefix = sys.argv[1] if len(sys.argv) >= 2 else "azure.mgmt"
     for autorest_package in find_autorest_generated_folder(prefix):
@@ -245,5 +240,4 @@ if __name__ == "__main__":
             if autorest_package.startswith(track2_pkg):
                 track2 = True
                 break
-        _LOGGER.info('autorest_package: {}, track2: {}'.format(autorest_package, track2))
         solve_mro(models, track2=track2)
