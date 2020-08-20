@@ -431,9 +431,7 @@ def return_valid_duration(instance_value, update_value):
     if iso8601pattern.match(value_toreturn):
         if parse_duration(value_toreturn) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
             return value_toreturn
-
-        if parse_duration(value_toreturn) >= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
-            return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
+        return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
 
     if timedeltapattern.match(value_toreturn):
         day, minute, seconds = value_toreturn.split(":")
@@ -441,11 +439,7 @@ def return_valid_duration(instance_value, update_value):
                                                                                             minutes=DURATION_MIN,
                                                                                             seconds=DURATION_SECS):
             return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
-
-        if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) >= timedelta(days=DURATION_DAYS,
-                                                                                            minutes=DURATION_MIN,
-                                                                                            seconds=DURATION_SECS):
-            return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
+        return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
 
 
 # to check the timespan value
@@ -458,18 +452,12 @@ def return_valid_duration_create(update_value):
             if parse_duration(update_value) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return update_value
 
-            if parse_duration(update_value) >= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
-                return None
-
         if timedeltapattern.match(update_value):
             day, minute, seconds = update_value.split(":")
             if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
 
-            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) >= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
-                return None
-    else:
-        return None
+    return None
 
 
 # NetwrokRuleSet Region
