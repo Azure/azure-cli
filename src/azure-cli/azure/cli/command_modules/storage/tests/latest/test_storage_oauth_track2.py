@@ -154,7 +154,14 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
                                 JMESPathCheck('properties.pageRanges', None),
-                                JMESPathCheckExists('properties.etag'))
+                                JMESPathCheckExists('properties.etag'),
+                                JMESPathCheck('objectReplicationDestinationPolicy', None),
+                                JMESPathCheck('objectReplicationSourceProperties', []),
+                                JMESPathCheck('rehydratePriority', None),
+                                JMESPathCheck('tags', None),
+                                JMESPathCheck('tagCount', None),
+                                JMESPathCheck('versionId', None))
+
         self.kwargs['etag'] = self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
             .get_output_in_json()['properties']['etag']
 
