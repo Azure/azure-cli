@@ -93,6 +93,11 @@ finally:
                     cmd = ['az', 'upgrade', '--all', str(update_all)]
                     if not prompt:
                         cmd.append('-y')
-                    subprocess.call(cmd, shell=platform.system() == 'Windows')
+                    import os
+                    devnull = open(os.devnull, 'w')
+                    if prompt:
+                        subprocess.call(cmd, shell=platform.system() == 'Windows')
+                    else:
+                        subprocess.call(cmd, shell=platform.system() == 'Windows', stdout=devnull)
     except Exception:  # pylint: disable=broad-except
         pass

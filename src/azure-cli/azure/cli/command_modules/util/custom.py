@@ -58,8 +58,9 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
     exit_code = 0
     if update_cli:
-        logger.warning("Your current Azure CLI version is %s. Latest version available is %s.",
-                       local_version, latest_version)
+        latest_version_msg = 'It will be updated to {}.'.format(latest_version) if yes \
+            else 'Latest version available is {}.'.format(latest_version)
+        logger.warning("Your current Azure CLI version is %s. %s", local_version, latest_version_msg)
         from knack.prompting import prompt_y_n
         if not yes:
             confirmation = prompt_y_n("Please check the release notes first: https://docs.microsoft.com/"
@@ -77,9 +78,10 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             if os.geteuid() != 0:  # pylint: disable=no-member
                 apt_update_cmd.insert(0, 'sudo')
                 az_update_cmd.insert(0, 'sudo')
-            subprocess.call(apt_update_cmd)
-            logger.debug("Update azure cli with '%s'", " ".join(apt_update_cmd))
-            exit_code = subprocess.call(az_update_cmd)
+            exit_code = subprocess.call(apt_update_cmd)
+            if exit_code == 0:
+                logger.debug("Update azure cli with '%s'", " ".join(apt_update_cmd))
+                exit_code = subprocess.call(az_update_cmd)
         elif installer == 'RPM':
             from azure.cli.core.util import get_linux_distro
             distname, _ = get_linux_distro()
@@ -99,17 +101,19 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                     if os.geteuid() != 0:  # pylint: disable=no-member
                         zypper_refresh_cmd.insert(0, 'sudo')
                         az_update_cmd.insert(0, 'sudo')
-                    subprocess.call(zypper_refresh_cmd)
-                    logger.debug("Update azure cli with '%s'", " ".join(az_update_cmd))
-                    exit_code = subprocess.call(az_update_cmd)
+                    exit_code = subprocess.call(zypper_refresh_cmd)
+                    if exit_code == 0:
+                        logger.debug("Update azure cli with '%s'", " ".join(az_update_cmd))
+                        exit_code = subprocess.call(az_update_cmd)
                 else:
                     logger.warning(UPGRADE_MSG)
         elif installer == 'HOMEBREW':
             logger.warning("Update homebrew formulae")
-            subprocess.call(['brew', 'update'])
-            update_cmd = ['brew', 'upgrade', 'azure-cli']
-            logger.debug("Update azure cli with '%s'", " ".join(update_cmd))
-            exit_code = subprocess.call(update_cmd)
+            exit_code = subprocess.call(['brew', 'update'])
+            if exit_code == 0:
+                update_cmd = ['brew', 'upgrade', 'azure-cli']
+                logger.debug("Update azure cli with '%s'", " ".join(update_cmd))
+                exit_code = subprocess.call(update_cmd)
         elif installer == 'PIP':
             pip_args = [sys.executable, '-m', 'pip', 'install', '--upgrade', 'azure-cli', '-vv',
                         '--disable-pip-version-check', '--no-cache-dir']
@@ -128,9 +132,10 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         sys.exit(exit_code)
 
     for ext_name in exts:
-        try:
-            logger.warning("Checking update for %s", ext_name)
-            subprocess.call(['az', 'extension', 'update', '-n', ext_name], shell=platform.system() == 'Windows')
-        except CLIError as ex:
-            telemetry.set_failure("Extension update failed during az upgrade. {}".format(str(ex)))
-            raise ex
+        logger.warning("Checking update for %s", ext_name)
+        exit_code = subprocess.call(['az', 'extension', 'update', '-n', ext_name], shell=platform.system() == 'Windows')
+        if exit_code:
+            msg = "Extension {} update failed during az upgrade. Exit code {}.".format(ext_name, exit_code)
+            raise CLIError(msg)
+
+    logger.warning("Upgrade finished.")
