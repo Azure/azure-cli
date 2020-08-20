@@ -63,7 +63,7 @@ long-summary: |
     This default policy can be used in conjunction with `az keyvault create` to create a self-signed certificate.
     The default policy can also be used as a starting point to create derivative policies.
 
-    For more details, see: https://docs.microsoft.com/rest/api/keyvault/certificates-and-policies
+    For more details, see: https://docs.microsoft.com/azure/key-vault/certificates/about-certificates#certificate-policy
 examples:
   - name: Create a self-signed certificate with the default policy
     text: |

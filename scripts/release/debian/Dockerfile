@@ -29,7 +29,6 @@ RUN mkdir -p ./bin/pypi && \
     BUILD_STAGINGDIRECTORY=/azure-cli/bin/pypi ./scripts/release/pypi/build.sh && \
     if [ -d ./privates ]; then find ./privates -name '*.whl' | xargs pip install; fi && \
     find ./bin/pypi -name '*.whl' | xargs pip install && \
-    pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg && \
     pip install --force-reinstall urllib3==1.24.2
 
 ARG cli_version=0.0.0-dev

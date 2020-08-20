@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
-
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -12,22 +11,28 @@ logger = get_logger(__name__)
 
 def create_metric_alert(client, resource_group_name, rule_name, scopes, condition, disabled=False, description=None,
                         tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
-                        auto_mitigate=None):
+                        auto_mitigate=None, target_resource_type=None, target_resource_region=None):
     from azure.mgmt.monitor.models import (MetricAlertResource,
                                            MetricAlertSingleResourceMultipleMetricCriteria,
                                            MetricAlertMultipleResourceMultipleMetricCriteria)
+    from azure.cli.core import CLIError
     # generate names for the conditions
     for i, cond in enumerate(condition):
         cond.name = 'cond{}'.format(i)
     criteria = None
-    target_resource_type = None
-    target_resource_region = None
-    if len(scopes) == 1:
-        criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
-    else:
+    resource_type, scope_type = _parse_resource_and_scope_type(scopes)
+    if scope_type in ['resource_group', 'subscription']:
+        if target_resource_type is None or target_resource_region is None:
+            raise CLIError('--target-resource-type and --target-resource-region must be provided.')
         criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
-        target_resource_type = _parse_resource_type(scopes)
-        target_resource_region = 'global'
+    else:
+        if len(scopes) == 1:
+            criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
+        else:
+            criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
+            target_resource_type = resource_type
+            target_resource_region = 'global'
+
     kwargs = {
         'description': description,
         'severity': severity,
@@ -212,18 +217,44 @@ def _parse_action_removals(actions):
     return emails, webhooks
 
 
-def _parse_resource_type(scopes):
-    from msrestazure.tools import parse_resource_id
-    from azure.cli.core import CLIError
-    namespace = None
-    resource_type = None
-    for item in scopes:
-        item_namespace = parse_resource_id(item)['namespace']
-        item_resource_type = parse_resource_id(item)['resource_type']
-        if namespace is None and resource_type is None:
-            namespace = item_namespace
-            resource_type = item_resource_type
+def _parse_resource_and_scope_type(scopes):
+    from azure.mgmt.core.tools import parse_resource_id
+    from knack.util import CLIError
+
+    if not scopes:
+        raise CLIError('scopes cannot be null.')
+
+    namespace = ''
+    resource_type = ''
+    scope_type = None
+
+    def validate_scope(item_namespace, item_resource_type, item_scope_type):
+        if namespace != item_namespace or resource_type != item_resource_type or scope_type != item_scope_type:
+            raise CLIError('Multiple scopes should be the same resource type.')
+
+    def store_scope(item_namespace, item_resource_type, item_scope_type):
+        nonlocal namespace
+        nonlocal resource_type
+        nonlocal scope_type
+        namespace = item_namespace
+        resource_type = item_resource_type
+        scope_type = item_scope_type
+
+    def parse_one_scope_with_action(scope, operation_on_scope):
+        result = parse_resource_id(scope)
+        if 'namespace' in result and 'resource_type' in result:
+            operation_on_scope(result['namespace'], result['resource_type'], 'resource')
+        elif 'resource_group' in result:  # It's a resource group.
+            operation_on_scope('', '', 'resource_group')
+        elif 'subscription' in result:  # It's a subscription.
+            operation_on_scope('', '', 'subscription')
         else:
-            if namespace != item_namespace or resource_type != item_resource_type:
-                raise CLIError('Multiple scopes should be the same resource type.')
-    return namespace + '/' + resource_type
+            raise CLIError('Scope must be a valid resource id.')
+
+    # Store the resource type and scope type from first scope
+    parse_one_scope_with_action(scopes[0], operation_on_scope=store_scope)
+    # Validate the following scopes
+    for item in scopes:
+        parse_one_scope_with_action(item, operation_on_scope=validate_scope)
+
+    return namespace + '/' + resource_type, scope_type
