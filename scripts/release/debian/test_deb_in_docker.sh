@@ -6,7 +6,7 @@ set -exv
 export USERNAME=azureuser
 
 apt update
-apt install -y apt-transport-https python3-pip git
+apt install -y apt-transport-https git
 
 # The distros that need libssl1.1
 case ${DISTRO} in
@@ -16,13 +16,12 @@ esac
 
 dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
 
-ln -s /usr/bin/python3 /usr/bin/python
-ln -s /usr/bin/pip3 /usr/bin/pip
 time az self-test
 time az --version
 
 cd /azure-cli/
-pip3 install wheel
+/opt/az/bin/python3 -m pip install wheel
+ln -sf /opt/az/bin/python3 /usr/bin/python
 ./scripts/ci/build.sh
 
 /opt/az/bin/python3 -m pip install pytest
