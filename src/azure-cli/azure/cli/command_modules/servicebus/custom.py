@@ -422,7 +422,7 @@ timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 def return_valid_duration(instance_value, update_value):
     from datetime import timedelta
     from isodate import parse_duration
-    from constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
+    from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         value_toreturn = update_value
     else:
@@ -446,7 +446,7 @@ def return_valid_duration(instance_value, update_value):
 def return_valid_duration_create(update_value):
     from datetime import timedelta
     from isodate import parse_duration
-    from constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
+    from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         if iso8601pattern.match(update_value):
             if parse_duration(update_value) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
