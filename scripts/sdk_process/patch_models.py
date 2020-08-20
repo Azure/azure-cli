@@ -68,7 +68,11 @@ def solve_mro(models, track2=False):
     for models_module in models:
         models_path = models_module.__path__[0]
         _LOGGER.info("Working on %s", models_path)
-        if track2 or Path(models_path, "models_py3.py").exists():
+
+        if track2 and Path(models_path, "models_py3.py").exists():
+            shutil.rmtree(Path(models_path))
+
+        if Path(models_path, "models_py3.py").exists():
             _LOGGER.info("Skipping since already patched")
             return
 
