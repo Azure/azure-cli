@@ -156,18 +156,11 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
 def cf_mariadb_servers(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).servers
 
-
 def cf_mysql_servers(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).servers
 
-def cf_mysql_flexible_servers(cli_ctx, _):
-    return get_mysql_flexible_management_client(cli_ctx).servers
-
 def cf_postgres_servers(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).servers
-
-def cf_postgres_flexible_servers(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).servers
 
 def cf_mariadb_firewall_rules(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).firewall_rules
@@ -175,14 +168,11 @@ def cf_mariadb_firewall_rules(cli_ctx, _):
 def cf_mysql_firewall_rules(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).firewall_rules
 
-
 def cf_postgres_firewall_rules(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).firewall_rules
 
-
 def cf_mariadb_config(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).configurations
-
 
 def cf_mysql_config(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).configurations
@@ -278,3 +268,35 @@ def cf_mysql_server_ad_administrators_operations(cli_ctx, _):
 
 def cf_postgres_server_ad_administrators_operations(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).server_administrators
+
+# Meru operations for flexible servers
+
+def cf_mysql_flexible_servers(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).servers
+
+def cf_mysql_flexible_firewall_rules(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).firewall_rules
+
+def cf_mysql_flexible_config(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).configurations
+
+def cf_mysql_flexible_virtual_network_rules_operations(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).virtual_network_rules
+
+def cf_mysql_flexible_db(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).databases
+
+def cf_postgres_flexible_servers(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).servers
+
+def cf_postgres_flexible_firewall_rules(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).firewall_rules
+
+def cf_postgres_flexible_config(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).configurations
+
+def cf_postgres_flexible_virtual_network_rules_operations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).virtual_network_rules
+
+
+

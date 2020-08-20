@@ -17,7 +17,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
 
 
-def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name,
+def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
                    location=None, no_wait=False, administrator_login=None, administrator_login_password=None, backup_retention=None,
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
                    assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
@@ -25,7 +25,7 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 
     # MOLJAIN TO DO: The SKU should not be hardcoded, need a fix with new swagger or need to manually parse sku provided
     parameters = postgresql.flexibleservers.models.Server(
-        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier="GeneralPurpose", capacity=4),
+        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier, capacity=4),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
@@ -50,7 +50,6 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 # arguments and validators
 def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
-    parameters = None
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server = resource_id(
@@ -67,9 +66,6 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,
         location=None)
-
-    parameters.properties.source_server_id = source_server
-    parameters.properties.restore_point_in_time = restore_point_in_time
 
     # Here is a workaround that we don't support cross-region restore currently,
     # so the location must be set as the same as source server (not the resource group)
@@ -137,13 +133,12 @@ def _flexible_server_update_custom_func(instance,
                                     v_cores = v_cores)
 
     if assign_identity:
-        from azure.mgmt.rdbms import postgresql
-        if instance.identity is None:
-            instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
-        params.identity = instance.identity
+        if server_module_path.find('postgres'):
+            from azure.mgmt.rdbms import postgresql
+            if instance.identity is None:
+                instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
+            params.identity = instance.identity
     return params
-
-
 
 # Wait command
 def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
@@ -156,3 +151,10 @@ def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
+    if start_ip_address is not None:
+        instance.start_ip_address = start_ip_address
+    if end_ip_address is not None:
+        instance.end_ip_address = end_ip_address
+    return instance

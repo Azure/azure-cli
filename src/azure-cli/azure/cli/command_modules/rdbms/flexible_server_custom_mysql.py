@@ -28,7 +28,7 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 
     ### TO DO: This is not complete yet, waiting on deployment
     parameters = mysql.flexibleservers.models.Server(
-        sku=mysql.flexibleservers.models.Sku(name=sku_name, tier="GeneralPurpose"),
+        sku=mysql.flexibleservers.models.Sku(name=sku_name),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
@@ -41,7 +41,6 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
             storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
         # storage_autogrow=auto_grow),
         location=location,
-        create_mode="Default",  # can also be create??
         tags=tags)
     if assign_identity:
         parameters.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
@@ -51,13 +50,8 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 # The parameter list should be the same as that in factory to use the ParametersContext
 # arguments and validators
 def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
-    provider = 'Microsoft.DBforPostgreSQL'
-    if isinstance(client, MySqlServersOperations):
-        provider = 'Microsoft.DBforMySQL'
-    elif isinstance(client, MariaDBServersOperations):
-        provider = 'Microsoft.DBforMariaDB'
+    provider = 'Microsoft.DBforMySQL'
 
-    parameters = None
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server = resource_id(
@@ -69,30 +63,13 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
-    if provider == 'Microsoft.DBforMySQL':
-        from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerForCreate(
-            properties=mysql.models.ServerPropertiesForRestore(
-                source_server_id=source_server,
-                restore_point_in_time=restore_point_in_time),
-            location=None)
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerForCreate(
-            properties=postgresql.models.ServerPropertiesForRestore(
-                source_server_id=source_server,
-                restore_point_in_time=restore_point_in_time),
-            location=None)
-    elif provider == 'Microsoft.DBforMariaDB':
-        from azure.mgmt.rdbms import mariadb
-        parameters = mariadb.models.ServerForCreate(
-            properties=mariadb.models.ServerPropertiesForRestore(
-                source_server_id=source_server,
-                restore_point_in_time=restore_point_in_time),
-            location=None)
-
-    parameters.properties.source_server_id = source_server
-    parameters.properties.restore_point_in_time = restore_point_in_time
+    from azure.mgmt.rdbms import mysql
+    parameters = mysql.flexibleservers.models.ServerForCreate(
+        properties=mysql.flexibleservers.models.ServerPropertiesForRestore(
+            source_server_id=source_server,
+            restore_point_in_time=restore_point_in_time,
+        ),
+        location=None)
 
     # Here is a workaround that we don't support cross-region restore currently,
     # so the location must be set as the same as source server (not the resource group)
@@ -105,6 +82,117 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
+# Update commands
+def _flexible_server_update_custom_func(instance,
+                               sku_name=None,
+                               storage_mb=None,
+                               backup_retention=None,
+                               administrator_login_password=None,
+                               ssl_enforcement=None,
+                               tags=None,
+                               auto_grow=None,
+                               assign_identity=False,
+                               public_network_access=None,
+                               minimal_tls_version=None):
+    from importlib import import_module
+    server_module_path = instance.__module__
+    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    ServerForUpdate = getattr(module, 'ServerForUpdate')
+
+    if sku_name:
+        instance.sku.name = sku_name
+        instance.sku.capacity = None
+        instance.sku.family = None
+        instance.sku.tier = None
+    else:
+        instance.sku = None
+
+    if storage_mb:
+        instance.storage_profile.storage_mb = storage_mb
+
+    if backup_retention:
+        instance.storage_profile.backup_retention_days = backup_retention
+
+    if auto_grow:
+        instance.storage_profile.storage_autogrow = auto_grow
+
+    params = ServerForUpdate(sku=instance.sku,
+                                    storage_profile=instance.storage_profile,
+                                    administrator_login_password=administrator_login_password,
+                                    version=None,
+                                    ssl_enforcement=ssl_enforcement,
+                                    tags=tags,
+                                    public_network_access=public_network_access,
+                                    minimal_tls_version=minimal_tls_version)
+
+    if assign_identity:
+        if server_module_path.find('mysql'):
+            from azure.mgmt.rdbms import mysql
+            if instance.identity is None:
+                instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
+            params.identity = instance.identity
+
+    return params
+
+## Replica commands
+
+# Custom functions for server replica, will add PostgreSQL part after backend ready in future
+def _flexible_replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
+    provider = 'Microsoft.DBforMySQL'
+
+    # set source server id
+    if not is_valid_resource_id(source_server):
+        if len(source_server.split('/')) == 1:
+            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                        resource_group=resource_group_name,
+                                        namespace=provider,
+                                        type='servers',
+                                        name=source_server)
+        else:
+            raise CLIError('The provided source-server {} is invalid.'.format(source_server))
+
+    source_server_id_parts = parse_resource_id(source_server)
+    try:
+        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+    except CloudError as e:
+        raise CLIError('Unable to get source server: {}.'.format(str(e)))
+
+    if location is None:
+        location = source_server_object.location
+
+    if sku_name is None:
+        sku_name = source_server_object.sku.name
+    if tier is None:
+        tier = source_server_object.sku.tier
+
+    from azure.mgmt.rdbms import mysql
+    parameters = mysql.flexibleservers.models.Server(
+        sku=mysql.flexibleservers.models.Sku(name=sku_name,tier=tier),
+        source_server_id=source_server,
+        location=location)
+
+    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
+
+def _flexible_replica_stop(client, resource_group_name, server_name):
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise CLIError('Unable to get server: {}.'.format(str(e)))
+
+    if server_object.replication_role.lower() != "replica":
+        raise CLIError('Server {} is not a replica server.'.format(server_name))
+
+    from importlib import import_module
+    server_module_path = server_object.__module__
+    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    ServerForUpdate = getattr(module, 'ServerForUpdate')
+
+    params = ServerForUpdate(replication_role='None')
+
+    return client.update(resource_group_name, server_name, params)
+
+
 
 # Common between sterling and meru
 # Custom functions for list servers
@@ -112,3 +200,11 @@ def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
+    if start_ip_address is not None:
+        instance.start_ip_address = start_ip_address
+    if end_ip_address is not None:
+        instance.end_ip_address = end_ip_address
+    return instance
+
