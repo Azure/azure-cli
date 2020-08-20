@@ -5,7 +5,7 @@
 from azure.cli.core.commands import CliCommandType
 
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-statements
 def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_workspace_factory
     from ._client_factory import cf_synapse_client_operations_factory
@@ -38,6 +38,14 @@ def load_command_table(self, _):
     synapse_firewallrules_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#IpFirewallRulesOperations.{}',
         client_factory=cf_synapse_client_ipfirewallrules_factory)
+
+    synapse_spark_session_sdk = CliCommandType(
+        operations_tmpl='azure.synapse.spark.operations#SparkSessionOperations.{}',
+        client_factory=None)
+
+    synapse_spark_batch_sdk = CliCommandType(
+        operations_tmpl='azure.synapse.spark.operations#SparkBatchOperations.{}',
+        client_factory=None)
 
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
@@ -86,6 +94,31 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_firewall_rule', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
+
+    # Data Plane Commands --Spark batch opertions
+    with self.command_group('synapse spark job', command_type=synapse_spark_batch_sdk,
+                            custom_command_type=get_custom_sdk('spark', None)) as g:
+        g.custom_command('submit', 'create_spark_batch_job')
+        g.custom_command('list', 'list_spark_batch_jobs')
+        g.custom_show_command('show', 'get_spark_batch_job')
+        g.custom_command('cancel', 'cancel_spark_batch_job', confirmation=True)
+
+    # Data Plane Commands --Spark session operations
+    with self.command_group('synapse spark session', synapse_spark_session_sdk,
+                            custom_command_type=get_custom_sdk('spark', None)) as g:
+        g.custom_command('create', 'create_spark_session_job')
+        g.custom_command('list', 'list_spark_session_jobs')
+        g.custom_show_command('show', 'get_spark_session_job')
+        g.custom_command('cancel', 'cancel_spark_session_job', confirmation=True)
+        g.custom_command('reset-timeout', 'reset_timeout')
+
+    # Data Plane Commands --Spark session statements operations
+    with self.command_group('synapse spark statement', synapse_spark_session_sdk,
+                            custom_command_type=get_custom_sdk('spark', None)) as g:
+        g.custom_command('invoke', 'create_spark_session_statement')
+        g.custom_command('list', 'list_spark_session_statements')
+        g.custom_show_command('show', 'get_spark_session_statement')
+        g.custom_command('cancel', 'cancel_spark_session_statement', confirmation=True)
 
     with self.command_group('synapse', is_preview=True):
         pass
