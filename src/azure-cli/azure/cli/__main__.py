@@ -71,11 +71,10 @@ finally:
     except NameError:
         pass
 
-    telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
-    telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
-    telemetry.conclude()
     try:
-        if sys.argv[1] != 'upgrade' and az_cli.config.getboolean('auto-upgrade', 'enable', False):
+        # check for new version auto-upgrade
+        if az_cli.config.getboolean('auto-upgrade', 'enable', False) and \
+            sys.argv[1] != 'upgrade' and (sys.argv[1] != 'extension' and sys.argv[2] != 'update'):
             from azure.cli.core._session import VERSIONS  # pylint: disable=ungrouped-imports
             from azure.cli.core.util import get_cached_latest_versions, _VERSION_UPDATE_TIME  # pylint: disable=ungrouped-imports
             if VERSIONS[_VERSION_UPDATE_TIME]:
@@ -91,13 +90,24 @@ finally:
                     update_all = az_cli.config.getboolean('auto-upgrade', 'all', True)
                     prompt = az_cli.config.getboolean('auto-upgrade', 'prompt', True)
                     cmd = ['az', 'upgrade', '--all', str(update_all)]
-                    if not prompt:
-                        cmd.append('-y')
-                    import os
-                    devnull = open(os.devnull, 'w')
                     if prompt:
-                        subprocess.call(cmd, shell=platform.system() == 'Windows')
+                        exit_code = subprocess.call(cmd, shell=platform.system() == 'Windows')
                     else:
-                        subprocess.call(cmd, shell=platform.system() == 'Windows', stdout=devnull)
-    except Exception:  # pylint: disable=broad-except
+                        import os
+                        devnull = open(os.devnull, 'w')
+                        cmd.append('-y')
+                        exit_code = subprocess.call(cmd, shell=platform.system() == 'Windows', stdout=devnull)
+                    if exit_code != 0:
+                        from knack.util import CLIError
+                        err_msg = "Auto upgrade failed with exit code {}".format(exit_code)
+                        logger.warning(err_msg)
+                        telemetry.set_exception(CLIError(err_msg),  fault_type='auto-upgrade-failed')
+    except IndexError:
         pass
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning("Auto upgrade failed. %s", str(ex))
+        telemetry.set_exception(ex,  fault_type='auto-upgrade-failed')
+
+    telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
+    telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
+    telemetry.conclude()
