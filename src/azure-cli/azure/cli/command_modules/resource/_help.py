@@ -2176,12 +2176,12 @@ examples:
         az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --operation delete --tags key1=value1
 """
 
-helps['template-specs'] = """
+helps['ts'] = """
 type: group
 short-summary: Manage template specs at subscription or resource group scope.
 """
 
-helps['template-specs create'] = """
+helps['ts create'] = """
 type: command
 short-summary: Create a template spec and or template spec version.
 parameters:
@@ -2210,14 +2210,14 @@ parameters:
     short-summary: The description of template spec version.
 examples:
   - name: Create a template spec.
-    text: az template-specs create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec"
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec"
   - name: Create a template spec version.
-    text: az template-specs create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec"
+    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec"
   - name: Create a template spec and a version of the template spec.
-    text: az template-specs create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec"
+    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec"
 """
 
-helps['template-specs update'] = """
+helps['ts update'] = """
 type: command
 short-summary: Update a template spec version.
 parameters:
@@ -2246,16 +2246,16 @@ parameters:
     short-summary: The description of template spec version.
 examples:
   - name: Update the template content of a template spec or template spec version based on the resource ID.
-    text: az template-specs update --template-spec resourceID -f updatedFile.json
+    text: az ts update --template-spec resourceID -f updatedFile.json
   - name: Update the display name of a template spec based on the resource ID.
-    text: az template-specs update --template-spec resourceID --display-name "NewParentDisplayName"
+    text: az ts update --template-spec resourceID --display-name "NewParentDisplayName"
   - name: Update the description of a template spec version.
-    text: az template-specs update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description"
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description"
   - name: Update all the properties of a template spec version.
-    text: az template-specs update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
 """
 
-helps['template-specs show'] = """
+helps['ts show'] = """
 type: command
 short-summary: Get the specified template spec or template spec version.
 parameters:
@@ -2272,14 +2272,14 @@ parameters:
     short-summary: The template spec resource ID.
 examples:
   - name: Show the specified template spec.
-    text: az template-specs show -g testrg --name TemplateSpecName
+    text: az ts show -g testrg --name TemplateSpecName
   - name: Show the specified template spec version.
-    text: az template-specs show -g testrg --name TemplateSpecName --version VersionName
+    text: az ts show -g testrg --name TemplateSpecName --version VersionName
   - name: Show the specified template spec or template spec version based on the resource ID.
-    text: az template-specs show --template-spec resourceID
+    text: az ts show --template-spec resourceID
 """
 
-helps['template-specs export'] = """
+helps['ts export'] = """
 type: command
 short-summary: Export the specified template spec and artifacts (if any) to the specified output folder.
 parameters:
@@ -2298,15 +2298,15 @@ parameters:
     short-summary: Existing folder to output export(s).
 examples:
   - name: Export the specified template spec with all versions.
-    text: az template-specs export -g testrg --name TemplateSpecName --output-folder C:/path/
+    text: az ts export -g testrg --name TemplateSpecName --output-folder C:/path/
   - name: Export the specified template spec.
-    text: az template-specs export -s resourceID --output-folder C:/path/
+    text: az ts export -s resourceID --output-folder C:/path/
   - name: Export the specified template spec version.
-    text: az template-specs export -g testrg --name TemplateSpecName --version VersionName --output-folder C:/path/
+    text: az ts export -g testrg --name TemplateSpecName --version VersionName --output-folder C:/path/
 """
 
 
-helps['template-specs delete'] = """
+helps['ts delete'] = """
 type: command
 short-summary: Delete a specified template spec or template spec version by name or resource ID.
 parameters:
@@ -2323,14 +2323,14 @@ parameters:
     short-summary: The template spec version.
 examples:
   - name: Delete the specified template spec and all versions.
-    text: az template-specs delete -g MyResourceGroup --name TemplateSpecName
+    text: az ts delete -g MyResourceGroup --name TemplateSpecName
   - name: Delete the specified version from the template spec.
-    text: az template-specs delete -g MyResourceGroup --name TemplateSpecName --version VersionName
+    text: az ts delete -g MyResourceGroup --name TemplateSpecName --version VersionName
   - name: Delete the template spec or version based on resource ID.
-    text: az template-specs delete --template-spec resourceID
+    text: az ts delete --template-spec resourceID
 """
 
-helps['template-specs list'] = """
+helps['ts list'] = """
 type: command
 short-summary: List template specs or template spec versions.
 parameters:
@@ -2342,11 +2342,11 @@ parameters:
     short-summary: Name of the template spec.
 examples:
   - name: List all template specs in current default subscription.
-    text: az template-specs list
+    text: az ts list
   - name: List all template specs in specified subscription.
-    text: az template-specs list --subscription Subscription
+    text: az ts list --subscription Subscription
   - name: List all template specs in resource group.
-    text: az template-specs list -g MyResourceGroup
+    text: az ts list -g MyResourceGroup
   - name: List all versions of parent template spec.
-    text: az template-specs list -g MyResourceGroup -n TemplateSpecName
+    text: az ts list -g MyResourceGroup -n TemplateSpecName
 """

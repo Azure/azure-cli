@@ -667,7 +667,7 @@ class TemplateSpecsTest(LiveScenarioTest):
             'version_description': '"AzCLI test version of root template spec"',
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
             self.check('artifacts.length([])', 3),
             self.check('artifacts[0].path', 'artifacts\\createResourceGroup.json'),
             self.check('artifacts[1].path', 'artifacts\\createKeyVault.json'),
@@ -676,7 +676,7 @@ class TemplateSpecsTest(LiveScenarioTest):
 
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
-        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_update_template_specs(self, resource_group, resource_group_location):
@@ -692,7 +692,7 @@ class TemplateSpecsTest(LiveScenarioTest):
             'version_description': '"AzCLI test version of root template spec"',
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', checks=[
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', checks=[
                           self.check('name', '1.0'),
                           self.check('description', None),
                           self.check('display_name', None),
@@ -700,19 +700,19 @@ class TemplateSpecsTest(LiveScenarioTest):
         self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
-        self.cmd('template-specs update -s {template_spec_id} --display-name {display_name} --description {description} --yes', checks=[
+        self.cmd('ts update -s {template_spec_id} --display-name {display_name} --description {description} --yes', checks=[
                  self.check('name', self.kwargs['template_spec_name']),
                  self.check('description', self.kwargs['description'].replace('"', '')),
                  self.check('displayName', self.kwargs['display_name'].replace('"', ''))
                  ])
 
-        self.cmd('template-specs update -s {template_spec_version_id} --version-description {version_description} --yes', checks=[
+        self.cmd('ts update -s {template_spec_version_id} --version-description {version_description} --yes', checks=[
                  self.check('name', '1.0'),
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
                  self.check('artifacts', None)
                  ])
 
-        self.cmd('template-specs update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
                  self.check('artifacts.length([])', 3),
                  self.check('artifacts[0].path', 'artifacts\\createResourceGroup.json'),
@@ -721,7 +721,7 @@ class TemplateSpecsTest(LiveScenarioTest):
                  ])
 
         # clean up
-        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', location='westus')
@@ -736,9 +736,9 @@ class TemplateSpecsTest(LiveScenarioTest):
             'resource_group_location': resource_group_location,
         })
 
-        template_spec_in_rg = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
-        template_spec_in_rg1_2 = self.cmd('template-specs create -g {rg1} -n {template_spec_name} -v 2.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
-        template_spec_in_rg1_3 = self.cmd('template-specs create -g {rg1} -n {template_spec_name} -v 3.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+        template_spec_in_rg = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+        template_spec_in_rg1_2 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 2.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+        template_spec_in_rg1_3 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 3.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
 
         self.kwargs['template_spec_id_rg'] = template_spec_in_rg['id'].replace('/versions/1.0', '')
 
@@ -746,30 +746,30 @@ class TemplateSpecsTest(LiveScenarioTest):
         self.kwargs['template_spec_version_id_rg1_3'] = template_spec_in_rg1_3['id']
         self.kwargs['template_spec_id_rg1'] = template_spec_in_rg1_2['id'].replace('/versions/2.0', '')
 
-        self.cmd('template-specs list', checks=[
+        self.cmd('ts list', checks=[
                  self.check("length([?id=='{template_spec_id_rg}'])", 1),
                  self.check("length([?id=='{template_spec_id_rg1}'])", 1),
                  ])
 
-        self.cmd('template-specs list -g {rg1}', checks=[
+        self.cmd('ts list -g {rg1}', checks=[
                  self.check("length([?id=='{template_spec_id_rg}'])", 0),
                  self.check("length([?id=='{template_spec_id_rg1}'])", 1),
                  ])
 
-        self.cmd('template-specs list -g {rg}', checks=[
+        self.cmd('ts list -g {rg}', checks=[
                  self.check("length([?id=='{template_spec_id_rg}'])", 1),
                  self.check("length([?id=='{template_spec_id_rg1}'])", 0)
                  ])
 
-        self.cmd('template-specs list -g {rg1} -n {template_spec_name}', checks=[
+        self.cmd('ts list -g {rg1} -n {template_spec_name}', checks=[
                  self.check('length([])', 2),
                  self.check("length([?id=='{template_spec_version_id_rg1_2}'])", 1),
                  self.check("length([?id=='{template_spec_version_id_rg1_3}'])", 1)
                  ])
 
         # clean up
-        self.cmd('template-specs delete --template-spec {template_spec_id_rg} --yes')
-        self.cmd('template-specs delete --template-spec {template_spec_id_rg1} --yes')
+        self.cmd('ts delete --template-spec {template_spec_id_rg} --yes')
+        self.cmd('ts delete --template-spec {template_spec_id_rg1} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_show_template_spec(self, resource_group, resource_group_location):
@@ -781,19 +781,19 @@ class TemplateSpecsTest(LiveScenarioTest):
             'resource_group_location': resource_group_location,
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', checks=[
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', checks=[
                           self.check('name', '1.0')]).get_output_in_json()
         self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
-        ts_cnt = self.cmd('template-specs show -g {rg} --name {template_spec_name}').get_output_in_json()
+        ts_cnt = self.cmd('ts show -g {rg} --name {template_spec_name}').get_output_in_json()
         assert len(ts_cnt) > 0
-        ts_cnt_by_id = self.cmd('template-specs show --template-spec {template_spec_id}').get_output_in_json()
+        ts_cnt_by_id = self.cmd('ts show --template-spec {template_spec_id}').get_output_in_json()
         assert len(ts_cnt_by_id) > 0
         assert len(ts_cnt) == len(ts_cnt_by_id)
 
         # clean up
-        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_export_template_spec(self, resource_group, resource_group_location):
@@ -809,13 +809,13 @@ class TemplateSpecsTest(LiveScenarioTest):
             'output_folder2': os.path.join(curr_dir, dir_name2).replace('\\', '\\\\'),
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
                           checks=self.check('name', '1.0')).get_output_in_json()
 
         self.kwargs['template_spec_version_id'] = result['id']
 
         os.makedirs(self.kwargs['output_folder'])
-        output_path = self.cmd('template-specs export -g {rg} --name {template_spec_name} --version 1.0 --output-folder {output_folder}').get_output_in_json()
+        output_path = self.cmd('ts export -g {rg} --name {template_spec_name} --version 1.0 --output-folder {output_folder}').get_output_in_json()
 
         template_file = os.path.join(output_path, (self.kwargs['template_spec_name'] + '.json'))
         artifactFile = os.path.join(output_path, 'artifacts\\createResourceGroup.json')
@@ -828,7 +828,7 @@ class TemplateSpecsTest(LiveScenarioTest):
         self.assertTrue(os.path.isfile(artifactFile2))
 
         os.makedirs(self.kwargs['output_folder2'])
-        output_path2 = self.cmd('template-specs export --template-spec {template_spec_version_id} --output-folder {output_folder2}').get_output_in_json()
+        output_path2 = self.cmd('ts export --template-spec {template_spec_version_id} --output-folder {output_folder2}').get_output_in_json()
 
         _template_file = os.path.join(output_path2, (self.kwargs['template_spec_name'] + '.json'))
         _artifactFile = os.path.join(output_path2, 'artifacts\\createResourceGroup.json')
@@ -851,21 +851,21 @@ class TemplateSpecsTest(LiveScenarioTest):
             'tf': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
                           checks=self.check('name', '1.0')).get_output_in_json()
 
         self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
 
-        self.cmd('template-specs show --template-spec {template_spec_version_id}')
-        self.cmd('template-specs show --template-spec {template_spec_id}')
+        self.cmd('ts show --template-spec {template_spec_version_id}')
+        self.cmd('ts show --template-spec {template_spec_id}')
 
-        self.cmd('template-specs delete --template-spec {template_spec_version_id} --yes')
-        self.cmd('template-specs list -g {rg}',
+        self.cmd('ts delete --template-spec {template_spec_version_id} --yes')
+        self.cmd('ts list -g {rg}',
                  checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
 
-        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
-        self.cmd('template-specs list -g {rg}',
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
+        self.cmd('ts list -g {rg}',
                  checks=self.check("length([?id=='{template_spec_id}'])", 0))
 
 
@@ -1542,7 +1542,7 @@ class DeploymentWhatIfTestWithTemplateSpecs(ScenarioTest):
             'params': os.path.join(curr_dir, 'storage_account_deploy_parameters.json').replace('\\', '\\\\'),
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
         self.kwargs['template_spec_version_id'] = result['id']
 
         deployment_output = self.cmd('deployment group create --resource-group {rg} --template-spec "{template_spec_version_id}"').get_output_in_json()
@@ -1567,7 +1567,7 @@ class DeploymentWhatIfTestWithTemplateSpecs(ScenarioTest):
             'params': os.path.join(curr_dir, 'policy_definition_deploy_parameters.json').replace('\\', '\\\\'),
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
         self.kwargs['template_spec_version_id'] = result['id']
 
         deployment_output = self.cmd('deployment sub create --location westus --template-spec {template_spec_version_id}').get_output_in_json()
@@ -1687,7 +1687,7 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
                           checks=self.check('name', '1.0')).get_output_in_json()
 
         self.kwargs['template_spec_version_id'] = result['id']
@@ -1721,7 +1721,7 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
 
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
-        self.cmd('template-specs delete --template-spec {template_spec_id} --yes')
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
 
 class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
@@ -1739,7 +1739,7 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
         })
 
-        result = self.cmd('template-specs create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
                           checks=self.check('name', '1.0')).get_output_in_json()
 
         self.kwargs['template_spec_version_id'] = result['id']
@@ -1778,7 +1778,6 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
         self.cmd('deployment group show -n {dn2} -g {rg}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
-
 
 class ResourceMoveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_resource_move_dest', parameter_name='resource_group_dest', key='rg2')

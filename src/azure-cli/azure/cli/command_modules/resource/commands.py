@@ -297,7 +297,7 @@ def load_command_table(self, _):
         g.custom_command('show-log', 'get_deployment_script_logs')
         g.custom_command('delete', 'delete_deployment_script', confirmation=True)
 
-    with self.command_group('template-specs', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, is_preview=True) as g:
+    with self.command_group('ts', resource_templatespecs_sdk, resource_type=ResourceType.MGMT_RESOURCE_TEMPLATESPECS, is_preview=True) as g:
         g.custom_command('create', 'create_template_spec', validator=_validate_template_input)
         g.custom_command('update', 'update_template_spec', validator=_validate_template_input, confirmation=True)
         g.custom_command('export', 'export_template_spec', validator=_validate_template_spec_out)

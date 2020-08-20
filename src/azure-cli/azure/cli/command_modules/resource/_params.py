@@ -515,30 +515,30 @@ def load_arguments(self, _):
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
 
-    with self.argument_context('template-specs') as c:
+    with self.argument_context('ts') as c:
         c.argument('name', options_list=['--name', '-n'])
         c.argument('version', options_list=['--version', '-v'])
 
-    with self.argument_context('template-specs create') as c:
+    with self.argument_context('ts create') as c:
         c.argument('template_file', options_list=['--template-file', '-f'])
         c.argument('location', options_list=['--location', '-l'])
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('description', options_list=['--description'])
         c.argument('version_description', options_list=['--version-description'])
 
-    with self.argument_context('template-specs update') as c:
+    with self.argument_context('ts update') as c:
         c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
         c.argument('template_file', options_list=['--template-file', '-f'])
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('description', options_list=['--description'])
         c.argument('version_description', options_list=['--version-description'])
 
-    with self.argument_context('template-specs show') as c:
+    with self.argument_context('ts show') as c:
         c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
 
-    with self.argument_context('template-specs export') as c:
+    with self.argument_context('ts export') as c:
         c.argument('output_folder', options_list=['--output-folder'])
         c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
 
-    with self.argument_context('template-specs delete') as c:
+    with self.argument_context('ts delete') as c:
         c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
