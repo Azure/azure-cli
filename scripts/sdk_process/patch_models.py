@@ -69,17 +69,9 @@ def solve_mro(models, track2=False):
         models_path = models_module.__path__[0]
         _LOGGER.info("Working on %s", models_path)
 
-        p_list = [
-            Path('/opt/hostedtoolcache/Python/3.6.11/x64/lib/python3.6/site-packages/azure/mgmt/keyvault/'),
-            Path('/opt/hostedtoolcache/Python/3.8.5/x64/lib/python3.6/site-packages/azure/mgmt/keyvault/')
-        ]
         if track2:
-            for p in p_list:
-                _LOGGER.info('Processing {}'.format(p))
-                if p.exists():
-
-                    _LOGGER.info('Deleting {}'.format(p))
-                    shutil.rmtree(p)
+            _LOGGER.info('Deleting {}'.format(models_path))
+            shutil.rmtree(models_path)
             return
 
         if Path(models_path, "models_py3.py").exists():
