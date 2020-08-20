@@ -337,8 +337,14 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
 
                     # Look up the resource `name`, like b24988ac-6180-42a0-ab88-20f7382dd24c
                     role_resource_name = payload['roleDefinitionId'].split('/')[-1]
-                    entry['roleDefinitionId'] = role_defs[role_resource_name][1]
-                    entry['roleName'] = role_defs[role_resource_name][0]
+                    entry['roleDefinitionId'] = role_resource_name
+                    role_def = role_defs.get("roleDefinitionId")
+                    if role_def:
+                        entry['roleName'] = role_def[0]
+                    else:
+                        # In case the role definition has been deleted.
+                        entry['roleName'] = "N/A"
+
             result.append(entry)
 
     # Fill in logical user/sp names as guid principal-id not readable
