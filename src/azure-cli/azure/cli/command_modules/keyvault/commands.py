@@ -67,10 +67,6 @@ def load_command_table(self, _):
         g.custom_command('recover', 'recover_keyvault', supports_no_wait=True)
         g.custom_command('list', 'list_keyvault')
         g.show_command('show', 'get')
-
-        g.command('purge', 'begin_purge_deleted', supports_no_wait=True)
-        g.custom_command('set-policy', 'set_policy', supports_no_wait=True)
-        g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
         g.command('delete', 'delete', deprecate_info=g.deprecate(
             tag_func=lambda x: '',
             message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, you will '
