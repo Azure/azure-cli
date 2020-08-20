@@ -490,6 +490,10 @@ helps['synapse role assignment delete'] = """
 type: command
 short-summary: Delete role assignments of workspace.
 examples:
+  - name: Delete role assignments by role and assignee.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --role "Sql Admin" --assignee sp_name
   - name: Delete role assignments by role id/name.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\

@@ -38,25 +38,24 @@ def get_role_assignment_by_id(cmd, workspace_name, role_assignment_id):
 # Delete Synapse Role Assignment
 def delete_role_assignment(cmd, workspace_name, ids=None, assignee=None, role=None):
     client = cf_synapse_client_accesscontrol_factory(cmd.cli_ctx, workspace_name)
-    ids = ids or []
     if ids:
         if assignee or role:
-            raise CLIError('When assignment --ids are used, other parameter values are not required')
+            raise CLIError('You should provide either --ids or --role/--assignee')
         role_assignments = list_role_assignments(cmd, workspace_name, None, None)
         assignment_id_list = [x.id for x in role_assignments]
         # check role assignment id
-        for i in ids:
-            if i not in assignment_id_list:
-                raise CLIError("role assigment id:'{}' doesn't exist.".format(i))
+        for assignment_id in ids:
+            if assignment_id not in assignment_id_list:
+                raise CLIError("role assigment id:'{}' doesn't exist.".format(assignment_id))
         # delete when all ids check pass
-        for i in ids:
-            client.delete_role_assignment_by_id(i)
+        for assignment_id in ids:
+            client.delete_role_assignment_by_id(assignment_id)
         return
 
     role_assignments = list_role_assignments(cmd, workspace_name, role, assignee)
     if role_assignments:
-        for a in role_assignments:
-            client.delete_role_assignment_by_id(a.id)
+        for assignment in role_assignments:
+            client.delete_role_assignment_by_id(assignment.id)
     else:
         raise CLIError('No matched assignments were found to delete')
 

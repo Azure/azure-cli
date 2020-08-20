@@ -436,13 +436,14 @@ class SynapseScenarioTests(ScenarioTest):
 
     def _create_workspace(self):
         self.kwargs.update({
-            'location': self.location,
             'workspace': self.create_random_name(prefix='clitest', length=16),
             'file-system': 'testfilesystem',
-            'storage-account': 'adlsgen2account',
             'login-user': 'cliuser1',
-            'login-password': 'password'
+            'login-password': self.create_random_name(prefix='Pswd1', length=16)
         })
+
+        # Create adlsgen2
+        self._create_storage_account()
 
         # Wait some time to improve robustness
         if self.is_live or self.in_recording:
@@ -457,5 +458,24 @@ class SynapseScenarioTests(ScenarioTest):
             ' --location {location}', checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+
+    def _create_storage_account(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
+        })
+
+        # Wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)
+
+        # create synapse workspace
+        self.cmd(
+            'az storage account create --name {storage-account} --resource-group {rg} --enable-hierarchical-namespace true --location {location}', checks=[
+                self.check('name', self.kwargs['storage-account']),
+                self.check('type', 'Microsoft.Storage/storageAccounts'),
                 self.check('provisioningState', 'Succeeded')
             ])
