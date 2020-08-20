@@ -245,4 +245,5 @@ if __name__ == "__main__":
             if autorest_package.startswith(track2_pkg):
                 track2 = True
                 break
+        _LOGGER.info('autorest_package: {}, track2: {}'.format(autorest_package, track2))
         solve_mro(models, track2=track2)
