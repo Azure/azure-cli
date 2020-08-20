@@ -1779,6 +1779,7 @@ class DeploymentTestAtResourceGroupTemplateSpecs(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
+
 class ResourceMoveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_resource_move_dest', parameter_name='resource_group_dest', key='rg2')
     @ResourceGroupPreparer(name_prefix='cli_test_resource_move_source', key='rg1')
