@@ -3,12 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements, line-too-long
+from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, get_resource_name_completion_list
 from azure.cli.core.util import get_json_object
 from ._validators import validate_storage_account, validate_statement_language
 from ._completers import get_role_definition_name_completion_list
 from .constant import SparkBatchLanguage, SparkStatementLanguage
+
+workspace_name_arg_type = CLIArgumentType(help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
+assignee_arg_type = CLIArgumentType(help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
+role_arg_type = CLIArgumentType(help='The role name/id that is assigned to the principal.', completer=get_role_definition_name_completion_list)
 
 
 def load_arguments(self, _):
@@ -201,24 +206,23 @@ def load_arguments(self, _):
     # synapse workspace access-control
     for scope in ['create', 'list']:
         with self.argument_context('synapse role assignment ' + scope) as c:
-            c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
-            c.argument('role', help='The role name/id that is assigned to the principal.', completer=get_role_definition_name_completion_list)
-            c.argument('assignee', help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('role', arg_type=role_arg_type)
+            c.argument('assignee', arg_type=assignee_arg_type)
 
     with self.argument_context('synapse role assignment show') as c:
-        c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('role_assignment_id', options_list=['--id'], help='Id of the role that is assigned to the principal.')
 
     with self.argument_context('synapse role assignment delete') as c:
-        c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
-        c.argument('role', help='The role name/id that is assigned to the principal.', completer=get_role_definition_name_completion_list)
-        c.argument('assignee', help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('role', arg_type=role_arg_type)
+        c.argument('assignee', arg_type=assignee_arg_type)
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
-        c.argument('delete_all', options_list=['--all', '-a'], action='store_true', help='Delete all assignments under the workspace.')
 
     with self.argument_context('synapse role definition show') as c:
-        c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
-        c.argument('role', help='Id of the role that is assigned to the principal.', completer=get_role_definition_name_completion_list)
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('role', arg_type=role_arg_type)
 
     with self.argument_context('synapse role definition list') as c:
-        c.argument('workspace_name', help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)

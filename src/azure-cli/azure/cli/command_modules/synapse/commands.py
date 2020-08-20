@@ -130,7 +130,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_role_assignment')
         g.custom_command('list', 'list_role_assignments')
         g.custom_show_command('show', 'get_role_assignment_by_id')
-        g.custom_command('delete', 'delete_role_assignment_by_id', confirmation=True)
+        g.custom_command('delete', 'delete_role_assignment', confirmation=True)
 
     with self.command_group('synapse role definition', synapse_accesscontrol_sdk,
                             custom_command_type=get_custom_sdk('accesscontrol', None)) as g:

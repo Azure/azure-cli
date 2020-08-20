@@ -36,11 +36,11 @@ def get_role_assignment_by_id(cmd, workspace_name, role_assignment_id):
 
 
 # Delete Synapse Role Assignment
-def delete_role_assignment_by_id(cmd, workspace_name, ids=None, assignee=None, role=None, delete_all=None):
+def delete_role_assignment(cmd, workspace_name, ids=None, assignee=None, role=None):
     client = cf_synapse_client_accesscontrol_factory(cmd.cli_ctx, workspace_name)
     ids = ids or []
     if ids:
-        if assignee or role or delete_all:
+        if assignee or role:
             raise CLIError('When assignment --ids are used, other parameter values are not required')
         role_assignments = list_role_assignments(cmd, workspace_name, None, None)
         assignment_id_list = [x.id for x in role_assignments]
@@ -48,20 +48,10 @@ def delete_role_assignment_by_id(cmd, workspace_name, ids=None, assignee=None, r
         for i in ids:
             if i not in assignment_id_list:
                 raise CLIError("role assigment id:'{}' doesn't exist.".format(i))
-        # delete all ids when check pass
+        # delete when all ids check pass
         for i in ids:
             client.delete_role_assignment_by_id(i)
         return
-
-    if delete_all:
-        if ids or role or delete_all:
-            raise CLIError('When assignment --all are used, other parameter values are not required')
-
-    if not any([ids, assignee, role, delete_all]):
-        from knack.prompting import prompt_y_n
-        msg = 'This will delete all role assignments under the workspace. Are you sure?'
-        if not prompt_y_n(msg, default="n"):
-            return
 
     role_assignments = list_role_assignments(cmd, workspace_name, role, assignee)
     if role_assignments:
