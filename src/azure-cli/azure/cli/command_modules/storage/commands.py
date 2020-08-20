@@ -312,8 +312,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters,
                                   process_blob_upload_batch_parameters)
 
-        g.storage_command_oauth('list', 'list_blobs', transform=transform_storage_list_output,
-                                table_transformer=transform_blob_output)
+        g.storage_custom_command_oauth('list', 'list_blobs', table_transformer=transform_blob_output)
         g.storage_command_oauth(
             'download', 'get_blob_to_path', table_transformer=transform_blob_output)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
