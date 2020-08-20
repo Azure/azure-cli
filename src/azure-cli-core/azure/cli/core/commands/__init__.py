@@ -863,19 +863,6 @@ class AzCliCommandInvoker(CommandInvoker):
         except AttributeError:
             pass
 
-    def _validation(self, parsed_ns):
-        try:
-            cmd_validator = getattr(parsed_ns, '_command_validator', None)
-            if cmd_validator:
-                self._validate_cmd_level(parsed_ns, cmd_validator)
-            else:
-                self._validate_arg_level(parsed_ns)
-        except CLIError:
-            raise
-        except Exception:  # pylint: disable=broad-except
-            err = sys.exc_info()[1]
-            getattr(parsed_ns, '_parser', self.parser).validation_error(str(err))
-
 
 class LongRunningOperation:  # pylint: disable=too-few-public-methods
     def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):

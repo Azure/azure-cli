@@ -219,7 +219,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create job with missing parameters
         self.kwargs['start'] = datetime.datetime.now().isoformat()
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.batch_cmd('batch job create --id {j_id} --metadata test=value '
                            '--job-manager-task-environment-settings a=b '
                            '--job-max-task-retry-count 5 ')
@@ -243,7 +243,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('metadata[0].value', 'value')])
 
         # test bad enum value
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.batch_cmd('batch job set --job-id {j_id} --on-all-tasks-complete badValue ')
 
         # test patch job
@@ -295,26 +295,26 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                        '--node-agent-sku-id "batch.node.ubuntu 16.04"')
 
         # test create pool with missing parameters
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.batch_cmd('batch pool create --id missing-params-test --os-family 4')
 
         # test create pool with missing required mutually exclusive parameters
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.batch_cmd('batch pool create --id missing-required-group-test --vm-size small')
 
         # test create pool with parameters from mutually exclusive groups
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.batch_cmd('batch pool create --id mutually-exclusive-test --vm-size small '
                            '--os-family 4 --image Canonical:UbuntuServer:16-LTS:latest')
 
         # test create pool with invalid vm size for IaaS
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.batch_cmd('batch pool create --id invalid-size-test --vm-size small '
                            '--image Canonical:UbuntuServer:16.04.0-LTS --node-agent-sku-id '
                            '"batch.node.ubuntu 16.04"')
 
         # test create pool with missing optional parameters
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.batch_cmd('batch pool create --id missing-optional-test --vm-size small '
                            '--os-family 4 --start-task-wait-for-success')
 
@@ -326,7 +326,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('startTask.userIdentity.userName', 'cliTestUser')])
 
         # test create pool from non-existant JSON file
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.batch_cmd('batch pool create --json-file batch-pool-create-missing.json')
 
         # test create pool from invalid JSON file
@@ -335,7 +335,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.batch_cmd('batch pool create --json-file "{json}"')
 
         # test create pool from JSON file with additional parameters
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
             self.batch_cmd('batch pool create --json-file "{json}" --vm-size small')
 

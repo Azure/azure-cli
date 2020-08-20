@@ -522,7 +522,7 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name)\
             .assert_with_checks(JMESPathCheck('properties.blobTier', 'P10'))
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.storage_cmd('storage blob set-tier -c {} -n {} --tier P20 -r High -t page', account_info,
                              container_name, blob_name)
 
@@ -546,11 +546,11 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info,
                          container_name, blob_name, source_file)
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.storage_cmd('storage blob set-tier -c {} -n {} --tier Cool -r Middle', account_info,
                              container_name, blob_name)
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             self.storage_cmd('storage blob set-tier -c {} -n {} --tier Archive -r High', account_info,
                              container_name, blob_name)
 
