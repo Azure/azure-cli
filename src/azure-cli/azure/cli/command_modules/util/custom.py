@@ -130,12 +130,16 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     if exit_code:
         telemetry.set_failure("CLI upgrade failed.")
         sys.exit(exit_code)
-
-    for ext_name in exts:
-        logger.warning("Checking update for %s", ext_name)
-        exit_code = subprocess.call(['az', 'extension', 'update', '-n', ext_name], shell=platform.system() == 'Windows')
-        if exit_code:
-            msg = "Extension {} update failed during az upgrade. Exit code {}.".format(ext_name, exit_code)
-            raise CLIError(msg)
+    # Updating Azure CLI and extension together is not supported in homebrewe package.
+    if installer == 'HOMEBREW' and exts:
+        logger.warning("Please rerun 'az upgrade' to update all extensions.")
+    else:
+        for ext_name in exts:
+            logger.warning("Checking update for %s", ext_name)
+            exit_code = subprocess.call(['az', 'extension', 'update', '-n', ext_name],
+                                        shell=platform.system() == 'Windows')
+            if exit_code:
+                msg = "Extension {} update failed during az upgrade. Exit code {}.".format(ext_name, exit_code)
+                raise CLIError(msg)
 
     logger.warning("Upgrade finished.")
