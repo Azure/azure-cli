@@ -18,6 +18,7 @@ from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAc
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
+
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_plr')
     def test_private_link_resource_keyvault(self, resource_group):
@@ -1420,12 +1421,12 @@ class NetworkARMTemplateBasedScenarioTest(ScenarioTest):
         self.cmd('az deployment group create -g {rg} -p "@{param_path}" target_resource_name={target_resource_name} -f "{template_path}"')
 
         self.cmd('az network vnet create -n {vnet} -g {rg} --subnet-name {subnet}',
-                     checks=self.check('length(newVNet.subnets)', 1))
+                 checks=self.check('length(newVNet.subnets)', 1))
         self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
-        target_private_link_resource= self.cmd('az network private-link-resource list --name {target_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        target_private_link_resource = self.cmd('az network private-link-resource list --name {target_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
         self.kwargs.update({
             'group_id': target_private_link_resource[0]['properties']['groupId']
         })
@@ -1438,7 +1439,7 @@ class NetworkARMTemplateBasedScenarioTest(ScenarioTest):
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
         # Show the connection at cosmos db side
-        list_private_endpoint_conn  = self.cmd('az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        list_private_endpoint_conn = self.cmd('az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
         self.kwargs.update({
             "pec_id": list_private_endpoint_conn[0]['id']
         })
@@ -1478,6 +1479,7 @@ class NetworkARMTemplateBasedScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     def test_private_endpoint_connection_app_configuration(self, resource_group):
         self._test_private_endpoint_connection_scenario(resource_group, 'clitestappconfig', 'Microsoft.AppConfiguration/configurationStores')
+
 
 if __name__ == '__main__':
     unittest.main()
