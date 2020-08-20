@@ -30,16 +30,16 @@ from ._validators import _construct_vnet, secret_text_encoding_values
 logger = get_logger(__name__)
 
 
-def _azure_stack_wrapper(cmd, client, function_name, *args, **kwargs):
+def _azure_stack_wrapper(cmd, client, function_name, **kwargs):
     no_wait = False
     if 'no_wait' in kwargs:
         no_wait = kwargs.pop('no_wait')
 
     if cmd.cli_ctx.cloud.profile == 'latest':
         function_name = 'begin_' + function_name
-        return sdk_no_wait(no_wait, getattr(client, function_name), *args, **kwargs)
+        return sdk_no_wait(no_wait, getattr(client, function_name), **kwargs)
 
-    return getattr(client, function_name)(*args, **kwargs)
+    return getattr(client, function_name)(**kwargs)
 
 
 def _default_certificate_profile(cmd):
