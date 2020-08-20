@@ -549,7 +549,7 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
                      destination_container=None, min_creation_time=None, prefix_match=None):
-
+    from msrest.exceptions import ClientException
     ObjectReplicationPolicy = cmd.get_models('ObjectReplicationPolicy')
 
     if properties is None:
@@ -569,9 +569,14 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                             rules=rules)
     else:
         or_policy = properties
-
-    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
-                                   object_replication_policy_id=policy_id, properties=or_policy)
+    try:
+        return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                       object_replication_policy_id=policy_id, properties=or_policy)
+    except ClientException as ex:
+        if ex.error.additional_properties['error']['code'] == 'InvalidRequestPropertyValue' and policy_id == 'default' \
+                and account_name == or_policy.source_account:
+            raise CLIError(
+                'ValueError: Please specify --policy-id with auto-generated policy id value on destination account.')
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,

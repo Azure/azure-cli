@@ -441,7 +441,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     )
     policy_id_type = CLIArgumentType(
         options_list=['--policy-id'],
-        help='The ID of object replication policy or "default" if the policy ID is unknown.'
+        help='The ID of object replication policy or "default" if the policy ID is unknown. Policy Id will be '
+             'auto-generated when setting on destination account. Required when setting on source account.'
     )
     rule_id_type = CLIArgumentType(
         options_list=['--rule-id', '-r'],
