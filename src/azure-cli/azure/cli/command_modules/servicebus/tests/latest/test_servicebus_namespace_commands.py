@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# AZURE CLI SERVICEBUS - CURD TEST DEFINITIONS
+# AZURE CLI SERVICEBUS - CRUD TEST DEFINITIONS
 
 import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
@@ -14,7 +14,7 @@ from knack.util import CLIError
 # pylint: disable=too-many-lines
 
 
-class SBNamespaceCURDScenarioTest(ScenarioTest):
+class SBNamespaceCRUDScenarioTest(ScenarioTest):
     from azure_devtools.scenario_tests import AllowLargeResponse
 
     @AllowLargeResponse()

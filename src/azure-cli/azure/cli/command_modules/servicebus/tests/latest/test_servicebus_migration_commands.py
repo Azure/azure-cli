@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# AZURE CLI SERVICEBUS - CURD TEST DEFINITIONS
+# AZURE CLI SERVICEBUS - CRUD TEST DEFINITIONS
 
 import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
@@ -14,7 +14,7 @@ from knack.util import CLIError
 # pylint: disable=too-many-lines
 
 
-class SBNSMigrationCURDScenarioTest(ScenarioTest):
+class SBNSMigrationCRUDScenarioTest(ScenarioTest):
     from azure_devtools.scenario_tests import AllowLargeResponse
 
     # Test playback fails and the live-only flag will be removed once it is addressed
@@ -167,6 +167,3 @@ class SBNSMigrationCURDScenarioTest(ScenarioTest):
             time.sleep(30)
             getnamespace = self.cmd(
                 'servicebus namespace show  --resource-group {rg} --name {namespacenamepremium}').get_output_in_json()
-
-        # Delete Namespace - Premium
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamepremium}')

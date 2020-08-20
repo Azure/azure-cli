@@ -422,49 +422,51 @@ timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 def return_valid_duration(instance_value, update_value):
     from datetime import timedelta
     from isodate import parse_duration
+    from .constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         value_toreturn = update_value
     else:
         value_toreturn = str(instance_value)
 
     if iso8601pattern.match(value_toreturn):
-        if parse_duration(value_toreturn) < timedelta(days=10675199, minutes=10085, seconds=477581):
+        if parse_duration(value_toreturn) < timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
             return value_toreturn
 
-        if parse_duration(value_toreturn) > timedelta(days=10675198, minutes=10085, seconds=477581):
-            return timedelta(days=10675198, minutes=10085, seconds=477581)
+        if parse_duration(value_toreturn) > timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
+            return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
 
     if timedeltapattern.match(value_toreturn):
         day, minute, seconds = value_toreturn.split(":")
-        if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=10675199,
-                                                                                           minutes=10085,
-                                                                                           seconds=477581):
+        if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=DURATION_DAYS,
+                                                                                           minutes=DURATION_MIN,
+                                                                                           seconds=DURATION_SECS):
             return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
 
-        if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=10675198,
-                                                                                           minutes=10085,
-                                                                                           seconds=477581):
-            return timedelta(days=10675198, minutes=10085, seconds=477581)
+        if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=DURATION_DAYS,
+                                                                                           minutes=DURATION_MIN,
+                                                                                           seconds=DURATION_SECS):
+            return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
 
 
 # to check the timespan value
 def return_valid_duration_create(update_value):
     from datetime import timedelta
     from isodate import parse_duration
+    from .constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         if iso8601pattern.match(update_value):
-            if parse_duration(update_value) < timedelta(days=10675199, minutes=10085, seconds=477581):
+            if parse_duration(update_value) < timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return update_value
 
-            if parse_duration(update_value) > timedelta(days=10675199, minutes=10085, seconds=477581):
+            if parse_duration(update_value) > timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return None
 
         if timedeltapattern.match(update_value):
             day, minute, seconds = update_value.split(":")
-            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=10675199, minutes=10085, seconds=477581):
+            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
 
-            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=10675198, minutes=10085, seconds=477581):
+            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return None
     else:
         return None
