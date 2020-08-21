@@ -239,11 +239,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
                             custom_command_type=storage_account_custom_type,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01', is_preview=True) as g:
-        g.show_command('show', 'get_service_properties')
+        from ._transformers import transform_restore_policy_output
+        g.show_command('show', 'get_service_properties', transform=transform_restore_policy_output)
         g.generic_update_command('update',
                                  getter_name='get_service_properties',
                                  setter_name='set_service_properties',
-                                 custom_func_name='update_blob_service_properties')
+                                 custom_func_name='update_blob_service_properties',
+                                 transform=transform_restore_policy_output)
 
     with self.command_group('storage account file-service-properties', file_service_mgmt_sdk,
                             custom_command_type=get_custom_sdk('account', client_factory=cf_mgmt_file_services,
