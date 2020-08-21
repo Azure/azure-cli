@@ -5,7 +5,7 @@ Release History
 
 2.11.0
 ++++++
-* Azure CLI live test pipeline (#12704)
+* Minor improment
 
 2.10.1
 ++++++
