@@ -102,11 +102,6 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
             .assert_with_checks(JMESPathCheck('changeFeed.enabled', True),
                                 JMESPathCheck('deleteRetentionPolicy.enabled', True),
                                 JMESPathCheck('deleteRetentionPolicy.days', 2))
-        time.sleep(60)
-        # Enable Restore Policy
-        self.cmd('storage account blob-service-properties update --enable-restore-policy --restore-days 1 -n {sa}')\
-            .assert_with_checks(JMESPathCheck('restorePolicy.enabled', True),
-                                JMESPathCheck('restorePolicy.days', 1))
 
         c1 = self.create_random_name(prefix='containera', length=24)
         c2 = self.create_random_name(prefix='containerb', length=24)
@@ -136,8 +131,13 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
                 container, storage_account, account_key)) \
                 .assert_with_checks(JMESPathCheck('deleted', True))
 
-        time.sleep(30)
-
+        time.sleep(60)
+        # Enable Restore Policy
+        self.cmd('storage account blob-service-properties update --enable-restore-policy --restore-days 1 -n {sa}')
+        self.cmd('storage account blob-service-properties show -n {sa}') \
+            .assert_with_checks(JMESPathCheck('restorePolicy.enabled', True),
+                                JMESPathCheck('restorePolicy.days', 1),
+                                JMESPathCheckExists('minRestoreTime'))
         # Restore blobs, with specific ranges
         time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
 
