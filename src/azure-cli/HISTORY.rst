@@ -15,16 +15,13 @@ Release History
 * Fixing add-ons available in the help message in `az aks create` (#14810)
 * Bring in support for cluster autoscaler profile in core CLI (#14779)
 
-**App Service**
+**AppService**
 
 * `az webapp`: Add list-instances command (#13408)
 * `az webapp ssh`: Add --instance parameter to connect to a specific instance (#13408)
 * `az webapp create-remote-connection`: Add --instance parameter to connect to a specific instance (#13408)
 * Fix #14758: az webapp create errors when creating windows app with --runtime dotnetcore (#14764)
 * Fix #14701: Implement functionapp create --assign-identity (#14702)
-
-**AppService**
-
 * Fix #11244: `az webapp auth update`: Add optional parameter to update client-secret-certificate-thumbprint (#14730)
 * `az functionapp keys`: Added commands that allow users to manage their function app keys (#14465)
 * `az functionapp function`: Added commands that allow users to manage their individual functions (#14465)
