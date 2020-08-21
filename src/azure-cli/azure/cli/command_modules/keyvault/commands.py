@@ -70,7 +70,7 @@ def load_command_table(self, _):
                                    'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('delete'))
         g.custom_command('purge', 'purge_vault_or_hsm', supports_no_wait=True,
-                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('purge_deleted'))
+                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('begin_purge_deleted'))
         g.custom_command('set-policy', 'set_policy', supports_no_wait=True)
         g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
         g.custom_command('list-deleted', 'list_deleted_vault_or_hsm',

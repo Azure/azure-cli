@@ -70,7 +70,7 @@ def load_arguments(self, _):
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
          'SkuName', 'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
-         'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+         'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(

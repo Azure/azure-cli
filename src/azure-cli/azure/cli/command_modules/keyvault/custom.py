@@ -205,9 +205,14 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
         return hsm_client.delete(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None):
+def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None, no_wait=False):
     if vault_name:
-        return client.purge_deleted(location=location, vault_name=vault_name)
+        return sdk_no_wait(
+            no_wait,
+            client.begin_purge_deleted,
+            location=location,
+            vault_name=vault_name
+        )
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -346,7 +351,8 @@ def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-a
     return _scaffold_certificate_profile(cmd) if scaffold else _default_certificate_profile(cmd)
 
 
-def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, vault_name=None, hsm_name=None):
+def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, vault_name=None, hsm_name=None,
+                         no_wait=False):
     if vault_name:
         return recover_vault(cmd=cmd,
                              client=client,
@@ -384,7 +390,7 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location):
                                    parameters=parameters)
 
 
-def recover_vault(cmd, client, vault_name, resource_group_name, location):
+def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wait=False):
     from azure.cli.core._profile import Profile
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -408,7 +414,8 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location):
                                 min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
-                                parameters=params)
+                                parameters=params,
+                                no_wait=no_wait)
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
