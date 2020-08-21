@@ -799,6 +799,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 print(p.message, file=sys.stderr)
             for e in experimentals:
                 print(e.message, file=sys.stderr)
+            return
 
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
