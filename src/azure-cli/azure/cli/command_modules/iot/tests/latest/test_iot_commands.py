@@ -35,6 +35,7 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('resourcegroup', rg),
                          self.check('name', hub),
                          self.check('sku.name', 'F1'),
+                         self.check('properties.minTlsVersion', None),
                          self.check('properties.eventHubEndpoints.events.partitionCount', '2')])
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
@@ -42,6 +43,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true --fc containerName'
                  .format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku S1 --mintls 2.5'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
