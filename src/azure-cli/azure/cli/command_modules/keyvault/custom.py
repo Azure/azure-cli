@@ -277,7 +277,7 @@ def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-a
     return _scaffold_certificate_profile(cmd) if scaffold else _default_certificate_profile(cmd)
 
 
-def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
+def recover_keyvault(cmd, client, vault_name, resource_group_name, location, no_wait=False):
     from azure.cli.core._profile import Profile
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -301,7 +301,8 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                 min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
-                                parameters=params)
+                                parameters=params,
+                                no_wait=no_wait)
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
@@ -566,7 +567,7 @@ def _permissions_distinct(permissions):
 
 def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
-               certificate_permissions=None, storage_permissions=None):
+               certificate_permissions=None, storage_permissions=None, no_wait=False):
     """ Update security policy settings for a Key Vault. """
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -621,10 +622,12 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=vault.location,
                                     tags=vault.tags,
-                                    properties=vault.properties))
+                                    properties=vault.properties),
+                                no_wait=no_wait)
 
 
-def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
+def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
+                     vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
     """ Add a network rule to the network ACLs for a Key Vault. """
 
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -666,10 +669,12 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=vault.location,
                                     tags=vault.tags,
-                                    properties=vault.properties))
+                                    properties=vault.properties),
+                                no_wait=no_wait)
 
 
-def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
+def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
+                        vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
     """ Remove a network rule from the network ACLs for a Key Vault. """
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -709,7 +714,8 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=vault.location,
                                     tags=vault.tags,
-                                    properties=vault.properties))
+                                    properties=vault.properties),
+                                no_wait=no_wait)
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
@@ -718,7 +724,7 @@ def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint:
     return vault.properties.network_acls
 
 
-def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None):
+def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None, no_wait=False):
     """ Delete security policy settings for a Key Vault. """
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -749,7 +755,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=vault.location,
                                     tags=vault.tags,
-                                    properties=vault.properties))
+                                    properties=vault.properties),
+                                no_wait=no_wait)
 # endregion
 
 
