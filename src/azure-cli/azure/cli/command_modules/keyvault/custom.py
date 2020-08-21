@@ -22,7 +22,7 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key, E
 from cryptography.exceptions import UnsupportedAlgorithm
 
 from azure.cli.core import telemetry
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
 
 from ._validators import _construct_vnet, secret_text_encoding_values
@@ -30,21 +30,37 @@ from ._validators import _construct_vnet, secret_text_encoding_values
 logger = get_logger(__name__)
 
 
-def _later_than(raw_profile, max_profile_date):
-    if raw_profile == 'latest':
-        return True
-    n = len(max_profile_date)
-    if len(raw_profile) < n:
-        return False
-    return raw_profile[:n] > max_profile_date
+def _not_less_than(current_profile, resource_type, min_api_version, sub_resource_name=None):
+    if current_profile not in AZURE_API_PROFILES:
+        raise CLIError('Unsupported profile: {}'.format(current_profile))
+
+    profile = AZURE_API_PROFILES[current_profile]
+    if resource_type not in profile:
+        raise CLIError('ResourceType {} not in Profile {}'.format(resource_type, current_profile))
+
+    if not sub_resource_name:
+        api_version = profile[resource_type]
+        if isinstance(api_version, SDKProfile):
+            return api_version.default_api_version >= min_api_version
+        return api_version >= min_api_version
+
+    sdk_profile = profile[resource_type]
+    if not isinstance(sdk_profile, SDKProfile):
+        raise CLIError('Invalid SDKProfile {} in Profile {}'.format(resource_type, current_profile))
+    sub_profile = sdk_profile.profile
+    if sub_resource_name not in sub_profile:
+        raise CLIError('SubResource {} not in ResourceType {} under Profile {}'.
+                       format(sub_resource_name, resource_type, current_profile))
+    api_version = sub_profile[sub_resource_name]
+    return api_version >= min_api_version
 
 
-def _azure_stack_wrapper(cmd, client, function_name, max_profile_date, **kwargs):
+def _azure_stack_wrapper(cmd, client, function_name, resource_type, min_api_version, sub_resource_name=None, **kwargs):
     no_wait = False
     if 'no_wait' in kwargs:
         no_wait = kwargs.pop('no_wait')
 
-    if _later_than(cmd.cli_ctx.cloud.profile, max_profile_date):
+    if _not_less_than(cmd.cli_ctx.cloud.profile, resource_type, min_api_version, sub_resource_name):
         function_name = 'begin_' + function_name
         return sdk_no_wait(no_wait, getattr(client, function_name), **kwargs)
 
@@ -281,7 +297,8 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                                        'create_mode': CreateMode.recover.value})
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                max_profile_date='2018-03-01',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=params)
@@ -461,7 +478,8 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                                properties=properties)
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                max_profile_date='2018-03-01',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=parameters,
@@ -472,7 +490,8 @@ def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_n
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                max_profile_date='2018-03-01',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
@@ -595,7 +614,8 @@ def set_policy(cmd, client, resource_group_name, vault_name,
         policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                max_profile_date='2018-03-01',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
@@ -639,7 +659,8 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
             rules.ip_rules.append(IPRule(value=ip_address))
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                max_profile_date='2018-03-01',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
@@ -681,7 +702,8 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
 
     # otherwise update
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                max_profile_date='2018-03-01',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
@@ -720,7 +742,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
         raise CLIError('No matching policies found')
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
-                                max_profile_date='2018-03-01',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
