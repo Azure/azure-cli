@@ -387,7 +387,8 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_storage_container_name=None,
                    fileupload_sas_ttl=1,
                    fileupload_storage_authentication_type=None,
-                   fileupload_storage_container_uri=None):
+                   fileupload_storage_container_uri=None,
+                   min_tls_version=None):
     from datetime import timedelta
     cli_ctx = cmd.cli_ctx
     if enable_fileupload_notifications:
@@ -428,7 +429,8 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
                                   messaging_endpoints=msg_endpoint_dic,
                                   storage_endpoints=storage_endpoint_dic,
-                                  cloud_to_device=cloud_to_device_properties)
+                                  cloud_to_device=cloud_to_device_properties,
+                                  min_tls_version=min_tls_version)
     properties.enable_file_upload_notifications = enable_fileupload_notifications
 
     hub_description = IotHubDescription(location=location,
