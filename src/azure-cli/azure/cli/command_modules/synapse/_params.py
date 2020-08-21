@@ -218,7 +218,7 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('role', arg_type=role_arg_type)
         c.argument('assignee', arg_type=assignee_arg_type)
-        c.argument('ids', nargs='+', help='space-separated role assignment ids. You should provide either --ids or --role/--assignee')
+        c.argument('ids', nargs='+', help='space-separated role assignment ids. You should not provide --role or --assignee when --ids is provided.')
 
     with self.argument_context('synapse role definition show') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)

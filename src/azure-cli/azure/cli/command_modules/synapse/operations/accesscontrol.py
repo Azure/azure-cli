@@ -40,7 +40,7 @@ def delete_role_assignment(cmd, workspace_name, ids=None, assignee=None, role=No
     client = cf_synapse_client_accesscontrol_factory(cmd.cli_ctx, workspace_name)
     if ids:
         if assignee or role:
-            raise CLIError('You should provide either --ids or --role/--assignee')
+            raise CLIError('You should not provide --role or --assignee when --ids is provided.')
         role_assignments = list_role_assignments(cmd, workspace_name, None, None)
         assignment_id_list = [x.id for x in role_assignments]
         # check role assignment id
@@ -57,7 +57,8 @@ def delete_role_assignment(cmd, workspace_name, ids=None, assignee=None, role=No
         for assignment in role_assignments:
             client.delete_role_assignment_by_id(assignment.id)
     else:
-        raise CLIError('No matched assignments were found to delete')
+        raise CLIError('No matched assignments were found to delete, please provide correct --role or --assignee.'
+                       'Use `az synapse role assignment list` to get role assignments.')
 
 
 # Create Synapse Role Assignment
