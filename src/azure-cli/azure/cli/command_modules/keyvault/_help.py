@@ -178,6 +178,15 @@ type: group
 short-summary: Manage vault network ACLs.
 """
 
+helps['keyvault network-rule wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vault is met.
+examples:
+  - name: Pause CLI until the network ACLs are updated.
+    text: |
+        az keyvault network-rule wait --name MyVault --updated
+"""
+
 helps['keyvault private-endpoint-connection'] = """
 type: group
 short-summary: Manage vault private endpoint connections.
