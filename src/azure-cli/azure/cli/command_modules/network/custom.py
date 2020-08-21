@@ -260,7 +260,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
-    # return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
