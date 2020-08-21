@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-VERSION = "2.10.1"
+2.11.0
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -26,8 +26,8 @@ else:
     if not m:
         print('Could not find __version__ in azure/cli/core/__init__.py')
         sys.exit(1)
-    if m.group(1) != VERSION:
-        print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
+    if m.group(1) != 2.11.0
+        print('Expected __version__ = "{}"; found "{}"'.format(2.11.0
         sys.exit(1)
 
 CLASSIFIERS = [
@@ -75,7 +75,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 
 setup(
     name='azure-cli-core',
-    version=VERSION,
+    version=2.11.0
     description='Microsoft Azure Command-Line Tools Core Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',

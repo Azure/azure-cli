@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.10.1"
+2.11.0
 
 import os
 import sys
@@ -96,7 +96,7 @@ class AzCli(CLI):
         return self.progress_controller
 
     def get_cli_version(self):
-        return __version__
+        return 2.11.0
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
@@ -494,7 +494,7 @@ class CommandIndex:
         from azure.cli.core._session import INDEX
         self.INDEX = INDEX
         if cli_ctx:
-            self.version = __version__
+            self.version = 2.11.0
             self.cloud_profile = cli_ctx.cloud.profile
 
     def get(self, args):
@@ -551,7 +551,7 @@ class CommandIndex:
         :param command_table: The command table built by azure.cli.core.MainCommandsLoader.load_command_table
         """
         start_time = timeit.default_timer()
-        self.INDEX[self._COMMAND_INDEX_VERSION] = __version__
+        self.INDEX[self._COMMAND_INDEX_VERSION] = 2.11.0
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
         from collections import defaultdict
         index = defaultdict(list)

@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = "1.0.5"
+2.11.0
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -29,7 +29,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 
 setup(
     name='azure-cli-telemetry',
-    version=VERSION,
+    version=2.11.0
     description='Microsoft Azure CLI Telemetry Package',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',

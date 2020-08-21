@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.10.1"
+2.11.0
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -33,8 +33,8 @@ else:
     if not m:
         print('Could not find __version__ in azure/cli/__main__.py')
         sys.exit(1)
-    if m.group(1) != VERSION:
-        print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
+    if m.group(1) != 2.11.0
+        print('Expected __version__ = "{}"; found "{}"'.format(2.11.0
         sys.exit(1)
 
 CLASSIFIERS = [
@@ -52,7 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-batch~=9.0',
-    'azure-cli-core=={}.*'.format(VERSION),
+    'azure-cli-core=={}.*'.format(2.11.0
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',
@@ -151,7 +151,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 
 setup(
     name='azure-cli',
-    version=VERSION,
+    version=2.11.0
     description='Microsoft Azure Command-Line Tools',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',

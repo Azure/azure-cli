@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.2.4"
+2.11.0
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -36,7 +36,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 
 setup(
     name='azure-cli-testsdk',
-    version=VERSION,
+    version=2.11.0
     description='Microsoft Azure Command-Line Tools Test SDK Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',

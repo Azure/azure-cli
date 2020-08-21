@@ -272,7 +272,7 @@ EXTENSION_TYPES = [WheelExtension, DevExtension]
 
 
 def ext_compat_with_cli(azext_metadata):
-    from azure.cli.core import __version__ as core_version
+    from azure.cli.core import 2.11.0
     from pkg_resources import parse_version
     is_compatible, min_required, max_required = (True, None, None)
     if azext_metadata:

@@ -23,4 +23,4 @@ __all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'Storage
            'VirtualNetworkPreparer', 'VnetNicPreparer']
 
 
-__version__ = '0.1.0'
+2.11.0
