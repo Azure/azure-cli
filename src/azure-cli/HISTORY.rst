@@ -12,7 +12,7 @@ Release History
 * Add AKS CMK argument in cluster creation (#14688)
 * Set network profile when using basic load balancer. (#14699)
 * Remove max pods validation from CLI and let preflight handle it (#14750)
-* Fixing add-ons available in the help message in 'az aks create' (#14810)
+* Fixing add-ons available in the help message in `az aks create` (#14810)
 * Bring in support for cluster autoscaler profile in core CLI (#14779)
 
 **App Service**
@@ -21,16 +21,16 @@ Release History
 * `az webapp ssh`: Add --instance parameter to connect to a specific instance (#13408)
 * `az webapp create-remote-connection`: Add --instance parameter to connect to a specific instance (#13408)
 * Fix #14758: az webapp create errors when creating windows app with --runtime dotnetcore (#14764)
-* Fix #14701: implement functionapp create --assign-identity (#14702)
+* Fix #14701: Implement functionapp create --assign-identity (#14702)
 
 **AppService**
 
-* Fix #11244: az webapp auth update: Add optional parameter to update client-secret-certificate-thumbprint (#14730)
+* Fix #11244: `az webapp auth update`: Add optional parameter to update client-secret-certificate-thumbprint (#14730)
 * `az functionapp keys`: Added commands that allow users to manage their function app keys (#14465)
 * `az functionapp function`: Added commands that allow users to manage their individual functions (#14465)
 * `az functionapp function keys`: Added commands that allow users to manage their function keys (#14465)
 * Fix #14788: az webapp create not getting correct webapp when names are substrings (#14829)
-* functionapp create: Removed ability to create 2.x Functions in regions that don't support it (#14831)
+* `az functionapp create`: Removed ability to create 2.x Functions in regions that don't support it (#14831)
 
 **ARM**
 
@@ -41,34 +41,20 @@ Release History
 
 * CLI enhancements, including route table checking permissions (#14535)
 
-**Backup**
-
-* Added VM tests (#14619)
-
 **Cloud**
 
 * `az cloud register`: Fix registering clouds with a config file (#14749)
 
-**commands**
-
-* (https://github.com/Azure/azure-cli/compare/dev...sunsw1994:transit-synapse-module?expand=1#diff-5b0bd1a3a75a19992ae032a48de92435) (#14755)
-* (https://github.com/sunsw1994/azure-cli/blob/dfb4f6e380bb34f2ca3df89813e0c31a40b85fd5/src/azure-cli/azure/cli/command_modules/synapse/commands.py) (#14819)
-* (https://github.com/sunsw1994/azure-cli/blob/dfb4f6e380bb34f2ca3df89813e0c31a40b85fd5/src/azure-cli/azure/cli/command_modules/synapse/commands.py) (#14834)
-
 **Compute**
 
 * Update VM SKUs that support accelerated networking (#13045)
-* vm create: Automatic in-guest patching (#14710)
-* image builder create: Add --vm-size, --os-disk-size, --vnet, --subnet (#14685)
+* `az vm create`: Automatic in-guest patching (#14710)
+* `az image builder create`: Add --vm-size, --os-disk-size, --vnet, --subnet (#14685)
 * New command az vm assess-patches (#14808)
 
 **Container**
 
-* Fix #6235 update help text for ports parameter in container create (#14825)
-
-**Data Plane**
-
-* -- Add synapse spark job releated commands based on track2 sdk (#14819)
+* Fix #6235: Update help text for ports parameter in container create (#14825)
 
 **Datalake Store**
 
@@ -110,19 +96,11 @@ Release History
 * `az network application-gateway auth-cert show`: Add example to demonstrate certificate format (#14856)
 * `az network private-endpoint-connection`: support app configuration (#14860)
 
-**New Feature**
-
-* [Data Plane] -- Add synapse accesscontrol related commands based on track2 sdk (#14834)
-
-**PEP420 **
-
-* (https://www.python.org/dev/peps/pep-0420/)is an official python enhancement proposal which introduces implicit namespace package. (#14372)
-
 **RBAC**
 
 * `az ad group create`: support specify description when creating a group (#14668)
 * `az role definition create`: print human readable message instead of exception when assignableScope is an empty array (#14663)
-* [BREAKING CHANGE] az ad sp create-for-rbac: change default permission of created certificate (#14640)
+* [BREAKING CHANGE] `az ad sp create-for-rbac`: change default permission of created certificate (#14640)
 
 **SQL**
 
@@ -141,10 +119,6 @@ Release History
 * Add workspace, sparkpool, sqlpool related cmdlets (#14755)
 * Add spark job releated commands based on track2 sdk (#14819)
 * Add accesscontrol feature related commands based on track2 sdk (#14834)
-
-**TestSDK**
-
-* Add serial_test decorator (#14736)
 
 **Upgrade**
 
