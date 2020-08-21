@@ -5,7 +5,7 @@ Release History
 
 2.11.0
 ++++++
-* Minor improment
+* Minor improvement
 
 2.10.1
 ++++++
