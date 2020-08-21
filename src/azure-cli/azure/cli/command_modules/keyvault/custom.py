@@ -30,12 +30,21 @@ from ._validators import _construct_vnet, secret_text_encoding_values
 logger = get_logger(__name__)
 
 
-def _azure_stack_wrapper(cmd, client, function_name, **kwargs):
+def _later_than(raw_profile, max_profile_date):
+    if raw_profile == 'latest':
+        return True
+    n = len(max_profile_date)
+    if len(raw_profile) < n:
+        return False
+    return raw_profile[:n] > max_profile_date
+
+
+def _azure_stack_wrapper(cmd, client, function_name, max_profile_date, **kwargs):
     no_wait = False
     if 'no_wait' in kwargs:
         no_wait = kwargs.pop('no_wait')
 
-    if cmd.cli_ctx.cloud.profile == 'latest':
+    if _later_than(cmd.cli_ctx.cloud.profile, max_profile_date):
         function_name = 'begin_' + function_name
         return sdk_no_wait(no_wait, getattr(client, function_name), **kwargs)
 
@@ -272,6 +281,7 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                                        'create_mode': CreateMode.recover.value})
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                max_profile_date='2018-03-01',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=params)
@@ -451,6 +461,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                                properties=properties)
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                max_profile_date='2018-03-01',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=parameters,
@@ -461,6 +472,7 @@ def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_n
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                max_profile_date='2018-03-01',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
@@ -583,6 +595,7 @@ def set_policy(cmd, client, resource_group_name, vault_name,
         policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                max_profile_date='2018-03-01',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
@@ -626,6 +639,7 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
             rules.ip_rules.append(IPRule(value=ip_address))
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                max_profile_date='2018-03-01',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
@@ -667,6 +681,7 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
 
     # otherwise update
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                max_profile_date='2018-03-01',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
@@ -705,6 +720,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
         raise CLIError('No matching policies found')
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                max_profile_date='2018-03-01',
                                 resource_group_name=resource_group_name,
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
