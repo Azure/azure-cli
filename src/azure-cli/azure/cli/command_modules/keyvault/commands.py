@@ -55,14 +55,12 @@ def load_command_table(self, _):
     # Management Plane Commands
     with self.command_group('keyvault', mgmt_vaults_entity.command_type,
                             client_factory=mgmt_vaults_entity.client_factory) as g:
-        g.custom_command('create', 'create_vault_or_hsm',
+        g.custom_command('create', 'create_vault_or_hsm', supports_no_wait=True,
                          doc_string_source=mgmt_vaults_entity.models_docs_tmpl.format('VaultProperties'))
-        g.custom_command('recover', 'recover_vault_or_hsm')
+        g.custom_command('recover', 'recover_vault_or_hsm', supports_no_wait=True)
         g.custom_command('list', 'list_vault_or_hsm')
         g.custom_show_command('show', 'get_vault_or_hsm',
                               doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('get'))
-        g.custom_command('delete', 'delete_vault_or_hsm',
-                         doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('delete'))
         g.custom_command('delete', 'delete_vault_or_hsm', deprecate_info=g.deprecate(
             tag_func=lambda x: '',
             message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, you will '
@@ -71,16 +69,18 @@ def load_command_table(self, _):
                                    'guidance.\n'
                                    'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('delete'))
-        g.custom_command('purge', 'purge_vault_or_hsm',
+        g.custom_command('purge', 'purge_vault_or_hsm', supports_no_wait=True,
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('purge_deleted'))
-        g.custom_command('set-policy', 'set_policy')
-        g.custom_command('delete-policy', 'delete_policy')
+        g.custom_command('set-policy', 'set_policy', supports_no_wait=True)
+        g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
         g.custom_command('list-deleted', 'list_deleted_vault_or_hsm',
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('list_deleted'))
         g.generic_update_command(
             'update', setter_name='update_vault_setter', setter_type=kv_vaults_custom,
             custom_func_name='update_vault',
-            doc_string_source=mgmt_vaults_entity.models_docs_tmpl.format('VaultProperties'))
+            doc_string_source=mgmt_vaults_entity.models_docs_tmpl.format('VaultProperties'),
+            supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('keyvault', private_mgmt_vaults_entity.command_type,
                             client_factory=private_mgmt_vaults_entity.client_factory) as g:
@@ -93,9 +93,10 @@ def load_command_table(self, _):
                             mgmt_vaults_entity.command_type,
                             min_api='2018-02-14',
                             client_factory=mgmt_vaults_entity.client_factory) as g:
-        g.custom_command('add', 'add_network_rule')
-        g.custom_command('remove', 'remove_network_rule')
+        g.custom_command('add', 'add_network_rule', supports_no_wait=True)
+        g.custom_command('remove', 'remove_network_rule', supports_no_wait=True)
         g.custom_command('list', 'list_network_rules')
+        g.wait_command('wait')
 
     with self.command_group('keyvault private-endpoint-connection',
                             mgmt_pec_entity.command_type,
@@ -106,7 +107,7 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+        g.command('delete', 'begin_delete', validator=validate_private_endpoint_connection_id, supports_no_wait=True)
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
         g.wait_command('wait', validator=validate_private_endpoint_connection_id)
 

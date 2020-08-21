@@ -6,7 +6,7 @@ from knack.log import get_logger
 
 from azure.cli.core.extension.operations import (
     add_extension, remove_extension, list_extensions, show_extension,
-    list_available_extensions, update_extension)
+    list_available_extensions, update_extension, list_versions)
 
 logger = get_logger(__name__)
 
@@ -37,3 +37,7 @@ def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_ur
 
 def list_available_extensions_cmd(index_url=None, show_details=False):
     return list_available_extensions(index_url=index_url, show_details=show_details)
+
+
+def list_versions_cmd(extension_name, index_url=None):
+    return list_versions(extension_name, index_url=index_url)

@@ -98,6 +98,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 command_args[client_arg_name] = client
             if 'cmd' not in op_args:
                 command_args.pop('cmd')
+
             try:
                 if command_type.settings.get('resource_type') == ResourceType.DATA_PRIVATE_KEYVAULT_T2:
                     abandoned_args = [
