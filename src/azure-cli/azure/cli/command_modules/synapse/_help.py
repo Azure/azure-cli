@@ -426,3 +426,116 @@ examples:
         az synapse spark statement cancel --livy-id 1 --session-id 11 --workspace-name testsynapseworkspace \\
         --spark-pool-name testsparkpool
 """
+
+helps['synapse role'] = """
+type: group
+short-summary: Manage Synapse's role assignments and definitions.
+"""
+
+helps['synapse role assignment'] = """
+type: group
+short-summary: Manage Synapse's role assignments.
+"""
+
+helps['synapse role assignment show'] = """
+type: command
+short-summary: Get a role assignment by id.
+examples:
+  - name: Get a role assignment by id.
+    text: |-
+        az synapse role assignment show --workspace-name testsynapseworkspace \\
+        --id 00000000-0000-0000-0000-000000000000
+"""
+
+helps['synapse role assignment list'] = """
+type: command
+short-summary: List role assignments.
+examples:
+  - name: List role assignments.
+    text: |-
+        az synapse role assignment list --workspace-name testsynapseworkspace
+  - name: List role assignments by role id/name.
+    text: |-
+        az synapse role assignment list --workspace-name testsynapseworkspace \\
+        --role "Sql Admin"
+  - name: List role assignments by assignee.
+    text: |-
+        az synapse role assignment list --workspace-name testsynapseworkspace \\
+        --assignee sp_name
+  - name: List role assignments by objectId of the User, Group or Service Principal.
+    text: |-
+        az synapse role assignment list --workspace-name testsynapseworkspace \\
+        --assignee 00000000-0000-0000-0000-000000000000
+"""
+
+helps['synapse role assignment create'] = """
+type: command
+short-summary: Create a role assignment.
+examples:
+  - name: Create a role assignment using service principal name.
+    text: |-
+        az synapse role assignment create --workspace-name testsynapseworkspace \\
+        --role "Sql Admin" --assignee sp_name
+  - name: Create a role assignment using user principal name.
+    text: |-
+        az synapse role assignment create --workspace-name testsynapseworkspace \\
+        --role "Sql Admin" --assignee username@consoso.com
+  - name: Create a role assignment using objectId of the User, Group or Service Principal.
+    text: |-
+        az synapse role assignment create --workspace-name testsynapseworkspace \\
+        --role "Sql Admin" --assignee 00000000-0000-0000-0000-000000000000
+"""
+
+helps['synapse role assignment delete'] = """
+type: command
+short-summary: Delete role assignments of workspace.
+examples:
+  - name: Delete role assignments by role and assignee.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --role "Sql Admin" --assignee sp_name
+  - name: Delete role assignments by role id/name.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --role "Sql Admin"
+  - name: Delete role assignments by service principal name.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --assignee sp_name
+  - name: Delete role assignments by user principal name.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --assignee username@consoso.com
+  - name: Delete role assignments by objectId of the User, Group or Service Principal.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --assignee 00000000-0000-0000-0000-000000000001
+  - name: Delete role assignments by ids.
+    text: |-
+        az synapse role assignment delete --workspace-name testsynapseworkspace \\
+        --ids 10000000-0000-0000-0000-10000000-10000000-0000-0000-0000-10000000
+"""
+
+helps['synapse role definition'] = """
+type: group
+short-summary:  Manage Synapse's role definitions.
+"""
+
+helps['synapse role definition list'] = """
+type: command
+short-summary: List role definitions.
+examples:
+  - name: List role definitions.
+    text: |-
+        az synapse role definition list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse role definition show'] = """
+type: command
+short-summary: Get role definition by role id/name.
+examples:
+  - name: Get role definition by role id.
+    text: |-
+        az synapse role definition show --workspace-name testsynapseworkspace \\
+        --role 00000000-0000-0000-0000-000000000000
+"""

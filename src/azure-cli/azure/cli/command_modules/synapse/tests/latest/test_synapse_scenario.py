@@ -6,7 +6,7 @@
 
 import os
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -53,6 +53,7 @@ class SynapseScenarioTests(ScenarioTest):
         time.sleep(120)
         self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}', expect_failure=True)
 
+    @record_only()
     def test_spark_pool(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -99,6 +100,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse spark pool show --name {spark-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
+    @record_only()
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -171,6 +173,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql pool show --name {sql-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_ip_firewall_rules(self, resource_group):
         self.kwargs.update({
@@ -216,6 +219,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse workspace firewall-rule show --name {ruleName} --workspace-name {workspace} '
                  '--resource-group {rg}', expect_failure=True)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_job(self, resource_group):
         self.kwargs.update({
@@ -265,6 +269,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('result', 'Cancelled')
                  ])
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_spark_session_and_statements(self, resource_group):
         self.kwargs.update({
@@ -354,15 +359,91 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'killed')
                  ])
 
+    @record_only()
+    def test_access_control(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
+            'role': 'Sql Admin',
+            'userPrincipal': 'username@microsoft.com',
+            'servicePrincipal': 'http://username-sp'})
+
+        self.cmd(
+            'az synapse role definition list --workspace-name {workspace} ',
+            checks=[
+                self.check('length([])', 3)
+            ])
+
+        # get role definition
+        role_definition_get = self.cmd(
+            'az synapse role definition show --workspace-name {workspace} --role "{role}" ',
+            checks=[
+                self.check('name', self.kwargs['role'])
+            ]).get_output_in_json()
+        self.kwargs['roleId'] = role_definition_get['id']
+
+        # create role assignment
+        role_assignment_create = self.cmd(
+            'az synapse role assignment create --workspace-name {workspace} --role "{role}" --assignee  {userPrincipal} ',
+            checks=[
+                self.check('roleId', self.kwargs['roleId'])
+            ]).get_output_in_json()
+        self.kwargs['roleAssignmentId'] = role_assignment_create['id']
+        self.kwargs['roleId'] = role_assignment_create['roleId']
+        self.kwargs['principalId'] = role_assignment_create['principalId']
+
+        # get role assignment
+        self.cmd(
+            'az synapse role assignment show --workspace-name {workspace} --id {roleAssignmentId} ',
+            checks=[
+                self.check('roleId', self.kwargs['roleId']),
+                self.check('principalId', self.kwargs['principalId'])
+            ])
+
+        # list role assignment by role
+        self.cmd(
+            'az synapse role assignment list --workspace-name {workspace} --role "{role}" ',
+            checks=[
+                self.check('length([])', 2)
+            ])
+
+        # list role assignment by userPrincipal
+        self.cmd(
+            'az synapse role assignment list --workspace-name {workspace} --assignee {userPrincipal} ',
+            checks=[
+                self.check('length([])', 2)
+            ])
+
+        # list role assignment by servicePrincipal
+        self.cmd(
+            'az synapse role assignment list --workspace-name {workspace} --assignee {servicePrincipal} ',
+            checks=[
+                self.check('length([])', 1)
+            ])
+
+        # list role assignment by object_id
+        self.cmd(
+            'az synapse role assignment list --workspace-name {workspace} --assignee {principalId} ',
+            checks=[
+                self.check('length([])', 2)
+            ])
+
+        # delete role assignment
+        self.cmd(
+            'az synapse role assignment delete --workspace-name {workspace} --ids {roleAssignmentId} -y ')
+        self.cmd(
+            'az synapse role assignment show --workspace-name {workspace} --id {roleAssignmentId} ',
+            expect_failure=True)
+
     def _create_workspace(self):
         self.kwargs.update({
-            'location': self.location,
             'workspace': self.create_random_name(prefix='clitest', length=16),
             'file-system': 'testfilesystem',
-            'storage-account': 'adlsgen2account',
             'login-user': 'cliuser1',
-            'login-password': 'password'
+            'login-password': self.create_random_name(prefix='Pswd1', length=16)
         })
+
+        # Create adlsgen2
+        self._create_storage_account()
 
         # Wait some time to improve robustness
         if self.is_live or self.in_recording:
@@ -377,5 +458,24 @@ class SynapseScenarioTests(ScenarioTest):
             ' --location {location}', checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+
+    def _create_storage_account(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'storage-account': self.create_random_name(prefix='adlsgen2', length=16)
+        })
+
+        # Wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)
+
+        # create synapse workspace
+        self.cmd(
+            'az storage account create --name {storage-account} --resource-group {rg} --enable-hierarchical-namespace true --location {location}', checks=[
+                self.check('name', self.kwargs['storage-account']),
+                self.check('type', 'Microsoft.Storage/storageAccounts'),
                 self.check('provisioningState', 'Succeeded')
             ])
