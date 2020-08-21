@@ -136,6 +136,12 @@ Release History
 * `az storage blob generate-sas`: add examples for --ip  and refine error message (#14854)
 * `az storage blob list`: Fix next_marker issue (#14751)
 
+**Synapse**
+
+* Add workspace, sparkpool, sqlpool related cmdlets (#14755)
+* Add spark job releated commands based on track2 sdk (#14819)
+* Add accesscontrol feature related commands based on track2 sdk (#14834)
+
 **TestSDK**
 
 * Add serial_test decorator (#14736)
