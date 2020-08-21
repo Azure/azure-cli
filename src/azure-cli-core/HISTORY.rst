@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.11.0
+++++++
+* Azure CLI live test pipeline (#12704)
+
 2.10.1
 ++++++
 * Minor fixes
