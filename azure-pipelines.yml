@@ -572,6 +572,33 @@ jobs:
 
     displayName: 'Bash Script'
 
+- job: TestHomebrewPackage
+  displayName: Test Homebrew Package
+  timeoutInMinutes: 120
+  dependsOn: BuildHomebrewFormula
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
+      artifactName: homebrew
+
+
+  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
+
+
+    displayName: 'Test Homebrew Package'
+
 - job: BuildYumPackage
   displayName: Build Yum Package
 
@@ -882,7 +909,11 @@ jobs:
   - bash: |
       set -ev
       . env/bin/activate
-      azdev linter --ci-exclusions
+      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+        azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+      else
+        azdev linter --ci-exclusions --min-severity medium
+      fi
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"

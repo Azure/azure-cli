@@ -391,9 +391,9 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # delete recursively with if-modified-since
         src_container = create_and_populate_container()
         self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {} --dryrun',
-                         storage_account_info, src_container, datetime.min.strftime('%Y-%m-%dT%H:%MZ'))
+                         storage_account_info, src_container, '2000-12-31T12:59:59Z')
         self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {}',
-                         storage_account_info, src_container, datetime.min.strftime('%Y-%m-%dT%H:%MZ'))
+                         storage_account_info, src_container, '2000-12-31T12:59:59Z')
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
             JMESPathCheck('length(@)', 0))
 

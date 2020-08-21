@@ -125,6 +125,12 @@ def load_arguments(self, _):
                                              'The resources specified in this parameter must be of the same type and exist in the same location.')
         c.argument('disabled', arg_type=get_three_state_flag())
         c.argument('enabled', arg_type=get_three_state_flag(), help='Whether the metric alert rule is enabled.')
+        c.argument('target_resource_type', options_list=['--target-resource-type', '--type'],
+                   help='The resource type of the target resource(s) in scopes. '
+                        'This must be provided when scopes is resource group or subscription.')
+        c.argument('target_resource_region', options_list=['--target-resource-region', '--region'],
+                   help='The region of the target resource(s) in scopes. '
+                        'This must be provided when scopes is resource group or subscription.')
 
     with self.argument_context('monitor metrics alert create', arg_group=None) as c:
         c.argument('actions', options_list=['--action', '-a'], action=MetricAlertAddAction, nargs='+', validator=get_action_group_validator('actions'))
@@ -401,8 +407,9 @@ def load_arguments(self, _):
                    help="All workspace's tables are exported when this is enabled.")
         c.argument('table_names', nargs='+', options_list=['--tables', '-t'],
                    help='An array of tables to export. if --export-all-tables is true, this argument should not be provided.')
-        c.argument('destination', help='The destination resource ID. It should be a storage account or an event hub namespace.',
-                   validator=process_workspace_data_export_destination)
+        c.argument('destination', validator=process_workspace_data_export_destination,
+                   help='The destination resource ID. It should be a storage account, an event hub namespace or an event hub. '
+                        'If event hub namespace is provided, event hub would be created for each table automatically.')
         c.ignore('data_export_type')
         c.ignore('event_hub_name')
         c.argument('enable', arg_type=get_three_state_flag(), help='Enable this data export rule.')

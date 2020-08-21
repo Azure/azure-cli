@@ -21,6 +21,8 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
 from knack.log import get_logger
 from knack.util import CLIError
 
+logger = get_logger(__name__)
+
 
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
@@ -50,6 +52,20 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
     return client.delete_container(
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
+
+
+def list_blobs(client, container_name, prefix=None, num_results=None, include=None, delimiter=None, marker=None,
+               timeout=None):
+
+    generator = client.list_blobs(container_name=container_name, prefix=prefix, num_results=num_results,
+                                  include=include, delimiter=delimiter, marker=marker, timeout=timeout)
+    result = list(generator)
+
+    if getattr(generator, 'next_marker', None):
+        logger.warning('Next Marker:')
+        logger.warning(generator.next_marker)
+
+    return result
 
 
 def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_restore, blob_ranges=None,
@@ -131,9 +147,8 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                             destination_path=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):
     """Copy a group of blob or files to a blob container."""
-    logger = None
+
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('copy files or blobs to blob container')
         logger.warning('    account %s', client.account_name)
         logger.warning('  container %s', container_name)
@@ -142,6 +157,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
         logger.warning('    pattern %s', pattern)
         logger.warning(' operations')
 
+    source_sas = source_sas.lstrip('?') if source_sas else source_sas
     if source_container:
         # copy blobs for blob container
 
@@ -216,7 +232,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         blobs_to_download[normalized_blob_name] = blob_name
 
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('download action: from %s to %s', source, destination)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
@@ -261,7 +276,6 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             'Last Modified': upload_result.last_modified if upload_result else None,
             'eTag': upload_result.etag if upload_result else None}
 
-    logger = get_logger(__name__)
     source_files = source_files or []
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
 
@@ -294,8 +308,8 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                 progress_callback.message = '{}/{}: "{}"'.format(
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
-            include, result = _upload_blob(cmd, client, destination_container_name,
-                                           normalize_blob_file_path(destination_path, dst), src,
+            include, result = _upload_blob(cmd, client, file_path=src, container_name=destination_container_name,
+                                           blob_name=normalize_blob_file_path(destination_path, dst),
                                            blob_type=blob_type, content_settings=guessed_content_settings,
                                            metadata=metadata, validate_content=validate_content,
                                            maxsize_condition=maxsize_condition, max_connections=max_connections,
@@ -330,10 +344,10 @@ def transform_blob_type(cmd, blob_type):
 
 
 # pylint: disable=too-many-locals
-def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
-                validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
-                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
-                progress_callback=None, encryption_scope=None):
+def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blob_type=None, content_settings=None,
+                metadata=None, validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None,
+                tier=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None,
+                timeout=None, progress_callback=None, encryption_scope=None):
     """Upload a blob to a container."""
 
     if encryption_scope:
@@ -488,7 +502,6 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         }
         return client.delete_blob(**delete_blob_args)
 
-    logger = get_logger(__name__)
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
@@ -604,40 +617,33 @@ def _get_datetime_from_string(dt_str):
     raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))
 
 
-# ------------------Track2 Support-----------------------
-def show_blob_v2(cmd, client, container_name, blob_name, snapshot=None, lease_id=None,
-                 if_modified_since=None, if_unmodified_since=None, if_match=None,
-                 if_none_match=None, timeout=None):
-    property_kwargs = {
-        'lease': lease_id,
-        'if_modified_since': if_modified_since,
-        'if_unmodified_since': if_unmodified_since,
-        'timeout': timeout
-    }
+def show_blob_v2(cmd, client, lease_id=None, **kwargs):
 
-    # Precondition Check
-    from ..track2_util import _if_match, _if_none_match
-    if if_match:
-        property_kwargs = _if_match(if_match, **property_kwargs)
-
-    if if_none_match:
-        property_kwargs = _if_none_match(if_none_match, **property_kwargs)
-
-    blob = client.get_blob_properties(**property_kwargs)
+    blob = client.get_blob_properties(lease=lease_id, **kwargs)
 
     page_ranges = None
     if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
-        page_ranges = client.get_page_ranges(**property_kwargs)
+        page_ranges = client.get_page_ranges(lease=lease_id, **kwargs)
 
     blob.page_ranges = page_ranges
 
     return blob
 
 
-def set_blob_tier_v2(client, container_name, blob_name, tier, blob_type='block', rehydrate_priority=None, timeout=None):
+def set_blob_tier_v2(client, tier, blob_type='block', rehydrate_priority=None, timeout=None):
     if blob_type == 'block':
         return client.set_standard_blob_tier(standard_blob_tier=tier, rehydrate_priority=rehydrate_priority,
                                              timeout=timeout)
     if blob_type == 'page':
         return client.set_premium_page_blob_tier(premium_page_blob_tier=tier, timeout=timeout)
     raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def acquire_blob_lease(client, lease_duration=-1, **kwargs):
+    client.acquire(lease_duration=lease_duration, **kwargs)
+    return client.id
+
+
+def renew_blob_lease(client, **kwargs):
+    client.renew(**kwargs)
+    return client.id

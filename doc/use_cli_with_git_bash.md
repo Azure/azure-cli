@@ -15,7 +15,7 @@ $ az vm show --ids "/subscriptions/00000000-0000-0000-0000-000000000000/resource
 
 invalid resource ID: C:/Program Files/Git/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/virtualMachines/my-vm
 ```
-To disable the path conversion. You can set enviroment variable `MSYS_NO_PATHCONV=1` or set it temporarily when a running command:
+To disable the path conversion. You can set environment variable `MSYS_NO_PATHCONV=1` or set it temporarily when a running command:
 ```
 $ MSYS_NO_PATHCONV=1 az vm show --ids "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/virtualMachines/my-vm"
 ```
@@ -25,7 +25,7 @@ More discussions [here](https://stackoverflow.com/questions/7250130/how-to-stop-
 ### Issues with pip-installed az
 
 #### Quoting Issues
-The double quotes will be stripped in the value and cause trouble when there are spaces inside the quotes since Git Bash will treat each parts separated by spaces as an invividual command option.
+The double quotes will be stripped in the value and cause trouble when there are spaces inside the quotes since Git Bash will treat each parts separated by spaces as an individual command option.
 ```
 $ az find "vm create"
 $ Command arguments: ['find', 'vm', 'create', '--debug']

@@ -20,7 +20,8 @@ from azure.cli.command_modules.acs._params import (regions_in_preview,
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
                                                   _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
                                                   create_application, _update_addons,
-                                                  _ensure_container_insights_for_monitoring, k8s_install_cli)
+                                                  _ensure_container_insights_for_monitoring,
+                                                  k8s_install_kubectl, k8s_install_kubelogin)
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
@@ -640,32 +641,76 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
-    def test_k8s_install_cli_emit_warnings(self, logger_mock, mock_url_retrieve):
+    def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
-            test_location = os.path.join(temp_dir, 'kubectl.exe')
-            k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
+            test_location = os.path.join(temp_dir, 'kubectl')
+            k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
             # 2 warnings, 1st for download result; 2nd for updating PATH
             self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
-
-            if platform.system() == 'Windows':
-                # try again with install location in PATH, we should only get one more warning
-                os.environ['PATH'] += ';' + temp_dir
-                k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
-                self.assertEqual(logger_mock.warning.call_count, 3)
         finally:
             shutil.rmtree(temp_dir)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
-    def test_k8s_install_cli_create_installation_dir(self, logger_mock, mock_url_retrieve):
+    def test_k8s_install_kubectl_create_installation_dir(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
-            test_location = os.path.join(temp_dir, 'foo', 'kubectl.exe')
-            k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
+            test_location = os.path.join(temp_dir, 'foo', 'kubectl')
+            k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertTrue(os.path.exists(test_location))
         finally:
             shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_emit_warnings(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+        try:
+            temp_dir = os.path.realpath(tempfile.mkdtemp())  # tempfile.TemporaryDirectory() is no available on 2.7
+            test_location = os.path.join(temp_dir, 'kubelogin')
+            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
+            self.assertEqual(mock_url_retrieve.call_count, 1)
+            # 2 warnings, 1st for download result; 2nd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_create_installation_dir(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+        try:
+            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+            test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
+            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
+            self.assertTrue(os.path.exists(test_location))
+        finally:
+            shutil.rmtree(temp_dir)
+
+
+def create_kubelogin_zip(file_url, download_path):
+    import zipfile
+    try:
+        cwd = os.getcwd()
+        temp_dir = os.path.realpath(tempfile.mkdtemp())
+        os.chdir(temp_dir)
+        bin_dir = 'bin'
+        system = platform.system()
+        if system == 'Windows':
+            bin_dir += '/windows_amd64'
+        elif system == 'Linux':
+            bin_dir += '/linux_amd64'
+        elif system == 'Darwin':
+            bin_dir += '/darwin_amd64'
+        os.makedirs(bin_dir)
+        bin_location = os.path.join(bin_dir, 'kubelogin')
+        open(bin_location, 'a').close()
+        with zipfile.ZipFile(download_path, 'w', zipfile.ZIP_DEFLATED) as outZipFile:
+            outZipFile.write(bin_location)
+    finally:
+        os.chdir(cwd)
+        shutil.rmtree(temp_dir)

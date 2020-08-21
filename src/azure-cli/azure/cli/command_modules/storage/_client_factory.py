@@ -23,18 +23,19 @@ Missing credentials to access storage service. The following variations are acce
 
 
 def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
-                                    socket_timeout=None, token_credential=None):
+                                    socket_timeout=None, token_credential=None, location_mode=None):
     return get_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
                                    socket_timeout=socket_timeout,
                                    token_credential=token_credential,
-                                   endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint)
+                                   endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint,
+                                   location_mode=location_mode)
 
 
 def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
-                                 socket_timeout=None, token_credential=None):
+                                 socket_timeout=None, token_credential=None, location_mode=None):
     try:
         return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
-                                               socket_timeout, token_credential)
+                                               socket_timeout, token_credential, location_mode=location_mode)
     except ValueError as val_exception:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')
@@ -78,7 +79,8 @@ def blob_data_service_factory(cli_ctx, kwargs):
                                         connection_string=kwargs.pop('connection_string', None),
                                         sas_token=kwargs.pop('sas_token', None),
                                         socket_timeout=kwargs.pop('socket_timeout', None),
-                                        token_credential=kwargs.pop('token_credential', None))
+                                        token_credential=kwargs.pop('token_credential', None),
+                                        location_mode=kwargs.pop('location_mode', None))
 
 
 def table_data_service_factory(cli_ctx, kwargs):
@@ -215,9 +217,16 @@ def cf_blob_service(cli_ctx, kwargs):
 
 
 def cf_blob_client(cli_ctx, kwargs):
-    return cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs['container_name'],
-                                                            blob=kwargs['blob_name'],
+    return cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs.pop('container_name'),
+                                                            blob=kwargs.pop('blob_name'),
                                                             snapshot=kwargs.pop('snapshot', None))
+
+
+def cf_blob_lease_client(cli_ctx, kwargs):
+    t_lease_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_lease#BlobLeaseClient')
+    blob_client = cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs.pop('container_name', None),
+                                                                   blob=kwargs.pop('blob_name', None))
+    return t_lease_service(client=blob_client, lease_id=kwargs.pop('lease_id', None))
 
 
 def cf_adls_service(cli_ctx, kwargs):
@@ -249,3 +258,7 @@ def cf_adls_directory(cli_ctx, kwargs):
 def cf_adls_file(cli_ctx, kwargs):
     return cf_adls_service(cli_ctx, kwargs).get_file_client(file_system=kwargs.pop('file_system_name', None),
                                                             file_path=kwargs.pop('path', None))
+
+
+def cf_or_policy(cli_ctx, _):
+    return storage_client_factory(cli_ctx).object_replication_policies
