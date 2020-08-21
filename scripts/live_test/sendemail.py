@@ -50,6 +50,7 @@ def main():
     testdata.collect()
 
     # Write database
+    write_db()
 
     # Send email
     send_email(container, testdata)
@@ -68,7 +69,7 @@ def get_container_name():
         mode = 'replay'
     else:
         mode = ''
-    name += '_' + mode
+    name += mode
     # if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
     #     name += '_archive'
     return name
@@ -93,6 +94,14 @@ def upload_files(container):
                 cmd = cmd.format(fullpath, container, name)
                 print('Running: ' + cmd)
                 os.popen(cmd)
+
+
+def write_db():
+    """
+    Insert data to database
+    :return:
+    """
+    pass
 
 
 def send_email(container, testdata):
