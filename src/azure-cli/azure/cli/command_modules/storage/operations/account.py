@@ -546,6 +546,7 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
                         encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
 
 
+# pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
                      destination_container=None, min_creation_time=None, prefix_match=None):
