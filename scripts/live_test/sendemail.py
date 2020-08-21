@@ -11,7 +11,7 @@ import datetime
 
 from sendgrid import SendGridAPIClient
 
-from scripts.live_test import test_data
+import test_data
 
 SENDGRID_KEY = sys.argv[1]
 BUILD_ID = sys.argv[2]
