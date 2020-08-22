@@ -8,7 +8,7 @@ from ._client_factory import iot_hub_service_factory
 from ._client_factory import iot_service_provisioning_factory
 from ._client_factory import iot_central_service_factory
 
-JOB_DEPRECATION_INFO = 'IoT Extension (azure-cli-iot-ext) Job commands'
+CS_DEPRECATION_INFO = 'IoT Extension (azure-iot) connection-string command (az iot hub connection-string show)'
 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -99,7 +99,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot hub', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_hub_create')
         g.custom_command('list', 'iot_hub_list')
-        g.custom_command('show-connection-string', 'iot_hub_show_connection_string')
+        g.custom_command('show-connection-string', 'iot_hub_show_connection_string',
+                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO))
         g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
                                  command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
