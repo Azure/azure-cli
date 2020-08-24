@@ -489,14 +489,14 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         })
 
         # create a vm with unmanaged os disk
-        self.cmd('vm create -g {rg} -n vm1 --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm create -g {rg} -n vm1 --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
         vm1_info = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()
         self.kwargs['disk_uri'] = vm1_info['storageProfile']['osDisk']['vhd']['uri']
 
         self.cmd('vm delete -g {rg} -n vm1 -y')
 
         # create a vm by attaching the OS disk from the deleted VM
-        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk',
+        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk')
