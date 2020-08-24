@@ -73,7 +73,8 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  log_analytics_resource_id=None,
                  app_insights_resource_id=None,
                  app_insights_telemetry_channel_resource_id=None,
-                 synapse_analytics_resource_id=None):
+                 synapse_analytics_resource_id=None,
+                 attestation_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -92,6 +93,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.app_insights_resource_id = app_insights_resource_id
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
         self.synapse_analytics_resource_id = synapse_analytics_resource_id
+        self.attestation_resource_id = attestation_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -126,7 +128,8 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
                  mysql_server_endpoint=None,
                  postgresql_server_endpoint=None,
                  mariadb_server_endpoint=None,
-                 synapse_analytics_endpoint=None):
+                 synapse_analytics_endpoint=None,
+                 attestation_endpoint=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.storage_sync_endpoint = storage_sync_endpoint
@@ -139,6 +142,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
         self.acr_login_server_endpoint = acr_login_server_endpoint
         self.synapse_analytics_endpoint = synapse_analytics_endpoint
+        self.attestation_endpoint = attestation_endpoint
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -231,6 +235,20 @@ def _get_synapse_analytics_resource_id(cloud_name):
     return synapse_analytics_resource_id_mapper.get(cloud_name, None)
 
 
+def _get_attestation_resource_id(cloud_name):
+    attestation_resource_id_mapper = {
+        'AzureCloud': 'https://attest.azure.net'
+    }
+    return attestation_resource_id_mapper.get(cloud_name, None)
+
+
+def _get_attestation_endpoint(cloud_name):
+    attestation_endpoint_mapper = {
+        'AzureCloud': '.attest.azure.net'
+    }
+    return attestation_endpoint_mapper.get(cloud_name, None)
+
+
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
     for cloud in arm_cloud_metadata_dict:
@@ -278,7 +296,8 @@ def _arm_to_cli_mapper(arm_dict):
             app_insights_resource_id=get_endpoint('appInsightsResourceId', fallback_value=_get_app_insights_resource_id(arm_dict['name'])),
             log_analytics_resource_id=get_endpoint('logAnalyticsResourceId', fallback_value=_get_log_analytics_resource_id(arm_dict['name'])),
             synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=_get_synapse_analytics_resource_id(arm_dict['name'])),
-            app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=_get_app_insights_telemetry_channel_resource_id(arm_dict['name']))),
+            app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=_get_app_insights_telemetry_channel_resource_id(arm_dict['name'])),
+            attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=_get_attestation_resource_id(arm_dict['name']))),
         suffixes=CloudSuffixes(
             storage_endpoint=get_suffix('storage'),
             storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=_get_storage_sync_endpoint(arm_dict['name'])),
@@ -290,7 +309,8 @@ def _arm_to_cli_mapper(arm_dict):
             azure_datalake_store_file_system_endpoint=get_suffix('azureDataLakeStoreFileSystem'),
             azure_datalake_analytics_catalog_and_job_endpoint=get_suffix('azureDataLakeAnalyticsCatalogAndJob'),
             synapse_analytics_endpoint=get_suffix('synapseAnalytics', add_dot=True, fallback_value=_get_synapse_analytics_endpoint(arm_dict['name'])),
-            acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True)))
+            acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True),
+            attestation_endpoint=get_suffix('attestationEndpoint', add_dot=True, fallback_value=_get_attestation_endpoint(arm_dict['name']))))
 
 
 class Cloud:  # pylint: disable=too-few-public-methods
@@ -338,7 +358,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         app_insights_resource_id='https://api.applicationinsights.io',
         log_analytics_resource_id='https://api.loganalytics.io',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track',
-        synapse_analytics_resource_id='https://dev.azuresynapse.net'),
+        synapse_analytics_resource_id='https://dev.azuresynapse.net',
+        attestation_resource_id='https://attest.azure.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         storage_sync_endpoint='afs.azure.net',
@@ -350,7 +371,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
         azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net',
         acr_login_server_endpoint='.azurecr.io',
-        synapse_analytics_endpoint='.dev.azuresynapse.net'))
+        synapse_analytics_endpoint='.dev.azuresynapse.net',
+        attestation_endpoint='.attest.azure.net'))
 
 AZURE_CHINA_CLOUD = Cloud(
     'AzureChinaCloud',
