@@ -1756,7 +1756,7 @@ class VMCreateExistingOptions(ScenarioTest):
             f.write(TEST_SSH_KEY_PUB_2)
 
         self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_1} --authentication-type all '
-                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value "{ssh_key}"')
+                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value "{ssh_key}" --nsg-rule NONE')
 
         self.cmd('vm show -n {vm_1} -g {rg}', checks=[
             self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', False),
@@ -1764,7 +1764,7 @@ class VMCreateExistingOptions(ScenarioTest):
         ])
 
         self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_2} --authentication-type ssh '
-                 ' --admin-username myadmin --ssh-key-value "{ssh_key}" "{ssh_key_2}" --ssh-dest-key-path "{ssh_dest}"')
+                 ' --admin-username myadmin --ssh-key-value "{ssh_key}" "{ssh_key_2}" --ssh-dest-key-path "{ssh_dest}" --nsg-rule NONE')
 
         self.cmd('vm show -n {vm_2} -g {rg}', checks=[
             self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
