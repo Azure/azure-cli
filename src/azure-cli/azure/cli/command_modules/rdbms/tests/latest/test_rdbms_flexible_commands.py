@@ -37,12 +37,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd(self.cli_ctx, 'az {} flexible-server delete -g {} -n {} --yes --no-wait'.format(database_engine, resource_group_name, server_name))
     
     @AllowLargeResponse()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='southeastasia')
     def test_postgres_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('postgres', resource_group)
     
     @AllowLargeResponse()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='southeastasia')
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
 
@@ -118,6 +118,7 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         self._test_flexible_server_local_context('postgres', resource_group)
     
     @AllowLargeResponse()
+    @ResourceGroupPreparer(location='southeastasia')
     def test_mysql_flexible_server_local_context(self, resource_group):
         self._test_flexible_server_local_context('mysql', resource_group)
     
