@@ -46,6 +46,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_flexible_config,
     cf_mysql_flexible_virtual_network_rules_operations,
     cf_mysql_flexible_db,
+    cf_mysql_flexible_replica,
     cf_postgres_flexible_servers,
     cf_postgres_flexible_firewall_rules,
     cf_postgres_flexible_config,
@@ -248,6 +249,11 @@ def load_command_table(self, _):
     mysql_flexible_db_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#DatabasesOperations.{}',
         client_factory=cf_mysql_flexible_db
+    )
+
+    mysql_flexible_replica_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#ReplicasOperations.{}',
+        client_factory=cf_mysql_flexible_replica
     )
 
     postgres_flexible_servers_sdk = CliCommandType(
@@ -583,6 +589,8 @@ def load_command_table(self, _):
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', '_flexible_server_create')
         g.custom_command('restore', '_flexible_server_restore', supports_no_wait=True)
+        g.command('start', 'start')
+        g.command('stop', 'stop')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
@@ -590,7 +598,7 @@ def load_command_table(self, _):
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_flexible_server_update_custom_func')
-        g.custom_wait_command('wait', '_server_mysql_get')
+        g.custom_wait_command('wait', '_flexible_server_mysql_get')
         g.command('restart', 'restart')
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
@@ -613,16 +621,15 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
-    with self.command_group('mysql flexible-server vnet-rule', mysql_flexible_vnet_sdk) as g:
+    # moljain; Is this naming correct?
+    with self.command_group('mysql flexible-server db', mysql_flexible_db_sdk) as g:
         g.command('create', 'create_or_update')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
-        g.generic_update_command('update')
 
-
-## TO DO
-    with self.command_group('mysql flexible-server replica', mysql_flexible_db_sdk) as g:
+    # not working at the moment
+    with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk) as g:
         g.command('list', 'list_by_server')
 
     with self.command_group('mysql flexible-server replica', mysql_flexible_servers_sdk,
@@ -631,11 +638,15 @@ def load_command_table(self, _):
         g.custom_command('create', '_flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop', '_flexible_replica_stop', confirmation=True)
 
+    ## Doesn't yet exist
+    # with self.command_group('mysql flexible-server vnet-rule', mysql_flexible_vnet_sdk) as g:
+    #     g.command('create', 'create_or_update')
+    #     g.command('delete', 'delete')
+    #     g.show_command('show', 'get')
+    #     g.command('list', 'list_by_server')
+    #     g.generic_update_command('update')
+    #
 
-    with self.command_group('mysql db', mysql_db_sdk) as g:
-        g.command('create', 'create_or_update')
-        g.command('delete', 'delete', confirmation=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_server')
+
 
 

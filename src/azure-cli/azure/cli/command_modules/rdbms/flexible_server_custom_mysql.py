@@ -20,15 +20,14 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
 
 
-def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name,
+def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
                    location=None, no_wait=False, administrator_login=None, administrator_login_password=None, backup_retention=None,
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
                    assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
     from azure.mgmt.rdbms import mysql
-
     ### TO DO: This is not complete yet, waiting on deployment
     parameters = mysql.flexibleservers.models.Server(
-        sku=mysql.flexibleservers.models.Sku(name=sku_name),
+        sku=mysql.flexibleservers.models.Sku(name=sku_name, tier = tier),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
@@ -49,7 +48,7 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 # Need to replace source server name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # arguments and validators
-def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
+def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
 
     if not is_valid_resource_id(source_server):
@@ -62,14 +61,12 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
                 name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
-
     from azure.mgmt.rdbms import mysql
-    parameters = mysql.flexibleservers.models.ServerForCreate(
-        properties=mysql.flexibleservers.models.ServerPropertiesForRestore(
-            source_server_id=source_server,
-            restore_point_in_time=restore_point_in_time,
-        ),
-        location=None)
+    parameters = mysql.flexibleservers.models.Server(
+        source_server=source_server,
+        restore_point_in_time=restore_point_in_time,
+        location=location
+    )
 
     # Here is a workaround that we don't support cross-region restore currently,
     # so the location must be set as the same as source server (not the resource group)
@@ -79,7 +76,6 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         parameters.location = source_server_object.location
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
-
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 # Update commands
@@ -96,7 +92,7 @@ def _flexible_server_update_custom_func(instance,
                                minimal_tls_version=None):
     from importlib import import_module
     server_module_path = instance.__module__
-    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    module = import_module(server_module_path) # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
 
     if sku_name:
@@ -208,3 +204,6 @@ def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, 
         instance.end_ip_address = end_ip_address
     return instance
 
+def _flexible_server_mysql_get(cmd, resource_group_name, server_name):
+    client = get_mysql_flexible_management_client(cmd.cli_ctx)
+    return client.servers.get(resource_group_name, server_name)

@@ -286,6 +286,9 @@ def cf_mysql_flexible_virtual_network_rules_operations(cli_ctx, _):
 def cf_mysql_flexible_db(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).databases
 
+def cf_mysql_flexible_replica(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).replicas
+
 def cf_postgres_flexible_servers(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).servers
 

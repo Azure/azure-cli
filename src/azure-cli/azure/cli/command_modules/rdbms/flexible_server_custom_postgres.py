@@ -23,9 +23,8 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
                    assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
     from azure.mgmt.rdbms import postgresql
 
-    # MOLJAIN TO DO: The SKU should not be hardcoded, need a fix with new swagger or need to manually parse sku provided
     parameters = postgresql.flexibleservers.models.Server(
-        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier, capacity=4),
+        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
@@ -48,7 +47,7 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 # Need to replace source server name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # arguments and validators
-def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
+def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -62,10 +61,10 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
     from azure.mgmt.rdbms import postgresql
-    parameters = postgresql.flexibleserver.models.Server(
+    parameters = postgresql.flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,
-        location=None)
+        location=location)
 
     # Here is a workaround that we don't support cross-region restore currently,
     # so the location must be set as the same as source server (not the resource group)
@@ -101,7 +100,7 @@ def _flexible_server_update_custom_func(instance,
                                minimal_tls_version=None):
     from importlib import import_module
     server_module_path = instance.__module__
-    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    module = import_module(server_module_path) # .replace('server', 'server_update_parameters')) not needed for flexservers
     ServerPropertiesForUpdate = getattr(module, 'ServerPropertiesForUpdate')
 
     if sku_name:
@@ -128,7 +127,6 @@ def _flexible_server_update_custom_func(instance,
 
     params = ServerPropertiesForUpdate(storage_profile=instance.storage_profile,
                                     administrator_login_password=administrator_login_password,
-                                    version=None,
                                     server_edition = server_edition,
                                     v_cores = v_cores)
 
