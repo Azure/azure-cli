@@ -224,7 +224,7 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             'vm': 'vm-generalize'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk --nsg-rule NONE')
         self.cmd('vm stop -g {rg} -n {vm}')
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
