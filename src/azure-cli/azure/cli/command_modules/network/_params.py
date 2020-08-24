@@ -147,7 +147,11 @@ def load_arguments(self, _):
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
 
     with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
-        c.argument('enable_private_link', action='store_true', help='Enable Private Link feature for this application gateway', default=False)
+        c.argument('enable_private_link',
+                   action='store_true',
+                   help='Enable Private Link feature for this application gateway. '
+                        'If boht public IP and private IP are enbaled, taking effect only in public frontend IP',
+                   default=False)
         c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
         c.argument('private_link_subnet', help='The name of the subnet within the same vnet of an application gateway')
