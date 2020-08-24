@@ -12,6 +12,19 @@
 from enum import Enum
 
 
+class OperationStatus(str, Enum):
+
+    success = "Success"
+    in_progress = "InProgress"
+    failed = "Failed"
+
+
+class SecurityDomainJsonWebKeyType(str, Enum):
+
+    rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
+    rsa_hsm = "RSA-HSM"  #: RSA with a private key which is not exportable from the HSM.
+
+
 class JsonWebKeyType(str, Enum):
 
     ec = "EC"  #: Elliptic Curve.
