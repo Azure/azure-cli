@@ -587,16 +587,17 @@ class VMAttachDisksOnCreate(ScenarioTest):
 
 class VMOSDiskSize(ScenarioTest):
 
+    @AllowLargeResponse(99999)
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
     def test_vm_set_os_disk_size(self, resource_group):
         # test unmanaged disk
         self.kwargs.update({'sa': self.create_random_name(prefix='cli', length=12)})
-        self.cmd('vm create -g {rg} -n vm --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75 --use-unmanaged-disk --storage-account {sa}')
+        self.cmd('vm create -g {rg} -n vm --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75 --use-unmanaged-disk --storage-account {sa} --nsg-rule NONE')
         result = self.cmd('storage blob list --account-name {sa} --container-name vhds').get_output_in_json()
         self.assertTrue(result[0]['properties']['contentLength'] > 75000000000)
 
         # test managed disk
-        self.cmd('vm create -g {rg} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75')
+        self.cmd('vm create -g {rg} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75 --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n vm1',
                  checks=self.check('storageProfile.osDisk.diskSizeGb', 75))
 
