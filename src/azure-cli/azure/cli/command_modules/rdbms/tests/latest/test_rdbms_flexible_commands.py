@@ -51,18 +51,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         # flexible-server create
         # flexible-server create auto-generate, no local context
-        if self.cli_ctx.local_context.is_on:
-            self.cmd('local-context off')
+        if not self.cli_ctx.local_context.is_on:
+            self.cmd('local-context on')
 
         auto_generated_output = self.cmd('{} flexible-server create'.format(database_engine))
         with self.assertRaises(CLIError):
-            self._remove_resource_group(self.cli_ctx.local_context.get('all', 'server_name'))
+            self._remove_resource_group(self.cli_ctx.local_context.get('all', 'resource_group_name'))
 
-        resource_group_name = self.cli_ctx.local_context.get('all', 'server_name')
+        resource_group_name = self.cli_ctx.local_context.get('all', 'resource_group_name')
         location = self.cli_ctx.local_context.get('all', 'location')
         server_name = self.cli_ctx.local_context.get(database_engine + ' flexible-server', 'server_name')
         self._remove_server(database_engine, resource_group_name, server_name)
-        self._remove_resource_group(self.cli_ctx.local_context.get('all', 'server_name'))
+        self._remove_resource_group(resource_group_name)
 
         # 1-2) user input generate
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
