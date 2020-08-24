@@ -69,7 +69,9 @@ def upload_source_code(cmd, client,
 def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_file_in_tar):
     logger.warning("Packing source code into tar to upload...")
 
-    ignore_list, ignore_list_size = _load_dockerignore_file(source_location)
+    # NOTE: os.path.basename is unable to parse "\" in the file path
+    original_docker_file_name = os.path.basename(docker_file_path.replace("\\", "/"))
+    ignore_list, ignore_list_size = _load_dockerignore_file(source_location, original_docker_file_name)
     common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
 
     def _ignore_check(tarinfo, parent_ignored, parent_matching_rule_index):
@@ -144,9 +146,17 @@ class IgnoreRule:  # pylint: disable=too-few-public-methods
         self.pattern += "$"
 
 
-def _load_dockerignore_file(source_location):
+def _load_dockerignore_file(source_location, original_docker_file_name):
     # reference: https://docs.docker.com/engine/reference/builder/#dockerignore-file
     docker_ignore_file = os.path.join(source_location, ".dockerignore")
+    docker_ignore_file_override = None
+    if original_docker_file_name != "Dockerfile":
+        docker_ignore_file_override = os.path.join(
+            source_location, "{}.dockerignore".format(original_docker_file_name))
+        if os.path.exists(docker_ignore_file_override):
+            logger.warning("Overriding .dockerignore with %s", docker_ignore_file_override)
+            docker_ignore_file = docker_ignore_file_override
+
     if not os.path.exists(docker_ignore_file):
         return None, 0
 
@@ -156,6 +166,8 @@ def _load_dockerignore_file(source_location):
         encoding = "utf-8-sig"
 
     ignore_list = []
+    if docker_ignore_file == docker_ignore_file_override:
+        ignore_list.append(IgnoreRule(".dockerignore"))
 
     for line in open(docker_ignore_file, 'r', encoding=encoding).readlines():
         rule = line.rstrip()
