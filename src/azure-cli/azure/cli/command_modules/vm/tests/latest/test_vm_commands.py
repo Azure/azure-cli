@@ -2037,7 +2037,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
             'disk': 'd7'
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk')
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk --nsg-rule NONE')
 
         # check we have no data disk
         result = self.cmd('vm show -g {rg} -n {vm}',
