@@ -9,6 +9,7 @@ from time import sleep
 from dateutil.tz import tzutc   # pylint: disable=import-error
 from azure_devtools.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.local_context import AzCLILocalContext, ALL, LOCAL_CONTEXT_FILE
 from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.testsdk.base import execute
@@ -18,7 +19,6 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
-    LocalContextScenarioTest,
     live_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
@@ -28,55 +28,7 @@ from azure.cli.testsdk.preparers import (
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest'
 SERVER_NAME_MAX_LENGTH = 63
-RESOURCE_GROUP_NAME_PREFIX = 'azuredbclitest_rg'
-RESOURCE_GROUP_NAME_MAX_LENGTH = 63
 
-class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
-
-    def test_postgres_flexible_server_local_context(self):
-        self._test_postgres_flexible_server_local_context('postgres')
-    
-    def _test_postgres_flexible_server_local_context(self, database):
-        from knack.util import CLIError
-
-        group_name = self.create_random_name(RESOURCE_GROUP_NAME_PREFIX, RESOURCE_GROUP_NAME_MAX_LENGTH)
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH) 
-        version = 12
-        storage_mb = 524288
-        location = 'eastus2'
-        administrator_login = 'pguser'
-        administrator_password = 'password@123'
-        sku_name = 'Standard_D4s_v3'
-
-        self.cmd('group create -l {} -n {}'.format(location, group_name))
-
-        self.cmd('{} flexible-server create --server-name {} --administrator-login {} --administrator-login-password {} --version {} --storage-mb {} --sku-name {}'
-                .format(database, server_name, administrator_login, administrator_password, version, storage_mb, sku_name))
-        with self.assertRaises(CLIError):
-            self.cmd('group delete -g {}'.format(group_name))
-            self.cmd('{} flexible-server delete -g {} -n {}'.format(database, group_name, server_name))
-
-        # In case create command takes too much, comment out group create, server create
-        # uncomment local context set and start from below 
-        
-        # self.cli_ctx.local_context.set(['all'], 'resource_group_name', group_name)
-        # self.cli_ctx.local_context.set(['all'], 'location', location)
-        # self.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name', server_name)
-        self.cmd('local-context show', checks=[
-            JMESPathCheck("all.resource_group_name", group_name),
-            JMESPathCheck("all.location", group_name),
-            JMESPathCheck('"postgres flexible-server"."server_name"', server_name)
-        ])
-
-        self.cmd('{} flexible-server show'.format(database))
-        self.cmd('{} flexible-server list'.format(database))
-        # self.cmd('{} flexible-server update --tags k1=v1'.format(database))  #doesn't run... 
-        self.cmd('{} flexible-server delete'.format(database))
-        with self.assertRaises(CLIError):
-            self.cmd('group delete')
-
-        self.cmd('group delete')
-            
 
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
