@@ -218,26 +218,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
             c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
-        with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
-            c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=postgres_server_name_arg_type)
-
-        with self.argument_context('{} flexible-server list'.format(command_group)) as c:
-            c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=postgres_server_name_arg_type)
-        
-        with self.argument_context('{} flexible-server wait'.format(command_group)) as c:
-            c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=postgres_server_name_arg_type)
-        
-        with self.argument_context('{} flexible-server show'.format(command_group)) as c:
-            c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=postgres_server_name_arg_type)
-        
-        with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
-            c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('server_name', arg_type=postgres_server_name_arg_type)
+        for scope in ['delete', 'list', 'wait', 'show', 'restart']:
+            argument_context_string = '{} flexible-server {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', arg_type=postgres_server_name_arg_type)
 
     _flexible_server_params('postgres')
+    _flexible_server_params('mysql')
     
 
