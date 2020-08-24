@@ -1070,7 +1070,7 @@ class VMExtensionScenarioTest(ScenarioTest):
             'ext_name': 'MyAccessExt'
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0')
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0 --nsg-rule NONE')
         self.cmd('vm extension set -n {ext_type} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} '
                  '--protected-settings "{config}" --extension-instance-name {ext_name}')
 
