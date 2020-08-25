@@ -3545,6 +3545,7 @@ class VMSSRollingUpgrade(ScenarioTest):
 
 
 class VMSSPriorityTesting(ScenarioTest):
+    @unittest.skip('Cannot test lb')
     @ResourceGroupPreparer(name_prefix='vmss_low_pri')
     def test_vmss_create_with_low_priority(self, resource_group):
         self.kwargs.update({
