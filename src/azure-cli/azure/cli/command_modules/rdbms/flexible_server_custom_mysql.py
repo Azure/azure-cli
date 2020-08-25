@@ -41,11 +41,11 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
         # storage_autogrow=auto_grow),
         location=location,
         create_mode="Default",
-        vnet_inj_args=mysql.flexibleservers.models.ServerPropertiesVnetInjArgs(
+        vnet_inj_args=mysql.flexibleservers.models.VnetInjArgs(
             delegated_vnet_id=None,  # what should this value be?
             delegated_subnet_name=subnet_name,
             delegated_vnet_name=vnet_name,
-            delegated_vnet_resource_group=None  # what should this value be?
+            # delegated_vnet_resource_group=None  # not in mysql
         ),
         tags=tags)
 
