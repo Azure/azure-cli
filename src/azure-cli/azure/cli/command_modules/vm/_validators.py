@@ -1034,7 +1034,7 @@ def _validate_admin_password(password, os_type):
     is_linux = (os_type.lower() == 'linux')
     max_length = 72 if is_linux else 123
     min_length = 12
-    error_msg = ("Rule 1: The password length must be betwween {} and {}\n"
+    error_msg = ("Rule 1: The password length must be between {} and {}\n"
                  "Rule 2: Password must have the 3 of the following: 1 lower case character, "
                  "1 upper case character, 1 number and 1 special character").format(min_length, max_length)
     if len(password) not in range(min_length, max_length + 1):
