@@ -6,7 +6,7 @@ set -exv
 export USERNAME=azureuser
 
 apt update
-apt install -y apt-transport-https git
+apt install -y apt-transport-https git gcc python3-dev
 
 # The distros that need libssl1.1
 case ${DISTRO} in
