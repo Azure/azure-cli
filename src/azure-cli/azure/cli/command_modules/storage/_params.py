@@ -775,19 +775,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='File path in file share of copy {} storage account'.format(item))
             c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
                        help='Local file path')
-        c.argument('destination_account_name', arg_group='Copy Destination',
+        c.argument('destination_account_name', arg_group='Copy destination',
                    help='Storage account name of copy destination',
                    deprecate_info=c.deprecate(redirect='--account-name', hide=True))
+        c.argument('account_name', acct_name_type, options_list='--account-name', id_part=None,
+                   arg_group='Storage Account')
         c.extra('source_account_name', arg_group='Copy source',
                 help='Account name of copy source storage account.')
         c.extra('source_account_key', arg_group='Copy source',
-                help='Account key of copy source storage account. Must be used in conjunction with storage '
+                help='Account key of copy source storage account. Must be used in conjunction with source storage '
                      'account name.')
         c.extra('source_connection_string', arg_group='Copy source',
                 help='Connection string of source storage account.')
         c.extra('source_sas', arg_group='Copy source',
-                help='Shared Access Signature (SAS) token of copy source. Must be used in conjunction with storage '
-                     'account name.')
+                help='Shared Access Signature (SAS) token of copy source. Must be used in conjunction with source '
+                     'storage account name.')
         c.argument('put_md5', arg_group='Additional Flags', action='store_true',
                    help='Create an MD5 hash of each file, and save the hash as the Content-MD5 property of the '
                    'destination blob/file.Only available when uploading.')
