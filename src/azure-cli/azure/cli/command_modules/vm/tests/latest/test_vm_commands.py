@@ -3690,7 +3690,7 @@ class VMGenericUpdate(ScenarioTest):
             'vm': 'vm1',
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2 --admin-username cligenerics --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n {vm} --image debian --data-disk-sizes-gb 1 2 --admin-username cligenerics --generate-ssh-keys --nsg-rule NONE')
 
         # we will try all kinds of generic updates we can
         self.cmd('vm update -g {rg} -n {vm} --set identity.type="SystemAssigned"', checks=[
