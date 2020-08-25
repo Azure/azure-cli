@@ -3383,7 +3383,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_w_params')
     def test_vm_run_command_with_parameters(self, resource_group):
         self.kwargs.update({'vm': 'test-run-command-vm2'})
-        self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!! --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!! --generate-ssh-keys --nsg-rule NONE')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
 
