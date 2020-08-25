@@ -461,5 +461,23 @@ short-summary: This command returns a public key (in PEM) that is stored in file
 examples:
   - name: Retrieve the exchange key and store it.
     text: |
-        az keyvault security-domain init-recovery --hsm-name MyHSM --sd-exchange-key "{path_to_store}"
+        az keyvault security-domain init-recovery --hsm-name MyHSM --sd-exchange-key "{PATH_TO_RESTORE}"
+"""
+
+helps['keyvault security-domain restore'] = """
+type: command
+short-summary: --sd-transfer-file specifies file path. This file contains security domain encrypted using SD Exchange file downloaded in security-domain init-recovery command.
+examples:
+  - name: Security domain restore.
+    text: |
+        az keyvault security-domain restore --hsm-name MyHSM --sd-transfer-file "{SD_TRANSFER_FILE}"
+"""
+
+helps['keyvault security-domain backup'] = """
+type: command
+short-summary: --sd-wrapping-key* are file paths to PEM files containing public key, that are uploaded. --security-domain-file specifies path to a file where the JSON blob returned by this command is stored.
+examples:
+  - name: Security domain backup.
+    text: |
+        az keyvault security-domain backup --hsm-name MyHSM --security-domain-file "{SD_FILE_NAME}" --sd-wrapping-key1 "{SDWK1_PEM_FILE_NAME}" --sd-wrapping-key2 "{SDWK2_PEM_FILE_NAME}" --sd-wrapping-key3 "{SDWK3_PEM_FILE_NAME}"
 """

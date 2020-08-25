@@ -421,13 +421,25 @@ def load_arguments(self, _):
     # endregion
 
     # region keyvault security-domain
-    with self.argument_context('keyvault security-domain init-recovery', arg_group='HSM Id') as c:
-        c.argument('hsm_base_url', hsm_name_type, required=False,
-                   help='Name of the HSM. Can be omitted if --id is specified.')
-        c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+    for scope in ['init-recovery', 'restore', 'backup']:
+        with self.argument_context('keyvault security-domain {}'.format(scope), arg_group='HSM Id') as c:
+            c.argument('hsm_base_url', hsm_name_type, required=False,
+                       help='Name of the HSM. Can be omitted if --id is specified.')
+            c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
 
     with self.argument_context('keyvault security-domain init-recovery') as c:
         c.argument('sd_exchange_key', help='Local file path to store the exported key.')
+
+    with self.argument_context('keyvault security-domain restore') as c:
+        c.argument('sd_transfer_file', help='This file contains security domain encrypted using SD Exchange file '
+                                            'downloaded in security-domain init-recovery command.')
+
+    with self.argument_context('keyvault security-domain backup') as c:
+        c.argument('sd_wrapping_key1', help='File path to PEM files containing public key.')
+        c.argument('sd_wrapping_key2', help='File path to PEM files containing public key.')
+        c.argument('sd_wrapping_key3', help='File path to PEM files containing public key.')
+        c.argument('security_domain_file',
+                   help='Path to a file where the JSON blob returned by this command is stored.')
     # endregion
 
     # region keyvault backup/restore

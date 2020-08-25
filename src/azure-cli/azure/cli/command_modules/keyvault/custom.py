@@ -2021,8 +2021,8 @@ def full_restore(client, storage_resource_uri, token, folder_to_restore,
 
 # region security domain
 def security_domain_init_recovery(client, hsm_base_url, sd_exchange_key):
-    if os.path.isfile(sd_exchange_key) or os.path.isdir(sd_exchange_key):
-        raise CLIError("File or directory named '{}' already exists.".format(sd_exchange_key))
+    if os.path.exists(sd_exchange_key):
+        raise CLIError("File named '{}' already exists.".format(sd_exchange_key))
 
     transfer_key = client.transfer_key(vault_base_url=hsm_base_url)
     json_web_key = _security_domain_jwk_to_dict(transfer_key.transfer_key)
@@ -2041,4 +2041,65 @@ def security_domain_init_recovery(client, hsm_base_url, sd_exchange_key):
             os.remove(sd_exchange_key)
         raise ex
 
+
+def security_domain_restore(cmd, client, hsm_base_url, sd_transfer_file, no_wait=False):
+    if not os.path.exists(sd_transfer_file):
+        raise CLIError('File {} does not exist.'.format(sd_transfer_file))
+    if os.path.isdir(sd_transfer_file):
+        raise CLIError('{} is a directory. A file is required.'.format(sd_transfer_file))
+
+    with open(sd_transfer_file) as f:
+        data = '\n'.join(f.readlines())
+
+    SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_upload,
+        vault_base_url=hsm_base_url,
+        security_domain=SecurityDomainObject(value=data)
+    )
+
+
+def security_domain_backup(cmd, client, hsm_base_url, sd_wrapping_key1, sd_wrapping_key2, sd_wrapping_key3,
+                           security_domain_file):
+    if os.path.exists(security_domain_file):
+        raise CLIError("File named '{}' already exists.".format(security_domain_file))
+
+    CertificateSet = cmd.get_models('CertificateSet', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    SecurityDomainCertificateItem = cmd.get_models('SecurityDomainCertificateItem',
+                                                   resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    SecurityDomainJsonWebKey = cmd.get_models('SecurityDomainJsonWebKey', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+
+    sd_wrapping_keys = [sd_wrapping_key1, sd_wrapping_key2, sd_wrapping_key3]
+    for path in sd_wrapping_keys:
+        if os.path.isdir(path):
+            raise CLIError('{} is a directory. A file is required.'.format(path))
+
+    certificates = []
+    for path in sd_wrapping_keys:
+        key_obj = SecurityDomainJsonWebKey()
+        with open(path, 'rb') as f:
+            pem_data = f.read()
+        try:
+            pkey = load_pem_private_key(pem_data, password=None, backend=default_backend())
+        except (ValueError, TypeError, UnsupportedAlgorithm) as e:
+            if str(e) == 'Could not deserialize key data.':
+                raise CLIError('Import failed: {} The private key in the PEM file must be encrypted.'.format(e))
+            raise CLIError('Import failed: {}'.format(e))
+
+        # populate key into jwk
+        if isinstance(pkey, rsa.RSAPrivateKey):
+            key_obj.kty = 'RSA-HSM'
+            _private_rsa_key_to_jwk(pkey, key_obj)
+        else:
+            raise CLIError('Import failed: Unsupported key type, {}.'.format(type(pkey)))
+
+        certificates.append(SecurityDomainCertificateItem(value=key_obj))
+
+    ret_json = client.download(
+        vault_base_url=hsm_base_url,
+        certificates=CertificateSet(certificates=certificates)
+    )
+    with open(security_domain_file, 'w') as f:
+        f.write(ret_json)
 # endregion
