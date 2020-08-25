@@ -22,10 +22,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 logger = get_logger(__name__)
-<<<<<<< HEAD
 
-=======
->>>>>>> 954cba082... add list interface
 
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
@@ -55,6 +52,7 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
     return client.delete_container(
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
+
 
 def list_blobs(client, delimiter=None, include=None, marker=None, num_results=None, prefix=None,
                show_next_marker=None, **kwargs):
