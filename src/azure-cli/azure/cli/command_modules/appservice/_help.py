@@ -1418,8 +1418,8 @@ examples:
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i myregistry.azurecr.io/docker-image:tag
   - name: create a WebApp using shared App Service Plan that is in a different resource group.
     text: >
-    AppServicePlanID=$(az appservice plan show -n SharedAppServicePlan -g MyResourceGroup --query "id" --out tsv)
-    az webapp create -g MyResourceGroup -n MyUniqueAppName -p "$AppServicePlanID"
+        AppServicePlanID=$(az appservice plan show -n SharedAppServicePlan -g MyResourceGroup --query "id" --out tsv)
+        az webapp create -g MyResourceGroup -p "$AppServicePlanID" -n MyUniqueAppName
 """
 
 helps['webapp create-remote-connection'] = """
