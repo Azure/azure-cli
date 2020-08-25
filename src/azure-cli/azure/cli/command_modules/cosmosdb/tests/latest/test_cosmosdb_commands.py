@@ -927,7 +927,6 @@ class CosmosDBTests(ScenarioTest):
         ctn_througput_update = self.cmd('az cosmosdb sql container throughput update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --throughput {tp2}').get_output_in_json()
         assert ctn_througput_update["resource"]["throughput"] == tp2
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_resource_throughput_autoscale')
     def test_cosmosdb_sql_resource_throughput_autoscale(self, resource_group):
         tp1 = 800
@@ -952,7 +951,7 @@ class CosmosDBTests(ScenarioTest):
         db_throughput_show = self.cmd('az cosmosdb sql database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert db_throughput_show["resource"]["throughput"] == tp1
 
-        db_througput_migrate_to_autoscale = self.cmd('az cosmosdb sql database throughput migrate-to-autoscale -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        self.cmd('az cosmosdb sql database throughput migrate-to-autoscale -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
         db_throughput_show = self.cmd('az cosmosdb sql database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert db_throughput_show["resource"]["autoscaleSettings"]["maxThroughput"]
@@ -960,7 +959,7 @@ class CosmosDBTests(ScenarioTest):
         db_througput_update = self.cmd('az cosmosdb sql database throughput update -g {rg} -a {acc} -n {db_name} --max-throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp2
 
-        db_througput_migrate_to_manual = self.cmd('az cosmosdb sql database throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        self.cmd('az cosmosdb sql database throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --throughput {tp3}')
         ctn_throughput_show = self.cmd('az cosmosdb sql container throughput show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
@@ -973,7 +972,6 @@ class CosmosDBTests(ScenarioTest):
 
         ctn_througput_migrate_to_manual = self.cmd('az cosmosdb sql container throughput migrate-to-manual-throughput -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_resource_throughput_autoscale')
     def test_cosmosdb_mongodb_resource_throughput_autoscale(self, resource_group):
         tp1 = 800
@@ -998,7 +996,7 @@ class CosmosDBTests(ScenarioTest):
         db_throughput_show = self.cmd('az cosmosdb mongodb database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert db_throughput_show["resource"]["throughput"] == tp1
 
-        db_througput_migrate_to_autoscale = self.cmd('az cosmosdb mongodb database throughput migrate-to-autoscale -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        self.cmd('az cosmosdb mongodb database throughput migrate-to-autoscale -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
         db_throughput_show = self.cmd('az cosmosdb mongodb database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert db_throughput_show["resource"]["autoscaleSettings"]["maxThroughput"]
@@ -1006,7 +1004,7 @@ class CosmosDBTests(ScenarioTest):
         db_througput_update = self.cmd('az cosmosdb mongodb database throughput update -g {rg} -a {acc} -n {db_name} --max-throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp2
 
-        db_througput_migrate_to_manual = self.cmd('az cosmosdb mongodb database throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        self.cmd('az cosmosdb mongodb database throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
         self.cmd('az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} -p {part} --throughput {tp3} --shard {shard_key}')
         col_throughput_show = self.cmd('az cosmosdb mongodb collection throughput show -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
@@ -1019,7 +1017,6 @@ class CosmosDBTests(ScenarioTest):
 
         col_througput_migrate_to_manual = self.cmd('az cosmosdb mongodb collection throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {col_name}').get_output_in_json()
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_resource_throughput_autoscale')
     def test_cosmosdb_mongodb_resource_throughput_autoscale(self, resource_group):
         tp1 = 800
@@ -1044,7 +1041,7 @@ class CosmosDBTests(ScenarioTest):
         db_throughput_show = self.cmd('az cosmosdb mongodb database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert db_throughput_show["resource"]["throughput"] == tp1
 
-        db_througput_migrate_to_autoscale = self.cmd('az cosmosdb mongodb database throughput migrate-to-autoscale -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        self.cmd('az cosmosdb mongodb database throughput migrate-to-autoscale -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
         db_throughput_show = self.cmd('az cosmosdb mongodb database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert db_throughput_show["resource"]["autoscaleSettings"]["maxThroughput"]
@@ -1052,7 +1049,7 @@ class CosmosDBTests(ScenarioTest):
         db_througput_update = self.cmd('az cosmosdb mongodb database throughput update -g {rg} -a {acc} -n {db_name} --max-throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp2
 
-        db_througput_migrate_to_manual = self.cmd('az cosmosdb mongodb database throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        self.cmd('az cosmosdb mongodb database throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
         self.cmd('az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --throughput {tp3} --shard {shard_key}')
         col_throughput_show = self.cmd('az cosmosdb mongodb collection throughput show -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
@@ -1064,7 +1061,6 @@ class CosmosDBTests(ScenarioTest):
         assert col_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp4
 
         col_througput_migrate_to_manual = self.cmd('az cosmosdb mongodb collection throughput migrate-to-manual-throughput -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_cassandra_resource_throughput_autoscale')
     def test_cosmosdb_cassandra_resource_throughput_autoscale(self, resource_group):
@@ -1090,7 +1086,7 @@ class CosmosDBTests(ScenarioTest):
         ks_throughput_show = self.cmd('az cosmosdb cassandra keyspace throughput show -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
         assert ks_throughput_show["resource"]["throughput"] == tp1
 
-        ks_througput_migrate_to_autoscale = self.cmd('az cosmosdb cassandra keyspace throughput migrate-to-autoscale -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
+        self.cmd('az cosmosdb cassandra keyspace throughput migrate-to-autoscale -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
 
         ks_throughput_show = self.cmd('az cosmosdb cassandra keyspace throughput show -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
         assert ks_throughput_show["resource"]["autoscaleSettings"]["maxThroughput"]
@@ -1098,7 +1094,7 @@ class CosmosDBTests(ScenarioTest):
         ks_througput_update = self.cmd('az cosmosdb cassandra keyspace throughput update -g {rg} -a {acc} -n {ks_name} --max-throughput {tp2}').get_output_in_json()
         assert ks_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp2
 
-        ks_througput_migrate_to_manual = self.cmd('az cosmosdb cassandra keyspace throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
+        self.cmd('az cosmosdb cassandra keyspace throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
 
         self.cmd('az cosmosdb cassandra table create -g {rg} -a {acc} --keyspace-name {ks_name} -n {tb_name} --throughput {tp3} --schema {schema}')
         tb_throughput_show = self.cmd('az cosmosdb cassandra table throughput show -g {rg} -a {acc} --keyspace-name {ks_name} -n {tb_name}').get_output_in_json()
@@ -1110,7 +1106,6 @@ class CosmosDBTests(ScenarioTest):
         assert tb_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp4
 
         tb_througput_migrate_to_manual = self.cmd('az cosmosdb cassandra table throughput migrate-to-manual-throughput -g {rg} -a {acc} --keyspace-name {ks_name} -n {tb_name}').get_output_in_json()
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_gremlin_resource_throughput_autoscale')
     def test_cosmosdb_gremlin_resource_throughput_autoscale(self, resource_group):
@@ -1136,7 +1131,7 @@ class CosmosDBTests(ScenarioTest):
         db_throughput_show = self.cmd('az cosmosdb gremlin database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert db_throughput_show["resource"]["throughput"] == tp1
 
-        db_througput_migrate_to_autoscale = self.cmd('az cosmosdb gremlin database throughput migrate-to-autoscale -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        self.cmd('az cosmosdb gremlin database throughput migrate-to-autoscale -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
         db_throughput_show = self.cmd('az cosmosdb gremlin database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert db_throughput_show["resource"]["autoscaleSettings"]["maxThroughput"]
@@ -1144,7 +1139,7 @@ class CosmosDBTests(ScenarioTest):
         db_througput_update = self.cmd('az cosmosdb gremlin database throughput update -g {rg} -a {acc} -n {db_name} --max-throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp2
 
-        db_througput_migrate_to_manual = self.cmd('az cosmosdb gremlin database throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        self.cmd('az cosmosdb gremlin database throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
         self.cmd('az cosmosdb gremlin graph create -g {rg} -a {acc} -d {db_name} -n {graph_name} -p {part} --throughput {tp3}')
         graph_throughput_show = self.cmd('az cosmosdb gremlin graph throughput show -g {rg} -a {acc} -d {db_name} -n {graph_name}').get_output_in_json()
@@ -1156,7 +1151,6 @@ class CosmosDBTests(ScenarioTest):
         assert graph_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp4
 
         graph_througput_migrate_to_manual = self.cmd('az cosmosdb gremlin graph throughput migrate-to-manual-throughput -g {rg} -a {acc} -d {db_name} -n {graph_name}').get_output_in_json()
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_table_resource_throughput_autoscale')
     def test_cosmosdb_table_resource_throughput_autoscale(self, resource_group):
@@ -1185,7 +1179,6 @@ class CosmosDBTests(ScenarioTest):
         assert table_througput_update["resource"]["autoscaleSettings"]["maxThroughput"] == tp2
 
         table_througput_migrate_to_manual = self.cmd('az cosmosdb table throughput migrate-to-manual-throughput -g {rg} -a {acc} -n {table_name}').get_output_in_json()
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_resource_max_throughput')
     def test_cosmosdb_sql_resource_max_throughput(self, resource_group):
