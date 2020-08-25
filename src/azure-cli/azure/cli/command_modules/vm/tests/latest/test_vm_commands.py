@@ -13,6 +13,7 @@ import unittest
 import mock
 import uuid
 
+from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_only
 from azure.cli.core.profiles import ResourceType
@@ -806,7 +807,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         # Expecting no results
         self.cmd('vm list --resource-group {rg}',
                  checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk')
+        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE')
 
         # Expecting one result, the one we created
         self.cmd('vm list --resource-group {rg}', checks=[
@@ -854,9 +855,19 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self.cmd('vm start --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/running')
         self.cmd('vm restart --resource-group {rg} --name {vm}')
-        self._check_vm_power_state('PowerState/running')
+        for i in range(5):
+            try:
+                self._check_vm_power_state('PowerState/running')
+                break
+            except JMESPathCheckAssertionError:
+                time.sleep(30)
         self.cmd('vm restart --resource-group {rg} --name {vm} --force')
-        self._check_vm_power_state('PowerState/running')
+        for i in range(5):
+            try:
+                self._check_vm_power_state('PowerState/running')
+                break
+            except JMESPathCheckAssertionError:
+                time.sleep(30)
         self.cmd('vm deallocate --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/deallocated')
         self.cmd('vm resize -g {rg} -n {vm} --size Standard_DS2_v2',
