@@ -449,3 +449,17 @@ examples:
     text: |
         az keyvault wait --name MyVault --created
 """
+
+helps['keyvault security-domain'] = """
+type: group
+short-summary: Manage security domains.
+"""
+
+helps['keyvault security-domain init-recovery'] = """
+type: command
+short-summary: This command returns a public key (in PEM) that is stored in file path specified by --sd-exchange-key parameter.
+examples:
+  - name: Retrieve the exchange key and store it.
+    text: |
+        az keyvault security-domain init-recovery --hsm-name MyHSM --sd-exchange-key "{path_to_store}"
+"""

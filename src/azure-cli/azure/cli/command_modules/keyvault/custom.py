@@ -1183,6 +1183,33 @@ def _bytes_to_int(b):
     return ans
 
 
+def _security_domain_jwk_to_dict(security_domain_jwk):
+    """Convert a `SecurityDomainJsonWebKey` struct to a python dict"""
+    d = {}
+    if security_domain_jwk.kid:
+        d['kid'] = security_domain_jwk.kid
+    if security_domain_jwk.kty:
+        d['kty'] = security_domain_jwk.kty
+    if security_domain_jwk.e:
+        d['e'] = _bytes_to_int(security_domain_jwk.e)
+    if security_domain_jwk.n:
+        d['n'] = _bytes_to_int(security_domain_jwk.n)
+    if security_domain_jwk.key_ops:
+        d['key_ops'] = security_domain_jwk.key_ops
+    if security_domain_jwk.x5c:
+        d['x5c'] = security_domain_jwk.x5c
+    if security_domain_jwk.use:
+        d['use'] = security_domain_jwk.use
+    if security_domain_jwk.x5t:
+        d['x5t'] = security_domain_jwk.x5t
+    if security_domain_jwk.x5tS256:
+        d['x5tS256'] = security_domain_jwk.x5tS256
+    if security_domain_jwk.alg:
+        d['alg'] = security_domain_jwk.alg
+
+    return d
+
+
 def _jwk_to_dict(jwk):
     """Convert a `JsonWebKey` struct to a python dict"""
     d = {}
@@ -1247,6 +1274,22 @@ def _extract_ec_public_key_from_jwk(jwk_dict):
     return public.public_key(default_backend())
 
 
+def _export_public_key(k, encoding=Encoding.PEM):
+    # https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends/cryptography_backend.py#L329-L332
+    return k.public_bytes(
+        encoding=encoding,
+        format=PublicFormat.SubjectPublicKeyInfo
+    )
+
+
+def _export_public_key_to_der(k):
+    return _export_public_key(k, encoding=Encoding.DER)
+
+
+def _export_public_key_to_pem(k):
+    return _export_public_key(k, encoding=Encoding.PEM)
+
+
 def download_key(client, file_path, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
                  vault_base_url=None, key_name=None, key_version='', encoding=None):
     """ Download a key from a KeyVault. """
@@ -1265,22 +1308,9 @@ def download_key(client, file_path, hsm_base_url=None, identifier=None,  # pylin
     else:
         raise CLIError('Unsupported key type: {}. (Supported key types: RSA, RSA-HSM, EC, EC-HSM)'.format(key_type))
 
-    def _to_der(k):
-        return k.public_bytes(
-            encoding=Encoding.DER,
-            format=PublicFormat.SubjectPublicKeyInfo
-        )
-
-    def _to_pem(k):
-        # https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends/cryptography_backend.py#L329-L332
-        return k.public_bytes(
-            encoding=Encoding.PEM,
-            format=PublicFormat.SubjectPublicKeyInfo
-        )
-
     methods = {
-        'DER': _to_der,
-        'PEM': _to_pem
+        'DER': _export_public_key_to_der,
+        'PEM': _export_public_key_to_pem
     }
 
     if encoding not in methods.keys():
@@ -1986,4 +2016,29 @@ def full_restore(client, storage_resource_uri, token, folder_to_restore,
         token,
         folder_to_restore
     )
+# endregion
+
+
+# region security domain
+def security_domain_init_recovery(client, hsm_base_url, sd_exchange_key):
+    if os.path.isfile(sd_exchange_key) or os.path.isdir(sd_exchange_key):
+        raise CLIError("File or directory named '{}' already exists.".format(sd_exchange_key))
+
+    transfer_key = client.transfer_key(vault_base_url=hsm_base_url)
+    json_web_key = _security_domain_jwk_to_dict(transfer_key.transfer_key)
+    key_type = json_web_key['kty']
+
+    if key_type in ['RSA', 'RSA-HSM']:
+        pub_key = _extract_rsa_public_key_from_jwk(json_web_key)
+    else:
+        raise CLIError('Unsupported key type: {}. (Supported key types: RSA, RSA-HSM)'.format(key_type))
+
+    try:
+        with open(sd_exchange_key, 'wb') as f:
+            f.write(_export_public_key_to_pem(pub_key))
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(sd_exchange_key):
+            os.remove(sd_exchange_key)
+        raise ex
+
 # endregion

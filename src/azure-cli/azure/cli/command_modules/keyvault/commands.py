@@ -131,6 +131,9 @@ def load_command_table(self, _):
                               'begin_full_restore_operation'))
         g.keyvault_command('status', 'restore_status')
 
+    with self.command_group('keyvault security-domain', private_data_entity.command_type, is_preview=True) as g:
+        g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
+
     with self.command_group('keyvault key', private_data_entity.command_type) as g:
         g.keyvault_command('list', 'get_keys',
                            transform=multi_transformers(

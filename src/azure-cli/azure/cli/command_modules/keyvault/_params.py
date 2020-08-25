@@ -420,11 +420,22 @@ def load_arguments(self, _):
 
     # endregion
 
+    # region keyvault security-domain
+    with self.argument_context('keyvault security-domain init-recovery', arg_group='HSM Id') as c:
+        c.argument('hsm_base_url', hsm_name_type, required=False,
+                   help='Name of the HSM. Can be omitted if --id is specified.')
+        c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+
+    with self.argument_context('keyvault security-domain init-recovery') as c:
+        c.argument('sd_exchange_key', help='Local file path to store the exported key.')
+    # endregion
+
     # region keyvault backup/restore
     for item in ['backup', 'restore']:
         for scope in ['start', 'status']:
             with self.argument_context('keyvault {} {}'.format(item, scope), arg_group='HSM Id') as c:
-                c.argument('vault_base_url', hsm_name_type, required=False)
+                c.argument('vault_base_url', hsm_name_type, required=False,
+                           help='Name of the HSM. Can be omitted if --id is specified.')
                 c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
                 c.ignore('cls')
 

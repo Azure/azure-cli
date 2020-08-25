@@ -10,6 +10,12 @@
 # --------------------------------------------------------------------------
 
 try:
+    from .security_domain_certificate_item_py3 import SecurityDomainCertificateItem
+    from .security_domain_json_web_key_py3 import SecurityDomainJsonWebKey
+    from .security_domain_object_py3 import SecurityDomainObject
+    from .security_domain_operation_status_py3 import SecurityDomainOperationStatus
+    from .transfer_key_py3 import TransferKey
+    from .certificate_set_py3 import CertificateSet
     from .attributes_py3 import Attributes
     from .json_web_key_py3 import JsonWebKey
     from .key_attributes_py3 import KeyAttributes
@@ -92,6 +98,12 @@ try:
     from .key_release_condition_py3 import KeyReleaseCondition
     from .key_release_policy_py3 import KeyReleasePolicy
 except (SyntaxError, ImportError):
+    from .security_domain_certificate_item import SecurityDomainCertificateItem
+    from .security_domain_json_web_key import SecurityDomainJsonWebKey
+    from .security_domain_object import SecurityDomainObject
+    from .security_domain_operation_status import SecurityDomainOperationStatus
+    from .transfer_key import TransferKey
+    from .certificate_set import CertificateSet
     from .attributes import Attributes
     from .json_web_key import JsonWebKey
     from .key_attributes import KeyAttributes
@@ -197,6 +209,12 @@ from .key_vault_client_enums import (
 )
 
 __all__ = [
+    'SecurityDomainCertificateItem',
+    'SecurityDomainJsonWebKey',
+    'SecurityDomainObject',
+    'SecurityDomainOperationStatus',
+    'TransferKey',
+    'CertificateSet',
     'Attributes',
     'JsonWebKey',
     'KeyAttributes',
