@@ -484,7 +484,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
         self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
         self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
-        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP")) # default name
+        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
         self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
 
         self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
