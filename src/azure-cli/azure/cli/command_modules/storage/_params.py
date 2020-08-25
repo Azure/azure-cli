@@ -11,7 +11,8 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
-                          validate_included_datasets_validator, validate_custom_domain, validate_container_public_access,
+                          validate_included_datasets_validator, validate_custom_domain,
+                          validate_container_public_access,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,

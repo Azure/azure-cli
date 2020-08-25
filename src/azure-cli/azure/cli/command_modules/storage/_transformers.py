@@ -191,6 +191,7 @@ def transform_blob_list_output(result):
             result[i] = {"name": item.name}
     return result
 
+
 def transform_blob_json_output(result):
     result = todict(result)
     new_result = {
