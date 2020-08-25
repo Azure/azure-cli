@@ -1732,12 +1732,12 @@ class VMCreateExistingOptions(ScenarioTest):
             'pswd': 'qpwWfn1qwernv#xnklwezxcvslkdfj'
         })
 
-        self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --enable-agent --admin-username azureuser --admin-password {pswd} --authentication-type password')
+        self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --enable-agent --admin-username azureuser --admin-password {pswd} --authentication-type password --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('osProfile.linuxConfiguration.provisionVmAgent', True)
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image Win2019Datacenter --admin-username azureuser --admin-password {pswd} --authentication-type password --enable-agent false')
+        self.cmd('vm create -g {rg} -n {vm2} --image Win2019Datacenter --admin-username azureuser --admin-password {pswd} --authentication-type password --enable-agent false --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('osProfile.windowsConfiguration.provisionVmAgent', False)
         ])
