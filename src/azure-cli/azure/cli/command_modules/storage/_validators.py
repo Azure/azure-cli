@@ -1403,8 +1403,7 @@ def validate_text_configuration(cmd, ns):
             has_header=ns.out_has_header)
     if ns.output_format == 'json':
         ns.output_config = DelimitedJSON(delimiter=ns.out_line_separator)
-    del ns.input_format, ns.output_format
-    del ns.in_line_separator, ns.in_column_separator, ns.in_quote_char, ns.in_record_separator, ns.in_escape_char, \
-        ns.in_has_header
-    del ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, ns.out_escape_char, \
-        ns.out_has_header
+    del ns.input_format, ns.in_line_separator, ns.in_column_separator, ns.in_quote_char, ns.in_record_separator, \
+        ns.in_escape_char, ns.in_has_header
+    del ns.output_format, ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, \
+        ns.out_escape_char, ns.out_has_header
