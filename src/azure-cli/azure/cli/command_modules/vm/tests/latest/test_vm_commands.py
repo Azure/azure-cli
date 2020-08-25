@@ -3623,7 +3623,8 @@ class VMCreateWithExistingNic(ScenarioTest):
         import re
         self.cmd('network public-ip create -g {rg} -n my-pip')
         self.cmd('network vnet create -g {rg} -n my-vnet --subnet-name my-subnet1')
-        self.cmd('network nic create -g {rg} -n my-nic --subnet my-subnet1 --vnet-name my-vnet --public-ip-address my-pip')
+        self.cmd('network nsg create -g {rg} -n nsg')
+        self.cmd('network nic create -g {rg} -n my-nic --subnet my-subnet1 --vnet-name my-vnet --public-ip-address my-pip --network-security-group nsg')
         self.cmd('network nic ip-config create -n my-ipconfig2 -g {rg} --nic-name my-nic --private-ip-address-version IPv6')
         self.cmd('vm create -g {rg} -n vm1 --image centos --nics my-nic --generate-ssh-keys --admin-username ubuntuadmin')
         result = self.cmd('vm show -g {rg} -n vm1 -d').get_output_in_json()
