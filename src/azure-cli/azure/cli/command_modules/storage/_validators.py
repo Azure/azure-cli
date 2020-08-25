@@ -1379,3 +1379,72 @@ def validate_or_policy(namespace):
 
         if "policyId" in or_policy.keys() and or_policy["policyId"]:
             namespace.policy_id = or_policy['policyId']
+
+
+def get_url_with_sas(cmd, namespace):
+    import re
+    import os
+    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
+
+    storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
+    # validate credential
+    validate_client_parameters(cmd, namespace)
+
+    if namespace.url is not None:
+        # validate source is uri or local path
+        storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
+        result = re.findall(storage_pattern, namespace.url)
+        if result:  # source is URL
+            storage_info = result[0]
+            namespace.account_name = storage_info[0]
+            if storage_info[1] in ['blob', 'dfs']:
+                service = 'blob'
+            elif storage_info[1] in ['file']:
+                service = 'file'
+            else:
+                raise ValueError('{} is not valid storage endpoint.'.format(namespace.url))
+
+    if namespace.container:
+        client = blob_data_service_factory(cmd.cli_ctx, namespace)
+        if namespace.blob is None:
+            blob = ''
+        source = client.make_blob_url(namespace.container, namespace.blob)
+        service = 'blob'
+    elif namespace.share:
+        client = file_data_service_factory(cmd.cli_ctx, namespace)
+        dir_name, file_name = os.path.split(namespace.file_path) if namespace.file_path else (None, '')
+        dir_name = None if dir_name in ('', '.') else dir_name
+        url = client.make_file_url(namespace.share, dir_name, file_name)
+        service = 'file'
+    elif not any(namespace.url, namespace.container, namespace.share):  # In account level, only blob service is supported
+        service = 'blob'
+        url = 'https://{}.{}.{}'.format(namespace.account_name, service, storage_endpoint)
+
+    # Add sas in url
+    if namespace.sas_token:
+        sas_token = namespace.sas_token.lstrip('?')
+    else:
+        sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
+    return '{}?{}'.format(url, sas_token)
+
+
+def _is_valid_uri(uri):
+    import os
+    if os.path.isdir(uri) or os.path.isfile(uri):
+        return uri
+    if "?" in uri:  # sas token exists
+        logger.debug("Find ? in {}. ", uri)
+        return uri
+    return False
+
+
+def validate_azcopy_credential(cmd, namespace):
+    if _is_valid_uri(namespace.source):
+        del namespace.source_account_name, namespace.source_account_key, namespace.source_sas,
+    else:
+        namespace.source = get_url_with_sas(cmd, namespace)
+
+    if _is_valid_uri(namespace.destination):
+        del namespace.destination_account_name, namespace.destination_account_key
+    else:
+        namespace.destination = get_url_with_sas(cmd, namespace)
