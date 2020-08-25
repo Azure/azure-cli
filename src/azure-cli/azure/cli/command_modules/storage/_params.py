@@ -775,11 +775,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='File path in file share of copy {} storage account'.format(item))
             c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
                        help='Local file path')
-        c.argument('destination_account_name', arg_group='Copy destination',
-                   help='Storage account name of copy destination',
-                   deprecate_info=c.deprecate(redirect='--account-name', hide=True))
-        c.argument('account_name', acct_name_type, options_list='--account-name', id_part=None,
-                   arg_group='Storage Account')
+        c.argument('account_name', acct_name_type, arg_group='Storage Account', id_part=None,
+                   options_list=['--account-name', c.deprecate(target='--destination-account-name', redirect='--account-name')],
+                   help='Storage account name of copy destination')
         c.extra('source_account_name', arg_group='Copy source',
                 help='Account name of copy source storage account.')
         c.extra('source_account_key', arg_group='Copy source',
