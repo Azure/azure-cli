@@ -3388,6 +3388,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
 
 
 class VMSSRunCommandScenarioTest(ScenarioTest):
+    @unittest.skip('Can\'t test it. We are not allowed to open ports.')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command')
     def test_vmss_run_command_e2e(self, resource_group, resource_group_location):
 
