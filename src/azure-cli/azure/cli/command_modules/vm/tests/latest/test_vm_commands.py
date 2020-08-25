@@ -3244,6 +3244,7 @@ class VMZoneScenarioTest(ScenarioTest):
         except Exception as ex:
             self.assertTrue('availability zone is not yet supported' in str(ex))
 
+    @unittest.skip('Can\'t test due to no qualified subscription')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
     @AllowLargeResponse(size_kb=99999)
     def test_vmss_create_single_zone(self, resource_group, resource_group_location):
