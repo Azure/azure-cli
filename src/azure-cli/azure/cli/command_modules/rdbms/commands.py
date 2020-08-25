@@ -554,7 +554,7 @@ def load_command_table(self, _):
                                  custom_func_name='_flexible_firewall_rule_update_custom_func')
 
     # no custom commands needed
-    with self.command_group('postgres flexible-server configuration', postgres_flexible_config_sdk) as g:
+    with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk) as g:
         g.command('set', 'update')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
@@ -608,13 +608,12 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
-        # g.custom_command('list', '_flexible_firewall_get_test') # this is setup solely for debugging
         g.generic_update_command('update',
                                  getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
                                  setter_name='_firewall_rule_custom_setter', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_flexible_firewall_rule_update_custom_func')
 
-    with self.command_group('mysql flexible-server configuration', mysql_flexible_config_sdk,
+    with self.command_group('mysql flexible-server parameter', mysql_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_config) as g:
         g.command('set', 'update')

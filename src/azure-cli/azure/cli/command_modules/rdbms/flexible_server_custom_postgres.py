@@ -12,15 +12,17 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import get_postgresql_flexible_management_client
+from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
+
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
 
-
 def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
-                   location=None, no_wait=False, administrator_login=None, administrator_login_password=None, backup_retention=None,
-                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
-                   assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
+                   location=None, storage_mb=None, administrator_login=None, administrator_login_password=None, version=None,
+                   backup_retention=None, tags=None, public_network_access=None, vnet_name=None, vnet_address_prefix=None,
+                   subnet_name=None, subnet_address_prefix=None, public_access=None, high_availability=None, zone=None,
+                   maintenance_window=None, assign_identity=False):
     from azure.mgmt.rdbms import postgresql
 
     parameters = postgresql.flexibleservers.models.Server(
@@ -28,20 +30,23 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
-        ssl_enforcement=ssl_enforcement,
         public_network_access=public_network_access,
-        infrastructure_encryption=infrastructure_encryption,
         storage_profile=postgresql.flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
-            # geo_redundant_backup=geo_redundant_backup,
+            # geo_redundant_backup=geo_redundant_backup, # to be enabled after private preview
             storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
-        # storage_autogrow=auto_grow),
         location=location,
-        create_mode="Default",  # can also be create
+        create_mode="Default",
+        vnet_inj_args = postgresql.flexibleservers.models.ServerPropertiesVnetInjArgs(
+            delegated_vnet_id=None,  # what should this value be?
+            delegated_subnet_name=subnet_name,
+            delegated_vnet_name=vnet_name,
+            delegated_vnet_resource_group=None  # what should this value be?
+        ),
         tags=tags)
 
     if assign_identity:
-        parameters.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
+        parameters.identity = postgresql.models.flexibleservers.Identity(type=postgresql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
     return client.create(resource_group_name, server_name, parameters)
 
 # Need to replace source server name with source server id, so customer server restore function
@@ -77,30 +82,19 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
-# Update commands
-def _flexible_server_update_get(client, resource_group_name, server_name):
-    return client.get(resource_group_name, server_name)
-
-def _flexible_server_update_set(client, resource_group_name, server_name, parameters):
-    return client.update(resource_group_name, server_name, parameters)
-
+# 8/25: may need to update the update function per updates to swagger spec
 def _flexible_server_update_custom_func(instance,
-                               version=None,
                                sku_name=None,
                                v_cores=None,
                                server_edition=None,
                                storage_mb=None,
                                backup_retention=None,
                                administrator_login_password=None,
-                               ssl_enforcement=None,
-                               tags=None,
                                auto_grow=None,
-                               assign_identity=False,
-                               public_network_access=None,
-                               minimal_tls_version=None):
+                               assign_identity=False):
     from importlib import import_module
     server_module_path = instance.__module__
-    module = import_module(server_module_path) # .replace('server', 'server_update_parameters')) not needed for flexservers
+    module = import_module(server_module_path)
     ServerPropertiesForUpdate = getattr(module, 'ServerPropertiesForUpdate')
 
     if sku_name:
@@ -122,8 +116,6 @@ def _flexible_server_update_custom_func(instance,
 
     if server_edition:
         instance.server_edition = server_edition
-    else:
-        server_edition = "GeneralPurpose" # default if not provided
 
     params = ServerPropertiesForUpdate(storage_profile=instance.storage_profile,
                                     administrator_login_password=administrator_login_password,
@@ -142,17 +134,3 @@ def _flexible_server_update_custom_func(instance,
 def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
-
-# Common between sterling and meru
-# Custom functions for list servers
-def _server_list_custom_func(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
-    if start_ip_address is not None:
-        instance.start_ip_address = start_ip_address
-    if end_ip_address is not None:
-        instance.end_ip_address = end_ip_address
-    return instance

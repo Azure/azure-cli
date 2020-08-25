@@ -14,35 +14,43 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
-from ._client_factory import get_mariadb_management_client, get_mysql_flexible_management_client, get_postgresql_flexible_management_client, cf_postgres_firewall_rules, cf_postgres_db, cf_postgres_config
+from ._client_factory import get_mariadb_management_client, get_mysql_flexible_management_client
+from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
 
-
 def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
-                   location=None, no_wait=False, administrator_login=None, administrator_login_password=None, backup_retention=None,
-                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
-                   assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
+                                location=None, storage_mb=None, administrator_login=None,
+                                administrator_login_password=None, version=None,
+                                backup_retention=None, tags=None, public_network_access=None, vnet_name=None,
+                                vnet_address_prefix=None, subnet_name=None, subnet_address_prefix=None, public_access=None,
+                                high_availability=None, zone=None, maintenance_window=None, assign_identity=False):
     from azure.mgmt.rdbms import mysql
-    ### TO DO: This is not complete yet, waiting on deployment
+
     parameters = mysql.flexibleservers.models.Server(
         sku=mysql.flexibleservers.models.Sku(name=sku_name, tier = tier),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
-        ssl_enforcement=ssl_enforcement,
         public_network_access=public_network_access,
-        infrastructure_encryption=infrastructure_encryption,
         storage_profile=mysql.flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
             # geo_redundant_backup=geo_redundant_backup,
             storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
         # storage_autogrow=auto_grow),
         location=location,
+        create_mode="Default",
+        vnet_inj_args=mysql.flexibleservers.models.ServerPropertiesVnetInjArgs(
+            delegated_vnet_id=None,  # what should this value be?
+            delegated_subnet_name=subnet_name,
+            delegated_vnet_name=vnet_name,
+            delegated_vnet_resource_group=None  # what should this value be?
+        ),
         tags=tags)
+
     if assign_identity:
-        parameters.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
+        parameters.identity = mysql.models.flexibleservers.Identity(type=mysql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
     return client.create(resource_group_name, server_name, parameters)
 
 # Need to replace source server name with source server id, so customer server restore function
@@ -78,18 +86,20 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
-# Update commands
+# 8/25: may need to update the update function per updates to swagger spec
 def _flexible_server_update_custom_func(instance,
                                sku_name=None,
                                storage_mb=None,
                                backup_retention=None,
                                administrator_login_password=None,
                                ssl_enforcement=None,
+                               vnet_name=None,
+                               subnet_name=None,
                                tags=None,
                                auto_grow=None,
                                assign_identity=False,
                                public_network_access=None,
-                               minimal_tls_version=None):
+                               replication_role=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path) # replacement not needed for update in flex servers
@@ -97,8 +107,6 @@ def _flexible_server_update_custom_func(instance,
 
     if sku_name:
         instance.sku.name = sku_name
-        instance.sku.capacity = None
-        instance.sku.family = None
         instance.sku.tier = None
     else:
         instance.sku = None
@@ -112,20 +120,27 @@ def _flexible_server_update_custom_func(instance,
     if auto_grow:
         instance.storage_profile.storage_autogrow = auto_grow
 
+    if subnet_name:
+        instance.vnet_inj_args.delegated_subnet_name = subnet_name
+
+    if vnet_name:
+        instance.vnet_inj_args.delegated_vnet_name = vnet_name
+
     params = ServerForUpdate(sku=instance.sku,
                                     storage_profile=instance.storage_profile,
                                     administrator_login_password=administrator_login_password,
-                                    version=None,
                                     ssl_enforcement=ssl_enforcement,
+                                    vnet_inj_args=instance.vnet_inj_args,
                                     tags=tags,
-                                    public_network_access=public_network_access,
-                                    minimal_tls_version=minimal_tls_version)
+                                    replication_role=replication_role,
+                                    public_network_access=public_network_access)
 
     if assign_identity:
         if server_module_path.find('mysql'):
             from azure.mgmt.rdbms import mysql
             if instance.identity is None:
-                instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
+                instance.identity = mysql.models.flexibleservers.Identity(
+                    type=mysql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
             params.identity = instance.identity
 
     return params
@@ -187,22 +202,6 @@ def _flexible_replica_stop(client, resource_group_name, server_name):
     params = ServerForUpdate(replication_role='None')
 
     return client.update(resource_group_name, server_name, params)
-
-
-
-# Common between sterling and meru
-# Custom functions for list servers
-def _server_list_custom_func(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
-    if start_ip_address is not None:
-        instance.start_ip_address = start_ip_address
-    if end_ip_address is not None:
-        instance.end_ip_address = end_ip_address
-    return instance
 
 def _flexible_server_mysql_get(cmd, resource_group_name, server_name):
     client = get_mysql_flexible_management_client(cmd.cli_ctx)
