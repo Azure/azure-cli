@@ -3360,6 +3360,7 @@ class VMZoneScenarioTest(ScenarioTest):
 
 class VMRunCommandScenarioTest(ScenarioTest):
 
+    @unittest.skip('Can\'t test open-port. It is not allowed in our subscription')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command')
     def test_vm_run_command_e2e(self, resource_group, resource_group_location):
 
@@ -3370,7 +3371,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
 
         self.cmd('vm run-command list -l {loc}')
         self.cmd('vm run-command show --command-id RunShellScript -l {loc}')
-        public_ip = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --admin-password Test12345678!! --generate-ssh-keys').get_output_in_json()['publicIpAddress']
+        public_ip = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --admin-password Test12345678!! --generate-ssh-keys --nsg-rule NONE').get_output_in_json()['publicIpAddress']
 
         self.cmd('vm open-port -g {rg} -n {vm} --port 80')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"')
