@@ -98,7 +98,7 @@ def create(
             option = prompt_y_n(hint)
             if not option:
                 raise CLIError('Operation cancelled.')
-    if kind.lower() == 'face':
+    if kind.lower() == 'face' or kind.lower() == 'cognitiveservices':
         if yes:
             logger.warning(terms_not_police)
         else:
