@@ -574,7 +574,7 @@ jobs:
 
 - job: TestHomebrewPackage
   displayName: Test Homebrew Package
-  timeoutInMinutes: 120
+  timeoutInMinutes: 180
   dependsOn: BuildHomebrewFormula
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
