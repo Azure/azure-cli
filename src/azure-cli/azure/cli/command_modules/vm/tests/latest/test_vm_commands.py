@@ -1541,7 +1541,7 @@ class VMBootDiagnostics(ScenarioTest):
         self.kwargs['storage_uri'] = 'https://{}.blob.core.windows.net/'.format(self.kwargs['sa'])
 
         self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l westus')
-        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0 --use-unmanaged-disk')
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0 --use-unmanaged-disk --nsg-rule NONE')
 
         self.cmd('vm boot-diagnostics enable -g {rg} -n {vm} --storage {sa}')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
@@ -1556,7 +1556,7 @@ class VMBootDiagnostics(ScenarioTest):
                  checks=self.check('diagnosticsProfile.bootDiagnostics.enabled', False))
 
         # try enable it at the create
-        self.cmd('vm create -g {rg} -n {vm2} --image debian --admin-username user11 --admin-password testPassword0 --boot-diagnostics-storage {sa}')
+        self.cmd('vm create -g {rg} -n {vm2} --image debian --admin-username user11 --admin-password testPassword0 --boot-diagnostics-storage {sa} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('diagnosticsProfile.bootDiagnostics.enabled', True),
             self.check('diagnosticsProfile.bootDiagnostics.storageUri', '{storage_uri}')
