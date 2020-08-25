@@ -602,6 +602,10 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
         # Prepare blob 1
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} ', account_info,
                          container, local_file, blob_name1)
+        # Test
+        self.storage_cmd('storage blob list -c {} ', account_info, container) \
+            .assert_with_checks(JMESPathCheck('[0].objectReplicationDestinationPolicy', None),
+                                JMESPathCheck('[0].objectReplicationSourceProperties', []))
 
         # Test with include snapshot
         result = self.storage_cmd('storage blob snapshot -c {} -n {} ', account_info, container, blob_name1)\
@@ -613,14 +617,13 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('[0].snapshot', snapshot))
 
         # Test with include metadata
-        # TODO: add back when fix
-        # self.storage_cmd('storage blob metadata update -c {} -n {} --metadata test=1 ', account_info,
-        #                  container, blob_name1)
-        # self.storage_cmd('storage blob metadata show -c {} -n {} ', account_info, container, blob_name1)\
-        #     .assert_with_checks(JMESPathCheck('test', '1'))
-        #
-        # self.storage_cmd('storage blob list -c {} --include m', account_info, container) \
-        #     .assert_with_checks(JMESPathCheck('[0].metadata.test', '1'))
+        self.storage_cmd('storage blob metadata update -c {} -n {} --metadata test=1 ', account_info,
+                         container, blob_name1)
+        self.storage_cmd('storage blob metadata show -c {} -n {} ', account_info, container, blob_name1)\
+            .assert_with_checks(JMESPathCheck('test', '1'))
+
+        self.storage_cmd('storage blob list -c {} --include m', account_info, container) \
+            .assert_with_checks(JMESPathCheck('[0].metadata.test', '1'))
 
         # Prepare blob 2
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} ', account_info,

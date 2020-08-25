@@ -242,14 +242,13 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.oauth_cmd('storage blob list -c {container} --include s --account-name {account} ') \
             .assert_with_checks(JMESPathCheck('[0].snapshot', snapshot))
 
-        # Test with include metadata
-        # TODO: add back when fix
-        # self.oauth_cmd('storage blob metadata update -c {container} -n {blob_name1} --metadata test=1 --account-name {account} ')
-        # self.oauth_cmd('storage blob metadata show -c {container} -n {blob_name1} --account-name {account} ')\
-        #     .assert_with_checks(JMESPathCheck('test', '1'))
-        #
-        # self.oauth_cmd('storage blob list -c {container} --include m --account-name {account}  ') \
-        #     .assert_with_checks(JMESPathCheck('[0].metadata.test', '1'))
+        # Test with metadata
+        self.oauth_cmd('storage blob metadata update -c {container} -n {blob_name1} --metadata test=1 --account-name {account} ')
+        self.oauth_cmd('storage blob metadata show -c {container} -n {blob_name1} --account-name {account} ')\
+            .assert_with_checks(JMESPathCheck('test', '1'))
+
+        self.oauth_cmd('storage blob list -c {container} --include m --account-name {account}  ') \
+            .assert_with_checks(JMESPathCheck('[0].metadata.test', '1'))
 
         # Prepare blob 2
         self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob_name2} --account-name {account} ')
