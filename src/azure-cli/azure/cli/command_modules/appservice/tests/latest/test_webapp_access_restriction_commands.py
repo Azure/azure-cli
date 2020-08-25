@@ -158,14 +158,14 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(location='centralus')
     def test_webapp_access_restriction_remove(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
             'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('appservice plan create -g {rg} -n {plan_name}')
+        self.cmd('appservice plan create -g {rg} -n {plan_name} --debug')
         self.cmd('webapp create -g {rg} -n {app_name} --plan {plan_name}', checks=[
             JMESPathCheck('state', 'Running')
         ])
