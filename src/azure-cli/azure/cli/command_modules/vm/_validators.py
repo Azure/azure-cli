@@ -1034,9 +1034,11 @@ def _validate_admin_password(password, os_type):
     is_linux = (os_type.lower() == 'linux')
     max_length = 72 if is_linux else 123
     min_length = 12
+    error_msg = ("Rule 1: The password length must be betwween {} and {}\n"
+                 "Rule 2: Password must have the 3 of the following: 1 lower case character, "
+                 "1 upper case character, 1 number and 1 special character").format(min_length, max_length)
     if len(password) not in range(min_length, max_length + 1):
-        raise CLIError('The password length must be between {} and {}'.format(min_length,
-                                                                              max_length))
+        raise CLIError("Your password is invalid for it violates Rule 1\n{}".format(error_msg))
     contains_lower = re.findall('[a-z]+', password)
     contains_upper = re.findall('[A-Z]+', password)
     contains_digit = re.findall('[0-9]+', password)
@@ -1045,7 +1047,7 @@ def _validate_admin_password(password, os_type):
                              contains_digit, contains_special_char] if x])
     # pylint: disable=line-too-long
     if count < 3:
-        raise CLIError('Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character')
+        raise CLIError("Your password is invalid for it violates Rule 2\n{}".format(error_msg))
 
 
 def validate_ssh_key(namespace):
