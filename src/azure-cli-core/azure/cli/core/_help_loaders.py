@@ -123,11 +123,12 @@ class YamlLoaderMixin:  # pylint:disable=too-few-public-methods
             for loader in loaders:
                 loader_file_path = inspect.getfile(loader.__class__)
                 dir_name = os.path.dirname(loader_file_path)
-                files = os.listdir(dir_name)
-                for file in files:
-                    if file.endswith("help.yaml") or file.endswith("help.yml"):
-                        help_file_path = os.path.join(dir_name, file)
-                        results.append(help_file_path)
+                if os.path.exists(dir_name) and os.path.isdir(dir_name):
+                    files = os.listdir(dir_name)
+                    for file in files:
+                        if file.endswith("help.yaml") or file.endswith("help.yml"):
+                            help_file_path = os.path.join(dir_name, file)
+                            results.append(help_file_path)
         return results
 
     @staticmethod

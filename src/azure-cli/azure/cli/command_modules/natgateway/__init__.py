@@ -8,7 +8,7 @@
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.profiles import ResourceType
 
-from ._help import helps  # pylint: disable=unused-import
+from azure.cli.command_modules.natgateway._help import helps  # pylint: disable=unused-import
 
 
 class NatGatewayCommandsLoader(AzCommandsLoader):
@@ -24,12 +24,12 @@ class NatGatewayCommandsLoader(AzCommandsLoader):
         )
 
     def load_command_table(self, args):
-        from .commands import load_command_table
+        from azure.cli.command_modules.natgateway.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        from ._params import load_arguments
+        from azure.cli.command_modules.natgateway._params import load_arguments
         load_arguments(self, command)
 
 

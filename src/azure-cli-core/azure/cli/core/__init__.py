@@ -206,13 +206,19 @@ class MainCommandsLoader(CLICommandsLoader):
             else:
                 # Perform module discovery
                 command_modules = []
-                try:
-                    mods_ns_pkg = import_module('azure.cli.command_modules')
-                    command_modules = [modname for _, modname, _ in
-                                       pkgutil.iter_modules(mods_ns_pkg.__path__)]
-                    logger.debug('Discovered command modules: %s', command_modules)
-                except ImportError as e:
-                    logger.warning(e)
+                if getattr(sys, 'frozen', False):
+                    # from PyInstaller.utils.hooks import collect_submodules
+                    # command_modules = collect_submodules('azure.cli.command_modules')
+                    command_modules = ['acr', 'acs', 'advisor', 'ams', 'apim', 'appconfig', 'appservice', 'aro', 'backup', 'batch', 'batchai', 'billing', 'botservice', 'cdn', 'cloud', 'cognitiveservices', 'configure', 'consumption', 'container', 'cosmosdb', 'deploymentmanager', 'dla', 'dls', 'dms', 'eventgrid', 'eventhubs', 'extension', 'feedback', 'find', 'hdinsight', 'interactive', 'iot', 'iotcentral', 'keyvault', 'kusto', 'lab', 'managedservices', 'maps', 'monitor', 'natgateway', 'netappfiles', 'network', 'policyinsights', 'privatedns', 'profile', 'rdbms', 'redis', 'relay', 'reservations', 'resource', 'role', 'search', 'security', 'servicebus', 'servicefabric', 'signalr', 'sql', 'sqlvm', 'storage', 'util', 'vm']
+                else:
+                    command_modules = []
+                    try:
+                        mods_ns_pkg = import_module('azure.cli.command_modules')
+                        command_modules = [modname for _, modname, _ in
+                                           pkgutil.iter_modules(mods_ns_pkg.__path__)]
+                        logger.debug('Discovered command modules: %s', command_modules)
+                    except ImportError as e:
+                        logger.warning(e)
 
             count = 0
             cumulative_elapsed_time = 0
