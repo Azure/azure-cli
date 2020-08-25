@@ -150,7 +150,7 @@ def load_arguments(self, _):
         c.argument('enable_private_link',
                    action='store_true',
                    help='Enable Private Link feature for this application gateway. '
-                        'If boht public IP and private IP are enbaled, taking effect only in public frontend IP',
+                        'If both public IP and private IP are enbaled, taking effect only in public frontend IP',
                    default=False)
         c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
