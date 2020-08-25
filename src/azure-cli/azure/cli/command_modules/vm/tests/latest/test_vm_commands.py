@@ -3569,6 +3569,7 @@ class VMSSPriorityTesting(ScenarioTest):
 # convert to ScenarioTest and re-record when issue #6006 is fixed
 class VMLBIntegrationTesting(ScenarioTest):
 
+    @unittest.skip('Can\'t test lb')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_lb_integration')
     def test_vm_lb_integration(self, resource_group):
 
