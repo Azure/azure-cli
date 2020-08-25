@@ -3495,6 +3495,7 @@ class VMDiskEncryptionTest(ScenarioTest):
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMSSRollingUpgrade(ScenarioTest):
 
+    @unittest.skip('Cannot open ports in our subscription')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_rolling_update')
     def test_vmss_rolling_upgrade(self, resource_group):
 
