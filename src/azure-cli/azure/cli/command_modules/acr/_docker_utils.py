@@ -493,6 +493,7 @@ def request_data_from_registry(http_method,
                                json_payload=None,
                                file_payload=None,
                                params=None,
+                               get_iter_content=False,
                                retry_times=3,
                                retry_interval=5,
                                timeout=300):
@@ -523,7 +524,8 @@ def request_data_from_registry(http_method,
                         params=params,
                         data=data_payload,
                         timeout=timeout,
-                        verify=(not should_disable_connection_verify())
+                        verify=(not should_disable_connection_verify()),
+                        stream=get_iter_content,
                     )
             else:
                 response = requests.request(
@@ -533,19 +535,20 @@ def request_data_from_registry(http_method,
                     params=params,
                     json=json_payload,
                     timeout=timeout,
-                    verify=(not should_disable_connection_verify())
+                    verify=(not should_disable_connection_verify()),
+                    stream=get_iter_content,
                 )
 
             log_registry_response(response)
 
             if response.status_code == 200:
-                result = response.json()[result_index] if result_index else response.json()
+                result = _get_result_from_response(response, result_index, get_iter_content)
                 next_link = response.headers['link'] if 'link' in response.headers else None
                 return result, next_link
             if response.status_code == 201 or response.status_code == 202:
                 result = None
                 try:
-                    result = response.json()[result_index] if result_index else response.json()
+                    result = _get_result_from_response(response, result_index, get_iter_content)
                 except ValueError as e:
                     logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
                 return result, None
@@ -576,6 +579,15 @@ def request_data_from_registry(http_method,
             time.sleep(retry_interval)
 
     raise CLIError(errorMessage)
+
+
+def _get_result_from_response(response, result_index, get_raw, chunk_size=128, decode_unicode=False):
+    if get_raw:
+        return response.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+    if result_index is not None:  # 0 is an acceptable result_index
+        return response.json()[result_index]
+    else:
+        return response.json()
 
 
 def parse_error_message(error_message, response):

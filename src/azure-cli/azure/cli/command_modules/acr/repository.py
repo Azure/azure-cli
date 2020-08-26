@@ -436,11 +436,16 @@ def acr_repository_metadata_show(cmd,
                                  registry_name,
                                  repository,
                                  key=None,
+                                 file_out=None,
                                  resource_group_name=None,  # pylint: disable=unused-argument
                                  tenant_suffix=None,
                                  username=None,
                                  password=None):
-    return _acr_repository_metadata_helper(
+    _validate_parameters_out(key, file_out)
+
+    get_iter_content = key is not None
+
+    result = _acr_repository_metadata_helper(
         cmd=cmd,
         registry_name=registry_name,
         http_method='get',
@@ -449,7 +454,16 @@ def acr_repository_metadata_show(cmd,
         key=key,
         tenant_suffix=tenant_suffix,
         username=username,
-        password=password)
+        password=password,
+        get_iter_content=get_iter_content)
+
+    if get_iter_content:
+        with open(file_out, 'wb') as f:
+            for chunk in result:
+                f.write(chunk)
+        return "Wrote metadata for key '{}' to file {}".format(key, file_out)
+    else:
+        return result
 
 
 def acr_repository_metadata_update(cmd,
@@ -483,7 +497,8 @@ def _acr_repository_metadata_helper(cmd,
                                     file_payload=None,
                                     tenant_suffix=None,
                                     username=None,
-                                    password=None):
+                                    password=None,
+                                    get_iter_content=False):
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -502,7 +517,8 @@ def _acr_repository_metadata_helper(cmd,
         path=path,
         username=username,
         password=password,
-        file_payload=file_payload)[0]
+        file_payload=file_payload,
+        get_iter_content=get_iter_content)[0]
 
 
 def acr_repository_metadata_delete(cmd,
@@ -538,6 +554,11 @@ def acr_repository_metadata_delete(cmd,
 def _validate_parameters(repository, image):
     if bool(repository) == bool(image):
         raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
+
+
+def _validate_parameters_out(key, file_out):
+    if bool(key) != bool(file_out):
+        raise CLIError('Usage error: --key KEY --file-out FILE_OUT')
 
 
 def _parse_image_name(image, allow_digest=False):
