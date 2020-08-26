@@ -133,7 +133,6 @@ def get_installed_cli_distributions():
     # return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
 
     # Use the hard-coded version instead of querying all modules under site-packages.
-    from azure.cli.__main__ import __version__ as azure_cli_version
     from azure.cli.core import __version__ as azure_cli_core_version
     from azure.cli.telemetry import __version__ as azure_cli_telemetry_version
 
@@ -144,7 +143,7 @@ def get_installed_cli_distributions():
             self.version = version
 
     return [
-        VersionItem('azure-cli', azure_cli_version),
+        VersionItem('azure-cli', azure_cli_core_version),
         VersionItem('azure-cli-core', azure_cli_core_version),
         VersionItem('azure-cli-telemetry', azure_cli_telemetry_version)
     ]
