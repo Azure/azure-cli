@@ -1562,6 +1562,7 @@ def update_long_term_retention(
 
     return policy
 
+
 def update_short_term_retention(
         cmd,
         client,
@@ -1573,7 +1574,7 @@ def update_short_term_retention(
     '''
     Updates short term retention for live database
     '''
-    
+
     policy = client.create_or_update(
         database_name=database_name,
         server_name=server_name,
@@ -1582,6 +1583,7 @@ def update_short_term_retention(
         diffbackup_hours=diffbackup_hours)
 
     return policy
+
 
 def get_short_term_retention(
         cmd,
@@ -1592,13 +1594,14 @@ def get_short_term_retention(
     '''
     Gets short term retention for live database
     '''
-    
+
     policy = client.get(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name)
 
     return policy
+
 
 def _list_by_database_long_term_retention_backups(
         client,
