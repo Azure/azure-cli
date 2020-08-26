@@ -24,7 +24,8 @@ def register_global_query_recommend_argument(cli_ctx):
     def handle_recommend_parameter(cli, **kwargs):
         args = kwargs['args']
         if args._query_recommend is not None:
-            cli_ctx.invocation.data['output'] = 'table'
+            if cli_ctx.invocation.data['output'] == 'json':
+                cli_ctx.invocation.data['output'] = 'table'
 
             def analyze_output(cli_ctx, **kwargs):
                 tree_builder = TreeBuilder()
