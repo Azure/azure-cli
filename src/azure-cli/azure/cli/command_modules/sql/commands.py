@@ -287,17 +287,16 @@ def load_command_table(self, _):
             supports_no_wait=True)
         g.wait_command('wait')
 
-    database_short_term_retention_policies_operations = CliCommandType(
+    backup_short_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#BackupShortTermRetentionPoliciesOperations.{}',
-        client_factory=get_sql_database_short_term_retention_policies_operations)
+        client_factory=get_sql_backup_short_term_retention_policies_operations)
 
     with self.command_group('sql db str-policy',
-                            database_short_term_retention_policies_operations,
-                            client_factory=get_sql_database_short_term_retention_policies_operations,
-                            is_preview=True) as g:
+                            backup_short_term_retention_policies_operations,
+                            client_factory=get_sql_backup_short_term_retention_policies_operations) as g:
 
-        g.custom_command('set', 'update_short_term_retention')
-        g.show_command('show', 'get')
+        g.custom_command('set', 'update_short_term_retention', supports_no_wait=True, is_preview=True)
+        g.custom_command('show', 'get_short_term_retention', is_preview=True)
 
     database_sensitivity_labels_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',

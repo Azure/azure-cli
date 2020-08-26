@@ -156,7 +156,7 @@ def get_sql_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_databases
 
 
-def get_sql_database_short_term_retention_policies_operations(cli_ctx, _):
+def get_sql_backup_short_term_retention_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).backup_short_term_retention_policies
 
 
