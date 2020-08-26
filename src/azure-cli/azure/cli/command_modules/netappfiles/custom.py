@@ -230,6 +230,6 @@ def authorize_replication(cmd, client, resource_group_name, account_name, pool_n
 
 # -- snapshot --
 
-def create_snapshot(cmd, client, account_name, pool_name, volume_name, snapshot_name, resource_group_name, location, file_system_id=None):
-    body = Snapshot(location=location, file_system_id=file_system_id)
-    return client.create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body.location, file_system_id)
+def create_snapshot(cmd, client, account_name, pool_name, volume_name, snapshot_name, resource_group_name, location):
+    body = Snapshot(location=location)
+    return client.create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body.location)

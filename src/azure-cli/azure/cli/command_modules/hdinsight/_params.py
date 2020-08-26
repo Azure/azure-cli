@@ -193,6 +193,10 @@ def load_arguments(self, _):
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),
                    help='Indicates whether enable encryption in transit.')
 
+        # Encryption At Host
+        c.argument('encryption_at_host', arg_group='Encryption At Host', arg_type=get_three_state_flag(),
+                   help='Indicates whether enable encryption at host or not.')
+
         # Autoscale Configuration
         c.argument('autoscale_type', arg_group='Autoscale Configuration', arg_type=get_enum_type(known_autoscale_types),
                    help='The autoscale type.')

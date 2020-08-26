@@ -1276,6 +1276,44 @@ def load_arguments(self, _):
             ])
 
     #####
+    #           sql server audit-policy
+    ######
+    with self.argument_context('sql server audit-policy update') as c:
+        storage_arg_group = 'Storage'
+
+        c.argument('storage_account',
+                   options_list=['--storage-account'],
+                   arg_group=storage_arg_group,
+                   help='Name of the storage account.')
+
+        c.argument('storage_account_access_key',
+                   options_list=['--storage-key'],
+                   arg_group=storage_arg_group,
+                   help='Access key for the storage account.')
+
+        c.argument('storage_endpoint',
+                   arg_group=storage_arg_group,
+                   help='The storage account endpoint.')
+        _configure_security_policy_storage_params(c)
+
+        policy_arg_group = 'Policy'
+
+        c.argument('state',
+                   arg_group=policy_arg_group,
+                   help='Auditing policy state',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('audit_actions_and_groups',
+                   options_list=['--actions'],
+                   arg_group=policy_arg_group,
+                   help='List of actions and action groups to audit.',
+                   nargs='+')
+
+        c.argument('retention_days',
+                   arg_group=policy_arg_group,
+                   help='The number of days to retain audit logs.')
+
+    #####
     #           sql server conn-policy
     #####
     with self.argument_context('sql server conn-policy') as c:

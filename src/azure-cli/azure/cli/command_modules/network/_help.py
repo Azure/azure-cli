@@ -106,6 +106,10 @@ short-summary: Show an authorization certificate.
 examples:
   - name: Show an authorization certificate.
     text: az network application-gateway auth-cert show -g MyResourceGroup --gateway-name MyAppGateway -n MyAuthCert
+  - name: View expiry date of an authorization certificate. It is in Base-64 encoded X.509(.CER) format.
+    text: |
+        az network application-gateway auth-cert show -g MyResourceGroup --gateway-name MyAppGateway \\
+            -n MyAuthCert --query data -o tsv | base64 -d | openssl x509 -enddate -noout
 """
 
 helps['network application-gateway auth-cert update'] = """

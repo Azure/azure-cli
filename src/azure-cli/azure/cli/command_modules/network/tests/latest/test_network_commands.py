@@ -466,6 +466,32 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_network_appgw_creation_with_public_and_private_ip')
+    def test_network_appgw_creation_with_public_and_private_ip(self, resource_group):
+        self.kwargs.update({
+            "appgw": "applicationGateway",
+            "ip": "publicIP",
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+
+        self.cmd("network application-gateway create -g {rg} -n {appgw} "
+                 "--sku Standard_v2 "
+                 "--enable-private-link "
+                 "--private-ip-address 10.0.0.17 "
+                 "--public-ip-address {ip}")
+        show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
+
+        self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
+        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
+
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
+
+        self.cmd("network application-gateway delete -g {rg} -n {appgw}")
+
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 

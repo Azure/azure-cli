@@ -72,6 +72,11 @@ examples:
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount --encryption-in-transit true
+  - name: Create a cluster with encryption at host.
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount --encryption-at-host true
   - name: Create a cluster with private link settings.
     text: |-
         az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\

@@ -236,12 +236,10 @@ parameters:
     short-summary: The name of the ANF volume
   - name: --name --snapshot-name -n -s
     short-summary: The name of the ANF snapshot
-  - name: --file-system-id
-    short-summary: The uuid of the volume
 examples:
   - name: Create an ANF snapshot
     text: >
-        az netappfiles snapshot create -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --name mysnapname -l eastus --file-system-id 13641da9-c0e9-4b97-84fc-4f8014a93848
+        az netappfiles snapshot create -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --name mysnapname -l eastus
 """
 
 helps['netappfiles snapshot delete'] = """

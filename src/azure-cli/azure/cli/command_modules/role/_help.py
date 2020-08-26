@@ -526,7 +526,7 @@ type: command
 short-summary: Create an Azure Active Directory user.
 parameters:
   - name: --force-change-password-next-login
-    short-summary: Marks this user as needing to update their password the next time they authenticate.
+    short-summary: Marks this user as needing to update their password the next time they authenticate. If omitted, false will be used.
   - name: --password
     short-summary: The password that should be assigned to the user for authentication.
 """

@@ -47,6 +47,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.synapse.spark.operations#SparkBatchOperations.{}',
         client_factory=None)
 
+    synapse_accesscontrol_sdk = CliCommandType(
+        operations_tmpl='azure.synapse.accesscontrol.operations#AccessControlClientOperationsMixin.{}',
+        client_factory=None)
+
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
                             custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
@@ -119,6 +123,19 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_spark_session_statements')
         g.custom_show_command('show', 'get_spark_session_statement')
         g.custom_command('cancel', 'cancel_spark_session_statement', confirmation=True)
+
+    # Data Plane Commands --Access control operations
+    with self.command_group('synapse role assignment', synapse_accesscontrol_sdk,
+                            custom_command_type=get_custom_sdk('accesscontrol', None)) as g:
+        g.custom_command('create', 'create_role_assignment')
+        g.custom_command('list', 'list_role_assignments')
+        g.custom_show_command('show', 'get_role_assignment_by_id')
+        g.custom_command('delete', 'delete_role_assignment', confirmation=True)
+
+    with self.command_group('synapse role definition', synapse_accesscontrol_sdk,
+                            custom_command_type=get_custom_sdk('accesscontrol', None)) as g:
+        g.custom_command('list', 'list_role_definitions')
+        g.custom_show_command('show', 'get_role_definition')
 
     with self.command_group('synapse', is_preview=True):
         pass
