@@ -20,6 +20,8 @@ docker run \
            -e CLI_VERSION=$CLI_VERSION \
            -e CLI_VERSION_REVISION=1~$DISTRO \
            -e DEBIAN_FRONTEND=noninteractive \
-           -it \
+	   -it \
            $DISTRO_BASE_IMAGE \
-           /bin/bash
+	   /bin/bash
+
+#	   /mnt/repo/scripts/pyinstaller/release/debian/build.sh
