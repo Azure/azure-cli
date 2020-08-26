@@ -59,7 +59,7 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 """
 
 # region create without args
-def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
+def _flexible_server_create(cmd, client, resource_group_name=None, seryesver_name=None, sku_name=None, tier=None,
                                 location=None, storage_mb=None, administrator_login=None,
                                 administrator_login_password=None, version=None,
                                 backup_retention=None, tags=None, public_network_access=None, vnet_name=None,
