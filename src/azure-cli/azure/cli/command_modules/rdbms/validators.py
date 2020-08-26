@@ -72,7 +72,7 @@ def password_validator(ns):
 def retention_validator(ns):
     if ns.backup_retention:
         val = ns.backup_retention
-        if not 7 <= val <= 35:
+        if not 7 <= int(val) <= 35:
             raise CLIError('incorrect usage: --backup_retention. Range is 7 to 35 days.')
 
 

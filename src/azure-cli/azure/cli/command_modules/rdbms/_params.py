@@ -5,6 +5,8 @@
 
 # pylint: disable=line-too-long
 
+from knack.arguments import CLIArgumentType
+
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     tags_type, get_location_type,
@@ -13,6 +15,9 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from .randomname.generate import generate_username
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
+from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
+                                                get_resource_name_completion_list)
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
 
@@ -208,3 +213,53 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
             c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
+
+
+    # Flexible-server
+    def _flexible_server_params(command_group):
+        server_name_setter_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME', help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                        local_context_attribute=LocalContextAttribute(name='server_name', 
+                                        actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+
+        server_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME', help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                        local_context_attribute=LocalContextAttribute(name='server_name', 
+                                        actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+
+        with self.argument_context('{} flexible-server create'.format(command_group)) as c:
+            c.argument('resource_group_name', required=True, arg_type=resource_group_name_type)
+            c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16. ')
+            c.argument('server_name', required=True, arg_type=server_name_setter_arg_type)
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+            c.argument('administrator_login', options_list=['--admin-user'], required=True, arg_group='Authentication')
+            c.argument('administrator_login_password', options_list=['--admin-password'], required=True, arg_group='Authentication')
+
+            c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
+            c.argument('storage_mb', options_list=['--storage-mb'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
+            c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
+            c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+            c.argument('high_availability', options_list=['--high-availability'], help='')
+            c.argument('public_access', options_list=['--public-access'], help='')
+            c.argument('version', help='Server major version.')
+
+        with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
+            c.argument('source_server', options_list=['--source-server'], help='The name or resource ID of the source server to restore from.')
+            c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+        
+        with self.argument_context('{} flexible-server update'.format(command_group)) as c:
+            c.ignore('family', 'capacity', 'tier')
+            c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
+            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+            c.argument('storage_mb', options_list=['--storage-mb'], help ='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.') #storage size? storage mb?
+            c.argument('tags', options_list=['--tags'], help='Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.')
+            c.argument('backup_retention', options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
+
+        for scope in ['delete', 'list', 'wait', 'show', 'restart', 'restore', 'update']:
+            argument_context_string = '{} flexible-server {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', required=True, arg_type=server_name_arg_type)
+
+    _flexible_server_params('postgres')
+    _flexible_server_params('mysql')
