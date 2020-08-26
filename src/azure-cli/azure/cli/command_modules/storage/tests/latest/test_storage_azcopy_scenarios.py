@@ -250,9 +250,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             os.path.join(test_dir, 'readme'), first_container_url, content_type))
         self.storage_cmd('storage blob list -c {}', first_account_info, first_container)\
             .assert_with_checks(JMESPathCheck('length(@)', 1))
-        self.cmd('storage blob show -n {} -c {} --account-name {}'
-                 .format('readme', first_container, first_account),
-                 checks=[JMESPathCheck('properties.contentSettings.contentType', content_type)])
+        self.storage_cmd('storage blob show -n {} -c {} ', first_account_info, 'readme', first_container)\
+            .assert_with_checks(JMESPathCheck('properties.contentSettings.contentType', content_type))
 
         # Upload entire directory
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
