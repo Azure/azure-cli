@@ -82,3 +82,23 @@ def cf_graph_client_factory(cli_ctx, **_):
                                        base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     configure_common_settings(cli_ctx, client)
     return client
+
+
+def cf_synapse_client_artifacts_factory(cli_ctx, workspace_name):
+    from azure.synapse.artifacts import ArtifactsClient
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
+    cred, _, _ = profile.get_login_credentials(
+        resource=cli_ctx.cloud.endpoints.synapse_analytics_resource_id,
+        subscription_id=subscription_id
+    )
+    return ArtifactsClient(
+        credential=cred,
+        endpoint='{}{}{}'.format("https://", workspace_name, cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
+    )
+
+
+def cf_synapse_linked_service(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).linked_service

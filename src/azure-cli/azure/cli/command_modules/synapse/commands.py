@@ -51,6 +51,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.synapse.accesscontrol.operations#AccessControlClientOperationsMixin.{}',
         client_factory=None)
 
+    synapse_linked_service_sdk = CliCommandType(
+        operation_tmpl='azure.synapse.artifacts.operations#LinkedServiceOperations.{}',
+        client_factory=None)
+
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
                             custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
@@ -136,6 +140,15 @@ def load_command_table(self, _):
                             custom_command_type=get_custom_sdk('accesscontrol', None)) as g:
         g.custom_command('list', 'list_role_definitions')
         g.custom_show_command('show', 'get_role_definition')
+
+    # Data Plane Commands --Linked service operations
+    with self.command_group('synapse linked service', synapse_linked_service_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('create', 'create_or_update_linked_service')
+        g.custom_command('update', 'create_or_update_linked_service')
+        g.custom_command('list', 'list_linked_service')
+        g.custom_show_command('show', 'get_linked_service')
+        g.custom_command('delete', 'delete_linked_service', confirmation=True)
 
     with self.command_group('synapse', is_preview=True):
         pass

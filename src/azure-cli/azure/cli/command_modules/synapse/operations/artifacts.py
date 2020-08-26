@@ -1,0 +1,28 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from azure.synapse.artifacts.models import LinkedService
+from .._client_factory import cf_synapse_linked_service
+
+
+# Linked Service
+def list_linked_service(cmd, workspace_name):
+    client = cf_synapse_linked_service(cmd.cli_ctx, workspace_name)
+    return client.get_linked_services_by_workspace()
+
+
+def get_linked_service(cmd, workspace_name, linked_service_name):
+    client = cf_synapse_linked_service(cmd.cli_ctx, workspace_name)
+    return client.get_linked_service(linked_service_name)
+
+def create_or_update_linked_service(cmd, workspace_name, linked_service_name, definition_file):
+    client = cf_synapse_linked_service(cmd.cli_ctx, workspace_name)
+    properties = LinkedService.from_dict(definition_file['properties'])
+    return client.create_or_update_linked_service(linked_service_name, properties)
+
+
+def delete_linked_service(cmd, workspace_name, linked_service_name):
+    client = cf_synapse_linked_service(cmd.cli_ctx, workspace_name)
+    return client.delete_linked_service(linked_service_name)

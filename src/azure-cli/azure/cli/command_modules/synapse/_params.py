@@ -7,6 +7,7 @@ from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, get_resource_name_completion_list
 from azure.cli.core.util import get_json_object
+from azure.cli.core.util import shell_safe_json_parse
 from ._validators import validate_storage_account, validate_statement_language
 from ._completers import get_role_definition_name_completion_list
 from .constant import SparkBatchLanguage, SparkStatementLanguage
@@ -14,7 +15,7 @@ from .constant import SparkBatchLanguage, SparkStatementLanguage
 workspace_name_arg_type = CLIArgumentType(help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
 assignee_arg_type = CLIArgumentType(help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
 role_arg_type = CLIArgumentType(help='The role name/id that is assigned to the principal.', completer=get_role_definition_name_completion_list)
-
+definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=FilesCompleter(), type=shell_safe_json_parse, help='Properties may be supplied from a file using the `@{path}` syntax or a JSON string.')
 
 def load_arguments(self, _):
     # synapse workspace
@@ -226,3 +227,20 @@ def load_arguments(self, _):
 
     with self.argument_context('synapse role definition list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse linked service ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('linked_service_name', options_list=['--name'], help='The linked service name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    with self.argument_context('synapse linked service list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    with self.argument_context('synapse linked service show') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('linked_service_name', options_list=['--name'], help='The linked service name.')
+
+    with self.argument_context('synapse linked service delete') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('linked_service_name', options_list=['--name'], help='The linked service name.')

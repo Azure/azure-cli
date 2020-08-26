@@ -479,3 +479,37 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('type', 'Microsoft.Storage/storageAccounts'),
                 self.check('provisioningState', 'Succeeded')
             ])
+
+    @record_only()
+    def test_linked_service(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
+            'name': 'linkedservice'})
+
+        # create linked service
+        linked_service_create = self.cmd(
+           'az synapse linked service create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/linkedservice.json ',
+            checks=[
+               self.check('name', self.kwargs['name'])
+            ])
+
+        # get linked service
+        self.cmd(
+            'az synapse linked service show --workspace-name {workspace} --name {name} ',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list linked service
+        self.cmd(
+            'az synapse linked service list --workspace-name {workspace} ',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/linkedservices')
+            ])
+
+        # delete linked service
+        self.cmd(
+            'az synapse linked service delete --workspace-name {workspace} --name {name} ')
+        self.cmd(
+            'az synapse linked service show --workspace-name {workspace} --name {name} ',
+            expect_failure=True)
