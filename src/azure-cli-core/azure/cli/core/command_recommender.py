@@ -79,7 +79,8 @@ class CommandRecommender():
                     'clientType': 'AzureCli',
                     'context': json.dumps(context)
                 },
-                headers=headers)
+                headers=headers,
+                timeout=1)
         except RequestException as ex:
             logger.debug('Recommendation requests.get() exception: %s', ex)
 

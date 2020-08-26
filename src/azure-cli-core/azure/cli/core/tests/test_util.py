@@ -392,7 +392,7 @@ class TestBase64ToHex(unittest.TestCase):
 
 class TestHandleException(unittest.TestCase):
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_keyboardinterrupt(self, mock_logger_error):
         # create test KeyboardInterrupt Exception
         keyboard_interrupt_ex = KeyboardInterrupt("KeyboardInterrupt")
@@ -404,7 +404,7 @@ class TestHandleException(unittest.TestCase):
         self.assertTrue(mock_logger_error.called)
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_clierror(self, mock_logger_error):
         from knack.util import CLIError
 
@@ -420,7 +420,7 @@ class TestHandleException(unittest.TestCase):
         self.assertIn(err_msg, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_clouderror(self, mock_logger_error):
         from msrestazure.azure_exceptions import CloudError
 
@@ -436,9 +436,9 @@ class TestHandleException(unittest.TestCase):
         # test behavior
         self.assertTrue(mock_logger_error.called)
         self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args.args[0])
-        self.assertEqual(ex_result, 1)
+        self.assertEqual(ex_result, mock_cloud_error.args[1])
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_typical_response_error(self, mock_logger_error):
         # create test HttpOperationError Exception
         err_msg = "Bad Request because of some incorrect param"
@@ -456,7 +456,7 @@ class TestHandleException(unittest.TestCase):
         self.assertIn(err_code, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_error_key_has_string_value(self, mock_logger_error):
         # test error in response, but has str value.
 
@@ -476,7 +476,7 @@ class TestHandleException(unittest.TestCase):
         self.assertIn(expected_message, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_no_error_key(self, mock_logger_error):
         # test error not in response
 
@@ -494,7 +494,7 @@ class TestHandleException(unittest.TestCase):
         self.assertIn(str(mock.call(mock_http_error).args[0]), mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_no_response_text(self, mock_logger_error):
         # test no response text
 
