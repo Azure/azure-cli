@@ -1242,6 +1242,9 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 1))
 
         # Set ORS policy to source account
+        with self.assertRaisesRegex(CLIError, 'ValueError: Please specify --policy-id with auto-generated policy id'):
+            self.cmd('storage account or-policy create -g {rg} -n {src_sc} -d {dest_sc} -s {src_sc} --dcont {dcont} --scont {scont}')
+
         import json
         temp_dir = self.create_temp_dir()
         policy_file = os.path.join(temp_dir, "policy.json")

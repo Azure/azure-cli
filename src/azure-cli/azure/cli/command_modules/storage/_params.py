@@ -146,6 +146,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
     )
+    marker_type = CLIArgumentType(
+        help='A string value that identifies the portion of the list of containers to be '
+             'returned with the next listing operation. The operation returns the NextMarker value within '
+             'the response body if the listing operation did not return all containers remaining to be listed '
+             'with the current page. If specified, this generator will begin returning results from the point '
+             'where the previous generator stopped.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -441,7 +447,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     )
     policy_id_type = CLIArgumentType(
         options_list=['--policy-id'],
-        help='The ID of object replication policy or "default" if the policy ID is unknown.'
+        help='The ID of object replication policy or "default" if the policy ID is unknown. Policy Id will be '
+             'auto-generated when setting on destination account. Required when setting on source account.'
     )
     rule_id_type = CLIArgumentType(
         options_list=['--rule-id', '-r'],
@@ -523,6 +530,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)
         c.argument('num_results', arg_type=num_results_type)
+        c.argument('delimiter',
+                   help='When the request includes this parameter, the operation returns a BlobPrefix element in the '
+                   'result list that acts as a placeholder for all blobs whose names begin with the same substring '
+                   'up to the appearance of the delimiter character. The delimiter may be a single character or a '
+                   'string.')
+        c.argument('marker', arg_type=marker_type)
+        c.argument('prefix',
+                   help='Filter the results to return only blobs whose name begins with the specified prefix.')
 
     with self.argument_context('storage blob generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list

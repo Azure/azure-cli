@@ -75,3 +75,11 @@ examples:
   - name: Update an extension by name and use pip proxy for dependencies
     text: az extension update --name anextension --pip-proxy https://user:pass@proxy.server:8080
 """
+
+helps['extension list-versions'] = """
+type: command
+short-summary: List available versions for an extension.
+examples:
+  - name: List available versions for an extension
+    text: az extension list-versions --name anextension
+"""

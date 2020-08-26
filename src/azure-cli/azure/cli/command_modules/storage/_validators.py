@@ -176,13 +176,14 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('There is no credential provided in your command and environment, we will query account key '
-                       'for your storage account. \nPlease provide --connection-string, --account-key or --sas-token '
-                       'as credential, or use `--auth-mode login` if you have required RBAC roles in your command. '
-                       'For more information about RBAC roles in storage, you can see '
+        logger.warning('There are no credentials provided in your command and environment, we will query for the '
+                       'account key inside your storage account. \nPlease provide --connection-string, '
+                       '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
+                       'have required RBAC roles in your command. For more information about RBAC roles '
+                       'in storage, visit '
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
-                       'Setting corresponding environment variable can avoid inputting credential in your command. '
-                       'Please use --help to get more information.')
+                       'Setting the corresponding environment variables can avoid inputting credentials in '
+                       'your command. Please use --help to get more information.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
@@ -991,7 +992,7 @@ def ipv4_range_type(string):
     ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
         if not re.match("^{ip_format}-{ip_format}$".format(ip_format=ip_format), string):
-            raise ValueError
+            raise CLIError("Please use the following format to specify ip range: '{ip1}-{ip2}'.")
     return string
 
 

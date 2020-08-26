@@ -296,8 +296,8 @@ def set_custom_properties(prop, name, value):
 
 @decorators.suppress_all_exceptions()
 def set_exception(exception, fault_type, summary=None):
-    if not summary:
-        _session.result_summary = summary
+    if not _session.result_summary:
+        _session.result_summary = _remove_cmd_chars(summary)
 
     _session.add_exception(exception, fault_type=fault_type, description=summary)
 
