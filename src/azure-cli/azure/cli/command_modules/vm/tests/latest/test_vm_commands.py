@@ -3195,6 +3195,7 @@ class MSIScenarioTest(ScenarioTest):
 
 class VMLiveScenarioTest(LiveScenarioTest):
 
+    @unittest.skip('Not necessary')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_progress')
     def test_vm_create_progress(self, resource_group):
         from azure.cli.testsdk.utilities import force_progress_logging
