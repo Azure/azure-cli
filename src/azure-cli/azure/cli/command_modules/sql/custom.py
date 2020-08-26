@@ -1562,6 +1562,77 @@ def update_long_term_retention(
 
     return policy
 
+def update_short_term_retention(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        retention_days,
+        diffbackupinterval_hours,
+        deleted_time=None):
+    '''
+    Updates short term retention for database
+    '''
+
+    if deleted_time:
+        database_name = '{},{}'.format(
+            database_name,
+            _to_filetimeutc(deleted_time))
+
+        client = \
+            get_sql_restorable_dropped_database_backup_short_term_retention_policies_operations(
+                cmd.cli_ctx,
+                None)
+
+        policy = client.create_or_update(
+            restorable_dropped_database_id=database_name,
+            server_name=server_name,
+            resource_group_name=resource_group_name,
+            retention_days=retention_days,
+            diffbackupinterval_hours=diffbackupinterval_hours)
+    else:
+        policy = client.create_or_update(
+            database_name=database_name,
+            server_name=server_name,
+            resource_group_name=resource_group_name,
+            retention_days=retention_days,
+            diffbackupinterval_hours=diffbackupinterval_hours)
+
+    return policy
+
+def get_short_term_retention(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        deleted_time=None):
+    '''
+    Gets short term retention for database
+    '''
+
+    if deleted_time:
+        database_name = '{},{}'.format(
+            database_name,
+            _to_filetimeutc(deleted_time))
+
+        client = \
+            get_sql_restorable_dropped_database_backup_short_term_retention_policies_operations(
+                cmd.cli_ctx,
+                None)
+
+        policy = client.get(
+            restorable_dropped_database_id=database_name,
+            server_name=server_name,
+            resource_group_name=resource_group_name)
+    else:
+        policy = client.get(
+            database_name=database_name,
+            server_name=server_name,
+            resource_group_name=resource_group_name)
+
+    return policy
 
 def _list_by_database_long_term_retention_backups(
         client,
