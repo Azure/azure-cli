@@ -16,7 +16,6 @@ class VersionTest(ScenarioTest):
         self.assertIn('azure-cli', output)
         self.assertIn('azure-cli-core', output)
         self.assertIn('azure-cli-telemetry', output)
-        self.assertIn('azure-cli-testsdk', output)
         self.assertIn('extensions', output)
         self.assertIsInstance(output['extensions'], Dict)
 
