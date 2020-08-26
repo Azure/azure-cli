@@ -756,27 +756,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
 
     with self.argument_context('storage copy') as c:
-        c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "
+        c.argument('destination',
+                   options_list=['--destination', '-d',
+                                 c.deprecate(target='--destination-local-path', redirect='--destination')],
+                   help="The path/url of copy destination. "
                    "It can be a local path, an url to azure storage server. If you provide destination parameter "
                    "here, you do not need to provide arguments in copy destination arguments group and copy "
-                   "destination arguments will be deprecated in future.")
-        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. It can be a local"
+                   "destination arguments will be deprecated in future.", required=False)
+        c.argument('source',
+                   options_list=['--source', '-s',
+                                 c.deprecate(target='--source-local-path', redirect='--source')],
+                   help="The path/url of copy source. It can be a local"
                    " path, an url to azure storage server or AWS S3 buckets. If you provide source parameter here,"
                    " you do not need to provide arguments in copy source arguments group and copy source arguments"
-                   " will be deprecated in future.")
+                   " will be deprecated in future.", required=False)
         for item in ['destination', 'source']:
-            c.argument('{}_container'.format(item), arg_group='Copy {}'.format(item),
-                       help='Container name of copy {} storage account'.format(item))
-            c.argument('{}_blob'.format(item), arg_group='Copy {}'.format(item),
-                       help='Blob name in blob container of copy {} storage account'.format(item))
-            c.argument('{}_share'.format(item), arg_group='Copy {}'.format(item),
-                       help='File share name of copy {} storage account'.format(item))
-            c.argument('{}_file_path'.format(item), arg_group='Copy {}'.format(item),
-                       help='File path in file share of copy {} storage account'.format(item))
-            c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
-                       help='Local file path')
+            c.extra('{}_container'.format(item), arg_group='Copy {}'.format(item),
+                    help='Container name of copy {} storage account'.format(item))
+            c.extra('{}_blob'.format(item), arg_group='Copy {}'.format(item),
+                    help='Blob name in blob container of copy {} storage account'.format(item))
+            c.extra('{}_share'.format(item), arg_group='Copy {}'.format(item),
+                    help='File share name of copy {} storage account'.format(item))
+            c.extra('{}_file_path'.format(item), arg_group='Copy {}'.format(item),
+                    help='File path in file share of copy {} storage account'.format(item))
+
         c.argument('account_name', acct_name_type, arg_group='Storage Account', id_part=None,
-                   options_list=['--account-name', c.deprecate(target='--destination-account-name', redirect='--account-name')],
+                   options_list=['--account-name',
+                                 c.deprecate(target='--destination-account-name', redirect='--account-name')],
                    help='Storage account name of copy destination')
         c.extra('source_account_name', arg_group='Copy source',
                 help='Account name of copy source storage account.')

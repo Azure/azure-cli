@@ -76,42 +76,10 @@ def get_url_with_sas(cmd, url, account_name, container, blob, share, file_path, 
     return _add_url_sas(source, sas_token)
 
 
-def storage_copy(cmd, source=None, destination=None, put_md5=None, recursive=None, blob_type=None,
+# pylint: disable=unused-argument
+def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=None,
                  preserve_s2s_access_tier=None, content_type=None, follow_symlinks=None,
-                 source_account_name=None, source_container=None, source_blob=None, source_share=None,
-                 source_file_path=None, source_local_path=None,
-                 account_name=None, destination_container=None, destination_blob=None, destination_share=None,
-                 destination_file_path=None, destination_local_path=None,
                  exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None, **kwargs):
-
-    # Figure out source and destination type
-    source_account_key = kwargs.pop('source_account_key', None)
-    source_sas = kwargs.pop('source_sas', None)
-    source_connection_string = kwargs.pop('source_connection_string', None)
-
-    account_key = kwargs.pop('account_key', None)
-    sas_token = kwargs.pop('sas_token', None)
-    connection_string = kwargs.pop('connection_string', None)
-
-    # determine if the copy will happen in the same storage account
-    if not source_account_key and not source_sas and not source_connection_string:
-        if source_account_name == account_name:
-            source_account_key = account_key
-            source_sas = sas_token
-            source_connection_string = connection_string
-
-    full_source = get_url_with_sas(cmd, source=source, account_name=source_account_name, container=source_container,
-                                   blob=source_blob, share=source_share, file_path=source_file_path,
-                                   local_path=source_local_path,
-                                   account_key=source_account_key,
-                                   connection_string=source_connection_string,
-                                   sas_token=source_sas)
-    full_destination = get_url_with_sas(cmd, source=destination, account_name=account_name,
-                                        container=destination_container, blob=destination_blob, share=destination_share,
-                                        file_path=destination_file_path, local_path=destination_local_path,
-                                        account_key=account_key,
-                                        connection_string=connection_string,
-                                        sas_token=sas_token)
 
     azcopy = AzCopy()
     flags = []
@@ -135,7 +103,7 @@ def storage_copy(cmd, source=None, destination=None, put_md5=None, recursive=Non
         flags.append('--content-type=' + content_type)
     if follow_symlinks is not None:
         flags.append('--follow-symlinks=true')
-    azcopy.copy(full_source, full_destination, flags=flags)
+    azcopy.copy(source, destination, flags=flags)
 
 
 def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern=None, include_pattern=None,

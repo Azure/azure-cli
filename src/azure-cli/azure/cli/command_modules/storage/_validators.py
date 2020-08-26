@@ -1381,19 +1381,17 @@ def validate_or_policy(namespace):
             namespace.policy_id = or_policy['policyId']
 
 
-def get_url_with_sas(cmd, namespace):
+def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):
     import re
     import os
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
     storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
-    # validate credential
-    validate_client_parameters(cmd, namespace)
 
-    if namespace.url is not None:
+    if url is not None:
         # validate source is uri or local path
         storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
-        result = re.findall(storage_pattern, namespace.url)
+        result = re.findall(storage_pattern, url)
         if result:  # source is URL
             storage_info = result[0]
             namespace.account_name = storage_info[0]
@@ -1402,21 +1400,27 @@ def get_url_with_sas(cmd, namespace):
             elif storage_info[1] in ['file']:
                 service = 'file'
             else:
-                raise ValueError('{} is not valid storage endpoint.'.format(namespace.url))
-
-    if namespace.container:
-        client = blob_data_service_factory(cmd.cli_ctx, namespace)
-        if namespace.blob is None:
+                raise ValueError('{} is not valid storage endpoint.'.format(url))
+    # validate credential
+    validate_client_parameters(cmd, namespace)
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token}
+    if container:
+        client = blob_data_service_factory(cmd.cli_ctx, kwargs)
+        if blob is None:
             blob = ''
-        source = client.make_blob_url(namespace.container, namespace.blob)
+        url = client.make_blob_url(container, blob)
+
         service = 'blob'
-    elif namespace.share:
-        client = file_data_service_factory(cmd.cli_ctx, namespace)
-        dir_name, file_name = os.path.split(namespace.file_path) if namespace.file_path else (None, '')
+    elif share:
+        client = file_data_service_factory(cmd.cli_ctx, kwargs)
+        dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
         dir_name = None if dir_name in ('', '.') else dir_name
-        url = client.make_file_url(namespace.share, dir_name, file_name)
+        url = client.make_file_url(share, dir_name, file_name)
         service = 'file'
-    elif not any(namespace.url, namespace.container, namespace.share):  # In account level, only blob service is supported
+    elif not any([url, container, share]):  # In account level, only blob service is supported
         service = 'blob'
         url = 'https://{}.{}.{}'.format(namespace.account_name, service, storage_endpoint)
 
@@ -1430,21 +1434,40 @@ def get_url_with_sas(cmd, namespace):
 
 def _is_valid_uri(uri):
     import os
-    if os.path.isdir(uri) or os.path.isfile(uri):
+    if not uri:
+        return False
+    if os.path.isdir(os.path.dirname(uri)):
         return uri
     if "?" in uri:  # sas token exists
-        logger.debug("Find ? in {}. ", uri)
+        logger.debug("Find ? in %s. ", uri)
         return uri
     return False
 
 
 def validate_azcopy_credential(cmd, namespace):
-    if _is_valid_uri(namespace.source):
-        del namespace.source_account_name, namespace.source_account_key, namespace.source_sas,
-    else:
-        namespace.source = get_url_with_sas(cmd, namespace)
+    # Get destination uri
+    if not _is_valid_uri(namespace.destination):
+        namespace.url = namespace.destination
+        namespace.destination = get_url_with_sas(
+            cmd, namespace, url=namespace.destination,
+            container=namespace.destination_container, blob=namespace.destination_blob,
+            share=namespace.destination_share, file_path=namespace.destination_file_path)
 
-    if _is_valid_uri(namespace.destination):
-        del namespace.destination_account_name, namespace.destination_account_key
-    else:
-        namespace.destination = get_url_with_sas(cmd, namespace)
+    if not _is_valid_uri(namespace.source):
+        # determine if source account is same with destination
+        if not namespace.source_account_key and not namespace.source_sas and not namespace.source_connection_string:
+            if namespace.source_account_name == namespace.account_name:
+                namespace.source_account_key = namespace.account_key
+                namespace.source_sas = namespace.sas_token
+                namespace.source_connection_string = namespace.connection_string
+        namespace.account_name = namespace.source_account_name
+        namespace.account_key = namespace.source_account_key
+        namespace.sas_token = namespace.source_sas
+        namespace.connection_string = namespace.source_connection_string
+
+        # Get source uri
+        namespace.url = namespace.source
+        namespace.source = get_url_with_sas(
+            cmd, namespace, url=namespace.source,
+            container=namespace.source_container, blob=namespace.source_blob,
+            share=namespace.source_share, file_path=namespace.source_file_path)

@@ -1114,15 +1114,15 @@ examples:
   - name: Upload an entire directory to Azure Blob using url.
     text: az storage copy -s /path/to/dir -d https://[account].blob.core.windows.net/[container]/[path/to/directory] --recursive
   - name: Upload an entire directory to Azure Blob using account name and container name.
-    text: az storage copy --source-local-path /path/to/dir --destination-account-name mystorageaccount --destination-container mycontainer --recursive
+    text: az storage copy -s /path/to/dir --destination-account-name mystorageaccount --destination-container mycontainer --recursive
   - name: Upload a set of files to Azure Blob using wildcards with url.
     text: az storage copy -s /path/*foo/*bar/*.pdf -d https://[account].blob.core.windows.net/[container]/[path/to/directory]
   - name: Upload a set of files to Azure Blob using wildcards with account name and container name.
-    text: az storage copy --source-local-path /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-container mycontainer
+    text: az storage copy -s /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-container mycontainer
   - name: Upload files and directories to Azure Blob using wildcards with url.
     text: az storage copy -s /path/*foo/*bar* -d https://[account].blob.core.windows.net/[container]/[path/to/directory] --recursive
   - name: Upload files and directories to Azure Blob using wildcards with account name and container name.
-    text: az storage copy --source-local-path /path/*foo/*bar* --destination-account-name mystorageaccount --destination-container mycontainer --recursive
+    text: az storage copy -s /path/*foo/*bar* --destination-account-name mystorageaccount --destination-container mycontainer --recursive
   - name: Download a single file from Azure Blob using url, and you can also specify your storage account and container information as above.
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/blob] -d /path/to/file.txt
   - name: Download an entire directory from Azure Blob, and you can also specify your storage account and container information as above.
@@ -1146,17 +1146,17 @@ examples:
   - name: Upload a single file to Azure File Share using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].file.core.windows.net/[share]/[path/to/file]
   - name: Upload a single file to Azure File Share using account name and share name.
-    text: az storage copy --source-local-path /path/to/file.txt --destination-account-name mystorageaccount --destination-share myshare
+    text: az storage copy -s /path/to/file.txt --destination-account-name mystorageaccount --destination-share myshare
   - name: Upload an entire directory to Azure File Share using url.
     text: az storage copy -s /path/to/dir -d https://[account].file.core.windows.net/[share]/[path/to/directory] --recursive
   - name: Upload an entire directory to Azure File Share using account name and container name.
-    text: az storage copy --source-local-path /path/to/dir --destination-account-name mystorageaccount --destination-share myshare --recursive
+    text: az storage copy -s /path/to/dir --destination-account-name mystorageaccount --destination-share myshare --recursive
   - name: Upload a set of files to Azure File Share using wildcards with account name and share name.
     text: az storage copy --source-local-path /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-share myshare
   - name: Upload files and directories to Azure File Share using wildcards with url.
     text: az storage copy -s /path/*foo/*bar* -d https://[account].file.core.windows.net/[share]/[path/to/directory] --recursive
   - name: Upload files and directories to Azure File Share using wildcards with account name and share name.
-    text: az storage copy --source-local-path /path/*foo/*bar* --destination-account-name mystorageaccount --destination-share myshare --recursive
+    text: az storage copy -s /path/*foo/*bar* --destination-account-name mystorageaccount --destination-share myshare --recursive
   - name: Download a single file from Azure File Share using url, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/[path/to/file] -d /path/to/file.txt
   - name: Download an entire directory from Azure File Share, and you can also specify your storage account and share information as above.
