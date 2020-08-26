@@ -147,7 +147,11 @@ def load_arguments(self, _):
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
 
     with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
-        c.argument('enable_private_link', action='store_true', help='Enable Private Link feature for this application gateway', default=False)
+        c.argument('enable_private_link',
+                   action='store_true',
+                   help='Enable Private Link feature for this application gateway. '
+                        'If both public IP and private IP are enbaled, taking effect only in public frontend IP',
+                   default=False)
         c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
         c.argument('private_link_subnet', help='The name of the subnet within the same vnet of an application gateway')
@@ -257,7 +261,7 @@ def load_arguments(self, _):
         c.argument('private_link_name', options_list=['--name', '-n'], help='The name of Private Link.')
         c.argument('private_link_ip_address', options_list='--ip-address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', options_list='--subnet-prefix', help='The CIDR prefix to use when creating a new subnet')
-        c.argument('private_link_subnet_name', options_list='--subnet', help='The name of a subnet within the same vnet of an application gateway')
+        c.argument('private_link_subnet_name_or_id', options_list='--subnet', help='The name or an existing ID of a subnet within the same vnet of an application gateway')
         c.argument('private_link_primary', options_list='--primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
     with self.argument_context('network application-gateway private-link list', arg_group=None) as c:
@@ -447,6 +451,14 @@ def load_arguments(self, _):
          'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
+        c.argument('rule_set_type', options_list='--type',
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
+                   help='The type of the web application firewall rule set.')
+        c.argument('rule_set_version',
+                   options_list='--version',
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   help='The version of the web application firewall rule set type. '
+                        '0.1 is used for Microsoft_BotManagerRuleSet')
 
     with self.argument_context('network application-gateway waf-policy policy-setting', min_api='2019-09-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None,
@@ -508,14 +520,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
                                min_api='2019-09-01') as c:
-        c.argument('rule_set_type', options_list='--type',
-                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
-                   help='The type of the web application firewall rule set.')
-        c.argument('rule_set_version',
-                   options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
-                   help='The version of the web application firewall rule set type. '
-                        '0.1 is used for Microsoft_BotManagerRuleSet')
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
@@ -812,7 +816,7 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help=subnet_help, id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
-        c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'], help='The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use "az network private-link-resource list" to obtain the list of group ids.')
+        c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'], help='The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use "az network private-link-resource list" to obtain the supported group ids.')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
         c.argument('manual_request', help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.", arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')

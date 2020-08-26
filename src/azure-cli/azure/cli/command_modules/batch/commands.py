@@ -51,7 +51,7 @@ def load_command_table(self, _):
     # Mgmt Account Operations
     with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
         g.custom_command('list', 'list_accounts', table_transformer=account_list_table_format)
-        g.custom_command('show', 'get_account')
+        g.custom_show_command('show', 'get_account')
         g.custom_command('create', 'create_account', supports_no_wait=True)
         g.custom_command('set', 'update_account')
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)

@@ -81,6 +81,10 @@ def cf_snapshots(cli_ctx, _):
     return _compute_client_factory(cli_ctx).snapshots
 
 
+def cf_disk_accesses(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).disk_accesses
+
+
 def cf_images(cli_ctx, _):
     return _compute_client_factory(cli_ctx).images
 

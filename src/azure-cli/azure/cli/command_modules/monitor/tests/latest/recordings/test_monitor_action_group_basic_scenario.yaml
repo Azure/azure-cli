@@ -1,58 +1,10 @@
 interactions:
 - request:
-    body: '{"location": "southcentralus", "tags": {"product": "azurecli", "cause":
-      "automation", "date": "2019-04-16T18:43:06Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '118'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-16T18:43:06Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '392'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 Apr 2019 18:43:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
-    status:
-      code: 201
-      message: Created
-- request:
     body: '{"location": "global", "properties": {"groupShortName": "cliactiongro",
       "enabled": true, "emailReceivers": [], "smsReceivers": [], "webhookReceivers":
-      []}}'
+      [], "itsmReceivers": [], "azureAppPushReceivers": [], "automationRunbookReceivers":
+      [], "voiceReceivers": [], "logicAppReceivers": [], "azureFunctionReceivers":
+      [], "armRoleReceivers": []}}'
     headers:
       Accept:
       - application/json
@@ -63,14 +15,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '155'
+      - '340'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -o
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
@@ -86,19 +38,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:09 GMT
+      - Mon, 20 Jul 2020 02:59:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1168'
     status:
       code: 201
       message: Created
@@ -113,13 +65,11 @@ interactions:
       - monitor action-group list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -o
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -135,13 +85,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:09 GMT
+      - Mon, 20 Jul 2020 02:59:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -164,13 +114,11 @@ interactions:
       - monitor action-group update
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -o --short-name --tag
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -186,13 +134,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:11 GMT
+      - Mon, 20 Jul 2020 02:59:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -209,7 +157,7 @@ interactions:
       "new_name", "enabled": true, "emailReceivers": [], "smsReceivers": [], "webhookReceivers":
       [], "itsmReceivers": [], "azureAppPushReceivers": [], "automationRunbookReceivers":
       [], "voiceReceivers": [], "logicAppReceivers": [], "azureFunctionReceivers":
-      []}}'
+      [], "armRoleReceivers": []}}'
     headers:
       Accept:
       - application/json
@@ -220,14 +168,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '340'
+      - '364'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -o --short-name --tag
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
@@ -243,13 +191,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:11 GMT
+      - Mon, 20 Jul 2020 02:59:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -259,7 +207,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1186'
+      - '1159'
     status:
       code: 200
       message: OK
@@ -274,13 +222,11 @@ interactions:
       - monitor action-group update
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g -o -a -a -a
+      - -n -g -o -a -a -a -a -a -a -a -a -a -a
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -296,140 +242,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:12 GMT
+      - Mon, 20 Jul 2020 02:59:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "Global", "tags": {"owner": "alice"}, "properties": {"groupShortName":
-      "new_name", "enabled": true, 
-      "emailReceivers": [{"name": "alice","emailAddress":"alice@example.com"}],
-      "smsReceivers": [{"name": "alice_sms", "countryCode": "1","phoneNumber": "5551234567"}],
-      "webhookReceivers": [{"name": "alice_web", "serviceUri": "https://www.example.com/alert?name=alice"}],
-      "itsmReceivers": [{"name":"alice_itsm", "workspace_id":"test_workspace", "connection_id":"test_conn", "ticket_configuration":"ticket_blob","region":"eastus"}], 
-      "azureAppPushReceivers": [{"name":"alice_apppush","emailAddress":"alice@example.com"}],  
-      "automationRunbookReceivers": [{"name":"alice_runbook","automation_account_id":"test_account","runbook_name":"test_runbook","webhook_resource_id":"test_webhook","service_uri":"http://example.com","is_global_runbook":true,"use_common_alert_schema":false}], 
-      "voiceReceivers":[{"name":"alice_voice","country_code":"1","phone_number": "5551234567"}], 
-      "logicAppReceivers": [{"name":"alice_logicapp", "resource_id":"test_resource","callback_url":"http://callback","use_common_alert_schema":false}], 
-      "azureFunctionReceivers": [{"name":"azfunc", "function_app_resource_id":"test_rsrc", "function_name":"test_func", "http_trigger_url":"http://trigger","use_common_alert_schema":true}]}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor action-group update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '543'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g -o -a -a -a
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002?api-version=2019-06-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":{"owner":"alice"},"properties":{"groupShortName":"new_name","enabled":true,
-      "emailReceivers":[{"name":"alice","emailAddress":"alice@example.com","status":"Enabled","useCommonAlertSchema":false}],
-      "smsReceivers":[{"name":"alice_sms","countryCode":"1","phoneNumber":"5551234567","status":"Enabled"}],
-      "webhookReceivers":[{"name":"alice_web","serviceUri":"https://www.example.com/alert?name=alice","useCommonAlertSchema":false}],
-      "itsmReceivers":[{"name":"alice_itsm", "workspace_id":"test_workspace", "connection_id":"test_conn", "ticket_configuration":"ticket_blob","region":"eastus"}],
-      "azureAppPushReceivers":[{"name":"alice_apppush","emailAddress":"alice@example.com"}],
-      "automationRunbookReceivers":[{"name":"alice_runbook","automationAccountId":"testAccount","runbookName":"test_runbook","webhookResourceId":"test_webhook","serviceUri":"http://example.co","isGlobalRunbook":true,"useCommonAlertSchema":false}],
-      "voiceReceivers":[{"name":"alice_voice","countryCode":"1","phoneNumber":"5551234567","status":"Enabled"}],
-      "logicAppReceivers":[{"name":"alice_logicapp", "resourceId":"test_resource","callbackUrl":"http://callback","useCommonAlertSchema":false}],
-      "azureFunctionReceivers":[{"name":"azfunc", "functionAppResourceId":"test_rsrc", "functionName":"test_func", "httpTriggerUrl":"http://trigger","useCommonAlertSchema":true}],
-      "armRoleReceivers":[{"name":"alicearmrole","roleId":"abcde"}]},
-      "identity":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '959'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 Apr 2019 18:43:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/8.5
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor action-group update
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g -o -r
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002?api-version=2019-06-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":{"owner":"alice"},"properties":{"groupShortName":"new_name","enabled":true,"emailReceivers":[{"name":"alice","emailAddress":"alice@example.com","status":"Enabled","useCommonAlertSchema":false}],"smsReceivers":[{"name":"alice_sms","countryCode":"1","phoneNumber":"5551234567","status":"Enabled"}],"webhookReceivers":[{"name":"alice_web","serviceUri":"https://www.example.com/alert?name=alice","useCommonAlertSchema":false}],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '959'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 Apr 2019 18:43:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -444,10 +263,22 @@ interactions:
 - request:
     body: '{"location": "Global", "tags": {"owner": "alice"}, "properties": {"groupShortName":
       "new_name", "enabled": true, "emailReceivers": [{"name": "alice", "emailAddress":
-      "alice@example.com"}], "smsReceivers": [{"name": "alice_sms", "countryCode":
-      "1", "phoneNumber": "5551234567"}], "webhookReceivers": [], "itsmReceivers":
-      [], "azureAppPushReceivers": [], "automationRunbookReceivers": [], "voiceReceivers":
-      [], "logicAppReceivers": [], "azureFunctionReceivers": []}}'
+      "alice@example.com", "useCommonAlertSchema": true}], "smsReceivers": [{"name":
+      "alice_sms", "countryCode": "1", "phoneNumber": "5551234567"}], "webhookReceivers":
+      [{"name": "alice_web", "serviceUri": "https://www.example.com/alert?name=alice",
+      "useCommonAlertSchema": true, "useAadAuth": false}], "itsmReceivers": [{"name":
+      "alice_itsm", "workspaceId": "test_workspace", "connectionId": "test_conn",
+      "ticketConfiguration": "ticket_blob", "region": "eastus"}], "azureAppPushReceivers":
+      [{"name": "alice_apppush", "emailAddress": "alice@example.com"}], "automationRunbookReceivers":
+      [{"automationAccountId": "test_account", "runbookName": "test_runbook", "webhookResourceId":
+      "test_webhook", "isGlobalRunbook": true, "name": "alice_runbook", "serviceUri":
+      "http://example.com", "useCommonAlertSchema": false}], "voiceReceivers": [{"name":
+      "alice_voice", "countryCode": "1", "phoneNumber": "5551234567"}], "logicAppReceivers":
+      [{"name": "alice_logicapp", "resourceId": "test_resource", "callbackUrl": "http://callback",
+      "useCommonAlertSchema": false}], "azureFunctionReceivers": [{"name": "azfunc",
+      "functionAppResourceId": "test_rsrc", "functionName": "test_func", "httpTriggerUrl":
+      "http://trigger", "useCommonAlertSchema": true}], "armRoleReceivers": [{"name":
+      "alicearmrole", "roleId": "abcde", "useCommonAlertSchema": true}]}}'
     headers:
       Accept:
       - application/json
@@ -458,36 +289,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '464'
+      - '1494'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g -o -r
+      - -n -g -o -a -a -a -a -a -a -a -a -a -a
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002?api-version=2019-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":{"owner":"alice"},"properties":{"groupShortName":"new_name","enabled":true,"emailReceivers":[{"name":"alice","emailAddress":"alice@example.com","status":"Enabled","useCommonAlertSchema":false}],"smsReceivers":[{"name":"alice_sms","countryCode":"1","phoneNumber":"5551234567","status":"Enabled"}],"webhookReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":{"owner":"alice"},"properties":{"groupShortName":"new_name","enabled":true,"emailReceivers":[{"name":"alice","emailAddress":"alice@example.com","status":"Enabled","useCommonAlertSchema":true}],"smsReceivers":[{"name":"alice_sms","countryCode":"1","phoneNumber":"5551234567","status":"Enabled"}],"webhookReceivers":[{"name":"alice_web","serviceUri":"https://www.example.com/alert?name=alice","useCommonAlertSchema":true,"useAadAuth":false,"objectId":null,"identifierUri":null,"tenantId":null}],"itsmReceivers":[{"name":"alice_itsm","workspaceId":"test_workspace","connectionId":"test_conn","ticketConfiguration":"ticket_blob","region":"eastus"}],"azureAppPushReceivers":[{"name":"alice_apppush","emailAddress":"alice@example.com"}],"automationRunbookReceivers":[{"automationAccountId":"test_account","runbookName":"test_runbook","webhookResourceId":"test_webhook","isGlobalRunbook":true,"name":"alice_runbook","serviceUri":"http://example.com","useCommonAlertSchema":false,"useAadAuth":false,"objectId":null,"identifierUri":null,"tenantId":null}],"voiceReceivers":[{"name":"alice_voice","countryCode":"1","phoneNumber":"5551234567"}],"logicAppReceivers":[{"name":"alice_logicapp","resourceId":"test_resource","callbackUrl":"http://callback","useCommonAlertSchema":false}],"azureFunctionReceivers":[{"name":"azfunc","functionAppResourceId":"test_rsrc","functionName":"test_func","httpTriggerUrl":"http://trigger","useCommonAlertSchema":true}],"armRoleReceivers":[{"name":"alicearmrole","roleId":"abcde","useCommonAlertSchema":true}]},"identity":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '854'
+      - '1896'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:14 GMT
+      - Mon, 20 Jul 2020 02:59:16 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -497,7 +328,127 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1158'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -o -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002?api-version=2019-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":{"owner":"alice"},"properties":{"groupShortName":"new_name","enabled":true,"emailReceivers":[{"name":"alice","emailAddress":"alice@example.com","status":"Enabled","useCommonAlertSchema":true}],"smsReceivers":[{"name":"alice_sms","countryCode":"1","phoneNumber":"5551234567","status":"Enabled"}],"webhookReceivers":[{"name":"alice_web","serviceUri":"https://www.example.com/alert?name=alice","useCommonAlertSchema":true,"useAadAuth":false,"objectId":null,"identifierUri":null,"tenantId":null}],"itsmReceivers":[{"name":"alice_itsm","workspaceId":"test_workspace","connectionId":"test_conn","ticketConfiguration":"ticket_blob","region":"eastus"}],"azureAppPushReceivers":[{"name":"alice_apppush","emailAddress":"alice@example.com"}],"automationRunbookReceivers":[{"automationAccountId":"test_account","runbookName":"test_runbook","webhookResourceId":"test_webhook","isGlobalRunbook":true,"name":"alice_runbook","serviceUri":"http://example.com","useCommonAlertSchema":false,"useAadAuth":false,"objectId":null,"identifierUri":null,"tenantId":null}],"voiceReceivers":[{"name":"alice_voice","countryCode":"1","phoneNumber":"5551234567"}],"logicAppReceivers":[{"name":"alice_logicapp","resourceId":"test_resource","callbackUrl":"http://callback","useCommonAlertSchema":false}],"azureFunctionReceivers":[{"name":"azfunc","functionAppResourceId":"test_rsrc","functionName":"test_func","httpTriggerUrl":"http://trigger","useCommonAlertSchema":true}],"armRoleReceivers":[{"name":"alicearmrole","roleId":"abcde","useCommonAlertSchema":true}]},"identity":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1896'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 02:59:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Global", "tags": {"owner": "alice"}, "properties": {"groupShortName":
+      "new_name", "enabled": true, "emailReceivers": [{"name": "alice", "emailAddress":
+      "alice@example.com", "useCommonAlertSchema": true}], "smsReceivers": [{"name":
+      "alice_sms", "countryCode": "1", "phoneNumber": "5551234567"}], "webhookReceivers":
+      [], "itsmReceivers": [{"name": "alice_itsm", "workspaceId": "test_workspace",
+      "connectionId": "test_conn", "ticketConfiguration": "ticket_blob", "region":
+      "eastus"}], "azureAppPushReceivers": [{"name": "alice_apppush", "emailAddress":
+      "alice@example.com"}], "automationRunbookReceivers": [{"automationAccountId":
+      "test_account", "runbookName": "test_runbook", "webhookResourceId": "test_webhook",
+      "isGlobalRunbook": true, "name": "alice_runbook", "serviceUri": "http://example.com",
+      "useCommonAlertSchema": false}], "voiceReceivers": [{"name": "alice_voice",
+      "countryCode": "1", "phoneNumber": "5551234567"}], "logicAppReceivers": [{"name":
+      "alice_logicapp", "resourceId": "test_resource", "callbackUrl": "http://callback",
+      "useCommonAlertSchema": false}], "azureFunctionReceivers": [{"name": "azfunc",
+      "functionAppResourceId": "test_rsrc", "functionName": "test_func", "httpTriggerUrl":
+      "http://trigger", "useCommonAlertSchema": true}], "armRoleReceivers": [{"name":
+      "alicearmrole", "roleId": "abcde", "useCommonAlertSchema": true}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1364'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g -o -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002?api-version=2019-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":{"owner":"alice"},"properties":{"groupShortName":"new_name","enabled":true,"emailReceivers":[{"name":"alice","emailAddress":"alice@example.com","status":"Enabled","useCommonAlertSchema":true}],"smsReceivers":[{"name":"alice_sms","countryCode":"1","phoneNumber":"5551234567","status":"Enabled"}],"webhookReceivers":[],"itsmReceivers":[{"name":"alice_itsm","workspaceId":"test_workspace","connectionId":"test_conn","ticketConfiguration":"ticket_blob","region":"eastus"}],"azureAppPushReceivers":[{"name":"alice_apppush","emailAddress":"alice@example.com"}],"automationRunbookReceivers":[{"automationAccountId":"test_account","runbookName":"test_runbook","webhookResourceId":"test_webhook","isGlobalRunbook":true,"name":"alice_runbook","serviceUri":"http://example.com","useCommonAlertSchema":false,"useAadAuth":false,"objectId":null,"identifierUri":null,"tenantId":null}],"voiceReceivers":[{"name":"alice_voice","countryCode":"1","phoneNumber":"5551234567"}],"logicAppReceivers":[{"name":"alice_logicapp","resourceId":"test_resource","callbackUrl":"http://callback","useCommonAlertSchema":false}],"azureFunctionReceivers":[{"name":"azfunc","functionAppResourceId":"test_rsrc","functionName":"test_func","httpTriggerUrl":"http://trigger","useCommonAlertSchema":true}],"armRoleReceivers":[{"name":"alicearmrole","roleId":"abcde","useCommonAlertSchema":true}]},"identity":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1720'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 02:59:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1191'
     status:
       code: 200
       message: OK
@@ -519,15 +470,15 @@ interactions:
       ParameterSetName:
       - -n --action-group -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002/subscribe?api-version=2019-06-01
   response:
     body:
-      string: '{"Code":"ReceiverNotFound","Message":null}'
+      string: '{"code":"ReceiverNotFound","message":null}'
     headers:
       cache-control:
       - no-cache
@@ -536,19 +487,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:15 GMT
+      - Mon, 20 Jul 2020 02:59:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
     status:
       code: 404
       message: Not Found
@@ -570,15 +521,15 @@ interactions:
       ParameterSetName:
       - -n --action-group -g
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002/subscribe?api-version=2019-06-01
   response:
     body:
-      string: '{"Code":"ReceiverAlreadyEnabled","Message":null}'
+      string: '{"code":"ReceiverAlreadyEnabled","message":null}'
     headers:
       cache-control:
       - no-cache
@@ -587,19 +538,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:16 GMT
+      - Mon, 20 Jul 2020 02:59:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 409
       message: Conflict
@@ -616,13 +567,11 @@ interactions:
       - keep-alive
       Content-Length:
       - '0'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -o
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: DELETE
@@ -636,19 +585,19 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 16 Apr 2019 18:43:17 GMT
+      - Mon, 20 Jul 2020 02:59:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14991'
     status:
       code: 200
       message: OK
@@ -663,13 +612,11 @@ interactions:
       - monitor action-group list
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g -o
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-monitor/0.5.2
-        Azure-SDK-For-Python AZURECLI/2.0.62
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
@@ -685,13 +632,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 18:43:17 GMT
+      - Mon, 20 Jul 2020 02:59:26 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-IIS/8.5
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -703,51 +650,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 16 Apr 2019 18:43:19 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc1TFlZMzUySVozNkg3UjMzTVU1TkVYVUY0WEpLNUNWNktLSnxFMERCQzY4MEU2RjQ1NkE3LVNPVVRIQ0VOVFJBTFVTIiwiam9iTG9jYXRpb24iOiJzb3V0aGNlbnRyYWx1cyJ9?api-version=2019-07-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
-    status:
-      code: 202
-      message: Accepted
 version: 1
