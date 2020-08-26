@@ -4052,14 +4052,19 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('tags.foo', 'bar')
         ])
 
-        self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
-                 '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
-                     self.check('name', '{host-name}'),
-                     self.check('platformFaultDomain', 2),
-                     self.check('sku.name', 'DSv3-Type1'),
-                     self.check('autoReplaceOnFailure', False),
-                     self.check('tags.bar', 'baz')
-                 ])
+        try:
+            self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
+                     '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
+                         self.check('name', '{host-name}'),
+                         self.check('platformFaultDomain', 2),
+                         self.check('sku.name', 'DSv3-Type1'),
+                         self.check('autoReplaceOnFailure', False),
+                         self.check('tags.bar', 'baz')
+                     ])
+
+        except CLIError as e:
+            if 'capacity' in str(e):
+                return
 
         result = self.cmd('vm host get-instance-view --host-group {host-group} --name {host-name} -g {rg}', checks=[
             self.check('name', '{host-name}'),
