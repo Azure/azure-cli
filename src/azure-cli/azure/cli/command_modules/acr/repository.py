@@ -53,6 +53,14 @@ def _get_manifest_path(repository, manifest=None):
     return '/acr/v1/{}/_manifests'.format(repository)
 
 
+def _get_repository_metadata_path(repository, key=None):
+    """Return the path to keyed metadata in a repository, or list of keys if key is empty.
+    """
+    if key:
+        return '/acr/v1/{}/_metadata/{}'.format(repository, key)
+    return '/acr/v1/{}/_metadata'.format(repository)
+
+
 def _get_manifest_digest(login_server, repository, tag, username, password):
     response = request_data_from_registry(
         http_method='get',
@@ -415,6 +423,109 @@ def acr_repository_delete(cmd,
         user_confirmation("Are you sure you want to delete the repository '{}' "
                           "and all images under it?".format(repository), yes)
         path = _get_repository_path(repository)
+
+    return request_data_from_registry(
+        http_method='delete',
+        login_server=login_server,
+        path=path,
+        username=username,
+        password=password)[0]
+
+
+def acr_repository_metadata_show(cmd,
+                                 registry_name,
+                                 repository,
+                                 key=None,
+                                 resource_group_name=None,  # pylint: disable=unused-argument
+                                 tenant_suffix=None,
+                                 username=None,
+                                 password=None):
+    return _acr_repository_metadata_helper(
+        cmd=cmd,
+        registry_name=registry_name,
+        http_method='get',
+        permission=RepoAccessTokenPermission.METADATA_READ.value,
+        repository=repository,
+        key=key,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password)
+
+
+def acr_repository_metadata_update(cmd,
+                                   registry_name,
+                                   repository,
+                                   key,
+                                   file,
+                                   resource_group_name=None,  # pylint: disable=unused-argument
+                                   tenant_suffix=None,
+                                   username=None,
+                                   password=None):
+    return _acr_repository_metadata_helper(
+        cmd=cmd,
+        registry_name=registry_name,
+        http_method='put',
+        permission=RepoAccessTokenPermission.META_WRITE_META_READ.value,
+        repository=repository,
+        key=key,
+        file_payload=file,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password)
+
+
+def _acr_repository_metadata_helper(cmd,
+                                    registry_name,
+                                    http_method,
+                                    permission,
+                                    repository,
+                                    key=None,
+                                    file_payload=None,
+                                    tenant_suffix=None,
+                                    username=None,
+                                    password=None):
+
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=permission)
+
+    path = _get_repository_metadata_path(repository, key)
+
+    return request_data_from_registry(
+        http_method=http_method,
+        login_server=login_server,
+        path=path,
+        username=username,
+        password=password,
+        file_payload=file_payload)[0]
+
+
+def acr_repository_metadata_delete(cmd,
+                                   registry_name,
+                                   repository,
+                                   key,
+                                   resource_group_name=None,  # pylint: disable=unused-argument
+                                   tenant_suffix=None,
+                                   username=None,
+                                   password=None,
+                                   yes=False):
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=RepoAccessTokenPermission.DELETE_META_READ.value)
+
+    user_confirmation("Are you sure you want to delete metadata in the key '{}'"
+                        " of the repository '{}'?".format(key, repository), yes)
+    path = _get_repository_metadata_path(repository, key)
 
     return request_data_from_registry(
         http_method='delete',
