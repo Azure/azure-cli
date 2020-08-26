@@ -4193,7 +4193,7 @@ class VMPriorityEvictionBillingTest(ScenarioTest):
         })
 
         # vm create
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-price 50 --admin-username azureuser --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --priority Low --eviction-policy Deallocate --max-price 50 --admin-username azureuser --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('priority', 'Low'),
@@ -4201,12 +4201,13 @@ class VMPriorityEvictionBillingTest(ScenarioTest):
             self.check('billingProfile.maxPrice', 50)
         ])
 
+        # Can't create lb in testing subscription
         # vmss create
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --lb-sku Standard --priority Low --eviction-policy Deallocate --max-price 50 --admin-username azureuser --admin-password testPassword0 --authentication-type password', checks=[
-            self.check('vmss.virtualMachineProfile.priority', 'Low'),
-            self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
-            self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
-        ])
+        # self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --lb-sku Standard --priority Low --eviction-policy Deallocate --max-price 50 --admin-username azureuser --admin-password testPassword0 --authentication-type password', checks=[
+        #     self.check('vmss.virtualMachineProfile.priority', 'Low'),
+        #     self.check('vmss.virtualMachineProfile.evictionPolicy', 'Deallocate'),
+        #     self.check('vmss.virtualMachineProfile.billingProfile.maxPrice', 50)
+        # ])
 
         # vm update
         self.cmd('vm deallocate -g {rg} -n {vm}')
@@ -4216,11 +4217,11 @@ class VMPriorityEvictionBillingTest(ScenarioTest):
         ])
 
         # vmss update
-        self.cmd('vmss deallocate -g {rg} -n {vmss}')
-        self.cmd('vmss update -g {rg} -n {vmss} --priority Spot --max-price 100', checks=[
-            self.check('virtualMachineProfile.priority', 'Spot'),
-            self.check('virtualMachineProfile.billingProfile.maxPrice', 100)
-        ])
+        # self.cmd('vmss deallocate -g {rg} -n {vmss}')
+        # self.cmd('vmss update -g {rg} -n {vmss} --priority Spot --max-price 100', checks=[
+        #     self.check('virtualMachineProfile.priority', 'Spot'),
+        #     self.check('virtualMachineProfile.billingProfile.maxPrice', 100)
+        # ])
 
 
 class VMCreateSpecialName(ScenarioTest):
