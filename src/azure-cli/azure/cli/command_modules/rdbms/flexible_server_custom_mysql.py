@@ -103,7 +103,8 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
     return _form_response(
     user, sku, loc, rg, id, host,version,
-        administrator_login_password if administrator_login_password is not None else '*****'
+        administrator_login_password if administrator_login_password is not None else '*****',
+        ''
     )
 
 
@@ -306,7 +307,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         '{} Server Create'.format(logging_name))
 
 
-def _form_response(username, sku, location, resource_group_name, id, host, version, password):
+def _form_response(username, sku, location, resource_group_name, id, host, version, password, connection_string):
     return {
         'host': host,
         'username': username,
@@ -315,7 +316,8 @@ def _form_response(username, sku, location, resource_group_name, id, host, versi
         'location': location,
         'resource group': resource_group_name,
         'id': id,
-        'version': version
+        'version': version,
+        'connection string': connection_string
     }
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods

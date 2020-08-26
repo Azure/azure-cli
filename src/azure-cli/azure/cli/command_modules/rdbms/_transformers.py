@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 def table_transform_output(result):
     table_result = []
-    for key in ('host', 'username', 'password', 'location', 'skuname', 'resource group', 'id', 'version'):
+    for key in ('host', 'username', 'password', 'location', 'skuname', 'resource group', 'id', 'version', 'connection string'):
         entry = OrderedDict()
         entry['Property'] = key
         entry['Value'] = result[key]
