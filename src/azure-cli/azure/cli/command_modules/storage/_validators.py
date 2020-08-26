@@ -1383,7 +1383,6 @@ def validate_or_policy(namespace):
 
 def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):
     import re
-    import os
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
     storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
@@ -1433,7 +1432,6 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
 
 
 def _is_valid_uri(uri):
-    import os
     if not uri:
         return False
     if os.path.isdir(os.path.dirname(uri)):
