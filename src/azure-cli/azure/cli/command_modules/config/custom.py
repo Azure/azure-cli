@@ -28,9 +28,8 @@ def _parse_key(key):
     if len(parts) == 1:
         # Section is not provided, default to `core`
         return 'core', key
-    elif len(parts) == 2:
-        # Section is provided, like `core.no_color`, use the specified section.
-        return parts[0], parts[1]
+    # Section is provided, like `core.no_color`, use the specified section.
+    return parts[0], parts[1]
 
 
 def config_set(cmd, key_value_pairs=None, local=False):
