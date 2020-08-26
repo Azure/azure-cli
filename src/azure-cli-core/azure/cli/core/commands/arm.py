@@ -758,8 +758,8 @@ def show_exception_handler(ex):
     if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
         import sys
         from azure.cli.core.azlogging import CommandLoggerContext
-        from azure.cli.core.util import AzCLIErrorType
-        from azure.cli.core.util import AzCLIError
+        from azure.cli.core.azclierror import AzCLIErrorType
+        from azure.cli.core.azclierror import AzCLIError
         with CommandLoggerContext(logger):
             az_error = AzCLIError(AzCLIErrorType.ValidationError, getattr(ex, 'message', ex))
             az_error.print_error()

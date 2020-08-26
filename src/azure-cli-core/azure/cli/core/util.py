@@ -14,10 +14,11 @@ import platform
 import ssl
 import re
 import logging
-from enum import Enum
 
 import six
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from azure.cli.core.azclierror import AzCLIErrorType
+from azure.cli.core.azclierror import AzCLIError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -63,82 +64,6 @@ DISALLOWED_USER_NAMES = [
 ]
 
 
-class AzCLIErrorType(Enum):
-    """ AzureCLI error types """
-
-    # userfaults
-    CommandNotFoundError = 'CommandNotFoundError'
-    ArgumentParseError = 'ArgumentParseError'
-    ValidationError = 'ValidationError'
-    ManualInterrupt = 'ManualInterrupt'
-    # service side error
-    ServiceError = 'ServiceError'
-    # client side error
-    ClientError = 'ClientError'
-    # unexpected error
-    UnexpectedError = 'UnexpectedError'
-
-
-class AzCLIError(CLIError):
-    """ AzureCLI error definition """
-
-    def __init__(self, error_type, error_msg, raw_exception=None, command=None):
-        """
-        :param error_type: The name of the AzureCLI error type.
-        :type error_type: azure.cli.core.util.AzCLIErrorType
-        :param error_msg: The error message detail.
-        :type error_msg: str
-        :param raw_exception: The raw exception.
-        :type raw_exception: Exception
-        :param command: The command which brings the error.
-        :type command: str
-        :param recommendations: The recommendations to resolve the error.
-        :type recommendations: list
-        """
-        self.error_type = error_type
-        self.error_msg = error_msg
-        self.raw_exception = raw_exception
-        self.command = command
-        self.recommendations = []
-        super().__init__(error_msg)
-
-    def set_recommendation(self, recommendation):
-        self.recommendations.append(recommendation)
-
-    def set_raw_exception(self, raw_exception):
-        self.raw_exception = raw_exception
-
-    def print_error(self):
-        from azure.cli.core.azlogging import CommandLoggerContext
-        with CommandLoggerContext(logger):
-            message = '{}: {}'.format(self.error_type.value, self.error_msg)
-            logger.error(message)
-            if self.raw_exception:
-                logger.exception(self.raw_exception)
-            if self.recommendations:
-                for recommendation in self.recommendations:
-                    print(recommendation, file=sys.stderr)
-
-    def send_telemetry(self):
-        import azure.cli.core.telemetry as telemetry
-        telemetry.set_error_type(self.error_type.value)
-
-        # For userfaults
-        if self.error_type in [AzCLIErrorType.CommandNotFoundError,
-                               AzCLIErrorType.ArgumentParseError,
-                               AzCLIErrorType.ValidationError,
-                               AzCLIErrorType.ManualInterrupt]:
-            telemetry.set_user_fault(self.error_msg)
-
-        # For failures: service side error, client side error, unexpected error
-        else:
-            telemetry.set_failure(self.error_msg)
-
-        # For unexpected error
-        if self.raw_exception:
-            telemetry.set_exception(self.raw_exception, '')
-
-
 def handle_exception(ex):  # pylint: disable=too-many-statements
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathTypeError
@@ -150,6 +75,7 @@ def handle_exception(ex):  # pylint: disable=too-many-statements
 
     with CommandLoggerContext(logger):
         error_msg = getattr(ex, 'message', str(ex))
+        exit_code = 1
 
         if isinstance(ex, AzCLIError):
             az_error = ex
@@ -171,10 +97,12 @@ def handle_exception(ex):  # pylint: disable=too-many-statements
             except Exception:  # pylint: disable=broad-except
                 pass
             az_error = AzCLIError(AzCLIErrorType.ValidationError, error_msg)
+            exit_code = ex.args[1] if len(ex.args) >= 2 else 1
 
         # TODO: Fine-grained analysis
         elif isinstance(ex, AzureException):
             az_error = AzCLIError(AzCLIErrorType.ServiceError, error_msg)
+            exit_code = ex.args[1] if len(ex.args) >= 2 else 1
 
         # TODO: Fine-grained analysis
         elif isinstance(ex, ClientRequestError):
@@ -215,7 +143,7 @@ def handle_exception(ex):  # pylint: disable=too-many-statements
         az_error.print_error()
         az_error.send_telemetry()
 
-        return 1
+        return exit_code
 
 
 # pylint: disable=inconsistent-return-statements

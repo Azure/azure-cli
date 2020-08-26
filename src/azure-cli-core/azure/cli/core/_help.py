@@ -184,6 +184,10 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
                 print(UX_SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else UX_SURVEY_PROMPT)
 
     def get_examples(self, command, parser, is_group):
+        """Get examples of a certain command from the help file.
+        Get the text of the example, strip the newline character and
+        return a list of commands which start with the given command name.
+        """
         nouns = command.split(' ')[1:]
         self.update_loaders_with_help_file_contents(nouns)
 
