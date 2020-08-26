@@ -40,3 +40,28 @@ class SharedSecret:
                 current_share_array = share_arrays[j]
                 current_share_array.append(share_array[j])
         return share_arrays
+
+    @staticmethod
+    def get_secret_byte(share_array, required):
+        if len(share_array) < required:
+            raise CLIError('Insufficient shares.')
+        return ByteShares.get_secret(share_array, required)
+
+    @staticmethod
+    def get_plaintext(share_arrays, required):
+        if len(share_arrays) < required:
+            raise CLIError('Insufficient shares.')
+
+        plaintext = bytearray()
+        plaintext_len = len(share_arrays[0])
+
+        for j in range(plaintext_len):
+            sv = array.array('H')
+            for i in range(required):
+                sa = share_arrays[i]
+                sv.append(sa[j])
+
+            text = SharedSecret.get_secret_byte(sv, required)
+            plaintext.append(text)
+
+        return plaintext

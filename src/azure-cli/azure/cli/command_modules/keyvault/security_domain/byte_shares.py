@@ -46,3 +46,24 @@ class ByteShares:
             v = ModMath.multiply(v, x)
             v = ModMath.add(v, self.coefficients[i])
         return Share(x, v)
+
+    @staticmethod
+    def get_secret(shares, required):
+        secret = 0
+        for i in range(required):
+            numerator = denominator = 1
+            si = Share.from_uint16(shares[i])
+            for j in range(required):
+                if i == j:
+                    continue
+                sj = Share.from_uint16(shares[j])
+                numerator = ModMath.multiply(numerator, sj.x)
+                diff = ModMath.subtract(sj.x, si.x)
+                denominator = ModMath.multiply(diff, denominator)
+
+            invert = ModMath.invert(denominator)
+            ci = ModMath.multiply(numerator, invert)
+            tmp = ModMath.multiply(ci, si.v)
+            secret = ModMath.add(secret, tmp)
+
+        return secret
