@@ -33,7 +33,7 @@ set REPO_ROOT=%~dp0..\..\..
 
 ::reset working folders
 if exist %BUILDING_DIR% rmdir /s /q %BUILDING_DIR%
-::rmdir always returns 0, so check folder's existence 
+::rmdir always returns 0, so check folder's existence
 if exist %BUILDING_DIR% (
     echo Failed to delete %BUILDING_DIR%.
     goto ERROR
@@ -88,7 +88,7 @@ robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 set CLI_SRC=%REPO_ROOT%\src
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
-for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg %CLI_SRC%\azure-cli-telemetry) do (
+for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
    %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir --no-deps .
    popd
@@ -96,8 +96,6 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nsp
 %BUILDING_DIR%\python.exe -m pip install -r %CLI_SRC%\azure-cli\requirements.py3.windows.txt
 
 if %errorlevel% neq 0 goto ERROR
-
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
@@ -110,6 +108,7 @@ copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
+copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
 :: Use universal files and remove Py3 only files
 pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt

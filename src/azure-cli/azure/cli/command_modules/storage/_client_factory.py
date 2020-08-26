@@ -258,3 +258,7 @@ def cf_adls_directory(cli_ctx, kwargs):
 def cf_adls_file(cli_ctx, kwargs):
     return cf_adls_service(cli_ctx, kwargs).get_file_client(file_system=kwargs.pop('file_system_name', None),
                                                             file_path=kwargs.pop('path', None))
+
+
+def cf_or_policy(cli_ctx, _):
+    return storage_client_factory(cli_ctx).object_replication_policies
