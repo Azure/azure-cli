@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.2.0
+++++++
+
+* Fix a tiny bug of sequential run.
+
 0.1.0
 ++++++
 
