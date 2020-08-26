@@ -2102,4 +2102,15 @@ def security_domain_backup(cmd, client, hsm_base_url, sd_wrapping_key1, sd_wrapp
     )
     with open(security_domain_file, 'w') as f:
         f.write(ret_json)
+
+
+def _sd_single_byte_test(shares, required):
+    for i in range(0x100):
+        secret = make_shared_secret(shares, required)
+        share_array = secret.make_byte_shares(i)
+        secret2 = get_secret(required)
+        result = secret2.get_secret_byte(share_array)
+
+        if i != result:
+            raise CLIError('single_byte_test failed')
 # endregion

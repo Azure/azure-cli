@@ -1,0 +1,42 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+import array
+
+from knack.util import CLIError
+from .byte_shares import ByteShares
+
+
+class SharedSecret:
+    max_shares = 126
+
+    def __init__(self, shares, required):
+        if shares > SharedSecret.max_shares or required > shares or required < 2:
+            raise CLIError('Incorrect share or required count.')
+
+        self.shares = shares
+        self.required = required
+        self.byte_shares = ByteShares(required, 0)
+
+    def make_byte_shares(self, b):
+        share_array = []
+        self.byte_shares.set_secret_byte(b)
+
+        for x in range(1, self.shares + 1):
+            s = self.byte_shares.make_share(x)
+            share_array.append(s.to_uint16())
+
+        return share_array
+
+    def make_shares(self, plaintext):
+        share_arrays = []
+        for i in range(len(plaintext)):
+            share_array = self.make_byte_shares(plaintext[i])
+            for j in range(len(share_array)):
+                if i == 0:
+                    share_arrays.append(array.array('H'))
+                current_share_array = share_arrays[j]
+                current_share_array.append(share_array[j])
+        return share_arrays
