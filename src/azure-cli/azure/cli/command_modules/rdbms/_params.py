@@ -12,7 +12,7 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-
+from .randomname.generate import generate_username
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
 
@@ -23,6 +23,47 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     }
 
     def _complex_params(command_group):
+        with self.argument_context('{} flexible-server create'.format(command_group)) as c:
+                # c.extra('generate_password', help='Generate a password.', arg_group='Authentication')
+                # Add create mode as a paramter
+            if command_group == 'postgres':
+                c.argument('version', default='12', help='Server major version.')
+                c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+                           help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
+                           arg_group='Authentication')
+            c.argument('storage_mb', options_list=['--storage-size'], default='524288', type=int,
+                           help='The max storage size of the server. Unit is megabytes.')
+
+            c.argument('sku_name', options_list=['--sku-name'], default='Standard_D4s_v3',
+                           help='The name of the sku, typically, tier + family + cores, e.g. B_Gen4_1, GP_Gen5_8.')
+            c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the server.')
+            c.argument('administrator_login', default=generate_username(), help='Name of the server.', arg_group='Authentication')
+            c.argument('assign_identity', options_list=['--assign-identity'],
+                           help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+            c.argument('backup_retention', type=int, options_list=['--backup-retention'],
+                           help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
+                           validator=retention_validator)
+            c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           options_list=['--ssl-enforcement'],
+                           help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
+            c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           options_list=['--public-network-access'],
+                           help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
+            c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           options_list=['--infrastructure-encryption', '-i'],
+                           help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
+            c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           options_list=['--geo-redundant-backup'],
+                           help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
+            c.argument('location', arg_type=get_location_type(self.cli_ctx))#, validator=get_default_location_from_resource_group)
+            c.argument('tags', tags_type)
+            c.ignore('database_name')
+            if command_group == 'mysql':
+                c.argument('version', default='5.7', help='Server major versions.')
+                c.argument('tier', default='GeneralPurpose')
+                #c.ignore('storage_mb')
+                #c.argument('version', default='12', help='Server major version.')
+
         with self.argument_context('{} server create'.format(command_group)) as c:
             c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16. ')
             c.argument('administrator_login', required=True, arg_group='Authentication')

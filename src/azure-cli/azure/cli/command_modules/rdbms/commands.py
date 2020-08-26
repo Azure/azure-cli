@@ -51,7 +51,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_firewall_rules,
     cf_postgres_flexible_config,
     cf_postgres_flexible_virtual_network_rules_operations)
-
+from ._transformers import table_transform_output
 # from .transformers import table_transform_connection_string
 # from .validators import db_up_namespace_processor
 
@@ -587,7 +587,8 @@ def load_command_table(self, _):
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_servers) as g:
-        g.custom_command('create', '_flexible_server_create')
+        #g.custom_command('create', '_flexible_server_create')
+        g.custom_command('create', '_flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', '_flexible_server_restore', supports_no_wait=True)
         g.command('start', 'start')
         g.command('stop', 'stop')
