@@ -7,7 +7,7 @@
 # This script is expected to be run in a container environment, therefore sudo doesn't present
 # here.
 
-set -ex
+set -exv
 
 : "${CLI_VERSION:?CLI_VERSION environment variable not set.}"
 : "${CLI_VERSION_REVISION:?CLI_VERSION_REVISION environment variable not set.}"
@@ -15,7 +15,7 @@ set -ex
 ls -Rl /mnt/artifacts
 
 WORKDIR=`cd $(dirname $0); cd ../../../; pwd`
-PYTHON_VERSION="3.6.5"
+PYTHON_VERSION="3.6.10"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages
@@ -35,19 +35,8 @@ make install
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
-# note: This installation step could happen in debian/rules but was unable to escape $ char.
-# It does not affect the built .deb file though.
-pip3 install wheel
-
-if [ -d $WORKDIR/privates ]; then
-    # The private pages are used when a dependency is not published yet
-    find $WORKDIR/private -name '*.whl' | xargs pip3 install
-fi
-
-# The product whl are expected to be pre-built
-find /mnt/artifacts/pypi -name '*.whl' | xargs pip3 install
-
-pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
+find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
+pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian

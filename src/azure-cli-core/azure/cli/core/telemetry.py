@@ -24,7 +24,7 @@ DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
 
 
-class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
+class TelemetrySession:  # pylint: disable=too-many-instance-attributes
     def __init__(self, correlation_id=None, application=None):
         self.start_time = None
         self.end_time = None
@@ -45,6 +45,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.extension_management_detail = None
         self.raw_command = None
         self.mode = 'default'
+        self.init_time_elapsed = None
+        self.invoke_time_elapsed = None
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
@@ -164,6 +166,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
                               lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
         set_custom_properties(result, 'StartTime', str(self.start_time))
         set_custom_properties(result, 'EndTime', str(self.end_time))
+        set_custom_properties(result, 'InitTimeElapsed', str(self.init_time_elapsed))
+        set_custom_properties(result, 'InvokeTimeElapsed', str(self.invoke_time_elapsed))
         set_custom_properties(result, 'OutputType', self.output_type)
         set_custom_properties(result, 'RawCommand', self.raw_command)
         set_custom_properties(result, 'Params', ','.join(self.parameters or []))
@@ -173,6 +177,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
+        from azure.cli.core._environment import _ENV_AZ_INSTALLER
+        set_custom_properties(result, 'Installer', os.getenv(_ENV_AZ_INSTALLER))
 
         return result
 
@@ -201,10 +207,14 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 _session = TelemetrySession()
 
 
+def has_exceptions():
+    return len(_session.exceptions) > 0
+
+
 def _user_agrees_to_telemetry(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
-        if not _get_config().getboolean('core', 'collect_telemetry', fallback=True):
+        if not is_telemetry_enabled():
             return None
         return func(*args, **kwargs)
 
@@ -219,6 +229,16 @@ def start(mode=None):
     if mode:
         _session.mode = mode
     _session.start_time = datetime.datetime.utcnow()
+
+
+@decorators.suppress_all_exceptions()
+def set_init_time_elapsed(init_time_elapsed):
+    _session.init_time_elapsed = init_time_elapsed
+
+
+@decorators.suppress_all_exceptions()
+def set_invoke_time_elapsed(invoke_time_elapsed):
+    _session.invoke_time_elapsed = invoke_time_elapsed
 
 
 @_user_agrees_to_telemetry
@@ -260,8 +280,8 @@ def set_custom_properties(prop, name, value):
 
 @decorators.suppress_all_exceptions()
 def set_exception(exception, fault_type, summary=None):
-    if not summary:
-        _session.result_summary = summary
+    if not _session.result_summary:
+        _session.result_summary = _remove_cmd_chars(summary)
 
     _session.add_exception(exception, fault_type=fault_type, description=summary)
 
@@ -358,6 +378,14 @@ def _add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATI
     })
 
 
+@decorators.suppress_all_exceptions()
+def is_telemetry_enabled():
+    from azure.cli.core.cloud import cloud_forbid_telemetry
+    if cloud_forbid_telemetry(_session.application):
+        return False
+    return _get_config().getboolean('core', 'collect_telemetry', fallback=True)
+
+
 # definitions
 
 @decorators.call_once
@@ -423,14 +451,18 @@ def _get_azure_subscription_id():
 
 
 def _get_shell_type():
+    # This method is not accurate and needs improvement, for instance all shells on Windows return 'cmd'.
     if 'ZSH_VERSION' in os.environ:
         return 'zsh'
-    elif 'BASH_VERSION' in os.environ:
+    if 'BASH_VERSION' in os.environ:
         return 'bash'
-    elif 'KSH_VERSION' in os.environ or 'FCEDIT' in os.environ:
+    if 'KSH_VERSION' in os.environ or 'FCEDIT' in os.environ:
         return 'ksh'
-    elif 'WINDIR' in os.environ:
+    if 'WINDIR' in os.environ:
         return 'cmd'
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        return 'cloud-shell'
     return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
 

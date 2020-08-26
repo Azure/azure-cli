@@ -49,9 +49,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('sub-command the-second-name'.split())
         self.assertIs(args.func, command2)
 
-        AzCliCommandParser.error = VerifyError(self,)
-        parser.parse_args('sub-command'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('sub-command'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_required_parameter(self):
         def test_handler(args):  # pylint: disable=unused-argument
@@ -72,9 +72,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep'.split())
         self.assertIs(args.func, command)
 
-        AzCliCommandParser.error = VerifyError(self)
-        parser.parse_args('test command'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('test command'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_nargs_parameter(self):
         def test_handler():
@@ -95,9 +95,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep nope'.split())
         self.assertIs(args.func, command)
 
-        AzCliCommandParser.error = VerifyError(self)
-        parser.parse_args('test command -req yep'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('test command -req yep'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_case_insensitive_enum_choices(self):
         from enum import Enum
@@ -144,9 +144,9 @@ class TestParser(unittest.TestCase):
         return ext_name
 
     def _mock_get_extensions():
-        MockExtension = namedtuple('Extension', ['name', 'preview'])
-        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False),
-                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False)]
+        MockExtension = namedtuple('Extension', ['name', 'preview', 'experimental', 'path', 'get_metadata'])
+        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}),
+                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {})]
 
     def _mock_load_command_loader(loader, args, name, prefix):
         from enum import Enum
@@ -215,6 +215,12 @@ class TestParser(unittest.TestCase):
         def mock_get_close_matches(*args, **kwargs):
             choice_lists.append(original_get_close_matches(*args, **kwargs))
 
+        def mock_ext_cmd_tree_load(*args, **kwargs):
+            return {"test": {"new-ext": {"create": "new-ext-name", "reset": "another-ext-name"}}}
+
+        def mock_add_extension(*args, **kwargs):
+            pass
+
         # run multiple faulty commands and save error logs, as well as close matches
         with mock.patch('logging.Logger.error', mock_log_error), \
                 mock.patch('difflib.get_close_matches', mock_get_close_matches):
@@ -248,6 +254,75 @@ class TestParser(unittest.TestCase):
             for choice in ['enum_1', 'enum_2']:
                 self.assertIn(choice, choices)
 
+        # test dynamic extension install
+        with mock.patch('logging.Logger.error', mock_log_error), \
+                mock.patch('azure.cli.core.extension.operations.add_extension', mock_add_extension), \
+                mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_command_tree', mock_ext_cmd_tree_load), \
+                mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_use_dynamic_install_config', return_value='yes_without_prompt'):
+            with self.assertRaises(SystemExit):
+                parser.parse_args('test new-ext create --opt enum_2'.split())
+            self.assertIn("Extension new-ext-name installed. Please rerun your command.", logger_msgs[5])
+            with self.assertRaises(SystemExit):
+                parser.parse_args('test new-ext reset pos1 pos2'.split())  # test positional args
+            self.assertIn("Extension another-ext-name installed. Please rerun your command.", logger_msgs[6])
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_parser_failure_recovery_recommendations(self):
+        cli = DummyCli()
+        main_loader = MainCommandsLoader(cli)
+        cli.loader = main_loader
+
+        cli.loader.load_command_table(None)
+
+        parser = cli.parser_cls(cli)
+        parser.load_command_table(cli.loader)
+
+        recommendation_provider_parameters = []
+
+        version = cli.get_cli_version()
+        expected_recommendation_provider_parameters = [
+            # version, command, parameters, extension
+            ExpectedParameters(version, 'test module1', ['--opt'], False),
+            ExpectedParameters(version, 'test extension1', ['--opt'], False),
+            ExpectedParameters(version, 'foo_bar', ['--opt'], False),
+            ExpectedParameters(version, 'test module', ['--opt'], False),
+            ExpectedParameters(version, 'test extension', ['--opt'], True)
+        ]
+
+        def mock_recommendation_provider(*args):
+            recommendation_provider_parameters.append(tuple(args))
+            return []
+
+        AzCliCommandParser.recommendation_provider = mock_recommendation_provider
+
+        faulty_cmd_args = [
+            'test module1 --opt enum_1',
+            'test extension1 --opt enum_1',
+            'test foo_bar --opt enum_3',
+            'test module --opt enum_3',
+            'test extension --opt enum_3'
+        ]
+
+        for text in faulty_cmd_args:
+            with self.assertRaises(SystemExit):
+                parser.parse_args(text.split())
+
+        for i, parameters in enumerate(recommendation_provider_parameters):
+            version, command, parameters, extension = parameters
+            expected = expected_recommendation_provider_parameters[i]
+            self.assertEqual(expected.version, version)
+            self.assertIn(expected.command, command)
+            self.assertEqual(expected.parameters, parameters)
+
+            if expected.has_extension:
+                self.assertIsNotNone(extension)
+            else:
+                self.assertIsNone(extension)
+
 
 class VerifyError(object):  # pylint: disable=too-few-public-methods
 
@@ -260,6 +335,9 @@ class VerifyError(object):  # pylint: disable=too-few-public-methods
         if self.substr:
             self.test.assertTrue(message.find(self.substr) >= 0)
         self.called = True
+
+
+ExpectedParameters = namedtuple('ExpectedParameters', ['version', 'command', 'parameters', 'has_extension'])
 
 
 if __name__ == '__main__':

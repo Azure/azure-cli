@@ -59,7 +59,7 @@ def version_in_base_repo(base_repo, mod_path, mod_name, mod_version):
         if mod_version == _get_mod_version(base_repo_mod_path):
             print('Version {} of {} is already used on in the base repo.'.format(mod_version, mod_name))
             return True
-    except FileNotFoundError:
+    except OSError:  # FileNotFoundError introduced in Python 3
         print('Module {} not in base repo. Skipping...'.format(mod_name), file=sys.stderr)
     except Exception as ex:
         # Print warning if unable to get module from base version (e.g. mod didn't exist there)

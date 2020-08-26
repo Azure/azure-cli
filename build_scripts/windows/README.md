@@ -16,7 +16,7 @@ Prerequisites
     - Choose the 'Use Git and optional Unix tools from the Windows Command Prompt' option.
 
 4. Install 'Microsoft Build Tools 2015'.
-    https://www.microsoft.com/en-us/download/details.aspx?id=48159
+    https://www.microsoft.com/download/details.aspx?id=48159
 
 5. Clone the repository.
     - git clone https://github.com/azure/azure-cli

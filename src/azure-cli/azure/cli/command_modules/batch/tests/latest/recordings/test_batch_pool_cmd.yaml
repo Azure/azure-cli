@@ -1,0 +1,864 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - batch account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdktest/providers/Microsoft.Batch/batchAccounts/sdktest2?api-version=2020-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdktest/providers/Microsoft.Batch/batchAccounts/sdktest2","name":"sdktest2","type":"Microsoft.Batch/batchAccounts","location":"westcentralus","properties":{"accountEndpoint":"sdktest2.westcentralus.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardA0_A7Family","coreQuota":20},{"name":"standardDv2Family","coreQuota":20},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardAv2Family","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":100,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdktest/providers/Microsoft.Storage/storageAccounts/sdkteststore2","lastKeySync":"2020-01-09T20:16:08.6234908Z"},"poolAllocationMode":"BatchService"},"tags":{"rawr":"test"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2165'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 03 Apr 2020 17:58:20 GMT
+      etag:
+      - '"0x8D79540C37A571C"'
+      expires:
+      - '-1'
+      last-modified:
+      - Thu, 09 Jan 2020 20:16:08 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - batch account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sdktest/providers/Microsoft.Batch/batchAccounts/sdktest2/listKeys?api-version=2020-05-01
+  response:
+    body:
+      string: '{"accountName":"sdktest2","primary":"lrCy/cm87CTTLd8yfM/ojizRGUNceCr6nWajz1mWKN45lMTJcGPF4zet+H+SkXYgJ5BGD3ab4m4b7U+wAwpC2A==","secondary":"eAS2NXIlOIAA8ovAf8a5RxnVXil/3CyuMt9cDBGUi1w7810IHN/5MF21otvBrTPOLAUFq/2sjA3dKYY7IvTpXA=="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '230'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 03 Apr 2020 17:58:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "xplatCreatedPool", "vmSize": "small", "cloudServiceConfiguration":
+      {"osFamily": "4"}, "targetDedicatedNodes": 0, "startTask": {"commandLine": "cmd
+      /c echo test", "userIdentity": {"autoUser": {"scope": "task", "elevationLevel":
+      "admin"}}, "waitForSuccess": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '270'
+      Content-Type:
+      - application/json; odata=minimalmetadata; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: POST
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: ''
+    headers:
+      dataserviceid:
+      - https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:22 GMT
+      etag:
+      - '0x8D7D7F8999D625C'
+      last-modified:
+      - Fri, 03 Apr 2020 17:58:22 GMT
+      location:
+      - https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool
+      request-id:
+      - b9a395f7-f767-4e5d-9114-327b1ead79ae
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"id": "pool_image1", "vmSize": "Standard_A1", "virtualMachineConfiguration":
+      {"imageReference": {"publisher": "a", "offer": "b", "sku": "c"}, "nodeAgentSKUId":
+      "batch.node.windows amd64"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '189'
+      Content-Type:
+      - application/json; odata=minimalmetadata; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: POST
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: "{\r\n  \"odata.metadata\":\"https://sdktest2.westcentralus.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\",\"code\":\"InvalidPropertyValue\",\"message\":{\r\n
+        \   \"lang\":\"en-US\",\"value\":\"The value provided for one of the properties
+        in the request body is invalid.\\nRequestId:7533cceb-34ac-45c1-9081-26474a006d3a\\nTime:2020-04-03T17:58:22.9810277Z\"\r\n
+        \ },\"values\":[\r\n    {\r\n      \"key\":\"PropertyName\",\"value\":\"imageReference\"\r\n
+        \   },{\r\n      \"key\":\"Reason\",\"value\":\"The specified imageReference
+        with publisher a offer b sku c is not supported.\"\r\n    }\r\n  ]\r\n}"
+    headers:
+      content-length:
+      - '588'
+      content-type:
+      - application/json;odata=minimalmetadata
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:22 GMT
+      request-id:
+      - 7533cceb-34ac-45c1-9081-26474a006d3a
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 400
+      message: The value provided for one of the properties in the request body is
+        invalid.
+- request:
+    body: '{"id": "pool_image1", "vmSize": "Standard_A1", "virtualMachineConfiguration":
+      {"imageReference": {"virtualMachineImageId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_rg/providers/Microsoft.Compute/images/custom_image"},
+      "nodeAgentSKUId": "batch.node.windows amd64"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '296'
+      Content-Type:
+      - application/json; odata=minimalmetadata; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: POST
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: "{\r\n  \"odata.metadata\":\"https://sdktest2.westcentralus.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\",\"code\":\"InvalidPropertyValue\",\"message\":{\r\n
+        \   \"lang\":\"en-US\",\"value\":\"The value provided for one of the properties
+        in the request body is invalid.\\nRequestId:73669b53-c377-40fc-9614-ea5478d2f04c\\nTime:2020-04-03T17:58:23.3677405Z\"\r\n
+        \ },\"values\":[\r\n    {\r\n      \"key\":\"PropertyName\",\"value\":\"virtualMachineImageId\"\r\n
+        \   },{\r\n      \"key\":\"PropertyValue\",\"value\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_rg/providers/Microsoft.Compute/images/custom_image\"\r\n
+        \   },{\r\n      \"key\":\"Reason\",\"value\":\"The specified resource id
+        must be of the format /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}\"\r\n
+        \   }\r\n  ]\r\n}"
+    headers:
+      content-length:
+      - '916'
+      content-type:
+      - application/json;odata=minimalmetadata
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:23 GMT
+      request-id:
+      - 73669b53-c377-40fc-9614-ea5478d2f04c
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 400
+      message: The value provided for one of the properties in the request body is
+        invalid.
+- request:
+    body: '{"id": "pool_image1", "vmSize": "Standard_A1", "virtualMachineConfiguration":
+      {"imageReference": {"publisher": "canonical", "offer": "ubuntuserver", "sku":
+      "18.04-lts"}, "nodeAgentSKUId": "batch.node.ubuntu 18.04", "diskEncryptionConfiguration":
+      {"targets": ["temporarydisk"]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '278'
+      Content-Type:
+      - application/json; odata=minimalmetadata; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: POST
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: ''
+    headers:
+      dataserviceid:
+      - https://sdktest2.westcentralus.batch.azure.com/pools/pool_image1
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:24 GMT
+      etag:
+      - '0x8D7D7F89AA3BD2B'
+      last-modified:
+      - Fri, 03 Apr 2020 17:58:24 GMT
+      location:
+      - https://sdktest2.westcentralus.batch.azure.com/pools/pool_image1
+      request-id:
+      - 09aeeec5-24c4-4ded-9d72-5025380bcd28
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: GET
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: "{\r\n  \"odata.metadata\":\"https://sdktest2.westcentralus.batch.azure.com/$metadata#pools/@Element\",\"id\":\"xplatCreatedPool\",\"url\":\"https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool\",\"eTag\":\"0x8D7D7F8999D625C\",\"lastModified\":\"2020-04-03T17:58:22.5304156Z\",\"creationTime\":\"2020-04-03T17:58:22.5304156Z\",\"state\":\"active\",\"stateTransitionTime\":\"2020-04-03T17:58:22.5304156Z\",\"allocationState\":\"steady\",\"allocationStateTransitionTime\":\"2020-04-03T17:58:23.0861006Z\",\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\":0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\":0,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\":{\r\n
+        \   \"commandLine\":\"cmd /c echo test\",\"userIdentity\":{\r\n      \"autoUser\":{\r\n
+        \       \"scope\":\"task\",\"elevationLevel\":\"admin\"\r\n      }\r\n    },\"maxTaskRetryCount\":0,\"waitForSuccess\":true\r\n
+        \ },\"maxTasksPerNode\":1,\"taskSchedulingPolicy\":{\r\n    \"nodeFillType\":\"Spread\"\r\n
+        \ },\"cloudServiceConfiguration\":{\r\n    \"osFamily\":\"4\",\"osVersion\":\"*\"\r\n
+        \ }\r\n}"
+    headers:
+      content-type:
+      - application/json;odata=minimalmetadata
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:24 GMT
+      etag:
+      - '0x8D7D7F8999D625C'
+      last-modified:
+      - Fri, 03 Apr 2020 17:58:22 GMT
+      request-id:
+      - 1cee98a8-2ab1-4554-8dfd-76bd98b880e2
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"targetDedicatedNodes": 0, "targetLowPriorityNodes": 3}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '56'
+      Content-Type:
+      - application/json; odata=minimalmetadata; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: POST
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool/resize?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: ''
+    headers:
+      dataserviceid:
+      - https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool/resize
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:25 GMT
+      etag:
+      - '0x8D7D7F89B1D7213'
+      last-modified:
+      - Fri, 03 Apr 2020 17:58:25 GMT
+      request-id:
+      - 7bf50e0e-6060-4720-a8fb-526779de9717
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: GET
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: "{\r\n  \"odata.metadata\":\"https://sdktest2.westcentralus.batch.azure.com/$metadata#pools/@Element\",\"id\":\"xplatCreatedPool\",\"url\":\"https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool\",\"eTag\":\"0x8D7D7F89B1D7213\",\"lastModified\":\"2020-04-03T17:58:25.0474003Z\",\"creationTime\":\"2020-04-03T17:58:22.5304156Z\",\"state\":\"active\",\"stateTransitionTime\":\"2020-04-03T17:58:22.5304156Z\",\"allocationState\":\"resizing\",\"allocationStateTransitionTime\":\"2020-04-03T17:58:25.0474003Z\",\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\":0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\":3,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\":{\r\n
+        \   \"commandLine\":\"cmd /c echo test\",\"userIdentity\":{\r\n      \"autoUser\":{\r\n
+        \       \"scope\":\"task\",\"elevationLevel\":\"admin\"\r\n      }\r\n    },\"maxTaskRetryCount\":0,\"waitForSuccess\":true\r\n
+        \ },\"maxTasksPerNode\":1,\"taskSchedulingPolicy\":{\r\n    \"nodeFillType\":\"Spread\"\r\n
+        \ },\"cloudServiceConfiguration\":{\r\n    \"osFamily\":\"4\",\"osVersion\":\"*\"\r\n
+        \ }\r\n}"
+    headers:
+      content-type:
+      - application/json;odata=minimalmetadata
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:24 GMT
+      etag:
+      - '0x8D7D7F89B1D7213'
+      last-modified:
+      - Fri, 03 Apr 2020 17:58:25 GMT
+      request-id:
+      - 860fd2fe-674f-4254-9e8a-df0c98418686
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: GET
+    uri: https://sdktest2.westcentralus.batch.azure.com/nodecounts?api-version=2020-03-01.11.0&maxresults=10&timeout=30
+  response:
+    body:
+      string: "{\r\n  \"odata.metadata\":\"https://sdktest2.westcentralus.batch.azure.com/$metadata#poolnodecounts\",\"value\":[\r\n
+        \   {\r\n      \"poolId\":\"pool_image1\",\"dedicated\":{\r\n        \"creating\":0,\"idle\":0,\"leavingPool\":0,\"offline\":0,\"preempted\":0,\"rebooting\":0,\"reimaging\":0,\"running\":0,\"starting\":0,\"startTaskFailed\":0,\"unusable\":0,\"unknown\":0,\"waitingForStartTask\":0,\"total\":0\r\n
+        \     },\"lowPriority\":{\r\n        \"creating\":0,\"idle\":0,\"leavingPool\":0,\"offline\":0,\"preempted\":0,\"rebooting\":0,\"reimaging\":0,\"running\":0,\"starting\":0,\"startTaskFailed\":0,\"unusable\":0,\"unknown\":0,\"waitingForStartTask\":0,\"total\":0\r\n
+        \     }\r\n    },{\r\n      \"poolId\":\"xplatCreatedPool\",\"dedicated\":{\r\n
+        \       \"creating\":0,\"idle\":0,\"leavingPool\":0,\"offline\":0,\"preempted\":0,\"rebooting\":0,\"reimaging\":0,\"running\":0,\"starting\":0,\"startTaskFailed\":0,\"unusable\":0,\"unknown\":0,\"waitingForStartTask\":0,\"total\":0\r\n
+        \     },\"lowPriority\":{\r\n        \"creating\":0,\"idle\":0,\"leavingPool\":0,\"offline\":0,\"preempted\":0,\"rebooting\":0,\"reimaging\":0,\"running\":0,\"starting\":0,\"startTaskFailed\":0,\"unusable\":0,\"unknown\":0,\"waitingForStartTask\":0,\"total\":0\r\n
+        \     }\r\n    }\r\n  ]\r\n}"
+    headers:
+      content-type:
+      - application/json;odata=minimalmetadata
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:25 GMT
+      request-id:
+      - f4403eb3-96eb-4a68-9e24-7cda1d311d90
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: POST
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool/stopresize?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: ''
+    headers:
+      dataserviceid:
+      - https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool/stopresize
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 17:58:25 GMT
+      etag:
+      - '0x8D7D7F89B1D7213'
+      last-modified:
+      - Fri, 03 Apr 2020 17:58:25 GMT
+      request-id:
+      - f40c45bc-cedb-4150-99dd-a02af8234c29
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: GET
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: "{\r\n  \"odata.metadata\":\"https://sdktest2.westcentralus.batch.azure.com/$metadata#pools/@Element\",\"id\":\"xplatCreatedPool\",\"url\":\"https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool\",\"eTag\":\"0x8D7D7F89B1D7213\",\"lastModified\":\"2020-04-03T17:58:25.0474003Z\",\"creationTime\":\"2020-04-03T17:58:22.5304156Z\",\"state\":\"active\",\"stateTransitionTime\":\"2020-04-03T17:58:22.5304156Z\",\"allocationState\":\"steady\",\"allocationStateTransitionTime\":\"2020-04-03T17:58:30.3555169Z\",\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\":0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\":3,\"resizeErrors\":[\r\n
+        \   {\r\n      \"code\":\"ResizeStopped\",\"message\":\"Desired number of
+        low priority nodes could not be allocated due to a stop resize operation\"\r\n
+        \   }\r\n  ],\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\":{\r\n
+        \   \"commandLine\":\"cmd /c echo test\",\"userIdentity\":{\r\n      \"autoUser\":{\r\n
+        \       \"scope\":\"task\",\"elevationLevel\":\"admin\"\r\n      }\r\n    },\"maxTaskRetryCount\":0,\"waitForSuccess\":true\r\n
+        \ },\"maxTasksPerNode\":1,\"taskSchedulingPolicy\":{\r\n    \"nodeFillType\":\"Spread\"\r\n
+        \ },\"cloudServiceConfiguration\":{\r\n    \"osFamily\":\"4\",\"osVersion\":\"*\"\r\n
+        \ }\r\n}"
+    headers:
+      content-type:
+      - application/json;odata=minimalmetadata
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 18:00:26 GMT
+      etag:
+      - '0x8D7D7F89B1D7213'
+      last-modified:
+      - Fri, 03 Apr 2020 17:58:25 GMT
+      request-id:
+      - 863490fc-59d6-46e3-bab3-2d121d2d8b52
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"startTask": {"commandLine": "cmd /c echo updated", "waitForSuccess":
+      true}, "certificateReferences": [], "applicationPackageReferences": [], "metadata":
+      []}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '158'
+      Content-Type:
+      - application/json; odata=minimalmetadata; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool/updateproperties?api-version=2020-03-01.11.0
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      dataserviceid:
+      - https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool/updateproperties
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 18:00:27 GMT
+      etag:
+      - '0x8D7D7F8E3F3C042'
+      last-modified:
+      - Fri, 03 Apr 2020 18:00:27 GMT
+      request-id:
+      - d00782f4-fa3d-4f89-9413-f85b8d84fa0e
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool?api-version=2020-03-01.11.0
+  response:
+    body:
+      string: "{\r\n  \"odata.metadata\":\"https://sdktest2.westcentralus.batch.azure.com/$metadata#pools/@Element\",\"id\":\"xplatCreatedPool\",\"url\":\"https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool\",\"eTag\":\"0x8D7D7F8E3F3C042\",\"lastModified\":\"2020-04-03T18:00:27.2478274Z\",\"creationTime\":\"2020-04-03T17:58:22.5304156Z\",\"state\":\"active\",\"stateTransitionTime\":\"2020-04-03T17:58:22.5304156Z\",\"allocationState\":\"steady\",\"allocationStateTransitionTime\":\"2020-04-03T17:58:30.3555169Z\",\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\":0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\":3,\"resizeErrors\":[\r\n
+        \   {\r\n      \"code\":\"ResizeStopped\",\"message\":\"Desired number of
+        low priority nodes could not be allocated due to a stop resize operation\"\r\n
+        \   }\r\n  ],\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\":{\r\n
+        \   \"commandLine\":\"cmd /c echo updated\",\"userIdentity\":{\r\n      \"autoUser\":{\r\n
+        \       \"scope\":\"pool\",\"elevationLevel\":\"nonadmin\"\r\n      }\r\n
+        \   },\"maxTaskRetryCount\":0,\"waitForSuccess\":true\r\n  },\"certificateReferences\":[\r\n
+        \   \r\n  ],\"maxTasksPerNode\":1,\"taskSchedulingPolicy\":{\r\n    \"nodeFillType\":\"Spread\"\r\n
+        \ },\"cloudServiceConfiguration\":{\r\n    \"osFamily\":\"4\",\"osVersion\":\"*\"\r\n
+        \ }\r\n}"
+    headers:
+      content-type:
+      - application/json;odata=minimalmetadata
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 18:00:27 GMT
+      etag:
+      - '0x8D7D7F8E3F3C042'
+      last-modified:
+      - Fri, 03 Apr 2020 18:00:27 GMT
+      request-id:
+      - 4ebbd10e-018d-47a8-9b0e-22872b3e363d
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"startTask": {"commandLine": "hostname"}, "certificateReferences": [],
+      "applicationPackageReferences": [], "metadata": [{"name": "a", "value": "b"},
+      {"name": "c", "value": "d"}]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '179'
+      Content-Type:
+      - application/json; odata=minimalmetadata; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool/updateproperties?api-version=2020-03-01.11.0
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      dataserviceid:
+      - https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool/updateproperties
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 18:00:27 GMT
+      etag:
+      - '0x8D7D7F8E44C860C'
+      last-modified:
+      - Fri, 03 Apr 2020 18:00:27 GMT
+      request-id:
+      - dbe28030-0a95-47fd-af2f-49571631eee4
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool?api-version=2020-03-01.11.0
+  response:
+    body:
+      string: "{\r\n  \"odata.metadata\":\"https://sdktest2.westcentralus.batch.azure.com/$metadata#pools/@Element\",\"id\":\"xplatCreatedPool\",\"url\":\"https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool\",\"eTag\":\"0x8D7D7F8E44C860C\",\"lastModified\":\"2020-04-03T18:00:27.8296076Z\",\"creationTime\":\"2020-04-03T17:58:22.5304156Z\",\"state\":\"active\",\"stateTransitionTime\":\"2020-04-03T17:58:22.5304156Z\",\"allocationState\":\"steady\",\"allocationStateTransitionTime\":\"2020-04-03T17:58:30.3555169Z\",\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\":0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\":3,\"resizeErrors\":[\r\n
+        \   {\r\n      \"code\":\"ResizeStopped\",\"message\":\"Desired number of
+        low priority nodes could not be allocated due to a stop resize operation\"\r\n
+        \   }\r\n  ],\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\":{\r\n
+        \   \"commandLine\":\"hostname\",\"userIdentity\":{\r\n      \"autoUser\":{\r\n
+        \       \"scope\":\"pool\",\"elevationLevel\":\"nonadmin\"\r\n      }\r\n
+        \   },\"maxTaskRetryCount\":0,\"waitForSuccess\":true\r\n  },\"certificateReferences\":[\r\n
+        \   \r\n  ],\"metadata\":[\r\n    {\r\n      \"name\":\"a\",\"value\":\"b\"\r\n
+        \   },{\r\n      \"name\":\"c\",\"value\":\"d\"\r\n    }\r\n  ],\"maxTasksPerNode\":1,\"taskSchedulingPolicy\":{\r\n
+        \   \"nodeFillType\":\"Spread\"\r\n  },\"cloudServiceConfiguration\":{\r\n
+        \   \"osFamily\":\"4\",\"osVersion\":\"*\"\r\n  }\r\n}"
+    headers:
+      content-type:
+      - application/json;odata=minimalmetadata
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 18:00:27 GMT
+      etag:
+      - '0x8D7D7F8E44C860C'
+      last-modified:
+      - Fri, 03 Apr 2020 18:00:27 GMT
+      request-id:
+      - bdcd082d-fc4f-4734-9550-8ec9a0a83931
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-batch/9.0.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+      return-client-request-id:
+      - 'false'
+    method: DELETE
+    uri: https://sdktest2.westcentralus.batch.azure.com/pools/xplatCreatedPool?api-version=2020-03-01.11.0&timeout=30
+  response:
+    body:
+      string: ''
+    headers:
+      dataserviceversion:
+      - '3.0'
+      date:
+      - Fri, 03 Apr 2020 18:00:28 GMT
+      request-id:
+      - 16d6eda1-0411-48e7-9dfb-e48cecd496a8
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+version: 1

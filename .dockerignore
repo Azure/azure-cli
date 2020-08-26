@@ -2,6 +2,8 @@
 *
 # Make an exception for azure-cli source code
 !src/*
+# Make an exception for release scripts
+!scripts/*
 # Make an exception for private SDKs if they exist
 !privates/*
 # Make an exception for tab completion script
@@ -10,5 +12,8 @@
 !LICENSE.txt
 # Exclude build droppings, as mentioned in .gitignore
 src/build*
+# Exclude tests
+src/azure-cli/azure/cli/command_modules/*/tests
+# Exclude python cache
 **/*.pyc
 **/__pycache__

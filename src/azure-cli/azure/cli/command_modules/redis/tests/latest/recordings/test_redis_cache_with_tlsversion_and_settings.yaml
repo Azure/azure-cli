@@ -1,0 +1,162 @@
+interactions:
+- request:
+    body: '{"properties": {"tenantSettings": {"hello": "1"}, "minimumTlsVersion":
+      "1.2", "sku": {"name": "Basic", "family": "c", "capacity": 0}}, "location":
+      "WestUS2"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '157'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g -l --sku --vm-size --minimum-tls-version --tenant-settings
+      User-Agent:
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002","location":"West
+        US 2","name":"cliredis000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"instances":[{"sslPort":15000}],"minimumTlsVersion":"1.2","tenantSettings":{"hello":"1"},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":{"primaryKey":"1APTLn6pAsUQY6H5LsTvCLoFpRPJ2A8ixQdf9PnOclA=","secondaryKey":"MGo+QhVNqnqUgO7THCMeRwgj4h5bLMqJC4dzy5n1VSo="},"hostName":"cliredis000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '912'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Dec 2019 23:50:41 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002?api-version=2019-07-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --vm-size --minimum-tls-version --tenant-settings
+      User-Agent:
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/redis/cliredis000002?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002","location":"West
+        US 2","name":"cliredis000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"instances":[{"sslPort":15000}],"minimumTlsVersion":"1.2","tenantSettings":{"hello":"1"},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cliredis000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '793'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Dec 2019 23:51:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis/cliredis000002","location":"West
+        US 2","name":"cliredis000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"instances":[{"sslPort":15000}],"minimumTlsVersion":"1.2","tenantSettings":{"hello":"1"},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cliredis000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '793'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Dec 2019 23:51:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
+    status:
+      code: 200
+      message: OK
+version: 1

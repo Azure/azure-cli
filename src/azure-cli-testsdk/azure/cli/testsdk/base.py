@@ -9,9 +9,10 @@ import shlex
 import logging
 import inspect
 import unittest
+import tempfile
 
 from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
-                                           OAuthRequestResponsesFilter, GeneralNameReplacer, LargeRequestBodyProcessor,
+                                           OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
                                            LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
                                            live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
@@ -19,9 +20,9 @@ from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
-                      patch_progress_controller)
+                      patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir, StorageAccountKeyReplacer
+from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -43,16 +44,21 @@ class CheckerMixin(object):
             raise KeyError("Key '{}' not found in kwargs. Check spelling and ensure it has been registered."
                            .format(ex.args[0]))
 
-    def check(self, query, expected_results):
+    def check(self, query, expected_results, case_sensitive=True):
         from azure.cli.testsdk.checkers import JMESPathCheck
         query = self._apply_kwargs(query)
         expected_results = self._apply_kwargs(expected_results)
-        return JMESPathCheck(query, expected_results)
+        return JMESPathCheck(query, expected_results, case_sensitive)
 
     def exists(self, query):
         from azure.cli.testsdk.checkers import JMESPathCheckExists
         query = self._apply_kwargs(query)
         return JMESPathCheckExists(query)
+
+    def not_exists(self, query):
+        from azure.cli.testsdk.checkers import JMESPathCheckNotExists
+        query = self._apply_kwargs(query)
+        return JMESPathCheckNotExists(query)
 
     def greater_than(self, query, expected_results):
         from azure.cli.testsdk.checkers import JMESPathCheckGreaterThan
@@ -78,6 +84,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
+        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),
@@ -85,9 +92,8 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             LargeResponseBodyProcessor(),
             DeploymentNameReplacer(),
             RequestUrlNormalizer(),
-            self.name_replacer,
-            StorageAccountKeyReplacer()
-        ]
+            self.name_replacer
+        ] + self._processors_to_reset
 
         default_replay_processors = [
             LargeResponseBodyReplacer(),
@@ -125,6 +131,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             recording_name=recording_name
         )
 
+    def tearDown(self):
+        for processor in self._processors_to_reset:
+            processor.reset()
+        super(ScenarioTest, self).tearDown()
+
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
         moniker = '{}{:06}'.format(prefix, self.test_resources_count)
@@ -142,7 +153,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def create_guid(self):
         import uuid
         self.test_guid_count += 1
-        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4X" % self.test_guid_count)
+        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4x" % self.test_guid_count)
 
         if self.in_recording:
             name = uuid.uuid4()
@@ -163,6 +174,37 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         return subscription_id
 
 
+class LocalContextScenarioTest(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None, working_dir=None):
+        super(LocalContextScenarioTest, self).__init__(method_name, config_file, recording_name, recording_processors,
+                                                       replay_processors, recording_patches, replay_patches)
+        if self.in_recording:
+            self.recording_patches.append(patch_get_current_system_username)
+        else:
+            self.replay_patches.append(patch_get_current_system_username)
+        self.original_working_dir = os.getcwd()
+        if working_dir:
+            self.working_dir = working_dir
+        else:
+            self.working_dir = tempfile.mkdtemp()
+
+    def setUp(self):
+        super(LocalContextScenarioTest, self).setUp()
+        self.cli_ctx.local_context.initialize()
+        os.chdir(self.working_dir)
+        self.cmd('local-context on')
+
+    def tearDown(self):
+        super(LocalContextScenarioTest, self).tearDown()
+        self.cmd('local-context off')
+        self.cmd('local-context delete --all --purge -y')
+        os.chdir(self.original_working_dir)
+        if os.path.exists(self.working_dir):
+            import shutil
+            shutil.rmtree(self.working_dir)
+
+
 @live_only()
 class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
@@ -170,6 +212,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         super(LiveScenarioTest, self).__init__(method_name)
         self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
+        self.test_resources_count = 0
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
@@ -184,6 +227,7 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
+        cli_ctx.data['_cache'] = None
 
         if os.environ.get(ENV_COMMAND_COVERAGE, None):
             with open(COVERAGE_FILE, 'a') as coverage_file:
@@ -198,7 +242,7 @@ class ExecutionResult(object):
             logger.error('Command "%s" => %d. (It did not fail as expected). %s\n', command,
                          self.exit_code, log_val)
             raise AssertionError('The command did not fail as it was expected.')
-        elif not expect_failure and self.exit_code != 0:
+        if not expect_failure and self.exit_code != 0:
             logger.error('Command "%s" => %d. %s\n', command, self.exit_code, log_val)
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 

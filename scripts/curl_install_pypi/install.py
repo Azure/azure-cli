@@ -42,10 +42,10 @@ AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 {install_dir}/bin/python -m azure.cli "$@"
 """
 
-VIRTUALENV_VERSION = '15.0.0'
+VIRTUALENV_VERSION = '16.7.7'
 VIRTUALENV_ARCHIVE = 'virtualenv-'+VIRTUALENV_VERSION+'.tar.gz'
 VIRTUALENV_DOWNLOAD_URL = 'https://pypi.python.org/packages/source/v/virtualenv/'+VIRTUALENV_ARCHIVE
-VIRTUALENV_ARCHIVE_SHA256 = '70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba5dfaf2225dc19'
+VIRTUALENV_ARCHIVE_SHA256 = 'd257bb3773e48cac60e475a19b608996c73f4d333b3ba2e4e57d5ac6134e0136'
 
 DEFAULT_INSTALL_DIR = os.path.expanduser(os.path.join('~', 'lib', 'azure-cli'))
 DEFAULT_EXEC_DIR = os.path.expanduser(os.path.join('~', 'bin'))
@@ -63,23 +63,28 @@ _python_argcomplete() {
         unset COMPREPLY
     fi
 }
-complete -o nospace -F _python_argcomplete "az"
+complete -o nospace -o default -o bashdefault -F _python_argcomplete "az"
 """
+
 
 class CLIInstallError(Exception):
     pass
 
+
 def print_status(msg=''):
     print('-- '+msg)
 
+
 def prompt_input(msg):
     return input('\n===> '+msg)
+
 
 def prompt_input_with_default(msg, default):
     if default:
         return prompt_input("{} (leave blank to use '{}'): ".format(msg, default)) or default
     else:
         return prompt_input('{}: '.format(msg))
+
 
 def prompt_y_n(msg, default=None):
     if default not in [None, 'y', 'n']:
@@ -95,18 +100,22 @@ def prompt_y_n(msg, default=None):
         if default and not ans:
             return default == y.lower()
 
+
 def exec_command(command_list, cwd=None, env=None):
     print_status('Executing: '+str(command_list))
     subprocess.check_call(command_list, cwd=cwd, env=env)
+
 
 def create_tmp_dir():
     tmp_dir = tempfile.mkdtemp()
     return tmp_dir
 
+
 def create_dir(dir):
     if not os.path.isdir(dir):
         print_status("Creating directory '{}'.".format(dir))
         os.makedirs(dir)
+
 
 def is_valid_sha256sum(a_file, expected_sum):
     sha256 = hashlib.sha256()
@@ -114,6 +123,7 @@ def is_valid_sha256sum(a_file, expected_sum):
         sha256.update(f.read())
     computed_hash = sha256.hexdigest()
     return expected_sum == computed_hash
+
 
 def create_virtualenv(tmp_dir, install_dir):
     download_location = os.path.join(tmp_dir, VIRTUALENV_ARCHIVE)
@@ -134,14 +144,12 @@ def create_virtualenv(tmp_dir, install_dir):
     cmd = [sys.executable, 'virtualenv.py', '--python', sys.executable, install_dir]
     exec_command(cmd, cwd=working_dir)
 
+
 def install_cli(install_dir, tmp_dir):
     path_to_pip = os.path.join(install_dir, 'bin', 'pip')
     cmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, 'azure-cli', '--upgrade']
     exec_command(cmd)
-    # Temporary fix to make sure that we have empty __init__.py files for the azure site-packages folder.
-    # (including the pkg_resources/declare namespace significantly impacts startup perf for the CLI)
-    fixupcmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, '--upgrade', '--force-reinstall', 'azure-nspkg', 'azure-mgmt-nspkg']
-    exec_command(fixupcmd)
+
 
 def create_executable(exec_dir, install_dir):
     create_dir(exec_dir)
@@ -152,6 +160,7 @@ def create_executable(exec_dir, install_dir):
     os.chmod(exec_filepath, cur_stat.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     print_status("The executable is available at '{}'.".format(exec_filepath))
     return exec_filepath
+
 
 def get_install_dir():
     install_dir = None
@@ -177,6 +186,7 @@ def get_install_dir():
     print_status("We will install at '{}'.".format(install_dir))
     return install_dir
 
+
 def get_exec_dir():
     exec_dir = None
     while not exec_dir:
@@ -190,12 +200,14 @@ def get_exec_dir():
     print_status("The executable will be in '{}'.".format(exec_dir))
     return exec_dir
 
+
 def _backup_rc(rc_file):
     try:
         shutil.copyfile(rc_file, rc_file+'.backup')
         print_status("Backed up '{}' to '{}'".format(rc_file, rc_file+'.backup'))
     except (OSError, IOError):
         pass
+
 
 def _get_default_rc_file():
     bashrc_exists = os.path.isfile(USER_BASH_RC)
@@ -206,6 +218,7 @@ def _get_default_rc_file():
         return USER_BASH_PROFILE
     return USER_BASH_RC if bashrc_exists else None
 
+
 def _default_rc_file_creation_step():
     rcfile = USER_BASH_PROFILE if platform.system().lower() == 'darwin' else USER_BASH_RC
     ans_yes = prompt_y_n('Could not automatically find a suitable file to use. Create {} now?'.format(rcfile), default='y')
@@ -213,6 +226,7 @@ def _default_rc_file_creation_step():
         open(rcfile, 'a').close()
         return rcfile
     return None
+
 
 def _find_line_in_file(file_path, search_pattern):
     try:
@@ -224,15 +238,18 @@ def _find_line_in_file(file_path, search_pattern):
         pass
     return False
 
+
 def _modify_rc(rc_file_path, line_to_add):
     if not _find_line_in_file(rc_file_path, line_to_add):
         with open(rc_file_path, 'a', encoding="utf-8") as rc_file:
             rc_file.write('\n'+line_to_add+'\n')
 
+
 def create_tab_completion_file(filename):
     with open(filename, 'w') as completion_file:
         completion_file.write(PYTHON_ARGCOMPLETE_CODE)
     print_status("Created tab completion file at '{}'".format(filename))
+
 
 def get_rc_file_path():
     rc_file = None
@@ -247,6 +264,7 @@ def get_rc_file_path():
         print_status("The file '{}' could not be found.".format(rc_file_path))
     return None
 
+
 def warn_other_azs_on_path(exec_dir, exec_filepath):
     env_path = os.environ.get('PATH')
     conflicting_paths = []
@@ -260,6 +278,7 @@ def warn_other_azs_on_path(exec_dir, exec_filepath):
         print_status("** WARNING: Other '{}' executables are on your $PATH. **".format(EXECUTABLE_NAME))
         print_status("Conflicting paths: {}".format(', '.join(conflicting_paths)))
         print_status("You can run this installation of the CLI with '{}'.".format(exec_filepath))
+
 
 def handle_path_and_tab_completion(completion_file_path, exec_filepath, exec_dir):
     ans_yes = prompt_y_n('Modify profile to update your $PATH and enable shell/tab completion now?', 'y')
@@ -282,6 +301,7 @@ def handle_path_and_tab_completion(completion_file_path, exec_filepath, exec_dir
         print_status("If you change your mind, add 'source {}' to your rc file and restart your shell to enable tab completion.".format(completion_file_path))
         print_status("You can run the CLI with '{}'.".format(exec_filepath))
 
+
 def verify_python_version():
     print_status('Verifying Python version.')
     v = sys.version_info
@@ -291,6 +311,7 @@ def verify_python_version():
         raise CLIInstallError("This script does not support the Python Anaconda environment. "
                               "Create an Anaconda virtual environment and install with 'pip'")
     print_status('Python version {}.{}.{} okay.'.format(v.major, v.minor, v.micro))
+
 
 def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
     try:
@@ -305,24 +326,45 @@ def _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list):
         if not ans_yes:
             raise CLIInstallError('Please install the native dependencies and try again.')
 
+
+def _get_linux_distro():
+    if platform.system() != 'Linux':
+        return None, None
+
+    try:
+        with open('/etc/os-release') as lines:
+            tokens = [line.strip() for line in lines]
+    except Exception as e:
+        return None, None
+
+    release_info = {}
+    for token in tokens:
+        if '=' in token:
+            k, v = token.split('=', 1)
+            release_info[k.lower()] = v.strip('"')
+
+    return release_info.get('name', None), release_info.get('version_id', None)
+
+
 def verify_native_dependencies():
-    distname, version, _ = platform.linux_distribution()
+    distname, version = _get_linux_distro()
+
     if not distname:
         # There's no distribution name so can't determine native dependencies required / or they may not be needed like on OS X
         return
+
     print_status('Verifying native dependencies.')
     is_python3 = sys.version_info[0] == 3
     distname = distname.lower().strip()
-    verify_cmd_args = None
-    install_cmd_args = None
-    dep_list = None
+
+    verify_cmd_args, install_cmd_args, dep_list = None, None, None
     if any(x in distname for x in ['ubuntu', 'debian']):
         verify_cmd_args = ['dpkg', '-s']
         install_cmd_args = ['apt-get', 'update', '&&', 'apt-get', 'install', '-y']
         python_dep = 'python3-dev' if is_python3 else 'python-dev'
         if distname == 'ubuntu' and version in ['12.04', '14.04'] or distname == 'debian' and version.startswith('7'):
             dep_list = ['libssl-dev', 'libffi-dev', python_dep]
-        elif distname == 'ubuntu' and version in ['15.10', '16.04']or distname == 'debian' and version.startswith('8'):
+        elif distname == 'ubuntu' and version in ['15.10', '16.04', '18.04']or distname == 'debian' and version.startswith('8'):
             dep_list = ['libssl-dev', 'libffi-dev', python_dep, 'build-essential']
     elif any(x in distname for x in ['centos', 'rhel', 'red hat']):
         verify_cmd_args = ['rpm', '-q']
@@ -330,19 +372,22 @@ def verify_native_dependencies():
         # python3-devel not available on yum but python3Xu-devel versions available.
         python_dep = 'python3{}u-devel'.format(sys.version_info[1]) if is_python3 else 'python-devel'
         dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
-    elif any(x in distname for x in ['opensuse', 'suse']):
+    elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['zypper', 'refresh', '&&', 'zypper', '--non-interactive', 'install']
         python_dep = 'python3-devel' if is_python3 else 'python-devel'
-        dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
+        dep_list = ['gcc', 'libffi-devel', python_dep, 'libopenssl-devel']
+
     if verify_cmd_args and install_cmd_args and dep_list:
         _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list)
     else:
         print_status("Unable to verify native dependencies. dist={}, version={}. Continuing...".format(distname, version))
 
+
 def verify_install_dir_exec_path_conflict(install_dir, exec_path):
     if install_dir == exec_path:
         raise CLIInstallError("The executable file '{}' would clash with the install directory of '{}'. Choose either a different install directory or directory to place the executable.".format(exec_path, install_dir))
+
 
 def main():
     verify_python_version()
@@ -364,6 +409,7 @@ def main():
     shutil.rmtree(tmp_dir)
     print_status("Installation successful.")
     print_status("Run the CLI with {} --help".format(exec_filepath))
+
 
 if __name__ == '__main__':
     try:

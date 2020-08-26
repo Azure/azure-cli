@@ -8,6 +8,7 @@ import os.path
 
 from knack.util import CLIError
 from knack.log import get_logger
+
 logger = get_logger(__name__)
 
 
@@ -60,7 +61,7 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
         try:
             key = paramiko.RSAKey(filename=private_key_filepath)
             logger.warning("Private SSH key file '%s' was found in the directory: '%s'. "
-                           "We will generate a paired public key file '%s'",
+                           "A paired public key file '%s' will be generated.",
                            private_key_filepath, ssh_dir, public_key_filepath)
         except (PasswordRequiredException, SSHException, IOError) as e:
             raise CLIError(e)

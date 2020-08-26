@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # This is the script builds the final wheel packages for shipping. The major difference between this script and the
-# scripts/ci/build.sh is that this script doesn't build testsdk and test packages. It doesn't update version string, 
+# scripts/ci/build.sh is that this script doesn't build testsdk and test packages. It doesn't update version string,
 # either. Therefore this script is shorter and cleaner.
 
-set -e
+set -ev
 
 : "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set}"
 : "${BUILD_SOURCESDIRECTORY:=`cd $(dirname $0); cd ../../../; pwd`}"

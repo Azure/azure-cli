@@ -12,25 +12,22 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'License :: OSI Approved :: MIT License',
 ]
 
 # Until https://gitlab.com/pycqa/flake8/issues/415 is resolved, pin version of pycodestyle
 DEPENDENCIES = [
-    'pylint==1.9.2',
     'coverage>=4.2',
     'flake8==3.5.0',
     'pycodestyle==2.3.1',
     'nose>=1.3.7',
     'readme_renderer>=17.2',
     'requests',
-    'pyyaml>=3.13',
+    'pyyaml~=5.2',
     'knack',
     'six>=1.10.0',
     'tabulate>=0.7.7',
@@ -61,5 +58,9 @@ setup(
             'run_tests=automation.tests:legacy_entry_point'
         ]
     },
-    install_requires=DEPENDENCIES
+    install_requires=DEPENDENCIES,
+    extras_require={ 
+        ":python_version<'3.0'": ['pylint==1.9.2'],
+        ":python_version>='3.0'": ['pylint==2.0.0']
+    }
 )

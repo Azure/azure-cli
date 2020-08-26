@@ -1,30 +1,66 @@
-RPM Packaging
-================
+# RPM Packaging
 
-Building the RPM package
-------------------------
+## Building RPM packages
 
-On a build machine (e.g. new CentOS 7 VM) run the following.
+On a machine with Docker, execute the following command from the root directory of this repository:
 
-Install dependencies required to build:
-Required for rpm build tools & required to build the CLI.
+_Enterprise Linux:_
+``` bash
+docker build --target build-env -f ./scripts/release/rpm/Dockerfile.centos -t mcr.microsoft.com/azure-cli:centos7-builder .
 ```
-sudo yum install -y gcc git rpm-build rpm-devel rpmlint make bash coreutils diffutils patch rpmdevtools python libffi-devel python-devel openssl-devel
+_Fedora:_
+
+```bash
+docker build --target build-env -f ./scripts/release/rpm/Dockerfile.fedora -t mcr.microsoft.com/azure-cli:fedora29-builder .
 ```
 
-Build example:
-Note: use the full path to the repo path, not a relative path.
+After several minutes, this will have created a Docker image named `microsoft/azure-cli:centos7-builder` containing an
+unsigned `.rpm` built from the current contents of your azure-cli directory. To extract the build product from the image
+you can run the following command:
+
+_Enterprise Linux:_
+``` bash
+docker run mcr.microsoft.com/azure-cli:centos7-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.el7.x86_64.rpm > ./bin/azure-cli-dev-1.el7.x86_64.rpm
 ```
-git clone https://github.com/azure/azure-cli
-cd azure-cli
-export CLI_VERSION=2.0.16
-export REPO_PATH=$(pwd)
-rpmbuild -v -bb --clean build_scripts/rpm/azure-cli.spec
+
+_Fedora:_
+``` bash
+docker run mcr.microsoft.com/azure-cli:fedora29-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.fc29.x86_64.rpm > ./bin/azure-cli-dev-1.fc29.x86_64.rpm
 ```
+
+This launches a container running from the image built and tagged by the previous command, prints the contents of the
+built package to standard out, and pipes it to a file on your host machine.
+
+### Additional Build Flags
+
+`--build-arg cli_version={your version string}`
+
+This will allow you to name your build. If not specified, the value "dev" is assumed.
+
+`--build-arg tag={centos/fedora version}`
+
+RPMs must be built using a Red Hat distro or derivative. By default, this build uses CentOS7, but one could easily tweak
+it to include slightly different packages for distribution.
+
+### Verification
+
+Run the RPM package
+-------------------
+
+On a machine with Docker, execute the following command from the root directory of this repository:
+
+``` bash
+docker build -f ./scripts/release/rpm/Dockerfile.centos -t mcr.microsoft.com/azure-cli:centos7 .
+``` 
+
+If you had previously followed this instructions above for building an RPM package, this should finish very quickly.
+Otherwise, it'll take a few minutes to create an image with a copy of the azure-cli installed.
+> Note: The image that is created by this command does not contain the source code of the azure-cli.
 
 Verification
 ------------
 
+Install the RPM:
 ```
 sudo rpm -i RPMS/*/azure-cli-2.0.16-1.noarch.rpm
 az --version
@@ -48,6 +84,6 @@ sudo rpm -e azure-cli
 Links
 -----
 
-https://fedoraproject.org/wiki/How_to_create_an_RPM_package
+- [Fedora Project: How to Create an RPM Package](https://fedoraproject.org/wiki/How_to_create_an_RPM_package)
+- [Fedora Project: Packaging RPM Macros](https://fedoraproject.org/wiki/Packaging:RPMMacros?rd=Packaging/RPMMacros)
 
-https://fedoraproject.org/wiki/Packaging:RPMMacros?rd=Packaging/RPMMacros

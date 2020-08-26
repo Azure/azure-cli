@@ -26,7 +26,7 @@ def patch_progress_controller(unit_test):
 def patch_main_exception_handler(unit_test):
     from vcr.errors import CannotOverwriteExistingCassetteException
 
-    def _handle_main_exception(ex):
+    def _handle_main_exception(ex, *args, **kwargs):  # pylint: disable=unused-argument
         if isinstance(ex, CannotOverwriteExistingCassetteException):
             # This exception usually caused by a no match HTTP request. This is a product error
             # that is caused by change of SDK invocation.
@@ -87,3 +87,13 @@ def patch_long_run_operation_delay(unit_test):
     mock_in_unit_test(unit_test,
                       'azure.cli.core.commands.LongRunningOperation._delay',
                       _shortcut_long_run_operation)
+
+
+def patch_get_current_system_username(unit_test):
+    def _get_current_system_username(*args, **kwargs):  # pylint: disable=unused-argument
+        from .utilities import create_random_name
+        return create_random_name(prefix='example_')
+
+    mock_in_unit_test(unit_test,
+                      'azure.cli.core.local_context._get_current_system_username',
+                      _get_current_system_username)

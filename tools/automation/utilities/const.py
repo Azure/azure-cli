@@ -5,3 +5,4 @@
 
 
 COMMAND_MODULE_PREFIX = 'azure-cli-'
+EXTENSIONS_MOD_PREFIX = 'azext_'

@@ -1,0 +1,4509 @@
+interactions:
+- request:
+    body: '{"name": "iot000003"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/checkNameAvailability?api-version=2020-03-01
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"Invalid","message":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '56'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:27:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-15T02:27:20Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:27:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"eventHubEndpoints": {"events": {"retentionTimeInDays":
+      1, "partitionCount": 4}}, "storageEndpoints": {"$default": {"sasTtlAsIso8601":
+      "PT1H", "connectionString": "", "containerName": ""}}, "messagingEndpoints":
+      {"fileNotifications": {"ttlAsIso8601": "PT1H", "maxDeliveryCount": 10}}, "enableFileUploadNotifications":
+      false, "cloudToDevice": {"maxDeliveryCount": 10, "defaultTtlAsIso8601": "PT1H",
+      "feedback": {"lockDurationAsIso8601": "PT5S", "ttlAsIso8601": "PT1H", "maxDeliveryCount":
+      10}}}, "sku": {"name": "S1", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '570'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003?api-version=2020-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003","name":"iot000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000001","properties":{"state":"Activating","provisioningState":"Accepted","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4},"operationsMonitoringEvents":{"retentionTimeInDays":1,"partitionCount":4}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfOTJhMmI5MmQtYzUzNC00NTZjLWFjMTEtNzZmZTg1NDE5MzVi?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '1154'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:27:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfOTJhMmI5MmQtYzUzNC00NTZjLWFjMTEtNzZmZTg1NDE5MzVi?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:28:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfOTJhMmI5MmQtYzUzNC00NTZjLWFjMTEtNzZmZTg1NDE5MzVi?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:28:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfOTJhMmI5MmQtYzUzNC00NTZjLWFjMTEtNzZmZTg1NDE5MzVi?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:29:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfOTJhMmI5MmQtYzUzNC00NTZjLWFjMTEtNzZmZTg1NDE5MzVi?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:29:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfOTJhMmI5MmQtYzUzNC00NTZjLWFjMTEtNzZmZTg1NDE5MzVi?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003?api-version=2020-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003","name":"iot000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000001","etag":"AAAAAFWuWPQ=","properties":{"locations":[{"location":"West
+        US","role":"primary"},{"location":"East US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"iot000003.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"iot000003","endpoint":"sb://iothub-ns-iotebkywem-3834100-d80c1853d3.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1657'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "dps000002"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/checkProvisioningServiceNameAvailability?api-version=2018-01-22
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"Invalid","message":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '56'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-15T02:27:20Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {}, "sku": {"name": "S1", "capacity":
+      1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '78'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"name":"dps000002","location":"westus","properties":{"state":"Activating","provisioningState":"Accepted","allocationPolicy":"Hashed","idScope":null},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfOTI2ZDc5NWUtZDY4ZC00MTE5LWE2NjgtNjBjNWRlYmEyMDY3?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfOTI2ZDc5NWUtZDY4ZC00MTE5LWE2NjgtNjBjNWRlYmEyMDY3?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIBfc=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"Hashed","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '832'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[{"etag":"AAAAAAPIBfc=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"Hashed","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '844'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIBfc=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"Hashed","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '832'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --set
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIBfc=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"Hashed","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '832'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "etag": "AAAAAAPIBfc=", "properties":
+      {"state": "Active", "provisioningState": "Succeeded", "iotHubs": [], "allocationPolicy":
+      "GeoLatency"}, "sku": {"name": "S1", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '214'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --set
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIBfc=","name":"dps000002","location":"westus","properties":{"state":"Transitioning","provisioningState":"Accepted","iotHubs":[],"allocationPolicy":"GeoLatency","idScope":null},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfYWFlNmI2NmUtOWU0YS00Y2YwLTk3ZDUtZDkwODVmZTlkZDA4?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '682'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:30:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --set
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfYWFlNmI2NmUtOWU0YS00Y2YwLTk3ZDUtZDkwODVmZTlkZDA4?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:31:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --set
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIBwo=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:31:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIBwo=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:31:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/listkeys?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[{"keyName":"provisioningserviceowner","primaryKey":"1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=","secondaryKey":"LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=","rights":"ServiceConfig,
+        DeviceConnect, EnrollmentWrite"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '229'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:31:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIBwo=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:31:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"iotHubs": [], "allocationPolicy":
+      "GeoLatency", "authorizationPolicies": [{"keyName": "provisioningserviceowner",
+      "primaryKey": "1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=", "secondaryKey":
+      "LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=", "rights": "ServiceConfig, DeviceConnect,
+      EnrollmentWrite"}, {"keyName": "policy000004", "rights": "EnrollmentRead"}]},
+      "sku": {"name": "S1", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '443'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"name":"dps000002","location":"westus","properties":{"state":"Transitioning","provisioningState":"Accepted","iotHubs":[],"allocationPolicy":"GeoLatency","idScope":null,"authorizationPolicies":[{"keyName":"provisioningserviceowner","primaryKey":"1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=","secondaryKey":"LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=","rights":"ServiceConfig,
+        DeviceConnect, EnrollmentWrite"},{"keyName":"policy000004","primaryKey":"/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=","secondaryKey":"mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=","rights":"EnrollmentRead"}]},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfMmIzYjM1NTMtY2Q1My00NTQ4LWI2YWUtOTIxNjNkMjE5Yjc5?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '1087'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:31:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfMmIzYjM1NTMtY2Q1My00NTQ4LWI2YWUtOTIxNjNkMjE5Yjc5?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB7E=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB7E=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/keys/policy000004/listkeys?api-version=2018-01-22
+  response:
+    body:
+      string: '{"keyName":"policy000004","primaryKey":"/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=","secondaryKey":"mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=","rights":"EnrollmentRead"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '182'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB7E=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/listkeys?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[{"keyName":"provisioningserviceowner","primaryKey":"1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=","secondaryKey":"LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=","rights":"ServiceConfig,
+        DeviceConnect, EnrollmentWrite"},{"keyName":"policy000004","primaryKey":"/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=","secondaryKey":"mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=","rights":"EnrollmentRead"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '412'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB7E=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy show
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/keys/policy000004/listkeys?api-version=2018-01-22
+  response:
+    body:
+      string: '{"keyName":"policy000004","primaryKey":"/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=","secondaryKey":"mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=","rights":"EnrollmentRead"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '182'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB7E=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/listkeys?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[{"keyName":"provisioningserviceowner","primaryKey":"1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=","secondaryKey":"LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=","rights":"ServiceConfig,
+        DeviceConnect, EnrollmentWrite"},{"keyName":"policy000004","primaryKey":"/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=","secondaryKey":"mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=","rights":"EnrollmentRead"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '412'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB7E=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"iotHubs": [], "allocationPolicy":
+      "GeoLatency", "authorizationPolicies": [{"keyName": "provisioningserviceowner",
+      "primaryKey": "1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=", "secondaryKey":
+      "LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=", "rights": "ServiceConfig, DeviceConnect,
+      EnrollmentWrite"}, {"keyName": "policy000004", "primaryKey": "/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=",
+      "secondaryKey": "mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=", "rights": "EnrollmentWrite"}]},
+      "sku": {"name": "S1", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '570'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"name":"dps000002","location":"westus","properties":{"state":"Transitioning","provisioningState":"Accepted","iotHubs":[],"allocationPolicy":"GeoLatency","idScope":null,"authorizationPolicies":[{"keyName":"provisioningserviceowner","primaryKey":"1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=","secondaryKey":"LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=","rights":"ServiceConfig,
+        DeviceConnect, EnrollmentWrite"},{"keyName":"policy000004","primaryKey":"/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=","secondaryKey":"mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=","rights":"EnrollmentWrite"}]},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfNTU1MWY3NGUtYzBlMy00NGE5LThkYWItZmM3ODQwNTcxMTI3?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '1088'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:32:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfNTU1MWY3NGUtYzBlMy00NGE5LThkYWItZmM3ODQwNTcxMTI3?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB/k=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB/k=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n -r
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/keys/policy000004/listkeys?api-version=2018-01-22
+  response:
+    body:
+      string: '{"keyName":"policy000004","primaryKey":"/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=","secondaryKey":"mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=","rights":"EnrollmentWrite"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '183'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1192'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy delete
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB/k=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/listkeys?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[{"keyName":"provisioningserviceowner","primaryKey":"1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=","secondaryKey":"LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=","rights":"ServiceConfig,
+        DeviceConnect, EnrollmentWrite"},{"keyName":"policy000004","primaryKey":"/ejNQsomWe3wtMHGsfg8YML7MM5N34K7+PhwXGs1eNA=","secondaryKey":"mHLqn5gvDs5OZuaQ+dk9AynvtubodZR/9jmC2Z2L+Kc=","rights":"EnrollmentWrite"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '413'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy delete
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPIB/k=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"iotHubs": [], "allocationPolicy":
+      "GeoLatency", "authorizationPolicies": [{"keyName": "provisioningserviceowner",
+      "primaryKey": "1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=", "secondaryKey":
+      "LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=", "rights": "ServiceConfig, DeviceConnect,
+      EnrollmentWrite"}]}, "sku": {"name": "S1", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '378'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"name":"dps000002","location":"westus","properties":{"state":"Transitioning","provisioningState":"Accepted","iotHubs":[],"allocationPolicy":"GeoLatency","idScope":null,"authorizationPolicies":[{"keyName":"provisioningserviceowner","primaryKey":"1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=","secondaryKey":"LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=","rights":"ServiceConfig,
+        DeviceConnect, EnrollmentWrite"}]},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfNjQ4NDJhMWYtM2NmZC00Njc2LWFkMmUtZmFlZGRhZmFkZDlh?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '904'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfNjQ4NDJhMWYtM2NmZC00Njc2LWFkMmUtZmFlZGRhZmFkZDlh?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICDE=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy delete
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICDE=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps access-policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --dps-name -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/listkeys?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[{"keyName":"provisioningserviceowner","primaryKey":"1TqMAqVWdRhXEkA8X85gnNCJNgTZHttFa2pjBy98+S0=","secondaryKey":"LVicpX5c2ItyegOv/9MBOy/4EiB7jePHT44s78qescY=","rights":"ServiceConfig,
+        DeviceConnect, EnrollmentWrite"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '229'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --name -p
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIWCa4VfwkW0YwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0MB4XDTIwMDcxNDAyMzM1N1oXDTIw\r\nMDcxODAyMzM1N1owIzEhMB8GA1UEAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQAtwruqIcQXFCtntKbqUcxF\r\nMZJlDdEfnSOvd2SjP09JdVKyyMpNAPALwIfhTb7Vru4Kyk+TUrfRc2pMXYbZkDO8\r\nV8DyYiKq79cnzKom02CvqUP2ObqNHmLss9xJZLoeC9bHLpdc8Af50nrN+iRGSJsK\r\nPHs9JiV5bB/GkxGdkvkReXrWULvfLE14yUV+66recuiK8fBhOXbpA7YGFE1RrPu+\r\njPGS7WqFMfy0oxzURz8Bu0LpB1cFseeHrPyABJEP+niEC4Vju9ZLuGIa22RnRexQ\r\nH+qHztFwKgRqD/EBmbiCpugqxqrl33c0/fH46F8PlQjwxLsUoQFNQycJyY0fbbPT\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAeWvPSE0VRLjm3x/WBusid0YZf38yMl2lvLvgQTJYS\r\nAc8y9U9auzYkrxBQV3N5XiE6KeUwHvQnlfgtqfPPz4AouBYWAwteQ+MYgQ0I2ukm\r\nrWr1b5urwBK9r9zZUHEnYlJ+wP+TFn0bO1sgzjLJ/7k655coA70UI1DZ5H5+A0bL\r\nSPwDcfIIKM2z92U5HMH7dNpOeUThRN0mgm7xdmpK95+2x1JKxeDYnRNHwTpFVJ/Q\r\nUbbdTelQs7JuRlaoID9yvl8PHUqkCg8KOOb7TeqcvmXwBCeOC/Qn3bh2VL8NGJwu\r\nK1dnX5QNlD52gvimOSTwu4PCccMTgBbjDdEvC4ibBvNP\r\n-----END
+      CERTIFICATE-----\r\n"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1215'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --name -p
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005?api-version=2018-01-22
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000006","expiry":"Sat, 18 Jul 2020
+        02:33:57 GMT","thumbprint":"D31691F969542360458A709F467A7165646715BE","isVerified":false,"created":"Wed,
+        15 Jul 2020 02:33:59 GMT","updated":"Wed, 15 Jul 2020 02:33:59 GMT","certificate":"-----BEGIN
+        CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIWCa4VfwkW0YwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0MB4XDTIwMDcxNDAyMzM1N1oXDTIw\r\nMDcxODAyMzM1N1owIzEhMB8GA1UEAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQAtwruqIcQXFCtntKbqUcxF\r\nMZJlDdEfnSOvd2SjP09JdVKyyMpNAPALwIfhTb7Vru4Kyk+TUrfRc2pMXYbZkDO8\r\nV8DyYiKq79cnzKom02CvqUP2ObqNHmLss9xJZLoeC9bHLpdc8Af50nrN+iRGSJsK\r\nPHs9JiV5bB/GkxGdkvkReXrWULvfLE14yUV+66recuiK8fBhOXbpA7YGFE1RrPu+\r\njPGS7WqFMfy0oxzURz8Bu0LpB1cFseeHrPyABJEP+niEC4Vju9ZLuGIa22RnRexQ\r\nH+qHztFwKgRqD/EBmbiCpugqxqrl33c0/fH46F8PlQjwxLsUoQFNQycJyY0fbbPT\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAeWvPSE0VRLjm3x/WBusid0YZf38yMl2lvLvgQTJYS\r\nAc8y9U9auzYkrxBQV3N5XiE6KeUwHvQnlfgtqfPPz4AouBYWAwteQ+MYgQ0I2ukm\r\nrWr1b5urwBK9r9zZUHEnYlJ+wP+TFn0bO1sgzjLJ/7k655coA70UI1DZ5H5+A0bL\r\nSPwDcfIIKM2z92U5HMH7dNpOeUThRN0mgm7xdmpK95+2x1JKxeDYnRNHwTpFVJ/Q\r\nUbbdTelQs7JuRlaoID9yvl8PHUqkCg8KOOb7TeqcvmXwBCeOC/Qn3bh2VL8NGJwu\r\nK1dnX5QNlD52gvimOSTwu4PCccMTgBbjDdEvC4ibBvNP\r\n-----END
+        CERTIFICATE-----\r\n"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005","name":"certificate000005","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"AAAAAAPICFY="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1833'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1156'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[{"properties":{"subject":"TESTCERT000006","expiry":"Sat,
+        18 Jul 2020 02:33:57 GMT","thumbprint":"D31691F969542360458A709F467A7165646715BE","isVerified":false,"created":"Wed,
+        15 Jul 2020 02:33:59 GMT","updated":"Wed, 15 Jul 2020 02:33:59 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005","name":"certificate000005","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"AAAAAAPICFY="}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '651'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:33:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --name
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005?api-version=2018-01-22
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000006","expiry":"Sat, 18 Jul 2020
+        02:33:57 GMT","thumbprint":"D31691F969542360458A709F467A7165646715BE","isVerified":false,"created":"Wed,
+        15 Jul 2020 02:33:59 GMT","updated":"Wed, 15 Jul 2020 02:33:59 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005","name":"certificate000005","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"AAAAAAPICFY="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --name -p --etag
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates?api-version=2018-01-22
+  response:
+    body:
+      string: '{"value":[{"properties":{"subject":"TESTCERT000006","expiry":"Sat,
+        18 Jul 2020 02:33:57 GMT","thumbprint":"D31691F969542360458A709F467A7165646715BE","isVerified":false,"created":"Wed,
+        15 Jul 2020 02:33:59 GMT","updated":"Wed, 15 Jul 2020 02:33:59 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005","name":"certificate000005","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"AAAAAAPICFY="}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '651'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIWCa4VfwkW0YwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0MB4XDTIwMDcxNDAyMzM1N1oXDTIw\r\nMDcxODAyMzM1N1owIzEhMB8GA1UEAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQAtwruqIcQXFCtntKbqUcxF\r\nMZJlDdEfnSOvd2SjP09JdVKyyMpNAPALwIfhTb7Vru4Kyk+TUrfRc2pMXYbZkDO8\r\nV8DyYiKq79cnzKom02CvqUP2ObqNHmLss9xJZLoeC9bHLpdc8Af50nrN+iRGSJsK\r\nPHs9JiV5bB/GkxGdkvkReXrWULvfLE14yUV+66recuiK8fBhOXbpA7YGFE1RrPu+\r\njPGS7WqFMfy0oxzURz8Bu0LpB1cFseeHrPyABJEP+niEC4Vju9ZLuGIa22RnRexQ\r\nH+qHztFwKgRqD/EBmbiCpugqxqrl33c0/fH46F8PlQjwxLsUoQFNQycJyY0fbbPT\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAeWvPSE0VRLjm3x/WBusid0YZf38yMl2lvLvgQTJYS\r\nAc8y9U9auzYkrxBQV3N5XiE6KeUwHvQnlfgtqfPPz4AouBYWAwteQ+MYgQ0I2ukm\r\nrWr1b5urwBK9r9zZUHEnYlJ+wP+TFn0bO1sgzjLJ/7k655coA70UI1DZ5H5+A0bL\r\nSPwDcfIIKM2z92U5HMH7dNpOeUThRN0mgm7xdmpK95+2x1JKxeDYnRNHwTpFVJ/Q\r\nUbbdTelQs7JuRlaoID9yvl8PHUqkCg8KOOb7TeqcvmXwBCeOC/Qn3bh2VL8NGJwu\r\nK1dnX5QNlD52gvimOSTwu4PCccMTgBbjDdEvC4ibBvNP\r\n-----END
+      CERTIFICATE-----\r\n"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1215'
+      Content-Type:
+      - application/json; charset=utf-8
+      If-Match:
+      - AAAAAAPICFY=
+      ParameterSetName:
+      - --dps-name -g --name -p --etag
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005?api-version=2018-01-22
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000006","expiry":"Sat, 18 Jul 2020
+        02:33:57 GMT","thumbprint":"D31691F969542360458A709F467A7165646715BE","isVerified":false,"created":"Wed,
+        15 Jul 2020 02:33:59 GMT","updated":"Wed, 15 Jul 2020 02:34:03 GMT","certificate":"-----BEGIN
+        CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIWCa4VfwkW0YwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0MB4XDTIwMDcxNDAyMzM1N1oXDTIw\r\nMDcxODAyMzM1N1owIzEhMB8GA1UEAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQAtwruqIcQXFCtntKbqUcxF\r\nMZJlDdEfnSOvd2SjP09JdVKyyMpNAPALwIfhTb7Vru4Kyk+TUrfRc2pMXYbZkDO8\r\nV8DyYiKq79cnzKom02CvqUP2ObqNHmLss9xJZLoeC9bHLpdc8Af50nrN+iRGSJsK\r\nPHs9JiV5bB/GkxGdkvkReXrWULvfLE14yUV+66recuiK8fBhOXbpA7YGFE1RrPu+\r\njPGS7WqFMfy0oxzURz8Bu0LpB1cFseeHrPyABJEP+niEC4Vju9ZLuGIa22RnRexQ\r\nH+qHztFwKgRqD/EBmbiCpugqxqrl33c0/fH46F8PlQjwxLsUoQFNQycJyY0fbbPT\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAeWvPSE0VRLjm3x/WBusid0YZf38yMl2lvLvgQTJYS\r\nAc8y9U9auzYkrxBQV3N5XiE6KeUwHvQnlfgtqfPPz4AouBYWAwteQ+MYgQ0I2ukm\r\nrWr1b5urwBK9r9zZUHEnYlJ+wP+TFn0bO1sgzjLJ/7k655coA70UI1DZ5H5+A0bL\r\nSPwDcfIIKM2z92U5HMH7dNpOeUThRN0mgm7xdmpK95+2x1JKxeDYnRNHwTpFVJ/Q\r\nUbbdTelQs7JuRlaoID9yvl8PHUqkCg8KOOb7TeqcvmXwBCeOC/Qn3bh2VL8NGJwu\r\nK1dnX5QNlD52gvimOSTwu4PCccMTgBbjDdEvC4ibBvNP\r\n-----END
+        CERTIFICATE-----\r\n"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005","name":"certificate000005","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"AAAAAAPICFw="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1833'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1179'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate generate-verification-code
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      If-Match:
+      - AAAAAAPICFw=
+      ParameterSetName:
+      - --dps-name -g -n --etag
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005/generateVerificationCode?api-version=2018-01-22
+  response:
+    body:
+      string: '{"properties":{"verificationCode":"4AD5F3F5C3321958FC8ABAE92B39BCEB88D235D085F74B83","subject":"TESTCERT000006","expiry":"Sat,
+        18 Jul 2020 02:33:57 GMT","thumbprint":"D31691F969542360458A709F467A7165646715BE","isVerified":false,"created":"Wed,
+        15 Jul 2020 02:33:59 GMT","updated":"Wed, 15 Jul 2020 02:34:05 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005","name":"certificate000005","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"AAAAAAPICF8="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '709'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1192'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDAjCCAeqgAwIBAgIIIBineeCvKuowDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlQ3bGozZGx2NXZxejQ3YXV0MB4XDTIwMDcxNDAyMzQwNVoXDTIw\r\nMDcxODAyMzQwNVowOzE5MDcGA1UEAwwwNEFENUYzRjVDMzMyMTk1OEZDOEFCQUU5\r\nMkIzOUJDRUI4OEQyMzVEMDg1Rjc0QjgzMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4A\r\nMIIBCQKCAQA64hfxPtrHtn6DQdG4GCrogSoKMKoMmgjx3apYT4m6V8laaDaMiSmC\r\nLY8lz5Zp/IwWwDtUFNNw8ZsLFKMXU++gK+pZZEvYMgOAlfPMYq9nqVH8+pLYZlTi\r\n+3ySFF5gWBMxSW/zyLGh8htkNv8tFjkVZLf4aMAwkTj29cvmxCh4FTGUv7P8GErY\r\njBPl7zEK2eAumUAnGmkJtO3gC2epso90bzrfwr0o6P2HKCKJ/6m1osGcngefozdI\r\nBdCAgFeeyV2TH0JU2NCk5Pm2bFoIVeV/bwamwnHcH2AEV5+dy+QpZLQD5BwrIL6K\r\nKaHsL7UbgGbEGncWGJVaMFc96pZ1TEJfAgMBAAGjIzAhMB8GA1UdIwQYMBaAFNo5\r\no+5ea0sNMlW/75VgGJCv2AcJMA0GCSqGSIb3DQEBCwUAA4IBAQAsesxveeJOCZpz\r\nqYxeTWM+voI/TkxhCJYcDe5wxAnh0L+gLRy7s1nKNVOok76Oc7xuPuleebZTiZHt\r\n35bhOSg4ITLkT+d2p+Cr3qqyNvtlmJJWTAJ3blwL6mDuxQXE12o7JqPxffwJ8/v6\r\nK1hf+WaAGuU7jxRGPd2rprhPxvDwqcXkn9r+FCh8o5qdk2rjghQuiysEVe9VwcNY\r\nfKswKM6+WzFrJosYX+Y3QMCmeVJId89EVBFuW58U3BhlTnwUii1FIIue0rEwupdn\r\n4EDCzK15r2gyunflYJ4K4lMVqXFt05VtWYIbjJCJFClnsVtYYAzyyFUR9dkr57yE\r\na77THiyr\r\n-----END
+      CERTIFICATE-----\r\n"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate verify
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1179'
+      Content-Type:
+      - application/json; charset=utf-8
+      If-Match:
+      - AAAAAAPICF8=
+      ParameterSetName:
+      - --dps-name -g -n -p --etag
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005/verify?api-version=2018-01-22
+  response:
+    body:
+      string: '{"properties":{"subject":"TESTCERT000006","expiry":"Sat, 18 Jul 2020
+        02:33:57 GMT","thumbprint":"D31691F969542360458A709F467A7165646715BE","isVerified":true,"created":"Wed,
+        15 Jul 2020 02:33:59 GMT","updated":"Wed, 15 Jul 2020 02:34:07 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005","name":"certificate000005","type":"Microsoft.Devices/provisioningServices/Certificates","etag":"AAAAAAPICGg="}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '638'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps certificate delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      If-Match:
+      - AAAAAAPICGg=
+      ParameterSetName:
+      - --dps-name -g --name --etag
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/certificates/certificate000005?api-version=2018-01-22
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 15 Jul 2020 02:34:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14994'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hub-name -n --permissions
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/IotHubs?api-version=2020-03-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Devices/IotHubs/zhoxing-test","name":"zhoxing-test","type":"Microsoft.Devices/IotHubs","location":"eastus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"zhoxing-test","etag":"AAAAAA5YkV0=","properties":{"locations":[{"location":"East
+        US","role":"primary"},{"location":"West US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"zhoxing-test.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"zhoxing-test","endpoint":"sb://iothub-ns-zhoxing-te-3566596-6286a68d2b.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003","name":"iot000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000001","etag":"AAAAAFWuWPQ=","properties":{"locations":[{"location":"West
+        US","role":"primary"},{"location":"East US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"iot000003.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"iot000003","endpoint":"sb://iothub-ns-iotebkywem-3834100-d80c1853d3.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3169'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --hub-name -n --permissions
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003/listkeys?api-version=2020-03-01
+  response:
+    body:
+      string: '{"value":[{"keyName":"iothubowner","primaryKey":"yQpqsdAKeWwbhUh+9bRDhhpZzu5Dr5DW8lC4UUir7Wc=","secondaryKey":"gXtBH4DOvWrdPrR8pF/O3sGY4eQ8NW/6AQ8K/2KPxc0=","rights":"RegistryWrite,
+        ServiceConnect, DeviceConnect"},{"keyName":"service","primaryKey":"mD+ltgNwgOxU2bgotvq+LjsxAvZdxk1LkblpZ/PL4y8=","secondaryKey":"J0YT5XVpAUe8ORBc8+POIdxmon5/jT41Dci7SU6UDqs=","rights":"ServiceConnect"},{"keyName":"device","primaryKey":"ZUaxv3mAhVyiHxxHbkbA0EGugTjRYAROMwTqrmD6Jt4=","secondaryKey":"VDHb76bXVY2U9JTVZz9FUiBsa2TJgofeiehVq+GTMUc=","rights":"DeviceConnect"},{"keyName":"registryRead","primaryKey":"gB55y/+hrNfTPdBfR1lHytpLEps8zobDrBEpdnk9ceY=","secondaryKey":"fS45BFS0Ulasx05RfhaHu+FFKUlaxuk6yaCruRfwJc0=","rights":"RegistryRead"},{"keyName":"registryReadWrite","primaryKey":"7xBVoXcio8RQ0ut+pR50BPdyS89d32tQwiYLe7lAw3E=","secondaryKey":"aZ9KKtSqBk4JBFuLJVFdbPMuo0hmpUD+1Hfns6GPmDY=","rights":"RegistryWrite"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '905'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "etag": "AAAAAFWuWPQ=", "properties":
+      {"authorizationPolicies": [{"keyName": "iothubowner", "primaryKey": "yQpqsdAKeWwbhUh+9bRDhhpZzu5Dr5DW8lC4UUir7Wc=",
+      "secondaryKey": "gXtBH4DOvWrdPrR8pF/O3sGY4eQ8NW/6AQ8K/2KPxc0=", "rights": "RegistryWrite,
+      ServiceConnect, DeviceConnect"}, {"keyName": "service", "primaryKey": "mD+ltgNwgOxU2bgotvq+LjsxAvZdxk1LkblpZ/PL4y8=",
+      "secondaryKey": "J0YT5XVpAUe8ORBc8+POIdxmon5/jT41Dci7SU6UDqs=", "rights": "ServiceConnect"},
+      {"keyName": "device", "primaryKey": "ZUaxv3mAhVyiHxxHbkbA0EGugTjRYAROMwTqrmD6Jt4=",
+      "secondaryKey": "VDHb76bXVY2U9JTVZz9FUiBsa2TJgofeiehVq+GTMUc=", "rights": "DeviceConnect"},
+      {"keyName": "registryRead", "primaryKey": "gB55y/+hrNfTPdBfR1lHytpLEps8zobDrBEpdnk9ceY=",
+      "secondaryKey": "fS45BFS0Ulasx05RfhaHu+FFKUlaxuk6yaCruRfwJc0=", "rights": "RegistryRead"},
+      {"keyName": "registryReadWrite", "primaryKey": "7xBVoXcio8RQ0ut+pR50BPdyS89d32tQwiYLe7lAw3E=",
+      "secondaryKey": "aZ9KKtSqBk4JBFuLJVFdbPMuo0hmpUD+1Hfns6GPmDY=", "rights": "RegistryWrite"},
+      {"keyName": "key000007", "rights": "RegistryWrite"}], "ipFilterRules": [], "eventHubEndpoints":
+      {"events": {"retentionTimeInDays": 1, "partitionCount": 4}}, "routing": {"endpoints":
+      {"serviceBusQueues": [], "serviceBusTopics": [], "eventHubs": [], "storageContainers":
+      []}, "routes": [], "fallbackRoute": {"name": "$fallback", "source": "DeviceMessages",
+      "condition": "true", "endpointNames": ["events"], "isEnabled": true}}, "storageEndpoints":
+      {"$default": {"sasTtlAsIso8601": "PT1H", "connectionString": "", "containerName":
+      ""}}, "messagingEndpoints": {"fileNotifications": {"lockDurationAsIso8601":
+      "PT1M", "ttlAsIso8601": "PT1H", "maxDeliveryCount": 10}}, "enableFileUploadNotifications":
+      false, "cloudToDevice": {"maxDeliveryCount": 10, "defaultTtlAsIso8601": "PT1H",
+      "feedback": {"lockDurationAsIso8601": "PT5S", "ttlAsIso8601": "PT1H", "maxDeliveryCount":
+      10}}, "features": "None"}, "sku": {"name": "S1", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1974'
+      Content-Type:
+      - application/json; charset=utf-8
+      If-Match:
+      - '{''IF-MATCH'': ''AAAAAFWuWPQ=''}'
+      ParameterSetName:
+      - --hub-name -n --permissions
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003?api-version=2020-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003","name":"iot000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000001","etag":"AAAAAFWuWPQ=","properties":{"operationsMonitoringProperties":{"events":{"None":"None","Connections":"None","DeviceTelemetry":"None","C2DCommands":"None","DeviceIdentityOperations":"None","FileUploadOperations":"None","Routes":"None"}},"provisioningState":"Accepted","authorizationPolicies":[{"keyName":"iothubowner","primaryKey":"yQpqsdAKeWwbhUh+9bRDhhpZzu5Dr5DW8lC4UUir7Wc=","secondaryKey":"gXtBH4DOvWrdPrR8pF/O3sGY4eQ8NW/6AQ8K/2KPxc0=","rights":"RegistryWrite,
+        ServiceConnect, DeviceConnect"},{"keyName":"service","primaryKey":"mD+ltgNwgOxU2bgotvq+LjsxAvZdxk1LkblpZ/PL4y8=","secondaryKey":"J0YT5XVpAUe8ORBc8+POIdxmon5/jT41Dci7SU6UDqs=","rights":"ServiceConnect"},{"keyName":"device","primaryKey":"ZUaxv3mAhVyiHxxHbkbA0EGugTjRYAROMwTqrmD6Jt4=","secondaryKey":"VDHb76bXVY2U9JTVZz9FUiBsa2TJgofeiehVq+GTMUc=","rights":"DeviceConnect"},{"keyName":"registryRead","primaryKey":"gB55y/+hrNfTPdBfR1lHytpLEps8zobDrBEpdnk9ceY=","secondaryKey":"fS45BFS0Ulasx05RfhaHu+FFKUlaxuk6yaCruRfwJc0=","rights":"RegistryRead"},{"keyName":"registryReadWrite","primaryKey":"7xBVoXcio8RQ0ut+pR50BPdyS89d32tQwiYLe7lAw3E=","secondaryKey":"aZ9KKtSqBk4JBFuLJVFdbPMuo0hmpUD+1Hfns6GPmDY=","rights":"RegistryWrite"},{"keyName":"key000007","primaryKey":"/PQvInFFNho9RWEdU+Pyapif9Mn0ofhzJdKlF4Ug4ak=","secondaryKey":"zSAoWHI6sq1zZ9FtqfpQsfjNV/8XkV0Q3/q1QAtD/t4=","rights":"RegistryWrite"}],"ipFilterRules":[],"eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4},"operationsMonitoringEvents":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"iot000003-operationmonitoring","endpoint":"sb://iothub-ns-iotebkywem-3834100-d80c1853d3.servicebus.windows.net/","internalAuthorizationPolicies":[{"KeyName":"scaleunitsend-8fbb12a1-f749-492a-b3fd-7b93e39b9eec-iothub","PrimaryKey":"F6JDyFmkoCs1A9DUKIFC4EhxTsMaRDpkZrmLEsF8/NA=","SecondaryKey":"U8DbDmMPOMqsuuvKAEYeYgVLS+bg9AZjsrKMZ9NCkDM=","ClaimType":"SharedAccessKey","ClaimValue":"None","Rights":["Send"],"CreatedTime":"Wed,
+        15 Jul 2020 02:29:16 GMT","ModifiedTime":"Wed, 15 Jul 2020 02:29:16 GMT"},{"KeyName":"owner-d0e2f157-c21c-4097-84f5-b8477209f3c2-iothub","PrimaryKey":"PX0xfuR8u0XjQ/1zeQleR6rwfSwwkqFGKBurrkKyA/w=","SecondaryKey":"78mF3yV/BdTUMIpRlDdYbFrmsl1Skl+w0CyQ6jsKIvs=","ClaimType":"SharedAccessKey","ClaimValue":"None","Rights":["Listen","Manage","Send"],"CreatedTime":"Wed,
+        15 Jul 2020 02:29:16 GMT","ModifiedTime":"Wed, 15 Jul 2020 02:29:16 GMT"}],"authorizationPolicies":[{"KeyName":"iothubowner","PrimaryKey":"yQpqsdAKeWwbhUh+9bRDhhpZzu5Dr5DW8lC4UUir7Wc=","SecondaryKey":"gXtBH4DOvWrdPrR8pF/O3sGY4eQ8NW/6AQ8K/2KPxc0=","ClaimType":"SharedAccessKey","ClaimValue":"None","Rights":["Listen"],"CreatedTime":"Wed,
+        15 Jul 2020 02:29:16 GMT","ModifiedTime":"Wed, 15 Jul 2020 02:29:16 GMT"},{"KeyName":"service","PrimaryKey":"mD+ltgNwgOxU2bgotvq+LjsxAvZdxk1LkblpZ/PL4y8=","SecondaryKey":"J0YT5XVpAUe8ORBc8+POIdxmon5/jT41Dci7SU6UDqs=","ClaimType":"SharedAccessKey","ClaimValue":"None","Rights":["Listen"],"CreatedTime":"Wed,
+        15 Jul 2020 02:29:16 GMT","ModifiedTime":"Wed, 15 Jul 2020 02:29:16 GMT"}]}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfOWEzMzg5NDktNjhhOC00NmQxLTg4YWEtMzQ5NjYxZWY4OTJj?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '4292'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hub-name -n --permissions
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfOWEzMzg5NDktNjhhOC00NmQxLTg4YWEtMzQ5NjYxZWY4OTJj?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --hub-name -n --permissions
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003?api-version=2020-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003","name":"iot000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000001","etag":"AAAAAFWv+Bk=","properties":{"locations":[{"location":"West
+        US","role":"primary"},{"location":"East US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"iot000003.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"iot000003","endpoint":"sb://iothub-ns-iotebkywem-3834100-d80c1853d3.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1},"identity":{"principalId":null,"tenantId":null,"type":"None"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1719'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub show-connection-string
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003/IotHubKeys/iothubowner/listkeys?api-version=2020-03-01
+  response:
+    body:
+      string: '{"keyName":"iothubowner","primaryKey":"yQpqsdAKeWwbhUh+9bRDhhpZzu5Dr5DW8lC4UUir7Wc=","secondaryKey":"gXtBH4DOvWrdPrR8pF/O3sGY4eQ8NW/6AQ8K/2KPxc0=","rights":"RegistryWrite,
+        ServiceConnect, DeviceConnect"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '203'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub show-connection-string
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/IotHubs?api-version=2020-03-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.Devices/IotHubs/zhoxing-test","name":"zhoxing-test","type":"Microsoft.Devices/IotHubs","location":"eastus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"zhoxing-test","etag":"AAAAAA5YkV0=","properties":{"locations":[{"location":"East
+        US","role":"primary"},{"location":"West US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"zhoxing-test.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"zhoxing-test","endpoint":"sb://iothub-ns-zhoxing-te-3566596-6286a68d2b.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/iot000003","name":"iot000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000001","etag":"AAAAAFWv+Bk=","properties":{"locations":[{"location":"West
+        US","role":"primary"},{"location":"East US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"iot000003.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"iot000003","endpoint":"sb://iothub-ns-iotebkywem-3834100-d80c1853d3.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1},"identity":{"principalId":null,"tenantId":null,"type":"None"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3231'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --connection-string -l
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICDE=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --connection-string -l
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICDE=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:34:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"iotHubs": [{"connectionString":
+      "HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=yQpqsdAKeWwbhUh+9bRDhhpZzu5Dr5DW8lC4UUir7Wc=",
+      "location": "westus"}], "allocationPolicy": "GeoLatency"}, "sku": {"name": "S1",
+      "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '311'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --connection-string -l
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"name":"dps000002","location":"westus","properties":{"state":"Transitioning","provisioningState":"Accepted","iotHubs":[{"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=yQpqsdAKeWwbhUh+9bRDhhpZzu5Dr5DW8lC4UUir7Wc=","location":"westus"}],"allocationPolicy":"GeoLatency","idScope":null},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfMDY5YjM3Y2EtMDM2Ni00YTQ4LWI2ZTktN2UxMzE4ZDhkN2Ni?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '891'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --connection-string -l
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfMDY5YjM3Y2EtMDM2Ni00YTQ4LWI2ZTktN2UxMzE4ZDhkN2Ni?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --connection-string -l
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICOA=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1027'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --connection-string -l
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICOA=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1027'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICOA=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1027'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICOA=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1027'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub --allocation-weight --apply-allocation-policy
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICOA=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1027'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub --allocation-weight --apply-allocation-policy
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICOA=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1027'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"iotHubs": [{"applyAllocationPolicy":
+      true, "allocationWeight": 10, "connectionString": "HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****",
+      "location": "westus"}], "allocationPolicy": "GeoLatency"}, "sku": {"name": "S1",
+      "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '326'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub --allocation-weight --apply-allocation-policy
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"name":"dps000002","location":"westus","properties":{"state":"Transitioning","provisioningState":"Accepted","iotHubs":[{"applyAllocationPolicy":true,"allocationWeight":10,"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","idScope":null},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfM2NkZDViOTAtNzk3MC00OGUwLThkMzItZjQ0M2ExYTA1MDFm?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '902'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:35:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --linked-hub --allocation-weight --apply-allocation-policy
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfM2NkZDViOTAtNzk3MC00OGUwLThkMzItZjQ0M2ExYTA1MDFm?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:36:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --linked-hub --allocation-weight --apply-allocation-policy
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICTQ=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"applyAllocationPolicy":true,"allocationWeight":10,"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1078'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:36:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub --allocation-weight --apply-allocation-policy
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICTQ=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"applyAllocationPolicy":true,"allocationWeight":10,"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1078'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:36:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICTQ=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"applyAllocationPolicy":true,"allocationWeight":10,"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1078'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:36:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub delete
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICTQ=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"applyAllocationPolicy":true,"allocationWeight":10,"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1078'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:36:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub delete
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICTQ=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[{"applyAllocationPolicy":true,"allocationWeight":10,"name":"iot000003.azure-devices.net","connectionString":"HostName=iot000003.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=****","location":"westus"}],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1078'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:36:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"iotHubs": [], "allocationPolicy":
+      "GeoLatency"}, "sku": {"name": "S1", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '125'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"name":"dps000002","location":"westus","properties":{"state":"Transitioning","provisioningState":"Accepted","iotHubs":[],"allocationPolicy":"GeoLatency","idScope":null},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfZjg3ZDkxNTktN2JlNi00ZTNjLTk2MDItYWEyODMyNDdiYmFj?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '660'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:36:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '4999'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --linked-hub
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfZjg3ZDkxNTktN2JlNi00ZTNjLTk2MDItYWEyODMyNDdiYmFj?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:37:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --dps-name -g --linked-hub
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICYk=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:37:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps linked-hub delete
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --dps-name -g --linked-hub
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: '{"etag":"AAAAAAPICYk=","name":"dps000002","location":"westus","properties":{"state":"Active","provisioningState":"Succeeded","iotHubs":[],"allocationPolicy":"GeoLatency","serviceOperationsHostName":"dps000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne0013B593"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002","subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '836'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:37:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002?api-version=2018-01-22
+  response:
+    body:
+      string: 'null'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfYWEyODk0YjItMzYxMi00MTExLWE3ZDMtMTk5NDEzMjM1MTRm?api-version=2018-01-22&asyncinfo
+      cache-control:
+      - no-cache
+      content-length:
+      - '4'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:37:10 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfYWEyODk0YjItMzYxMi00MTExLWE3ZDMtMTk5NDEzMjM1MTRm?api-version=2018-01-22
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14990'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot dps delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-iothubprovisioningservices/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/dps000002/operationResults/b3NfaWRfYWEyODk0YjItMzYxMi00MTExLWE3ZDMtMTk5NDEzMjM1MTRm?api-version=2018-01-22&asyncinfo
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 15 Jul 2020 02:37:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

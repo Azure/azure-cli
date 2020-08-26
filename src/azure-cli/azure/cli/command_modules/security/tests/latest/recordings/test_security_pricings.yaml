@@ -1,0 +1,263 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security pricing list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-security/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.7.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings?api-version=2018-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines","name":"VirtualMachines","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Free","freeTrialRemainingTime":"PT0S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/SqlServers","name":"SqlServers","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Standard","freeTrialRemainingTime":"PT0S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/AppServices","name":"AppServices","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Standard","freeTrialRemainingTime":"PT0S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/StorageAccounts","name":"StorageAccounts","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Standard","freeTrialRemainingTime":"PT0S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/SqlServerVirtualMachines","name":"SqlServerVirtualMachines","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Standard","freeTrialRemainingTime":"PT0S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/KubernetesService","name":"KubernetesService","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Standard","freeTrialRemainingTime":"PT0S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/ContainerRegistry","name":"ContainerRegistry","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Standard","freeTrialRemainingTime":"PT0S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/KeyVaults","name":"KeyVaults","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Free","freeTrialRemainingTime":"PT0S"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1991'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 17 Jun 2020 10:20:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"pricingTier": "free"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security pricing create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '39'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --tier
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-security/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.7.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines?api-version=2018-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines","name":"VirtualMachines","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Free","freeTrialRemainingTime":"PT0S"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '244'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 17 Jun 2020 10:20:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security pricing show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-security/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.7.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines?api-version=2018-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines","name":"VirtualMachines","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Free","freeTrialRemainingTime":"PT0S"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '244'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 17 Jun 2020 10:20:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"pricingTier": "standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security pricing create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '43'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --tier
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-security/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.7.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines?api-version=2018-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines","name":"VirtualMachines","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Standard","freeTrialRemainingTime":"PT0S"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '248'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 17 Jun 2020 10:20:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security pricing show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-security/0.4.0
+        Azure-SDK-For-Python AZURECLI/2.7.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines?api-version=2018-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/pricings/VirtualMachines","name":"VirtualMachines","type":"Microsoft.Security/pricings","properties":{"pricingTier":"Standard","freeTrialRemainingTime":"PT0S"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '248'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 17 Jun 2020 10:20:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+version: 1

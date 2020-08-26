@@ -1,67 +1,52 @@
 class AzureCli < Formula
+  include Language::Python::Virtualenv
+
   desc "Microsoft Azure CLI 2.0"
   homepage "https://docs.microsoft.com/cli/azure/overview"
   url "{{ upstream_url }}"
+  version "{{ cli_version }}"
   sha256 "{{ upstream_sha }}"
+  license "MIT"
   head "https://github.com/Azure/azure-cli.git"
 
 {{ bottle_hash }}
 
-  depends_on "openssl"
-  depends_on "python"
+  depends_on "openssl@1.1"
+  depends_on "python@3.8"
+
+  uses_from_macos "libffi"
+
+  on_linux do
+    depends_on "pkg-config" => :build
+  end
 
 {{ resources }}
 
   def install
-    xy = Language::Python.major_minor_version "python3"
-    site_packages = libexec/"lib/python#{xy}/site-packages"
-    ENV.prepend_create_path "PYTHONPATH", site_packages
-    ENV.prepend "LDFLAGS", "-L#{Formula["openssl"].opt_lib}"
-    ENV.prepend "CFLAGS", "-I#{Formula["openssl"].opt_include}"
-    ENV.prepend "CPPFLAGS", "-I#{Formula["openssl"].opt_include}"
+    # Work around Xcode 11 clang bug
+    # https://code.videolan.org/videolan/libbluray/issues/20
+    ENV.append_to_cflags "-fno-stack-check" if DevelopmentTools.clang_build_version >= 1010
+
+    venv = virtualenv_create(libexec, "python3")
+    venv.pip_install resources
 
     # Get the CLI components we'll install
     components = [
       buildpath/"src/azure-cli",
       buildpath/"src/azure-cli-telemetry",
       buildpath/"src/azure-cli-core",
-      buildpath/"src/azure-cli-nspkg",
-      buildpath/"src/azure-cli-command_modules-nspkg",
     ]
-    components += Pathname.glob(buildpath/"src/command_modules/azure-cli-*/")
-
-    # Install dependencies
-    # note: Even if in 'resources', don't include 'futures' as not needed for Python3
-    # and causes import errors. See https://github.com/agronholm/pythonfutures/issues/41
-    deps = resources.map(&:name).to_set - ["futures"]
-    deps.each do |r|
-      resource(r).stage do
-        system "python3", *Language::Python.setup_install_args(libexec)
-      end
-    end
 
     # Install CLI
     components.each do |item|
       cd item do
-        system "python3", *Language::Python.setup_install_args(libexec)
+        venv.pip_install item
       end
     end
 
-    # This replaces the `import pkg_resources` namespace imports from upstream
-    # with empty string as the import is slow and not needed in this environment.
-    File.open(site_packages/"azure/__init__.py", "w") {}
-    File.open(site_packages/"azure/cli/__init__.py", "w") {}
-    File.open(site_packages/"azure/cli/command_modules/__init__.py", "w") {}
-    File.open(site_packages/"azure/mgmt/__init__.py", "w") {}
-
     (bin/"az").write <<~EOS
       #!/usr/bin/env bash
-      export PYTHONPATH="#{ENV["PYTHONPATH"]}"
-      if command -v python#{xy} >/dev/null 2>&1; then
-        python#{xy} -m azure.cli \"$@\"
-      else
-        python3 -m azure.cli \"$@\"
-      fi
+      AZ_INSTALLER=HOMEBREW #{libexec}/bin/python -m azure.cli \"$@\"
     EOS
 
     bash_completion.install "az.completion" => "az"

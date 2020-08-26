@@ -1,0 +1,406 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -c -g --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dedicated_host_000001?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001","name":"cli_test_dedicated_host_000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","date":"2020-07-20T03:29:15Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '432'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 03:29:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "tags": {"foo": "bar"}, "properties": {"platformFaultDomainCount":
+      3}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '97'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -c -g --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001/providers/Microsoft.Compute/hostGroups/my-host-group?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host-group\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_DEDICATED_HOST_446FTHW43BS3S3OBJY53DY52NZKWYVV42T64DBP6TVJMDZX5IL2/providers/Microsoft.Compute/hostGroups/my-host-group\",\r\n
+        \ \"location\": \"westeurope\",\r\n  \"tags\": {\r\n    \"foo\": \"bar\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"platformFaultDomainCount\": 3\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '365'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 03:29:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;119,Microsoft.Compute/PutDeleteDedicatedHost30Min;599
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1176'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -d -g --sku --auto-replace --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_dedicated_host_000001?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001","name":"cli_test_dedicated_host_000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","date":"2020-07-20T03:29:15Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '432'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 03:29:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "tags": {"bar": "baz"}, "properties": {"platformFaultDomain":
+      2, "autoReplaceOnFailure": false}, "sku": {"name": "DSv3-Type1"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '154'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --host-group -d -g --sku --auto-replace --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \ \"location\": \"westeurope\",\r\n  \"tags\": {\r\n    \"bar\": \"baz\"\r\n
+        \ },\r\n  \"sku\": {\r\n    \"name\": \"DSv3-Type1\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"platformFaultDomain\": 2,\r\n    \"autoReplaceOnFailure\": false,\r\n
+        \   \"hostId\": \"e4402947-b52d-4d68-82e6-81a2f8bf2288\",\r\n    \"provisioningState\":
+        \"Creating\"\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westeurope/operations/7cb23ecf-09c2-43d0-bcc8-5dfd571f0e84?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '541'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 03:29:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;118,Microsoft.Compute/PutDeleteDedicatedHost30Min;598
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1152'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -d -g --sku --auto-replace --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westeurope/operations/7cb23ecf-09c2-43d0-bcc8-5dfd571f0e84?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2020-07-20T03:29:30.3851348+00:00\",\r\n  \"endTime\":
+        \"2020-07-20T03:29:30.7601359+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"7cb23ecf-09c2-43d0-bcc8-5dfd571f0e84\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 03:30:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14998,Microsoft.Compute/GetOperation30Min;29998
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -d -g --sku --auto-replace --tags
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \ \"location\": \"westeurope\",\r\n  \"tags\": {\r\n    \"bar\": \"baz\"\r\n
+        \ },\r\n  \"sku\": {\r\n    \"name\": \"DSv3-Type1\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"platformFaultDomain\": 2,\r\n    \"autoReplaceOnFailure\": false,\r\n
+        \   \"hostId\": \"e4402947-b52d-4d68-82e6-81a2f8bf2288\",\r\n    \"virtualMachines\":
+        [],\r\n    \"provisioningTime\": \"2020-07-20T03:29:30.6507613+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '632'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 03:30:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetDedicatedHost3Min;248,Microsoft.Compute/GetDedicatedHost30Min;998
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host get-instance-view
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --host-group --name -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
+        Azure-SDK-For-Python AZURECLI/2.9.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?$expand=instanceView&api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dedicated_host_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \ \"location\": \"westeurope\",\r\n  \"tags\": {\r\n    \"bar\": \"baz\"\r\n
+        \ },\r\n  \"sku\": {\r\n    \"name\": \"DSv3-Type1\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"platformFaultDomain\": 2,\r\n    \"autoReplaceOnFailure\": false,\r\n
+        \   \"hostId\": \"e4402947-b52d-4d68-82e6-81a2f8bf2288\",\r\n    \"virtualMachines\":
+        [],\r\n    \"provisioningTime\": \"2020-07-20T03:29:30.6507613+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"assetId\":
+        \"e3c78c1b-a848-4531-a27f-16d98df4d8fd\",\r\n      \"availableCapacity\":
+        {\r\n        \"allocatableVMs\": [\r\n          {\r\n            \"vmSize\":
+        \"Standard_D2hs_v3\",\r\n            \"count\": 32\r\n          },\r\n          {\r\n
+        \           \"vmSize\": \"Standard_D2s_v3\",\r\n            \"count\": 32\r\n
+        \         },\r\n          {\r\n            \"vmSize\": \"Standard_D4hs_v3\",\r\n
+        \           \"count\": 16\r\n          },\r\n          {\r\n            \"vmSize\":
+        \"Standard_D4s_v3\",\r\n            \"count\": 16\r\n          },\r\n          {\r\n
+        \           \"vmSize\": \"Standard_D8hs_v3\",\r\n            \"count\": 8\r\n
+        \         },\r\n          {\r\n            \"vmSize\": \"Standard_D8s_v3\",\r\n
+        \           \"count\": 8\r\n          },\r\n          {\r\n            \"vmSize\":
+        \"Standard_D16s_v3\",\r\n            \"count\": 4\r\n          },\r\n          {\r\n
+        \           \"vmSize\": \"Standard_D32-8s_v3\",\r\n            \"count\":
+        2\r\n          },\r\n          {\r\n            \"vmSize\": \"Standard_D32-16s_v3\",\r\n
+        \           \"count\": 2\r\n          },\r\n          {\r\n            \"vmSize\":
+        \"Standard_D32s_v3\",\r\n            \"count\": 2\r\n          },\r\n          {\r\n
+        \           \"vmSize\": \"Standard_D48s_v3\",\r\n            \"count\": 1\r\n
+        \         },\r\n          {\r\n            \"vmSize\": \"Standard_D64-16s_v3\",\r\n
+        \           \"count\": 1\r\n          },\r\n          {\r\n            \"vmSize\":
+        \"Standard_D64-32s_v3\",\r\n            \"count\": 1\r\n          },\r\n          {\r\n
+        \           \"vmSize\": \"Standard_D64s_v3\",\r\n            \"count\": 1\r\n
+        \         }\r\n        ]\r\n      },\r\n      \"statuses\": [\r\n        {\r\n
+        \         \"code\": \"ProvisioningState/succeeded\",\r\n          \"level\":
+        \"Info\",\r\n          \"displayStatus\": \"Provisioning succeeded\",\r\n
+        \         \"time\": \"2020-07-20T03:29:30.6507613+00:00\"\r\n        },\r\n
+        \       {\r\n          \"code\": \"HealthState/available\",\r\n          \"level\":
+        \"Info\",\r\n          \"displayStatus\": \"Host available\"\r\n        }\r\n
+        \     ]\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2507'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Jul 2020 03:30:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetDedicatedHost3Min;247,Microsoft.Compute/GetDedicatedHost30Min;997
+    status:
+      code: 200
+      message: OK
+version: 1

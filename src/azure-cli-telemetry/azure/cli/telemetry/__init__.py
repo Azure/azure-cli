@@ -6,22 +6,7 @@
 import sys
 import os
 import subprocess
-
-try:
-    import portalocker
-except ImportError:
-    if os.name != 'nt':
-        raise
-    # To fix the import error of win32con and win32file in Windows. Manually add win32 search
-    # path to the sys.path. It is expected to be accomplished by the pywin32.pth. However,
-    # the Windows package of Azure CLI ships with the portable Python, # which doesn't honer
-    # the file.
-    site_package_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../../'))
-    sys.path.append(os.path.join(site_package_dir, 'win32'))
-    sys.path.append(os.path.join(site_package_dir, 'win32', 'lib'))
-    os.environ["PATH"] += (';' + os.path.join(site_package_dir, "pywin32_system32"))
-
-    import portalocker
+import portalocker
 
 from azure.cli.telemetry.util import save_payload
 
@@ -54,7 +39,7 @@ def _start(config_dir):
             kwargs['stderr'] = subprocess.STDOUT
 
     subprocess.Popen(**kwargs)
-    logger.info('Return from creating porcess')
+    logger.info('Return from creating process')
 
 
 def save(config_dir, payload):

@@ -1,15 +1,39 @@
 #!/usr/bin/env bash
 
-# Build APT package in an Azure Container Instances
-# This script assumes the Azure CLI is installed and logged in.
+# Build assets related to Linux Distributions that use RPM/yum for installation.
 
-set -ex
+set -exv
 
-CLI_VERSION=`cat src/azure-cli/azure/cli/__init__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
+: "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set.}"
 
-docker run --rm \
-           -v "$BUILD_SOURCESDIRECTORY":/mnt/repo \
-           -v "$BUILD_STAGINGDIRECTORY":/mnt/output \
-           -e CLI_VERSION=$CLI_VERSION \
-           centos:7 \
-           /mnt/repo/scripts/release/rpm/build.sh
+CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
+
+# Create a container image that includes the source code and a built RPM using this file.
+docker build \
+    --target build-env \
+    --build-arg cli_version=${CLI_VERSION} \
+    -f ./scripts/release/rpm/Dockerfile.centos \
+    -t microsoft/azure-cli:centos7-builder \
+    .
+
+# Continue the previous build, and create a container that has the current azure-cli build but not the source code.
+docker build \
+    --build-arg cli_version=${CLI_VERSION} \
+    -f ./scripts/release/rpm/Dockerfile.centos \
+    -t microsoft/azure-cli:centos7 \
+    .
+
+# Extract the built RPM so that it can be distributed independently.
+docker run \
+    microsoft/azure-cli:centos7-builder \
+    cat /root/rpmbuild/RPMS/x86_64/azure-cli-${CLI_VERSION}-1.el7.x86_64.rpm \
+    > ${BUILD_STAGINGDIRECTORY}/azure-cli-${CLI_VERSION}-1.el7.x86_64.rpm
+
+# Save these too a staging directory so that later build phases can choose to save them as Artifacts or publish them to
+# a registry.
+#
+# The products of `docker save` can be rehydrated using `docker load`.
+mkdir -p ${BUILD_STAGINGDIRECTORY}/docker
+docker save microsoft/azure-cli:centos7-builder | gzip > ${BUILD_STAGINGDIRECTORY}/docker/microsoft_azure-cli_centos7-builder.tar.gz &
+docker save microsoft/azure-cli:centos7 | gzip > ${BUILD_STAGINGDIRECTORY}/docker/microsoft_azure-cli_centos7.tar.gz &
+wait

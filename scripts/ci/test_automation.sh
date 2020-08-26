@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
-. $(cd $(dirname $0); pwd)/artifacts.sh
+. $(dirname ${BASH_SOURCE[0]})/artifacts.sh
 
 ls -la $share_folder/build
 
@@ -35,22 +35,23 @@ pip freeze
 if [ "$REDUCE_SDK" == "True" ]
 then
     title 'azure.mgmt file counts'
-    (cd $(dirname $(which python)); cd ../lib/*/site-packages/azure/mgmt; find . -name '*.py' | wc)
+    (find $(dirname $(which python))/../lib -name '*.py' | grep azure/mgmt/ | wc)
 
-    python $(cd $(dirname $0); cd ..; pwd)/sdk_process/patch_models.py
+    python $(dirname ${BASH_SOURCE[0]})/../sdk_process/patch_models.py
 
     title 'azure.mgmt file counts after reduce'
-    (cd $(dirname $(which python)); cd ../lib/*/site-packages/azure/mgmt; find . -name '*.py' | wc)
+    (find $(dirname $(which python))/../lib -name '*.py' | grep azure/mgmt/ | wc)
 fi
 
 target_profile=${AZURE_CLI_TEST_TARGET_PROFILE:-latest}
-if [ "$target_profile" = "2017-03-09" ]; then
-    # example: 2017-03-09-profile
-    target_profile=$target_profile-profile
-elif [ "$target_profile" = "2018-03-01" ]
-then
+if [ "$target_profile" != "latest" ]; then
+    # example: 2019-03-01-hybrid
     target_profile=$target_profile-hybrid
 fi
+
+# test basic az commands
+az -v
+az -h
 
 title 'Running tests'
 python -m automation test --ci --profile $target_profile

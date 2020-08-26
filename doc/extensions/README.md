@@ -12,8 +12,6 @@ What is an Extension?
 - Currently, we support one extension type, a [Python Wheel](http://pythonwheels.com/).
 - All extension documentation here refers to this type of extension.
 
-> Extensions should be built with wheel `0.29.0` or `0.30.0` until [#6441](https://github.com/Azure/azure-cli/issues/6441) is resolved
-
 
 What an Extension is not
 ------------------------
@@ -25,14 +23,22 @@ What an Extension is not
 - If you're looking to build your own CLI using `az` patterns, see [knack](https://github.com/Microsoft/knack).
 
 
+How to find and install an Extension
+------------------------
+
+- List all available extensions: `az extension list-available`
+
+- Install an extension: `az extension install --name <extension-name>`
+
+More details on usage in [Extensions for Azure CLI 2.0](https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview?view=azure-cli-latest#install-extensions)
+
+
 Doc Sections
 ------------
 
-- [Authoring](authoring.md) - How to author and develop an extension
+- [Authoring](authoring.md) - How to author, develop and publish an extension
 
 - [Command Guidelines](../command_guidelines.md) - Command Guidelines
-
-- [Publishing](publishing.md) - How to publish an extension
 
 - [Summary Guidelines](extension_summary_guidelines.md) - Summary guidelines for extensions to be published
 

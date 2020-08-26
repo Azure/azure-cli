@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 #  pylint: disable=unused-import
-from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, CustomResourceType, PROFILE_TYPE
+from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, CustomResourceType, PROFILE_TYPE,\
+    SDKProfile
 
 
 def get_api_version(cli_ctx, resource_type, as_sdk_profile=False):
@@ -42,6 +43,12 @@ def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None, op
                                       min_api=min_api,
                                       max_api=max_api,
                                       operation_group=operation_group)
+
+
+def supported_resource_type(cli_ctx, resource_type):
+    from azure.cli.core.profiles._shared import supported_resource_type as _supported_resource_type
+    return _supported_resource_type(cli_ctx.cloud.profile,
+                                    resource_type=resource_type)
 
 
 def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
@@ -88,7 +95,8 @@ def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
 API_PROFILES = {
     'latest': AZURE_API_PROFILES['latest'],
     '2017-03-09-profile': AZURE_API_PROFILES['2017-03-09-profile'],
-    '2018-03-01-hybrid': AZURE_API_PROFILES['2018-03-01-hybrid']
+    '2018-03-01-hybrid': AZURE_API_PROFILES['2018-03-01-hybrid'],
+    '2019-03-01-hybrid': AZURE_API_PROFILES['2019-03-01-hybrid']
 }
 
 

@@ -7,16 +7,17 @@
 import argparse
 import platform
 
-from knack.arguments import (
-    CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
-from knack.log import get_logger
-from knack.util import CLIError
-
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_PARAM_KWARGS
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
+
+from knack.arguments import (
+    CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
+from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -30,7 +31,7 @@ def get_subscription_locations(cli_ctx):
 @Completer
 def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_subscription_locations(cmd.cli_ctx)
-    return [l.name for l in result]
+    return [item.name for item in result]
 
 
 # pylint: disable=redefined-builtin
@@ -94,8 +95,8 @@ def get_location_name_type(cli_ctx):
     def location_name_type(name):
         if ' ' in name:
             # if display name is provided, attempt to convert to short form name
-            name = next((l.name for l in get_subscription_locations(cli_ctx)
-                         if l.display_name.lower() == name.lower()), name)
+            name = next((location.name for location in get_subscription_locations(cli_ctx)
+                         if location.display_name.lower() == name.lower()), name)
         return name
     return location_name_type
 
@@ -104,8 +105,7 @@ def get_one_of_subscription_locations(cli_ctx):
     result = get_subscription_locations(cli_ctx)
     if result:
         return next((r.name for r in result if r.name.lower() == 'westus'), result[0].name)
-    else:
-        raise CLIError('Current subscription does not have valid location list')
+    raise CLIError('Current subscription does not have valid location list')
 
 
 def get_resource_groups(cli_ctx):
@@ -117,7 +117,7 @@ def get_resource_groups(cli_ctx):
 @Completer
 def get_resource_group_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_resource_groups(cmd.cli_ctx)
-    return [l.name for l in result]
+    return [item.name for item in result]
 
 
 def get_resources_in_resource_group(cli_ctx, resource_group_name, resource_type=None):
@@ -235,23 +235,34 @@ def get_enum_type(data, default=None):
 # GLOBAL ARGUMENT DEFINITIONS
 
 resource_group_name_type = CLIArgumentType(
-    options_list=('--resource-group', '-g'),
+    options_list=['--resource-group', '-g'],
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
-    configured_default='group')
+    configured_default='group',
+    local_context_attribute=LocalContextAttribute(
+        name='resource_group_name',
+        actions=[LocalContextAction.SET, LocalContextAction.GET],
+        scopes=[ALL]
+    ))
 
-name_type = CLIArgumentType(options_list=('--name', '-n'), help='the primary resource name')
+name_type = CLIArgumentType(options_list=['--name', '-n'], help='the primary resource name')
 
 
 def get_location_type(cli_ctx):
     location_type = CLIArgumentType(
-        options_list=('--location', '-l'),
+        options_list=['--location', '-l'],
         completer=get_location_completion_list,
         type=get_location_name_type(cli_ctx),
-        help="Location. You can configure the default location using `az configure --defaults location=<location>`",
+        help="Location. Values from: `az account list-locations`. "
+             "You can configure the default location using `az configure --defaults location=<location>`.",
         metavar='LOCATION',
-        configured_default='location')
+        configured_default='location',
+        local_context_attribute=LocalContextAttribute(
+            name='location',
+            actions=[LocalContextAction.SET, LocalContextAction.GET],
+            scopes=[ALL]
+        ))
     return location_type
 
 
@@ -266,7 +277,7 @@ quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CLIArgumentType(
     validator=validate_tags,
-    help="space-separated tags in 'key[=value]' format. {}".format(quote_text),
+    help="space-separated tags: key[=value] [key[=value] ...]. {}".format(quote_text),
     nargs='*'
 )
 
@@ -278,7 +289,7 @@ tag_type = CLIArgumentType(
 )
 
 no_wait_type = CLIArgumentType(
-    options_list=('--no-wait', ),
+    options_list=['--no-wait', ],
     help='do not wait for the long-running operation to finish',
     action='store_true'
 )
@@ -296,6 +307,13 @@ zone_type = CLIArgumentType(
     choices=['1', '2', '3'],
     nargs=1
 )
+
+vnet_name_type = CLIArgumentType(
+    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET])
+)
+
+subnet_name_type = CLIArgumentType(
+    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
 
 def patch_arg_make_required(argument):
@@ -320,27 +338,12 @@ class AzArgumentContext(ArgumentsContext):
         super(AzArgumentContext, self).__init__(command_loader, scope)
         self.scope = scope  # this is called "command" in knack, but that is not an accurate name
         self.group_kwargs = merge_kwargs(kwargs, command_loader.module_kwargs, CLI_PARAM_KWARGS)
-        self.is_stale = False
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.is_stale = True
-
-    def _applicable(self):
-        if self.command_loader.skip_applicability:
-            return True
-        command_name = self.command_loader.command_name
-        scope = self.scope
-        return command_name.startswith(scope)
-
-    def _check_stale(self):
-        if self.is_stale:
-            message = "command authoring error: argument context '{}' is stale! " \
-                      "Check that the subsequent block for has a corresponding `as` statement.".format(self.scope)
-            logger.error(message)
-            raise CLIError(message)
 
     def _flatten_kwargs(self, kwargs, arg_type):
         merged_kwargs = self._merge_kwargs(kwargs)
@@ -390,18 +393,6 @@ class AzArgumentContext(ArgumentsContext):
         if not self._applicable():
             return
 
-        if self.scope not in self.command_loader.command_table:
-            raise ValueError("command authoring error: positional argument '{}' cannot be registered to a group-level "
-                             "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
-
-        # Before adding the new positional arg, ensure that there are no existing positional arguments
-        # registered for this command.
-        command_args = self.command_loader.argument_registry.arguments[self.scope]
-        positional_args = {k: v for k, v in command_args.items() if v.settings.get('options_list') == []}
-        if positional_args and dest not in positional_args:
-            raise CLIError("command authoring error: commands may have, at most, one positional argument. '{}' already "
-                           "has positional argument: {}.".format(self.scope, ' '.join(positional_args.keys())))
-
         merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
         merged_kwargs = {k: v for k, v in merged_kwargs.items() if k in CLI_POSITIONAL_PARAM_KWARGS}
         merged_kwargs['options_list'] = []
@@ -414,7 +405,7 @@ class AzArgumentContext(ArgumentsContext):
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
-            super(AzArgumentContext, self).argument(dest, **merged_kwargs)
+            super(AzArgumentContext, self).positional(dest, **merged_kwargs)
         else:
             self._ignore_if_not_registered(dest)
 
@@ -485,13 +476,6 @@ class AzArgumentContext(ArgumentsContext):
             super(AzArgumentContext, self).ignore(arg)
 
     def extra(self, dest, arg_type=None, **kwargs):
-        self._check_stale()
-        if not self._applicable():
-            return
-
-        if self.scope not in self.command_loader.command_table:
-            raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
-                             "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
 
         merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
         resource_type = merged_kwargs.get('resource_type', None)
@@ -502,5 +486,22 @@ class AzArgumentContext(ArgumentsContext):
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
+            # Restore when knack #132 is fixed
+            # merged_kwargs.pop('dest', None)
+            # super(AzArgumentContext, self).extra(dest, **merged_kwargs)
+            from knack.arguments import CLICommandArgument
+            self._check_stale()
+            if not self._applicable():
+                return
+
+            if self.command_scope in self.command_loader.command_group_table:
+                raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
+                                 "scope '{}'. It must be registered to a specific command.".format(
+                                     dest, self.command_scope))
+
+            deprecate_action = self._handle_deprecations(dest, **merged_kwargs)
+            if deprecate_action:
+                merged_kwargs['action'] = deprecate_action
             merged_kwargs.pop('dest', None)
-            super(AzArgumentContext, self).extra(argument_dest=dest, **merged_kwargs)
+            self.command_loader.extra_argument_registry[self.command_scope][dest] = CLICommandArgument(
+                dest, **merged_kwargs)

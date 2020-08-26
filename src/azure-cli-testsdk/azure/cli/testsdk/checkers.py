@@ -10,21 +10,31 @@ from .exceptions import JMESPathCheckAssertionError
 
 
 class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
-    def __init__(self, query, expected_result):
+    def __init__(self, query, expected_result, case_sensitive=True):
         self._query = query
         self._expected_result = expected_result
+        self._case_sensitive = case_sensitive
 
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
-        actual_result = jmespath.search(self._query, json_value,
-                                        jmespath.Options(collections.OrderedDict))
-        if actual_result != self._expected_result and str(actual_result) != str(self._expected_result):
+        actual_result = None
+        try:
+            actual_result = jmespath.search(self._query, json_value,
+                                            jmespath.Options(collections.OrderedDict))
+        except jmespath.exceptions.JMESPathTypeError:
+            raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
+                                              execution_result.output)
+        if self._case_sensitive:
+            equals = actual_result == self._expected_result or str(actual_result) == str(self._expected_result)
+        else:
+            equals = actual_result == self._expected_result \
+                or str(actual_result).lower() == str(self._expected_result).lower()
+        if not equals:
             if actual_result:
                 raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
                                                   execution_result.output)
-            else:
-                raise JMESPathCheckAssertionError(self._query, self._expected_result, 'None',
-                                                  execution_result.output)
+            raise JMESPathCheckAssertionError(self._query, self._expected_result, 'None',
+                                              execution_result.output)
 
 
 class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
@@ -36,6 +46,19 @@ class JMESPathCheckExists(object):  # pylint: disable=too-few-public-methods
         actual_result = jmespath.search(self._query, json_value,
                                         jmespath.Options(collections.OrderedDict))
         if not actual_result:
+            raise JMESPathCheckAssertionError(self._query, 'some value', actual_result,
+                                              execution_result.output)
+
+
+class JMESPathCheckNotExists(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, query):
+        self._query = query
+
+    def __call__(self, execution_result):
+        json_value = execution_result.get_output_in_json()
+        actual_result = jmespath.search(self._query, json_value,
+                                        jmespath.Options(collections.OrderedDict))
+        if actual_result:
             raise JMESPathCheckAssertionError(self._query, 'some value', actual_result,
                                               execution_result.output)
 
@@ -55,9 +78,8 @@ class JMESPathCheckGreaterThan(object):  # pylint: disable=too-few-public-method
             if actual_result:
                 raise JMESPathCheckAssertionError(self._query, expected_result_format, actual_result,
                                                   execution_result.output)
-            else:
-                raise JMESPathCheckAssertionError(self._query, expected_result_format, 'None',
-                                                  execution_result.output)
+            raise JMESPathCheckAssertionError(self._query, expected_result_format, 'None',
+                                              execution_result.output)
 
 
 class JMESPathPatternCheck(object):  # pylint: disable=too-few-public-methods

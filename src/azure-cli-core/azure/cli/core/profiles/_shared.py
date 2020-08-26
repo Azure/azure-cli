@@ -24,7 +24,7 @@ class APIVersionException(Exception):
 PROFILE_TYPE = object()
 
 
-class CustomResourceType(object):  # pylint: disable=too-few-public-methods
+class CustomResourceType:  # pylint: disable=too-few-public-methods
     def __init__(self, import_prefix, client_name):
         self.import_prefix = import_prefix
         self.client_name = client_name
@@ -32,21 +32,72 @@ class CustomResourceType(object):  # pylint: disable=too-few-public-methods
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
+    MGMT_APIMANAGEMENT = ('azure.mgmt.apimanagement', 'ApiManagementClient')
+    MGMT_KUSTO = ('azure.mgmt.kusto', 'KustoManagementClient')
     MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
     MGMT_NETWORK_DNS = ('azure.mgmt.dns', 'DnsManagementClient')
     MGMT_AUTHORIZATION = ('azure.mgmt.authorization', 'AuthorizationManagementClient')
+    MGMT_CONTAINERREGISTRY = ('azure.mgmt.containerregistry', 'ContainerRegistryManagementClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
     MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links', 'ManagementLinkClient')
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
+    MGMT_RESOURCE_DEPLOYMENTSCRIPTS = ('azure.mgmt.resource.deploymentscripts', 'DeploymentScriptsClient')
+    MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
-    DATA_STORAGE = ('azure.multiapi.storage', None)
+    MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
+    MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
+    MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
+    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
+    # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
+    # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
+    # when related commands start to support Multi-API
+
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
+    MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', None)
+    MGMT_ADVISOR = ('azure.mgmt.advisor', None)
+    MGMT_MEDIA = ('azure.mgmt.media', None)
+    MGMT_BACKUP = ('azure.mgmt.recoveryservicesbackup', None)
+    MGMT_BATCH = ('azure.mgmt.batch', None)
+    MGMT_BATCHAI = ('azure.mgmt.batchai', None)
+    MGMT_BILLING = ('azure.mgmt.billing', None)
+    MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
+    MGMT_CDN = ('azure.mgmt.cdn', None)
+    MGMT_COGNITIVESERVICES = ('azure.mgmt.cognitiveservices', None)
+    MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
+    MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
+    MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
+    MGMT_DEPLOYMENTMANAGER = ('azure.mgmt.deploymentmanager', None)
+    MGMT_DATALAKE_ANALYTICS = ('azure.mgmt.datalake.analytics', None)
+    MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
+    MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
+    MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
+    MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', None)
+    MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
+    MGMT_MAPS = ('azure.mgmt.maps', None)
+    MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
+    MGMT_RDBMS = ('azure.mgmt.rdbms', None)
+    MGMT_REDIS = ('azure.mgmt.redis', None)
+    MGMT_RELAY = ('azure.mgmt.relay', None)
+    MGMT_RESERVATIONS = ('azure.mgmt.reservations', None)
+    MGMT_SEARCH = ('azure.mgmt.search', None)
+    MGMT_SERVICEBUS = ('azure.mgmt.servicebus', None)
+    MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)
+    MGMT_SIGNALR = ('azure.mgmt.signalr', None)
+    MGMT_SQL = ('azure.mgmt.sql', None)
+    MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
+    MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
+    MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
+    DATA_STORAGE = ('azure.multiapi.storage', None)
+    DATA_STORAGE_BLOB = ('azure.multiapi.storagev2.blob', None)
+    DATA_STORAGE_FILEDATALAKE = ('azure.multiapi.storagev2.filedatalake', None)
+    DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
+    DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -60,12 +111,12 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
         self.client_name = client_name
 
 
-class SDKProfile(object):  # pylint: disable=too-few-public-methods
+class SDKProfile:  # pylint: disable=too-few-public-methods
 
     def __init__(self, default_api_version, profile=None):
         """Constructor.
 
-        :param str default_api_version: Default API version if not overriden by a profile. Nullable.
+        :param str default_api_version: Default API version if not overridden by a profile. Nullable.
         :param profile: A dict operation group name to API version.
         :type profile: dict[str, str]
         """
@@ -79,35 +130,111 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2018-03-01-preview',
-        ResourceType.MGMT_NETWORK: '2018-08-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2018-10-01', {
-            'resource_skus': '2017-09-01',
-            'disks': '2018-06-01',
-            'snapshots': '2018-06-01',
-            'galleries': '2018-06-01',
-            'gallery_images': '2018-06-01',
-            'gallery_image_versions': '2018-06-01',
+        ResourceType.MGMT_STORAGE: '2019-06-01',
+        ResourceType.MGMT_NETWORK: '2020-05-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
+            'resource_skus': '2019-04-01',
+            'disks': '2020-05-01',
+            'disk_encryption_sets': '2020-05-01',
+            'disk_accesses': '2020-05-01',
+            'snapshots': '2020-05-01',
+            'galleries': '2019-12-01',
+            'gallery_images': '2019-12-01',
+            'gallery_image_versions': '2019-12-01',
+            'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2018-03-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2019-09-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2020-06-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2019-10-01-preview',
+        ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
+        ResourceType.MGMT_KEYVAULT: '2019-09-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-09-01-preview', {
+            'classic_administrators': '2015-06-01',
+            'role_definitions': '2018-01-01-preview',
+            'provider_operations_metadata': '2018-01-01-preview'
+        }),
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
+        ResourceType.DATA_KEYVAULT: '7.0',
+        ResourceType.DATA_STORAGE: '2018-11-09',
+        ResourceType.DATA_STORAGE_BLOB: '2019-12-12',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2018-11-09',
+        ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
+        ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'activity_log_alerts': '2017-04-01',
+            'activity_logs': '2015-04-01',
+            'alert_rule_incidents': '2016-03-01',
+            'alert_rules': '2016-03-01',
+            'autoscale_settings': '2015-04-01',
+            'baseline': '2018-09-01',
+            'baselines': '2019-03-01',
+            'diagnostic_settings': '2017-05-01-preview',
+            'diagnostic_settings_category': '2017-05-01-preview',
+            'event_categories': '2015-04-01',
+            'guest_diagnostics_settings': '2018-06-01-preview',
+            'guest_diagnostics_settings_association': '2018-06-01-preview',
+            'log_profiles': '2016-03-01',
+            'metric_alerts': '2018-03-01',
+            'metric_alerts_status': '2018-03-01',
+            'metric_baseline': '2018-09-01',
+            'metric_definitions': '2018-01-01',
+            'metric_namespaces': '2017-12-01-preview',
+            'metrics': '2018-01-01',
+            'operations': '2015-04-01',
+            'scheduled_query_rules': '2018-04-16',
+            'service_diagnostic_settings': '2016-09-01',
+            'tenant_activity_logs': '2015-04-01',
+            'vm_insights': '2018-11-27-preview',
+            'private_link_resources': '2019-10-17-preview',
+            'private_link_scoped_resources': '2019-10-17-preview',
+            'private_link_scope_operation_status': '2019-10-17-preview',
+            'private_link_scopes': '2019-10-17-preview',
+            'private_endpoint_connections': '2019-10-17-preview',
+            'subscription_diagnostic_settings': '2017-05-01-preview'
+        }),
+        ResourceType.MGMT_APPSERVICE: '2019-08-01',
+        ResourceType.MGMT_IOTHUB: '2020-03-01',
+        ResourceType.MGMT_ARO: '2020-04-30'
+    },
+    '2019-03-01-hybrid': {
+        ResourceType.MGMT_STORAGE: '2017-10-01',
+        ResourceType.MGMT_NETWORK: '2017-10-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
+            'resource_skus': '2017-09-01',
+            'disks': '2017-03-30',
+            'snapshots': '2017-03-30'
+        }),
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
-            'classic_administrators': '2015-06-01'
+        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
+            'classic_administrators': '2015-06-01',
+            'policy_assignments': '2016-12-01',
+            'policy_definitions': '2016-12-01'
         }),
-        ResourceType.DATA_STORAGE: '2018-03-28',
+        ResourceType.DATA_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_STORAGE: '2017-11-09',
+        ResourceType.DATA_STORAGE_BLOB: '2017-11-09',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-11-09',
+        ResourceType.DATA_STORAGE_FILESHARE: '2017-11-09',
+        ResourceType.DATA_STORAGE_QUEUE: '2017-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2018-02-14',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
-            'classic_administrators': '2015-06-01'
-        }),
-        ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_STORAGE: '2018-03-28',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        # Full MultiAPI support is not done in AppService, the line below is merely
+        # to have commands show up in the hybrid profile which happens to have the latest
+        # API versions
+        ResourceType.MGMT_APPSERVICE: '2018-02-01',
+        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_IOTHUB: '2019-03-22'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
@@ -125,6 +252,10 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
+        ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-04-17',
+        ResourceType.DATA_STORAGE_FILESHARE: '2017-04-17',
+        ResourceType.DATA_STORAGE_QUEUE: '2017-04-17',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
@@ -142,12 +273,16 @@ AZURE_API_PROFILES = {
             'classic_administrators': '2015-06-01'
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
-        ResourceType.DATA_STORAGE: '2015-04-05'
+        ResourceType.DATA_STORAGE: '2015-04-05',
+        ResourceType.DATA_STORAGE_BLOB: '2015-04-05',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2015-04-05',
+        ResourceType.DATA_STORAGE_FILESHARE: '2015-04-05',
+        ResourceType.DATA_STORAGE_QUEUE: '2015-04-05'
     }
 }
 
 
-class _ApiVersions(object):  # pylint: disable=too-few-public-methods
+class _ApiVersions:  # pylint: disable=too-few-public-methods
     def __init__(self, client_type, sdk_profile, post_process):
         self._client_type = client_type
         self._sdk_profile = sdk_profile
@@ -208,7 +343,7 @@ def get_api_version(api_profile, resource_type, as_sdk_profile=False):
 
 
 @total_ordering
-class _SemVerAPIFormat(object):
+class _SemVerAPIFormat:
     """Basic semver x.y.z API format.
     Supports x, or x.y, or x.y.z
     """
@@ -232,7 +367,7 @@ class _SemVerAPIFormat(object):
 
 
 @total_ordering  # pylint: disable=too-few-public-methods
-class _DateAPIFormat(object):
+class _DateAPIFormat:
     """ Class to support comparisons for API versions in
         YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile, YYYY-MM-DD-profile-preview
         or any string that starts with YYYY-MM-DD format. A special case is made for 'latest'.
@@ -333,6 +468,15 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     return _validate_api_version(api_version_obj, min_api, max_api)
 
 
+def supported_resource_type(api_profile, resource_type):
+    if api_profile == 'latest' or resource_type is None:
+        return True
+    try:
+        return bool(AZURE_API_PROFILES[api_profile][resource_type])
+    except KeyError:
+        return False
+
+
 def _get_attr(sdk_path, mod_attr_path, checked=True):
     try:
         attr_mod, attr_path = mod_attr_path.split('#') \
@@ -362,6 +506,8 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
                       azure.keyvault.v7_0.models.KeyVault
     """
     api_version = get_api_version(api_profile, resource_type)
+    if api_version is None:
+        return resource_type
     if isinstance(api_version, _ApiVersions):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))

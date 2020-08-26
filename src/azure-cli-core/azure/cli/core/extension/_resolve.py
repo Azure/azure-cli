@@ -2,14 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from wheel.install import WHEEL_INFO_RE
 from pkg_resources import parse_version
 
-from knack.log import get_logger
-
-from azure.cli.core.extension import ext_compat_with_cli
+from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE
 from azure.cli.core.extension._index import get_index_extensions
 
+from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -21,7 +20,7 @@ class NoExtensionCandidatesError(Exception):
 def _is_not_platform_specific(item):
     parsed_filename = WHEEL_INFO_RE(item['filename'])
     p = parsed_filename.groupdict()
-    if p.get('pyver') == 'py2.py3' and p.get('abi') == 'none' and p.get('plat') == 'any':
+    if p.get('abi') == 'none' and p.get('plat') == 'any':
         return True
     logger.debug("Skipping '%s' as not universal wheel."
                  "We do not currently support platform specific extension detection. "
@@ -54,12 +53,19 @@ def _is_greater_than_cur_version(cur_version):
     return filter_func
 
 
-def resolve_from_index(extension_name, cur_version=None, index_url=None):
+def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None):
+    """
+    Gets the download Url and digest for the matching extension
+
+    :param cur_version: threshold verssion to filter out extensions.
+    """
     candidates = get_index_extensions(index_url=index_url).get(extension_name, [])
+
     if not candidates:
         raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
 
     filters = [_is_not_platform_specific, _is_compatible_with_cli_version, _is_greater_than_cur_version(cur_version)]
+
     for f in filters:
         logger.debug("Candidates %s", [c['filename'] for c in candidates])
         candidates = list(filter(f, candidates))
@@ -68,10 +74,32 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None):
 
     candidates_sorted = sorted(candidates, key=lambda c: parse_version(c['metadata']['version']), reverse=True)
     logger.debug("Candidates %s", [c['filename'] for c in candidates_sorted])
-    logger.debug("Choosing the latest of the remaining candidates.")
-    chosen = candidates_sorted[0]
+
+    if target_version:
+        try:
+            chosen = [c for c in candidates_sorted if c['metadata']['version'] == target_version][0]
+        except IndexError:
+            raise NoExtensionCandidatesError('Extension with version {} not found'.format(target_version))
+    else:
+        logger.debug("Choosing the latest of the remaining candidates.")
+        chosen = candidates_sorted[0]
+
     logger.debug("Chosen %s", chosen)
     download_url, digest = chosen.get('downloadUrl'), chosen.get('sha256Digest')
     if not download_url:
         raise NoExtensionCandidatesError("No download url found.")
     return download_url, digest
+
+
+def resolve_project_url_from_index(extension_name):
+    """
+    Gets the project url of the matching extension from the index
+    """
+    candidates = get_index_extensions().get(extension_name, [])
+    if not candidates:
+        raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
+    try:
+        return candidates[0]['metadata']['extensions']['python.details']['project_urls']['Home']
+    except KeyError as ex:
+        logger.debug(ex)
+        raise CLIError('Could not find project information for extension {}.'.format(extension_name))

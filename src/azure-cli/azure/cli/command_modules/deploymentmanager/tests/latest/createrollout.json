@@ -1,0 +1,34 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
+  "resources": [
+    {
+      "location": "Central US",
+      "apiVersion": "2018-09-01-preview",
+      "type": "Microsoft.DeploymentManager/rollouts",
+      "name": "cliadmxd57xgRollout",
+      "Identity": {
+        "type": "userAssigned",
+        "identityIds": [
+          "/subscriptions/53012dcb-5039-4e96-8e6c-5d913da1cdb5/resourcegroups/cliadmxd57xg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cliadmxd57xgIdentity"
+        ]
+      },
+      "properties": {
+        "buildVersion": "1.0.0",
+        "targetServiceTopologyId": "/subscriptions/53012dcb-5039-4e96-8e6c-5d913da1cdb5/resourcegroups/cliadmxd57xg/providers/Microsoft.DeploymentManager/serviceTopologies/cliadmxd57xgServiceTopology",
+        "artifactSourceId": "/subscriptions/53012dcb-5039-4e96-8e6c-5d913da1cdb5/resourcegroups/cliadmxd57xg/providers/Microsoft.DeploymentManager/artifactSources/cliadmxd57xgArtifactSource",
+        "stepGroups": [
+          {
+            "name": "PilotRegion",
+            "preDeploymentSteps": [
+              {
+                "stepId": "/subscriptions/53012dcb-5039-4e96-8e6c-5d913da1cdb5/resourcegroups/cliadmxd57xg/providers/Microsoft.DeploymentManager/steps/cliadmxd57xgWaitStep"
+              }
+            ],
+            "deploymentTargetId": "/subscriptions/53012dcb-5039-4e96-8e6c-5d913da1cdb5/resourcegroups/cliadmxd57xg/providers/Microsoft.DeploymentManager/serviceTopologies/cliadmxd57xgServiceTopology/services/cliadmxd57xgService/serviceUnits/cliadmxd57xgServiceUnit"
+          }
+        ]
+      }
+    }
+  ],
+  "contentVersion": "1.0.0.0"
+}

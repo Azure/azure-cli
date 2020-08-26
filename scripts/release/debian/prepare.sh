@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-set -ex
+set -evx
 
 # Create the debian/ directory for building the azure-cli Debian package
 
@@ -106,7 +106,7 @@ override_dh_install:
 ${TAB}mkdir -p debian/azure-cli/opt/az
 ${TAB}cp -a python_env/* debian/azure-cli/opt/az
 ${TAB}mkdir -p debian/azure-cli/usr/bin/
-${TAB}echo "\043!/usr/bin/env bash\n/opt/az/bin/python3 -Im azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
+${TAB}echo "\043!/usr/bin/env bash\nAZ_INSTALLER=DEB /opt/az/bin/python3 -Im azure.cli \"\044\100\"" > debian/azure-cli/usr/bin/az
 ${TAB}chmod 0755 debian/azure-cli/usr/bin/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
 ${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli

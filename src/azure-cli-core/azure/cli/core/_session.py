@@ -43,7 +43,7 @@ class Session(collections.MutableMapping):
         try:
             if max_age > 0:
                 st = os.stat(self.filename)
-                if st.st_mtime + max_age < time.clock():
+                if st.st_mtime + max_age < time.time():
                     self.save()
             with codecs_open(self.filename, 'r', encoding=self._encoding) as f:
                 self.data = json.load(f)
@@ -104,3 +104,15 @@ CONFIG = Session()
 
 # SESSION provides read-write session variables
 SESSION = Session()
+
+# INDEX contains {top-level command: [command_modules and extensions]} mapping index
+INDEX = Session()
+
+# VERSIONS provides local versions and pypi versions.
+# DO NOT USE it to get the current version of azure-cli,
+# it could be lagged behind and can be used to check whether
+# an upgrade of azure-cli happens
+VERSIONS = Session()
+
+# EXT_CMD_TREE provides command to extension name mapping
+EXT_CMD_TREE = Session()

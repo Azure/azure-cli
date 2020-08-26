@@ -5,9 +5,9 @@
 
 import re
 
-import knack.events as events
-
 from azure.cli.core.util import b64_to_hex
+
+import knack.events as events
 
 
 def register_global_transforms(cli_ctx):
@@ -32,7 +32,7 @@ def _add_resource_group(obj):
             _add_resource_group(array_item)
     elif isinstance(obj, dict):
         try:
-            if 'resourceGroup' not in obj:
+            if 'resourcegroup' not in [x.lower() for x in obj.keys()]:
                 if obj['id']:
                     obj['resourceGroup'] = _parse_id(obj['id'])['resource-group']
         except (KeyError, IndexError, TypeError):
@@ -63,3 +63,13 @@ def _resource_group_transform(_, **kwargs):
 
 def _x509_from_base64_to_hex_transform(_, **kwargs):
     _add_x509_hex(kwargs['event_data']['result'])
+
+
+def gen_dict_to_list_transform(key='value'):
+
+    def _dict_to_list_transform(result):
+        if hasattr(result, key):
+            return getattr(result, key)
+        return result
+
+    return _dict_to_list_transform
