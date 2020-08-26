@@ -1149,20 +1149,20 @@ def load_arguments(self, _):
                                arg_group='V2 Endpoint',
                                min_api='2019-11-01') as c:
         c.argument('endpoint_dest_name',
-                   help='The name of the source of connection monitor endpoint. '
-                        'If you are creating a V2 Connection Monitor, it\'s required')
-        c.argument('endpoint_dest_resource_id',
-                   help='Resource ID of the source of connection monitor endpoint')
-        c.argument('endpoint_dest_address',
-                   help='Address of the source of connection monitor endpoint (IP or domain name)')
-        c.argument('endpoint_source_name',
                    help='The name of the destination of connection monitor endpoint. '
                         'If you are creating a V2 Connection Monitor, it\'s required')
+        c.argument('endpoint_dest_resource_id',
+                   help='Resource ID of the destination of connection monitor endpoint')
+        c.argument('endpoint_dest_address',
+                   help='Address of the destination of connection monitor endpoint (IP or domain name)')
+        c.argument('endpoint_source_name',
+                   help='The name of the source of connection monitor endpoint. '
+                        'If you are creating a V2 Connection Monitor, it\'s required')
         c.argument('endpoint_source_resource_id',
-                   help='Resource ID of the destination of connection monitor endpoint. '
+                   help='Resource ID of the source of connection monitor endpoint. '
                         'If endpoint is intended to used as source, this option is required.')
         c.argument('endpoint_source_address',
-                   help='Address of the destination of connection monitor endpoint (IP or domain name)')
+                   help='Address of the source of connection monitor endpoint (IP or domain name)')
 
     # Argument Group for test configuration to create a V2 connection monitor
     with self.argument_context('network watcher connection-monitor',
