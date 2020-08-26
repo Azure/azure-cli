@@ -11,20 +11,20 @@ from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 logger = get_logger(__name__)
 
 
-def register_global_query_example_argument(cli_ctx):
-    '''Register --query-example argument, and register handler
+def register_global_query_examples_argument(cli_ctx):
+    '''Register --query-examples argument, and register handler
     '''
 
     def handle_example_parameter(cli, **kwargs):  # pylint: disable=unused-argument
         args = kwargs['args']
-        if args._query_example is not None:  # pylint: disable=protected-access
+        if args._query_examples is not None:  # pylint: disable=protected-access
             cli_ctx.invocation.data['output'] = 'table'
 
             def analyze_output(cli_ctx, **kwargs):
                 tree_builder = TreeBuilder()
                 tree_builder.build(kwargs['event_data']['result'])
-                kwargs['event_data']['result'] = tree_builder.generate_example(
-                    args._query_example)  # pylint: disable=protected-access
+                kwargs['event_data']['result'] = tree_builder.generate_examples(
+                    args._query_examples)  # pylint: disable=protected-access
                 cli_ctx.unregister_event(
                     events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
 
@@ -32,12 +32,12 @@ def register_global_query_example_argument(cli_ctx):
                 events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
             cli_ctx.invocation.data['query_active'] = True
 
-    def register_query_example(cli, **kwargs):
+    def register_query_examples(cli, **kwargs):
         from knack.experimental import ExperimentalItem
         commands_loader = kwargs.get('commands_loader')
         cmd_tbl = commands_loader.command_table
         experimental_info = ExperimentalItem(cli.local_context.cli_ctx,
-                                             object_type='parameter', target='_query_example')
+                                             object_type='parameter', target='_query_examples')
         default_kwargs = {
             'help': 'Recommend JMESPath string for you. Currently this is a dummy parameter',
             'arg_group': 'Global',
@@ -46,11 +46,11 @@ def register_global_query_example_argument(cli_ctx):
             'experimental_info': experimental_info
         }
         for _, cmd in cmd_tbl.items():
-            cmd.add_argument('_query_example', *
-                             ['--query-example'], **default_kwargs)
+            cmd.add_argument('_query_examples', *
+                             ['--query-examples'], **default_kwargs)
 
     cli_ctx.register_event(
-        EVENT_INVOKER_PRE_LOAD_ARGUMENTS, register_query_example
+        EVENT_INVOKER_PRE_LOAD_ARGUMENTS, register_query_examples
     )
     cli_ctx.register_event(
         events.EVENT_INVOKER_POST_PARSE_ARGS, handle_example_parameter)
@@ -69,6 +69,6 @@ class TreeBuilder:
         '''
         self._data = data
 
-    def generate_example(self, keywords_list):  # pylint: disable=unused-argument, no-self-use
+    def generate_examples(self, keywords_list):  # pylint: disable=unused-argument, no-self-use
         examples = []
         return todict(examples)
