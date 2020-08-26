@@ -4668,7 +4668,7 @@ class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
                  checks=self.is_empty())
 
         self.cmd('network vnet create --resource-group {rg} --name {vnet} --location {loc}')
-        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --vnet-name {vnet}')
+        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --vnet-name {vnet} --nsg-rule NONE')
 
         # Expecting one result, the one we created
         self.cmd('vm list --resource-group {rg}', checks=[
