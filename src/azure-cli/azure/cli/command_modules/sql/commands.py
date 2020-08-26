@@ -22,13 +22,13 @@ from ._format import (
 )
 
 from ._util import (
+    get_sql_backup_short_term_retention_policies_operations,
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations,
     get_sql_databases_operations,
     get_sql_database_blob_auditing_policies_operations,
     get_sql_database_long_term_retention_backups_operations,
     get_sql_database_long_term_retention_policies_operations,
-    get_sql_database_short_term_retention_policies_operations,
     get_sql_database_sensitivity_labels_operations,
     get_sql_database_operations_operations,
     get_sql_database_threat_detection_policies_operations,
