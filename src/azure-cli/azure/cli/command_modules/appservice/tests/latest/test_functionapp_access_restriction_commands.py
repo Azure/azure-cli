@@ -81,7 +81,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(random_name_length=17,parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_add(self, resource_group, location):
         self.kwargs.update({

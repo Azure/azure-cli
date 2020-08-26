@@ -2039,10 +2039,10 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
 
     application_logs = None
     if application_logging is not None:
-        if not application_logging:
-            level = 'Off'
-        elif level is None:
+        if application_logging == 'true':
             level = 'Error'
+        else:
+            level = 'Off'
         fs_log = FileSystemApplicationLogsConfig(level=level)
         application_logs = ApplicationLogsConfig(file_system=fs_log)
 

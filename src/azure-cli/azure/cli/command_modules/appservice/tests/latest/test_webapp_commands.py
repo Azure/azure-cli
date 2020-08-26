@@ -87,7 +87,8 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd(test_cmd)
         self.cmd('webapp log show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorMessages.enabled', True),
-            JMESPathCheck('failedRequestsTracing.enabled', True)
+            JMESPathCheck('failedRequestsTracing.enabled', True),
+            JMESPathCheck('applicationLogging.enabled', None),
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorLoggingEnabled', True),
