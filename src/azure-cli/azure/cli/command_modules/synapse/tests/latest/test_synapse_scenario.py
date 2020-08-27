@@ -555,7 +555,7 @@ def step__privatelinkresources_get_get_private_link_resources_for_workspace(test
 @try_manual
 def step__sqlpools_put_create_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_10,
                                                    rg_11, rg_12, rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool create '
+    test.cmd('az synapse sql-pool create '
              '--resource-group "{rg}" '
              '--location "West US 2" '
              '--collation "" '
@@ -569,7 +569,7 @@ def step__sqlpools_put_create_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, r
              '--name "{mySqlPool2}" '
              '--workspace-name "{myWorkspace}"',
              checks=[])
-    test.cmd('az synapse s-q-l-pool wait --created '
+    test.cmd('az synapse sql-pool wait --created '
              '--resource-group "{rg}" '
              '--name "{mySqlPool2}"',
              checks=[])
@@ -579,7 +579,7 @@ def step__sqlpools_put_create_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, r
 @try_manual
 def step__sqlpools_get_get_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_10, rg_11,
                                                 rg_12, rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool show '
+    test.cmd('az synapse sql-pool show '
              '--resource-group "{rg_4}" '
              '--name "{mySqlPool}" '
              '--workspace-name "{myWorkspace4}"',
@@ -591,7 +591,7 @@ def step__sqlpools_get_get_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4
 def step__sqlpools_get_list_sql_analytics_pools_in_a_workspace(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8,
                                                                rg_9, rg_10, rg_11, rg_12, rg_13, rg_14, rg_15, rg_16,
                                                                rg_17):
-    test.cmd('az synapse s-q-l-pool list '
+    test.cmd('az synapse sql-pool list '
              '--resource-group "{rg_3}" '
              '--workspace-name "{myWorkspace3}"',
              checks=[])
@@ -602,7 +602,7 @@ def step__sqlpools_get_list_sql_analytics_pools_in_a_workspace(test, rg_5, rg, r
 def step__sqlpools_get_list_sql_analytics_pools_in_a_workspace_with_filter(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6,
                                                                            rg_7, rg_8, rg_9, rg_10, rg_11, rg_12,
                                                                            rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool list '
+    test.cmd('az synapse sql-pool list '
              '--resource-group "{rg_3}" '
              '--workspace-name "{myWorkspace3}"',
              checks=[])
@@ -612,7 +612,7 @@ def step__sqlpools_get_list_sql_analytics_pools_in_a_workspace_with_filter(test,
 @try_manual
 def step__sqlpools_post_pause_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_10,
                                                    rg_11, rg_12, rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool pause '
+    test.cmd('az synapse sql-pool pause '
              '--resource-group "{rg_5}" '
              '--name "{mySqlPool3}" '
              '--workspace-name "{myWorkspace5}"',
@@ -623,7 +623,7 @@ def step__sqlpools_post_pause_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, r
 @try_manual
 def step__sqlpools_post_rename_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_10,
                                                     rg_11, rg_12, rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool rename '
+    test.cmd('az synapse sql-pool rename '
              '--id "/subscriptions/{subscription_id}/resourceGroups/{rg_5}/providers/Microsoft.Synapse/workspaces/{myWo'
              'rkspace5}/sqlPools/{mySqlPool4}" '
              '--resource-group "{rg_5}" '
@@ -636,7 +636,7 @@ def step__sqlpools_post_rename_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, 
 @try_manual
 def step__sqlpools_post_resume_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_10,
                                                     rg_11, rg_12, rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool resume '
+    test.cmd('az synapse sql-pool resume '
              '--resource-group "{rg_4}" '
              '--name "{mySqlPool}" '
              '--workspace-name "{myWorkspace4}"',
@@ -647,7 +647,7 @@ def step__sqlpools_post_resume_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, 
 @try_manual
 def step__sqlpools_patch_update_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_10,
                                                      rg_11, rg_12, rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool update '
+    test.cmd('az synapse sql-pool update '
              '--resource-group "{rg}" '
              '--location "West US 2" '
              '--collation "" '
@@ -683,7 +683,7 @@ def step__sqlpoolblobauditingpolicies_put_create_or_update_a_database_s_blob_aud
                                                                                                                  rg_15,
                                                                                                                  rg_16,
                                                                                                                  rg_17):
-    test.cmd('az synapse s-q-l-pool-blob-auditing-policy create '
+    test.cmd('az synapse sql-pool-blob-auditing-policy create '
              '--audit-actions-and-groups "DATABASE_LOGOUT_GROUP" '
              '--audit-actions-and-groups "DATABASE_ROLE_MEMBER_CHANGE_GROUP" '
              '--audit-actions-and-groups "UPDATE on database::TestDatabaseName by public" '
@@ -696,7 +696,7 @@ def step__sqlpoolblobauditingpolicies_put_create_or_update_a_database_s_blob_aud
              '--storage-account-subscription-id "00000000-1234-0000-5678-000000000000" '
              '--storage-endpoint "https://mystorage.blob.core.windows.net" '
              '--resource-group "{rg_8}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace10}"',
              checks=[])
 
@@ -721,13 +721,13 @@ def step__sqlpoolblobauditingpolicies_put_create_or_update_a_database_s_blob_aud
                                                                                                                      rg_15,
                                                                                                                      rg_16,
                                                                                                                      rg_17):
-    test.cmd('az synapse s-q-l-pool-blob-auditing-policy create '
+    test.cmd('az synapse sql-pool-blob-auditing-policy create '
              '--state "Enabled" '
              '--storage-account-access-key "sdlfkjabc+sdlfkjsdlkfsjdfLDKFTERLKFDFKLjsdfksjdflsdkfD234230943284932847645'
              '8/3RSD==" '
              '--storage-endpoint "https://mystorage.blob.core.windows.net" '
              '--resource-group "{rg_8}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace10}"',
              checks=[])
 
@@ -739,9 +739,9 @@ def step__sqlpoolblobauditingpolicies_get_get_blob_auditing_policy_of_a_sql_anal
                                                                                            rg_9, rg_10, rg_11, rg_12,
                                                                                            rg_13, rg_14, rg_15, rg_16,
                                                                                            rg_17):
-    test.cmd('az synapse s-q-l-pool-blob-auditing-policy show '
+    test.cmd('az synapse sql-pool-blob-auditing-policy show '
              '--resource-group "{rg_7}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace9}"',
              checks=[])
 
@@ -752,9 +752,9 @@ def step__sqlpoolconnectionpolicies_get_get_a_connection_policy_of_a_sql_analyti
                                                                                         rg_4, rg_6, rg_7, rg_8, rg_9,
                                                                                         rg_10, rg_11, rg_12, rg_13,
                                                                                         rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-connection-policy show '
+    test.cmd('az synapse sql-pool-connection-policy show '
              '--resource-group "{rg_7}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace9}"',
              checks=[])
 
@@ -765,9 +765,9 @@ def step__sqlpooldatawarehouseuseractivities_get_get_a_sql_analytics_pool_user_a
                                                                                         rg_4, rg_6, rg_7, rg_8, rg_9,
                                                                                         rg_10, rg_11, rg_12, rg_13,
                                                                                         rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-data-warehouse-user-activity show '
+    test.cmd('az synapse sql-pool-data-warehouse-user-activity show '
              '--resource-group "{rg_5}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace5}"',
              checks=[])
 
@@ -777,9 +777,9 @@ def step__sqlpooldatawarehouseuseractivities_get_get_a_sql_analytics_pool_user_a
 def step__sqlpoolgeobackuppolicies_get_get_sql_pool_geo_backup_policy(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7,
                                                                       rg_8, rg_9, rg_10, rg_11, rg_12, rg_13, rg_14,
                                                                       rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-geo-backup-policy show '
+    test.cmd('az synapse sql-pool-geo-backup-policy show '
              '--resource-group "{rg_6}" '
-             '--s-q-l-pool-name "{mySqlPool6}" '
+             '--sql-pool-name "{mySqlPool6}" '
              '--workspace-name "{myWorkspace6}"',
              checks=[])
 
@@ -791,10 +791,10 @@ def step__sqlpoolmetadatasyncconfigs_put_set_metadata_sync_config_for_a_sql_anal
                                                                                            rg_9, rg_10, rg_11, rg_12,
                                                                                            rg_13, rg_14, rg_15, rg_16,
                                                                                            rg_17):
-    test.cmd('az synapse s-q-l-pool-metadata-sync-config create '
+    test.cmd('az synapse sql-pool-metadata-sync-config create '
              '--enabled true '
              '--resource-group "{rg}" '
-             '--s-q-l-pool-name "{mySqlPool2}" '
+             '--sql-pool-name "{mySqlPool2}" '
              '--workspace-name "{myWorkspace}"',
              checks=[])
 
@@ -806,9 +806,9 @@ def step__sqlpoolmetadatasyncconfigs_get_get_metadata_sync_config_for_a_sql_anal
                                                                                            rg_9, rg_10, rg_11, rg_12,
                                                                                            rg_13, rg_14, rg_15, rg_16,
                                                                                            rg_17):
-    test.cmd('az synapse s-q-l-pool-metadata-sync-config show '
+    test.cmd('az synapse sql-pool-metadata-sync-config show '
              '--resource-group "{rg}" '
-             '--s-q-l-pool-name "{mySqlPool2}" '
+             '--sql-pool-name "{mySqlPool2}" '
              '--workspace-name "{myWorkspace}"',
              checks=[])
 
@@ -820,10 +820,10 @@ def step__sqlpooloperationresults_get_get_the_result_of_an_operation_on_a_sql_an
                                                                                              rg_8, rg_9, rg_10, rg_11,
                                                                                              rg_12, rg_13, rg_14,
                                                                                              rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-operation-result get-location-header-result '
+    test.cmd('az synapse sql-pool-operation-result get-location-header-result '
              '--operation-id "fedcba98-7654-4210-fedc-ba9876543210" '
              '--resource-group "{rg}" '
-             '--s-q-l-pool-name "{mySqlPool2}" '
+             '--sql-pool-name "{mySqlPool2}" '
              '--workspace-name "{myWorkspace}"',
              checks=[])
 
@@ -834,9 +834,9 @@ def step__sqlpooloperations_get_list_the_sql_analytics_pool_management_operation
                                                                                   rg_6, rg_7, rg_8, rg_9, rg_10, rg_11,
                                                                                   rg_12, rg_13, rg_14, rg_15, rg_16,
                                                                                   rg_17):
-    test.cmd('az synapse s-q-l-pool-operation list '
+    test.cmd('az synapse sql-pool-operation list '
              '--resource-group "{rg_9}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace11}"',
              checks=[])
 
@@ -847,9 +847,9 @@ def step__sqlpoolreplicationlinks_get_lists_a_sql_analytic_pool_s_replication_li
                                                                                     rg_6, rg_7, rg_8, rg_9, rg_10,
                                                                                     rg_11, rg_12, rg_13, rg_14, rg_15,
                                                                                     rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-replication-link list '
+    test.cmd('az synapse sql-pool-replication-link list '
              '--resource-group "{rg_6}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace8}"',
              checks=[])
 
@@ -860,9 +860,9 @@ def step__sqlpoolrestorepoints_get_get_a_list_of_restore_points_of_a_sql_analyti
                                                                                         rg_4, rg_6, rg_7, rg_8, rg_9,
                                                                                         rg_10, rg_11, rg_12, rg_13,
                                                                                         rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-restore-point list '
+    test.cmd('az synapse sql-pool-restore-point list '
              '--resource-group "{rg_5}" '
-             '--s-q-l-pool-name "{mySqlPool7}" '
+             '--sql-pool-name "{mySqlPool7}" '
              '--workspace-name "{myWorkspace7}"',
              checks=[])
 
@@ -872,10 +872,10 @@ def step__sqlpoolrestorepoints_get_get_a_list_of_restore_points_of_a_sql_analyti
 def step__sqlpoolrestorepoints_post_creates_sql_pool_restore_point_(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8,
                                                                     rg_9, rg_10, rg_11, rg_12, rg_13, rg_14, rg_15,
                                                                     rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-restore-point create '
+    test.cmd('az synapse sql-pool-restore-point create '
              '--restore-point-label "mylabel" '
              '--resource-group "{rg_5}" '
-             '--s-q-l-pool-name "{mySqlPool7}" '
+             '--sql-pool-name "{mySqlPool7}" '
              '--workspace-name "{myWorkspace7}"',
              checks=[])
 
@@ -885,9 +885,9 @@ def step__sqlpoolrestorepoints_post_creates_sql_pool_restore_point_(test, rg_5, 
 def step__sqlpoolschemas_get_list_the_schema_in_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7,
                                                                      rg_8, rg_9, rg_10, rg_11, rg_12, rg_13, rg_14,
                                                                      rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-schema list '
+    test.cmd('az synapse sql-pool-schema list '
              '--resource-group "{rg_11}" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--workspace-name "{myWorkspace14}"',
              checks=[])
 
@@ -907,7 +907,7 @@ def step__sqlpoolsecurityalertpolicies_put_update_a_sql_pool_s_threat_detection_
                                                                                                            rg_15,
                                                                                                            rg_16,
                                                                                                            rg_17):
-    test.cmd('az synapse s-q-l-pool-security-alert-policy create '
+    test.cmd('az synapse sql-pool-security-alert-policy create '
              '--disabled-alerts "Sql_Injection" '
              '--disabled-alerts "Usage_Anomaly" '
              '--email-account-admins true '
@@ -919,7 +919,7 @@ def step__sqlpoolsecurityalertpolicies_put_update_a_sql_pool_s_threat_detection_
              '8/3RSD==" '
              '--storage-endpoint "https://mystorage.blob.core.windows.net" '
              '--resource-group "{rg_16}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace19}"',
              checks=[])
 
@@ -944,10 +944,10 @@ def step__sqlpoolsecurityalertpolicies_put_update_a_sql_pool_s_threat_detection_
                                                                                                                rg_15,
                                                                                                                rg_16,
                                                                                                                rg_17):
-    test.cmd('az synapse s-q-l-pool-security-alert-policy create '
+    test.cmd('az synapse sql-pool-security-alert-policy create '
              '--state "Enabled" '
              '--resource-group "{rg_16}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace19}"',
              checks=[])
 
@@ -958,9 +958,9 @@ def step__sqlpoolsecurityalertpolicies_get_get_a_security_alert_of_a_sql_analyti
                                                                                         rg_4, rg_6, rg_7, rg_8, rg_9,
                                                                                         rg_10, rg_11, rg_12, rg_13,
                                                                                         rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-security-alert-policy show '
+    test.cmd('az synapse sql-pool-security-alert-policy show '
              '--resource-group "{rg_15}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace18}"',
              checks=[])
 
@@ -980,7 +980,7 @@ def step__sqlpoolsensitivitylabels_put_updates_the_sensitivity_label_of_a_given_
                                                                                                            rg_15,
                                                                                                            rg_16,
                                                                                                            rg_17):
-    test.cmd('az synapse s-q-l-pool-sensitivity-label create '
+    test.cmd('az synapse sql-pool-sensitivity-label create '
              '--column-name "myColumn" '
              '--information-type "PhoneNumber" '
              '--information-type-id "d22fa6e9-5ee4-3bde-4c2b-a409604c4646" '
@@ -988,7 +988,7 @@ def step__sqlpoolsensitivitylabels_put_updates_the_sensitivity_label_of_a_given_
              '--label-name "PII" '
              '--resource-group "{rg_11}" '
              '--schema-name "dbo" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--table-name "myTable" '
              '--workspace-name "{myWorkspace13}"',
              checks=[])
@@ -1005,10 +1005,10 @@ def step__sqlpoolsensitivitylabels_get_gets_the_current_sensitivity_labels_of_a_
                                                                                                          rg_12, rg_13,
                                                                                                          rg_14, rg_15,
                                                                                                          rg_16,
-                                                                                                         rg_17):
-    test.cmd('az synapse s-q-l-pool-sensitivity-label list-current '
+rg_17):
+    test.cmd('az synapse sql-pool-sensitivity-label list-current '
              '--resource-group "{rg_11}" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--workspace-name "{myWorkspace13}"',
              checks=[])
 
@@ -1032,9 +1032,9 @@ def step__sqlpoolsensitivitylabels_get_gets_the_recommended_sensitivity_labels_o
                                                                                                              rg_15,
                                                                                                              rg_16,
                                                                                                              rg_17):
-    test.cmd('az synapse s-q-l-pool-sensitivity-label list-recommended '
+    test.cmd('az synapse sql-pool-sensitivity-label list-recommended '
              '--resource-group "{rg_11}" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--workspace-name "{myWorkspace13}"',
              checks=[])
 
@@ -1047,11 +1047,11 @@ def step__sqlpoolsensitivitylabels_post_disables_sensitivity_recommendations_on_
                                                                                                rg_11, rg_12, rg_13,
                                                                                                rg_14, rg_15, rg_16,
                                                                                                rg_17):
-    test.cmd('az synapse s-q-l-pool-sensitivity-label disable-recommendation '
+    test.cmd('az synapse sql-pool-sensitivity-label disable-recommendation '
              '--column-name "myColumn" '
              '--resource-group "{rg_11}" '
              '--schema-name "dbo" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--table-name "myTable" '
              '--workspace-name "{myWorkspace13}"',
              checks=[])
@@ -1064,11 +1064,11 @@ def step__sqlpoolsensitivitylabels_post_enables_sensitivity_recommendations_on_a
                                                                                               rg_8, rg_9, rg_10, rg_11,
                                                                                               rg_12, rg_13, rg_14,
                                                                                               rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-sensitivity-label enable-recommendation '
+    test.cmd('az synapse sql-pool-sensitivity-label enable-recommendation '
              '--column-name "myColumn" '
              '--resource-group "{rg_11}" '
              '--schema-name "dbo" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--table-name "myTable" '
              '--workspace-name "{myWorkspace13}"',
              checks=[])
@@ -1085,10 +1085,10 @@ def step__sqlpooltablecolumns_get_list_the_columns_in_a_table_of_a_given_schema_
                                                                                                         rg_13, rg_14,
                                                                                                         rg_15, rg_16,
                                                                                                         rg_17):
-    test.cmd('az synapse s-q-l-pool-table-column list '
+    test.cmd('az synapse sql-pool-table-column list '
              '--resource-group "{rg_11}" '
              '--schema-name "dbo" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--table-name "table1" '
              '--workspace-name "{myWorkspace14}"',
              checks=[])
@@ -1100,10 +1100,10 @@ def step__sqlpooltables_get_list_the_tables_of_a_given_schema_in_a_sql_analytics
                                                                                       rg_6, rg_7, rg_8, rg_9, rg_10,
                                                                                       rg_11, rg_12, rg_13, rg_14,
                                                                                       rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-table list '
+    test.cmd('az synapse sql-pool-table list '
              '--resource-group "{rg_11}" '
              '--schema-name "dbo" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--workspace-name "{myWorkspace14}"',
              checks=[])
 
@@ -1128,10 +1128,10 @@ def step__sqlpooltransparentdataencryptions_put_create_or_update_a_sql_pool_s_tr
                                                                                                                         rg_15,
                                                                                                                         rg_16,
                                                                                                                         rg_17):
-    test.cmd('az synapse s-q-l-pool-transparent-data-encryption create '
+    test.cmd('az synapse sql-pool-transparent-data-encryption create '
              '--status "Enabled" '
              '--resource-group "{rg_4}" '
-             '--s-q-l-pool-name "{mySqlPool}" '
+             '--sql-pool-name "{mySqlPool}" '
              '--workspace-name "{myWorkspace4}"',
              checks=[])
 
@@ -1156,9 +1156,9 @@ def step__sqlpooltransparentdataencryptions_get_get_transparent_data_encryption_
                                                                                                                       rg_15,
                                                                                                                       rg_16,
                                                                                                                       rg_17):
-    test.cmd('az synapse s-q-l-pool-transparent-data-encryption show '
+    test.cmd('az synapse sql-pool-transparent-data-encryption show '
              '--resource-group "{rg_4}" '
-             '--s-q-l-pool-name "{mySqlPool}" '
+             '--sql-pool-name "{mySqlPool}" '
              '--workspace-name "{myWorkspace4}"',
              checks=[])
 
@@ -1168,9 +1168,9 @@ def step__sqlpooltransparentdataencryptions_get_get_transparent_data_encryption_
 def step__sqlpoolusages_get_list_the_usages_of_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8,
                                                                     rg_9, rg_10, rg_11, rg_12, rg_13, rg_14, rg_15,
                                                                     rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-usage list '
+    test.cmd('az synapse sql-pool-usage list '
              '--resource-group "{rg_10}" '
-             '--s-q-l-pool-name "{mySqlPool8}" '
+             '--sql-pool-name "{mySqlPool8}" '
              '--workspace-name "{myWorkspace12}"',
              checks=[])
 
@@ -1195,14 +1195,14 @@ def step__sqlpoolvulnerabilityassessmentrulebaselines_put_creates_or_updates_a_d
                                                                                                                                   rg_15,
                                                                                                                                   rg_16,
                                                                                                                                   rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment-rule-baseline create '
+    test.cmd('az synapse sql-pool-vulnerability-assessment-rule-baseline create '
              '--baseline-name "default" '
              '--baseline-results result="userA" result="SELECT" '
              '--baseline-results result="userB" result="SELECT" '
              '--baseline-results result="userC" result="SELECT" result="tableId_4" '
              '--resource-group "{rg_12}" '
              '--rule-id "VA1001" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace15}"',
              checks=[])
 
@@ -1218,10 +1218,10 @@ def step__sqlpoolvulnerabilityassessmentscans_get_get_a_vulnerability_scan_recor
                                                                                                           rg_12, rg_13,
                                                                                                           rg_14, rg_15,
                                                                                                           rg_16,
-                                                                                                          rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment-scan list '
+rg_17):
+    test.cmd('az synapse sql-pool-vulnerability-assessment-scan list '
              '--resource-group "{rg_13}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace16}"',
              checks=[])
 
@@ -1237,10 +1237,10 @@ def step__sqlpoolvulnerabilityassessmentscans_post_executes_a_sql_pool_s_vulnera
                                                                                                         rg_13, rg_14,
                                                                                                         rg_15, rg_16,
                                                                                                         rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment-scan initiate-scan '
+    test.cmd('az synapse sql-pool-vulnerability-assessment-scan initiate-scan '
              '--resource-group "{rg_13}" '
              '--scan-id "scan01" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace16}"',
              checks=[])
 
@@ -1264,10 +1264,10 @@ def step__sqlpoolvulnerabilityassessmentscans_post_export_a_database_s_vulnerabi
                                                                                                               rg_15,
                                                                                                               rg_16,
                                                                                                               rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment-scan export '
+    test.cmd('az synapse sql-pool-vulnerability-assessment-scan export '
              '--resource-group "{rg_14}" '
              '--scan-id "scan001" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace17}"',
              checks=[])
 
@@ -1292,14 +1292,14 @@ def step__sqlpoolvulnerabilityassessments_put_create_a_database_s_vulnerability_
                                                                                                                rg_15,
                                                                                                                rg_16,
                                                                                                                rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment create '
+    test.cmd('az synapse sql-pool-vulnerability-assessment create '
              '--recurring-scans email-subscription-admins=true emails="email1@mail.com" emails="email2@mail.com" '
              'is-enabled=true '
              '--storage-account-access-key "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" '
              '--storage-container-path "https://myStorage.blob.core.windows.net/vulnerability-assessment/" '
              '--storage-container-sas-key "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" '
              '--resource-group "{rg_12}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace15}"',
              checks=[])
 
@@ -1324,11 +1324,11 @@ def step__sqlpoolvulnerabilityassessments_put_create_a_database_s_vulnerability_
                                                                                                                                                               rg_15,
                                                                                                                                                               rg_16,
                                                                                                                                                               rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment create '
+    test.cmd('az synapse sql-pool-vulnerability-assessment create '
              '--storage-account-access-key "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" '
              '--storage-container-path "https://myStorage.blob.core.windows.net/vulnerability-assessment/" '
              '--resource-group "{rg_12}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace15}"',
              checks=[])
 
@@ -1353,11 +1353,11 @@ def step__sqlpoolvulnerabilityassessments_put_create_a_database_s_vulnerability_
                                                                                                                                                              rg_15,
                                                                                                                                                              rg_16,
                                                                                                                                                              rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment create '
+    test.cmd('az synapse sql-pool-vulnerability-assessment create '
              '--storage-container-path "https://myStorage.blob.core.windows.net/vulnerability-assessment/" '
              '--storage-container-sas-key "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" '
              '--resource-group "{rg_12}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace15}"',
              checks=[])
 
@@ -1368,9 +1368,9 @@ def step__sqlpoolvulnerabilityassessments_get_get_a_sql_pool_s_vulnerability_ass
                                                                                         rg_4, rg_6, rg_7, rg_8, rg_9,
                                                                                         rg_10, rg_11, rg_12, rg_13,
                                                                                         rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment show '
+    test.cmd('az synapse sql-pool-vulnerability-assessment show '
              '--resource-group "{rg_12}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace15}"',
              checks=[])
 
@@ -1385,9 +1385,9 @@ def step__sqlpoolvulnerabilityassessments_get_get_a_vulnerability_assessment_of_
                                                                                                      rg_13, rg_14,
                                                                                                      rg_15, rg_16,
                                                                                                      rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment list '
+    test.cmd('az synapse sql-pool-vulnerability-assessment list '
              '--resource-group "{rg_12}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace15}"',
              checks=[])
 
@@ -1398,11 +1398,11 @@ def step__sqlpoolsensitivitylabels_delete_deletes_the_sensitivity_label_of_a_giv
                                                                                           rg_4, rg_6, rg_7, rg_8, rg_9,
                                                                                           rg_10, rg_11, rg_12, rg_13,
                                                                                           rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-sensitivity-label delete -y '
+    test.cmd('az synapse sql-pool-sensitivity-label delete -y '
              '--column-name "myColumn" '
              '--resource-group "{rg_11}" '
              '--schema-name "dbo" '
-             '--s-q-l-pool-name "{mySqlPool9}" '
+             '--sql-pool-name "{mySqlPool9}" '
              '--table-name "myTable" '
              '--workspace-name "{myWorkspace13}"',
              checks=[])
@@ -1414,7 +1414,7 @@ def step__workspaceaadadmins_put_create_or_update_workspace_active_directory_adm
                                                                                    rg_6, rg_7, rg_8, rg_9, rg_10,
                                                                                    rg_11, rg_12, rg_13, rg_14, rg_15,
                                                                                    rg_16, rg_17):
-    test.cmd('az synapse workspace-a-a-d-admin create '
+    test.cmd('az synapse workspace-aad-admin create '
              '--administrator-type "ActiveDirectory" '
              '--login "bob@contoso.com" '
              '--sid "c6b82b90-a647-49cb-8a62-0d2d3cb7ac7c" '
@@ -1429,7 +1429,7 @@ def step__workspaceaadadmins_put_create_or_update_workspace_active_directory_adm
 def step__workspaceaadadmins_get_get_workspace_active_directory_admin(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7,
                                                                       rg_8, rg_9, rg_10, rg_11, rg_12, rg_13, rg_14,
                                                                       rg_15, rg_16, rg_17):
-    test.cmd('az synapse workspace-a-a-d-admin show '
+    test.cmd('az synapse workspace-aad-admin show '
              '--resource-group "{rg_2}" '
              '--workspace-name "{myWorkspace2}"',
              checks=[])
@@ -1455,7 +1455,7 @@ def step__workspacemanagedidentitysqlcontrolsettings_put_create_or_update_manage
                                                                                                                 rg_15,
                                                                                                                 rg_16,
                                                                                                                 rg_17):
-    test.cmd('az synapse workspace-managed-identity-s-q-l-control-setting create '
+    test.cmd('az synapse workspace-managed-identity-sql-control-setting create '
              '--resource-group "{rg_2}" '
              '--workspace-name "{myWorkspace2}"',
              checks=[])
@@ -1469,8 +1469,8 @@ def step__workspacemanagedidentitysqlcontrolsettings_get_get_managed_identity_sq
                                                                                                    rg_9, rg_10, rg_11,
                                                                                                    rg_12, rg_13, rg_14,
                                                                                                    rg_15, rg_16,
-                                                                                                   rg_17):
-    test.cmd('az synapse workspace-managed-identity-s-q-l-control-setting show '
+rg_17):
+    test.cmd('az synapse workspace-managed-identity-sql-control-setting show '
              '--resource-group "{rg_2}" '
              '--workspace-name "{myWorkspace2}"',
              checks=[])
@@ -1556,11 +1556,11 @@ def step__sqlpoolvulnerabilityassessmentrulebaselines_delete_removes_a_database_
                                                                                                                           rg_15,
                                                                                                                           rg_16,
                                                                                                                           rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment-rule-baseline delete -y '
+    test.cmd('az synapse sql-pool-vulnerability-assessment-rule-baseline delete -y '
              '--baseline-name "default" '
              '--resource-group "{rg_12}" '
              '--rule-id "VA1001" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace15}"',
              checks=[])
 
@@ -1582,9 +1582,9 @@ def step__sqlpoolvulnerabilityassessments_delete_remove_a_database_s_vulnerabili
                                                                                               rg_8, rg_9, rg_10, rg_11,
                                                                                               rg_12, rg_13, rg_14,
                                                                                               rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool-vulnerability-assessment delete -y '
+    test.cmd('az synapse sql-pool-vulnerability-assessment delete -y '
              '--resource-group "{rg_12}" '
-             '--s-q-l-pool-name "{mySqlPool5}" '
+             '--sql-pool-name "{mySqlPool5}" '
              '--workspace-name "{myWorkspace15}"',
              checks=[])
 
@@ -1593,7 +1593,7 @@ def step__sqlpoolvulnerabilityassessments_delete_remove_a_database_s_vulnerabili
 @try_manual
 def step__sqlpools_delete_delete_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_10,
                                                       rg_11, rg_12, rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse s-q-l-pool delete -y '
+    test.cmd('az synapse sql-pool delete -y '
              '--resource-group "{rg}" '
              '--name "{mySqlPool2}" '
              '--workspace-name "{myWorkspace}"',
@@ -1605,7 +1605,7 @@ def step__sqlpools_delete_delete_a_sql_analytics_pool(test, rg_5, rg, rg_2, rg_3
 def step__workspaceaadadmins_delete_delete_workspace_active_directory_admin(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6,
                                                                             rg_7, rg_8, rg_9, rg_10, rg_11, rg_12,
                                                                             rg_13, rg_14, rg_15, rg_16, rg_17):
-    test.cmd('az synapse workspace-a-a-d-admin delete -y '
+    test.cmd('az synapse workspace-aad-admin delete -y '
              '--resource-group "{rg_2}" '
              '--workspace-name "{myWorkspace2}"',
              checks=[])
@@ -2008,7 +2008,7 @@ def call_scenario(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_1
                                                                                                           rg_12, rg_13,
                                                                                                           rg_14, rg_15,
                                                                                                           rg_16,
-                                                                                                          rg_17)
+    rg_17)
     step__sqlpoolvulnerabilityassessmentscans_post_executes_a_sql_pool_s_vulnerability_assessment_scan_(test, rg_5, rg,
                                                                                                         rg_2, rg_3,
                                                                                                         rg_4, rg_6,
@@ -2136,7 +2136,7 @@ def call_scenario(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_1
                                                                                                    rg_9, rg_10, rg_11,
                                                                                                    rg_12, rg_13, rg_14,
                                                                                                    rg_15, rg_16,
-                                                                                                   rg_17)
+    rg_17)
     step__bigdatapools_delete_delete_a_big_data_pool(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7, rg_8, rg_9, rg_10,
                                                      rg_11, rg_12, rg_13, rg_14, rg_15, rg_16, rg_17)
     step__integrationruntimenodes_delete_delete_integration_runtime_node(test, rg_5, rg, rg_2, rg_3, rg_4, rg_6, rg_7,

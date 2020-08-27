@@ -213,34 +213,34 @@ helps['synapse ip-firewall-rule wait'] = """
 "ExampleIpFirewallRule" --workspace-name "ExampleWorkspace" --deleted
 """
 
-helps['synapse s-q-l-pool'] = """
+helps['synapse sql-pool'] = """
     type: group
-    short-summary: synapse s-q-l-pool
+    short-summary: synapse sql-pool
 """
 
-helps['synapse s-q-l-pool list'] = """
+helps['synapse sql-pool list'] = """
     type: command
     short-summary: "List all SQL pools"
     examples:
       - name: List SQL Analytics pools in a workspace
         text: |-
-               az synapse s-q-l-pool list --resource-group "sqlcrudtest-6845" --workspace-name "sqlcrudtest-7177"
+               az synapse sql-pool list --resource-group "sqlcrudtest-6845" --workspace-name "sqlcrudtest-7177"
       - name: List SQL Analytics pools in a workspace with filter
         text: |-
-               az synapse s-q-l-pool list --resource-group "sqlcrudtest-6845" --workspace-name "sqlcrudtest-7177"
+               az synapse sql-pool list --resource-group "sqlcrudtest-6845" --workspace-name "sqlcrudtest-7177"
 """
 
-helps['synapse s-q-l-pool show'] = """
+helps['synapse sql-pool show'] = """
     type: command
     short-summary: "Get SQL pool properties"
     examples:
       - name: Get a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool show --resource-group "sqlcrudtest-6852" --name "sqlcrudtest-9187" \
---workspace-name "sqlcrudtest-2080"
+               az synapse sql-pool show --resource-group "sqlcrudtest-6852" --name "sqlcrudtest-9187" --workspace-name \
+"sqlcrudtest-2080"
 """
 
-helps['synapse s-q-l-pool create'] = """
+helps['synapse sql-pool create'] = """
     type: command
     short-summary: "Create a SQL pool"
     parameters:
@@ -254,13 +254,13 @@ helps['synapse s-q-l-pool create'] = """
     examples:
       - name: Create a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool create --resource-group "ExampleResourceGroup" --location "West US 2" --collation \
+               az synapse sql-pool create --resource-group "ExampleResourceGroup" --location "West US 2" --collation \
 "" --create-mode "" --creation-date "1970-01-01T00:00:00.000Z" --max-size-bytes 0 --recoverable-database-id "" \
 --restore-point-in-time "1970-01-01T00:00:00.000Z" --source-database-id "" --sku name="" tier="" --name \
 "ExampleSqlPool" --workspace-name "ExampleWorkspace"
 """
 
-helps['synapse s-q-l-pool update'] = """
+helps['synapse sql-pool update'] = """
     type: command
     short-summary: "Apply a partial update to a SQL pool"
     parameters:
@@ -274,439 +274,438 @@ helps['synapse s-q-l-pool update'] = """
     examples:
       - name: Update a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool update --resource-group "ExampleResourceGroup" --location "West US 2" --collation \
+               az synapse sql-pool update --resource-group "ExampleResourceGroup" --location "West US 2" --collation \
 "" --create-mode "" --creation-date "1970-01-01T00:00:00.000Z" --max-size-bytes 0 --recoverable-database-id "" \
 --restore-point-in-time "1970-01-01T00:00:00.000Z" --source-database-id "" --sku name="" tier="" --name \
 "ExampleSqlPool" --workspace-name "ExampleWorkspace"
 """
 
-helps['synapse s-q-l-pool delete'] = """
+helps['synapse sql-pool delete'] = """
     type: command
     short-summary: "Delete a SQL pool"
     examples:
       - name: Delete a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool delete --resource-group "ExampleResourceGroup" --name "ExampleSqlPool" \
+               az synapse sql-pool delete --resource-group "ExampleResourceGroup" --name "ExampleSqlPool" \
 --workspace-name "ExampleWorkspace"
 """
 
-helps['synapse s-q-l-pool pause'] = """
+helps['synapse sql-pool pause'] = """
     type: command
     short-summary: "Pause a SQL pool"
     examples:
       - name: Pause a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool pause --resource-group "Default-SQL-SouthEastAsia" --name "testdwdb" \
+               az synapse sql-pool pause --resource-group "Default-SQL-SouthEastAsia" --name "testdwdb" \
 --workspace-name "testsvr"
 """
 
-helps['synapse s-q-l-pool rename'] = """
+helps['synapse sql-pool rename'] = """
     type: command
     short-summary: "Rename a SQL pool."
     examples:
       - name: Rename a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool rename --id "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/De\
-fault-SQL-SouthEastAsia/providers/Microsoft.Synapse/workspaces/testsvr/sqlPools/newtestdb" --resource-group \
+               az synapse sql-pool rename --id "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/Defa\
+ult-SQL-SouthEastAsia/providers/Microsoft.Synapse/workspaces/testsvr/sqlPools/newtestdb" --resource-group \
 "Default-SQL-SouthEastAsia" --name "testdb" --workspace-name "testsvr"
 """
 
-helps['synapse s-q-l-pool resume'] = """
+helps['synapse sql-pool resume'] = """
     type: command
     short-summary: "Resume a SQL pool"
     examples:
       - name: Resume a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool resume --resource-group "sqlcrudtest-6852" --name "sqlcrudtest-9187" \
+               az synapse sql-pool resume --resource-group "sqlcrudtest-6852" --name "sqlcrudtest-9187" \
 --workspace-name "sqlcrudtest-2080"
 """
 
-helps['synapse s-q-l-pool wait'] = """
+helps['synapse sql-pool wait'] = """
     type: command
-    short-summary: Place the CLI in a waiting state until a condition of the synapse s-q-l-pool is met.
+    short-summary: Place the CLI in a waiting state until a condition of the synapse sql-pool is met.
     examples:
-      - name: Pause executing next line of CLI script until the synapse s-q-l-pool is successfully created.
+      - name: Pause executing next line of CLI script until the synapse sql-pool is successfully created.
         text: |-
-               az synapse s-q-l-pool wait --resource-group "sqlcrudtest-6852" --name "sqlcrudtest-9187" \
---workspace-name "sqlcrudtest-2080" --created
-      - name: Pause executing next line of CLI script until the synapse s-q-l-pool is successfully deleted.
+               az synapse sql-pool wait --resource-group "sqlcrudtest-6852" --name "sqlcrudtest-9187" --workspace-name \
+"sqlcrudtest-2080" --created
+      - name: Pause executing next line of CLI script until the synapse sql-pool is successfully deleted.
         text: |-
-               az synapse s-q-l-pool wait --resource-group "sqlcrudtest-6852" --name "sqlcrudtest-9187" \
---workspace-name "sqlcrudtest-2080" --deleted
+               az synapse sql-pool wait --resource-group "sqlcrudtest-6852" --name "sqlcrudtest-9187" --workspace-name \
+"sqlcrudtest-2080" --deleted
 """
 
-helps['synapse s-q-l-pool-metadata-sync-config'] = """
+helps['synapse sql-pool-metadata-sync-config'] = """
     type: group
-    short-summary: synapse s-q-l-pool-metadata-sync-config
+    short-summary: synapse sql-pool-metadata-sync-config
 """
 
-helps['synapse s-q-l-pool-metadata-sync-config show'] = """
+helps['synapse sql-pool-metadata-sync-config show'] = """
     type: command
     short-summary: "Get the metadata sync configuration for a SQL pool"
     examples:
       - name: Get metadata sync config for a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-metadata-sync-config show --resource-group "ExampleResourceGroup" \
---s-q-l-pool-name "ExampleSqlPool" --workspace-name "ExampleWorkspace"
+               az synapse sql-pool-metadata-sync-config show --resource-group "ExampleResourceGroup" --sql-pool-name \
+"ExampleSqlPool" --workspace-name "ExampleWorkspace"
 """
 
-helps['synapse s-q-l-pool-metadata-sync-config create'] = """
+helps['synapse sql-pool-metadata-sync-config create'] = """
     type: command
     short-summary: "Set the metadata sync configuration for a SQL pool"
     examples:
       - name: Set metadata sync config for a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-metadata-sync-config create --enabled true --resource-group \
-"ExampleResourceGroup" --s-q-l-pool-name "ExampleSqlPool" --workspace-name "ExampleWorkspace"
+               az synapse sql-pool-metadata-sync-config create --enabled true --resource-group "ExampleResourceGroup" \
+--sql-pool-name "ExampleSqlPool" --workspace-name "ExampleWorkspace"
 """
 
-helps['synapse s-q-l-pool-operation-result'] = """
+helps['synapse sql-pool-operation-result'] = """
     type: group
-    short-summary: synapse s-q-l-pool-operation-result
+    short-summary: synapse sql-pool-operation-result
 """
 
-helps['synapse s-q-l-pool-operation-result get-location-header-result'] = """
+helps['synapse sql-pool-operation-result get-location-header-result'] = """
     type: command
     short-summary: "Get the status of a SQL pool operation"
     examples:
       - name: Get the result of an operation on a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-operation-result get-location-header-result --operation-id \
-"fedcba98-7654-4210-fedc-ba9876543210" --resource-group "ExampleResourceGroup" --s-q-l-pool-name "ExampleSqlPool" \
+               az synapse sql-pool-operation-result get-location-header-result --operation-id \
+"fedcba98-7654-4210-fedc-ba9876543210" --resource-group "ExampleResourceGroup" --sql-pool-name "ExampleSqlPool" \
 --workspace-name "ExampleWorkspace"
 """
 
-helps['synapse s-q-l-pool-geo-backup-policy'] = """
+helps['synapse sql-pool-geo-backup-policy'] = """
     type: group
-    short-summary: synapse s-q-l-pool-geo-backup-policy
+    short-summary: synapse sql-pool-geo-backup-policy
 """
 
-helps['synapse s-q-l-pool-geo-backup-policy show'] = """
+helps['synapse sql-pool-geo-backup-policy show'] = """
     type: command
     short-summary: "Get the specified SQL pool geo backup policy"
     examples:
       - name: Get Sql pool geo backup policy
         text: |-
-               az synapse s-q-l-pool-geo-backup-policy show --resource-group "sqlcrudtest-4799" --s-q-l-pool-name \
-"testdw" --workspace-name "sqlcrudtest-5961"
+               az synapse sql-pool-geo-backup-policy show --resource-group "sqlcrudtest-4799" --sql-pool-name "testdw" \
+--workspace-name "sqlcrudtest-5961"
 """
 
-helps['synapse s-q-l-pool-data-warehouse-user-activity'] = """
+helps['synapse sql-pool-data-warehouse-user-activity'] = """
     type: group
-    short-summary: synapse s-q-l-pool-data-warehouse-user-activity
+    short-summary: synapse sql-pool-data-warehouse-user-activity
 """
 
-helps['synapse s-q-l-pool-data-warehouse-user-activity show'] = """
+helps['synapse sql-pool-data-warehouse-user-activity show'] = """
     type: command
     short-summary: "Gets the user activities of a SQL pool which includes running and suspended queries"
     examples:
       - name: Get a SQL Analytics pool user activity
         text: |-
-               az synapse s-q-l-pool-data-warehouse-user-activity show --resource-group "Default-SQL-SouthEastAsia" \
---s-q-l-pool-name "testdb" --workspace-name "testsvr"
+               az synapse sql-pool-data-warehouse-user-activity show --resource-group "Default-SQL-SouthEastAsia" \
+--sql-pool-name "testdb" --workspace-name "testsvr"
 """
 
-helps['synapse s-q-l-pool-restore-point'] = """
+helps['synapse sql-pool-restore-point'] = """
     type: group
-    short-summary: synapse s-q-l-pool-restore-point
+    short-summary: synapse sql-pool-restore-point
 """
 
-helps['synapse s-q-l-pool-restore-point list'] = """
+helps['synapse sql-pool-restore-point list'] = """
     type: command
     short-summary: "Get SQL pool backup information"
     examples:
       - name: Get a list of restore points of a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-restore-point list --resource-group "Default-SQL-SouthEastAsia" --s-q-l-pool-name \
+               az synapse sql-pool-restore-point list --resource-group "Default-SQL-SouthEastAsia" --sql-pool-name \
 "testDatabase" --workspace-name "testserver"
 """
 
-helps['synapse s-q-l-pool-restore-point create'] = """
+helps['synapse sql-pool-restore-point create'] = """
     type: command
     short-summary: "Creates a restore point for a data warehouse."
     examples:
       - name: Creates Sql pool restore point.
         text: |-
-               az synapse s-q-l-pool-restore-point create --restore-point-label "mylabel" --resource-group \
-"Default-SQL-SouthEastAsia" --s-q-l-pool-name "testDatabase" --workspace-name "testserver"
+               az synapse sql-pool-restore-point create --restore-point-label "mylabel" --resource-group \
+"Default-SQL-SouthEastAsia" --sql-pool-name "testDatabase" --workspace-name "testserver"
 """
 
-helps['synapse s-q-l-pool-replication-link'] = """
+helps['synapse sql-pool-replication-link'] = """
     type: group
-    short-summary: synapse s-q-l-pool-replication-link
+    short-summary: synapse sql-pool-replication-link
 """
 
-helps['synapse s-q-l-pool-replication-link list'] = """
+helps['synapse sql-pool-replication-link list'] = """
     type: command
     short-summary: "Lists a Sql pool's replication links."
     examples:
       - name: Lists a Sql Analytic pool's replication links
         text: |-
-               az synapse s-q-l-pool-replication-link list --resource-group "sqlcrudtest-4799" --s-q-l-pool-name \
-"testdb" --workspace-name "sqlcrudtest-6440"
+               az synapse sql-pool-replication-link list --resource-group "sqlcrudtest-4799" --sql-pool-name "testdb" \
+--workspace-name "sqlcrudtest-6440"
 """
 
-helps['synapse s-q-l-pool-transparent-data-encryption'] = """
+helps['synapse sql-pool-transparent-data-encryption'] = """
     type: group
-    short-summary: synapse s-q-l-pool-transparent-data-encryption
+    short-summary: synapse sql-pool-transparent-data-encryption
 """
 
-helps['synapse s-q-l-pool-transparent-data-encryption show'] = """
+helps['synapse sql-pool-transparent-data-encryption show'] = """
     type: command
     short-summary: "Get a SQL pool's transparent data encryption configuration."
     examples:
       - name: Get transparent data encryption configuration of a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-transparent-data-encryption show --resource-group "sqlcrudtest-6852" \
---s-q-l-pool-name "sqlcrudtest-9187" --workspace-name "sqlcrudtest-2080"
+               az synapse sql-pool-transparent-data-encryption show --resource-group "sqlcrudtest-6852" \
+--sql-pool-name "sqlcrudtest-9187" --workspace-name "sqlcrudtest-2080"
 """
 
-helps['synapse s-q-l-pool-transparent-data-encryption create'] = """
+helps['synapse sql-pool-transparent-data-encryption create'] = """
     type: command
     short-summary: "Creates or updates a Sql pool's transparent data encryption configuration."
     examples:
       - name: Create or update a Sql pool's transparent data encryption configuration
         text: |-
-               az synapse s-q-l-pool-transparent-data-encryption create --status "Enabled" --resource-group \
-"sqlcrudtest-6852" --s-q-l-pool-name "sqlcrudtest-9187" --workspace-name "sqlcrudtest-2080"
+               az synapse sql-pool-transparent-data-encryption create --status "Enabled" --resource-group \
+"sqlcrudtest-6852" --sql-pool-name "sqlcrudtest-9187" --workspace-name "sqlcrudtest-2080"
 """
 
-helps['synapse s-q-l-pool-transparent-data-encryption update'] = """
+helps['synapse sql-pool-transparent-data-encryption update'] = """
     type: command
     short-summary: "Creates or updates a Sql pool's transparent data encryption configuration."
 """
 
-helps['synapse s-q-l-pool-blob-auditing-policy'] = """
+helps['synapse sql-pool-blob-auditing-policy'] = """
     type: group
-    short-summary: synapse s-q-l-pool-blob-auditing-policy
+    short-summary: synapse sql-pool-blob-auditing-policy
 """
 
-helps['synapse s-q-l-pool-blob-auditing-policy show'] = """
+helps['synapse sql-pool-blob-auditing-policy show'] = """
     type: command
     short-summary: "Get a SQL pool's blob auditing policy."
     examples:
       - name: Get blob auditing policy of a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-blob-auditing-policy show --resource-group "blobauditingtest-6852" \
---s-q-l-pool-name "testdb" --workspace-name "blobauditingtest-2080"
+               az synapse sql-pool-blob-auditing-policy show --resource-group "blobauditingtest-6852" --sql-pool-name \
+"testdb" --workspace-name "blobauditingtest-2080"
 """
 
-helps['synapse s-q-l-pool-blob-auditing-policy create'] = """
+helps['synapse sql-pool-blob-auditing-policy create'] = """
     type: command
     short-summary: "Creates or updates a SQL pool's blob auditing policy."
     examples:
       - name: Create or update a database's blob auditing policy with all parameters
         text: |-
-               az synapse s-q-l-pool-blob-auditing-policy create --audit-actions-and-groups "DATABASE_LOGOUT_GROUP" \
+               az synapse sql-pool-blob-auditing-policy create --audit-actions-and-groups "DATABASE_LOGOUT_GROUP" \
 --audit-actions-and-groups "DATABASE_ROLE_MEMBER_CHANGE_GROUP" --audit-actions-and-groups "UPDATE on \
 database::TestDatabaseName by public" --is-azure-monitor-target-enabled true --is-storage-secondary-key-in-use false \
 --retention-days 6 --state "Enabled" --storage-account-access-key "sdlfkjabc+sdlfkjsdlkfsjdfLDKFTERLKFDFKLjsdfksjdflsdk\
 fD2342309432849328476458/3RSD==" --storage-account-subscription-id "00000000-1234-0000-5678-000000000000" \
---storage-endpoint "https://mystorage.blob.core.windows.net" --resource-group "blobauditingtest-4799" \
---s-q-l-pool-name "testdb" --workspace-name "blobauditingtest-6440"
+--storage-endpoint "https://mystorage.blob.core.windows.net" --resource-group "blobauditingtest-4799" --sql-pool-name \
+"testdb" --workspace-name "blobauditingtest-6440"
       - name: Create or update a database's blob auditing policy with minimal parameters
         text: |-
-               az synapse s-q-l-pool-blob-auditing-policy create --state "Enabled" --storage-account-access-key \
+               az synapse sql-pool-blob-auditing-policy create --state "Enabled" --storage-account-access-key \
 "sdlfkjabc+sdlfkjsdlkfsjdfLDKFTERLKFDFKLjsdfksjdflsdkfD2342309432849328476458/3RSD==" --storage-endpoint \
-"https://mystorage.blob.core.windows.net" --resource-group "blobauditingtest-4799" --s-q-l-pool-name "testdb" \
+"https://mystorage.blob.core.windows.net" --resource-group "blobauditingtest-4799" --sql-pool-name "testdb" \
 --workspace-name "blobauditingtest-6440"
 """
 
-helps['synapse s-q-l-pool-blob-auditing-policy update'] = """
+helps['synapse sql-pool-blob-auditing-policy update'] = """
     type: command
     short-summary: "Creates or updates a SQL pool's blob auditing policy."
 """
 
-helps['synapse s-q-l-pool-operation'] = """
+helps['synapse sql-pool-operation'] = """
     type: group
-    short-summary: synapse s-q-l-pool-operation
+    short-summary: synapse sql-pool-operation
 """
 
-helps['synapse s-q-l-pool-operation list'] = """
+helps['synapse sql-pool-operation list'] = """
     type: command
     short-summary: "Gets a list of operations performed on the SQL pool."
     examples:
       - name: List the Sql Analytics pool management operations
         text: |-
-               az synapse s-q-l-pool-operation list --resource-group "sqlcrudtest-7398" --s-q-l-pool-name "testdb" \
+               az synapse sql-pool-operation list --resource-group "sqlcrudtest-7398" --sql-pool-name "testdb" \
 --workspace-name "sqlcrudtest-4645"
 """
 
-helps['synapse s-q-l-pool-usage'] = """
+helps['synapse sql-pool-usage'] = """
     type: group
-    short-summary: synapse s-q-l-pool-usage
+    short-summary: synapse sql-pool-usage
 """
 
-helps['synapse s-q-l-pool-usage list'] = """
+helps['synapse sql-pool-usage list'] = """
     type: command
     short-summary: "Gets SQL pool usages."
     examples:
       - name: List the usages of a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-usage list --resource-group "sqlcrudtest-6730" --s-q-l-pool-name "3481" \
+               az synapse sql-pool-usage list --resource-group "sqlcrudtest-6730" --sql-pool-name "3481" \
 --workspace-name "sqlcrudtest-9007"
 """
 
-helps['synapse s-q-l-pool-sensitivity-label'] = """
+helps['synapse sql-pool-sensitivity-label'] = """
     type: group
-    short-summary: synapse s-q-l-pool-sensitivity-label
+    short-summary: synapse sql-pool-sensitivity-label
 """
 
-helps['synapse s-q-l-pool-sensitivity-label create'] = """
+helps['synapse sql-pool-sensitivity-label create'] = """
     type: command
     short-summary: "Creates or updates the sensitivity label of a given column in a Sql pool"
     examples:
       - name: Updates the sensitivity label of a given column with all parameters
         text: |-
-               az synapse s-q-l-pool-sensitivity-label create --column-name "myColumn" --information-type \
-"PhoneNumber" --information-type-id "d22fa6e9-5ee4-3bde-4c2b-a409604c4646" --label-id "bf91e08c-f4f0-478a-b016-25164b2a\
-65ff" --label-name "PII" --resource-group "myRG" --schema-name "dbo" --s-q-l-pool-name "myDatabase" --table-name \
-"myTable" --workspace-name "myServer"
+               az synapse sql-pool-sensitivity-label create --column-name "myColumn" --information-type "PhoneNumber" \
+--information-type-id "d22fa6e9-5ee4-3bde-4c2b-a409604c4646" --label-id "bf91e08c-f4f0-478a-b016-25164b2a65ff" \
+--label-name "PII" --resource-group "myRG" --schema-name "dbo" --sql-pool-name "myDatabase" --table-name "myTable" \
+--workspace-name "myServer"
 """
 
-helps['synapse s-q-l-pool-sensitivity-label update'] = """
+helps['synapse sql-pool-sensitivity-label update'] = """
     type: command
     short-summary: "Creates or updates the sensitivity label of a given column in a Sql pool"
 """
 
-helps['synapse s-q-l-pool-sensitivity-label delete'] = """
+helps['synapse sql-pool-sensitivity-label delete'] = """
     type: command
     short-summary: "Deletes the sensitivity label of a given column in a Sql pool"
     examples:
       - name: Deletes the sensitivity label of a given column
         text: |-
-               az synapse s-q-l-pool-sensitivity-label delete --column-name "myColumn" --resource-group "myRG" \
---schema-name "dbo" --s-q-l-pool-name "myDatabase" --table-name "myTable" --workspace-name "myServer"
+               az synapse sql-pool-sensitivity-label delete --column-name "myColumn" --resource-group "myRG" \
+--schema-name "dbo" --sql-pool-name "myDatabase" --table-name "myTable" --workspace-name "myServer"
 """
 
-helps['synapse s-q-l-pool-sensitivity-label disable-recommendation'] = """
+helps['synapse sql-pool-sensitivity-label disable-recommendation'] = """
     type: command
     short-summary: "Disables sensitivity recommendations on a given column"
     examples:
       - name: Disables sensitivity recommendations on a given column
         text: |-
-               az synapse s-q-l-pool-sensitivity-label disable-recommendation --column-name "myColumn" \
---resource-group "myRG" --schema-name "dbo" --s-q-l-pool-name "myDatabase" --table-name "myTable" --workspace-name \
-"myServer"
+               az synapse sql-pool-sensitivity-label disable-recommendation --column-name "myColumn" --resource-group \
+"myRG" --schema-name "dbo" --sql-pool-name "myDatabase" --table-name "myTable" --workspace-name "myServer"
 """
 
-helps['synapse s-q-l-pool-sensitivity-label enable-recommendation'] = """
+helps['synapse sql-pool-sensitivity-label enable-recommendation'] = """
     type: command
     short-summary: "Enables sensitivity recommendations on a given column (recommendations are enabled by default on \
 all columns)"
     examples:
       - name: Enables sensitivity recommendations on a given column
         text: |-
-               az synapse s-q-l-pool-sensitivity-label enable-recommendation --column-name "myColumn" --resource-group \
-"myRG" --schema-name "dbo" --s-q-l-pool-name "myDatabase" --table-name "myTable" --workspace-name "myServer"
+               az synapse sql-pool-sensitivity-label enable-recommendation --column-name "myColumn" --resource-group \
+"myRG" --schema-name "dbo" --sql-pool-name "myDatabase" --table-name "myTable" --workspace-name "myServer"
 """
 
-helps['synapse s-q-l-pool-sensitivity-label list-current'] = """
+helps['synapse sql-pool-sensitivity-label list-current'] = """
     type: command
     short-summary: "Gets SQL pool sensitivity labels."
     examples:
       - name: Gets the current sensitivity labels of a given SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-sensitivity-label list-current --resource-group "myRG" --s-q-l-pool-name \
-"myDatabase" --workspace-name "myServer"
+               az synapse sql-pool-sensitivity-label list-current --resource-group "myRG" --sql-pool-name "myDatabase" \
+--workspace-name "myServer"
 """
 
-helps['synapse s-q-l-pool-sensitivity-label list-recommended'] = """
+helps['synapse sql-pool-sensitivity-label list-recommended'] = """
     type: command
     short-summary: "Gets sensitivity labels of a given SQL pool."
     examples:
       - name: Gets the recommended sensitivity labels of a given SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-sensitivity-label list-recommended --resource-group "myRG" --s-q-l-pool-name \
+               az synapse sql-pool-sensitivity-label list-recommended --resource-group "myRG" --sql-pool-name \
 "myDatabase" --workspace-name "myServer"
 """
 
-helps['synapse s-q-l-pool-schema'] = """
+helps['synapse sql-pool-schema'] = """
     type: group
-    short-summary: synapse s-q-l-pool-schema
+    short-summary: synapse sql-pool-schema
 """
 
-helps['synapse s-q-l-pool-schema list'] = """
+helps['synapse sql-pool-schema list'] = """
     type: command
     short-summary: "Gets schemas of a given SQL pool."
     examples:
       - name: List the schema in a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-schema list --resource-group "myRG" --s-q-l-pool-name "myDatabase" \
---workspace-name "serverName"
+               az synapse sql-pool-schema list --resource-group "myRG" --sql-pool-name "myDatabase" --workspace-name \
+"serverName"
 """
 
-helps['synapse s-q-l-pool-table'] = """
+helps['synapse sql-pool-table'] = """
     type: group
-    short-summary: synapse s-q-l-pool-table
+    short-summary: synapse sql-pool-table
 """
 
-helps['synapse s-q-l-pool-table list'] = """
+helps['synapse sql-pool-table list'] = """
     type: command
     short-summary: "Gets tables of a given schema in a SQL pool."
     examples:
       - name: List the tables of a given schema in a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-table list --resource-group "myRG" --schema-name "dbo" --s-q-l-pool-name \
-"myDatabase" --workspace-name "serverName"
+               az synapse sql-pool-table list --resource-group "myRG" --schema-name "dbo" --sql-pool-name "myDatabase" \
+--workspace-name "serverName"
 """
 
-helps['synapse s-q-l-pool-table-column'] = """
+helps['synapse sql-pool-table-column'] = """
     type: group
-    short-summary: synapse s-q-l-pool-table-column
+    short-summary: synapse sql-pool-table-column
 """
 
-helps['synapse s-q-l-pool-table-column list'] = """
+helps['synapse sql-pool-table-column list'] = """
     type: command
     short-summary: "Gets columns in a given table in a SQL pool."
     examples:
       - name: List the columns in a table of a given schema in a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-table-column list --resource-group "myRG" --schema-name "dbo" --s-q-l-pool-name \
+               az synapse sql-pool-table-column list --resource-group "myRG" --schema-name "dbo" --sql-pool-name \
 "myDatabase" --table-name "table1" --workspace-name "serverName"
 """
 
-helps['synapse s-q-l-pool-connection-policy'] = """
+helps['synapse sql-pool-connection-policy'] = """
     type: group
-    short-summary: synapse s-q-l-pool-connection-policy
+    short-summary: synapse sql-pool-connection-policy
 """
 
-helps['synapse s-q-l-pool-connection-policy show'] = """
+helps['synapse sql-pool-connection-policy show'] = """
     type: command
     short-summary: "Get a Sql pool's connection policy, which is used with table auditing."
     examples:
       - name: Get a connection policy of a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-connection-policy show --resource-group "blobauditingtest-6852" --s-q-l-pool-name \
+               az synapse sql-pool-connection-policy show --resource-group "blobauditingtest-6852" --sql-pool-name \
 "testdb" --workspace-name "blobauditingtest-2080"
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment'] = """
+helps['synapse sql-pool-vulnerability-assessment'] = """
     type: group
-    short-summary: synapse s-q-l-pool-vulnerability-assessment
+    short-summary: synapse sql-pool-vulnerability-assessment
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment list'] = """
+helps['synapse sql-pool-vulnerability-assessment list'] = """
     type: command
     short-summary: "Lists the vulnerability assessment policies associated with a SQL pool."
     examples:
       - name: Get a vulnerability assessment of a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment list --resource-group "vulnerabilityaseessmenttest-4799" \
---s-q-l-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
+               az synapse sql-pool-vulnerability-assessment list --resource-group "vulnerabilityaseessmenttest-4799" \
+--sql-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment show'] = """
+helps['synapse sql-pool-vulnerability-assessment show'] = """
     type: command
     short-summary: "Gets the Sql pool's vulnerability assessment."
     examples:
       - name: Get a Sql pool's vulnerability assessment
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment show --resource-group "vulnerabilityaseessmenttest-4799" \
---s-q-l-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
+               az synapse sql-pool-vulnerability-assessment show --resource-group "vulnerabilityaseessmenttest-4799" \
+--sql-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment create'] = """
+helps['synapse sql-pool-vulnerability-assessment create'] = """
     type: command
     short-summary: "Creates or updates the Sql pool vulnerability assessment."
     parameters:
@@ -722,27 +721,27 @@ subscription administrators.
     examples:
       - name: Create a database's vulnerability assessment with all parameters
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment create --recurring-scans email-subscription-admins=true \
+               az synapse sql-pool-vulnerability-assessment create --recurring-scans email-subscription-admins=true \
 emails="email1@mail.com" emails="email2@mail.com" is-enabled=true --storage-account-access-key \
 "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" --storage-container-path "https://myStorage.blob.core.window\
 s.net/vulnerability-assessment/" --storage-container-sas-key "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"\
- --resource-group "vulnerabilityaseessmenttest-4799" --s-q-l-pool-name "testdb" --workspace-name \
+ --resource-group "vulnerabilityaseessmenttest-4799" --sql-pool-name "testdb" --workspace-name \
 "vulnerabilityaseessmenttest-6440"
       - name: Create a database's vulnerability assessment with minimal parameters, when storageAccountAccessKey is specified
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment create --storage-account-access-key \
+               az synapse sql-pool-vulnerability-assessment create --storage-account-access-key \
 "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" --storage-container-path "https://myStorage.blob.core.window\
-s.net/vulnerability-assessment/" --resource-group "vulnerabilityaseessmenttest-4799" --s-q-l-pool-name "testdb" \
+s.net/vulnerability-assessment/" --resource-group "vulnerabilityaseessmenttest-4799" --sql-pool-name "testdb" \
 --workspace-name "vulnerabilityaseessmenttest-6440"
       - name: Create a database's vulnerability assessment with minimal parameters, when storageContainerSasKey is specified
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment create --storage-container-path \
+               az synapse sql-pool-vulnerability-assessment create --storage-container-path \
 "https://myStorage.blob.core.windows.net/vulnerability-assessment/" --storage-container-sas-key \
 "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" --resource-group "vulnerabilityaseessmenttest-4799" \
---s-q-l-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
+--sql-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment update'] = """
+helps['synapse sql-pool-vulnerability-assessment update'] = """
     type: command
     short-summary: "Creates or updates the Sql pool vulnerability assessment."
     parameters:
@@ -757,96 +756,96 @@ subscription administrators.
             emails: Specifies an array of e-mail addresses to which the scan notification is sent.
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment delete'] = """
+helps['synapse sql-pool-vulnerability-assessment delete'] = """
     type: command
     short-summary: "Removes the database's vulnerability assessment."
     examples:
       - name: Remove a database's vulnerability assessment
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment delete --resource-group "vulnerabilityaseessmenttest-4799\
-" --s-q-l-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
+               az synapse sql-pool-vulnerability-assessment delete --resource-group "vulnerabilityaseessmenttest-4799" \
+--sql-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment-scan'] = """
+helps['synapse sql-pool-vulnerability-assessment-scan'] = """
     type: group
-    short-summary: synapse s-q-l-pool-vulnerability-assessment-scan
+    short-summary: synapse sql-pool-vulnerability-assessment-scan
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment-scan list'] = """
+helps['synapse sql-pool-vulnerability-assessment-scan list'] = """
     type: command
     short-summary: "Lists the vulnerability assessment scans of a SQL pool."
     examples:
       - name: Get a vulnerability scan record of a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment-scan list --resource-group \
-"vulnerabilityassessmenttest-4711" --s-q-l-pool-name "testdb" --workspace-name "vulnerabilityassessmenttest-6411"
+               az synapse sql-pool-vulnerability-assessment-scan list --resource-group "vulnerabilityassessmenttest-471\
+1" --sql-pool-name "testdb" --workspace-name "vulnerabilityassessmenttest-6411"
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment-scan export'] = """
+helps['synapse sql-pool-vulnerability-assessment-scan export'] = """
     type: command
     short-summary: "Convert an existing scan result to a human readable format. If already exists nothing happens"
     examples:
       - name: Export a database's vulnerability assessment scan results.
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment-scan export --resource-group \
-"vulnerabilityassessmenttest-4799" --scan-id "scan001" --s-q-l-pool-name "testdb" --workspace-name \
+               az synapse sql-pool-vulnerability-assessment-scan export --resource-group \
+"vulnerabilityassessmenttest-4799" --scan-id "scan001" --sql-pool-name "testdb" --workspace-name \
 "vulnerabilityassessmenttest-6440"
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment-scan initiate-scan'] = """
+helps['synapse sql-pool-vulnerability-assessment-scan initiate-scan'] = """
     type: command
     short-summary: "Executes a Vulnerability Assessment database scan."
     examples:
       - name: Executes a Sql pool's vulnerability assessment scan.
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment-scan initiate-scan --resource-group \
-"vulnerabilityassessmenttest-4711" --scan-id "scan01" --s-q-l-pool-name "testdb" --workspace-name \
+               az synapse sql-pool-vulnerability-assessment-scan initiate-scan --resource-group \
+"vulnerabilityassessmenttest-4711" --scan-id "scan01" --sql-pool-name "testdb" --workspace-name \
 "vulnerabilityassessmenttest-6411"
 """
 
-helps['synapse s-q-l-pool-security-alert-policy'] = """
+helps['synapse sql-pool-security-alert-policy'] = """
     type: group
-    short-summary: synapse s-q-l-pool-security-alert-policy
+    short-summary: synapse sql-pool-security-alert-policy
 """
 
-helps['synapse s-q-l-pool-security-alert-policy show'] = """
+helps['synapse sql-pool-security-alert-policy show'] = """
     type: command
     short-summary: "Get a Sql pool's security alert policy."
     examples:
       - name: Get a security alert of a SQL Analytics pool
         text: |-
-               az synapse s-q-l-pool-security-alert-policy show --resource-group "securityalert-6852" \
---s-q-l-pool-name "testdb" --workspace-name "securityalert-2080"
+               az synapse sql-pool-security-alert-policy show --resource-group "securityalert-6852" --sql-pool-name \
+"testdb" --workspace-name "securityalert-2080"
 """
 
-helps['synapse s-q-l-pool-security-alert-policy create'] = """
+helps['synapse sql-pool-security-alert-policy create'] = """
     type: command
     short-summary: "Create or update a Sql pool's security alert policy."
     examples:
       - name: Update a Sql pool's threat detection policy with all parameters
         text: |-
-               az synapse s-q-l-pool-security-alert-policy create --disabled-alerts "Sql_Injection" --disabled-alerts \
+               az synapse sql-pool-security-alert-policy create --disabled-alerts "Sql_Injection" --disabled-alerts \
 "Usage_Anomaly" --email-account-admins true --email-addresses "test@microsoft.com" --email-addresses \
 "user@microsoft.com" --retention-days 6 --state "Enabled" --storage-account-access-key "sdlfkjabc+sdlfkjsdlkfsjdfLDKFTE\
 RLKFDFKLjsdfksjdflsdkfD2342309432849328476458/3RSD==" --storage-endpoint "https://mystorage.blob.core.windows.net" \
---resource-group "securityalert-4799" --s-q-l-pool-name "testdb" --workspace-name "securityalert-6440"
+--resource-group "securityalert-4799" --sql-pool-name "testdb" --workspace-name "securityalert-6440"
       - name: Update a Sql pool's threat detection policy with minimal parameters
         text: |-
-               az synapse s-q-l-pool-security-alert-policy create --state "Enabled" --resource-group \
-"securityalert-4799" --s-q-l-pool-name "testdb" --workspace-name "securityalert-6440"
+               az synapse sql-pool-security-alert-policy create --state "Enabled" --resource-group \
+"securityalert-4799" --sql-pool-name "testdb" --workspace-name "securityalert-6440"
 """
 
-helps['synapse s-q-l-pool-security-alert-policy update'] = """
+helps['synapse sql-pool-security-alert-policy update'] = """
     type: command
     short-summary: "Create or update a Sql pool's security alert policy."
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment-rule-baseline'] = """
+helps['synapse sql-pool-vulnerability-assessment-rule-baseline'] = """
     type: group
-    short-summary: synapse s-q-l-pool-vulnerability-assessment-rule-baseline
+    short-summary: synapse sql-pool-vulnerability-assessment-rule-baseline
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment-rule-baseline create'] = """
+helps['synapse sql-pool-vulnerability-assessment-rule-baseline create'] = """
     type: command
     short-summary: "Creates or updates a Sql pool's vulnerability assessment rule baseline."
     parameters:
@@ -861,13 +860,13 @@ helps['synapse s-q-l-pool-vulnerability-assessment-rule-baseline create'] = """
     examples:
       - name: Creates or updates a database's vulnerability assessment rule baseline.
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment-rule-baseline create --baseline-name "default" \
+               az synapse sql-pool-vulnerability-assessment-rule-baseline create --baseline-name "default" \
 --baseline-results result="userA" result="SELECT" --baseline-results result="userB" result="SELECT" --baseline-results \
 result="userC" result="SELECT" result="tableId_4" --resource-group "vulnerabilityaseessmenttest-4799" --rule-id \
-"VA1001" --s-q-l-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
+"VA1001" --sql-pool-name "testdb" --workspace-name "vulnerabilityaseessmenttest-6440"
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment-rule-baseline update'] = """
+helps['synapse sql-pool-vulnerability-assessment-rule-baseline update'] = """
     type: command
     short-summary: "Creates or updates a Sql pool's vulnerability assessment rule baseline."
     parameters:
@@ -881,14 +880,14 @@ helps['synapse s-q-l-pool-vulnerability-assessment-rule-baseline update'] = """
             Multiple actions can be specified by using more than one --baseline-results argument.
 """
 
-helps['synapse s-q-l-pool-vulnerability-assessment-rule-baseline delete'] = """
+helps['synapse sql-pool-vulnerability-assessment-rule-baseline delete'] = """
     type: command
     short-summary: "Removes the database's vulnerability assessment rule baseline."
     examples:
       - name: Removes a database's vulnerability assessment rule baseline.
         text: |-
-               az synapse s-q-l-pool-vulnerability-assessment-rule-baseline delete --baseline-name "default" \
---resource-group "vulnerabilityaseessmenttest-4799" --rule-id "VA1001" --s-q-l-pool-name "testdb" --workspace-name \
+               az synapse sql-pool-vulnerability-assessment-rule-baseline delete --baseline-name "default" \
+--resource-group "vulnerabilityaseessmenttest-4799" --rule-id "VA1001" --sql-pool-name "testdb" --workspace-name \
 "vulnerabilityaseessmenttest-6440"
 """
 
@@ -979,89 +978,89 @@ helps['synapse workspace wait'] = """
                az synapse workspace wait --resource-group "resourceGroup1" --name "workspace1" --deleted
 """
 
-helps['synapse workspace-a-a-d-admin'] = """
+helps['synapse workspace-aad-admin'] = """
     type: group
-    short-summary: synapse workspace-a-a-d-admin
+    short-summary: synapse workspace-aad-admin
 """
 
-helps['synapse workspace-a-a-d-admin show'] = """
+helps['synapse workspace-aad-admin show'] = """
     type: command
     short-summary: "Gets a workspace active directory admin"
     examples:
       - name: Get workspace active directory admin
         text: |-
-               az synapse workspace-a-a-d-admin show --resource-group "resourceGroup1" --workspace-name "workspace1"
+               az synapse workspace-aad-admin show --resource-group "resourceGroup1" --workspace-name "workspace1"
 """
 
-helps['synapse workspace-a-a-d-admin create'] = """
+helps['synapse workspace-aad-admin create'] = """
     type: command
     short-summary: "Creates or updates a workspace active directory admin"
     examples:
       - name: Create or update workspace active directory admin
         text: |-
-               az synapse workspace-a-a-d-admin create --administrator-type "ActiveDirectory" --login \
-"bob@contoso.com" --sid "c6b82b90-a647-49cb-8a62-0d2d3cb7ac7c" --tenant-id "c6b82b90-a647-49cb-8a62-0d2d3cb7ac7c" \
---resource-group "resourceGroup1" --workspace-name "workspace1"
+               az synapse workspace-aad-admin create --administrator-type "ActiveDirectory" --login "bob@contoso.com" \
+--sid "c6b82b90-a647-49cb-8a62-0d2d3cb7ac7c" --tenant-id "c6b82b90-a647-49cb-8a62-0d2d3cb7ac7c" --resource-group \
+"resourceGroup1" --workspace-name "workspace1"
 """
 
-helps['synapse workspace-a-a-d-admin update'] = """
+helps['synapse workspace-aad-admin update'] = """
     type: command
     short-summary: "Creates or updates a workspace active directory admin"
 """
 
-helps['synapse workspace-a-a-d-admin delete'] = """
+helps['synapse workspace-aad-admin delete'] = """
     type: command
     short-summary: "Deletes a workspace active directory admin"
     examples:
       - name: Delete workspace active directory admin
         text: |-
-               az synapse workspace-a-a-d-admin delete --resource-group "resourceGroup1" --workspace-name "workspace1"
+               az synapse workspace-aad-admin delete --resource-group "resourceGroup1" --workspace-name "workspace1"
 """
 
-helps['synapse workspace-a-a-d-admin wait'] = """
+helps['synapse workspace-aad-admin wait'] = """
     type: command
-    short-summary: Place the CLI in a waiting state until a condition of the synapse workspace-a-a-d-admin is met.
+    short-summary: Place the CLI in a waiting state until a condition of the synapse workspace-aad-admin is met.
     examples:
-      - name: Pause executing next line of CLI script until the synapse workspace-a-a-d-admin is successfully created.
+      - name: Pause executing next line of CLI script until the synapse workspace-aad-admin is successfully created.
         text: |-
-               az synapse workspace-a-a-d-admin wait --resource-group "resourceGroup1" --workspace-name "workspace1" \
+               az synapse workspace-aad-admin wait --resource-group "resourceGroup1" --workspace-name "workspace1" \
 --created
-      - name: Pause executing next line of CLI script until the synapse workspace-a-a-d-admin is successfully updated.
+      - name: Pause executing next line of CLI script until the synapse workspace-aad-admin is successfully updated.
         text: |-
-               az synapse workspace-a-a-d-admin wait --resource-group "resourceGroup1" --workspace-name "workspace1" \
+               az synapse workspace-aad-admin wait --resource-group "resourceGroup1" --workspace-name "workspace1" \
 --updated
-      - name: Pause executing next line of CLI script until the synapse workspace-a-a-d-admin is successfully deleted.
+      - name: Pause executing next line of CLI script until the synapse workspace-aad-admin is successfully deleted.
         text: |-
-               az synapse workspace-a-a-d-admin wait --resource-group "resourceGroup1" --workspace-name "workspace1" \
+               az synapse workspace-aad-admin wait --resource-group "resourceGroup1" --workspace-name "workspace1" \
 --deleted
 """
 
-helps['synapse workspace-managed-identity-s-q-l-control-setting'] = """
+helps['synapse workspace-managed-identity-sql-control-setting'] = """
     type: group
-    short-summary: synapse workspace-managed-identity-s-q-l-control-setting
+    short-summary: synapse workspace-managed-identity-sql-control-setting
 """
 
-helps['synapse workspace-managed-identity-s-q-l-control-setting show'] = """
+helps['synapse workspace-managed-identity-sql-control-setting show'] = """
     type: command
     short-summary: "Get Managed Identity Sql Control Settings"
     examples:
       - name: Get managed identity sql control settings
         text: |-
-               az synapse workspace-managed-identity-s-q-l-control-setting show --resource-group "resourceGroup1" \
+               az synapse workspace-managed-identity-sql-control-setting show --resource-group "resourceGroup1" \
 --workspace-name "workspace1"
 """
 
-helps['synapse workspace-managed-identity-s-q-l-control-setting create'] = """
+helps['synapse workspace-managed-identity-sql-control-setting create'] = """
     type: command
     short-summary: "Create or update Managed Identity Sql Control Settings"
     examples:
       - name: Create or update managed identity sql control settings
         text: |-
-               az synapse workspace-managed-identity-s-q-l-control-setting create --resource-group "resourceGroup1" \
+               az synapse workspace-managed-identity-sql-control-setting create --resource-group "resourceGroup1" \
 --workspace-name "workspace1"
 """
 
-helps['synapse workspace-managed-identity-s-q-l-control-setting update'] = """
+helps['synapse workspace-managed-identity-sql-control-setting update'] = """
     type: command
     short-summary: "Create or update Managed Identity Sql Control Settings"
 """

@@ -9,7 +9,6 @@
 # --------------------------------------------------------------------------
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
-# pylint: disable=unused-argument
 
 from azure.cli.core.util import sdk_no_wait
 
@@ -147,14 +146,20 @@ def synapse_ip_firewall_rule_create(client,
                        start_ip_address=start_ip_address)
 
 
-def synapse_ip_firewall_rule_update(instance,
+def synapse_ip_firewall_rule_update(client,
                                     resource_group_name,
                                     workspace_name,
                                     rule_name,
                                     end_ip_address=None,
                                     start_ip_address=None,
                                     no_wait=False):
-    return instance
+    return sdk_no_wait(no_wait,
+                       client.create_or_update,
+                       resource_group_name=resource_group_name,
+                       workspace_name=workspace_name,
+                       rule_name=rule_name,
+                       end_ip_address=end_ip_address,
+                       start_ip_address=start_ip_address)
 
 
 def synapse_ip_firewall_rule_delete(client,
@@ -181,39 +186,39 @@ def synapse_ip_firewall_rule_replace_all(client,
                        ip_firewall_rules=ip_firewall_rules)
 
 
-def synapse_s_q_l_pool_list(client,
-                            resource_group_name,
-                            workspace_name):
+def synapse_sql_pool_list(client,
+                          resource_group_name,
+                          workspace_name):
     return client.list_by_workspace(resource_group_name=resource_group_name,
                                     workspace_name=workspace_name)
 
 
-def synapse_s_q_l_pool_show(client,
-                            resource_group_name,
-                            workspace_name,
-                            s_q_l_pool_name):
+def synapse_sql_pool_show(client,
+                          resource_group_name,
+                          workspace_name,
+                          sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name)
+                      sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_create(client,
-                              resource_group_name,
-                              workspace_name,
-                              s_q_l_pool_name,
-                              location,
-                              tags=None,
-                              sku=None,
-                              max_size_bytes=None,
-                              collation=None,
-                              source_database_id=None,
-                              recoverable_database_id=None,
-                              provisioning_state=None,
-                              status=None,
-                              restore_point_in_time=None,
-                              create_mode=None,
-                              creation_date=None,
-                              no_wait=False):
+def synapse_sql_pool_create(client,
+                            resource_group_name,
+                            workspace_name,
+                            sql_pool_name,
+                            location,
+                            tags=None,
+                            sku=None,
+                            max_size_bytes=None,
+                            collation=None,
+                            source_database_id=None,
+                            recoverable_database_id=None,
+                            provisioning_state=None,
+                            status=None,
+                            restore_point_in_time=None,
+                            create_mode=None,
+                            creation_date=None,
+                            no_wait=False):
     sql_pool_info = {}
     sql_pool_info['tags'] = tags
     sql_pool_info['location'] = location
@@ -231,26 +236,26 @@ def synapse_s_q_l_pool_create(client,
                        client.create,
                        resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name,
+                       sql_pool_name=sql_pool_name,
                        sql_pool_info=sql_pool_info)
 
 
-def synapse_s_q_l_pool_update(client,
-                              resource_group_name,
-                              workspace_name,
-                              s_q_l_pool_name,
-                              tags=None,
-                              location=None,
-                              sku=None,
-                              max_size_bytes=None,
-                              collation=None,
-                              source_database_id=None,
-                              recoverable_database_id=None,
-                              provisioning_state=None,
-                              status=None,
-                              restore_point_in_time=None,
-                              create_mode=None,
-                              creation_date=None):
+def synapse_sql_pool_update(client,
+                            resource_group_name,
+                            workspace_name,
+                            sql_pool_name,
+                            tags=None,
+                            location=None,
+                            sku=None,
+                            max_size_bytes=None,
+                            collation=None,
+                            source_database_id=None,
+                            recoverable_database_id=None,
+                            provisioning_state=None,
+                            status=None,
+                            restore_point_in_time=None,
+                            create_mode=None,
+                            creation_date=None):
     sql_pool_info = {}
     sql_pool_info['tags'] = tags
     sql_pool_info['location'] = location
@@ -266,188 +271,192 @@ def synapse_s_q_l_pool_update(client,
     sql_pool_info['creation_date'] = creation_date
     return client.update(resource_group_name=resource_group_name,
                          workspace_name=workspace_name,
-                         sql_pool_name=s_q_l_pool_name,
+                         sql_pool_name=sql_pool_name,
                          sql_pool_info=sql_pool_info)
 
 
-def synapse_s_q_l_pool_delete(client,
-                              resource_group_name,
-                              workspace_name,
-                              s_q_l_pool_name,
-                              no_wait=False):
+def synapse_sql_pool_delete(client,
+                            resource_group_name,
+                            workspace_name,
+                            sql_pool_name,
+                            no_wait=False):
     return sdk_no_wait(no_wait,
                        client.delete,
                        resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name)
+                       sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_pause(client,
-                             resource_group_name,
-                             workspace_name,
-                             s_q_l_pool_name,
-                             no_wait=False):
+def synapse_sql_pool_pause(client,
+                           resource_group_name,
+                           workspace_name,
+                           sql_pool_name,
+                           no_wait=False):
     return sdk_no_wait(no_wait,
                        client.pause,
                        resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name)
+                       sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_rename(client,
-                              resource_group_name,
-                              workspace_name,
-                              s_q_l_pool_name,
-                              id_):
+def synapse_sql_pool_rename(client,
+                            resource_group_name,
+                            workspace_name,
+                            sql_pool_name,
+                            id_):
     return client.rename(resource_group_name=resource_group_name,
                          workspace_name=workspace_name,
-                         sql_pool_name=s_q_l_pool_name,
+                         sql_pool_name=sql_pool_name,
                          id=id_)
 
 
-def synapse_s_q_l_pool_resume(client,
-                              resource_group_name,
-                              workspace_name,
-                              s_q_l_pool_name,
-                              no_wait=False):
+def synapse_sql_pool_resume(client,
+                            resource_group_name,
+                            workspace_name,
+                            sql_pool_name,
+                            no_wait=False):
     return sdk_no_wait(no_wait,
                        client.resume,
                        resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name)
+                       sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_metadata_sync_config_show(client,
-                                                 resource_group_name,
-                                                 workspace_name,
-                                                 s_q_l_pool_name):
+def synapse_sql_pool_metadata_sync_config_show(client,
+                                               resource_group_name,
+                                               workspace_name,
+                                               sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name)
+                      sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_metadata_sync_config_create(client,
-                                                   resource_group_name,
-                                                   workspace_name,
-                                                   s_q_l_pool_name,
-                                                   enabled=None):
+def synapse_sql_pool_metadata_sync_config_create(client,
+                                                 resource_group_name,
+                                                 workspace_name,
+                                                 sql_pool_name,
+                                                 enabled=None):
     return client.create(resource_group_name=resource_group_name,
                          workspace_name=workspace_name,
-                         sql_pool_name=s_q_l_pool_name,
+                         sql_pool_name=sql_pool_name,
                          enabled=enabled)
 
 
-def synapse_s_q_l_pool_operation_result_get_location_header_result(client,
-                                                                   resource_group_name,
-                                                                   workspace_name,
-                                                                   s_q_l_pool_name,
-                                                                   operation_id):
+def synapse_sql_pool_operation_result_get_location_header_result(client,
+                                                                 resource_group_name,
+                                                                 workspace_name,
+                                                                 sql_pool_name,
+                                                                 operation_id):
     return client.get_location_header_result(resource_group_name=resource_group_name,
                                              workspace_name=workspace_name,
-                                             sql_pool_name=s_q_l_pool_name,
+                                             sql_pool_name=sql_pool_name,
                                              operation_id=operation_id)
 
 
-def synapse_s_q_l_pool_geo_backup_policy_show(client,
-                                              resource_group_name,
-                                              workspace_name,
-                                              s_q_l_pool_name):
+def synapse_sql_pool_geo_backup_policy_show(client,
+                                            resource_group_name,
+                                            workspace_name,
+                                            sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name,
+                      sql_pool_name=sql_pool_name,
                       geo_backup_policy_name="Default")
 
 
-def synapse_s_q_l_pool_data_warehouse_user_activity_show(client,
-                                                         resource_group_name,
-                                                         workspace_name,
-                                                         s_q_l_pool_name):
+def synapse_sql_pool_data_warehouse_user_activity_show(client,
+                                                       resource_group_name,
+                                                       workspace_name,
+                                                       sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name,
+                      sql_pool_name=sql_pool_name,
                       data_warehouse_user_activity_name="current")
 
 
-def synapse_s_q_l_pool_restore_point_list(client,
-                                          resource_group_name,
-                                          workspace_name,
-                                          s_q_l_pool_name):
+def synapse_sql_pool_restore_point_list(client,
+                                        resource_group_name,
+                                        workspace_name,
+                                        sql_pool_name):
     return client.list(resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name)
+                       sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_restore_point_create(client,
-                                            resource_group_name,
-                                            workspace_name,
-                                            s_q_l_pool_name,
-                                            restore_point_label):
+def synapse_sql_pool_restore_point_create(client,
+                                          resource_group_name,
+                                          workspace_name,
+                                          sql_pool_name,
+                                          restore_point_label):
     return client.create(resource_group_name=resource_group_name,
                          workspace_name=workspace_name,
-                         sql_pool_name=s_q_l_pool_name,
+                         sql_pool_name=sql_pool_name,
                          restore_point_label=restore_point_label)
 
 
-def synapse_s_q_l_pool_replication_link_list(client,
-                                             resource_group_name,
-                                             workspace_name,
-                                             s_q_l_pool_name):
+def synapse_sql_pool_replication_link_list(client,
+                                           resource_group_name,
+                                           workspace_name,
+                                           sql_pool_name):
     return client.list(resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name)
+                       sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_transparent_data_encryption_show(client,
-                                                        resource_group_name,
-                                                        workspace_name,
-                                                        s_q_l_pool_name):
+def synapse_sql_pool_transparent_data_encryption_show(client,
+                                                      resource_group_name,
+                                                      workspace_name,
+                                                      sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name,
+                      sql_pool_name=sql_pool_name,
                       transparent_data_encryption_name="current")
 
 
-def synapse_s_q_l_pool_transparent_data_encryption_create(client,
-                                                          resource_group_name,
-                                                          workspace_name,
-                                                          s_q_l_pool_name,
-                                                          status=None):
+def synapse_sql_pool_transparent_data_encryption_create(client,
+                                                        resource_group_name,
+                                                        workspace_name,
+                                                        sql_pool_name,
+                                                        status=None):
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
                                    transparent_data_encryption_name="current",
                                    status=status)
 
 
-def synapse_s_q_l_pool_transparent_data_encryption_update(instance,
-                                                          resource_group_name,
-                                                          workspace_name,
-                                                          s_q_l_pool_name,
-                                                          status=None):
-    return instance
+def synapse_sql_pool_transparent_data_encryption_update(client,
+                                                        resource_group_name,
+                                                        workspace_name,
+                                                        sql_pool_name,
+                                                        status=None):
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   workspace_name=workspace_name,
+                                   sql_pool_name=sql_pool_name,
+                                   transparent_data_encryption_name="current",
+                                   status=status)
 
 
-def synapse_s_q_l_pool_blob_auditing_policy_show(client,
-                                                 resource_group_name,
-                                                 workspace_name,
-                                                 s_q_l_pool_name):
+def synapse_sql_pool_blob_auditing_policy_show(client,
+                                               resource_group_name,
+                                               workspace_name,
+                                               sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name)
+                      sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_blob_auditing_policy_create(client,
-                                                   resource_group_name,
-                                                   workspace_name,
-                                                   s_q_l_pool_name,
-                                                   state=None,
-                                                   storage_endpoint=None,
-                                                   storage_account_access_key=None,
-                                                   retention_days=None,
-                                                   audit_actions_and_groups=None,
-                                                   storage_account_subscription_id=None,
-                                                   is_storage_secondary_key_in_use=None,
-                                                   is_azure_monitor_target_enabled=None):
+def synapse_sql_pool_blob_auditing_policy_create(client,
+                                                 resource_group_name,
+                                                 workspace_name,
+                                                 sql_pool_name,
+                                                 state=None,
+                                                 storage_endpoint=None,
+                                                 storage_account_access_key=None,
+                                                 retention_days=None,
+                                                 audit_actions_and_groups=None,
+                                                 storage_account_subscription_id=None,
+                                                 is_storage_secondary_key_in_use=None,
+                                                 is_azure_monitor_target_enabled=None):
     parameters = {}
     parameters['state'] = state
     parameters['storage_endpoint'] = storage_endpoint
@@ -459,70 +468,66 @@ def synapse_s_q_l_pool_blob_auditing_policy_create(client,
     parameters['is_azure_monitor_target_enabled'] = is_azure_monitor_target_enabled
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
                                    parameters=parameters)
 
 
-def synapse_s_q_l_pool_blob_auditing_policy_update(instance,
-                                                   resource_group_name,
-                                                   workspace_name,
-                                                   s_q_l_pool_name,
-                                                   state=None,
-                                                   storage_endpoint=None,
-                                                   storage_account_access_key=None,
-                                                   retention_days=None,
-                                                   audit_actions_and_groups=None,
-                                                   storage_account_subscription_id=None,
-                                                   is_storage_secondary_key_in_use=None,
-                                                   is_azure_monitor_target_enabled=None):
-    if state is not None:
-        instance.state = state
-    if storage_endpoint is not None:
-        instance.storage_endpoint = storage_endpoint
-    if storage_account_access_key is not None:
-        instance.storage_account_access_key = storage_account_access_key
-    if retention_days is not None:
-        instance.retention_days = retention_days
-    if audit_actions_and_groups is not None:
-        instance.audit_actions_and_groups = audit_actions_and_groups
-    if storage_account_subscription_id is not None:
-        instance.storage_account_subscription_id = storage_account_subscription_id
-    if is_storage_secondary_key_in_use is not None:
-        instance.is_storage_secondary_key_in_use = is_storage_secondary_key_in_use
-    if is_azure_monitor_target_enabled is not None:
-        instance.is_azure_monitor_target_enabled = is_azure_monitor_target_enabled
-    return instance
+def synapse_sql_pool_blob_auditing_policy_update(client,
+                                                 resource_group_name,
+                                                 workspace_name,
+                                                 sql_pool_name,
+                                                 state=None,
+                                                 storage_endpoint=None,
+                                                 storage_account_access_key=None,
+                                                 retention_days=None,
+                                                 audit_actions_and_groups=None,
+                                                 storage_account_subscription_id=None,
+                                                 is_storage_secondary_key_in_use=None,
+                                                 is_azure_monitor_target_enabled=None):
+    parameters = {}
+    parameters['state'] = state
+    parameters['storage_endpoint'] = storage_endpoint
+    parameters['storage_account_access_key'] = storage_account_access_key
+    parameters['retention_days'] = retention_days
+    parameters['audit_actions_and_groups'] = audit_actions_and_groups
+    parameters['storage_account_subscription_id'] = storage_account_subscription_id
+    parameters['is_storage_secondary_key_in_use'] = is_storage_secondary_key_in_use
+    parameters['is_azure_monitor_target_enabled'] = is_azure_monitor_target_enabled
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   workspace_name=workspace_name,
+                                   sql_pool_name=sql_pool_name,
+                                   parameters=parameters)
 
 
-def synapse_s_q_l_pool_operation_list(client,
-                                      resource_group_name,
-                                      workspace_name,
-                                      s_q_l_pool_name):
+def synapse_sql_pool_operation_list(client,
+                                    resource_group_name,
+                                    workspace_name,
+                                    sql_pool_name):
     return client.list(resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name)
+                       sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_usage_list(client,
-                                  resource_group_name,
-                                  workspace_name,
-                                  s_q_l_pool_name):
+def synapse_sql_pool_usage_list(client,
+                                resource_group_name,
+                                workspace_name,
+                                sql_pool_name):
     return client.list(resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name)
+                       sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_sensitivity_label_create(client,
-                                                resource_group_name,
-                                                workspace_name,
-                                                s_q_l_pool_name,
-                                                schema_name,
-                                                table_name,
-                                                column_name,
-                                                label_name=None,
-                                                label_id=None,
-                                                information_type=None,
-                                                information_type_id=None):
+def synapse_sql_pool_sensitivity_label_create(client,
+                                              resource_group_name,
+                                              workspace_name,
+                                              sql_pool_name,
+                                              schema_name,
+                                              table_name,
+                                              column_name,
+                                              label_name=None,
+                                              label_id=None,
+                                              information_type=None,
+                                              information_type_id=None):
     parameters = {}
     parameters['label_name'] = label_name
     parameters['label_id'] = label_id
@@ -530,24 +535,24 @@ def synapse_s_q_l_pool_sensitivity_label_create(client,
     parameters['information_type_id'] = information_type_id
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
                                    schema_name=schema_name,
                                    table_name=table_name,
                                    column_name=column_name,
                                    parameters=parameters)
 
 
-def synapse_s_q_l_pool_sensitivity_label_update(client,
-                                                resource_group_name,
-                                                workspace_name,
-                                                s_q_l_pool_name,
-                                                schema_name,
-                                                table_name,
-                                                column_name,
-                                                label_name=None,
-                                                label_id=None,
-                                                information_type=None,
-                                                information_type_id=None):
+def synapse_sql_pool_sensitivity_label_update(client,
+                                              resource_group_name,
+                                              workspace_name,
+                                              sql_pool_name,
+                                              schema_name,
+                                              table_name,
+                                              column_name,
+                                              label_name=None,
+                                              label_id=None,
+                                              information_type=None,
+                                              information_type_id=None):
     parameters = {}
     parameters['label_name'] = label_name
     parameters['label_id'] = label_id
@@ -555,160 +560,160 @@ def synapse_s_q_l_pool_sensitivity_label_update(client,
     parameters['information_type_id'] = information_type_id
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
                                    schema_name=schema_name,
                                    table_name=table_name,
                                    column_name=column_name,
                                    parameters=parameters)
 
 
-def synapse_s_q_l_pool_sensitivity_label_delete(client,
-                                                resource_group_name,
-                                                workspace_name,
-                                                s_q_l_pool_name,
-                                                schema_name,
-                                                table_name,
-                                                column_name):
+def synapse_sql_pool_sensitivity_label_delete(client,
+                                              resource_group_name,
+                                              workspace_name,
+                                              sql_pool_name,
+                                              schema_name,
+                                              table_name,
+                                              column_name):
     return client.delete(resource_group_name=resource_group_name,
                          workspace_name=workspace_name,
-                         sql_pool_name=s_q_l_pool_name,
+                         sql_pool_name=sql_pool_name,
                          schema_name=schema_name,
                          table_name=table_name,
                          column_name=column_name)
 
 
-def synapse_s_q_l_pool_sensitivity_label_disable_recommendation(client,
-                                                                resource_group_name,
-                                                                workspace_name,
-                                                                s_q_l_pool_name,
-                                                                schema_name,
-                                                                table_name,
-                                                                column_name):
+def synapse_sql_pool_sensitivity_label_disable_recommendation(client,
+                                                              resource_group_name,
+                                                              workspace_name,
+                                                              sql_pool_name,
+                                                              schema_name,
+                                                              table_name,
+                                                              column_name):
     return client.disable_recommendation(resource_group_name=resource_group_name,
                                          workspace_name=workspace_name,
-                                         sql_pool_name=s_q_l_pool_name,
+                                         sql_pool_name=sql_pool_name,
                                          schema_name=schema_name,
                                          table_name=table_name,
                                          column_name=column_name)
 
 
-def synapse_s_q_l_pool_sensitivity_label_enable_recommendation(client,
-                                                               resource_group_name,
-                                                               workspace_name,
-                                                               s_q_l_pool_name,
-                                                               schema_name,
-                                                               table_name,
-                                                               column_name):
+def synapse_sql_pool_sensitivity_label_enable_recommendation(client,
+                                                             resource_group_name,
+                                                             workspace_name,
+                                                             sql_pool_name,
+                                                             schema_name,
+                                                             table_name,
+                                                             column_name):
     return client.enable_recommendation(resource_group_name=resource_group_name,
                                         workspace_name=workspace_name,
-                                        sql_pool_name=s_q_l_pool_name,
+                                        sql_pool_name=sql_pool_name,
                                         schema_name=schema_name,
                                         table_name=table_name,
                                         column_name=column_name)
 
 
-def synapse_s_q_l_pool_sensitivity_label_list_current(client,
-                                                      resource_group_name,
-                                                      workspace_name,
-                                                      s_q_l_pool_name,
-                                                      filter_=None):
+def synapse_sql_pool_sensitivity_label_list_current(client,
+                                                    resource_group_name,
+                                                    workspace_name,
+                                                    sql_pool_name,
+                                                    filter_=None):
     return client.list_current(resource_group_name=resource_group_name,
                                workspace_name=workspace_name,
-                               sql_pool_name=s_q_l_pool_name,
+                               sql_pool_name=sql_pool_name,
                                filter=filter_)
 
 
-def synapse_s_q_l_pool_sensitivity_label_list_recommended(client,
-                                                          resource_group_name,
-                                                          workspace_name,
-                                                          s_q_l_pool_name,
-                                                          include_disabled_recommendations=None,
-                                                          skip_token=None,
-                                                          filter_=None):
+def synapse_sql_pool_sensitivity_label_list_recommended(client,
+                                                        resource_group_name,
+                                                        workspace_name,
+                                                        sql_pool_name,
+                                                        include_disabled_recommendations=None,
+                                                        skip_token=None,
+                                                        filter_=None):
     return client.list_recommended(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
                                    include_disabled_recommendations=include_disabled_recommendations,
                                    skip_token=skip_token,
                                    filter=filter_)
 
 
-def synapse_s_q_l_pool_schema_list(client,
-                                   resource_group_name,
-                                   workspace_name,
-                                   s_q_l_pool_name,
-                                   filter_=None):
+def synapse_sql_pool_schema_list(client,
+                                 resource_group_name,
+                                 workspace_name,
+                                 sql_pool_name,
+                                 filter_=None):
     return client.list(resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name,
+                       sql_pool_name=sql_pool_name,
                        filter=filter_)
 
 
-def synapse_s_q_l_pool_table_list(client,
-                                  resource_group_name,
-                                  workspace_name,
-                                  s_q_l_pool_name,
-                                  schema_name,
-                                  filter_=None):
+def synapse_sql_pool_table_list(client,
+                                resource_group_name,
+                                workspace_name,
+                                sql_pool_name,
+                                schema_name,
+                                filter_=None):
     return client.list_by_schema(resource_group_name=resource_group_name,
                                  workspace_name=workspace_name,
-                                 sql_pool_name=s_q_l_pool_name,
+                                 sql_pool_name=sql_pool_name,
                                  schema_name=schema_name,
                                  filter=filter_)
 
 
-def synapse_s_q_l_pool_table_column_list(client,
-                                         resource_group_name,
-                                         workspace_name,
-                                         s_q_l_pool_name,
-                                         schema_name,
-                                         table_name,
-                                         filter_=None):
+def synapse_sql_pool_table_column_list(client,
+                                       resource_group_name,
+                                       workspace_name,
+                                       sql_pool_name,
+                                       schema_name,
+                                       table_name,
+                                       filter_=None):
     return client.list_by_table_name(resource_group_name=resource_group_name,
                                      workspace_name=workspace_name,
-                                     sql_pool_name=s_q_l_pool_name,
+                                     sql_pool_name=sql_pool_name,
                                      schema_name=schema_name,
                                      table_name=table_name,
                                      filter=filter_)
 
 
-def synapse_s_q_l_pool_connection_policy_show(client,
-                                              resource_group_name,
-                                              workspace_name,
-                                              s_q_l_pool_name):
+def synapse_sql_pool_connection_policy_show(client,
+                                            resource_group_name,
+                                            workspace_name,
+                                            sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name,
+                      sql_pool_name=sql_pool_name,
                       connection_policy_name="default")
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_list(client,
-                                                     resource_group_name,
-                                                     workspace_name,
-                                                     s_q_l_pool_name):
+def synapse_sql_pool_vulnerability_assessment_list(client,
+                                                   resource_group_name,
+                                                   workspace_name,
+                                                   sql_pool_name):
     return client.list(resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name)
+                       sql_pool_name=sql_pool_name)
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_show(client,
-                                                     resource_group_name,
-                                                     workspace_name,
-                                                     s_q_l_pool_name):
+def synapse_sql_pool_vulnerability_assessment_show(client,
+                                                   resource_group_name,
+                                                   workspace_name,
+                                                   sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name,
+                      sql_pool_name=sql_pool_name,
                       vulnerability_assessment_name="default")
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_create(client,
-                                                       resource_group_name,
-                                                       workspace_name,
-                                                       s_q_l_pool_name,
-                                                       storage_container_path=None,
-                                                       storage_container_sas_key=None,
-                                                       storage_account_access_key=None,
-                                                       recurring_scans=None):
+def synapse_sql_pool_vulnerability_assessment_create(client,
+                                                     resource_group_name,
+                                                     workspace_name,
+                                                     sql_pool_name,
+                                                     storage_container_path=None,
+                                                     storage_container_sas_key=None,
+                                                     storage_account_access_key=None,
+                                                     recurring_scans=None):
     parameters = {}
     parameters['storage_container_path'] = storage_container_path
     parameters['storage_container_sas_key'] = storage_container_sas_key
@@ -716,95 +721,96 @@ def synapse_s_q_l_pool_vulnerability_assessment_create(client,
     parameters['recurring_scans'] = recurring_scans
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
                                    vulnerability_assessment_name="default",
                                    parameters=parameters)
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_update(instance,
-                                                       resource_group_name,
-                                                       workspace_name,
-                                                       s_q_l_pool_name,
-                                                       storage_container_path=None,
-                                                       storage_container_sas_key=None,
-                                                       storage_account_access_key=None,
-                                                       recurring_scans=None):
-    if storage_container_path is not None:
-        instance.storage_container_path = storage_container_path
-    if storage_container_sas_key is not None:
-        instance.storage_container_sas_key = storage_container_sas_key
-    if storage_account_access_key is not None:
-        instance.storage_account_access_key = storage_account_access_key
-    if recurring_scans is not None:
-        instance.recurring_scans = recurring_scans
-    return instance
+def synapse_sql_pool_vulnerability_assessment_update(client,
+                                                     resource_group_name,
+                                                     workspace_name,
+                                                     sql_pool_name,
+                                                     storage_container_path=None,
+                                                     storage_container_sas_key=None,
+                                                     storage_account_access_key=None,
+                                                     recurring_scans=None):
+    parameters = {}
+    parameters['storage_container_path'] = storage_container_path
+    parameters['storage_container_sas_key'] = storage_container_sas_key
+    parameters['storage_account_access_key'] = storage_account_access_key
+    parameters['recurring_scans'] = recurring_scans
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   workspace_name=workspace_name,
+                                   sql_pool_name=sql_pool_name,
+                                   vulnerability_assessment_name="default",
+                                   parameters=parameters)
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_delete(client,
-                                                       resource_group_name,
-                                                       workspace_name,
-                                                       s_q_l_pool_name):
+def synapse_sql_pool_vulnerability_assessment_delete(client,
+                                                     resource_group_name,
+                                                     workspace_name,
+                                                     sql_pool_name):
     return client.delete(resource_group_name=resource_group_name,
                          workspace_name=workspace_name,
-                         sql_pool_name=s_q_l_pool_name,
+                         sql_pool_name=sql_pool_name,
                          vulnerability_assessment_name="default")
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_scan_list(client,
-                                                          resource_group_name,
-                                                          workspace_name,
-                                                          s_q_l_pool_name):
+def synapse_sql_pool_vulnerability_assessment_scan_list(client,
+                                                        resource_group_name,
+                                                        workspace_name,
+                                                        sql_pool_name):
     return client.list(resource_group_name=resource_group_name,
                        workspace_name=workspace_name,
-                       sql_pool_name=s_q_l_pool_name,
+                       sql_pool_name=sql_pool_name,
                        vulnerability_assessment_name="default")
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_scan_export(client,
-                                                            resource_group_name,
-                                                            workspace_name,
-                                                            s_q_l_pool_name,
-                                                            scan_id):
+def synapse_sql_pool_vulnerability_assessment_scan_export(client,
+                                                          resource_group_name,
+                                                          workspace_name,
+                                                          sql_pool_name,
+                                                          scan_id):
     return client.export(resource_group_name=resource_group_name,
                          workspace_name=workspace_name,
-                         sql_pool_name=s_q_l_pool_name,
+                         sql_pool_name=sql_pool_name,
                          vulnerability_assessment_name="default",
                          scan_id=scan_id)
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_scan_initiate_scan(client,
-                                                                   resource_group_name,
-                                                                   workspace_name,
-                                                                   s_q_l_pool_name,
-                                                                   scan_id):
+def synapse_sql_pool_vulnerability_assessment_scan_initiate_scan(client,
+                                                                 resource_group_name,
+                                                                 workspace_name,
+                                                                 sql_pool_name,
+                                                                 scan_id):
     return client.initiate_scan(resource_group_name=resource_group_name,
                                 workspace_name=workspace_name,
-                                sql_pool_name=s_q_l_pool_name,
+                                sql_pool_name=sql_pool_name,
                                 vulnerability_assessment_name="default",
                                 scan_id=scan_id)
 
 
-def synapse_s_q_l_pool_security_alert_policy_show(client,
-                                                  resource_group_name,
-                                                  workspace_name,
-                                                  s_q_l_pool_name):
+def synapse_sql_pool_security_alert_policy_show(client,
+                                                resource_group_name,
+                                                workspace_name,
+                                                sql_pool_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name,
-                      sql_pool_name=s_q_l_pool_name,
+                      sql_pool_name=sql_pool_name,
                       security_alert_policy_name="default")
 
 
-def synapse_s_q_l_pool_security_alert_policy_create(client,
-                                                    resource_group_name,
-                                                    workspace_name,
-                                                    s_q_l_pool_name,
-                                                    state=None,
-                                                    disabled_alerts=None,
-                                                    email_addresses=None,
-                                                    email_account_admins=None,
-                                                    storage_endpoint=None,
-                                                    storage_account_access_key=None,
-                                                    retention_days=None):
+def synapse_sql_pool_security_alert_policy_create(client,
+                                                  resource_group_name,
+                                                  workspace_name,
+                                                  sql_pool_name,
+                                                  state=None,
+                                                  disabled_alerts=None,
+                                                  email_addresses=None,
+                                                  email_account_admins=None,
+                                                  storage_endpoint=None,
+                                                  storage_account_access_key=None,
+                                                  retention_days=None):
     parameters = {}
     parameters['state'] = state
     parameters['disabled_alerts'] = disabled_alerts
@@ -815,80 +821,78 @@ def synapse_s_q_l_pool_security_alert_policy_create(client,
     parameters['retention_days'] = retention_days
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
                                    security_alert_policy_name="default",
                                    parameters=parameters)
 
 
-def synapse_s_q_l_pool_security_alert_policy_update(instance,
-                                                    resource_group_name,
-                                                    workspace_name,
-                                                    s_q_l_pool_name,
-                                                    state=None,
-                                                    disabled_alerts=None,
-                                                    email_addresses=None,
-                                                    email_account_admins=None,
-                                                    storage_endpoint=None,
-                                                    storage_account_access_key=None,
-                                                    retention_days=None):
-    if state is not None:
-        instance.state = state
-    if disabled_alerts is not None:
-        instance.disabled_alerts = disabled_alerts
-    if email_addresses is not None:
-        instance.email_addresses = email_addresses
-    if email_account_admins is not None:
-        instance.email_account_admins = email_account_admins
-    if storage_endpoint is not None:
-        instance.storage_endpoint = storage_endpoint
-    if storage_account_access_key is not None:
-        instance.storage_account_access_key = storage_account_access_key
-    if retention_days is not None:
-        instance.retention_days = retention_days
-    return instance
-
-
-def synapse_s_q_l_pool_vulnerability_assessment_rule_baseline_create(client,
-                                                                     resource_group_name,
-                                                                     workspace_name,
-                                                                     s_q_l_pool_name,
-                                                                     rule_id,
-                                                                     baseline_name,
-                                                                     baseline_results=None):
+def synapse_sql_pool_security_alert_policy_update(client,
+                                                  resource_group_name,
+                                                  workspace_name,
+                                                  sql_pool_name,
+                                                  state=None,
+                                                  disabled_alerts=None,
+                                                  email_addresses=None,
+                                                  email_account_admins=None,
+                                                  storage_endpoint=None,
+                                                  storage_account_access_key=None,
+                                                  retention_days=None):
+    parameters = {}
+    parameters['state'] = state
+    parameters['disabled_alerts'] = disabled_alerts
+    parameters['email_addresses'] = email_addresses
+    parameters['email_account_admins'] = email_account_admins
+    parameters['storage_endpoint'] = storage_endpoint
+    parameters['storage_account_access_key'] = storage_account_access_key
+    parameters['retention_days'] = retention_days
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
+                                   security_alert_policy_name="default",
+                                   parameters=parameters)
+
+
+def synapse_sql_pool_vulnerability_assessment_rule_baseline_create(client,
+                                                                   resource_group_name,
+                                                                   workspace_name,
+                                                                   sql_pool_name,
+                                                                   rule_id,
+                                                                   baseline_name,
+                                                                   baseline_results=None):
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   workspace_name=workspace_name,
+                                   sql_pool_name=sql_pool_name,
                                    vulnerability_assessment_name="default",
                                    rule_id=rule_id,
                                    baseline_name=baseline_name,
                                    baseline_results=baseline_results)
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_rule_baseline_update(client,
-                                                                     resource_group_name,
-                                                                     workspace_name,
-                                                                     s_q_l_pool_name,
-                                                                     rule_id,
-                                                                     baseline_name,
-                                                                     baseline_results=None):
+def synapse_sql_pool_vulnerability_assessment_rule_baseline_update(client,
+                                                                   resource_group_name,
+                                                                   workspace_name,
+                                                                   sql_pool_name,
+                                                                   rule_id,
+                                                                   baseline_name,
+                                                                   baseline_results=None):
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
-                                   sql_pool_name=s_q_l_pool_name,
+                                   sql_pool_name=sql_pool_name,
                                    vulnerability_assessment_name="default",
                                    rule_id=rule_id,
                                    baseline_name=baseline_name,
                                    baseline_results=baseline_results)
 
 
-def synapse_s_q_l_pool_vulnerability_assessment_rule_baseline_delete(client,
-                                                                     resource_group_name,
-                                                                     workspace_name,
-                                                                     s_q_l_pool_name,
-                                                                     rule_id,
-                                                                     baseline_name):
+def synapse_sql_pool_vulnerability_assessment_rule_baseline_delete(client,
+                                                                   resource_group_name,
+                                                                   workspace_name,
+                                                                   sql_pool_name,
+                                                                   rule_id,
+                                                                   baseline_name):
     return client.delete(resource_group_name=resource_group_name,
                          workspace_name=workspace_name,
-                         sql_pool_name=s_q_l_pool_name,
+                         sql_pool_name=sql_pool_name,
                          vulnerability_assessment_name="default",
                          rule_id=rule_id,
                          baseline_name=baseline_name)
@@ -973,21 +977,21 @@ def synapse_workspace_delete(client,
                        workspace_name=workspace_name)
 
 
-def synapse_workspace_a_a_d_admin_show(client,
-                                       resource_group_name,
-                                       workspace_name):
+def synapse_workspace_aad_admin_show(client,
+                                     resource_group_name,
+                                     workspace_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name)
 
 
-def synapse_workspace_a_a_d_admin_create(client,
-                                         resource_group_name,
-                                         workspace_name,
-                                         tenant_id=None,
-                                         login=None,
-                                         administrator_type=None,
-                                         sid=None,
-                                         no_wait=False):
+def synapse_workspace_aad_admin_create(client,
+                                       resource_group_name,
+                                       workspace_name,
+                                       tenant_id=None,
+                                       login=None,
+                                       administrator_type=None,
+                                       sid=None,
+                                       no_wait=False):
     aad_admin_info = {}
     aad_admin_info['tenant_id'] = tenant_id
     aad_admin_info['login'] = login
@@ -1000,55 +1004,63 @@ def synapse_workspace_a_a_d_admin_create(client,
                        aad_admin_info=aad_admin_info)
 
 
-def synapse_workspace_a_a_d_admin_update(instance,
-                                         resource_group_name,
-                                         workspace_name,
-                                         tenant_id=None,
-                                         login=None,
-                                         administrator_type=None,
-                                         sid=None,
-                                         no_wait=False):
-    if tenant_id is not None:
-        instance.tenant_id = tenant_id
-    if login is not None:
-        instance.login = login
-    if administrator_type is not None:
-        instance.administrator_type = administrator_type
-    if sid is not None:
-        instance.sid = sid
-    return instance
+def synapse_workspace_aad_admin_update(client,
+                                       resource_group_name,
+                                       workspace_name,
+                                       tenant_id=None,
+                                       login=None,
+                                       administrator_type=None,
+                                       sid=None,
+                                       no_wait=False):
+    aad_admin_info = {}
+    aad_admin_info['tenant_id'] = tenant_id
+    aad_admin_info['login'] = login
+    aad_admin_info['administrator_type'] = administrator_type
+    aad_admin_info['sid'] = sid
+    return sdk_no_wait(no_wait,
+                       client.create_or_update,
+                       resource_group_name=resource_group_name,
+                       workspace_name=workspace_name,
+                       aad_admin_info=aad_admin_info)
 
 
-def synapse_workspace_a_a_d_admin_delete(client,
-                                         resource_group_name,
-                                         workspace_name,
-                                         no_wait=False):
+def synapse_workspace_aad_admin_delete(client,
+                                       resource_group_name,
+                                       workspace_name,
+                                       no_wait=False):
     return sdk_no_wait(no_wait,
                        client.delete,
                        resource_group_name=resource_group_name,
                        workspace_name=workspace_name)
 
 
-def synapse_workspace_managed_identity_s_q_l_control_setting_show(client,
-                                                                  resource_group_name,
-                                                                  workspace_name):
+def synapse_workspace_managed_identity_sql_control_setting_show(client,
+                                                                resource_group_name,
+                                                                workspace_name):
     return client.get(resource_group_name=resource_group_name,
                       workspace_name=workspace_name)
 
 
-def synapse_workspace_managed_identity_s_q_l_control_setting_create(client,
-                                                                    resource_group_name,
-                                                                    workspace_name,
-                                                                    grant_sql_control_to_managed_identity_desired_state=None):
+def synapse_workspace_managed_identity_sql_control_setting_create(client,
+                                                                  resource_group_name,
+                                                                  workspace_name,
+                                                                  grant_sql_control_to_managed_identity_desired_state=None):
+    grant_sql_control_to_managed_identity = {}
+    grant_sql_control_to_managed_identity['desired_state'] = grant_sql_control_to_managed_identity_desired_state
     return client.create_or_update(resource_group_name=resource_group_name,
-                                   workspace_name=workspace_name)
+                                   workspace_name=workspace_name,
+                                   grant_sql_control_to_managed_identity=grant_sql_control_to_managed_identity)
 
 
-def synapse_workspace_managed_identity_s_q_l_control_setting_update(instance,
-                                                                    resource_group_name,
-                                                                    workspace_name,
-                                                                    grant_sql_control_to_managed_identity_desired_state=None):
-    return instance
+def synapse_workspace_managed_identity_sql_control_setting_update(client,
+                                                                  resource_group_name,
+                                                                  workspace_name,
+                                                                  grant_sql_control_to_managed_identity_desired_state=None):
+    grant_sql_control_to_managed_identity = {}
+    grant_sql_control_to_managed_identity['desired_state'] = grant_sql_control_to_managed_identity_desired_state
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   workspace_name=workspace_name,
+                                   grant_sql_control_to_managed_identity=grant_sql_control_to_managed_identity)
 
 
 def synapse_integration_runtime_list(client,

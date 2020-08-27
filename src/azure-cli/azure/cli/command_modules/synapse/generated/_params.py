@@ -143,21 +143,20 @@ def load_arguments(self, _):
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
         c.argument('rule_name', type=str, help='The IP firewall rule name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool list') as c:
+    with self.argument_context('synapse sql-pool list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
 
-    with self.argument_context('synapse s-q-l-pool show') as c:
+    with self.argument_context('synapse sql-pool show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', options_list=['--name', '-n', '--s-q-l-pool-name'], type=str, help='SQL pool '
-                   'name', id_part='child_name_1')
+        c.argument('sql_pool_name', options_list=['--name', '-n', '--sql-pool-name'], type=str, help='SQL pool name',
+                   id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool create') as c:
+    with self.argument_context('synapse sql-pool create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', options_list=['--name', '-n', '--s-q-l-pool-name'], type=str, help='SQL pool '
-                   'name')
+        c.argument('sql_pool_name', options_list=['--name', '-n', '--sql-pool-name'], type=str, help='SQL pool name')
         c.argument('tags', tags_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
@@ -172,11 +171,11 @@ def load_arguments(self, _):
         c.argument('create_mode', type=str, help='What is this?')
         c.argument('creation_date', help='Date the SQL pool was created')
 
-    with self.argument_context('synapse s-q-l-pool update') as c:
+    with self.argument_context('synapse sql-pool update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', options_list=['--name', '-n', '--s-q-l-pool-name'], type=str, help='SQL pool '
-                   'name', id_part='child_name_1')
+        c.argument('sql_pool_name', options_list=['--name', '-n', '--sql-pool-name'], type=str, help='SQL pool name',
+                   id_part='child_name_1')
         c.argument('tags', tags_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
@@ -191,110 +190,109 @@ def load_arguments(self, _):
         c.argument('create_mode', type=str, help='What is this?')
         c.argument('creation_date', help='Date the SQL pool was created')
 
-    with self.argument_context('synapse s-q-l-pool delete') as c:
+    with self.argument_context('synapse sql-pool delete') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', options_list=['--name', '-n', '--s-q-l-pool-name'], type=str, help='SQL pool '
-                   'name', id_part='child_name_1')
+        c.argument('sql_pool_name', options_list=['--name', '-n', '--sql-pool-name'], type=str, help='SQL pool name',
+                   id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool pause') as c:
+    with self.argument_context('synapse sql-pool pause') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', options_list=['--name', '-n', '--s-q-l-pool-name'], type=str, help='SQL pool '
-                   'name', id_part='child_name_1')
+        c.argument('sql_pool_name', options_list=['--name', '-n', '--sql-pool-name'], type=str, help='SQL pool name',
+                   id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool rename') as c:
+    with self.argument_context('synapse sql-pool rename') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', options_list=['--name', '-n', '--s-q-l-pool-name'], type=str, help='SQL pool '
-                   'name', id_part='child_name_1')
+        c.argument('sql_pool_name', options_list=['--name', '-n', '--sql-pool-name'], type=str, help='SQL pool name',
+                   id_part='child_name_1')
         c.argument('id_', options_list=['--id'], type=str, help='The target ID for the resource')
 
-    with self.argument_context('synapse s-q-l-pool resume') as c:
+    with self.argument_context('synapse sql-pool resume') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', options_list=['--name', '-n', '--s-q-l-pool-name'], type=str, help='SQL pool '
-                   'name', id_part='child_name_1')
+        c.argument('sql_pool_name', options_list=['--name', '-n', '--sql-pool-name'], type=str, help='SQL pool name',
+                   id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool wait') as c:
+    with self.argument_context('synapse sql-pool wait') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', options_list=['--name', '-n', '--s-q-l-pool-name'], type=str, help='SQL pool '
-                   'name', id_part='child_name_1')
+        c.argument('sql_pool_name', options_list=['--name', '-n', '--sql-pool-name'], type=str, help='SQL pool name',
+                   id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-metadata-sync-config show') as c:
+    with self.argument_context('synapse sql-pool-metadata-sync-config show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-metadata-sync-config create') as c:
+    with self.argument_context('synapse sql-pool-metadata-sync-config create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('enabled', arg_type=get_three_state_flag(), help='Indicates whether the metadata sync is enabled or '
                    'disabled')
 
-    with self.argument_context('synapse s-q-l-pool-operation-result get-location-header-result') as c:
+    with self.argument_context('synapse sql-pool-operation-result get-location-header-result') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('operation_id', type=str, help='Operation ID', id_part='child_name_2')
 
-    with self.argument_context('synapse s-q-l-pool-geo-backup-policy show') as c:
+    with self.argument_context('synapse sql-pool-geo-backup-policy show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-data-warehouse-user-activity show') as c:
+    with self.argument_context('synapse sql-pool-data-warehouse-user-activity show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-restore-point list') as c:
+    with self.argument_context('synapse sql-pool-restore-point list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
 
-    with self.argument_context('synapse s-q-l-pool-restore-point create') as c:
+    with self.argument_context('synapse sql-pool-restore-point create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('restore_point_label', type=str, help='The restore point label to apply')
 
-    with self.argument_context('synapse s-q-l-pool-replication-link list') as c:
+    with self.argument_context('synapse sql-pool-replication-link list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
 
-    with self.argument_context('synapse s-q-l-pool-transparent-data-encryption show') as c:
+    with self.argument_context('synapse sql-pool-transparent-data-encryption show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-transparent-data-encryption create') as c:
+    with self.argument_context('synapse sql-pool-transparent-data-encryption create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('status', arg_type=get_enum_type(['Enabled', 'Disabled']), help='The status of the database '
                    'transparent data encryption.')
 
-    with self.argument_context('synapse s-q-l-pool-transparent-data-encryption update') as c:
+    with self.argument_context('synapse sql-pool-transparent-data-encryption update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('status', arg_type=get_enum_type(['Enabled', 'Disabled']), help='The status of the database '
                    'transparent data encryption.')
-        c.ignore('sql_pool_name', 'transparent_data_encryption_name')
 
-    with self.argument_context('synapse s-q-l-pool-blob-auditing-policy show') as c:
+    with self.argument_context('synapse sql-pool-blob-auditing-policy show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-blob-auditing-policy create') as c:
+    with self.argument_context('synapse sql-pool-blob-auditing-policy create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('state', arg_type=get_enum_type(['Enabled', 'Disabled']), help='Specifies the state of the policy. '
                    'If state is Enabled, storageEndpoint or isAzureMonitorTargetEnabled are required.')
         c.argument('storage_endpoint', type=str, help='Specifies the blob storage endpoint (e.g. '
@@ -349,10 +347,10 @@ def load_arguments(self, _):
                    'API](https://go.microsoft.com/fwlink/?linkid=2033207) or [Diagnostic Settings '
                    'PowerShell](https://go.microsoft.com/fwlink/?linkid=2033043)')
 
-    with self.argument_context('synapse s-q-l-pool-blob-auditing-policy update') as c:
+    with self.argument_context('synapse sql-pool-blob-auditing-policy update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('state', arg_type=get_enum_type(['Enabled', 'Disabled']), help='Specifies the state of the policy. '
                    'If state is Enabled, storageEndpoint or isAzureMonitorTargetEnabled are required.')
         c.argument('storage_endpoint', type=str, help='Specifies the blob storage endpoint (e.g. '
@@ -406,22 +404,21 @@ def load_arguments(self, _):
                    'ion=2017-05-01-preview  For more information, see [Diagnostic Settings REST '
                    'API](https://go.microsoft.com/fwlink/?linkid=2033207) or [Diagnostic Settings '
                    'PowerShell](https://go.microsoft.com/fwlink/?linkid=2033043)')
-        c.ignore('sql_pool_name')
 
-    with self.argument_context('synapse s-q-l-pool-operation list') as c:
+    with self.argument_context('synapse sql-pool-operation list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
 
-    with self.argument_context('synapse s-q-l-pool-usage list') as c:
+    with self.argument_context('synapse sql-pool-usage list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
 
-    with self.argument_context('synapse s-q-l-pool-sensitivity-label create') as c:
+    with self.argument_context('synapse sql-pool-sensitivity-label create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('schema_name', type=str, help='The name of the schema.')
         c.argument('table_name', type=str, help='The name of the table.')
         c.argument('column_name', type=str, help='The name of the column.')
@@ -430,10 +427,10 @@ def load_arguments(self, _):
         c.argument('information_type', type=str, help='The information type.')
         c.argument('information_type_id', type=str, help='The information type ID.')
 
-    with self.argument_context('synapse s-q-l-pool-sensitivity-label update') as c:
+    with self.argument_context('synapse sql-pool-sensitivity-label update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('schema_name', type=str, help='The name of the schema.', id_part='child_name_2')
         c.argument('table_name', type=str, help='The name of the table.', id_part='child_name_3')
         c.argument('column_name', type=str, help='The name of the column.', id_part='child_name_4')
@@ -442,41 +439,41 @@ def load_arguments(self, _):
         c.argument('information_type', type=str, help='The information type.')
         c.argument('information_type_id', type=str, help='The information type ID.')
 
-    with self.argument_context('synapse s-q-l-pool-sensitivity-label delete') as c:
+    with self.argument_context('synapse sql-pool-sensitivity-label delete') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('schema_name', type=str, help='The name of the schema.', id_part='child_name_2')
         c.argument('table_name', type=str, help='The name of the table.', id_part='child_name_3')
         c.argument('column_name', type=str, help='The name of the column.', id_part='child_name_4')
 
-    with self.argument_context('synapse s-q-l-pool-sensitivity-label disable-recommendation') as c:
+    with self.argument_context('synapse sql-pool-sensitivity-label disable-recommendation') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('schema_name', type=str, help='The name of the schema.', id_part='child_name_2')
         c.argument('table_name', type=str, help='The name of the table.', id_part='child_name_3')
         c.argument('column_name', type=str, help='The name of the column.', id_part='child_name_4')
 
-    with self.argument_context('synapse s-q-l-pool-sensitivity-label enable-recommendation') as c:
+    with self.argument_context('synapse sql-pool-sensitivity-label enable-recommendation') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('schema_name', type=str, help='The name of the schema.', id_part='child_name_2')
         c.argument('table_name', type=str, help='The name of the table.', id_part='child_name_3')
         c.argument('column_name', type=str, help='The name of the column.', id_part='child_name_4')
 
-    with self.argument_context('synapse s-q-l-pool-sensitivity-label list-current') as c:
+    with self.argument_context('synapse sql-pool-sensitivity-label list-current') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('filter_', options_list=['--filter'], type=str, help='An OData filter expression that filters '
                    'elements in the collection.')
 
-    with self.argument_context('synapse s-q-l-pool-sensitivity-label list-recommended') as c:
+    with self.argument_context('synapse sql-pool-sensitivity-label list-recommended') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('include_disabled_recommendations', arg_type=get_three_state_flag(), help='Specifies whether to '
                    'include disabled recommendations or not.')
         c.argument('skip_token', type=str, help='An OData query option to indicate how many elements to skip in the '
@@ -484,49 +481,49 @@ def load_arguments(self, _):
         c.argument('filter_', options_list=['--filter'], type=str, help='An OData filter expression that filters '
                    'elements in the collection.')
 
-    with self.argument_context('synapse s-q-l-pool-schema list') as c:
+    with self.argument_context('synapse sql-pool-schema list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('filter_', options_list=['--filter'], type=str, help='An OData filter expression that filters '
                    'elements in the collection.')
 
-    with self.argument_context('synapse s-q-l-pool-table list') as c:
+    with self.argument_context('synapse sql-pool-table list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('schema_name', type=str, help='The name of the schema.')
         c.argument('filter_', options_list=['--filter'], type=str, help='An OData filter expression that filters '
                    'elements in the collection.')
 
-    with self.argument_context('synapse s-q-l-pool-table-column list') as c:
+    with self.argument_context('synapse sql-pool-table-column list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('schema_name', type=str, help='The name of the schema.')
         c.argument('table_name', type=str, help='The name of the table.')
         c.argument('filter_', options_list=['--filter'], type=str, help='An OData filter expression that filters '
                    'elements in the collection.')
 
-    with self.argument_context('synapse s-q-l-pool-connection-policy show') as c:
+    with self.argument_context('synapse sql-pool-connection-policy show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment list') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment show') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment create') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('storage_container_path', type=str, help='A blob storage container path to hold the scan results '
                    '(e.g. https://myStorage.blob.core.windows.net/VaScans/).  It is required if server level '
                    'vulnerability assessment policy doesn\'t set')
@@ -538,10 +535,10 @@ def load_arguments(self, _):
                    'storageAccountAccessKey is required.')
         c.argument('recurring_scans', action=AddRecurringScans, nargs='*', help='The recurring scans settings')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment update') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('storage_container_path', type=str, help='A blob storage container path to hold the scan results '
                    '(e.g. https://myStorage.blob.core.windows.net/VaScans/).  It is required if server level '
                    'vulnerability assessment policy doesn\'t set')
@@ -552,41 +549,40 @@ def load_arguments(self, _):
                    'for vulnerability assessment scan results. If \'StorageContainerSasKey\' isn\'t specified, '
                    'storageAccountAccessKey is required.')
         c.argument('recurring_scans', action=AddRecurringScans, nargs='*', help='The recurring scans settings')
-        c.ignore('sql_pool_name', 'vulnerability_assessment_name')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment delete') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment delete') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment-scan list') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment-scan list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment-scan export') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment-scan export') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('scan_id', type=str, help='The vulnerability assessment scan Id of the scan to retrieve.', id_part=''
                    'child_name_3')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment-scan initiate-scan') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment-scan initiate-scan') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('scan_id', type=str, help='The vulnerability assessment scan Id of the scan to retrieve.', id_part=''
                    'child_name_3')
 
-    with self.argument_context('synapse s-q-l-pool-security-alert-policy show') as c:
+    with self.argument_context('synapse sql-pool-security-alert-policy show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
 
-    with self.argument_context('synapse s-q-l-pool-security-alert-policy create') as c:
+    with self.argument_context('synapse sql-pool-security-alert-policy create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('state', arg_type=get_enum_type(['New', 'Enabled', 'Disabled']), help='Specifies the state of the '
                    'policy, whether it is enabled or disabled or a policy has not been applied yet on the specific Sql '
                    'pool.')
@@ -604,10 +600,10 @@ def load_arguments(self, _):
         c.argument('retention_days', type=int, help='Specifies the number of days to keep in the Threat Detection '
                    'audit logs.')
 
-    with self.argument_context('synapse s-q-l-pool-security-alert-policy update') as c:
+    with self.argument_context('synapse sql-pool-security-alert-policy update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('state', arg_type=get_enum_type(['New', 'Enabled', 'Disabled']), help='Specifies the state of the '
                    'policy, whether it is enabled or disabled or a policy has not been applied yet on the specific Sql '
                    'pool.')
@@ -624,32 +620,31 @@ def load_arguments(self, _):
                    'audit storage account.')
         c.argument('retention_days', type=int, help='Specifies the number of days to keep in the Threat Detection '
                    'audit logs.')
-        c.ignore('sql_pool_name', 'security_alert_policy_name')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment-rule-baseline create') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment-rule-baseline create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name')
+        c.argument('sql_pool_name', type=str, help='SQL pool name')
         c.argument('rule_id', type=str, help='The vulnerability assessment rule ID.')
         c.argument('baseline_name', arg_type=get_enum_type(['master', 'default']), help='The name of the vulnerability '
                    'assessment rule baseline (default implies a baseline on a Sql pool level rule and master for '
                    'workspace level rule).')
         c.argument('baseline_results', action=AddBaselineResults, nargs='*', help='The rule baseline result')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment-rule-baseline update') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment-rule-baseline update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('rule_id', type=str, help='The vulnerability assessment rule ID.', id_part='child_name_3')
         c.argument('baseline_name', arg_type=get_enum_type(['master', 'default']), help='The name of the vulnerability '
                    'assessment rule baseline (default implies a baseline on a Sql pool level rule and master for '
                    'workspace level rule).', id_part='child_name_4')
         c.argument('baseline_results', action=AddBaselineResults, nargs='*', help='The rule baseline result')
 
-    with self.argument_context('synapse s-q-l-pool-vulnerability-assessment-rule-baseline delete') as c:
+    with self.argument_context('synapse sql-pool-vulnerability-assessment-rule-baseline delete') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
-        c.argument('s_q_l_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
+        c.argument('sql_pool_name', type=str, help='SQL pool name', id_part='child_name_1')
         c.argument('rule_id', type=str, help='The vulnerability assessment rule ID.', id_part='child_name_3')
         c.argument('baseline_name', arg_type=get_enum_type(['master', 'default']), help='The name of the vulnerability '
                    'assessment rule baseline (default implies a baseline on a Sql pool level rule and master for '
@@ -709,11 +704,11 @@ def load_arguments(self, _):
         c.argument('workspace_name', options_list=['--name', '-n', '--workspace-name'], type=str, help='The name of '
                    'the workspace', id_part='name')
 
-    with self.argument_context('synapse workspace-a-a-d-admin show') as c:
+    with self.argument_context('synapse workspace-aad-admin show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
 
-    with self.argument_context('synapse workspace-a-a-d-admin create') as c:
+    with self.argument_context('synapse workspace-aad-admin create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
         c.argument('tenant_id', type=str, help='Tenant ID of the workspace active directory administrator')
@@ -721,7 +716,7 @@ def load_arguments(self, _):
         c.argument('administrator_type', type=str, help='Workspace active directory administrator type')
         c.argument('sid', type=str, help='Object ID of the workspace active directory administrator')
 
-    with self.argument_context('synapse workspace-a-a-d-admin update') as c:
+    with self.argument_context('synapse workspace-aad-admin update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
         c.argument('tenant_id', type=str, help='Tenant ID of the workspace active directory administrator')
@@ -729,26 +724,26 @@ def load_arguments(self, _):
         c.argument('administrator_type', type=str, help='Workspace active directory administrator type')
         c.argument('sid', type=str, help='Object ID of the workspace active directory administrator')
 
-    with self.argument_context('synapse workspace-a-a-d-admin delete') as c:
+    with self.argument_context('synapse workspace-aad-admin delete') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
 
-    with self.argument_context('synapse workspace-a-a-d-admin wait') as c:
+    with self.argument_context('synapse workspace-aad-admin wait') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
 
-    with self.argument_context('synapse workspace-managed-identity-s-q-l-control-setting show') as c:
+    with self.argument_context('synapse workspace-managed-identity-sql-control-setting show') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
 
-    with self.argument_context('synapse workspace-managed-identity-s-q-l-control-setting create') as c:
+    with self.argument_context('synapse workspace-managed-identity-sql-control-setting create') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace')
         c.argument('grant_sql_control_to_managed_identity_desired_state', arg_type=get_enum_type(['Enabled',
                                                                                                   'Disabled']), help=''
                    'Desired state')
 
-    with self.argument_context('synapse workspace-managed-identity-s-q-l-control-setting update') as c:
+    with self.argument_context('synapse workspace-managed-identity-sql-control-setting update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
         c.argument('grant_sql_control_to_managed_identity_desired_state', arg_type=get_enum_type(['Enabled',
