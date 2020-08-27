@@ -127,6 +127,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
 
+    with self.argument_context('acr repository metadata') as c:
+        c.argument('key', help="The name of the key used to access specific metadata.")
+        c.argument('file', help="Path to file for upload/download of metadata.")
+
     with self.argument_context('acr create') as c:
         c.argument('registry_name', completer=None, validator=None)
         c.argument('deployment_name', validator=None)

@@ -486,6 +486,40 @@ examples:
     text: az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
 """
 
+helps['acr repository metadata'] = """
+type: group
+short-summary: Manage metadata of repositories (image names) for Azure Container Registries.
+"""
+
+helps['acr repository metadata delete'] = """
+type: command
+short-summary: Delete metadata by key for a repository in an Azure Container Registry.
+long-summary: This command deletes the metadata (if any) specified by a given key for a repository in an Azure Container Registry.
+examples:
+  - name: Delete keyed metadata in a repository from an Azure Container Registry. This deletes metadata under the key 'testKey' in the repository 'hello-world'.
+    text: az acr repository metadata delete -n MyRegistry --repository hello-world --key testKey
+"""
+
+helps['acr repository metadata show'] = """
+type: command
+short-summary: Get the metadata of a repository in an Azure Container Registry.
+long-summary: This command either downloads metadata under a given key in a repository in an Azure Container Registry to a given file, or it shows all available metadata keys.
+examples:
+  - name: Show the available metadata of the repository 'hello-world'.
+    text: az acr repository metadata show -n MyRegistry --repository hello-world
+  - name: Download the metadata under key 'testKey' in repository 'hello-world' to the file 'testFile.out' in the current directory.
+    text: az acr repository metadata show -n MyRegistry --repository hello-world --key testKey --file testFile.out
+"""
+
+helps['acr repository metadata update'] = """
+type: command
+short-summary: Update metadata by key of a repository in an Azure Container Registry by uploading local file.
+long-summary: This command sets the metadata under a given key of a repository in an Azure Container Registry to the contents of a specified local file.
+examples:
+  - name: Update the metadata under key 'testKey' in repository 'hello-world' with contents of the file 'testFile.in' in the current directory.
+    text: az acr repository metadata update -n MyRegistry --repository hello-world --key testKey --file testFile.in
+"""
+
 helps['acr run'] = """
 type: command
 short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
