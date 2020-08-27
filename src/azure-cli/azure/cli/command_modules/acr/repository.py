@@ -462,7 +462,8 @@ def acr_repository_metadata_show(cmd,
         with open(file, 'wb') as f:
             for chunk in result:
                 f.write(chunk)
-        return "Wrote metadata for key '{}' to file {}".format(key, file)
+        print("Wrote downloaded metadata for key '{}' to file {}".format(key, file))
+        return None
     else:
         return result
 
