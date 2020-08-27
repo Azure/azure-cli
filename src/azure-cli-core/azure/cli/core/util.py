@@ -128,8 +128,25 @@ def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
 
 
 def get_installed_cli_distributions():
-    from pkg_resources import working_set
-    return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
+    # Stop importing pkg_resources, because importing it is slow (~200ms).
+    # from pkg_resources import working_set
+    # return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
+
+    # Use the hard-coded version instead of querying all modules under site-packages.
+    from azure.cli.core import __version__ as azure_cli_core_version
+    from azure.cli.telemetry import __version__ as azure_cli_telemetry_version
+
+    class VersionItem:  # pylint: disable=too-few-public-methods
+        """A mock of pkg_resources.EggInfoDistribution to maintain backward compatibility."""
+        def __init__(self, key, version):
+            self.key = key
+            self.version = version
+
+    return [
+        VersionItem('azure-cli', azure_cli_core_version),
+        VersionItem('azure-cli-core', azure_cli_core_version),
+        VersionItem('azure-cli-telemetry', azure_cli_telemetry_version)
+    ]
 
 
 def _update_latest_from_pypi(versions):
