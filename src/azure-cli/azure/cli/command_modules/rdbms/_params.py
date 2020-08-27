@@ -189,25 +189,29 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             # c.extra('generate_password', help='Generate a password.', arg_group='Authentication')
             # Add create mode as a parameter
             if command_group == 'postgres':
-                default_string = 'azurepg-'
+                #default_string = 'azurepg-'
                 c.argument('tier', default='GeneralPurpose', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', default='131072', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
                 c.argument('version', default='12', help='Server major version.')              
             elif command_group == 'mysql':
-                default_string = 'azuremysql-'
+                #default_string = 'azuremysql-'
                 c.argument('tier', default='Burstable', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', default='10240', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
                 c.argument('version', default='5.7', help='Server major version.')
                 
-            c.argument('server_name', default=create_random_resource_name(default_string), arg_type=server_name_setter_arg_type)
-            c.argument('resource_group_name', default=create_random_resource_name(default_string), arg_type=resource_group_name_type)
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+            c.argument('server_name', arg_type=server_name_setter_arg_type)
+            #c.argument('resource_group_name', default=create_random_resource_name(default_string), arg_type=resource_group_name_type)
+            c.argument('location', arg_type=get_location_type(self.cli_ctx))#, validator=get_default_location_from_resource_group)
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication')
-            c.argument('administrator_login_password', options_list=['--admin-password, -p'], arg_group='Authentication')
-
-            c.argument('backup_retention', default='7', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
+            #c.argument('administrator_login_password', options_list=['--admin-password, -p'], arg_group='Authentication')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+                       help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
+                       arg_group='Authentication')
+            c.argument('backup_retention', type=int, options_list=['--backup-retention'],
+                       help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
+                       validator=retention_validator)
             c.argument('tags', tags_type)
             c.argument('public_access', options_list=['--public-access'], help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ')
             # c.argument('vnet_name', option_list=['--vnet'])

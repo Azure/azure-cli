@@ -59,7 +59,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     logger.warning('Make a note of your password. If you forget, you would have to'
                    ' reset your password with CLI command for reset password')
 
-    cmd.cli_ctx.invocation.data['output'] = 'table'
+    _update_local_contexts(cmd, server_name, resource_group_name, location)
 
     return _form_response(
         user, sku, loc, rg, id, host, version,
@@ -250,6 +250,13 @@ def _form_response(username, sku, location, resource_group_name, id, host, versi
         'connection string': connection_string
     }
 
+
+def _update_local_contexts(cmd, server_name, resource_group_name, location):
+    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server-name',
+                                  server_name)  # Setting the server name in the local context
+    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'location',
+                                  location)  # Setting the location in the local context
+    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'resource_group_name', resource_group_name)
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods

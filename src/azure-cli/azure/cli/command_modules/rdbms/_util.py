@@ -77,7 +77,7 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
     if server_name is None:
         server_name = create_random_resource_name('server')
         # cmd.cli_ctx.local_context.get_value('server-name')
-        cmd.cli_ctx.local_context.set(['all'], 'server-name', server_name)  # Setting the location in the local context
+        # cmd.cli_ctx.local_context.set(['all'], 'server-name', server_name)  # Setting the location in the local context
 
     if administrator_login_password is None:
         administrator_login_password = str(uuid.uuid4())
@@ -93,7 +93,7 @@ def _update_location(cmd, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)
     rg = resource_client.resource_groups.get(resource_group_name)
     location = rg.location
-    cmd.cli_ctx.local_context.set(['all'], 'location', location)  # Setting the location in the local context
+    # cmd.cli_ctx.local_context.set(['all'], 'location', location)  # Setting the location in the local context
     return location
 
 
@@ -104,7 +104,7 @@ def _create_resource_group(cmd, location, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)
     logger.warning('Creating Resource Group \'%s\'...', resource_group_name)
     resource_client.resource_groups.create_or_update(resource_group_name, params)
-    cmd.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group_name)
+    # cmd.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group_name)
     return resource_group_name
 
 
