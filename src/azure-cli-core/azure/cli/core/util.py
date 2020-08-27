@@ -191,7 +191,10 @@ def _update_latest_from_github(versions):
             success = False
         else:
             versions[pkg.replace(COMPONENT_PREFIX, '')]['pypi'] = version
-    versions[CLI_PACKAGE_NAME]['pypi'] = versions['core']['pypi']
+    try:
+        versions[CLI_PACKAGE_NAME]['pypi'] = versions['core']['pypi']
+    except KeyError:
+        pass
     return versions, success
 
 
