@@ -106,6 +106,10 @@ short-summary: Show an authorization certificate.
 examples:
   - name: Show an authorization certificate.
     text: az network application-gateway auth-cert show -g MyResourceGroup --gateway-name MyAppGateway -n MyAuthCert
+  - name: View expiry date of an authorization certificate. It is in Base-64 encoded X.509(.CER) format.
+    text: |
+        az network application-gateway auth-cert show -g MyResourceGroup --gateway-name MyAppGateway \\
+            -n MyAuthCert --query data -o tsv | base64 -d | openssl x509 -enddate -noout
 """
 
 helps['network application-gateway auth-cert update'] = """
@@ -164,6 +168,11 @@ type: command
 short-summary: List all the Private Link
 """
 
+helps['network application-gateway private-link wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the condition of corresponding application gateway is met
+"""
+
 helps['network application-gateway private-link ip-config'] = """
 type: group
 short-summary: Manage IP configuration of a Private Link to configure its capability
@@ -187,6 +196,11 @@ short-summary: Show an IP configuration of a Private Link
 helps['network application-gateway private-link ip-config list'] = """
 type: command
 short-summary: List all the IP configuration of a Private Link
+"""
+
+helps['network application-gateway private-link ip-config wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until the condition of corresponding application gateway is met
 """
 
 helps['network application-gateway frontend-ip'] = """

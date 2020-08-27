@@ -120,9 +120,8 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
-                  JMESPathCheck('customHttpsParameters.protocolType', 'ServerNameIndication'),
-                  JMESPathCheck('customHttpsParameters.certificateSource', 'Cdn'),
-                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.certificateType', 'Shared')]
+                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
+                  JMESPathCheck('customHttpsProvisioningSubstate', 'SubmittingDomainControlValidationRequest')]
         self.custom_domain_enable_https_command(resource_group,
                                                 profile_name,
                                                 endpoint_name,
@@ -142,7 +141,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
         endpoint_name = 'cdn-cli-test-3'
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
@@ -162,10 +161,8 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
-                  JMESPathCheck('customHttpsParameters.protocolType', 'IPBased'),
-                  JMESPathCheck('customHttpsParameters.certificateSource', 'Cdn'),
-                  JMESPathCheck('customHttpsParameters.minimumTlsVersion', 'None'),
-                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.certificateType', 'Shared')]
+                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
+                  JMESPathCheck('customHttpsProvisioningSubstate', 'SubmittingDomainControlValidationRequest')]
         self.custom_domain_enable_https_command(resource_group,
                                                 profile_name,
                                                 endpoint_name,
@@ -222,10 +219,8 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Enable custom HTTPS with a CDN managed certificate.
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
-                  JMESPathCheck('customHttpsParameters.protocolType', 'ServerNameIndication'),
-                  JMESPathCheck('customHttpsParameters.certificateSource', 'Cdn'),
-                  JMESPathCheck('customHttpsParameters.minimumTlsVersion', 'TLS10'),
-                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.certificateType', 'Dedicated')]
+                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
+                  JMESPathCheck('customHttpsProvisioningSubstate', 'SubmittingDomainControlValidationRequest')]
         self.custom_domain_enable_https_command(resource_group,
                                                 profile_name,
                                                 endpoint_name,
@@ -243,14 +238,8 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Enable custom HTTPS with a custom certificate
         checks = [JMESPathCheck('name', byoc_custom_domain_name),
                   JMESPathCheck('hostName', byoc_hostname),
-                  JMESPathCheck('customHttpsParameters.certificateSource', 'AzureKeyVault'),
-                  JMESPathCheck('customHttpsParameters.protocolType', 'ServerNameIndication'),
-                  JMESPathCheck('customHttpsParameters.minimumTlsVersion', 'TLS12'),
-                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.resourceGroupName',
-                                resource_group),
-                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.vaultName', vault_name),
-                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.secretName', cert_name),
-                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.secretVersion', version)]
+                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
+                  JMESPathCheck('customHttpsProvisioningSubstate', 'ImportingUserProvidedCertificate')]
         self.custom_domain_enable_https_command(resource_group,
                                                 profile_name,
                                                 endpoint_name,

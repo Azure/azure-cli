@@ -5,7 +5,7 @@
 
 import os
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
-                               JMESPathCheck)
+                               JMESPathCheck, JMESPathCheckExists)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 from azure_devtools.scenario_tests import AllowLargeResponse
@@ -178,4 +178,42 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
         self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
             JMESPathCheck('length(@)', 0)
+        })
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_tier", location="eastus")
+    @StorageAccountPreparer(name_prefix="tier", location="eastus", kind='StorageV2')
+    def test_storage_share_rm_with_access_tier(self):
+
+        self.kwargs.update({
+            'share': self.create_random_name('share', 24),
+            'new_share': self.create_random_name('share', 24)
+        })
+
+        # Update with access tier
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share}', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('accessTier', None)
+        })
+
+        self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share}', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('accessTier', 'TransactionOptimized')
+        })
+
+        self.cmd('storage share-rm update --storage-account {sa} -g {rg} -n {share} --access-tier Hot', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('accessTier', 'Hot')
+        })
+
+        self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share}', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('accessTier', 'Hot'),
+            JMESPathCheckExists('accessTierChangeTime')
+        })
+
+        # Create with access tier
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {new_share} --access-tier Hot', checks={
+            JMESPathCheck('[0].name', self.kwargs['share']),
+            JMESPathCheck('accessTier', 'Hot')
         })

@@ -466,6 +466,32 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_network_appgw_creation_with_public_and_private_ip')
+    def test_network_appgw_creation_with_public_and_private_ip(self, resource_group):
+        self.kwargs.update({
+            "appgw": "applicationGateway",
+            "ip": "publicIP",
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+
+        self.cmd("network application-gateway create -g {rg} -n {appgw} "
+                 "--sku Standard_v2 "
+                 "--enable-private-link "
+                 "--private-ip-address 10.0.0.17 "
+                 "--public-ip-address {ip}")
+        show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
+
+        self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
+        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
+
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
+
+        self.cmd("network application-gateway delete -g {rg} -n {appgw}")
+
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
@@ -1505,6 +1531,81 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp2'])
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
+    def test_network_app_gateway_waf_policy_with_version_and_type(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group,
+            'csr_grp1': 'REQUEST-921-PROTOCOL-ATTACK',
+            'csr_grp2': 'REQUEST-913-SCANNER-DETECTION'
+        })
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf} --version 3.1 --type OWASP')
+
+        # case 1: Initialize(add) managed rule set
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp1} --rules 921120 921110')
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
+            self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.1'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921120')
+        ])
+
+        # case 2: Append(add) another managed rule set to same rule group
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp1} --rules 921150')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 3),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150')
+                 ])
+
+        # # case 3: Add another managed rule set of different rule group
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp2} --rules 913100')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].rules | length(@)', 1),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100')
+                 ])
+
+        # case 4: override(update) existing managed rule set
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp1} --rules 921130 921140')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921130'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[1].ruleId', '921140')
+                 ])
+
+        # # case 5: clear manage rule set by group {csr_grp1}
+        self.cmd('network application-gateway waf-policy managed-rule rule-set remove -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.1 '
+                 '--group-name {csr_grp1} ')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRuleSets[0].ruleSetVersion', '3.1'),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp2'])
                  ])
 
@@ -3885,7 +3986,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network virtual-appliance sku list', checks=[
-            self.check('length(@)', 4)
+            self.check('length(@)', 3)
         ])
         self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"', checks=[
             self.check('name', 'barracudasdwanrelease')

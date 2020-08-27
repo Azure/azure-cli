@@ -24,9 +24,5 @@ def volumes_mgmt_client_factory(cli_ctx, _):
     return cf_netappfiles(cli_ctx).volumes
 
 
-def mount_targets_mgmt_client_factory(cli_ctx, _):
-    return cf_netappfiles(cli_ctx).mount_targets
-
-
 def snapshots_mgmt_client_factory(cli_ctx, _):
     return cf_netappfiles(cli_ctx).snapshots

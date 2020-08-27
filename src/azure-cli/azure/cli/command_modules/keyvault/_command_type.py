@@ -98,6 +98,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 command_args[client_arg_name] = client
             if 'cmd' not in op_args:
                 command_args.pop('cmd')
+
             try:
                 result = op(**command_args)
                 # apply results transform if specified

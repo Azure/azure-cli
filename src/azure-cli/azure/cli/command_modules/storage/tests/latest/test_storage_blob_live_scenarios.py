@@ -8,42 +8,50 @@ from datetime import datetime, timedelta
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
+from azure.cli.testsdk.decorators import serial_test
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadLiveTests(LiveScenarioTest):
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_128mb_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 128 * 1024, 'block')
 
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_64mb_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 64 * 1024, 'block')
 
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_256mb_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 256 * 1024, 'block')
 
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_1G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 1024 * 1024, 'block')
 
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_2G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 2 * 1024 * 1024,
                                              'block')
 
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_10G_file(self, resource_group, storage_account):
         self.verify_blob_upload_and_download(resource_group, storage_account, 10 * 1024 * 1024,
                                              'block', skip_download=True)
 
+    @serial_test()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_page_blob_upload_10G_file(self, resource_group, storage_account):

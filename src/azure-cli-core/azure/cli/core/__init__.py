@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.9.1"
+__version__ = "2.11.0"
 
 import os
 import sys
@@ -48,7 +48,8 @@ class AzCli(CLI):
             register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
-        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX
+        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
+        from azure.cli.core.util import handle_version_update
         from azure.cli.core.commands.recommend import register_global_query_recommend_argument
 
         from knack.util import ensure_dir
@@ -65,6 +66,8 @@ class AzCli(CLI):
         CONFIG.load(os.path.join(azure_folder, 'az.json'))
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         INDEX.load(os.path.join(azure_folder, 'commandIndex.json'))
+        VERSIONS.load(os.path.join(azure_folder, 'versionCheck.json'))
+        handle_version_update()
 
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
@@ -375,18 +378,6 @@ class MainCommandsLoader(CLICommandsLoader):
                             res.append(sup)
             return res
 
-        def _roughly_parse_command(args):
-            # Roughly parse the command part: <az vm create> --name vm1
-            # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but we don't need to bother with
-            # positional args
-            nouns = []
-            for arg in args:
-                if arg and arg[0] != '-':
-                    nouns.append(arg)
-                else:
-                    break
-            return ' '.join(nouns).lower()
-
         # Clear the tables to make this method idempotent
         self.command_group_table.clear()
         self.command_table.clear()
@@ -406,17 +397,32 @@ class MainCommandsLoader(CLICommandsLoader):
                 _update_command_table_from_extensions([], index_extensions)
 
                 logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
+                from azure.cli.core.util import roughly_parse_command
                 # The index may be outdated. Make sure the command appears in the loaded command table
-                command_str = _roughly_parse_command(args)
-                if command_str in self.command_table:
-                    logger.debug("Found a match in the command table for '%s'", command_str)
-                    return self.command_table
-                if command_str in self.command_group_table:
-                    logger.debug("Found a match in the command group table for '%s'", command_str)
+                raw_cmd = roughly_parse_command(args)
+                for cmd in self.command_table:
+                    if raw_cmd.startswith(cmd):
+                        # For commands with positional arguments, the raw command won't match the one in the
+                        # command table. For example, `az find vm create` won't exist in the command table, but the
+                        # corresponding command should be `az find`.
+                        # raw command  : az find vm create
+                        # command table: az find
+                        # remaining    :         vm create
+                        logger.debug("Found a match in the command table.")
+                        logger.debug("Raw command  : %s", raw_cmd)
+                        logger.debug("Command table: %s", cmd)
+                        remaining = raw_cmd[len(cmd) + 1:]
+                        if remaining:
+                            logger.debug("remaining    : %s %s", ' ' * len(cmd), remaining)
+                        return self.command_table
+                # For command group, it must be an exact match, as no positional argument is supported by
+                # command group operations.
+                if raw_cmd in self.command_group_table:
+                    logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
                     return self.command_table
 
-                logger.debug("Could not find a match in the command table for '%s'. The index may be outdated",
-                             command_str)
+                logger.debug("Could not find a match in the command or command group table for '%s'. "
+                             "The index may be outdated.", raw_cmd)
             else:
                 logger.debug("No module found from index for '%s'", args)
 
