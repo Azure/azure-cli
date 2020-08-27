@@ -108,7 +108,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
         g.command('check-name', 'check_name_availability')
-        g.show_command('show-test-coverage', 'delete')
         g.custom_command('create', 'create_storage_account')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get_properties')
