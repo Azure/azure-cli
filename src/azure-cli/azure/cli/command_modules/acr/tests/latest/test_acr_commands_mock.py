@@ -461,7 +461,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                                          registry_name='testregistry',
                                          repository='testrepository',
                                          key='testkey',
-                                         file_out='testfileout')
+                                         file='testfileout')
             mock_requests_metadata_get.assert_called_with(
                 method='get',
                 url='https://testregistry.azurecr.io/acr/v1/testrepository/_metadata/testkey',

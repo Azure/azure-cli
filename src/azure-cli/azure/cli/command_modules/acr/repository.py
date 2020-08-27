@@ -436,12 +436,12 @@ def acr_repository_metadata_show(cmd,
                                  registry_name,
                                  repository,
                                  key=None,
-                                 file_out=None,
+                                 file=None,
                                  resource_group_name=None,  # pylint: disable=unused-argument
                                  tenant_suffix=None,
                                  username=None,
                                  password=None):
-    _validate_parameters_out(key, file_out)
+    _validate_parameters_out(key, file)
 
     # To get value of keyed metadata, get content as iter_content and write to file.
     get_iter_content = key is not None
@@ -459,10 +459,10 @@ def acr_repository_metadata_show(cmd,
         get_iter_content=get_iter_content)
 
     if get_iter_content:
-        with open(file_out, 'wb') as f:
+        with open(file, 'wb') as f:
             for chunk in result:
                 f.write(chunk)
-        return "Wrote metadata for key '{}' to file {}".format(key, file_out)
+        return "Wrote metadata for key '{}' to file {}".format(key, file)
     else:
         return result
 
@@ -557,9 +557,9 @@ def _validate_parameters(repository, image):
         raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
 
 
-def _validate_parameters_out(key, file_out):
-    if bool(key) != bool(file_out):
-        raise CLIError('Usage error: --key KEY --file-out FILE_OUT')
+def _validate_parameters_out(key, file):
+    if bool(key) != bool(file):
+        raise CLIError('Usage error: --key KEY --file FILE')
 
 
 def _parse_image_name(image, allow_digest=False):
