@@ -55,9 +55,12 @@ def register_global_query_recommend_argument(cli_ctx):
             'nargs': '*',
             'experimental_info': experimental_info
         }
-        for _, cmd in cmd_tbl.items():
-            cmd.add_argument('_query_recommend', *
-                             ['--query-recommend'], **default_kwargs)
+        block_list = ['create', 'add', 'update', 'remove', 'rm', 'delete']
+        for cmd_name, cmd in cmd_tbl.items():
+            cmd_action = cmd_name.split()[-1]
+            if cmd_action not in block_list:
+                cmd.add_argument('_query_recommend', *
+                                 ['--query-recommend'], **default_kwargs)
 
     cli_ctx.register_event(
         EVENT_INVOKER_PRE_LOAD_ARGUMENTS, register_query_recommend
