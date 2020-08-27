@@ -29,34 +29,7 @@ def _update_last_cmd(cmd):
         f.write("{}\n".format(cmd))
 
 
-def _get_recommend_from_local(last_cmd, last_param, request_type, top_num=5, extra_data=None):
-    import os
-    mock_db = os.path.join(os.environ['HOME'], '.azure', 'recommendation', 'mock-db.json')
-    with open(mock_db, 'r') as f:
-        db = json.load(f)
-
-    error_path = os.path.join(os.environ['HOME'], '.azure', 'recommendation', 'error')
-    if last_cmd == 'notification-hub namespace create':
-        if os.path.isfile(error_path):
-            fix_error = True
-            os.remove(error_path)
-        else:
-            open(error_path, 'a').close()
-            fix_error = False
-
-    for item in db['data']:
-        if item['command'] == last_cmd:
-            if last_cmd == 'notification-hub namespace create':
-                if fix_error:
-                    return item['nextCommand'][2:]
-                else:
-                    return item['nextCommand'][:2]
-            return item['nextCommand']
-
-    return []
-
-
-def _get_recommend_from_api(last_cmd, last_param, request_type, top_num=5, extra_data=None):
+def _get_recommend_from_api(last_cmd, request_type, top_num=5, extra_data=None):
     '''query next command from web api'''
     import requests
     url = _get_api_url()
@@ -75,10 +48,6 @@ def _get_recommend_from_api(last_cmd, last_param, request_type, top_num=5, extra
     return recommends
 
 
-def _send_feedback(command, is_helpful):
-    pass
-
-
 def _read_int(msg, default_value=0):
     ret = input(msg)
     if ret == '' or not ret.isnumeric():
@@ -90,9 +59,10 @@ def _read_int(msg, default_value=0):
 
 def _give_recommends(recommends):
     print("")
-    for i in range(len(recommends)):
-        rec = recommends[i]
-        print("{}. az {}".format(i + 1, rec['command']))
+    idx = 0
+    for rec in recommends:
+        idx += 1
+        print("{}. az {}".format(idx, rec['command']))
         print("Recommended reason: {}% {}".format(rec['ratio'] * 100, rec['reason']))
 
 
@@ -108,9 +78,7 @@ Please select the type of recommendation you need:
     print(msg)
     option = _read_int("What kind of recommendation do you want? (RETURN is to set all): ", 1)
     last_cmd = _get_last_cmd()
-    last_param = ''
-    # recommends = _get_recommend_from_api(last_cmd, last_param, option)
-    recommends = _get_recommend_from_local(last_cmd, last_param, option)
+    recommends = _get_recommend_from_api(last_cmd, option)
     if not recommends:
         raise CLIError("Failed to get recommend for '{}'.".format(last_cmd))
     _give_recommends(recommends)
@@ -124,12 +92,9 @@ Please select the type of recommendation you need:
         else:
             option = 0
     if option == 0:
-        _send_feedback(cmd, False)
+        # we can send feedback here
         return "recommend abort"
 
-    # print()
-    # feedback = input("Does it help for you? (y/n): ")
-    # execute select command
     option = option - 1
     nx_cmd = recommends[option]["command"]
     nx_param = recommends[option]["arguments"]
@@ -147,11 +112,5 @@ Please select the type of recommendation you need:
         args.append(param)
         args.append(value)
 
-    # invocation = cmd.cli_ctx.invocation_cls(cli_ctx=cmd.cli_ctx,
-    #                                         parser_cls=cmd.cli_ctx.parser_cls,
-    #                                         commands_loader_cls=cmd.cli_ctx.commands_loader_cls,
-    #                                         help_cls=cmd.cli_ctx.help_cls)
-    # _update_last_cmd(nx_cmd)
-    # ret = invocation.execute(args)
     ret = cmd.cli_ctx.invoke(args)
     return None
