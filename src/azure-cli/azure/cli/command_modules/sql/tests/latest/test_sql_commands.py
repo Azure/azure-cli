@@ -712,6 +712,41 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
+    @record_only()
+    def test_sql_db_short_term_retention(
+            self):
+
+        self.kwargs.update({
+            'rg': 'myResourceGroup',
+            'loc': 'eastus',
+            'server_name': 'mysqlserver-x',
+            'database_name': 'testStr',
+            'retention_days': '7',
+            'diffbackup_hours': '24'
+        })
+        
+        # test update short term retention policy on live database
+        self.cmd(
+            'sql db str-policy set -g {rg} -s {server_name} -n {database_name} --retention-days {retention_days} --diffbackup-hours {diffbackup_hours}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('retentionDays', '{retention_days}'),
+                self.check('diffbackupintervalinhours', '{diffbackup_hours}')])
+
+        # test get short term retention policy on live database
+        self.cmd(
+            'sql db str-policy show -g {rg} -s {server_name} -n {database_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('retentionDays', '{retention_days}'),
+                self.check('diffbackupintervalinhours', '{diffbackup_hours}')])
+
+        # Delete by group/server/name
+        self.cmd('az sql db delete --name {database_name} --resource-group {rg} --server {server_name}',
+                 checks=[NoneCheck()])       
+               
+        
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     @record_only()
     def test_sql_db_long_term_retention(
