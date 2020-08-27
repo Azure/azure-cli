@@ -297,7 +297,7 @@ def load_command_table(self, _):
                             is_preview=True) as g:
 
         g.custom_command('set', 'update_short_term_retention', supports_no_wait=True)
-        g.show_command('show', 'get_short_term_retention')
+        g.show_custom_command('show', 'get_short_term_retention')
 
     database_sensitivity_labels_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
