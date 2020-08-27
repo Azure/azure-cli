@@ -392,8 +392,8 @@ jobs:
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
 
-- job: AutomationTest
-  displayName: Automation Test (Profile Latest)
+- job: AutomationTestWithTestCoverage
+  displayName: Automation Test with Test Coverage (Profile Latest)
   timeoutInMinutes: 120
   pool:
     vmImage: 'ubuntu-16.04'
@@ -891,7 +891,7 @@ jobs:
 - job: TestCoverage
   displayName: Test Coverage
 
-  dependsOn: AutomationTest
+  dependsOn: AutomationTestWithTestCoverage
   condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
