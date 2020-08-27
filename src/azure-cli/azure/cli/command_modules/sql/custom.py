@@ -1564,7 +1564,6 @@ def update_long_term_retention(
 
 
 def update_short_term_retention(
-        cmd,
         client,
         database_name,
         server_name,
@@ -1580,13 +1579,12 @@ def update_short_term_retention(
         server_name=server_name,
         resource_group_name=resource_group_name,
         retention_days=retention_days,
-        diffbackup_hours=diffbackup_hours)
+        diff_backup_interval_in_hours=diffbackup_hours)
 
     return policy
 
 
 def get_short_term_retention(
-        cmd,
         client,
         database_name,
         server_name,
