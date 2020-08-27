@@ -790,6 +790,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Account key of copy source storage account. Must be used in conjunction with source storage '
                      'account name.')
         c.extra('source_connection_string', arg_group='Copy source',
+                options_list=['--source-connection-string', '--src-conn'],
                 help='Connection string of source storage account.')
         c.extra('source_sas', arg_group='Copy source',
                 help='Shared Access Signature (SAS) token of copy source. Must be used in conjunction with source '
