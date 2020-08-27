@@ -811,7 +811,7 @@ def load_arguments(self, _):
                           "To enable Azure Hybrid Benefit for Windows Server, use 'Windows_Server'. " \
                           "To enable Multitenant Hosting Rights for Windows 10, use 'Windows_Client'. " \
                           "For more information see the Azure Windows VM online docs."
-            c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
+            c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'None']))
             c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
                        arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
                        help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
