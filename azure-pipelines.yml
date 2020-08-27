@@ -890,7 +890,6 @@ jobs:
 
 - job: TestCoverage
   displayName: Test Coverage
-
   dependsOn: AutomationTestWithTestCoverage
   condition: succeeded()
   pool:
@@ -910,5 +909,7 @@ jobs:
        cp $(System.ArtifactsDirectory)/command_coverage/az_command_coverage.txt ./az_command_coverage.txt
        set -ev
        . env/bin/activate
-       azdev linter test storage
+       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+         azdev test-coverage --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+       fi
     displayName: 'Test Coverage Result'
