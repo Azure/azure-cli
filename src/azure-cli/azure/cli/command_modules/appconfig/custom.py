@@ -26,13 +26,24 @@ SYSTEM_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
 SYSTEM_ASSIGNED_IDENTITY = '[system]'
 
 
-def create_configstore(client, resource_group_name, name, location, sku="Standard", assign_identity=None):
+def create_configstore(client,
+                       resource_group_name,
+                       name,
+                       location,
+                       sku="Standard",
+                       assign_identity=None,
+                       enable_public_network=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
+    public_network_access = None
+    if enable_public_network is not None:
+        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
-                                            sku=Sku(name=sku))
+                                            sku=Sku(name=sku),
+                                            public_network_access=public_network_access)
 
     return client.create(resource_group_name, name, configstore_params)
 

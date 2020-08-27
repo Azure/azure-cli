@@ -134,6 +134,7 @@ def _is_v2_sku(sku):
     return 'v2' in sku
 
 
+# pylint: disable=too-many-statements
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
@@ -244,10 +245,21 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     deployment_name = 'ag_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            from azure.cli.core.commands import LongRunningOperation
+            _log_pprint_template(template)
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
-
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
@@ -461,10 +473,11 @@ def add_ag_private_link(cmd,
                         application_gateway_name,
                         frontend_ip,
                         private_link_name,
-                        private_link_subnet_name,
-                        private_link_subnet_prefix,
+                        private_link_subnet_name_or_id,
+                        private_link_subnet_prefix=None,
                         private_link_primary=None,
-                        private_link_ip_address=None):
+                        private_link_ip_address=None,
+                        no_wait=False):
     (SubResource, IPAllocationMethod, Subnet,
      ApplicationGatewayPrivateLinkConfiguration,
      ApplicationGatewayPrivateLinkIpConfiguration) = cmd.get_models(
@@ -505,28 +518,31 @@ def add_ag_private_link(cmd,
 
     # prepare the subnet for new private link
     for subnet in vnet.subnets:
-        if subnet.name == private_link_subnet_name:
-            raise CLIError('Subnet name duplicates')
+        if subnet.name == private_link_subnet_name_or_id:
+            raise CLIError('Subnet duplicates')
         if subnet.address_prefix == private_link_subnet_prefix:
             raise CLIError('Subnet prefix duplicates')
         if subnet.address_prefixes and private_link_subnet_prefix in subnet.address_prefixes:
             raise CLIError('Subnet prefix duplicates')
 
-    private_link_subnet = Subnet(name=private_link_subnet_name,
-                                 address_prefix=private_link_subnet_prefix,
-                                 private_link_service_network_policies='Disabled')
-    vnet.subnets.append(private_link_subnet)
-    ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
+    if is_valid_resource_id(private_link_subnet_name_or_id):
+        private_link_subnet_id = private_link_subnet_name_or_id
+    else:
+        private_link_subnet = Subnet(name=private_link_subnet_name_or_id,
+                                     address_prefix=private_link_subnet_prefix,
+                                     private_link_service_network_policies='Disabled')
+        private_link_subnet_id = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet_name,
+            child_type_1='subnets',
+            child_name_1=private_link_subnet_name_or_id
+        )
+        vnet.subnets.append(private_link_subnet)
+        ncf.virtual_networks.create_or_update(resource_group_name, vnet_name, vnet)
 
-    private_link_subnet_id = resource_id(
-        subscription=get_subscription_id(cmd.cli_ctx),
-        resource_group=resource_group_name,
-        namespace='Microsoft.Network',
-        type='virtualNetworks',
-        name=vnet_name,
-        child_type_1='subnets',
-        child_name_1=private_link_subnet_name
-    )
     private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
         else IPAllocationMethod.dynamic.value
     private_link_ip_config = ApplicationGatewayPrivateLinkIpConfiguration(
@@ -548,7 +564,10 @@ def add_ag_private_link(cmd,
 
     appgw.private_link_configurations.append(private_link_config)
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name, appgw)
 
 
 def show_ag_private_link(cmd,
@@ -582,7 +601,8 @@ def list_ag_private_link(cmd,
 def remove_ag_private_link(cmd,
                            resource_group_name,
                            application_gateway_name,
-                           private_link_name):
+                           private_link_name,
+                           no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -606,7 +626,11 @@ def remove_ag_private_link(cmd,
     # ncf.subnets.delete(vnet_resource_group, vnet_name, subnet)
 
     appgw.private_link_configurations.remove(removed_private_link)
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def add_ag_private_link_ip(cmd,
@@ -615,7 +639,8 @@ def add_ag_private_link_ip(cmd,
                            private_link_name,
                            private_link_ip_name,
                            private_link_primary=False,
-                           private_link_ip_address=None):
+                           private_link_ip_address=None,
+                           no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -647,7 +672,11 @@ def add_ag_private_link_ip(cmd,
 
     target_private_link.ip_configurations.append(private_link_ip_config)
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def show_ag_private_link_ip(cmd,
@@ -701,7 +730,8 @@ def remove_ag_private_link_ip(cmd,
                               resource_group_name,
                               application_gateway_name,
                               private_link_name,
-                              private_link_ip_name):
+                              private_link_ip_name,
+                              no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
 
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -722,7 +752,11 @@ def remove_ag_private_link_ip(cmd,
     else:
         raise CLIError("IP Configuration doesn't exist")
 
-    return ncf.application_gateways.create_or_update(resource_group_name, application_gateway_name, appgw)
+    return sdk_no_wait(no_wait,
+                       ncf.application_gateways.create_or_update,
+                       resource_group_name,
+                       application_gateway_name,
+                       appgw)
 
 
 def create_ag_backend_http_settings_collection(cmd, resource_group_name, application_gateway_name, item_name, port,
@@ -1407,7 +1441,9 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 
 # region ApplicationGatewayWAFPolicy
-def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location=None, tags=None):
+def create_ag_waf_policy(cmd, client, resource_group_name, policy_name,
+                         location=None, tags=None, rule_set_type='OWASP',
+                         rule_set_version='3.0'):
     WebApplicationFirewallPolicy, ManagedRulesDefinition, \
         ManagedRuleSet = cmd.get_models('WebApplicationFirewallPolicy',
                                         'ManagedRulesDefinition',
@@ -1415,7 +1451,7 @@ def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location
     #  https://docs.microsoft.com/en-us/azure/application-gateway/waf-overview
 
     # mandatory default rule with empty rule sets
-    managed_rule_set = ManagedRuleSet(rule_set_type='OWASP', rule_set_version='3.0')
+    managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type, rule_set_version=rule_set_version)
     managed_rule_definition = ManagedRulesDefinition(managed_rule_sets=[managed_rule_set])
     waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags, managed_rules=managed_rule_definition)
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
@@ -1906,11 +1942,11 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'cname':
                 record_obj.update({'alias': record.cname.rstrip('.') + '.'})
             elif record_type == 'mx':
-                record_obj.update({'preference': record.preference, 'host': record.exchange})
+                record_obj.update({'preference': record.preference, 'host': record.exchange.rstrip('.') + '.'})
             elif record_type == 'ns':
-                record_obj.update({'host': record.nsdname})
+                record_obj.update({'host': record.nsdname.rstrip('.') + '.'})
             elif record_type == 'ptr':
-                record_obj.update({'host': record.ptrdname})
+                record_obj.update({'host': record.ptrdname.rstrip('.') + '.'})
             elif record_type == 'soa':
                 record_obj.update({
                     'mname': record.host.rstrip('.') + '.',
@@ -1922,7 +1958,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 zone_obj['$ttl'] = record.minimum_ttl
             elif record_type == 'srv':
                 record_obj.update({'priority': record.priority, 'weight': record.weight,
-                                   'port': record.port, 'target': record.target})
+                                   'port': record.port, 'target': record.target.rstrip('.') + '.'})
             elif record_type == 'txt':
                 record_obj.update({'txt': ''.join(record.value)})
 
@@ -3054,10 +3090,21 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     deployment_name = 'lb_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            from azure.cli.core.commands import LongRunningOperation
+            _log_pprint_template(template)
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
-
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
@@ -3755,7 +3802,7 @@ def remove_nic_ip_config_inbound_nat_rule(
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
     keep_items = \
-        [x for x in ip_config.load_balancer_inbound_nat_rules if x.id != inbound_nat_rule]
+        [x for x in ip_config.load_balancer_inbound_nat_rules or [] if x.id != inbound_nat_rule]
     ip_config.load_balancer_inbound_nat_rules = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return get_property(poller.result().ip_configurations, ip_config_name)
@@ -5973,12 +6020,22 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            from azure.cli.core.commands import LongRunningOperation
+            _log_pprint_template(template)
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
-
-    return sdk_no_wait(no_wait, client.create_or_update,
-                       resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,

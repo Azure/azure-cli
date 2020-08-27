@@ -74,7 +74,6 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
 
     candidates_sorted = sorted(candidates, key=lambda c: parse_version(c['metadata']['version']), reverse=True)
     logger.debug("Candidates %s", [c['filename'] for c in candidates_sorted])
-    logger.debug("Choosing the latest of the remaining candidates.")
 
     if target_version:
         try:
@@ -82,6 +81,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         except IndexError:
             raise NoExtensionCandidatesError('Extension with version {} not found'.format(target_version))
     else:
+        logger.debug("Choosing the latest of the remaining candidates.")
         chosen = candidates_sorted[0]
 
     logger.debug("Chosen %s", chosen)

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -130,3 +130,88 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.lease.duration', None),
                                 JMESPathCheck('properties.lease.state', 'available'),
                                 JMESPathCheck('properties.lease.status', 'unlocked'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_show_oauth(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'account': storage_account,
+            'container': self.create_container(account_info=account_info),
+            'local_file': self.create_temp_file(128),
+            'block': self.create_random_name(prefix='block', length=12),
+            'page': self.create_random_name(prefix='page', length=12),
+        })
+
+        # test block blob
+        self.oauth_cmd('storage blob upload -c {container} -n {block} -f "{local_file}" --account-name {sa}')
+
+        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
+            .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
+                                JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                JMESPathCheck('properties.contentLength', 128 * 1024),
+                                JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.pageRanges', None),
+                                JMESPathCheckExists('properties.etag'),
+                                JMESPathCheck('objectReplicationDestinationPolicy', None),
+                                JMESPathCheck('objectReplicationSourceProperties', []),
+                                JMESPathCheck('rehydratePriority', None),
+                                JMESPathCheck('tags', None),
+                                JMESPathCheck('tagCount', None),
+                                JMESPathCheck('versionId', None))
+
+        self.kwargs['etag'] = self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
+            .get_output_in_json()['properties']['etag']
+
+        # test page blob
+        self.oauth_cmd('storage blob upload -c {container} -n {page} -f "{local_file}" --type page --account-name {sa}')
+        self.oauth_cmd('storage blob show -c {container} -n {page} --account-name {sa}') \
+            .assert_with_checks(JMESPathCheck('name', self.kwargs['page']),
+                                JMESPathCheck('properties.blobType', 'PageBlob'),
+                                JMESPathCheck('properties.contentLength', 128 * 1024),
+                                JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheckExists('properties.pageRanges'))
+
+        # test snapshot
+        self.kwargs['snapshot'] = self.oauth_cmd('storage blob snapshot -c {container} -n {block} --account-name {sa}')\
+            .get_output_in_json()['snapshot']
+        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}') \
+            .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
+                                JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                JMESPathCheck('properties.contentLength', 128 * 1024),
+                                JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.pageRanges', None))
+
+        # test precondition
+        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-match {etag}') \
+            .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
+                                JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                JMESPathCheck('properties.contentLength', 128 * 1024),
+                                JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.pageRanges', None))
+
+        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-match *') \
+            .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
+                                JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                JMESPathCheck('properties.contentLength', 128 * 1024),
+                                JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.pageRanges', None))
+
+        from azure.core.exceptions import ResourceModifiedError, HttpResponseError
+        with self.assertRaisesRegex(ResourceModifiedError, 'ErrorCode:ConditionNotMet'):
+            self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-none-match {etag}')
+
+        with self.assertRaisesRegex(HttpResponseError, 'ErrorCode:UnsatisfiableCondition'):
+            self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-none-match *')
+
+        with self.assertRaisesRegex(ResourceModifiedError, 'ErrorCode:ConditionNotMet'):
+            self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-unmodified-since "2020-06-29T06:32Z"')
+
+        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-modified-since "2020-06-29T06:32Z"') \
+            .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
+                                JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                JMESPathCheck('properties.contentLength', 128 * 1024),
+                                JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.pageRanges', None))

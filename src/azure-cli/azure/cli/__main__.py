@@ -2,9 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=wrong-import-position
+
+import timeit
+# Log the start time
+start_time = timeit.default_timer()
 
 import sys
-import timeit
 import uuid
 
 import azure.cli.core.telemetry as telemetry
@@ -12,9 +16,9 @@ from azure.cli.core import get_default_cli
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
-# Log the start time
-# TODO: Disable E402 "Module level import not at top of file" so that imports can also be timed
-start_time = timeit.default_timer()
+__author__ = "Microsoft Corporation <python@microsoft.com>"
+__version__ = "2.11.0"
+
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
 # If uuid1 raises ValueError, use uuid4 instead.
@@ -60,8 +64,6 @@ except SystemExit as ex:  # some code directly call sys.exit, this is to make su
     raise ex
 
 finally:
-    telemetry.conclude()
-
     try:
         # Log the invoke finish time
         invoke_finish_time = timeit.default_timer()
@@ -71,3 +73,44 @@ finally:
                     invoke_finish_time - init_finish_time)
     except NameError:
         pass
+
+    try:
+        # check for new version auto-upgrade
+        if az_cli.config.getboolean('auto-upgrade', 'enable', False) and \
+                sys.argv[1] != 'upgrade' and (sys.argv[1] != 'extension' and sys.argv[2] != 'update'):
+            from azure.cli.core._session import VERSIONS  # pylint: disable=ungrouped-imports
+            from azure.cli.core.util import get_cached_latest_versions, _VERSION_UPDATE_TIME  # pylint: disable=ungrouped-imports
+            if VERSIONS[_VERSION_UPDATE_TIME]:
+                import datetime
+                version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
+                if datetime.datetime.now() > version_update_time + datetime.timedelta(days=10):
+                    get_cached_latest_versions()
+                from distutils.version import LooseVersion
+                if LooseVersion(VERSIONS['versions']['core']['local']) < LooseVersion(VERSIONS['versions']['core']['pypi']):  # pylint: disable=line-too-long
+                    import subprocess
+                    import platform
+                    logger.warning("New Azure CLI version available. Running 'az upgrade' to update automatically.")
+                    update_all = az_cli.config.getboolean('auto-upgrade', 'all', True)
+                    prompt = az_cli.config.getboolean('auto-upgrade', 'prompt', True)
+                    cmd = ['az', 'upgrade', '--all', str(update_all)]
+                    if prompt:
+                        exit_code = subprocess.call(cmd, shell=platform.system() == 'Windows')
+                    else:
+                        import os
+                        devnull = open(os.devnull, 'w')
+                        cmd.append('-y')
+                        exit_code = subprocess.call(cmd, shell=platform.system() == 'Windows', stdout=devnull)
+                    if exit_code != 0:
+                        from knack.util import CLIError
+                        err_msg = "Auto upgrade failed with exit code {}".format(exit_code)
+                        logger.warning(err_msg)
+                        telemetry.set_exception(CLIError(err_msg), fault_type='auto-upgrade-failed')
+    except IndexError:
+        pass
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning("Auto upgrade failed. %s", str(ex))
+        telemetry.set_exception(ex, fault_type='auto-upgrade-failed')
+
+    telemetry.set_init_time_elapsed("{:.6f}".format(init_finish_time - start_time))
+    telemetry.set_invoke_time_elapsed("{:.6f}".format(invoke_finish_time - init_finish_time))
+    telemetry.conclude()
