@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 import os
 import os.path
 import re
-from math import ceil
 from ipaddress import ip_network
 
 # pylint: disable=no-name-in-module,import-error
@@ -16,6 +15,8 @@ from knack.log import get_logger
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 import azure.cli.core.keys as keys
+
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterPropertiesAutoScalerProfile
 
 logger = get_logger(__name__)
 
@@ -118,6 +119,36 @@ def validate_k8s_version(namespace):
                            'such as "1.11.8" or "1.12.6"')
 
 
+def validate_cluster_autoscaler_profile(namespace):
+    """ Validates that cluster autoscaler profile is acceptable by:
+        1. Extracting the key[=value] format to map
+        2. Validating that the key isn't empty and that the key is valid
+        Empty strings pass validation
+    """
+    _extract_cluster_autoscaler_params(namespace)
+    if namespace.cluster_autoscaler_profile is not None:
+        for key in namespace.cluster_autoscaler_profile.keys():
+            _validate_cluster_autoscaler_key(key)
+
+
+def _validate_cluster_autoscaler_key(key):
+    if not key:
+        raise CLIError('Empty key specified for cluster-autoscaler-profile')
+    valid_keys = list(k.replace("_", "-") for k, v in ManagedClusterPropertiesAutoScalerProfile._attribute_map.items())  # pylint: disable=protected-access
+    if key not in valid_keys:
+        raise CLIError("'{0}' is an invalid key for cluster-autoscaler-profile. "
+                       "Valid keys are {1}.".format(key, ', '.join(valid_keys)))
+
+
+def _extract_cluster_autoscaler_params(namespace):
+    """ Extracts multiple space-separated cluster autoscaler parameters in key[=value] format """
+    if isinstance(namespace.cluster_autoscaler_profile, list):
+        params_dict = {}
+        for item in namespace.cluster_autoscaler_profile:
+            params_dict.update(validate_tag(item))
+        namespace.cluster_autoscaler_profile = params_dict
+
+
 def validate_nodepool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
     if namespace.nodepool_name != "":
@@ -162,16 +193,6 @@ def validate_linux_host_name(namespace):
     if not found:
         raise CLIError('--name cannot exceed 63 characters and can only contain '
                        'letters, numbers, or dashes (-).')
-
-
-def validate_max_pods(namespace):
-    """Validates that max_pods is set to a reasonable minimum number."""
-    # kube-proxy and kube-svc reside each nodes,
-    # 2 kube-proxy pods, 1 azureproxy/heapster/dashboard/tunnelfront are in kube-system
-    minimum_pods_required = ceil((namespace.node_count * 2 + 6 + 1) / namespace.node_count)
-    if namespace.max_pods != 0 and namespace.max_pods < minimum_pods_required:
-        raise CLIError('--max-pods must be at least {} for a managed Kubernetes cluster to function.'
-                       .format(minimum_pods_required))
 
 
 def validate_vm_set_type(namespace):

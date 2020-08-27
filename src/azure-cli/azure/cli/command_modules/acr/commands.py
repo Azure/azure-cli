@@ -189,7 +189,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('list', 'acr_repository_list')
         g.command('show-tags', 'acr_repository_show_tags')
         g.command('show-manifests', 'acr_repository_show_manifests')
-        g.command('show', 'acr_repository_show')
+        g.show_command('show', 'acr_repository_show')
         g.command('update', 'acr_repository_update')
         g.command('delete', 'acr_repository_delete')
         g.command('untag', 'acr_repository_untag')
@@ -263,16 +263,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('acr taskrun', acr_taskrun_util, is_preview=True) as g:
         g.command('list', 'acr_taskrun_list')
         g.command('delete', 'acr_taskrun_delete')
-        g.command('show', 'acr_taskrun_show')
+        g.show_command('show', 'acr_taskrun_show')
         g.command('logs', 'acr_taskrun_logs', client_factory=cf_acr_runs,
                   table_transformer=None)
 
     with self.command_group('acr config content-trust', acr_policy_util) as g:
-        g.command('show', 'acr_config_content_trust_show')
+        g.show_command('show', 'acr_config_content_trust_show')
         g.command('update', 'acr_config_content_trust_update')
 
     with self.command_group('acr config retention', acr_policy_util, is_preview=True) as g:
-        g.command('show', 'acr_config_retention_show')
+        g.show_command('show', 'acr_config_retention_show')
         g.command('update', 'acr_config_retention_update')
 
     def _helm_deprecate_message(self):
@@ -286,7 +286,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                             deprecate_info=self.deprecate(redirect="helm v3",
                                                           message_func=_helm_deprecate_message)) as g:
         g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format)
-        g.command('show', 'acr_helm_show', table_transformer=helm_show_output_format)
+        g.show_command('show', 'acr_helm_show', table_transformer=helm_show_output_format)
         g.command('delete', 'acr_helm_delete')
         g.command('push', 'acr_helm_push')
         g.command('repo add', 'acr_helm_repo_add')
@@ -304,14 +304,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('create', 'acr_scope_map_create')
         g.command('delete', 'acr_scope_map_delete')
         g.command('update', 'acr_scope_map_update')
-        g.command('show', 'acr_scope_map_show')
+        g.show_command('show', 'acr_scope_map_show')
         g.command('list', 'acr_scope_map_list')
 
     with self.command_group('acr token', acr_token_util, is_preview=True) as g:
         g.command('create', 'acr_token_create')
         g.command('delete', 'acr_token_delete')
         g.command('update', 'acr_token_update')
-        g.command('show', 'acr_token_show')
+        g.show_command('show', 'acr_token_show')
         g.command('list', 'acr_token_list')
         g.command('credential delete', 'acr_token_credential_delete')
 
@@ -336,10 +336,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('list', 'list_private_link_resources')
 
     with self.command_group('acr identity', acr_custom_util) as g:
-        g.command('show', 'show_identity')
+        g.show_command('show', 'show_identity')
         g.command('assign', 'assign_identity')
         g.command('remove', 'remove_identity')
 
     with self.command_group('acr encryption', acr_custom_util) as g:
-        g.command('show', 'show_encryption')
+        g.show_command('show', 'show_encryption')
         g.command('rotate-key', "rotate_key")

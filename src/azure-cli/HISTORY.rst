@@ -3,6 +3,149 @@
 Release History
 ===============
 
+2.11.0
+++++++
+
+**AKS**
+
+* Remove preview tag from Virtual Node add-on (#14717)
+* Add AKS CMK argument in cluster creation (#14688)
+* Set network profile when using basic load balancer. (#14699)
+* Remove max pods validation from CLI and let preflight handle it (#14750)
+* Fixing add-ons available in the help message in `az aks create` (#14810)
+* Bring in support for cluster autoscaler profile in core CLI (#14779)
+
+**AppService**
+
+* `az webapp`: Add list-instances command (#13408)
+* `az webapp ssh`: Add --instance parameter to connect to a specific instance (#13408)
+* `az webapp create-remote-connection`: Add --instance parameter to connect to a specific instance (#13408)
+* Fix #14758: az webapp create errors when creating windows app with --runtime dotnetcore (#14764)
+* Fix #14701: Implement functionapp create --assign-identity (#14702)
+* Fix #11244: `az webapp auth update`: Add optional parameter to update client-secret-certificate-thumbprint (#14730)
+* `az functionapp keys`: Added commands that allow users to manage their function app keys (#14465)
+* `az functionapp function`: Added commands that allow users to manage their individual functions (#14465)
+* `az functionapp function keys`: Added commands that allow users to manage their function keys (#14465)
+* Fix #14788: az webapp create not getting correct webapp when names are substrings (#14829)
+* `az functionapp create`: Removed ability to create 2.x Functions in regions that don't support it (#14831)
+
+**ARM**
+
+* `az resource list`: Extend the return data of `createdTime`, `changedTime` and `provisioningState` (#14704)
+* `az resource`: Add parameter `--latest-include-preview` to support using the latest api-version whether this version is preview (#14589)
+
+**ARO**
+
+* CLI enhancements, including route table checking permissions (#14535)
+
+**Cloud**
+
+* `az cloud register`: Fix registering clouds with a config file (#14749)
+
+**Compute**
+
+* Update VM SKUs that support accelerated networking (#13045)
+* `az vm create`: Automatic in-guest patching (#14710)
+* `az image builder create`: Add --vm-size, --os-disk-size, --vnet, --subnet (#14685)
+* New command az vm assess-patches (#14808)
+
+**Container**
+
+* Fix #6235: Update help text for ports parameter in container create (#14825)
+
+**Datalake Store**
+
+* Fix issue #14545 for data lake join operation (#14689)
+
+**EventHub**
+
+* `az eventhubs eventhub create/update`: Change documentation of destination_name (#12747)
+
+**Extension**
+
+* Add `az extension list-versions` command to list all available versions of an extension (#14803)
+
+**HDInsight**
+
+* Support creating cluster with autoscale configuration and Support managing autoscale configuration (#14692)
+* Support creating cluster with encryption at host (#14824)
+
+**IoTCentral**
+
+* CLI documentation improvements (#14650)
+
+**Monitor**
+
+* `az monitor metrics alert create`: support RG and Sub as the scope values (#14703)
+
+**NetAppFiles**
+
+* [BREAKING CHANGE] az netappfiles snapshot create: Removed file-system-id from parameters (#14791)
+* [BREAKING CHANGE] az netappfiles snapshot show: Snapshot no longer has parameter file-system-id (#14791)
+* `az netappfiles account`: Model ActiveDirectory has a new parameter backup_operators (#14791)
+* `az netappfiles volume show`: Model dataProtection has a new parameter snapshot (#14791)
+* `az netappfiles volume show`: Model Volume has a new parameter snapshot_directory_visible (#14791)
+
+**Network**
+
+* `az network dns export`: export FQDN for MX, PTR, NS and SRV type instead of relative path (#14734)
+* Support private link for managed disks (#14707)
+* `az network application-gateway auth-cert show`: Add example to demonstrate certificate format (#14856)
+* `az network private-endpoint-connection`: support app configuration (#14860)
+
+**RBAC**
+
+* `az ad group create`: support specify description when creating a group (#14668)
+* `az role definition create`: print human readable message instead of exception when assignableScope is an empty array (#14663)
+* [BREAKING CHANGE] `az ad sp create-for-rbac`: change default permission of created certificate (#14640)
+
+**SQL**
+
+* `az sql server audit-policy`: Add sql server auditing support (#14726)
+
+**Storage**
+
+* `az storage blob copy start-batch`: Fix #6018 for --source-sas (#14709)
+* `az storage account or-policy`: Support storage account object replication policy (#14817)
+* Fix issue #14083 to upgrade azure-multiapi-storage package version for package issue and new api version support (#14785)
+* `az storage blob generate-sas`: add examples for --ip  and refine error message (#14854)
+* `az storage blob list`: Fix next_marker issue (#14751)
+
+**Synapse**
+
+* Add workspace, sparkpool, sqlpool related cmdlets (#14755)
+* Add spark job releated commands based on track2 sdk (#14819)
+* Add accesscontrol feature related commands based on track2 sdk (#14834)
+
+**Upgrade**
+
+* Add `az upgrade` command to upgrade azure cli and extensions (#14803)
+
+2.10.1
+++++++
+
+**App Service**
+
+* Fix # 9887 webapp and functionapp, support assigning/removing user managed identity (#14233)
+* Fix #1382, #14055: Update error messages for az webapp create and az webapp config container set (#14633)
+* `az webapp up`: Fix default ASP selection logic when --plan parameter is not provided (#14673)
+
+**AppConfig**
+
+* Support enabling/disabling PublicNetworkAccess during store creation (#14554)
+
+**Compute**
+
+* Support associating disk and snapshot with a disk-access resource (#14624)
+
+**Lab**
+
+* Fix for issue #7904 date validation bug in lab vm creation (#13486)
+
+**Storage**
+
+* `az storage blob upload-batch`: Fix issue #14660 with unpositional arguments (#14669)
+
 2.10.0
 ++++++
 

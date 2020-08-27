@@ -373,7 +373,7 @@ parameters:
     short-summary: Certificate to use for credentials.
     long-summary: When used with `--keyvault,` indicates the name of the cert to use or create. Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to load from a file. Do not include private key info.
   - name: --create-cert
-    short-summary: Create a self-signed certificate to use for the credential.
+    short-summary: Create a self-signed certificate to use for the credential. Only the current OS user has read/write permission to this certificate.
     long-summary: Use with `--keyvault` to create the certificate in Key Vault. Otherwise, a certificate will be created locally.
   - name: --keyvault
     short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
@@ -526,7 +526,7 @@ type: command
 short-summary: Create an Azure Active Directory user.
 parameters:
   - name: --force-change-password-next-login
-    short-summary: Marks this user as needing to update their password the next time they authenticate.
+    short-summary: Marks this user as needing to update their password the next time they authenticate. If omitted, false will be used.
   - name: --password
     short-summary: The password that should be assigned to the user for authentication.
 """
