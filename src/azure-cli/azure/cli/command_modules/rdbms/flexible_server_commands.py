@@ -83,7 +83,6 @@ def load_flexibleserver_command_table(self, _):
 ### MERU COMMANDS
     flexible_servers_custom_postgres = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_postgres#{}')
     flexible_servers_custom_mysql = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_mysql#{}')
-    flexible_servers_custom_mariadb = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_mariadb#{}')
 
     ## Postgres commands
     with self.command_group('postgres flexible-server', postgres_flexible_servers_sdk,

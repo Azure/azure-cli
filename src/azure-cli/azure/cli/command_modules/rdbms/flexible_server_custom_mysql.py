@@ -13,8 +13,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
-from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
-from ._client_factory import get_mariadb_management_client, get_mysql_flexible_management_client
+from ._client_factory import get_mysql_flexible_management_client
 from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
 
 from ._util import resolve_poller
