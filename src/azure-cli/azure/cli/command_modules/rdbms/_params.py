@@ -29,60 +29,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     }
 
     def _complex_params(command_group):
-        with self.argument_context('{} flexible-server create'.format(command_group)) as c:
-                # c.extra('generate_password', help='Generate a password.', arg_group='Authentication')
-                # Add create mode as a paramter
-            if command_group == 'postgres':
-                c.argument('version', default='12', help='Server major version.')
-                c.argument('location', arg_type=get_location_type(
-                    self.cli_ctx))  # , validator=get_default_location_from_resource_group)
-
-                c.argument('administrator_login', default=generate_username(), help='Name of the server.',
-                           arg_group='Authentication')
-                c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
-                           help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
-                           arg_group='Authentication')
-
-                c.argument('storage_mb', options_list=['--storage-size'], default='524288', type=int,
-                           help='The max storage size of the server. Unit is megabytes.')
-
-                c.argument('sku_name', options_list=['--sku-name'], default='Standard_D4s_v3',
-                           help='The name of the sku, typically, tier + family + cores')
-
-                c.argument('server_name', default=create_random_resource_name("azurepg_"), options_list=['--server-name', '-s'], help='Name of the server.')
-
-                c.argument('resource-group', default=create_random_resource_name("azurepg_"),
-                           options_list=['--server-name', '-s'], help='Name of the server.')
-
-                c.argument('assign_identity', options_list=['--assign-identity'],
-                           help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
-
-                c.argument('backup_retention', type=int, options_list=['--backup-retention'],
-                           help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
-                           validator=retention_validator)
-
-                c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']),
-                           options_list=['--ssl-enforcement'],
-                           help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
-                c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']),
-                           options_list=['--public-network-access'],
-                           help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
-                c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']),
-                           options_list=['--infrastructure-encryption', '-i'],
-                           help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
-                c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']),
-                           options_list=['--geo-redundant-backup'],
-                           help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
-
-                c.argument('tags', tags_type)
-                c.ignore('database_name')
-
-            if command_group == 'mysql':
-                c.argument('version', default='5.7', help='Server versions.')
-                c.argument('tier', default='GeneralPurpose')
-                #c.ignore('storage_mb')
-                #c.argument('version', default='12', help='Server major version.')
-
         with self.argument_context('{} server create'.format(command_group)) as c:
             c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16. ')
             c.argument('administrator_login', required=True, arg_group='Authentication')
@@ -240,23 +186,38 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                         actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
         with self.argument_context('{} flexible-server create'.format(command_group)) as c:
-            c.argument('resource_group_name', required=True, arg_type=resource_group_name_type)
-            c.argument('sku_name', options_list=['--sku-name'], required=True, help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16. ')
-            c.argument('server_name', required=True, arg_type=server_name_setter_arg_type)
+            # c.extra('generate_password', help='Generate a password.', arg_group='Authentication')
+
+            # Add create mode as a parameter
+            if command_group == 'postgres':
+                default_string = 'azurepg_'
+                c.argument('tier', default='GeneralPurpose', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+                c.argument('storage_mb', default='131072', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
+                c.argument('version', default='12', help='Server major version.')              
+            elif command_group == 'mysql':
+                default_string = 'azuremysql_'
+                c.argument('tier', default='Burstable', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+                c.argument('storage_mb', default='10240', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
+                c.argument('version', default='5.7', help='Server major version.')
+      
+            c.argument('server_name', default=create_random_resource_name(default_string), arg_type=server_name_setter_arg_type)
+            c.argument('resource_group_name', default=create_random_resource_name(default_string),  arg_type=resource_group_name_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+            c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication')
+            c.argument('administrator_login_password', options_list=['--admin-password, -p'], arg_group='Authentication')
 
-            c.argument('administrator_login', options_list=['--admin-user'], required=True, arg_group='Authentication')
-            c.argument('administrator_login_password', options_list=['--admin-password'], required=True, arg_group='Authentication')
-
-            c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
-            c.argument('storage_mb', options_list=['--storage-mb'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
-            c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
-            c.argument('infrastructure_encryption', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--infrastructure-encryption', '-i'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
-            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
-            c.argument('high_availability', options_list=['--high-availability'], help='')
-            c.argument('public_access', options_list=['--public-access'], help='')
-            c.argument('version', help='Server major version.')
-
+            c.argument('backup_retention', default='7', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
+            c.argument('tags', tags_type)
+            c.argument('public_access', options_list=['--public-access'], help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ')
+            # c.argument('vnet_name', option_list=['--vnet'])
+            # c.argument('vnet_address_prefix', default='10.0.0.0/16', option_list=['--vnet-address-prefix'])
+            # c.argument('subnet_name', option_list=['--subnet'])
+            # c.argument('subnet_address_preefix', default='10.0.0.0/24', option_list=['--subnet-address-prefix'])
+            c.argument('high_availability', options_list=['--high-availability'], help='')     
+            c.ignore('database_name')
+        
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server'], help='The name or resource ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
@@ -273,7 +234,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             argument_context_string = '{} flexible-server {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
-                c.argument('server_name', required=True, arg_type=server_name_arg_type)
+                c.argument('server_name', arg_type=server_name_arg_type)
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')
