@@ -464,8 +464,7 @@ def acr_repository_metadata_show(cmd,
                 f.write(chunk)
         print("Wrote downloaded metadata for key '{}' to file {}".format(key, file))
         return None
-    else:
-        return result
+    return result
 
 
 def acr_repository_metadata_update(cmd,

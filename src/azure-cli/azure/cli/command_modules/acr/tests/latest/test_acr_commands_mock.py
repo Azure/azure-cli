@@ -409,7 +409,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             timeout=300,
             verify=mock.ANY,
             stream=False)
-    
+
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
     def test_repository_metadata_show(self, mock_requests_metadata_get, mock_get_access_credentials):
