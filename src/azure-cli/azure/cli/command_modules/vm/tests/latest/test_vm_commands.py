@@ -877,11 +877,11 @@ class VMSimulateEvictionScenarioTest(ScenarioTest):
         })
 
         # simulate-eviction on a Regular VM, expect failure
-        self.cmd('vm create --resource-group {rg} --name {vm1} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image Centos --priority Regular')
+        self.cmd('vm create --resource-group {rg} --name {vm1} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image Centos --priority Regular --nsg-rule NONE')
         self.cmd('vm simulate-eviction --resource-group {rg} --name {vm1}', expect_failure=True)
 
         # simulate-eviction on a Spot VM with Deallocate policy, expect VM to be deallocated
-        self.cmd('vm create --resource-group {rg} --name {vm2} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image Centos --priority Spot --eviction-policy Deallocate')
+        self.cmd('vm create --resource-group {rg} --name {vm2} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image Centos --priority Spot --eviction-policy Deallocate --nsg-rule NONE')
         self.cmd('vm simulate-eviction --resource-group {rg} --name {vm2}')
         time.sleep(180)
         self.cmd('vm get-instance-view --resource-group {rg} --name {vm2}', checks=[
@@ -893,7 +893,7 @@ class VMSimulateEvictionScenarioTest(ScenarioTest):
         ])
 
         # simulate-eviction on a Spot VM with Delete policy, expect VM to be deleted
-        self.cmd('vm create --resource-group {rg} --name {vm3} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image Centos --priority Spot --eviction-policy Delete')
+        self.cmd('vm create --resource-group {rg} --name {vm3} --admin-username azureuser --admin-password testPassword0 --authentication-type password --location {loc} --image Centos --priority Spot --eviction-policy Delete --nsg-rule NONE')
         self.cmd('vm simulate-eviction --resource-group {rg} --name {vm3}')
         time.sleep(180)
         self.cmd('vm list --resource-group {rg}', checks=[self.check('length(@)', 2)])
@@ -2811,7 +2811,7 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         self.cmd('vmss simulate-eviction --resource-group {rg} --name {vmss1} --instance-id {id}', expect_failure=True)
 
         # simulate-eviction on a Spot VMSS with Deallocate policy, expect VMSS instance to be deallocated
-        self.cmd('vmss create --resource-group {rg} --name {vmss2} --location {loc} --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --lb-sku Standard')
+        self.cmd('vmss create --resource-group {rg} --name {vmss2} --location {loc} --instance-count 2 --image Centos --priority Spot --eviction-policy Deallocate --single-placement-group True')
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss2}').get_output_in_json()
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
         self.kwargs['id'] = self.kwargs['instance_ids'][0]
@@ -2824,7 +2824,7 @@ class VMSSSimulateEvictionScenarioTest(ScenarioTest):
         ])
 
         # simulate-eviction on a Spot VMSS with Delete policy, expect VMSS instance to be deleted
-        self.cmd('vmss create --resource-group {rg} --name {vmss3} --location {loc} --instance-count 2 --image Centos --priority Spot --eviction-policy Delete --lb-sku Standard')
+        self.cmd('vmss create --resource-group {rg} --name {vmss3} --location {loc} --instance-count 2 --image Centos --priority Spot --eviction-policy Delete --single-placement-group True')
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss3}').get_output_in_json()
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
         self.kwargs['id'] = self.kwargs['instance_ids'][0]
@@ -4898,6 +4898,9 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('osProfile.windowsConfiguration.enableAutomaticUpdates', True),
             self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'AutomaticByOS')
+        ])
+        self.cmd('vm assess-patches -g {rg} -n {vm}', checks=[
+            self.check('status', 'Succeeded')
         ])
 
 

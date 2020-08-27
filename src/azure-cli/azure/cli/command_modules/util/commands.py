@@ -11,3 +11,6 @@ def load_command_table(self, _):
 
     with self.command_group('') as g:
         g.custom_command('version', 'show_version')
+
+    with self.command_group('') as g:
+        g.custom_command('upgrade', 'upgrade_version', is_experimental=True)

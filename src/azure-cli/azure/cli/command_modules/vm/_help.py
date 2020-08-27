@@ -748,6 +748,14 @@ type: group
 short-summary: Manage Linux or Windows virtual machines.
 """
 
+helps['vm assess-patches'] = """
+type: command
+short-summary: Assess patches on a VM.
+examples:
+  - name: Assess patches on a VM.
+    text: az vm assess-patches -g MyResourceGroup -n MyVm
+"""
+
 helps['vm auto-shutdown'] = """
 type: command
 short-summary: Manage auto-shutdown for VM.

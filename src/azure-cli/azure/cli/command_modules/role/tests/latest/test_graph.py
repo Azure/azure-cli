@@ -339,7 +339,7 @@ class GraphGroupScenarioTest(ScenarioTest):
             user2_result = self.cmd('ad user create --display-name {user2} --password {pass} --user-principal-name {user2}@{domain}').get_output_in_json()
             self.kwargs['user2_id'] = user2_result['objectId']
             # create group
-            group_result = self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()
+            group_result = self.cmd('ad group create --display-name {group} --mail-nickname {group} --description {group}').get_output_in_json()
             self.kwargs['group_id'] = group_result['objectId']
             # add user1 into group
             self.cmd('ad group member add -g {group} --member-id {user1_id}',
@@ -354,7 +354,8 @@ class GraphGroupScenarioTest(ScenarioTest):
             # show group
             self.cmd('ad group show -g {group}', checks=[
                 self.check('objectId', '{group_id}'),
-                self.check('displayName', '{group}')
+                self.check('displayName', '{group}'),
+                self.check('description', '{group}')
             ])
             self.cmd('ad group show -g {group}',
                      checks=self.check('displayName', '{group}'))

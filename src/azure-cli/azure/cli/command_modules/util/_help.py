@@ -40,3 +40,8 @@ helps['version'] = """
 type: command
 short-summary: Show the versions of Azure CLI modules and extensions in JSON format by default or format configured by --output
 """
+
+helps['upgrade'] = """
+type: command
+short-summary: Upgrade Azure CLI and extensions
+"""

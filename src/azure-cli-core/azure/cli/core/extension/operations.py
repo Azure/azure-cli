@@ -298,7 +298,9 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
             download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-            raise CLIError("No updates available for '{}'. Use --debug for more information.".format(extension_name))
+            msg = "No updates available for '{}'. Use --debug for more information.".format(extension_name)
+            logger.warning(msg)
+            return
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.
         backup_dir = os.path.join(tempfile.mkdtemp(), extension_name)
         extension_path = ext.path
@@ -353,6 +355,45 @@ def list_available_extensions(index_url=None, show_details=False):
             'experimental': latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
             'installed': installed
         })
+    return results
+
+
+def list_versions(extension_name, index_url=None):
+    index_data = get_index_extensions(index_url=index_url)
+
+    try:
+        exts = index_data[extension_name]
+    except Exception:
+        raise CLIError('Extension {} not found.'.format(extension_name))
+
+    try:
+        installed_ext = get_extension(extension_name, ext_type=WheelExtension)
+    except ExtensionNotInstalledException:
+        installed_ext = None
+
+    results = []
+    latest_compatible_version = None
+
+    for ext in sorted(exts, key=lambda c: parse_version(c['metadata']['version']), reverse=True):
+        compatible = ext_compat_with_cli(ext['metadata'])[0]
+        ext_version = ext['metadata']['version']
+        if latest_compatible_version is None and compatible:
+            latest_compatible_version = ext_version
+        installed = ext_version == installed_ext.version if installed_ext else False
+        if installed and parse_version(latest_compatible_version) > parse_version(installed_ext.version):
+            installed = str(True) + ' (upgrade available)'
+        version = ext['metadata']['version']
+        if latest_compatible_version == ext_version:
+            version = version + ' (max compatible version)'
+        results.append({
+            'name': extension_name,
+            'version': version,
+            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False),
+            'experimental': ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'installed': installed,
+            'compatible': compatible
+        })
+    results.reverse()
     return results
 
 
