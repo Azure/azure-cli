@@ -214,9 +214,8 @@ def get_cached_latest_versions(versions=None):
                 return cache_versions.copy(), True
 
     versions, success = _update_latest_from_github(versions)
-    if success:
-        VERSIONS['versions'] = versions
-        VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
+    VERSIONS['versions'] = versions
+    VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
     return versions.copy(), success
 
 
