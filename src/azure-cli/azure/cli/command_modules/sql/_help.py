@@ -112,10 +112,6 @@ helps['sql db import'] = """
 type: command
 short-summary: Imports a bacpac into an existing database.
 examples:
-  - name: Get an SAS key for use in import operation.
-    text: |
-        az storage blob generate-sas --account-name myAccountName -c myContainer -n myBacpac.bacpac \\
-            --permissions r --expiry 2018-01-01T00:00:00Z
   - name: Import bacpac into an existing database using an SAS key.
     text: |
         az sql db import -s myserver -n mydatabase -g mygroup -p password -u login \\
