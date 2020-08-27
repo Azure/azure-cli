@@ -187,23 +187,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} flexible-server create'.format(command_group)) as c:
             # c.extra('generate_password', help='Generate a password.', arg_group='Authentication')
-
             # Add create mode as a parameter
             if command_group == 'postgres':
-                default_string = 'azurepg_'
+                default_string = 'azurepg-'
                 c.argument('tier', default='GeneralPurpose', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', default='131072', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
                 c.argument('version', default='12', help='Server major version.')              
             elif command_group == 'mysql':
-                default_string = 'azuremysql_'
+                default_string = 'azuremysql-'
                 c.argument('tier', default='Burstable', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', default='10240', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
                 c.argument('version', default='5.7', help='Server major version.')
-      
+                
             c.argument('server_name', default=create_random_resource_name(default_string), arg_type=server_name_setter_arg_type)
-            c.argument('resource_group_name', default=create_random_resource_name(default_string),  arg_type=resource_group_name_type)
+            c.argument('resource_group_name', default=create_random_resource_name(default_string), arg_type=resource_group_name_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication')
             c.argument('administrator_login_password', options_list=['--admin-password, -p'], arg_group='Authentication')
