@@ -536,7 +536,7 @@ def request_data_from_registry(http_method,
                     json=json_payload,
                     timeout=timeout,
                     verify=(not should_disable_connection_verify()),
-                    stream=get_iter_content,
+                    stream=get_iter_content,  # must enable stream to get content via iter_content
                 )
 
             log_registry_response(response)
@@ -581,8 +581,8 @@ def request_data_from_registry(http_method,
     raise CLIError(errorMessage)
 
 
-def _get_result_from_response(response, result_index, get_raw, chunk_size=128, decode_unicode=False):
-    if get_raw:
+def _get_result_from_response(response, result_index, get_iter_content, chunk_size=128, decode_unicode=False):
+    if get_iter_content:
         return response.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
     if result_index is not None:  # 0 is an acceptable result_index
         return response.json()[result_index]

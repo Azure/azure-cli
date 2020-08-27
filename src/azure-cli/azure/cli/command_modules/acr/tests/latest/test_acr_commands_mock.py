@@ -52,6 +52,10 @@ TEST_ACR_ACCESS_TOKEN = 'testacraccesstoken'
 TEST_REPOSITORY = 'testrepository'
 
 
+def _get_builtins_open():
+    return '__builtin__.open' if sys.version_info[0] < 3 else 'builtins.open'
+
+
 class AcrMockCommandsTests(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
@@ -414,6 +418,8 @@ class AcrMockCommandsTests(unittest.TestCase):
         response = mock.MagicMock()
         response.headers = {}
         response.status_code = 200
+
+        # Content when showing list of metadata keys for a repository
         response.content = json.dumps({
             'registry': 'testregistry.azurecr.io',
             'imageName': 'testrepository',
@@ -423,13 +429,13 @@ class AcrMockCommandsTests(unittest.TestCase):
             ],
         }).encode()
 
+        # iter_content when showing metadata for a repository by key
         mock_iter_content = mock.MagicMock()
         testfilecontents = ['0' * 128, 'testfilecontents']
         mock_iter_content.return_value = iter(testfilecontents)
         response.iter_content = mock_iter_content
 
         mock_requests_metadata_get.return_value = response
-
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
 
         # Show metadata for a repository
@@ -445,19 +451,17 @@ class AcrMockCommandsTests(unittest.TestCase):
             timeout=300,
             verify=mock.ANY,
             stream=False)
-
-        builtins_open = '__builtin__.open' if sys.version_info[0] < 3 else 'builtins.open'
+        assert not mock_iter_content.called, ("Response's iter_content() should not be called when "
+                                              "listing metadata for a repository.")
 
         # Show metadata for a repository by key
-        with mock.patch(builtins_open) as mock_open:
+        with mock.patch(_get_builtins_open()) as mock_open:
             mock_open.return_value = mock.MagicMock()
             acr_repository_metadata_show(cmd,
                                          registry_name='testregistry',
                                          repository='testrepository',
                                          key='testkey',
                                          file_out='testfileout')
-            mock_open.assert_called_with('testfileout', 'wb')
-            mock_iter_content.assert_called_with(chunk_size=128, decode_unicode=False)
             mock_requests_metadata_get.assert_called_with(
                 method='get',
                 url='https://testregistry.azurecr.io/acr/v1/testrepository/_metadata/testkey',
@@ -467,8 +471,11 @@ class AcrMockCommandsTests(unittest.TestCase):
                 timeout=300,
                 verify=mock.ANY,
                 stream=True)
-            for call, teststring in zip(mock_open.return_value.__enter__.return_value.write.mock_calls, testfilecontents):
-                call.assert_called_with(teststring.encode())
+            mock_iter_content.assert_called_with(chunk_size=128, decode_unicode=False)
+            mock_open.assert_called_with('testfileout', 'wb')
+            mock_write_calls = mock_open.return_value.__enter__.return_value.write.mock_calls
+            for mock_write_call, teststring in zip(mock_write_calls, testfilecontents):
+                mock_write_call.assert_called_with(teststring.encode())
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
@@ -485,11 +492,9 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_metadata_update.return_value = response
 
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
-        
-        builtins_open = '__builtin__.open' if sys.version_info[0] < 3 else 'builtins.open'
 
         # Update metadata for a repository by key with data from file
-        with mock.patch(builtins_open) as mock_open:
+        with mock.patch(_get_builtins_open()) as mock_open:
             mock_open.return_value = mock.MagicMock()
             acr_repository_metadata_update(cmd,
                                            registry_name='testregistry',
@@ -797,7 +802,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
 
-        builtins_open = '__builtin__.open' if sys.version_info[0] < 3 else 'builtins.open'
+        builtins_open = _get_builtins_open()
 
         # Push a chart
         with mock.patch(builtins_open) as mock_open:

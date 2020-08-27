@@ -443,6 +443,7 @@ def acr_repository_metadata_show(cmd,
                                  password=None):
     _validate_parameters_out(key, file_out)
 
+    # To get value of keyed metadata, get content as iter_content and write to file.
     get_iter_content = key is not None
 
     result = _acr_repository_metadata_helper(
@@ -540,7 +541,7 @@ def acr_repository_metadata_delete(cmd,
         permission=RepoAccessTokenPermission.DELETE_META_READ.value)
 
     user_confirmation("Are you sure you want to delete metadata in the key '{}'"
-                        " of the repository '{}'?".format(key, repository), yes)
+                      " of the repository '{}'?".format(key, repository), yes)
     path = _get_repository_metadata_path(repository, key)
 
     return request_data_from_registry(
