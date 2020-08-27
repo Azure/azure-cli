@@ -129,7 +129,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr repository metadata') as c:
         c.argument('key', help="The name of the key used to access specific metadata.")
-        c.argument('file', help="Path to file for upload/download of metadata.")
+        c.argument('file', help="The path to a file for upload/download of metadata.")
 
     with self.argument_context('acr create') as c:
         c.argument('registry_name', completer=None, validator=None)
