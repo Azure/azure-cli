@@ -59,7 +59,10 @@ class TestData:
             passed_sum += passed
             failed_sum += failed
 
+        print(self.modules)
+        print('Sorting...')
         sorted(self.modules, key=lambda x: x[0])
+        print(self.modules)
 
         total_sum = passed_sum + failed_sum
         rate_sum = 1 if total_sum == 0 else passed_sum / total_sum
