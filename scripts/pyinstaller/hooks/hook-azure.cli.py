@@ -3,24 +3,22 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
 import pkgutil
-from importlib import import_module
+import importlib
 
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-SRC_DIR = os.path.join(BASE_DIR, 'src')
-PATTERN = r'operations_tmpl=(?P<quote>[\'"])(?P<module>.+)#.+(?P=quote)'
-EXCLUDE_SUFFIX = ['.{}', '.operations']
+_hiddenimports = collect_submodules('humanfriendly')
+_data = []
 
-_hiddenimports = []
-modules = []
-
-mods_ns_pkg = import_module('azure.cli.command_modules')
+mods_ns_pkg = importlib.import_module('azure.cli.command_modules')
 command_modules = [modname for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__)]
 for command_module in command_modules:
     _hiddenimports.extend(collect_submodules('azure.cli.command_modules.{}'.format(command_module)))
 
-print(_hiddenimports)
+    tests_module = 'azure.cli.command_modules.{}.tests'.format(command_module)
+    tests = importlib.util.find_spec(tests_module)
+    if tests is not None:
+        _data.extend(collect_data_files(tests_module))
 hiddenimports = _hiddenimports
+datas = _data
