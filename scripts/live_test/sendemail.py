@@ -8,10 +8,11 @@ import os
 import json
 import traceback
 import datetime
+import mysql.connector
+import test_data
 
 from sendgrid import SendGridAPIClient
 
-import test_data
 
 SENDGRID_KEY = sys.argv[1]
 BUILD_ID = sys.argv[2]
@@ -22,6 +23,7 @@ USER_LIVE = sys.argv[6]
 ARTIFACT_DIR = sys.argv[7]
 REQUESTED_FOR_EMAIL = sys.argv[8]
 ACCOUNT_KEY = sys.argv[9]
+COMMIT_ID = sys.argv[10]
 
 
 def main():
@@ -35,6 +37,7 @@ def main():
     print(ARTIFACT_DIR)
     print(REQUESTED_FOR_EMAIL)
     print(ACCOUNT_KEY)
+    print(COMMIT_ID)
 
     # Upload results to storage account, container
     container = ''
@@ -50,7 +53,10 @@ def main():
     testdata.collect()
 
     # Write database
-    write_db()
+    try:
+        write_db(container, testdata)
+    except Exception:
+        print(traceback.format_exc())
 
     # Send email
     send_email(container, testdata)
@@ -96,12 +102,59 @@ def upload_files(container):
                 os.popen(cmd)
 
 
-def write_db():
+def write_db(container, testdata):
     """
-    Insert data to database
-    :return:
+    Insert data to database.
+    Sql statements to create table:
+    USE clidb;
+    CREATE TABLE t1 (
+       repo       VARCHAR(200) COMMENT 'Repo URL',
+       branch     VARCHAR(200) COMMENT 'Branch name',
+       commit     VARCHAR(50) COMMENT 'Commit ID',
+       target     VARCHAR(2000) COMMENT 'Target modules to test. Splited by space, Empty string represents all modules',
+       live       TINYINT(1) COMMENT 'Live run or not',
+       user       VARCHAR(50) COMMENT 'User (email address) who triggers the run',
+       pass       INT COMMENT 'Number of passed tests',
+       fail       INT COMMENT 'Number of failed tests',
+       rate       VARCHAR(50) COMMENT 'Pass rate',
+       detail     VARCHAR(10000) COMMENT 'Detail',
+       container  VARCHAR(200) COMMENT 'Container URL',
+       date       VARCHAR(10) COMMENT 'Date. E.g. 20200801',
+       time       VARCHAR(10) COMMENT 'Time. E.g. 183000'
+    );
+
     """
-    pass
+    print('Writing DB...')
+    # Connect
+    cnx = mysql.connector.connect(user='fey@clisqldbserver',
+                                  password='',
+                                  host='clisqldbserver.mysql.database.azure.com',
+                                  database='clidb')
+    cursor = cnx.cursor()
+    sql = 'INSERT INTO t1 (repo, branch, commit, target, live, user, pass, fail, rate, detail, container, date, time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
+    repo = USER_REPO
+    branch = USER_BRANCH
+    commit = COMMIT_ID
+    target = USER_TARGET
+    live = USER_LIVE
+    user = REQUESTED_FOR_EMAIL
+    pass0 = testdata.total[2]
+    fail = testdata.total[1]
+    rate = testdata.total[3]
+    detail = str(testdata.modules)
+    container = 'https://clitestresultstac.blob.core.windows.net/' + container
+    d = datetime.datetime.now()
+    date = d.strftime('%Y%m%d')
+    time = d.strftime('%H%M%S')
+    data = (repo, branch, commit, target, live, user, pass0, fail, rate, detail, container, date, time)
+    print(data)
+    cursor.execute(sql, data)
+
+    # Make sure data is committed to the database
+    cnx.commit()
+    # Close
+    cursor.close()
+    cnx.close()
 
 
 def send_email(container, testdata):
