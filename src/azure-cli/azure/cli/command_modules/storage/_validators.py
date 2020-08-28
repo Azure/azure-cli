@@ -584,6 +584,43 @@ def validate_included_datasets(cmd, namespace):
         namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
 
 
+def get_include_help_string(include_list):
+    item = []
+    for include in include_list:
+        if include.value == 'uncommittedblobs':
+            continue
+        item.append('(' + include.value[0] + ')' + include[1:])
+    return ', '.join(item)
+
+
+def validate_included_datasets_validator(include_class):
+    allowed_values = [x.lower() for x in dir(include_class) if not x.startswith('__')]
+    allowed_string = ''.join(x[0] for x in allowed_values)
+
+    def validator(namespace):
+        if namespace.include:
+            if set(namespace.include) - set(allowed_string):
+                help_string = get_include_help_string(include_class)
+                raise ValueError(
+                    'valid values are {} or a combination thereof.'.format(help_string))
+            include = []
+            if 's' in namespace.include:
+                include.append(include_class.snapshots)
+            if 'm' in namespace.include:
+                include.append(include_class.metadata)
+            if 'c' in namespace.include:
+                include.append(include_class.copy)
+            if 'd' in namespace.include:
+                include.append(include_class.deleted)
+            if 'v' in namespace.include:
+                include.append(include_class.versions)
+            if 't' in namespace.include:
+                include.append(include_class.tags)
+            namespace.include = include
+
+    return validator
+
+
 def validate_key_name(namespace):
     key_options = {'primary': '1', 'secondary': '2'}
     if hasattr(namespace, 'key_type') and namespace.key_type:

@@ -801,9 +801,6 @@ examples:
 helps['storage blob list'] = """
 type: command
 short-summary: List blobs in a given container.
-parameters:
-  - name: --include
-    short-summary: 'Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots, (d)eleted-soft. Can be combined.'
 examples:
   - name: List all storage blobs in a container whose names start with 'foo'; will match names such as 'foo', 'foobar', and 'foo/bar'
     text: az storage blob list -c MyContainer --prefix foo
