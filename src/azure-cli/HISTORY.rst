@@ -9,6 +9,7 @@ Release History
 **ACR**
 
 * Add Isolated Tier to Agent Pool (#14952)
+* Add OCI Artifact Source Context (#14576)
 
 **AKS**
 
