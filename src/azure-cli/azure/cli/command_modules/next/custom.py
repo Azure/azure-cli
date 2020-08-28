@@ -14,7 +14,7 @@ def _get_api_url():
 def _get_last_cmd():
     '''Get last executed command from local log files'''
     import os
-    his_file_name = os.path.join(os.environ['HOME'], '.azure', 'recommendation', 'hackthon_cmd_history.log')
+    his_file_name = os.path.join(os.environ['HOME'], '.azure', 'recommendation', 'cmd_history.log')
     with open(his_file_name, "r") as f:
         lines = f.read().splitlines()
         lines = [x for x in lines if x != 'next']
@@ -24,7 +24,7 @@ def _get_last_cmd():
 
 def _update_last_cmd(cmd):
     import os
-    his_file_name = os.path.join(os.environ['HOME'], '.azure', 'recommendation', 'hackthon_cmd_history.log')
+    his_file_name = os.path.join(os.environ['HOME'], '.azure', 'recommendation', 'cmd_history.log')
     with open(his_file_name, "a") as f:
         f.write("{}\n".format(cmd))
 

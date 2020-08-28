@@ -685,7 +685,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
         ensure_dir(base_dir)
 
-        with open(os.path.join(base_dir, 'hackthon_cmd_history.log'), 'a+') as fd:
+        with open(os.path.join(base_dir, 'cmd_history.log'), 'a+') as fd:
             print(cmd, file=fd)
 
     @staticmethod
