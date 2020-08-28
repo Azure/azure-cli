@@ -22,7 +22,10 @@ Release History
 
 * [BREAKING CHANGE] Allow to create both public and private IP while creating an Application Gateway (#14874)
 * `az network list-service-tags`: add details on location parameter use to the help message (#14935)
+**Storage**
 
+ * `az storage blob list`: Support OR properties with new api version
+ 
 2.11.0
 ++++++
 
