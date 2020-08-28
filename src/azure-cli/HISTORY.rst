@@ -3,6 +3,27 @@
 Release History
 ===============
 
+2.11.1
+++++++
+
+**ACR**
+
+* Add Isolated Tier to Agent Pool (#14952)
+
+**AKS**
+
+* fix: aks cluster create issue (#14920)
+
+**Cognitive Services**
+
+* [BREAKING CHANGE] Show additional legal term for certain APIs (#14901)
+
+**Network**
+
+* [BREAKING CHANGE] Allow to create both public and private IP while creating an Application Gateway (#14874)
+* Fix help message of options about connection-monitor endpoint (#14922)
+* `az network list-service-tags`: add details on location parameter use to the help message (#14935)
+
 2.11.0
 ++++++
 
