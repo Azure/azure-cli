@@ -715,20 +715,25 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
-    @AllowLargeResponse()
-    def test_sql_db_short_term_retention(self, resource_group, server):
+    def test_sql_db_short_term_retention(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb"
 
-        # create database
+        # Create db
         print('Creating sql db...\n')
+        self.cmd('sql db create -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name))
+    
+        # Update arguments
+        print('Updating arguments...\n')
         self.kwargs.update({
             'resource_group': resource_group,
             'server_name': server,
-            'database_name': self.create_random_name("strsqldb", 20),
+            'database_name': database_name,
             'retention_days': '7',
             'diffbackup_hours': '24'
         })
 
-        # test update short term retention policy on live database
+        # Test update short term retention policy on live database
         print('Testing sql db str-policy set...\n')
         self.cmd(
             'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days} --diffbackup-hours {diffbackup_hours}',
@@ -737,7 +742,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
                 self.check('retentionDays', '{retention_days}'),
                 self.check('diffbackupintervalinhours', '{diffbackup_hours}')])
 
-        # test get short term retention policy on live database
+        # Test get short term retention policy on live database
         print('Testing sql db str-policy show...\n')
         self.cmd(
             'sql db str-policy show -g {resource_group} -s {server_name} -n {database_name}',
@@ -749,7 +754,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
         # Delete by group/server/name
         print('Deleting sql db...\n')
         self.cmd('az sql db delete --name {database_name} --resource-group {resource_group} --server {server_name}',
-                 checks=[NoneCheck()])       
+                 checks=[NoneCheck()])
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
