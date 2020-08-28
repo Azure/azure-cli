@@ -241,6 +241,7 @@ jobs:
         pwd
         commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
         pip install sendgrid
+        pip install mysql-connector-python
         # Send notification
         az -v
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
