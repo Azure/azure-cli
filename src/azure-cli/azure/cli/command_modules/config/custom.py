@@ -19,7 +19,7 @@ def _normalize_config_value(value):
 
 def _parse_key(key):
     """Parse the key to section and option name. There can be 2 case:
-        1. If no section is provided, like `no_color`, section will default to `core`
+        1. If no section is provided, like `no_color`, section will default to `core`.
         2. If section is provided, like `core.no_color`, use the specified section.
     """
     if not key:

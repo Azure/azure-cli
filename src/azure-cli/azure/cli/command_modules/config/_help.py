@@ -40,7 +40,7 @@ examples:
     text: az config get
   - name: Get the configured value of option `no_color`.
     text: az config get no_color
-  - name: Get options in `core` section. Note that `core` is followed by a dot (.).
+  - name: Get options in the `core` section. Note that `core` is followed by a dot (.).
     text: az config get core.
   - name: Get configured defaults. Note that `defaults` is followed by a dot (.).
     text: az config get defaults.
