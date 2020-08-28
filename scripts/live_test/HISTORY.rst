@@ -7,6 +7,7 @@ Release History
 ++++++
 
 * Fix a tiny bug of sequential run.
+* Persistent testing results to database.
 
 0.1.0
 ++++++
