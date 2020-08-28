@@ -28,7 +28,8 @@ python3.7 -m venv env
 source ./env/bin/activate
 pip install pyinstaller==3.5
 pip install --upgrade "setuptools<45.0.0"
-rm -f ${WORKDIR}/src/azure-cli/azure/__init__.py ${WORKDIR}/src/azure-cli/azure/cli/__init__.py ${WORKDIR}/src/azure-cli-core/azure/__init__.py ${WORKDIR}/src/azure-cli-core/azure/cli/__init__.py ${WORKDIR}/src/azure-cli-telemetry/azure/__init__.py ${WORKDIR}/src/azure-cli-telemetry/azure/cli/__init__.py
+rm -f ${WORKDIR}/src/azure-cli/azure/__init__.py ${WORKDIR}/src/azure-cli/azure/cli/__init__.py ${WORKDIR}/src/azure-cli-core/azure/__init__.py ${WORKDIR}/src/azure-cli-core/azure/cli/__init__.py ${WORKDIR}/src/azure-cli-telemetry/azure/__init__.py ${WORKDIR}/src/azure-cli-telemetry/azure/cli/__init__.py ${WORKDIR}/src/azure-cli-testsdk/azure/__init__.py ${WORKDIR}/src/azure-cli-testsdk/azure/cli/__init__.py
+pip install -e ./src/azure-cli-testsdk
 pip install --no-deps -e ./src/azure-cli-telemetry
 pip install --no-deps -e ./src/azure-cli-core
 pip install --no-deps -e ./src/azure-cli

@@ -22,4 +22,5 @@ command_modules = [modname for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg
 for command_module in command_modules:
     _hiddenimports.extend(collect_submodules('azure.cli.command_modules.{}'.format(command_module)))
 
+print(_hiddenimports)
 hiddenimports = _hiddenimports
