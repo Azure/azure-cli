@@ -12,7 +12,7 @@ Release History
 
 **AKS**
 
-* fix: aks cluster create issue (#14920)
+* Fix aks cluster create issue (#14920)
 
 **Cognitive Services**
 
