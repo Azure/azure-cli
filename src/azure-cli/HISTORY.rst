@@ -21,7 +21,6 @@ Release History
 **Network**
 
 * [BREAKING CHANGE] Allow to create both public and private IP while creating an Application Gateway (#14874)
-* Fix help message of options about connection-monitor endpoint (#14922)
 * `az network list-service-tags`: add details on location parameter use to the help message (#14935)
 
 2.11.0
