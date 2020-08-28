@@ -16,8 +16,7 @@ from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations impor
 from ._client_factory import get_mysql_flexible_management_client
 from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
 
-from ._util import resolve_poller
-from ._util import generate_missing_parameters
+from ._util import resolve_poller, generate_missing_parameters, _create_vnet
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
@@ -75,6 +74,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, seryesver_nam
         logger.warning('Found existing MySQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
     except CloudError:
+        subnet_id = _create_vnet(cmd, server_name, location, "Microsoft.MySQL/flexibleServers")
         # Create mysql server
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,

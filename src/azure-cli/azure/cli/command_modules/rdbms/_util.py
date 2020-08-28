@@ -9,12 +9,14 @@ from knack.config import CLIConfig
 from knack.log import get_logger
 from azure.cli.core.commands import AzArgumentContext
 from azure.cli.core.commands import LongRunningOperation, _is_poller
+from azure.cli.core.profiles import ResourceType
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory
+from ._client_factory import resource_client_factory, network_client_factory
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'northeurope'
+DEFAULT_LOCATION = 'southeastasia'
+
 
 class RdbmsArgumentContext(AzArgumentContext):  # pylint: disable=too-few-public-methods
 
@@ -111,3 +113,27 @@ def _create_resource_group(cmd, location, resource_group_name):
 def _check_resource_group_existence(cmd, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)
     return  resource_client.resource_groups.check_existence(resource_group_name)
+
+
+def _create_vnet(cmd, servername, location, resource_group_name, delegation_service_name):
+    Subnet, VirtualNetwork, AddressSpace, Delegation = cmd.get_models('Subnet', 'VirtualNetwork', 'AddressSpace', 'Delegation', resource_type=ResourceType.MGMT_NETWORK)
+    client = network_client_factory(cmd.cli_ctx)
+    vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername)
+
+    logger.warning('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
+    client.virtual_networks.create_or_update(resource_group_name, vnet_name, VirtualNetwork(name=vnet_name, location=location, address_space=AddressSpace(
+                                                                 address_prefixes=[vnet_address_prefix])))
+    delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
+    subnet = Subnet(name=subnet_name, location=location, address_prefix=subnet_prefix, delegations=[delegation])
+
+    logger.warning('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
+    subnet = client.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+    return subnet.id
+
+
+def _create_vnet_metadata(servername):
+    vnet_name = servername + 'VNET'
+    subnet_name = servername + 'Subnet'
+    vnet_address_prefix = '10.0.0.0/16'
+    subnet_prefix = '10.0.0.0/24'
+    return vnet_name, subnet_name, vnet_address_prefix, subnet_prefix

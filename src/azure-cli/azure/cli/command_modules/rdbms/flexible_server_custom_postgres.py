@@ -13,8 +13,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import get_postgresql_flexible_management_client
 from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
-from ._util import generate_missing_parameters
-from ._util import resolve_poller
+from ._util import generate_missing_parameters, resolve_poller, _create_vnet
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
@@ -35,6 +34,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         logger.warning('Found existing PostgreSQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
     except CloudError:
+        subnet_id = _create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
         # Create postgresql server
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
@@ -257,6 +257,9 @@ def _update_local_contexts(cmd, server_name, resource_group_name, location):
     cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'location',
                                   location)  # Setting the location in the local context
     cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'resource_group_name', resource_group_name)
+
+
+
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
