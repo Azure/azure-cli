@@ -23,7 +23,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
         # 2. Login with 'az login'
         # 3. Go to dev.azure.com apply for a personal access token, and login with 'az devops login'
         # 4. Change the self.azure_devops_organization to your Azure DevOps organization
-        self.azure_devops_organization = "<Your DevOps Organization>"
+        self.azure_devops_organization = "azureclitest"  # Put "<Your DevOps Organization>" to record live tests. Please change back to "azureclitest" as we have a routine live tests pipeline using this account.
         self.os_type = "Windows"
         self.runtime = "dotnet"
 
@@ -155,11 +155,20 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
         os.chdir(TEST_DIR)
 
     def _tearDownDevopsEnvironment(self):
+        import time
         # Change directory back
         os.chdir(CURR_DIR)
 
         # Remove Azure Devops project
-        self.cmd('devops project delete --organization https://dev.azure.com/{org} --id {id} --yes'.format(
-            org=self.azure_devops_organization,
-            id=self.azure_devops_project_id
-        ))
+        retry = 5
+        for i in range(retry):
+            try:
+                self.cmd('devops project delete --organization https://dev.azure.com/{org} --id {id} --yes'.format(
+                    org=self.azure_devops_organization,
+                    id=self.azure_devops_project_id
+                ))
+                break
+            except Exception as ex:
+                if i == retry - 1:
+                    raise ex
+                time.sleep(120)
