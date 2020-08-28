@@ -61,6 +61,30 @@ def _get_repository_metadata_path(repository, key=None):
     return '/acr/v1/{}/_metadata'.format(repository)
 
 
+def _get_tag_metadata_path(repository, tag, key=None):
+    """Return the path to keyed metadata for a tag, or list of keys if key is empty.
+    """
+    if key:
+        return '/acr/v1/{}/_tags/{}/_metadata/{}'.format(repository, tag, key)
+    return '/acr/v1/{}/_tags/{}/_metadata'.format(repository, tag)
+
+
+def _get_manifest_metadata_path(repository, manifest, key=None):
+    """Return the path to keyed metadata for a manifest, or list of keys if key is empty.
+    """
+    if key:
+        return '/acr/v1/{}/_manifests/{}/_metadata/{}'.format(repository, manifest, key)
+    return '/acr/v1/{}/_manifests/{}/_metadata'.format(repository, manifest)
+
+
+def _get_metadata_path(repository, tag=None, manifest=None, key=None):
+    if tag:
+        return _get_tag_metadata_path(repository, tag, key)
+    if manifest:
+        return _get_manifest_metadata_path(repository, manifest, key)
+    return _get_repository_metadata_path(repository, key)
+
+
 def _get_manifest_digest(login_server, repository, tag, username, password):
     response = request_data_from_registry(
         http_method='get',
@@ -435,13 +459,16 @@ def acr_repository_delete(cmd,
 def acr_repository_metadata_show(cmd,
                                  registry_name,
                                  repository,
+                                 tag=None,
+                                 manifest=None,
                                  key=None,
                                  file=None,
                                  resource_group_name=None,  # pylint: disable=unused-argument
                                  tenant_suffix=None,
                                  username=None,
                                  password=None):
-    _validate_parameters_out(key, file)
+    _validate_parameters_tag_manifest(tag, manifest)
+    _validate_parameters_key_file(key, file)
 
     # To get value of keyed metadata, get content as iter_content and write to file.
     get_iter_content = key is not None
@@ -452,6 +479,8 @@ def acr_repository_metadata_show(cmd,
         http_method='get',
         permission=RepoAccessTokenPermission.METADATA_READ.value,
         repository=repository,
+        tag=tag,
+        manifest=manifest,
         key=key,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -472,16 +501,23 @@ def acr_repository_metadata_update(cmd,
                                    repository,
                                    key,
                                    file,
+                                   manifest=None,
+                                   tag=None,
                                    resource_group_name=None,  # pylint: disable=unused-argument
                                    tenant_suffix=None,
                                    username=None,
                                    password=None):
+    _validate_parameters_tag_manifest(tag, manifest)
+    _validate_parameters_key_file(key, file)
+
     return _acr_repository_metadata_helper(
         cmd=cmd,
         registry_name=registry_name,
         http_method='put',
         permission=RepoAccessTokenPermission.META_WRITE_META_READ.value,
         repository=repository,
+        tag=tag,
+        manifest=manifest,
         key=key,
         file_payload=file,
         tenant_suffix=tenant_suffix,
@@ -494,6 +530,8 @@ def _acr_repository_metadata_helper(cmd,
                                     http_method,
                                     permission,
                                     repository,
+                                    tag=None,
+                                    manifest=None,
                                     key=None,
                                     file_payload=None,
                                     tenant_suffix=None,
@@ -510,7 +548,7 @@ def _acr_repository_metadata_helper(cmd,
         repository=repository,
         permission=permission)
 
-    path = _get_repository_metadata_path(repository, key)
+    path = _get_metadata_path(repository, tag, manifest, key)
 
     return request_data_from_registry(
         http_method=http_method,
@@ -526,11 +564,15 @@ def acr_repository_metadata_delete(cmd,
                                    registry_name,
                                    repository,
                                    key,
+                                   tag=None,
+                                   manifest=None,
                                    resource_group_name=None,  # pylint: disable=unused-argument
                                    tenant_suffix=None,
                                    username=None,
                                    password=None,
                                    yes=False):
+    _validate_parameters_tag_manifest(tag, manifest)
+
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -542,7 +584,7 @@ def acr_repository_metadata_delete(cmd,
 
     user_confirmation("Are you sure you want to delete metadata in the key '{}'"
                       " of the repository '{}'?".format(key, repository), yes)
-    path = _get_repository_metadata_path(repository, key)
+    path = _get_metadata_path(repository, tag, manifest, key)
 
     return request_data_from_registry(
         http_method='delete',
@@ -555,9 +597,14 @@ def acr_repository_metadata_delete(cmd,
 def _validate_parameters(repository, image):
     if bool(repository) == bool(image):
         raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
+    
+def _validate_parameters_tag_manifest(tag, manifest):
+    if manifest is not None and tag is not None:
+        raise CLIError('Usage error: at most one of --manifest MANIFEST and'
+                       ' --tag TAG may be specified.')
 
 
-def _validate_parameters_out(key, file):
+def _validate_parameters_key_file(key, file):
     if bool(key) != bool(file):
         raise CLIError('Usage error: --key KEY --file FILE')
 
