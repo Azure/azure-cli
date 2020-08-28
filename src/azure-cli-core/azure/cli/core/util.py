@@ -208,7 +208,10 @@ def _update_latest_from_github(versions):
             success = False
         else:
             versions[pkg.replace(COMPONENT_PREFIX, '')]['pypi'] = version
-    versions[CLI_PACKAGE_NAME]['pypi'] = versions['core']['pypi']
+    try:
+        versions[CLI_PACKAGE_NAME]['pypi'] = versions['core']['pypi']
+    except KeyError:
+        pass
     return versions, success
 
 
@@ -228,9 +231,8 @@ def get_cached_latest_versions(versions=None):
                 return cache_versions.copy(), True
 
     versions, success = _update_latest_from_github(versions)
-    if success:
-        VERSIONS['versions'] = versions
-        VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
+    VERSIONS['versions'] = versions
+    VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
     return versions.copy(), success
 
 
