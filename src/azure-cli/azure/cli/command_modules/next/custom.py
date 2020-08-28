@@ -34,10 +34,7 @@ def _get_recommend_from_api(last_cmd, request_type, top_num=5, extra_data=None):
     import requests
     url = _get_api_url()
     payload = {
-        "command": last_cmd,
-        "extra_data": extra_data,
-        "type": request_type,
-        "top_num": top_num
+        "command": last_cmd
     }
     response = requests.post(url, json.dumps(payload))
     if response.status_code != 200:
@@ -61,9 +58,13 @@ def _give_recommends(recommends):
     print("")
     idx = 0
     for rec in recommends:
+        if 'reason' in rec:
+            reason = rec['reason']
+        else:
+            reason = "Many people use this command in next step."
         idx += 1
         print("{}. az {}".format(idx, rec['command']))
-        print("Recommended reason: {}% {}".format(rec['ratio'] * 100, rec['reason']))
+        print("Recommended reason: {:.1f}% {}".format(rec['ratio'] * 100, reason))
 
 
 def handle_next(cmd):
