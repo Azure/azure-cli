@@ -1292,10 +1292,12 @@ def load_arguments(self, _):
                    help='Test coverage for the endpoint')
         c.argument('filter_type',
                    arg_type=get_enum_type(ConnectionMonitorEndpointFilterType),
+                   deprecate_info=c.deprecate(hide=False),
                    help="The behavior of the endpoint filter. Currently only 'Include' is supported.")
         c.argument('filter_items',
                    options_list=['--filter-item'],
                    action=NWConnectionMonitorEndpointFilterItemAction,
+                   deprecate_info=c.deprecate(hide=False),
                    nargs='+',
                    help="List of property=value pairs to define filter items. "
                         "Property currently include: type, address. "
