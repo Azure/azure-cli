@@ -40,7 +40,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
             'fn': self.functionapp,
         })
 
-    @ResourceGroupPreparer(random_name_length=20)
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_command(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
@@ -60,7 +60,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
         finally:
             self._tearDownDevopsEnvironment()
 
-    @ResourceGroupPreparer(random_name_length=20)
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_mismatch_runtime(self, resource_group, resource_group_location, storage_account_for_test):
         # Overwrite function runtime to use node
@@ -75,7 +75,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
         finally:
             self._tearDownDevopsEnvironment()
 
-    @ResourceGroupPreparer(random_name_length=20)
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_mismatch_functionapp(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
@@ -91,7 +91,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
             self.kwargs.update({'fn': self.functionapp})
             self._tearDownDevopsEnvironment()
 
-    @ResourceGroupPreparer(random_name_length=20)
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_mismatch_organization(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
@@ -107,7 +107,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
             self.kwargs.update({'org': self.azure_devops_organization})
             self._tearDownDevopsEnvironment()
 
-    @ResourceGroupPreparer(random_name_length=20)
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_mismatch_project(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
