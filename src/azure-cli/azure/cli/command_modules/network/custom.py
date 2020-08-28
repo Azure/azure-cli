@@ -4416,15 +4416,28 @@ def add_nw_connection_monitor_v2_endpoint(cmd,
                                           endpoint_resource_id=None,
                                           address=None,
                                           filter_type=None,
-                                          filter_items=None):
-    ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
-        'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
+                                          filter_items=None,
+                                          address_include=None,
+                                          address_exclude=None):
+    (ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter,
+     ConnectionMonitorEndpointScope, ConnectionMonitorEndpointScopeItem) = cmd.get_models(
+         'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter',
+         'ConnectionMonitorEndpointScope', 'ConnectionMonitorEndpointScopeItem')
+
+    endpoint_scope = ConnectionMonitorEndpointScope(include=[], exclude=[])
+    for ip in address_include or []:
+        include_item = ConnectionMonitorEndpointScopeItem(address=ip)
+        endpoint_scope.include.append(include_item)
+    for ip in address_exclude or []:
+        exclude_item = ConnectionMonitorEndpointScopeItem(address=ip)
+        endpoint_scope.exclude.append(exclude_item)
 
     endpoint = ConnectionMonitorEndpoint(name=name,
                                          resource_id=endpoint_resource_id,
                                          address=address,
                                          type=endpoint_type,
-                                         coverage_level=coverage_level)
+                                         coverage_level=coverage_level,
+                                         scope=endpoint_scope)
 
     if filter_type and filter_items:
         endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
