@@ -232,7 +232,7 @@ def load_command_table(self, _):
         g.custom_command('migrate', 'cli_cosmosdb_cassandra_table_throughput_migrate')
 
     with self.command_group('cosmosdb gremlin database throughput', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
-        g.command('show', 'get_gremlin_database_throughput')
+        g..show_command('show', 'get_gremlin_database_throughput')
         g.custom_command('update', 'cli_cosmosdb_gremlin_database_throughput_update')
         g.custom_command('migrate', 'cli_cosmosdb_gremlin_database_throughput_migrate')
 
