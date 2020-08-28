@@ -458,16 +458,14 @@ def acr_repository_delete(cmd,
 
 def acr_repository_metadata_show(cmd,
                                  registry_name,
-                                 repository,
-                                 tag=None,
-                                 manifest=None,
+                                 repository=None,
+                                 image=None,
                                  key=None,
                                  file=None,
                                  resource_group_name=None,  # pylint: disable=unused-argument
                                  tenant_suffix=None,
                                  username=None,
                                  password=None):
-    _validate_parameters_tag_manifest(tag, manifest)
     _validate_parameters_key_file(key, file)
 
     # To get value of keyed metadata, get content as iter_content and write to file.
@@ -479,8 +477,7 @@ def acr_repository_metadata_show(cmd,
         http_method='get',
         permission=RepoAccessTokenPermission.METADATA_READ.value,
         repository=repository,
-        tag=tag,
-        manifest=manifest,
+        image=image,
         key=key,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -498,16 +495,14 @@ def acr_repository_metadata_show(cmd,
 
 def acr_repository_metadata_update(cmd,
                                    registry_name,
-                                   repository,
                                    key,
                                    file,
-                                   manifest=None,
-                                   tag=None,
+                                   repository=None,
+                                   image=None,
                                    resource_group_name=None,  # pylint: disable=unused-argument
                                    tenant_suffix=None,
                                    username=None,
                                    password=None):
-    _validate_parameters_tag_manifest(tag, manifest)
     _validate_parameters_key_file(key, file)
 
     return _acr_repository_metadata_helper(
@@ -516,8 +511,7 @@ def acr_repository_metadata_update(cmd,
         http_method='put',
         permission=RepoAccessTokenPermission.META_WRITE_META_READ.value,
         repository=repository,
-        tag=tag,
-        manifest=manifest,
+        image=image,
         key=key,
         file_payload=file,
         tenant_suffix=tenant_suffix,
@@ -525,19 +519,62 @@ def acr_repository_metadata_update(cmd,
         password=password)
 
 
+def acr_repository_metadata_delete(cmd,
+                                   registry_name,
+                                   key,
+                                   repository=None,
+                                   image=None,
+                                   resource_group_name=None,  # pylint: disable=unused-argument
+                                   tenant_suffix=None,
+                                   username=None,
+                                   password=None,
+                                   yes=False):
+    def _confirmation_metadata_delete(repo, tag=None, manifest=None):
+        if tag:
+            user_confirmation("Are you sure you want to delete metadata in the key '{}'"
+                              " of the image '{}:{}'?".format(key, repo, tag), yes)
+        elif manifest:
+            user_confirmation("Are you sure you want to delete metadata in the key '{}'"
+                              " of the image '{}@{}'?".format(key, repo, manifest), yes)
+        else:
+            user_confirmation("Are you sure you want to delete metadata in the key '{}'"
+                              " of the repository '{}'?".format(key, repo), yes)
+
+    return _acr_repository_metadata_helper(
+        cmd=cmd,
+        registry_name=registry_name,
+        http_method='delete',
+        permission=RepoAccessTokenPermission.DELETE_META_READ.value,
+        repository=repository,
+        image=image,
+        key=key,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        confirmation_func=_confirmation_metadata_delete)
+
+
 def _acr_repository_metadata_helper(cmd,
                                     registry_name,
                                     http_method,
                                     permission,
-                                    repository,
-                                    tag=None,
-                                    manifest=None,
+                                    repository=None,
+                                    image=None,
                                     key=None,
                                     file_payload=None,
                                     tenant_suffix=None,
                                     username=None,
                                     password=None,
-                                    get_iter_content=False):
+                                    get_iter_content=False,
+                                    confirmation_func=None):
+    _validate_parameters(repository, image)
+
+    if image:
+        # If --image is specified, repository must be empty.
+        repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+    else:
+        # This is a request on repository
+        tag, manifest = None, None
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -548,6 +585,8 @@ def _acr_repository_metadata_helper(cmd,
         repository=repository,
         permission=permission)
 
+    if confirmation_func:
+        confirmation_func(repository, tag, manifest)
     path = _get_metadata_path(repository, tag, manifest, key)
 
     return request_data_from_registry(
@@ -560,48 +599,9 @@ def _acr_repository_metadata_helper(cmd,
         get_iter_content=get_iter_content)[0]
 
 
-def acr_repository_metadata_delete(cmd,
-                                   registry_name,
-                                   repository,
-                                   key,
-                                   tag=None,
-                                   manifest=None,
-                                   resource_group_name=None,  # pylint: disable=unused-argument
-                                   tenant_suffix=None,
-                                   username=None,
-                                   password=None,
-                                   yes=False):
-    _validate_parameters_tag_manifest(tag, manifest)
-
-    login_server, username, password = get_access_credentials(
-        cmd=cmd,
-        registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
-        username=username,
-        password=password,
-        repository=repository,
-        permission=RepoAccessTokenPermission.DELETE_META_READ.value)
-
-    user_confirmation("Are you sure you want to delete metadata in the key '{}'"
-                      " of the repository '{}'?".format(key, repository), yes)
-    path = _get_metadata_path(repository, tag, manifest, key)
-
-    return request_data_from_registry(
-        http_method='delete',
-        login_server=login_server,
-        path=path,
-        username=username,
-        password=password)[0]
-
-
 def _validate_parameters(repository, image):
     if bool(repository) == bool(image):
         raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
-    
-def _validate_parameters_tag_manifest(tag, manifest):
-    if manifest is not None and tag is not None:
-        raise CLIError('Usage error: at most one of --manifest MANIFEST and'
-                       ' --tag TAG may be specified.')
 
 
 def _validate_parameters_key_file(key, file):
