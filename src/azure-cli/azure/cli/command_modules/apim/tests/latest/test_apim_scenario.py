@@ -185,6 +185,116 @@ class ApimScenarioTest(ScenarioTest):
             self.check('state', '{new_state}')
         ])
 
+        self.kwargs.update({
+            'operation_id': 'testOperation',
+            'url_template': "/session/{id}/oid/{oname}",
+            'method': 'GET',
+            'operation_name': 'GetSPSession',
+            'operation_description': 'This is Description',
+            'template_parameter1': 'name=id description="Format - int32." type="integer" required="true"',
+            'template_parameter2': 'name=oname description="oid name" type="string" required="true"',
+            'new_operation_name': 'GetSPSession2',
+            'new_operation_description': 'This is Description2',
+            'new_method': 'PUT'
+        })
+        # API operation operations
+
+        # list operations in an API
+        initial_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+
+        # create an operation
+        self.cmd('apim api operation create -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}" --url-template "{url_template}" --method "{method}" --display-name {operation_name} --template-parameters {template_parameter1} --template-parameters {template_parameter2} --description {operation_description}', checks=[
+            self.check('description', '{operation_description}'),
+            self.check('displayName', '{operation_name}'),
+            self.check('urlTemplate', '{url_template}'),
+            self.check('method', '{method}'),
+            self.check('name', '{operation_name}')
+        ])
+
+        current_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+        self.assertEqual(initial_operation_count + 1, current_operation_count)
+
+        # get an operation
+        self.cmd('apim api operation show -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}"')
+
+        # update an operation
+        self.cmd('apim api operation update -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}" --description "{new_operation_name}" --method "{new_method}" --display-name {new_operation_name}', checks=[
+            self.check('description', '{new_operation_description}'),
+            self.check('displayName', '{new_operation_name}'),
+            self.check('urlTemplate', '{url_template}'),
+            self.check('method', '{new_method}')
+        ])
+
+        # delete an operation
+        self.cmd('apim api operation delete -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}"')
+
+        final_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+        self.assertEqual(final_operation_count + 1, current_operation_count)
+
+
+        self.kwargs.update({
+            'release_id': "releaseVersionOne",
+            'release_notes': "release this version",
+            'new_release_notes': "release that version",
+            'versionset_name': 'MyVersionSet',
+            'version_schema': 'Query',
+            'version_query_name': 'QueryName',
+            'vs_description': 'This is vs description',
+            'vs_id': 'MyVSId',
+            'new_vs_name': 'MyNewVersionSet'
+        })
+
+        # list API release
+        initial_release_count = len(self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+
+        # list API revision
+        self.cmd('apim api revision create -g "{rg}" -n "{service_name}" --api-id "{api_id}"')
+
+        # create API release
+        self.cmd('apim api release create -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}" --notes "{release_notes}"', checks=[
+            self.check('name', '{release_id}'),
+            self.check('notes', '{release_notes}')
+        ])
+
+        # show API release
+        self.cmd('apim api release show -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}"')
+
+        # update API release
+        self.cmd('apim api release update -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}" --notes "{release_notes}"', checks=[
+            self.check('name', '{release_id}'),
+            self.check('notes', '{new_release_notes}')
+        ])
+
+        # delete API release
+        self.cmd('apim api release delete -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}"')
+
+        final_release_count = len(self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+        self.assertEqual(final_release_count, initial_release_count)
+
+        # list API version set
+        initial_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"'))
+
+        # create API version set
+        self.cmd('apim api versionset create -g "{rg}" -n "{service_name}" --display-name "{versionset_name}" --version-set-id "{vs_id}" --versioning-scheme "{version_schema}" --description "{vs_description}" --version-query-name "{version_query_name}"', checks=[
+            self.check('displayName', '{versionset_name}'),
+            self.check('description', '{vs_description}'),
+            self.check('versioningScheme', '{version_schema}'),
+            self.check('name', '{vs_id}')
+        ])
+
+        # show API version set
+        self.cmd('apim api versionset show -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}"')
+
+        # update API version set
+        self.cmd('apim api versionset update -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}" --display-name "{new_vs_name}"', checks=[
+            self.check('displayName', '{new_vs_name}')
+        ])
+
+        # delete API version set 
+        self.cmd('apim api versionset delete -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}"')
+        final_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"'))
+        self.assertEqual(final_vs_count, initial_vs_count)
+        
         # product Apis operations
 
         # list APIs in a product

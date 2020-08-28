@@ -32,6 +32,26 @@ type: group
 short-summary: Manage Azure API Management Named Values.
 """
 
+helps['apim api operation'] = """
+type: group
+short-summary: Manage Azure API Management API Operations.
+"""
+
+helps['apim api release'] = """
+type: group
+short-summary: Manage Azure API Management API Release.
+"""
+
+helps['apim api revision'] = """
+type: group
+short-summary: Manage Azure API Management API Revision.
+"""
+
+helps['apim api versionset'] = """
+type: group
+short-summary: Manage Azure API Management API Version Set.
+"""
+
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
@@ -302,4 +322,154 @@ examples:
   - name: Create a basic API.
     text: |-
         az apim nv update --service-name MyApim -g MyResourceGroup --named-value-id MyNamedValue --value foo
+"""
+
+helps['apim api operation list'] = """
+type: command
+short-summary: List a collection of the operations for the specified API.
+examples:
+  - name: List a collection of the operations for the specified API.
+    text: |-
+        az apim api operation list --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId
+"""
+
+helps['apim api operation show'] = """
+type: command
+short-summary: Gets the details of the API Operation specified by its identifier.
+examples:
+  - name: Gets the details of the API Operation specified by its identifier.
+    text: |-
+        az apim api operation show --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --operation-id MyOperationId
+"""
+
+helps['apim api operation create'] = """
+type: command
+short-summary: Creates a new operation in the API
+examples:
+  - name: Creates a new operation in the API with several parameters
+    text: |-
+        az apim api operation create --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --url-template "/session/{param1}/{param2}" --method "GET" --display-name MyOperationName --description MyDescription --template-parameters name=param1 description=descriptionContent type=paramType required="true" --template-parameters name=param2 required="false" type="string"
+"""
+
+helps['apim api operation update'] = """
+type: command
+short-summary: Updates the details of the operation in the API specified by its identifier.
+examples:
+  - name: Updates method, displayname, description of the operation in the API specified by its identifier.
+    text: |-
+        az apim api operation update --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --operation-id MyOperationId --method "PUT" --display-name NewDisplayName --description NewDescription
+"""
+
+helps['apim api operation delete'] = """
+type: command
+short-summary: Deletes the specified operation in the API.
+examples:
+  - name: Deletes the specified operation in the API.
+    text: |-
+        az apim api operation delete --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --operation-id MyOperationId
+"""
+
+helps['apim api release list'] = """
+type: command
+short-summary: Lists all releases of an API.
+examples:
+  - name: Lists all releases of an API.
+    text: |-
+        az apim api release list --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId
+"""
+
+helps['apim api release show'] = """
+type: command
+short-summary: Returns the details of an API release.
+examples:
+  - name: Returns the details of an API release.
+    text: |-
+        az apim api release show --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --release-id MyReleaseId
+"""
+
+helps['apim api release create'] = """
+type: command
+short-summary: Creates a new Release for the API.
+examples:
+  - name: Creates a new Release for the API.
+    text: |-
+        az apim api release create --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --release-id MyReleaseId --api-revision 2 --notes MyNotes
+"""
+
+helps['apim api release update'] = """
+type: command
+short-summary: Updates the details of the release of the API specified by its identifier.
+examples:
+  - name: Updates the notes of the release of the API specified by its identifier.
+    text: |-
+        az apim api release update --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --release-id MyReleaseId --notes MyNewNotes
+"""
+
+helps['apim api release delete'] = """
+type: command
+short-summary: Deletes the specified release in the API.
+examples:
+  - name: Deletes the specified release in the API.
+    text: |-
+        az apim api release delete --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --release-id MyReleaseId
+"""
+
+helps['apim api revision list'] = """
+type: command
+short-summary: Lists all revisions of an API.
+examples:
+  - name: Lists all revisions of an API.
+    text: |-
+        az apim api revision list --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId
+"""
+
+helps['apim api versionset list'] = """
+type: command
+short-summary: Lists a collection of API Version Sets in the specified service instance.
+examples:
+  - name: Lists a collection of API Version Sets in the specified service instance.
+    text: |-
+        az apim api versionset list --resource-group MyResourceGroup --service-name MyServiceName
+"""
+
+helps['apim api versionset show'] = """
+type: command
+short-summary: Gets the details of the Api Version Set specified by its identifier.
+examples:
+  - name: Gets the details of the Api Version Set specified by its identifier.
+    text: |-
+        az apim api versionset show --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId
+"""
+
+helps['apim api versionset create'] = """
+type: command
+short-summary: Creates a Api Version Set.
+examples:
+  - name: Creates a Api Version Set with version schema as header.
+    text: |-
+        az apim api versionset create --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId --display-name MyDisplayName --versioning-scheme "Header" --description MyDescription --version-header-name MyHeaderName
+  - name: Creates a Api Version Set with version schema as query.
+    text: |-
+        az apim api versionset create --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId --display-name MyDisplayName --versioning-scheme "Query" --description MyDescription --version-query-name MyQueryName
+"""
+
+helps['apim api versionset update'] = """
+type: command
+short-summary: Updates the details of the Api VersionSet specified by its identifier.
+examples:
+  - name: Updates the description, display-name of the Api VersionSet specified by its identifier.
+    text: |-
+        az apim api versionset update --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId --display-name MyNewDisplayName --description MyNewDescription
+  - name: Updates the version schema of the Api VersionSet specified by its identifier.
+    text: |-
+        az apim api versionset update --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId --versioning-scheme "Query" --version-query-name MyNewQueryName
+"""
+
+helps['apim api versionset delete'] = """
+type: command
+short-summary: Deletes specific Api Version Set.
+examples:
+  - name: Deletes specific Api Version Set.
+    text: |-
+        az apim api versionset delete --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId
 """
