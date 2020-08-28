@@ -15,9 +15,11 @@ from msrest.serialization import Model
 class CertificateSet(Model):
 
     _attribute_map = {
-        'certificates': {'key': 'certificates', 'type': '[SecurityDomainCertificateItem]'}
+        'certificates': {'key': 'certificates', 'type': '[SecurityDomainCertificateItem]'},
+        'required': {'key': 'required', 'type': 'int'}
     }
 
-    def __init__(self, *, certificates=None, **kwargs) -> None:
+    def __init__(self, *, certificates=None, required=None, **kwargs) -> None:
         super(CertificateSet, self).__init__(**kwargs)
         self.certificates = certificates
+        self.required = required

@@ -464,20 +464,20 @@ examples:
         az keyvault security-domain init-recovery --hsm-name MyHSM --sd-exchange-key "{PATH_TO_RESTORE}"
 """
 
-helps['keyvault security-domain restore'] = """
+helps['keyvault security-domain upload'] = """
 type: command
-short-summary: --sd-transfer-file specifies file path. This file contains security domain encrypted using SD Exchange file downloaded in security-domain init-recovery command.
+short-summary: --sd-file specifies file path. This file contains security domain encrypted using SD Exchange file downloaded in security-domain init-recovery command.
 examples:
-  - name: Security domain restore.
+  - name: Security domain upload (M=2).
     text: |
-        az keyvault security-domain restore --hsm-name MyHSM --sd-transfer-file "{SD_TRANSFER_FILE}"
+        az keyvault security-domain upload --hsm-name MyHSM --sd-file "{SD_TRANSFER_FILE}" --sd-exchange-key "{PEM_FILE_NAME}" --sd-wrapping-keys "{PEM_PRIVATE_KEY1_FILE_NAME}" "{PEM_PRIVATE_KEY2_FILE_NAME}"
 """
 
-helps['keyvault security-domain backup'] = """
+helps['keyvault security-domain download'] = """
 type: command
-short-summary: --sd-wrapping-key* are file paths to PEM files containing public key, that are uploaded. --security-domain-file specifies path to a file where the JSON blob returned by this command is stored.
+short-summary: --sd-wrapping-keys are file paths to PEM files containing public key, that are uploaded. --security-domain-file specifies path to a file where the JSON blob returned by this command is stored.
 examples:
-  - name: Security domain backup.
+  - name: Security domain download (N=3, M=2).
     text: |
-        az keyvault security-domain backup --hsm-name MyHSM --security-domain-file "{SD_FILE_NAME}" --sd-wrapping-key1 "{SDWK1_PEM_FILE_NAME}" --sd-wrapping-key2 "{SDWK2_PEM_FILE_NAME}" --sd-wrapping-key3 "{SDWK3_PEM_FILE_NAME}"
+        az keyvault security-domain download --hsm-name MyHSM --security-domain-file "{SD_FILE_NAME}" --sd-quorum 2 --sd-wrapping-keys "{PEM_PUBLIC_KEY1_FILE_NAME}" "{PEM_PUBLIC_KEY2_FILE_NAME}" "{PEM_PUBLIC_KEY3_FILE_NAME}"
 """

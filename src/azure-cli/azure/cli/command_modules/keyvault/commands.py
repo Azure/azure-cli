@@ -133,8 +133,8 @@ def load_command_table(self, _):
 
     with self.command_group('keyvault security-domain', private_data_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
-        g.keyvault_custom('restore', 'security_domain_restore')
-        g.keyvault_custom('backup', 'security_domain_backup')
+        g.keyvault_custom('upload', 'security_domain_upload')
+        g.keyvault_custom('download', 'security_domain_download')
 
     with self.command_group('keyvault key', private_data_entity.command_type) as g:
         g.keyvault_command('list', 'get_keys',

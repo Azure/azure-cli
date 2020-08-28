@@ -19,8 +19,10 @@ from knack.util import CLIError
 from OpenSSL import crypto
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
-from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
+from cryptography.hazmat.primitives.serialization import \
+    load_pem_public_key, load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.x509 import load_pem_x509_certificate
 
 from azure.cli.core import telemetry
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
@@ -1083,6 +1085,12 @@ def _int_to_bytes(i):
     return codecs.decode(h, 'hex')
 
 
+def _public_rsa_key_to_jwk(rsa_key, jwk):
+    pubv = rsa_key.public_numbers()
+    jwk.n = _int_to_bytes(pubv.n)
+    jwk.e = _int_to_bytes(pubv.e)
+
+
 def _private_rsa_key_to_jwk(rsa_key, jwk):
     priv = rsa_key.private_numbers()
     jwk.n = _int_to_bytes(priv.public_numbers.n)
@@ -2042,13 +2050,13 @@ def security_domain_init_recovery(client, hsm_base_url, sd_exchange_key):
         raise ex
 
 
-def security_domain_restore(cmd, client, hsm_base_url, sd_transfer_file, no_wait=False):
-    if not os.path.exists(sd_transfer_file):
-        raise CLIError('File {} does not exist.'.format(sd_transfer_file))
-    if os.path.isdir(sd_transfer_file):
-        raise CLIError('{} is a directory. A file is required.'.format(sd_transfer_file))
+def security_domain_upload(cmd, client, hsm_base_url, sd_file, sd_exchange_key, sd_wrapping_keys, no_wait=False):
+    if not os.path.exists(sd_file):
+        raise CLIError('File {} does not exist.'.format(sd_file))
+    if os.path.isdir(sd_file):
+        raise CLIError('{} is a directory. A file is required.'.format(sd_file))
 
-    with open(sd_transfer_file) as f:
+    with open(sd_file) as f:
         data = '\n'.join(f.readlines())
 
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
@@ -2060,8 +2068,8 @@ def security_domain_restore(cmd, client, hsm_base_url, sd_transfer_file, no_wait
     )
 
 
-def security_domain_backup(cmd, client, hsm_base_url, sd_wrapping_key1, sd_wrapping_key2, sd_wrapping_key3,
-                           security_domain_file):
+def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, security_domain_file, sd_quorum,
+                             identifier=None):  # pylint: disable=unused-argument
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
@@ -2070,7 +2078,6 @@ def security_domain_backup(cmd, client, hsm_base_url, sd_wrapping_key1, sd_wrapp
                                                    resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     SecurityDomainJsonWebKey = cmd.get_models('SecurityDomainJsonWebKey', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
-    sd_wrapping_keys = [sd_wrapping_key1, sd_wrapping_key2, sd_wrapping_key3]
     for path in sd_wrapping_keys:
         if os.path.isdir(path):
             raise CLIError('{} is a directory. A file is required.'.format(path))
@@ -2080,37 +2087,23 @@ def security_domain_backup(cmd, client, hsm_base_url, sd_wrapping_key1, sd_wrapp
         key_obj = SecurityDomainJsonWebKey()
         with open(path, 'rb') as f:
             pem_data = f.read()
-        try:
-            pkey = load_pem_private_key(pem_data, password=None, backend=default_backend())
-        except (ValueError, TypeError, UnsupportedAlgorithm) as e:
-            if str(e) == 'Could not deserialize key data.':
-                raise CLIError('Import failed: {} The private key in the PEM file must be encrypted.'.format(e))
-            raise CLIError('Import failed: {}'.format(e))
+
+        cert = load_pem_x509_certificate(pem_data, backend=default_backend())
+        pubkey = cert.public_key()
 
         # populate key into jwk
-        if isinstance(pkey, rsa.RSAPrivateKey):
+        if isinstance(pubkey, rsa.RSAPublicKey):
             key_obj.kty = 'RSA-HSM'
-            _private_rsa_key_to_jwk(pkey, key_obj)
+            _public_rsa_key_to_jwk(pubkey, key_obj)
         else:
-            raise CLIError('Import failed: Unsupported key type, {}.'.format(type(pkey)))
+            raise CLIError('Import failed: Unsupported key type, {}.'.format(type(pubkey)))
 
         certificates.append(SecurityDomainCertificateItem(value=key_obj))
 
     ret_json = client.download(
-        vault_base_url=hsm_base_url,
-        certificates=CertificateSet(certificates=certificates)
+        vault_base_url=vault_base_url,
+        certificates=CertificateSet(certificates=certificates, required=sd_quorum)
     )
     with open(security_domain_file, 'w') as f:
         f.write(ret_json)
-
-
-def _sd_single_byte_test(shares, required):
-    for i in range(0x100):
-        secret = make_shared_secret(shares, required)
-        share_array = secret.make_byte_shares(i)
-        secret2 = get_secret(required)
-        result = secret2.get_secret_byte(share_array)
-
-        if i != result:
-            raise CLIError('single_byte_test failed')
 # endregion
