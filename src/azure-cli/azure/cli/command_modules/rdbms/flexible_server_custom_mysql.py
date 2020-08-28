@@ -11,6 +11,7 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core._profile import Profile
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from ._client_factory import get_mysql_flexible_management_client
@@ -57,7 +58,7 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 """
 
 # region create without args
-def _flexible_server_create(cmd, client, resource_group_name=None, seryesver_name=None, sku_name=None, tier=None,
+def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                                 location=None, storage_mb=None, administrator_login=None,
                                 administrator_login_password=None, version=None,
                                 backup_retention=None, tags=None, public_network_access=None, vnet_name=None,
@@ -74,7 +75,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, seryesver_nam
         logger.warning('Found existing MySQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
     except CloudError:
-        subnet_id = _create_vnet(cmd, server_name, location, "Microsoft.MySQL/flexibleServers")
+        subnet_id = _create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.MySQL/flexibleServers")
         # Create mysql server
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
@@ -322,9 +323,11 @@ def _form_response(username, sku, location, resource_group_name, id, host, versi
 def _update_local_contexts(cmd, server_name, resource_group_name, location):
     cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server-name',
                                   server_name)  # Setting the server name in the local context
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'location',
+    cmd.cli_ctx.local_context.set(['all'], 'location',
                                   location)  # Setting the location in the local context
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'resource_group_name', resource_group_name)
+    cmd.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group_name)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    cmd.cli_ctx.local_context.set(['all'], 'subscription', profile.get_subscription()['id'])
 
 
 

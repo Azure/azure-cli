@@ -177,31 +177,37 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     # Flexible-server
     def _flexible_server_params(command_group):
-        server_name_setter_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME', help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+        server_name_setter_arg_type = CLIArgumentType(configured_default='web', metavar='NAME', 
+                                        help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
                                         local_context_attribute=LocalContextAttribute(name='server_name', 
                                         actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
 
-        server_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME', help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+        server_name_arg_type = CLIArgumentType(configured_default='web', metavar='NAME', 
+                                        help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
                                         local_context_attribute=LocalContextAttribute(name='server_name', 
+                                        actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+
+        subscription_arg_type = CLIArgumentType(configured_default='web', options_list=['--subscription'], metvar='NAME', 
+                                        help="Name or ID of subscription. You can configure the default subscription using az account set -s NAME_OR_ID",
+                                        local_context_attribute=LocalContextAttribute(name='subscription',
                                         actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
         with self.argument_context('{} flexible-server create'.format(command_group)) as c:
             # c.extra('generate_password', help='Generate a password.', arg_group='Authentication')
             # Add create mode as a parameter
             if command_group == 'postgres':
-                #default_string = 'azurepg-'
                 c.argument('tier', default='GeneralPurpose', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', default='131072', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
                 c.argument('version', default='12', help='Server major version.')              
+                c.argument('zone', options_list=['--zone, -z'], help='To define which zone is used to provision the server ')
             elif command_group == 'mysql':
-                #default_string = 'azuremysql-'
                 c.argument('tier', default='Burstable', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', default='10240', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
                 c.argument('version', default='5.7', help='Server major version.')
                 
-            c.argument('server_name', arg_type=server_name_setter_arg_type)
+            c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             #c.argument('resource_group_name', default=create_random_resource_name(default_string), arg_type=resource_group_name_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))#, validator=get_default_location_from_resource_group)
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication')
@@ -214,10 +220,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        validator=retention_validator)
             c.argument('tags', tags_type)
             c.argument('public_access', options_list=['--public-access'], help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ')
-            # c.argument('vnet_name', option_list=['--vnet'])
-            # c.argument('vnet_address_prefix', default='10.0.0.0/16', option_list=['--vnet-address-prefix'])
-            # c.argument('subnet_name', option_list=['--subnet'])
-            # c.argument('subnet_address_preefix', default='10.0.0.0/24', option_list=['--subnet-address-prefix'])
+            # c.argument('vnet_name', options_list=['--vnet'])
+            # c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'])
+            # c.argument('subnet_name', options_list=['--subnet'])
+            # c.argument('subnet_address_preefix', default='10.0.0.0/24', options_list=['--subnet-address-prefix'])
             c.argument('high_availability', options_list=['--high-availability'], help='')     
             c.ignore('database_name')
         
@@ -237,7 +243,60 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             argument_context_string = '{} flexible-server {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
-                c.argument('server_name', arg_type=server_name_arg_type)
+                c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
+        
+        # flexible-server parameter
+        for scope in ['list', 'set', 'show']:
+            argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('ids', options_list=['--ids'], help='')
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('subscription_id', arg_type=subscription_arg_type)
+                c.argument('json', options_list=['--json'], help='Output in json format. true/false')
+
+        with self.argument_context('{} flexible-server parameter set'.format(command_group)) as c:
+            c.argument('name', options_list=['--name', '-n'], required=True, help='') # N/A
+            c.argument('value', options_list=['--value', '-v'])
+            c.argument('apply_to_group', options_list=['--apply-to-group'], help='') # N/A
+
+        with self.argument_context('{} flexible-server parameter show'.format(command_group)) as c:
+            c.argument('name', options_list=['--name', '-n'], required=True, help='') # N/A
+    
+        # firewall-rule
+        for scope in ['create', 'delete', 'list', 'show', 'update']:
+            argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('subscription_id', arg_type=subscription_arg_type)
+        
+        with self.argument_context('{} flexible-server firewall-rule create'.format(command_group)) as c:
+            c.argument('end_ip_address', options_list=['--end-ip-address'])
+            c.argument('name', options_list=['--name'])
+            c.argument('start_ip_address', options_list=['--start-ip-address'])
+        
+        with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:
+            c.argument('ids', options_list=['--ids'], help='')
+            c.argument('name', options_list=['--name'])
+            c.argument('prompt', options_list=['--prompt'])
+
+        with self.argument_context('{} flexible-server firewall-rule list'.format(command_group)) as c:
+            c.argument('ids', options_list=['--ids'], help='')
+
+        with self.argument_context('{} flexible-server firewall-rule show'.format(command_group)) as c:
+            c.argument('ids', options_list=['--ids'], help='')
+            c.argument('name', options_list=['--name'], help='')
+
+        with self.argument_context('{} flexible-server firewall-rule update'.format(command_group)) as c:
+            c.argument('add', options_list=['--add'], help='')
+            c.argument('end_ip_address', options_list=['--end-ip-address'])
+            c.argument('force_string', options_list=['--force-string'])
+            c.argument('ids', options_list=['--ids'])
+            c.argument('name', options_list=['--name'])
+            c.argument('remove', options_list=['--remove'])
+            c.argument('set', options_list=['--set'])
+            c.argument('start_ip_address', options_list=['--start-ip-address'])
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')
