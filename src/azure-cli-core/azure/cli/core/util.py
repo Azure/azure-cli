@@ -354,8 +354,38 @@ def get_json_object(json_string):
     return _convert_to_snake_case(shell_safe_json_parse(json_string))
 
 
-def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
+class OptionalProtectData:
+    @staticmethod
+    def encode(content: str):
+        try:
+            import win32crypt
+
+            protected_data = win32crypt.CryptProtectData(content.encode(), "bla", None, None, None, 0)
+            hex_str = bytes.hex(protected_data)
+
+            return hex_str
+        except:
+            return content
+
+    @staticmethod
+    def decode(data):
+        try:
+            import win32crypt
+
+            hex_data = bytes.fromhex(data)
+            _, unprotected_hex = win32crypt.CryptUnprotectData(hex_data, None, None, None, 0)
+            unprotected_data = unprotected_hex.decode()
+
+            return unprotected_data
+        except:
+            return data
+
+
+def get_file_json(file_path, throw_on_empty=True, preserve_order=False, decode=None):
     content = read_file_content(file_path)
+    if decode:
+        content = decode(content)
+
     if not content and not throw_on_empty:
         return None
     try:

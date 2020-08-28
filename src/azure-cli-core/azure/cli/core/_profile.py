@@ -21,7 +21,7 @@ from knack.util import CLIError
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
-    is_windows, is_wsl
+    is_windows, is_wsl, OptionalProtectData
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 
@@ -109,7 +109,7 @@ _AUTH_CTX_FACTORY = _authentication_context_factory
 def _load_tokens_from_file(file_path):
     if os.path.isfile(file_path):
         try:
-            return get_file_json(file_path, throw_on_empty=False) or []
+            return get_file_json(file_path, throw_on_empty=False, decode=OptionalProtectData.decode)
         except (CLIError, ValueError) as ex:
             raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
                            "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
@@ -1012,7 +1012,7 @@ class CredsCache:
                         i.pop(key, None)
 
                 all_creds.extend(self._service_principal_creds)
-                cred_file.write(json.dumps(all_creds))
+                cred_file.write(OptionalProtectData.encode(json.dumps(all_creds)))
 
     def retrieve_token_for_user(self, username, tenant, resource):
         context = self._auth_ctx_factory(self._ctx, tenant, cache=self.adal_token_cache)
