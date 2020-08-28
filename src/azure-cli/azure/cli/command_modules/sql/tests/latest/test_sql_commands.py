@@ -713,25 +713,17 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
-    @SqlServerPreparer(parameter_name='server', resource_group_parameter_name='resource_group', location='westeurope')
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
     @AllowLargeResponse()
-    def test_sql_db_short_term_retention(self, resource_group, resource_group_location, server):
-        database_name = "strtestdb"
+    def test_sql_db_short_term_retention(self, resource_group, server):
 
         # create database
         print('Creating sql db...\n')
-        self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(resource_group, server, database_name),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('elasticPoolId', None),
-                     JMESPathCheck('status', 'Online')])
-
         self.kwargs.update({
             'resource_group': resource_group,
+            'server_name': server,
+            'database_name': self.create_random_name("strsqldb", 20),
             'retention_days': '7',
             'diffbackup_hours': '24'
         })
