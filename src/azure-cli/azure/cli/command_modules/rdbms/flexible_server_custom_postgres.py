@@ -12,12 +12,13 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import get_postgresql_flexible_management_client,cf_postgres_flexible_firewall_rules
+from azure.cli.core._profile import Profile
+from ._client_factory import get_postgresql_flexible_management_client
 from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
 from ._util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
-
 
 # region create without args
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, location=None, backup_retention=None,
@@ -30,7 +31,6 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
     try:
         location, resource_group_name, server_name, administrator_login_password = generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password)
-
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing PostgreSQL Server \'%s\' in group \'%s\'',
@@ -67,6 +67,8 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         administrator_login_password if administrator_login_password is not None else '*****',
         _create_postgresql_connection_string(host, administrator_login_password)
     )
+
+
 """
 def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
                    location=None, storage_mb=None, administrator_login=None, administrator_login_password=None, version=None,
@@ -99,8 +101,6 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
         parameters.identity = postgresql.models.flexibleservers.Identity(type=postgresql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
     return client.create(resource_group_name, server_name, parameters)
 """
-
-
 # Need to replace source server name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # arguments and validators
