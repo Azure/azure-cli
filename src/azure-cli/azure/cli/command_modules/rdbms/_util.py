@@ -115,7 +115,7 @@ def _check_resource_group_existence(cmd, resource_group_name):
     return  resource_client.resource_groups.check_existence(resource_group_name)
 
 
-def _create_vnet(cmd, servername, location, resource_group_name, delegation_service_name):
+def create_vnet(cmd, servername, location, resource_group_name, delegation_service_name):
     Subnet, VirtualNetwork, AddressSpace, Delegation = cmd.get_models('Subnet', 'VirtualNetwork', 'AddressSpace', 'Delegation', resource_type=ResourceType.MGMT_NETWORK)
     client = network_client_factory(cmd.cli_ctx)
     vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername)
@@ -137,3 +137,31 @@ def _create_vnet_metadata(servername):
     vnet_address_prefix = '10.0.0.0/16'
     subnet_prefix = '10.0.0.0/24'
     return vnet_name, subnet_name, vnet_address_prefix, subnet_prefix
+
+
+def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
+    # allow access to azure ip addresses
+    cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name
+    if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
+        logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
+                   'Azure resources...')
+        firewall_name = 'azure-access'
+    elif start_ip == end_ip:
+        firewall_name = 'single-ip-firewall'
+    else:
+        firewall_name = 'multiple-ip-firewall'
+    firewall_client = cf_firewall(cmd.cli_ctx, None)
+    resolve_poller(
+        firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
+        cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
+
+
+def parse_public_access_input(public_access):
+    allow_azure_services = False
+    if public_access is not None:
+        parsed_input = public_access.split('-')
+        if len(parsed_input) == 1:
+            return parsed_input[0], parsed_input[0]
+        else:
+            return parsed_input[0], parsed_input[1]
+

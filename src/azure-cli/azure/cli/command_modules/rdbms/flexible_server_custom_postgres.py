@@ -11,42 +11,43 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
-from ._client_factory import get_postgresql_flexible_management_client
+from ._client_factory import get_postgresql_flexible_management_client,cf_postgres_flexible_firewall_rules
 from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
-from ._util import generate_missing_parameters, resolve_poller, _create_vnet
+from ._util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
 
+
 # region create without args
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, location=None, backup_retention=None,
                                    sku_name=None, geo_redundant_backup=None, storage_mb=None, administrator_login=None,
-                                   administrator_login_password=None, version=None, ssl_enforcement=None, database_name=None, tags=None, public_network_access=None, infrastructure_encryption=None,
+                                   administrator_login_password=None, version=None, ssl_enforcement=None, database_name=None, tags=None, public_access=None, infrastructure_encryption=None,
                                    assign_identity=False):
     from azure.mgmt.rdbms import postgresql
     db_context = DbContext(
-        azure_sdk=postgresql, logging_name='PostgreSQL', command_group='postgres', server_client=client)
+        azure_sdk=postgresql, cf_firewall=cf_postgres_flexible_firewall_rules, logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
     try:
         location, resource_group_name, server_name, administrator_login_password = generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password)
+
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing PostgreSQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
     except CloudError:
-        subnet_id = _create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
-        # Create postgresql server
+        if public_access is None:
+            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
+
+        # Create postgresql
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
-            ssl_enforcement, tags, public_network_access, infrastructure_encryption, assign_identity)
-    """
-    user = '{}@{}'.format(administrator_login, server_name)
-    host = server_result.fully_qualified_domain_name
-    sku = '{}'.format(sku_name)
-    rg = '{}'.format(resource_group_name)
-    loc = '{}'.format(location)
-    """
+            ssl_enforcement, tags, public_access, infrastructure_encryption, assign_identity)
+
+        if public_access is not None:
+            start_ip, end_ip = parse_public_access_input(public_access)
+            create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     rg = '{}'.format(resource_group_name)
     user = server_result.administrator_login
@@ -66,8 +67,6 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         administrator_login_password if administrator_login_password is not None else '*****',
         _create_postgresql_connection_string(host, administrator_login_password)
     )
-
-
 """
 def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
                    location=None, storage_mb=None, administrator_login=None, administrator_login_password=None, version=None,
@@ -100,6 +99,8 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
         parameters.identity = postgresql.models.flexibleservers.Identity(type=postgresql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
     return client.create(resource_group_name, server_name, parameters)
 """
+
+
 # Need to replace source server name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # arguments and validators
@@ -264,9 +265,10 @@ def _update_local_contexts(cmd, server_name, resource_group_name, location):
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class DbContext:
-    def __init__(self, azure_sdk=None, logging_name=None,
+    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None,
                  command_group=None, server_client=None):
         self.azure_sdk = azure_sdk
+        self.cf_firewall = cf_firewall
         self.logging_name = logging_name
         self.command_group = command_group
         self.server_client = server_client
