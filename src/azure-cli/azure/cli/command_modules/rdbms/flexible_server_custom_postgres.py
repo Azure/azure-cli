@@ -35,7 +35,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         logger.warning('Found existing PostgreSQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
     except CloudError:
-        subnet_id = _create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
+        # subnet_id = _create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
         # Create postgresql server
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,

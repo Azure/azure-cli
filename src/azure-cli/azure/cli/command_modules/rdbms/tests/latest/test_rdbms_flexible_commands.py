@@ -30,8 +30,8 @@ GROUP_NAME_MAX_LENGTH = 20
 
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
-    location = 'northeurope'
-    location_check = 'North Europe'
+    location = 'southeastasia'
+    location_check = 'Southeast Asia'
 
     def _remove_resource_group(self, resource_group_name):
         self.cmd('group delete -n {} --yes'.format(resource_group_name))
@@ -54,22 +54,22 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         from knack.util import CLIError
 
         # flexible-server create
+
         # flexible-server create auto-generate, no local context
         if not self.cli_ctx.local_context.is_on:
             self.cmd('local-context on')
 
         if database_engine == 'postgres':
             sku_name = 'Standard_D4s_v3'
-            storage_size = 128000
-            version = 12
+            storage_size = '131072'
+            version = '12'
         elif database_engine == 'mysql':
             sku_name =  'Standard_B1MS'
-            storage_size = 10000
-            version = 5.7
-        backup_retention = 7
+            storage_size = '10240'
+            version = '5.7'
+        backup_retention = '7'
 
-        default_list_checks = [JMESPathCheck('resourceGroup', resource_group),
-                       JMESPathCheck('version', version),
+        default_list_checks = [JMESPathCheck('version', version),
                        JMESPathCheck('sku.name', sku_name),
                        JMESPathCheck('storageProfile.storageMb', storage_size),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
@@ -84,14 +84,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._remove_server(database_engine, auto_generated_resource_group_name, server_name)
         self._remove_resource_group(auto_generated_resource_group_name)
 
-        # flexible-server create user input
+        # flexible-server create with user input
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         admin_user = 'cloudsa'
         admin_password = 'SecretPassword123'
-        if database_engine == 'postgres':
-            sku_name = 'Standard_D4s_v3'
-        elif database_engine == 'mysql':
-            sku_name =  'Standard_B1MS'
+        sku_name = 'Standard_D4s_v3'
         location = self.location
         location_check = self.location_check
         tier = 'GeneralPurpose'
@@ -100,23 +97,23 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('resourceGroup', resource_group),
                        JMESPathCheck('sku.name', sku_name),
                        JMESPathCheck('storageProfile.storageMb', storage_size),
-                       JMESPathCheck('location', self.location_check),
+                       JMESPathCheck('location', location_check),
                        JMESPathCheck('administratorLogin', admin_user)]
         
         if database_engine == 'postgres':
-            self.cmd('{} flexible-server create -g {} -n {} --admin-user {} --admin-password {} --sku-name {}'
-                    .format(database_engine, resource_group, server_name, admin_user, admin_password, sku_name),
-                    checks=list_checks)
+            self.cmd('{} flexible-server create -g {} -n {} --admin-user {} --admin-password {} --sku-name {} \
+                    --version {} --storage-size {} --l {}'.format(database_engine, resource_group, \
+                    server_name, admin_user, admin_password, sku_name, version, storage_size, location), checks=list_checks)
         elif database_engine == 'mysql':
             self.cmd('{} flexible-server create -g {} -n {} --admin-user {} --admin-password {} --sku-name {} \
-                    --version {} --storage-mb {} --l {} --tier {}'.format(database_engine, resource_group, \
+                    --version {} --storage-size {} --l {} --tier {}'.format(database_engine, resource_group, \
                     server_name, admin_user, admin_password, sku_name, version, storage_size, location, tier), checks=list_checks)
 
         # flexible-server create failure
-        if database_engine == 'postgres':
-            failing_admin_user = 'root'
-            self.cmd('{} flexible-server create -g {} --admin-user {}'.format(database_engine, resource_group, failing_admin_user),
-                    expect_failure=True)
+        # if database_engine == 'postgres':
+        #     failing_admin_user = 'root'
+        #     self.cmd('{} flexible-server create -g {} --admin-user {}'.format(database_engine, resource_group, failing_admin_user),
+        #             expect_failure=True)
         
         # flexible-server show
         self.cmd('{} flexible-server show -g {} -n {}'
@@ -125,15 +122,15 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         # flexible-server update
         backup_retention = '15'
-        storage_mb = '525000'
+        storage_size = '40960'
         updated_list_checks = [JMESPathCheck('storageProfile.backupRetentionDays', 15),
-                                JMESPathCheck('storageProfile.storageMb', storage_mb)]
-        self.cmd('{} server update -g {} -n {} --backup-retention {} --storage-mb {}'
-                 .format(database_engine, resource_group, server_name, backup_retention, storage_mb),
+                                JMESPathCheck('storageProfile.storageMb', storage_size)]
+        self.cmd('{} flexible-server update -g {} -n {} --backup-retention {} --storage-size {}'
+                 .format(database_engine, resource_group, server_name, backup_retention, storage_size),
                  checks=updated_list_checks)
         
         # flexible-server restart
-        self.cmd('{} server restart -g {} -n {}'
+        self.cmd('{} flexible-server restart -g {} -n {}'
                      .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         # flexible-server 
@@ -142,8 +139,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
-    location = 'northeurope'
-    location_check = 'North Europe'
+    location = 'southeastasia'
+    location_check = 'Southeast Asia'
 
     def _remove_resource_group(self, resource_group_name):
         self.cmd('group delete --name {} --yes'.format(resource_group_name))
@@ -165,7 +162,6 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
     def _test_flexible_server_local_context(self, database_engine, resource_group):
         from knack.util import CLIError
 
-        
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         admin_user = 'cloudsa'
         admin_password = 'SecretPassword123'
@@ -173,10 +169,13 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         location = self.location
         location_check = self.location_check
         
-        tier = 'GeneralPurpose'
-        sku_name = 'Standard_D4s_v3'
-        version = '5.7'
-        storage_size = '524288'
+        if database_engine == 'postgres':
+            version = '12'
+            tier = 'GeneralPurpose'
+        elif database_engine == 'mysql':
+            version =  '5.7'
+            tier = 'Burstable'
+        storage_size = '40960'
 
         self.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group)
         self.cli_ctx.local_context.set(['all'], 'location', location)
@@ -190,18 +189,13 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
                        JMESPathCheck('administratorLogin', admin_user)]
         
         if database_engine == 'postgres':
-            self.cmd('{} flexible-server create --name {} --admin-user {} --admin-password {} --sku-name {}'
-                    .format(database_engine, server_name, admin_user, admin_password, sku_name),
-                    checks=list_checks)
+            self.cmd('{} flexible-server create --name {} --admin-user {} --admin-password {} --version {} --storage-size {} \
+                    --sku-name {}'.format(database_engine, server_name, admin_user, admin_password, version, storage_size, \
+                    sku_name), checks=list_checks)
         elif database_engine == 'mysql':
-            self.cmd('{} flexible-server create --name {} --admin-user {} --admin-password {} --version {} --storage-mb {} \
-                    --name {} --sku-name {} --tier {}'.format(database_engine, server_name, admin_user, admin_password, version, storage_size, \
-                    server_name, sku_name, tier), checks=list_checks)
-
-        rself.cmd('local-context show', checks=[
-            JMESPathCheck('all.resource_group_name', resource_group),
-            JMESPathCheck('all.location', location)])
-
+            self.cmd('{} flexible-server create --name {} --admin-user {} --admin-password {} --version {} --storage-size {} \
+                    --sku-name {} --tier {}'.format(database_engine, server_name, admin_user, admin_password, version, storage_size, \
+                    sku_name, tier), checks=list_checks)
         with self.assertRaises(CLIError):
             self._remove_server(resource_group, server_name)
 
@@ -209,10 +203,10 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
         # # flexible-server update
         backup_retention = '15'
-        storage_mb = '525000'
+        storage_size = '32768'
         updated_list_checks = [JMESPathCheck('storageProfile.backupRetentionDays', 15),
-                       JMESPathCheck('storageProfile.storageMb', storage_mb)]
-        self.cmd('{} flexible-server update --backup-retention {} --storage-mb {} '.format(database_engine, backup_retention, storage_mb), \
+                       JMESPathCheck('storageProfile.storageMb', storage_size)]
+        self.cmd('{} flexible-server update --backup-retention {} --storage-size {} '.format(database_engine, backup_retention, storage_size), \
                     checks=updated_list_checks)
 
         # # flexible-server delete

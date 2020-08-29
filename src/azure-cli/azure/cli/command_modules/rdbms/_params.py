@@ -235,7 +235,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('family', 'capacity', 'tier')
             c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
             c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
-            c.argument('storage_mb', options_list=['--storage-mb'], help ='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.') #storage size? storage mb?
+            c.argument('storage_mb', options_list=['--storage-size'], help ='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.') #storage size? storage mb?
             c.argument('tags', options_list=['--tags'], help='Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.')
             c.argument('backup_retention', options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
 
