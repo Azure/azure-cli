@@ -119,15 +119,17 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
                 subscription=get_subscription_id(cmd.cli_ctx),
                 resource_group=resource_group_name,
                 namespace=provider,
-                type='servers',
+                type='flexibleServers',
                 name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
+
     from azure.mgmt.rdbms import mysql
     parameters = mysql.flexibleservers.models.Server(
-        source_server=source_server,
+        source_server_id=source_server,
         restore_point_in_time=restore_point_in_time,
-        location=location
+        location=location,
+        create_mode="PointInTimeRestore"
     )
 
     # Here is a workaround that we don't support cross-region restore currently,
@@ -274,7 +276,6 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     from azure.mgmt.rdbms import mysql
 
-    # MOLJAIN TO DO: The SKU should not be hardcoded, need a fix with new swagger or need to manually parse sku provided
     parameters = mysql.flexibleservers.models.Server(
         sku=mysql.flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,
@@ -283,16 +284,12 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         public_network_access=public_network_access,
         storage_profile=mysql.flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
-            # geo_redundant_backup=geo_redundant_backup,
-            storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
-        # storage_autogrow=auto_grow),
+            storage_mb=storage_mb),
         location=location,
         create_mode="Default",
-        vnet_inj_args=mysql.flexibleservers.models.VnetInjArgs(
-            delegated_vnet_id=None,  # what should this value be?
-            delegated_subnet_name=subnet_name,
-            delegated_vnet_name=vnet_name,
-            # delegated_vnet_resource_group=None  # what should this value be?
+        vnet_inj_args=mysql.flexibleservers.models.VirtualNetworkRule(
+            virtual_network_subnet_id=None, #TODO virtual_network_subnet_id,
+            ignore_missing_vnet_service_endpoint=None # TODO False default?
         ),
         tags=tags)
 

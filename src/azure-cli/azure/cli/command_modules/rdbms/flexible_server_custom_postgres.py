@@ -88,11 +88,8 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
             storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
         location=location,
         create_mode="Default",
-        vnet_inj_args = postgresql.flexibleservers.models.ServerPropertiesVnetInjArgs(
-            delegated_vnet_id=None,  # what should this value be?
-            delegated_subnet_name=subnet_name,
-            delegated_vnet_name=vnet_name,
-            delegated_vnet_resource_group=None  # what should this value be?
+        delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+            subnet_arm_resource_id=subnet_arm_resource_id
         ),
         tags=tags)
 
@@ -111,7 +108,7 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
                 subscription=get_subscription_id(cmd.cli_ctx),
                 resource_group=resource_group_name,
                 namespace=provider,
-                type='servers',
+                type='flexibleServers',
                 name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
@@ -120,6 +117,7 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
     parameters = postgresql.flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server,
+        create_mode="PointInTimeRestore",
         location=location)
 
     # Here is a workaround that we don't support cross-region restore currently,
@@ -136,17 +134,15 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
 # 8/25: may need to update the update function per updates to swagger spec
 def _flexible_server_update_custom_func(instance,
                                sku_name=None,
-                               v_cores=None,
-                               server_edition=None,
                                storage_mb=None,
                                backup_retention=None,
                                administrator_login_password=None,
-                               auto_grow=None,
+                               standby_count=None,
                                assign_identity=False):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path)
-    ServerPropertiesForUpdate = getattr(module, 'ServerPropertiesForUpdate')
+    ServerForUpdate = getattr(module, 'ServerForUpdate')
 
     if sku_name:
         instance.sku.name = sku_name
@@ -162,22 +158,19 @@ def _flexible_server_update_custom_func(instance,
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
 
-    if auto_grow:
-        instance.storage_profile.storage_autogrow = auto_grow
-
-    if server_edition:
-        instance.server_edition = server_edition
-
-    params = ServerPropertiesForUpdate(storage_profile=instance.storage_profile,
-                                    administrator_login_password=administrator_login_password,
-                                    server_edition = server_edition,
-                                    v_cores = v_cores)
+    params = ServerForUpdate(sku=instance.sku,
+                             storage_profile=instance.storage_profile,
+                             administrator_login_password=administrator_login_password,
+                             standby_count=standby_count)
 
     if assign_identity:
         if server_module_path.find('postgres'):
             from azure.mgmt.rdbms import postgresql
             if instance.identity is None:
-                instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
+                instance.identity = postgresql.models.ResourceIdentity(
+                    type=postgresql.models.IdentityType.system_assigned.value)
+                instance.identity = postgresql.models.flexibleservers.Identity(
+                    type=postgresql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
             params.identity = instance.identity
     return params
 
@@ -202,9 +195,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     from azure.mgmt.rdbms import postgresql
 
-    # MOLJAIN TO DO: The SKU should not be hardcoded, need a fix with new swagger or need to manually parse sku provided
     parameters = postgresql.flexibleservers.models.Server(
-        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier="GeneralPurpose", capacity=4),
+        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier="GeneralPurpose"),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
@@ -215,7 +207,9 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
             backup_retention_days=backup_retention,
             geo_redundant_backup=geo_redundant_backup,
             storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
-        # storage_autogrow=auto_grow),
+        delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+            subnet_arm_resource_id=None  ##subnet_arm_resource_id
+        ),
         location=location,
         create_mode="Default",  # can also be create
         tags=tags)
