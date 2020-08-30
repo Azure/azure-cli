@@ -11,13 +11,13 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core._profile import Profile
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
-from ._client_factory import get_mysql_flexible_management_client
+from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules
 from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
 
-from ._util import resolve_poller
-from ._util import generate_missing_parameters
+from ._util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, parse_public_access_input
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
@@ -58,15 +58,15 @@ def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_n
 """
 
 # region create without args
-def _flexible_server_create(cmd, client, resource_group_name=None, seryesver_name=None, sku_name=None, tier=None,
+def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                                 location=None, storage_mb=None, administrator_login=None,
                                 administrator_login_password=None, version=None,
-                                backup_retention=None, tags=None, public_network_access=None, vnet_name=None,
-                                vnet_address_prefix=None, subnet_name=None, subnet_address_prefix=None, public_access=None,
+                                backup_retention=None, tags=None, public_access=None, vnet_name=None,
+                                vnet_address_prefix=None, subnet_name=None, subnet_address_prefix=None, public_network_access=None,
                                 high_availability=None, zone=None, maintenance_window=None, assign_identity=False):
     from azure.mgmt.rdbms import mysql
     db_context = DbContext(
-        azure_sdk=mysql, logging_name='MySQL', command_group='mysql', server_client=client)
+        azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, logging_name='MySQL', command_group='mysql', server_client=client)
 
     try:
         location, resource_group_name, server_name, administrator_login_password = generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password)
@@ -75,18 +75,19 @@ def _flexible_server_create(cmd, client, resource_group_name=None, seryesver_nam
         logger.warning('Found existing MySQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
     except CloudError:
+        if public_access is None:
+            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.MySQL/flexibleServers")
+
         # Create mysql server
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, storage_mb, administrator_login, administrator_login_password, version,
             tags, public_network_access, assign_identity, tier, subnet_name, vnet_name)
-    """
-    user = '{}@{}'.format(administrator_login, server_name)
-    host = server_result.fully_qualified_domain_name
-    sku = '{}'.format(sku_name)
-    rg = '{}'.format(resource_group_name)
-    loc = '{}'.format(location)
-    """
+
+        if public_access is not None:
+            start_ip, end_ip = parse_public_access_input(public_access)
+            create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+
     rg = '{}'.format(resource_group_name)
     user = server_result.administrator_login
     id = server_result.id
@@ -98,10 +99,9 @@ def _flexible_server_create(cmd, client, resource_group_name=None, seryesver_nam
     logger.warning('Make a note of your password. If you forget, you would have to'
                    ' reset your password with CLI command for reset password')
 
-    cmd.cli_ctx.invocation.data['output'] = 'table'
+    _update_local_contexts(cmd, server_name, resource_group_name, location)
 
-    return _form_response(
-    user, sku, loc, rg, id, host,version,
+    return _form_response(user, sku, loc, rg, id, host,version,
         administrator_login_password if administrator_login_password is not None else '*****',
         ''
     )
@@ -316,11 +316,22 @@ def _form_response(username, sku, location, resource_group_name, id, host, versi
         'connection string': connection_string
     }
 
+
+def _update_local_contexts(cmd, server_name, resource_group_name, location):
+    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server-name',
+                                  server_name)  # Setting the server name in the local context
+    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'location',
+                                  location)  # Setting the location in the local context
+    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'resource_group_name', resource_group_name)
+
+
+
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class DbContext:
-    def __init__(self, azure_sdk=None, logging_name=None,
+    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None,
                  command_group=None, server_client=None):
         self.azure_sdk = azure_sdk
+        self.cf_firewall = cf_firewall
         self.logging_name = logging_name
         self.command_group = command_group
         self.server_client = server_client

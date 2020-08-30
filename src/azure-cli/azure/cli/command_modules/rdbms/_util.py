@@ -9,12 +9,14 @@ from knack.config import CLIConfig
 from knack.log import get_logger
 from azure.cli.core.commands import AzArgumentContext
 from azure.cli.core.commands import LongRunningOperation, _is_poller
+from azure.cli.core.profiles import ResourceType
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory
+from ._client_factory import resource_client_factory, network_client_factory
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'northeurope'
+DEFAULT_LOCATION = 'southeastasia'
+
 
 class RdbmsArgumentContext(AzArgumentContext):  # pylint: disable=too-few-public-methods
 
@@ -77,7 +79,7 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
     if server_name is None:
         server_name = create_random_resource_name('server')
         # cmd.cli_ctx.local_context.get_value('server-name')
-        cmd.cli_ctx.local_context.set(['all'], 'server-name', server_name)  # Setting the location in the local context
+        # cmd.cli_ctx.local_context.set(['all'], 'server-name', server_name)  # Setting the location in the local context
 
     if administrator_login_password is None:
         administrator_login_password = str(uuid.uuid4())
@@ -93,7 +95,7 @@ def _update_location(cmd, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)
     rg = resource_client.resource_groups.get(resource_group_name)
     location = rg.location
-    cmd.cli_ctx.local_context.set(['all'], 'location', location)  # Setting the location in the local context
+    # cmd.cli_ctx.local_context.set(['all'], 'location', location)  # Setting the location in the local context
     return location
 
 
@@ -104,10 +106,62 @@ def _create_resource_group(cmd, location, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)
     logger.warning('Creating Resource Group \'%s\'...', resource_group_name)
     resource_client.resource_groups.create_or_update(resource_group_name, params)
-    cmd.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group_name)
+    # cmd.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group_name)
     return resource_group_name
 
 
 def _check_resource_group_existence(cmd, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)
     return  resource_client.resource_groups.check_existence(resource_group_name)
+
+
+def create_vnet(cmd, servername, location, resource_group_name, delegation_service_name):
+    Subnet, VirtualNetwork, AddressSpace, Delegation = cmd.get_models('Subnet', 'VirtualNetwork', 'AddressSpace', 'Delegation', resource_type=ResourceType.MGMT_NETWORK)
+    client = network_client_factory(cmd.cli_ctx)
+    vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername)
+
+    logger.warning('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
+    client.virtual_networks.create_or_update(resource_group_name, vnet_name, VirtualNetwork(name=vnet_name, location=location, address_space=AddressSpace(
+                                                                 address_prefixes=[vnet_address_prefix])))
+    delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
+    subnet = Subnet(name=subnet_name, location=location, address_prefix=subnet_prefix, delegations=[delegation])
+
+    logger.warning('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
+    subnet = client.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+    return subnet.id
+
+
+def _create_vnet_metadata(servername):
+    vnet_name = servername + 'VNET'
+    subnet_name = servername + 'Subnet'
+    vnet_address_prefix = '10.0.0.0/16'
+    subnet_prefix = '10.0.0.0/24'
+    return vnet_name, subnet_name, vnet_address_prefix, subnet_prefix
+
+
+def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
+    # allow access to azure ip addresses
+    cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name
+    if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
+        logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
+                   'Azure resources...')
+        firewall_name = 'azure-access'
+    elif start_ip == end_ip:
+        firewall_name = 'single-ip-firewall'
+    else:
+        firewall_name = 'multiple-ip-firewall'
+    firewall_client = cf_firewall(cmd.cli_ctx, None)
+    resolve_poller(
+        firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
+        cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
+
+
+def parse_public_access_input(public_access):
+    allow_azure_services = False
+    if public_access is not None:
+        parsed_input = public_access.split('-')
+        if len(parsed_input) == 1:
+            return parsed_input[0], parsed_input[0]
+        else:
+            return parsed_input[0], parsed_input[1]
+
