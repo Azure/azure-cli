@@ -12,6 +12,7 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core._profile import Profile
+from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules
@@ -319,11 +320,13 @@ def _form_response(username, sku, location, resource_group_name, id, host, versi
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server-name',
+    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server_name',
                                   server_name)  # Setting the server name in the local context
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'location',
+    cmd.cli_ctx.local_context.set([ALL], 'location',
                                   location)  # Setting the location in the local context
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'resource_group_name', resource_group_name)
+    cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    cmd.cli_ctx.local_context.set([ALL], 'subscription', profile.get_subscription()['id'])
 
 
 
