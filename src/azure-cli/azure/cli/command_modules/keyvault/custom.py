@@ -21,13 +21,50 @@ from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 
-
 from azure.cli.core import telemetry
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
+from azure.cli.core.util import sdk_no_wait
 
 from ._validators import _construct_vnet, secret_text_encoding_values
 
 logger = get_logger(__name__)
+
+
+def _not_less_than(current_profile, resource_type, min_api_version, sub_resource_name=None):
+    if current_profile not in AZURE_API_PROFILES:
+        raise CLIError('Unsupported profile: {}'.format(current_profile))
+
+    profile = AZURE_API_PROFILES[current_profile]
+    if resource_type not in profile:
+        raise CLIError('ResourceType {} not in Profile {}'.format(resource_type, current_profile))
+
+    if not sub_resource_name:
+        api_version = profile[resource_type]
+        if isinstance(api_version, SDKProfile):
+            return api_version.default_api_version >= min_api_version
+        return api_version >= min_api_version
+
+    sdk_profile = profile[resource_type]
+    if not isinstance(sdk_profile, SDKProfile):
+        raise CLIError('Invalid SDKProfile {} in Profile {}'.format(resource_type, current_profile))
+    sub_profile = sdk_profile.profile
+    if sub_resource_name not in sub_profile:
+        raise CLIError('SubResource {} not in ResourceType {} under Profile {}'.
+                       format(sub_resource_name, resource_type, current_profile))
+    api_version = sub_profile[sub_resource_name]
+    return api_version >= min_api_version
+
+
+def _azure_stack_wrapper(cmd, client, function_name, resource_type, min_api_version, sub_resource_name=None, **kwargs):
+    no_wait = False
+    if 'no_wait' in kwargs:
+        no_wait = kwargs.pop('no_wait')
+
+    if _not_less_than(cmd.cli_ctx.cloud.profile, resource_type, min_api_version, sub_resource_name):
+        function_name = 'begin_' + function_name
+        return sdk_no_wait(no_wait, getattr(client, function_name), **kwargs)
+
+    return getattr(client, function_name)(**kwargs)
 
 
 def _default_certificate_profile(cmd):
@@ -259,9 +296,12 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                                        'sku': Sku(name=SkuName.standard.value),
                                                        'create_mode': CreateMode.recover.value})
 
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=params)
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=params)
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
@@ -328,7 +368,8 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     bypass=None,
                     default_action=None,
                     no_self_perms=None,
-                    tags=None):
+                    tags=None,
+                    no_wait=False):
 
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
@@ -435,19 +476,28 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=parameters)
+
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=parameters,
+                                no_wait=no_wait)
 
 
-def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name):
+def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name, no_wait=False):
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=parameters.location,
-                                       properties=parameters.properties))
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=parameters.location,
+                                    properties=parameters.properties),
+                                no_wait=no_wait)
 
 
 def update_keyvault(cmd, instance, enabled_for_deployment=None,
@@ -562,12 +612,16 @@ def set_policy(cmd, client, resource_group_name, vault_name,
             if certificate_permissions is None else certificate_permissions
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
         policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=vault.location,
-                                       tags=vault.tags,
-                                       properties=vault.properties))
+
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=vault.location,
+                                    tags=vault.tags,
+                                    properties=vault.properties))
 
 
 def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
@@ -604,12 +658,15 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
         if to_modify:
             rules.ip_rules.append(IPRule(value=ip_address))
 
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=vault.location,
-                                       tags=vault.tags,
-                                       properties=vault.properties))
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=vault.location,
+                                    tags=vault.tags,
+                                    properties=vault.properties))
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
@@ -644,12 +701,15 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
         return vault
 
     # otherwise update
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=vault.location,
-                                       tags=vault.tags,
-                                       properties=vault.properties))
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=vault.location,
+                                    tags=vault.tags,
+                                    properties=vault.properties))
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
@@ -680,12 +740,16 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
                                         object_id.lower() != p.object_id.lower()]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=vault.location,
-                                       tags=vault.tags,
-                                       properties=vault.properties))
+
+    return _azure_stack_wrapper(cmd, client, 'create_or_update',
+                                resource_type=ResourceType.MGMT_KEYVAULT,
+                                min_api_version='2018-02-14',
+                                resource_group_name=resource_group_name,
+                                vault_name=vault_name,
+                                parameters=VaultCreateOrUpdateParameters(
+                                    location=vault.location,
+                                    tags=vault.tags,
+                                    properties=vault.properties))
 # endregion
 
 
@@ -1289,18 +1353,18 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
                                                             resource_type=ResourceType.MGMT_KEYVAULT)
 
-    private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                                             private_endpoint_connection_name=private_endpoint_connection_name)
+    connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
+                            private_endpoint_connection_name=private_endpoint_connection_name)
 
     new_status = PrivateEndpointServiceConnectionStatus.approved \
         if is_approved else PrivateEndpointServiceConnectionStatus.rejected
-    private_endpoint_connection.private_link_service_connection_state.status = new_status
-    private_endpoint_connection.private_link_service_connection_state.description = description
+    connection.private_link_service_connection_state.status = new_status
+    connection.private_link_service_connection_state.description = description
 
     retval = client.put(resource_group_name=resource_group_name,
                         vault_name=vault_name,
                         private_endpoint_connection_name=private_endpoint_connection_name,
-                        properties=private_endpoint_connection)
+                        properties=connection)
 
     if no_wait:
         return retval

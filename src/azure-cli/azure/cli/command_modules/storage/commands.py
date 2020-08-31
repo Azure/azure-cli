@@ -15,7 +15,9 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
                                                                cf_adls_file_system, cf_adls_directory,
                                                                cf_adls_file, cf_adls_service,
-                                                               cf_blob_client, cf_blob_lease_client)
+                                                               cf_blob_client, cf_blob_lease_client,
+                                                               cf_or_policy, cf_container_client)
+
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -190,12 +192,39 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('list', 'list_network_rules')
         g.custom_command('remove', 'remove_network_rule')
 
+    or_policy_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#ObjectReplicationPoliciesOperations.{}',
+        client_factory=cf_or_policy,
+        resource_type=ResourceType.MGMT_STORAGE)
+
+    or_policy_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_or_policy)
+
+    with self.command_group('storage account or-policy', or_policy_sdk, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01',
+                            custom_command_type=or_policy_custom_type) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('create', 'create_or_policy')
+        g.generic_update_command('update', setter_name='update_or_policy', setter_type=or_policy_custom_type)
+        g.command('delete', 'delete')
+
+    with self.command_group('storage account or-policy rule', or_policy_sdk, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01',
+                            custom_command_type=or_policy_custom_type) as g:
+        g.custom_show_command('show', 'get_or_rule')
+        g.custom_command('list', 'list_or_rules')
+        g.custom_command('add', 'add_or_rule')
+        g.custom_command('update', 'update_or_rule')
+        g.custom_command('remove', 'remove_or_rule')
+
     with self.command_group('storage account private-endpoint-connection', private_endpoint_sdk,
                             custom_command_type=private_endpoint_custom_type, is_preview=True,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
         from ._validators import validate_private_endpoint_connection_id
         g.command('delete', 'delete', confirmation=True, validator=validate_private_endpoint_connection_id)
-        g.command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
         g.custom_command('approve', 'approve_private_endpoint_connection',
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection',
@@ -253,12 +282,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             min_api='2019-02-02',
                             custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
-        from ._transformers import transform_blob_json_output
+        from ._transformers import transform_blob_list_output, transform_blob_json_output
         from ._format import transform_blob_output
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
                                        exception_handler=show_exception_handler)
         g.storage_custom_command_oauth('set-tier', 'set_blob_tier_v2')
+        g.storage_custom_command_oauth('list', 'list_blobs', client_factory=cf_container_client,
+                                       transform=transform_blob_list_output,
+                                       table_transformer=transform_blob_output)
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
@@ -283,9 +315,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                     create_boolean_result_output_transformer)
         from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters,
                                   process_blob_upload_batch_parameters)
-
-        g.storage_command_oauth('list', 'list_blobs', transform=transform_storage_list_output,
-                                table_transformer=transform_blob_output)
         g.storage_command_oauth(
             'download', 'get_blob_to_path', table_transformer=transform_blob_output)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')

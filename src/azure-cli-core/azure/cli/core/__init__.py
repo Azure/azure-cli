@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.10.1"
+__version__ = "2.11.1"
 
 import os
 import sys
@@ -48,7 +48,8 @@ class AzCli(CLI):
             register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
-        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX
+        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
+        from azure.cli.core.util import handle_version_update
 
         from knack.util import ensure_dir
 
@@ -64,6 +65,8 @@ class AzCli(CLI):
         CONFIG.load(os.path.join(azure_folder, 'az.json'))
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         INDEX.load(os.path.join(azure_folder, 'commandIndex.json'))
+        VERSIONS.load(os.path.join(azure_folder, 'versionCheck.json'))
+        handle_version_update()
 
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
