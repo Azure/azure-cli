@@ -287,9 +287,10 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
             storage_mb=storage_mb),
         location=location,
         create_mode="Default",
-        vnet_inj_args=mysql.flexibleservers.models.VirtualNetworkRule(
-            virtual_network_subnet_id=None, #TODO virtual_network_subnet_id,
-            ignore_missing_vnet_service_endpoint=None # TODO False default?
+        vnet_inj_args=mysql.flexibleservers.models.VnetInjArgs(
+            delegated_vnet_id=None,  # TODO: fix vnet experience
+            delegated_subnet_name=subnet_name,
+            delegated_vnet_name=vnet_name,
         ),
         tags=tags)
 
