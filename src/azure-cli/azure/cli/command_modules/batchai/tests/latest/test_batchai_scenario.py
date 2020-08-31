@@ -17,6 +17,7 @@ except ImportError:
     import mock
 
 from azure.cli.testsdk import JMESPathCheck, JMESPathCheckExists, StringContainCheck
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 NODE_STARTUP_TIME = 10 * 60  # Compute node should start in 10 mins after cluster creation.
 CLUSTER_RESIZE_TIME = 20 * 60  # Cluster should resize in 20 mins after job submitted/completed.
@@ -282,6 +283,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai cluster show -g {0} -w workspace -n cluster'.format(resource_group),
                      checks=[JMESPathCheck('nodeStateCounts.idleNodeCount', 1)])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(name_prefix='bai', location=LOCATION_FOR_SCENARIO_TESTS)
     def test_batchai_cluster_with_auto_storage(self, resource_group, storage_account):
@@ -303,6 +305,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                     JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].containerName', 'batchaicontainer'),
                     JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].relativeMountPath', 'autobfs')])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(name_prefix='bai', location=LOCATION_FOR_SCENARIO_TESTS)
     def test_batchai_cluster_with_setup_command(self, resource_group, storage_account):
