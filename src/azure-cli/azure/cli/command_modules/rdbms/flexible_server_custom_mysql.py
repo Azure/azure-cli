@@ -321,7 +321,7 @@ def _form_response(username, sku, location, resource_group_name, id, host, versi
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):
     cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server_name',
-                                  server_namecccccccccc)  # Setting the server name in the local context
+                                  server_name)  # Setting the server name in the local context
     cmd.cli_ctx.local_context.set([ALL], 'location',
                                   location)  # Setting the location in the local context
     cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
