@@ -2649,7 +2649,13 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
         return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
-    return client.virtual_machine_scale_sets.get(resource_group_name, name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
+    if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
+            vmss.virtual_machine_profile.storage_profile and \
+            vmss.virtual_machine_profile.storage_profile.image_reference and \
+            vmss.virtual_machine_profile.storage_profile.image_reference.id:
+        vmss.virtual_machine_profile.storage_profile.image_reference = None
+    return vmss
 
 
 def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
