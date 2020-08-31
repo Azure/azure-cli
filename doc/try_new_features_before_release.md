@@ -55,10 +55,10 @@ env\Scripts\activate.ps1
 
 ## Install from source code
 
-This method is for geek users. You can test Azure CLI of any repo, any branch, any commit.
+This method is for geek users. You can test Azure CLI of any repository, any branch, any commit.
 
 ```
-# You can also clone a fork of this repo
+# You can also clone a fork of this repository
 git clone https://github.com/Azure/azure-cli.git
 # You can checkout any branch, any commit
 git checkout dev
