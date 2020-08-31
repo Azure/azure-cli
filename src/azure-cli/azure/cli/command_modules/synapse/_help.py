@@ -539,3 +539,57 @@ examples:
         az synapse role definition show --workspace-name testsynapseworkspace \\
         --role 00000000-0000-0000-0000-000000000000
 """
+
+helps['synapse linked-service'] = """
+type: group
+short-summary: Manage Synapse's linked services.
+"""
+
+helps['synapse linked-service create'] = """
+type: command
+short-summary: Create a linked service.
+examples:
+  - name: Create a linked service.
+    text: |-
+        az synapse linked-service create --workspace-name testsynapseworkspace \\
+          --name testlinkedservice --file @path/linkedservice.json
+"""
+
+helps['synapse linked-service update'] = """
+type: command
+short-summary: Update an exist linked service.
+examples:
+  - name: Update an exist linked service.
+    text: |-
+        az synapse linked-service update --workspace-name testsynapseworkspace \\
+          --name testlinkedservice --file @path/linkedservice.json
+"""
+
+helps['synapse linked-service show'] = """
+type: command
+short-summary: Get a linked service.
+examples:
+  - name: Get a linked service.
+    text: |-
+        az synapse linked-service show --workspace-name testsynapseworkspace \\
+          --name testlinkedservice
+"""
+
+helps['synapse linked-service list'] = """
+type: command
+short-summary: List linked services.
+examples:
+  - name: List linked services.
+    text: |-
+        az synapse linked-service list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse linked-service delete'] = """
+type: command
+short-summary: Delete a linked service.
+examples:
+  - name: Delete a linked service.
+    text: |-
+        az synapse linked-service delete --workspace-name testsynapseworkspace \\
+          --name testlinkedservice
+"""

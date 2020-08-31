@@ -141,14 +141,14 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_role_definitions')
         g.custom_show_command('show', 'get_role_definition')
 
-    # Data Plane Commands --Linked service operations
-    with self.command_group('synapse linked service', synapse_linked_service_sdk,
+    # Data Plane Commands --Artifacts Linked service operations
+    with self.command_group('synapse linked-service', synapse_linked_service_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
-        g.custom_command('create', 'create_or_update_linked_service')
-        g.custom_command('update', 'create_or_update_linked_service')
+        g.custom_command('create', 'create_or_update_linked_service', supports_no_wait=True)
+        g.custom_command('update', 'create_or_update_linked_service', supports_no_wait=True)
         g.custom_command('list', 'list_linked_service')
         g.custom_show_command('show', 'get_linked_service')
-        g.custom_command('delete', 'delete_linked_service', confirmation=True)
+        g.custom_command('delete', 'delete_linked_service', confirmation=True, supports_no_wait=True)
 
     with self.command_group('synapse', is_preview=True):
         pass

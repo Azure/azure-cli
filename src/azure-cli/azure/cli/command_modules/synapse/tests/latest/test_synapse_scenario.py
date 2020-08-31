@@ -483,33 +483,48 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_linked_service(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspace',
+            'rg': 'ywtest',
             'name': 'linkedservice'})
 
+        # create a workspace
+        self._create_workspace()
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
         # create linked service
-        linked_service_create = self.cmd(
-           'az synapse linked service create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/linkedservice.json ',
+        self.cmd(
+            'az synapse linked-service create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/linkedservice.json',
             checks=[
-               self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name'])
             ])
 
         # get linked service
         self.cmd(
-            'az synapse linked service show --workspace-name {workspace} --name {name} ',
+            'az synapse linked-service show --workspace-name {workspace} --name {name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
 
         # list linked service
         self.cmd(
-            'az synapse linked service list --workspace-name {workspace} ',
+            'az synapse linked-service list --workspace-name {workspace}',
             checks=[
                 self.check('[0].type', 'Microsoft.Synapse/workspaces/linkedservices')
             ])
 
         # delete linked service
         self.cmd(
-            'az synapse linked service delete --workspace-name {workspace} --name {name} ')
+            'az synapse linked-service delete --workspace-name {workspace} --name {name} -y')
         self.cmd(
-            'az synapse linked service show --workspace-name {workspace} --name {name} ',
+            'az synapse linked-service show --workspace-name {workspace} --name {name}',
             expect_failure=True)
+
+        # delete workspace
+        self.cmd('az synapse workspace delete --name {workspace} --resource-group {rg} --yes')
