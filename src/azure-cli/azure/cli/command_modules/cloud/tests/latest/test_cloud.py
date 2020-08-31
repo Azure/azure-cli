@@ -2,8 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# When tested locally, please use 'azdev test cloud -a "-n 1" to run in serial'
+
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.decorators import serial_test
+
 
 class CloudTests(ScenarioTest):
     def setUp(self):
