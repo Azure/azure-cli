@@ -52,3 +52,24 @@ python -m venv env
 # Activate it
 env\Scripts\activate.ps1
 ```
+
+## Install from source code
+
+This method is for geek users. You can test Azure CLI of any repo, any branch, any commit.
+
+```
+# You can also clone a fork of this repo
+git clone https://github.com/Azure/azure-cli.git
+# You can checkout any branch, any commit
+git checkout dev
+# Create a virtual environment
+python -m venv env
+# Activate it
+env\Scripts\activate.ps1
+# Install azdev
+pip install azdev
+# Install dependencies
+azdev setup -c azure-cli
+# Run Azure CLI
+az -v
+```
