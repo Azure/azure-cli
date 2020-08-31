@@ -9,7 +9,7 @@ from knack.arguments import CLIArgumentType
 
 def load_arguments(self, _):
     from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole
-    from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
+    from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList, validate_list_of_integers
     from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes
     from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type
     from azure.cli.core.commands.parameters import get_resource_name_completion_list
@@ -42,6 +42,7 @@ def load_arguments(self, _):
         c.argument('vm_size', arg_type=get_enum_type(allowed_c_family_sizes + allowed_p_family_sizes), help='Size of Redis cache to deploy. Basic and Standard Cache sizes start with C. Premium Cache sizes start with P')
         c.argument('enable_non_ssl_port', action='store_true', help='If specified, then the non-ssl redis server port (6379) will be enabled.')
         c.argument('replicas_per_master', help='The number of replicas to be created per master.', is_preview=True)
+        c.argument('ports', type=validate_list_of_integers, help='Specifies the ports of nodes to be rebooted. Comma separated list of integers.', is_preview=True)
 
     with self.argument_context('redis firewall-rules list') as c:
         c.argument('cache_name', arg_type=cache_name, id_part=None)

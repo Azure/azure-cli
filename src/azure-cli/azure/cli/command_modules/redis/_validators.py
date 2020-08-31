@@ -29,3 +29,7 @@ class ScheduleEntryList(list):
         self.extend([ScheduleEntry(day_of_week=row['dayOfWeek'],
                                    start_hour_utc=int(row['startHourUtc']),
                                    maintenance_window=row.get('maintenanceWindow', None)) for row in dictval])
+
+def validate_list_of_integers(string):
+    # extract comma-separated list of integers
+    return list(map(int, string.split(',')))
