@@ -17,31 +17,23 @@ class CloudTests(ScenarioTest):
         self.cli_ctx.cloud.name = ''
         self.cmd('az cloud set -n ' + self.cloudname)
 
-    def test_cloud_set_AzureCloud(self):
+    def test_cloud_set(self):
         self.cmd('az cloud set -n AzureCloud')
-
-    def test_cloud_set_AzureChinaCloud(self):
+        self.cmd('az cloud show -n AzureCloud', checks=[self.check('isActive', True)])
         self.cmd('az cloud set -n AzureChinaCloud')
-
-    def test_cloud_set_AzureUSGovernment(self):
+        self.cmd('az cloud show -n AzureChinaCloud', checks=[self.check('isActive', True)])
         self.cmd('az cloud set -n AzureUSGovernment')
-
-    def test_cloud_set_AzureGermanCloud(self):
+        self.cmd('az cloud show -n AzureUSGovernment', checks=[self.check('isActive', True)])
         self.cmd('az cloud set -n AzureGermanCloud')
-
-    def test_cloud_set_azurecloud(self):
+        self.cmd('az cloud show -n AzureGermanCloud', checks=[self.check('isActive', True)])
         self.cmd('az cloud set -n azurecloud')
-
-    def test_cloud_set_azurechinacloud(self):
+        self.cmd('az cloud show -n AzureCloud', checks=[self.check('isActive', True)])
         self.cmd('az cloud set -n azurechinacloud')
-
-    def test_cloud_set_azureusgovernment(self):
+        self.cmd('az cloud show -n AzureChinaCloud', checks=[self.check('isActive', True)])
         self.cmd('az cloud set -n azureusgovernment')
-
-    def test_cloud_set_azuregermancloud(self):
+        self.cmd('az cloud show -n AzureUSGovernment', checks=[self.check('isActive', True)])
         self.cmd('az cloud set -n azuregermancloud')
-
-    def test_cloud_set_unregistered_cloud_name(self):
+        self.cmd('az cloud show -n AzureGermanCloud', checks=[self.check('isActive', True)])
         self.cmd('az cloud set -n azCloud', expect_failure=True)
 
 
