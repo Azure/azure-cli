@@ -72,7 +72,7 @@ python -m venv env
 # Activate the virtual environment
 env\Scripts\activate.ps1
 
-# Install azdev - the dev tool for Azure CLI
+# Install azdev - the development tool for Azure CLI
 pip install azdev
 
 # Install dependencies. This may take about 5 minutes
