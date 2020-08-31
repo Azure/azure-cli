@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 # region create without args
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, location=None, backup_retention=None,
-                                   sku_name=None, geo_redundant_backup=None, storage_mb=None, administrator_login=None,
+                                   sku_name=None, tier=None, geo_redundant_backup=None, storage_mb=None, administrator_login=None,
                                    administrator_login_password=None, version=None, ssl_enforcement=None, database_name=None, tags=None, public_access=None, infrastructure_encryption=None,
                                    assign_identity=False):
     from azure.mgmt.rdbms import postgresql
@@ -42,7 +42,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         # Create postgresql
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
-            sku_name, geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
+            sku_name, tier, geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
             ssl_enforcement, tags, public_access, infrastructure_encryption, assign_identity)
 
         if public_access is not None:
@@ -182,7 +182,7 @@ def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
 
 
 
-def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name,
+def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
                    ssl_enforcement, tags, public_network_access, infrastructure_encryption, assign_identity):
     logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
@@ -197,7 +197,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
     from azure.mgmt.rdbms import postgresql
 
     parameters = postgresql.flexibleservers.models.Server(
-        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier="GeneralPurpose"),
+        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,

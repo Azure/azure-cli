@@ -59,7 +59,6 @@ def create_random_resource_name(prefix='azure', length=15):
 
 
 def generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password):
-
     # if location is not passed as a parameter or is missing from local context
     if location is None:
         location = DEFAULT_LOCATION
@@ -86,7 +85,9 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
 
     # This is for the case when user does not pass a location but the resource group exists in the local context.
     #  In that case, the location needs to be set to the location of the rg, not the default one.
-    location = _update_location(cmd, resource_group_name)
+
+    ## TODO: Fix this because it changes the default location even when I pass in a location param
+    # location = _update_location(cmd, resource_group_name)
 
     return location, resource_group_name, server_name, administrator_login_password
 
