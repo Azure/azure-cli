@@ -1087,6 +1087,14 @@ def _int_to_bytes(i):
     return codecs.decode(h, 'hex')
 
 
+def _security_domain_b64_url_encode_for_x5c(s):
+    return base64.b64encode(s).decode('ascii')
+
+
+def _security_domain_b64_url_encode(s):
+    return base64.b64encode(s).decode('ascii').strip('=').replace('+', '-').replace('/', '_')
+
+
 def _public_rsa_key_to_jwk(rsa_key, jwk, encoding=None):
     pubv = rsa_key.public_numbers()
     jwk.n = _int_to_bytes(pubv.n)
@@ -2097,22 +2105,32 @@ def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, secu
         cert = load_pem_x509_certificate(pem_data, backend=default_backend())
         public_key = cert.public_key()
         public_bytes = cert.public_bytes(Encoding.DER)
-        sd_jwk.x5c = [base64.urlsafe_b64encode(public_bytes)]  # only one cert, not a chain
-        sd_jwk.x5tS256 = base64.urlsafe_b64encode(hashlib.sha256(public_bytes).digest())
+        sd_jwk.x5c = [_security_domain_b64_url_encode_for_x5c(public_bytes)]  # only one cert, not a chain
+        sd_jwk.x5t = _security_domain_b64_url_encode(hashlib.sha1(public_bytes).digest())
+        sd_jwk.x5tS256 = _security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
+        sd_jwk.key_ops = ['verify', 'encrypt', 'wrapKey']
 
         # populate key into jwk
         if isinstance(public_key, rsa.RSAPublicKey):
-            sd_jwk.kty = 'RSA-HSM'
-            _public_rsa_key_to_jwk(public_key, sd_jwk, encoding=base64.urlsafe_b64encode)
+            sd_jwk.kty = 'RSA'
+            sd_jwk.alg = 'RSA-OAEP-256'  # TODO
+            _public_rsa_key_to_jwk(public_key, sd_jwk, encoding=_security_domain_b64_url_encode)
         else:
             raise CLIError('Import failed: Unsupported key type, {}.'.format(type(public_key)))
 
-        certificates.append(SecurityDomainCertificateItem(value=sd_jwk))
+        certificates.append(sd_jwk)
 
-    ret_json = client.download(
+    logger.info('Certificates was successfully added.')
+
+    ret = client.download(
         vault_base_url=vault_base_url,
         certificates=CertificateSet(certificates=certificates, required=sd_quorum)
     )
-    with open(security_domain_file, 'w') as f:
-        f.write(ret_json)
+
+    try:
+        with open(security_domain_file, 'w') as f:
+            f.write(ret.value)
+            logger.info('SD file {} was successfully downloaded.'.format(security_domain_file))
+    except:  # pylint: disable=bare-except
+        os.remove(security_domain_file)
 # endregion
