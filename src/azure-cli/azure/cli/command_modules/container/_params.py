@@ -68,7 +68,7 @@ def load_arguments(self, _):
         c.argument('memory', type=float, help='The required memory of the containers in GB, accurate to one decimal place')
         c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The OS type of the containers')
         c.argument('ip_address', arg_type=get_enum_type(IP_ADDRESS_TYPES), help='The IP address type of the container group')
-        c.argument('ports', type=int, nargs='+', default=[80], help='The ports to open')
+        c.argument('ports', type=int, nargs='+', default=[80], help='A list of ports to open. Space-separated list of ports')
         c.argument('protocol', arg_type=get_enum_type(ContainerNetworkProtocol), help='The network protocol to use')
         c.argument('dns_name_label', help='The dns name label for container group with public IP')
         c.argument('restart_policy', arg_type=get_enum_type(ContainerGroupRestartPolicy), help='Restart policy for all containers within the container group')

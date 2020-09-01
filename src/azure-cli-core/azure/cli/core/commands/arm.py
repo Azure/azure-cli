@@ -636,6 +636,10 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
             properties = getattr(instance, 'properties', None)
             if properties:
                 provisioning_state = getattr(properties, 'provisioning_state', None)
+                # some SDK, like keyvault, has 'provisioningState' under 'properties.additional_properties'
+                if not provisioning_state:
+                    additional_properties = getattr(properties, 'additional_properties', {})
+                    provisioning_state = additional_properties.get('provisioningState')
         return provisioning_state
 
     def handler(args):

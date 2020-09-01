@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.10.1"
+VERSION = "2.11.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -54,7 +54,7 @@ DEPENDENCIES = [
     'azure-batch~=9.0',
     'azure-cli-core=={}.*'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
-    'azure-datalake-store~=0.0.48',
+    'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
@@ -88,7 +88,7 @@ DEPENDENCIES = [
     'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.12.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-keyvault~=2.2.0',
+    'azure-mgmt-keyvault~=7.0.0b2',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.7.0',
     'azure-mgmt-managedservices~=1.0',
@@ -124,7 +124,8 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=0.4.1',
     'azure-loganalytics~=0.1.0',
     'azure-storage-common~=1.4',
-    'azure-synapse-spark~= 0.2.0',
+    'azure-synapse-accesscontrol~=0.2.0',
+    'azure-synapse-spark~=0.2.0',
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'jsmin~=2.2.2',

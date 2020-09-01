@@ -23,7 +23,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
         # 2. Login with 'az login'
         # 3. Go to dev.azure.com apply for a personal access token, and login with 'az devops login'
         # 4. Change the self.azure_devops_organization to your Azure DevOps organization
-        self.azure_devops_organization = "<Your DevOps Organization>"
+        self.azure_devops_organization = "azureclitest"  # Put "<Your DevOps Organization>" to record live tests. Please change back to "azureclitest" as we have a routine live tests pipeline using this account.
         self.os_type = "Windows"
         self.runtime = "dotnet"
 
@@ -40,7 +40,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
             'fn': self.functionapp,
         })
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_command(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
@@ -60,7 +60,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
         finally:
             self._tearDownDevopsEnvironment()
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_mismatch_runtime(self, resource_group, resource_group_location, storage_account_for_test):
         # Overwrite function runtime to use node
@@ -75,7 +75,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
         finally:
             self._tearDownDevopsEnvironment()
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_mismatch_functionapp(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
@@ -91,7 +91,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
             self.kwargs.update({'fn': self.functionapp})
             self._tearDownDevopsEnvironment()
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_mismatch_organization(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
@@ -107,7 +107,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
             self.kwargs.update({'org': self.azure_devops_organization})
             self._tearDownDevopsEnvironment()
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     @StorageAccountPreparer(parameter_name='storage_account_for_test')
     def test_devops_build_mismatch_project(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
@@ -155,11 +155,20 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
         os.chdir(TEST_DIR)
 
     def _tearDownDevopsEnvironment(self):
+        import time
         # Change directory back
         os.chdir(CURR_DIR)
 
         # Remove Azure Devops project
-        self.cmd('devops project delete --organization https://dev.azure.com/{org} --id {id} --yes'.format(
-            org=self.azure_devops_organization,
-            id=self.azure_devops_project_id
-        ))
+        retry = 5
+        for i in range(retry):
+            try:
+                self.cmd('devops project delete --organization https://dev.azure.com/{org} --id {id} --yes'.format(
+                    org=self.azure_devops_organization,
+                    id=self.azure_devops_project_id
+                ))
+                break
+            except Exception as ex:
+                if i == retry - 1:
+                    raise ex
+                time.sleep(120)

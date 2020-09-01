@@ -1492,10 +1492,11 @@ def export_deployment_as_template(cmd, resource_group_name, deployment_name):
 def create_resource(cmd, properties,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None,
-                    resource_id=None, api_version=None, location=None, is_full_object=False):
+                    resource_id=None, api_version=None, location=None, is_full_object=False,
+                    latest_include_preview=False):
     res = _ResourceUtils(cmd.cli_ctx, resource_group_name, resource_provider_namespace,
                          parent_resource_path, resource_type, resource_name,
-                         resource_id, api_version)
+                         resource_id, api_version, latest_include_preview=latest_include_preview)
     return res.create_resource(properties, location, is_full_object)
 
 
@@ -1513,7 +1514,7 @@ def _get_parsed_resource_ids(resource_ids):
     return ({'resource_id': rid} for rid in resource_ids)
 
 
-def _get_rsrc_util_from_parsed_id(cli_ctx, parsed_id, api_version):
+def _get_rsrc_util_from_parsed_id(cli_ctx, parsed_id, api_version, latest_include_preview=False):
     return _ResourceUtils(cli_ctx,
                           parsed_id.get('resource_group', None),
                           parsed_id.get('resource_namespace', None),
@@ -1521,7 +1522,8 @@ def _get_rsrc_util_from_parsed_id(cli_ctx, parsed_id, api_version):
                           parsed_id.get('resource_type', None),
                           parsed_id.get('resource_name', None),
                           parsed_id.get('resource_id', None),
-                          api_version)
+                          api_version,
+                          latest_include_preview=latest_include_preview)
 
 
 def _create_parsed_id(cli_ctx, resource_group_name=None, resource_provider_namespace=None, parent_resource_path=None,
@@ -1551,7 +1553,7 @@ def _single_or_collection(obj, default=None):
 # pylint: unused-argument
 def show_resource(cmd, resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                  resource_name=None, api_version=None, include_response_body=False):
+                  resource_name=None, api_version=None, include_response_body=False, latest_include_preview=False):
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
                                                                               resource_group_name,
                                                                               resource_provider_namespace,
@@ -1560,14 +1562,14 @@ def show_resource(cmd, resource_ids=None, resource_group_name=None,
                                                                               resource_name)]
 
     return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version).get_resource(
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).get_resource(
             include_response_body) for id_dict in parsed_ids])
 
 
 # pylint: disable=unused-argument
 def delete_resource(cmd, resource_ids=None, resource_group_name=None,
                     resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                    resource_name=None, api_version=None):
+                    resource_name=None, api_version=None, latest_include_preview=False):
     """
     Deletes the given resource(s).
     This function allows deletion of ids with dependencies on one another.
@@ -1579,7 +1581,7 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
                                                                               parent_resource_path,
                                                                               resource_type,
                                                                               resource_name)]
-    to_be_deleted = [(_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version), id_dict)
+    to_be_deleted = [(_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview), id_dict)
                      for id_dict in parsed_ids]
 
     results = []
@@ -1621,7 +1623,8 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
 # pylint: unused-argument
 def update_resource(cmd, parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
-                    parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
+                    parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
+                    latest_include_preview=False):
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
                                                                               resource_group_name,
                                                                               resource_provider_namespace,
@@ -1630,13 +1633,14 @@ def update_resource(cmd, parameters, resource_ids=None,
                                                                               resource_name)]
 
     return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version).update(parameters) for id_dict in parsed_ids])
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).update(parameters)
+         for id_dict in parsed_ids])
 
 
 # pylint: unused-argument
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
-                 is_incremental=None):
+                 is_incremental=None, latest_include_preview=False):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
@@ -1647,15 +1651,15 @@ def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resourc
                                                                               resource_name)]
 
     return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version).tag(tags, is_incremental)
-         for id_dict in parsed_ids])
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).tag(
+            tags, is_incremental) for id_dict in parsed_ids])
 
 
 # pylint: unused-argument
 def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                            resource_group_name=None, resource_provider_namespace=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
-                           api_version=None):
+                           api_version=None, latest_include_preview=False):
     """ Invokes the provided action on an existing resource."""
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
                                                                               resource_group_name,
@@ -1664,8 +1668,9 @@ def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                                                                               resource_type,
                                                                               resource_name)]
 
-    return _single_or_collection([_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version)
-                                  .invoke_action(action, request_body) for id_dict in parsed_ids])
+    return _single_or_collection(
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).invoke_action(
+            action, request_body) for id_dict in parsed_ids])
 
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
@@ -1915,7 +1920,9 @@ def list_resources(cmd, resource_group_name=None,
     odata_filter = _list_resources_odata_filter_builder(resource_group_name,
                                                         resource_provider_namespace,
                                                         resource_type, name, tag, location)
-    resources = rcf.resources.list(filter=odata_filter)
+
+    expand = "createdTime,changedTime,provisioningState"
+    resources = rcf.resources.list(filter=odata_filter, expand=expand)
     return list(resources)
 
 
@@ -2785,7 +2792,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
-                 resource_id=None, api_version=None, rcf=None):
+                 resource_id=None, api_version=None, rcf=None, latest_include_preview=False):
         # if the resouce_type is in format 'namespace/type' split it.
         # (we don't have to do this, but commands like 'vm show' returns such values)
         if resource_type and not resource_provider_namespace and not parent_resource_path:
@@ -2797,14 +2804,16 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         self.rcf = rcf or _resource_client_factory(cli_ctx)
         if api_version is None:
             if resource_id:
-                api_version = _ResourceUtils._resolve_api_version_by_id(self.rcf, resource_id)
+                api_version = _ResourceUtils._resolve_api_version_by_id(self.rcf, resource_id,
+                                                                        latest_include_preview=latest_include_preview)
             else:
                 _validate_resource_inputs(resource_group_name, resource_provider_namespace,
                                           resource_type, resource_name)
                 api_version = _ResourceUtils.resolve_api_version(self.rcf,
                                                                  resource_provider_namespace,
                                                                  parent_resource_path,
-                                                                 resource_type)
+                                                                 resource_type,
+                                                                 latest_include_preview=latest_include_preview)
 
         self.resource_group_name = resource_group_name
         self.resource_provider_namespace = resource_provider_namespace
@@ -3007,7 +3016,8 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
                                     self.rcf.resources.config.long_running_operation_timeout)
 
     @staticmethod
-    def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type):
+    def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type,
+                            latest_include_preview=False):
         provider = rcf.providers.get(resource_provider_namespace)
 
         # If available, we will use parent resource's api-version
@@ -3018,6 +3028,12 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         if not rt:
             raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
         if len(rt) == 1 and rt[0].api_versions:
+            # If latest_include_preview is true,
+            # the last api-version will be taken regardless of whether it is preview version or not
+            if latest_include_preview:
+                return rt[0].api_versions[0]
+            # Take the latest stable version first.
+            # if there is no stable version, the latest preview version will be taken.
             npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
             return npv[0] if npv else rt[0].api_versions[0]
         raise IncorrectUsageError(
@@ -3025,7 +3041,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
             .format(resource_type))
 
     @staticmethod
-    def _resolve_api_version_by_id(rcf, resource_id):
+    def _resolve_api_version_by_id(rcf, resource_id, latest_include_preview=False):
         parts = parse_resource_id(resource_id)
 
         if len(parts) == 2 and parts['subscription'] is not None and parts['resource_group'] is not None:
@@ -3051,4 +3067,5 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
             parent = None
             resource_type = parts['type']
 
-        return _ResourceUtils.resolve_api_version(rcf, namespace, parent, resource_type)
+        return _ResourceUtils.resolve_api_version(rcf, namespace, parent, resource_type,
+                                                  latest_include_preview=latest_include_preview)

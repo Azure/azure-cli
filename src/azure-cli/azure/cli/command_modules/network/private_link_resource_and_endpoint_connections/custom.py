@@ -32,6 +32,7 @@ def register_providers():
     _register_one_provider('Microsoft.SignalRService/signalr', '2020-05-01', False)
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
     _register_one_provider('Microsoft.Compute/diskAccesses', '2020-05-01', False, support_connection_operation=False)
+    _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
