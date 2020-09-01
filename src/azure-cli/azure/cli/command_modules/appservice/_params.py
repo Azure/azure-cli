@@ -126,7 +126,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
-                                                                 scopes=['webapp', 'cupertino']))
+                                                                 scopes=['webapp', 'connect']))
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
@@ -598,7 +598,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
-                                                                 scopes=['webapp', 'cupertino']))
+                                                                 scopes=['webapp', 'connect']))
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name of the appserviceplan associated with the webapp",
