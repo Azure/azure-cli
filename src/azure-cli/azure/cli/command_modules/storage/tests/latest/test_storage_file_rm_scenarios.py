@@ -218,6 +218,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('accessTier', 'Hot')
         })
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="cli_stats")
     @StorageAccountPreparer(name_prefix="stats")
     def test_storage_share_rm_with_stats(self, resource_group, storage_account):
@@ -229,7 +230,10 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result, str(0))
 
         local_file = self.create_temp_file(512, full_random=False)
-        self.storage_cmd('storage file upload --share-name {} --source "{}"', account_info, share_name, local_file)
+        src_file = os.path.join('dir', 'source_file.txt')
+
+        self.storage_cmd('storage file upload --share-name {} --source "{}" --path {} ', account_info, share_name,
+                         local_file, src_file)
         result = self.cmd('storage share-rm stats -n {} --storage-account {}'.format(
             share_name, storage_account)).output.strip('\n')
         self.assertEqual(result, str(512 * 1024))
