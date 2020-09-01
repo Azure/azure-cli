@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+import base64
 import codecs
+import hashlib
 import json
 import math
 import os
@@ -1085,10 +1087,14 @@ def _int_to_bytes(i):
     return codecs.decode(h, 'hex')
 
 
-def _public_rsa_key_to_jwk(rsa_key, jwk):
+def _public_rsa_key_to_jwk(rsa_key, jwk, encoding=None):
     pubv = rsa_key.public_numbers()
     jwk.n = _int_to_bytes(pubv.n)
+    if encoding:
+        jwk.n = encoding(jwk.n)
     jwk.e = _int_to_bytes(pubv.e)
+    if encoding:
+        jwk.e = encoding(jwk.e)
 
 
 def _private_rsa_key_to_jwk(rsa_key, jwk):
@@ -2084,21 +2090,24 @@ def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, secu
 
     certificates = []
     for path in sd_wrapping_keys:
-        key_obj = SecurityDomainJsonWebKey()
+        sd_jwk = SecurityDomainJsonWebKey()
         with open(path, 'rb') as f:
             pem_data = f.read()
 
         cert = load_pem_x509_certificate(pem_data, backend=default_backend())
-        pubkey = cert.public_key()
+        public_key = cert.public_key()
+        public_bytes = cert.public_bytes(Encoding.DER)
+        sd_jwk.x5c = [base64.urlsafe_b64encode(public_bytes)]  # only one cert, not a chain
+        sd_jwk.x5tS256 = base64.urlsafe_b64encode(hashlib.sha256(public_bytes).digest())
 
         # populate key into jwk
-        if isinstance(pubkey, rsa.RSAPublicKey):
-            key_obj.kty = 'RSA-HSM'
-            _public_rsa_key_to_jwk(pubkey, key_obj)
+        if isinstance(public_key, rsa.RSAPublicKey):
+            sd_jwk.kty = 'RSA-HSM'
+            _public_rsa_key_to_jwk(public_key, sd_jwk, encoding=base64.urlsafe_b64encode)
         else:
-            raise CLIError('Import failed: Unsupported key type, {}.'.format(type(pubkey)))
+            raise CLIError('Import failed: Unsupported key type, {}.'.format(type(public_key)))
 
-        certificates.append(SecurityDomainCertificateItem(value=key_obj))
+        certificates.append(SecurityDomainCertificateItem(value=sd_jwk))
 
     ret_json = client.download(
         vault_base_url=vault_base_url,
