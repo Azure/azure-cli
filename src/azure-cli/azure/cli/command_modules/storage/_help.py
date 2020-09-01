@@ -2044,6 +2044,14 @@ examples:
     text: az storage share-rm show --ids file-share-id
 """
 
+helps['storage share-rm stats'] = """
+type: command
+short-summary: Get the usage bytes of the data stored on the share.
+examples:
+  - name: Get the usage bytes of the data stored on the share.
+    text: az storage share-rm stats -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
+"""
+
 helps['storage share-rm update'] = """
 type: command
 short-summary: Update the properties for an Azure file share.
