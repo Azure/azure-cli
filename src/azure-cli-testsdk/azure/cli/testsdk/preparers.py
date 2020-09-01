@@ -149,8 +149,8 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
                  resource_group_parameter_name='resource_group', skip_delete=True,
-                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv', random_name_length=24):
-        super(KeyVaultPreparer, self).__init__(name_prefix, random_name_length)
+                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv'):
+        super(KeyVaultPreparer, self).__init__(name_prefix, 24)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
