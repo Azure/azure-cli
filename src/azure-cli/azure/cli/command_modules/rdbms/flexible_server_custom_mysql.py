@@ -201,6 +201,27 @@ def _flexible_server_update_custom_func(instance,
 
     return params
 
+## Parameter update command
+def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name=None, source=None, value=None):
+    print("Entering the method correctly")
+    return None
+    # if source is None and value is None:
+    #     # update the command with system default
+    #     print("here")
+    #     try:
+    #         parameter = client.get(resource_group_name, server_name, configuration_name)
+    #         value = parameter.default_value # reset value to default
+    #         print(value)
+    #         source = "system-default"
+    #     except CloudError as e:
+    #         raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
+    # elif source is None:
+    #     source = "user-override"
+    # print(source)
+    # print(value)
+    #
+    # return client.update(resource_group_name, server_name, configuration_name, value, source)
+
 ## Replica commands
 
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future

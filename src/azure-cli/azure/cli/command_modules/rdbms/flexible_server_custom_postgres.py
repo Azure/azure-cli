@@ -14,7 +14,6 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import get_postgresql_flexible_management_client,cf_postgres_flexible_firewall_rules
 from azure.cli.core._profile import Profile
 from ._client_factory import get_postgresql_flexible_management_client
-from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
 from ._util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
@@ -180,7 +179,25 @@ def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
+def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name=None, source=None, value=None):
+    print(client)
+    print("Entering the method correctly")
+    if source is None and value is None:
+        # update the command with system default
+        print("here")
+        try:
+            parameter = client.get(resource_group_name, server_name, configuration_name)
+            value = parameter.default_value # reset value to default
+            print(value)
+            source = "system-default"
+        except CloudError as e:
+            raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
+    elif source is None:
+        source = "user-override"
+    print(source)
+    print(value)
 
+    return client.update(resource_group_name, server_name, configuration_name, value, source)
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,

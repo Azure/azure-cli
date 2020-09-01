@@ -520,9 +520,10 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     ### MERU COMMANDS
+    flexible_server_custom_common = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_common#{}')
     flexible_servers_custom_postgres = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_postgres#{}')
     flexible_servers_custom_mysql = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_mysql#{}')
-    flexible_servers_custom_mariadb = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_mariadb#{}')
+    # flexible_servers_custom_mariadb = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_mariadb#{}')
 
     ## Postgres commands
     with self.command_group('postgres flexible-server', postgres_flexible_servers_sdk,
@@ -534,7 +535,7 @@ def load_command_table(self, _):
         g.command('stop', 'stop')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func')
+        g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
@@ -551,7 +552,7 @@ def load_command_table(self, _):
         g.generic_update_command('update',
                                  getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
                                  setter_name='_firewall_rule_custom_setter', setter_type=rdbms_custom, setter_arg_name='parameters',
-                                 custom_func_name='_flexible_firewall_rule_update_custom_func')
+                                 custom_func_name='_flexible_firewall_rule_update_custom_func', custom_func_type=flexible_server_custom_common)
 
     # no custom commands needed
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk) as g:
@@ -612,12 +613,12 @@ def load_command_table(self, _):
         g.generic_update_command('update',
                                  getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
                                  setter_name='_firewall_rule_custom_setter', setter_type=rdbms_custom, setter_arg_name='parameters',
-                                 custom_func_name='_flexible_firewall_rule_update_custom_func')
+                                 custom_func_name='_flexible_firewall_rule_update_custom_func', custom_func_type=flexible_server_custom_common)
 
     with self.command_group('mysql flexible-server parameter', mysql_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_config) as g:
-        g.command('set', 'update')
+        g.custom_command('sett', '_flexible_parameter_update', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
