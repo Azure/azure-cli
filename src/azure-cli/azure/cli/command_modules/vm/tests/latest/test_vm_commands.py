@@ -76,7 +76,7 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
 class VMOpenPortTest(ScenarioTest):
 
-    @unittest.skip('We don\'t have an environment that allows opening ports. Funny.')
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_open_port')
     def test_vm_open_port(self, resource_group):
 
