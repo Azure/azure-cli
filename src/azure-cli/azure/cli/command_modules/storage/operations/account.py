@@ -466,7 +466,9 @@ def update_management_policies(client, resource_group_name, account_name, parame
 # TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
 def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
                                    delete_retention_days=None, enable_restore_policy=None, restore_days=None,
-                                   enable_versioning=None):
+                                   enable_versioning=None, enable_last_access_tracking=None,
+                                   tracking_policy_name=None, tracking_granularity_in_days=None,
+                                   blob_type=None):
     if enable_change_feed is not None:
         instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
 
@@ -484,6 +486,11 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
 
     if enable_versioning is not None:
         instance.is_versioning_enabled = enable_versioning
+
+    if enable_last_access_tracking is not None:
+        instance.last_access_time_tracking_policy = cmd.get_models('LastAccessTimeTrackingPolicy')(
+            enable=enable_last_access_tracking, name=tracking_policy_name,
+            tracking_granularity_in_days=tracking_granularity_in_days, blob_type=blob_type)
 
     return instance
 
