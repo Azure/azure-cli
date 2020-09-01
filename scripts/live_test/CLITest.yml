@@ -245,7 +245,7 @@ jobs:
         # Send notification
         az -v
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id"
+        python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
         # python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
         # Clean resources
         if [[ "$(USER_LIVE)" == "--live" && "$(USER_TARGET)" == "" ]]; then

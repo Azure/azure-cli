@@ -24,6 +24,7 @@ ARTIFACT_DIR = sys.argv[7]
 REQUESTED_FOR_EMAIL = sys.argv[8]
 ACCOUNT_KEY = sys.argv[9]
 COMMIT_ID = sys.argv[10]
+DB_PWD = sys.argv[11]
 
 
 def main():
@@ -38,6 +39,7 @@ def main():
     print(REQUESTED_FOR_EMAIL)
     print(ACCOUNT_KEY)
     print(COMMIT_ID)
+    print(DB_PWD)
 
     # Upload results to storage account, container
     container = ''
@@ -127,7 +129,7 @@ def write_db(container, testdata):
     print('Writing DB...')
     # Connect
     cnx = mysql.connector.connect(user='fey@clisqldbserver',
-                                  password='',
+                                  password=DB_PWD,
                                   host='clisqldbserver.mysql.database.azure.com',
                                   database='clidb')
     cursor = cnx.cursor()
