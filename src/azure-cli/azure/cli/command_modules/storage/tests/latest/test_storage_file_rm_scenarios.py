@@ -224,16 +224,16 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
     def test_storage_share_rm_with_stats(self, resource_group, storage_account):
         account_info = self.get_account_info(group=resource_group, name=storage_account)
         share_name = self.create_random_name(prefix='share', length=12)
-        self.cmd('storage share-rm create -n {} --storage-account {}'.format(share_name, storage_account))
-        result = self.cmd('storage share-rm stats -n {} --storage-account {}'.format(
-            share_name, storage_account)).output.strip('\n')
+        self.cmd('storage share-rm create -n {} --storage-account {} -g {} '.format(
+            share_name, storage_account, resource_group))
+        result = self.cmd('storage share-rm stats -n {} --storage-account {} -g {} '.format(
+            share_name, storage_account, resource_group)).output.strip('\n')
         self.assertEqual(result, str(0))
 
         local_file = self.create_temp_file(512, full_random=False)
-        src_file = os.path.join('dir', 'source_file.txt')
 
-        self.storage_cmd('storage file upload --share-name {} --source "{}" --path {} ', account_info, share_name,
-                         local_file, src_file)
-        result = self.cmd('storage share-rm stats -n {} --storage-account {}'.format(
-            share_name, storage_account)).output.strip('\n')
+        self.storage_cmd('storage file upload --share-name {} --source "{}" --path source_file.txt ', account_info,
+                         share_name, local_file)
+        result = self.cmd('storage share-rm stats -n {} --storage-account {} -g {} '.format(
+            share_name, storage_account, resource_group)).output.strip('\n')
         self.assertEqual(result, str(512 * 1024))
