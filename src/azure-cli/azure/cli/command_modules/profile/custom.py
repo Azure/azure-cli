@@ -225,13 +225,11 @@ def check_cli(cmd):
         logger.error('Error occurred loading help!\n')
         raise ex
 
-    print('Running tests...')
-    run_tests()
-
     if not exceptions:
         print('CLI self-test completed: OK')
     else:
         raise CLIError(exceptions)
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 
@@ -261,3 +259,5 @@ def run_tests():
     core_module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/azure-cli-core.xml', '--pyargs', 'azure.cli.command_modules.core']
     pytest.main(module_args)
 >>>>>>> add run tests in self-test
+=======
+>>>>>>> rollback self-test
