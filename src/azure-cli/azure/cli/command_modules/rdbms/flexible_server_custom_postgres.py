@@ -10,19 +10,20 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
-from ._client_factory import get_postgresql_flexible_management_client,cf_postgres_flexible_firewall_rules
 from azure.cli.core._profile import Profile
-from ._client_factory import get_postgresql_flexible_management_client
 from ._util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
+from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
 
-SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
+
 
 # region create without args
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, location=None, backup_retention=None,
                                    sku_name=None, tier=None, geo_redundant_backup=None, storage_mb=None, administrator_login=None,
-                                   administrator_login_password=None, version=None, ssl_enforcement=None, database_name=None, tags=None, public_access=None, infrastructure_encryption=None,
+                                   administrator_login_password=None, version=None, tags=None, public_access=None,
                                    assign_identity=False):
     from azure.mgmt.rdbms import postgresql
     db_context = DbContext(
@@ -42,10 +43,13 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, tier, geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
-            ssl_enforcement, tags, public_access, infrastructure_encryption, assign_identity)
+            tags, public_access, assign_identity)
 
         if public_access is not None:
-            start_ip, end_ip = parse_public_access_input(public_access)
+            if public_access == 'on':
+                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+            else:
+                start_ip, end_ip = parse_public_access_input(public_access)
             create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     rg = '{}'.format(resource_group_name)
@@ -68,38 +72,6 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     )
 
 
-"""
-def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
-                   location=None, storage_mb=None, administrator_login=None, administrator_login_password=None, version=None,
-                   backup_retention=None, tags=None, public_network_access=None, vnet_name=None, vnet_address_prefix=None,
-                   subnet_name=None, subnet_address_prefix=None, public_access=None, high_availability=None, zone=None,
-                   maintenance_window=None, assign_identity=False):
-    from azure.mgmt.rdbms import postgresql
-
-    parameters = postgresql.flexibleservers.models.Server(
-        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier),
-        administrator_login=administrator_login,
-        administrator_login_password=administrator_login_password,
-        version=version,
-        public_network_access=public_network_access,
-        storage_profile=postgresql.flexibleservers.models.StorageProfile(
-            backup_retention_days=backup_retention,
-            # geo_redundant_backup=geo_redundant_backup, # to be enabled after private preview
-            storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
-        location=location,
-        create_mode="Default",
-        delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_arm_resource_id
-        ),
-        tags=tags)
-
-    if assign_identity:
-        parameters.identity = postgresql.models.flexibleservers.Identity(type=postgresql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
-    return client.create(resource_group_name, server_name, parameters)
-"""
-# Need to replace source server name with source server id, so customer server restore function
-# The parameter list should be the same as that in factory to use the ParametersContext
-# arguments and validators
 def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
     if not is_valid_resource_id(source_server):
@@ -120,8 +92,7 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         create_mode="PointInTimeRestore",
         location=location)
 
-    # Here is a workaround that we don't support cross-region restore currently,
-    # so the location must be set as the same as source server (not the resource group)
+    # Retrieve location from same location as source server
     id_parts = parse_resource_id(source_server)
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
@@ -130,6 +101,7 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
 
 # 8/25: may need to update the update function per updates to swagger spec
 def _flexible_server_update_custom_func(instance,
@@ -174,6 +146,7 @@ def _flexible_server_update_custom_func(instance,
             params.identity = instance.identity
     return params
 
+
 # Wait command
 def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)
@@ -201,12 +174,9 @@ def _flexible_parameter_update(client, server_name, configuration_name, resource
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
-                   ssl_enforcement, tags, public_network_access, infrastructure_encryption, assign_identity):
+                   tags, public_network_access, assign_identity):
     logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
-
-    logger.warning('Make a note of your password. If you forget, you would have to'
-                   ' reset your password with CLI command for reset password')
 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                    'Please refer to https://aka.ms/postgres-pricing for pricing details', server_name, sku_name)
@@ -218,15 +188,12 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
-        ssl_enforcement=ssl_enforcement,
         public_network_access=public_network_access,
-        infrastructure_encryption=infrastructure_encryption,
         storage_profile=postgresql.flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
-            geo_redundant_backup=geo_redundant_backup,
-            storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
+            storage_mb=storage_mb),  ##[TODO : required I think otherwise data is null error seen in backend exceptions
         delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=None  ##subnet_arm_resource_id
+            subnet_arm_resource_id=None
         ),
         location=location,
         create_mode="Default",  # can also be create
@@ -264,14 +231,13 @@ def _form_response(username, sku, location, resource_group_name, id, host, versi
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):
-    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server-name',
+    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
                                   server_name)  # Setting the server name in the local context
-    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'location',
+    cmd.cli_ctx.local_context.set([ALL], 'location',
                                   location)  # Setting the location in the local context
-    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'resource_group_name', resource_group_name)
-
-
-
+    cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    cmd.cli_ctx.local_context.set([ALL], 'subscription', profile.get_subscription()['id'])
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods

@@ -5,71 +5,35 @@
 
 # pylint: disable=unused-argument, line-too-long
 
-import uuid
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core._profile import Profile
-from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
+from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
-from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules
-from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
+from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db
+from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, parse_public_access_input
 
-from ._util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, parse_public_access_input
-
-SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
+DEFAULT_DB_NAME = 'flexibleserverdb'
 
-"""
-def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
-                                location=None, storage_mb=None, administrator_login=None,
-                                administrator_login_password=None, version=None,
-                                backup_retention=None, tags=None, public_network_access=None, vnet_name=None,
-                                vnet_address_prefix=None, subnet_name=None, subnet_address_prefix=None, public_access=None,
-                                high_availability=None, zone=None, maintenance_window=None, assign_identity=False):
-    from azure.mgmt.rdbms import mysql
-
-    parameters = mysql.flexibleservers.models.Server(
-        sku=mysql.flexibleservers.models.Sku(name=sku_name, tier = tier),
-        administrator_login=administrator_login,
-        administrator_login_password=administrator_login_password,
-        version=version,
-        public_network_access=public_network_access,
-        storage_profile=mysql.flexibleservers.models.StorageProfile(
-            backup_retention_days=backup_retention,
-            # geo_redundant_backup=geo_redundant_backup,
-            storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
-        # storage_autogrow=auto_grow),
-        location=location,
-        create_mode="Default",
-        vnet_inj_args=mysql.flexibleservers.models.VnetInjArgs(
-            delegated_vnet_id=None,  # what should this value be?
-            delegated_subnet_name=subnet_name,
-            delegated_vnet_name=vnet_name,
-            # delegated_vnet_resource_group=None  # not in mysql
-        ),
-        tags=tags)
-
-    if assign_identity:
-        parameters.identity = mysql.models.flexibleservers.Identity(type=mysql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
-    return client.create(resource_group_name, server_name, parameters)
-"""
 
 # region create without args
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                                 location=None, storage_mb=None, administrator_login=None,
                                 administrator_login_password=None, version=None,
-                                backup_retention=None, tags=None, public_access=None, vnet_name=None,
+                                backup_retention=None, tags=None, public_access=None, vnet_name=None, database_name=None,
                                 vnet_address_prefix=None, subnet_name=None, subnet_address_prefix=None, public_network_access=None,
                                 high_availability=None, zone=None, maintenance_window=None, assign_identity=False):
     from azure.mgmt.rdbms import mysql
     db_context = DbContext(
-        azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, logging_name='MySQL', command_group='mysql', server_client=client)
+        azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
 
     try:
         location, resource_group_name, server_name, administrator_login_password = generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password)
+
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing MySQL Server \'%s\' in group \'%s\'',
@@ -85,8 +49,16 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
             tags, public_network_access, assign_identity, tier, subnet_name, vnet_name)
 
         if public_access is not None:
-            start_ip, end_ip = parse_public_access_input(public_access)
+            if public_access == 'on':
+                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+            else:
+                start_ip, end_ip = parse_public_access_input(public_access)
             create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+
+        # Create mysql database if it does not exist
+        if database_name is None:
+            database_name = DEFAULT_DB_NAME
+        _create_database(db_context, cmd, resource_group_name, server_name, database_name)
 
     rg = '{}'.format(resource_group_name)
     user = server_result.administrator_login
@@ -102,14 +74,10 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     _update_local_contexts(cmd, server_name, resource_group_name, location)
 
     return _form_response(user, sku, loc, rg, id, host,version,
-        administrator_login_password if administrator_login_password is not None else '*****',
-        ''
+                          administrator_login_password if administrator_login_password is not None else '*****',
+                          _create_mysql_connection_string(host, database_name, user, administrator_login_password)
     )
 
-
-# Need to replace source server name with source server id, so customer server restore function
-# The parameter list should be the same as that in factory to use the ParametersContext
-# arguments and validators
 def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
 
@@ -132,8 +100,7 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         create_mode="PointInTimeRestore"
     )
 
-    # Here is a workaround that we don't support cross-region restore currently,
-    # so the location must be set as the same as source server (not the resource group)
+    # Retrieve location from same location as source server
     id_parts = parse_resource_id(source_server)
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
@@ -141,6 +108,7 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
 
 # 8/25: may need to update the update function per updates to swagger spec
 def _flexible_server_update_custom_func(instance,
@@ -204,23 +172,22 @@ def _flexible_server_update_custom_func(instance,
 ## Parameter update command
 def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name=None, source=None, value=None):
     print("Entering the method correctly")
-    return None
-    # if source is None and value is None:
-    #     # update the command with system default
-    #     print("here")
-    #     try:
-    #         parameter = client.get(resource_group_name, server_name, configuration_name)
-    #         value = parameter.default_value # reset value to default
-    #         print(value)
-    #         source = "system-default"
-    #     except CloudError as e:
-    #         raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
-    # elif source is None:
-    #     source = "user-override"
-    # print(source)
-    # print(value)
-    #
-    # return client.update(resource_group_name, server_name, configuration_name, value, source)
+    if source is None and value is None:
+        # update the command with system default
+        print("here")
+        try:
+            parameter = client.get(resource_group_name, server_name, configuration_name)
+            value = parameter.default_value # reset value to default
+            print(value)
+            source = "system-default"
+        except CloudError as e:
+            raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
+    elif source is None:
+        source = "user-override"
+    print(source)
+    print(value)
+
+    return client.update(resource_group_name, server_name, configuration_name, value, source)
 
 ## Replica commands
 
@@ -280,6 +247,7 @@ def _flexible_replica_stop(client, resource_group_name, server_name):
 
     return client.update(resource_group_name, server_name, params)
 
+
 def _flexible_server_mysql_get(cmd, resource_group_name, server_name):
     client = get_mysql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
@@ -318,7 +286,6 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
     if assign_identity:
         parameters.identity = mysql.models.flexibleservers.Identity(
             type=mysql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
-    # return client.create(resource_group_name, server_name, parameters)
 
     return resolve_poller(
         server_client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,
@@ -340,20 +307,45 @@ def _form_response(username, sku, location, resource_group_name, id, host, versi
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server-name',
+    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server_name',
                                   server_name)  # Setting the server name in the local context
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'location',
+    cmd.cli_ctx.local_context.set([ALL], 'location',
                                   location)  # Setting the location in the local context
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'resource_group_name', resource_group_name)
+    cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    cmd.cli_ctx.local_context.set([ALL], 'subscription', profile.get_subscription()['id'])
 
+
+def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
+    # check for existing database, create if not
+    cf_db, logging_name = db_context.cf_db, db_context.logging_name
+    database_client = cf_db(cmd.cli_ctx, None)
+    try:
+        database_client.get(resource_group_name, server_name, database_name)
+    except CloudError:
+        logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
+        resolve_poller(
+            database_client.create_or_update(resource_group_name, server_name, database_name, 'utf8'), cmd.cli_ctx,
+            '{} Database Create/Update'.format(logging_name))
+
+
+def _create_mysql_connection_string(host, database_name, user_name, password):
+    connection_kwargs = {
+        'host': host,
+        'dbname': database_name,
+        'username': user_name,
+        'password': password if password is not None else '{password}'
+    }
+    return 'server={host};database={dbname};uid={username};pwd={password}'.format(**connection_kwargs)
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class DbContext:
-    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None,
+    def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
                  command_group=None, server_client=None):
         self.azure_sdk = azure_sdk
         self.cf_firewall = cf_firewall
+        self.cf_db = cf_db
         self.logging_name = logging_name
         self.command_group = command_group
         self.server_client = server_client

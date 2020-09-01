@@ -568,27 +568,10 @@ def load_command_table(self, _):
         g.command('list', 'list_by_server')
         g.generic_update_command('update')
 
-    ## Replica operations for postgres flexible servers not available yet
-    # with self.command_group('postgres server replica', postgres_replica_sdk) as g:
-    #     g.command('list', 'list_by_server')
-    #
-    # with self.command_group('postgres server replica', postgres_servers_sdk,
-    #                         client_factory=cf_postgres_servers) as g:
-    #     g.custom_command('create', '_replica_create', supports_no_wait=True)
-    #     g.custom_command('stop', '_replica_stop', confirmation=True)
-
-    ## DB operations for postgres flexible servers not available yet
-    # with self.command_group('postgres db', postgres_db_sdk) as g:
-    #     g.command('create', 'create_or_update')
-    #     g.command('delete', 'delete', confirmation=True)
-    #     g.show_command('show', 'get')
-    #     g.command('list', 'list_by_server')
-
     ## MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_servers) as g:
-        #g.custom_command('create', '_flexible_server_create')
         g.custom_command('create', '_flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', '_flexible_server_restore', supports_no_wait=True)
         g.command('start', 'start')
@@ -622,13 +605,13 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
-    # moljain; Is this naming correct?
     with self.command_group('mysql flexible-server db', mysql_flexible_db_sdk) as g:
         g.command('create', 'create_or_update')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
+    '''
     # not working at the moment
     with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk) as g:
         g.command('list', 'list_by_server')
@@ -638,16 +621,7 @@ def load_command_table(self, _):
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', '_flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop', '_flexible_replica_stop', confirmation=True)
-
-    ## Doesn't yet exist
-    # with self.command_group('mysql flexible-server vnet-rule', mysql_flexible_vnet_sdk) as g:
-    #     g.command('create', 'create_or_update')
-    #     g.command('delete', 'delete')
-    #     g.show_command('show', 'get')
-    #     g.command('list', 'list_by_server')
-    #     g.generic_update_command('update')
-    #
-
+    '''
 
 
 
