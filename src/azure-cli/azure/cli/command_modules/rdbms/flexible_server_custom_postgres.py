@@ -13,18 +13,16 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core._profile import Profile
 from azure.cli.core.local_context import ALL
-from ._client_factory import get_postgresql_flexible_management_client,cf_postgres_flexible_firewall_rules
-from ._client_factory import get_postgresql_flexible_management_client
-from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
-from ._util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
+from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
 
-SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
+
 
 # region create without args
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, location=None, backup_retention=None,
                                    sku_name=None, tier=None, geo_redundant_backup=None, storage_mb=None, administrator_login=None,
-                                   administrator_login_password=None, version=None, database_name=None, tags=None, public_access=None,
+                                   administrator_login_password=None, version=None, tags=None, public_access=None,
                                    assign_identity=False):
     from azure.mgmt.rdbms import postgresql
     db_context = DbContext(
@@ -73,35 +71,6 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     )
 
 
-"""
-def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
-                   location=None, storage_mb=None, administrator_login=None, administrator_login_password=None, version=None,
-                   backup_retention=None, tags=None, public_network_access=None, vnet_name=None, vnet_address_prefix=None,
-                   subnet_name=None, subnet_address_prefix=None, public_access=None, high_availability=None, zone=None,
-                   maintenance_window=None, assign_identity=False):
-    from azure.mgmt.rdbms import postgresql
-
-    parameters = postgresql.flexibleservers.models.Server(
-        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier),
-        administrator_login=administrator_login,
-        administrator_login_password=administrator_login_password,
-        version=version,
-        public_network_access=public_network_access,
-        storage_profile=postgresql.flexibleservers.models.StorageProfile(
-            backup_retention_days=backup_retention,
-            # geo_redundant_backup=geo_redundant_backup, # to be enabled after private preview
-            storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
-        location=location,
-        create_mode="Default",
-        delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_arm_resource_id
-        ),
-        tags=tags)
-
-    if assign_identity:
-        parameters.identity = postgresql.models.flexibleservers.Identity(type=postgresql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
-    return client.create(resource_group_name, server_name, parameters)
-"""
 # Need to replace source server name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # arguments and validators
@@ -135,6 +104,7 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+
 
 # 8/25: may need to update the update function per updates to swagger spec
 def _flexible_server_update_custom_func(instance,
@@ -179,6 +149,7 @@ def _flexible_server_update_custom_func(instance,
             params.identity = instance.identity
     return params
 
+
 # Wait command
 def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)
@@ -190,9 +161,6 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
                    tags, public_network_access, assign_identity):
     logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
-
-    logger.warning('Make a note of your password. If you forget, you would have to'
-                   ' reset your password with CLI command for reset password')
 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                    'Please refer to https://aka.ms/postgres-pricing for pricing details', server_name, sku_name)

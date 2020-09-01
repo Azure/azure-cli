@@ -18,7 +18,6 @@ from .randomname.generate import generate_username
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list)
-from ._util import create_random_resource_name
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements

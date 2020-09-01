@@ -119,5 +119,26 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 def public_access_validator(ns):
     if ns.public_access:
         val = ns.public_access
-        if not(val == 'on' or len(val.split('-')) == 1 and len(val.split('-')) == 2):
+        if not(val == 'on' or (len(val.split('-')) == 1 and _validate_ip(val)) or (len(val.split('-')) == 2 and _validate_ip(val))):
             raise CLIError('incorrect usage: --public-access. Acceptable values are \'on\' or \'<startIP>\' or \'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
+
+
+def _validate_ip(ips):
+    import re
+    regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+                25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+                25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+                25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$'''
+    parsed_input = ips.split('-')
+    if len(parsed_input) == 1:
+        if re.search(regex, parsed_input[0]):
+            return True
+        else:
+            return False
+    elif len(parsed_input) == 2:
+        if re.search(regex, parsed_input[0]) and re.search(regex, parsed_input[1]):
+            return True
+        else:
+            return False
+    else:
+        return False

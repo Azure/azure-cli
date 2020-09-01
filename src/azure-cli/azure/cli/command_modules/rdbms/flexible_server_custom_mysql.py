@@ -5,7 +5,6 @@
 
 # pylint: disable=unused-argument, line-too-long
 
-import uuid
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -13,51 +12,13 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core._profile import Profile
 from azure.cli.core.local_context import ALL
-from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db
-from .flexible_server_custom_common import _server_list_custom_func, _flexible_firewall_rule_update_custom_func # needed for common functions in commands.py
+from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, parse_public_access_input
 
-from ._util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, parse_public_access_input
-
-SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
 
-"""
-def _flexible_server_create(cmd, client, resource_group_name, server_name, sku_name, tier,
-                                location=None, storage_mb=None, administrator_login=None,
-                                administrator_login_password=None, version=None,
-                                backup_retention=None, tags=None, public_network_access=None, vnet_name=None,
-                                vnet_address_prefix=None, subnet_name=None, subnet_address_prefix=None, public_access=None,
-                                high_availability=None, zone=None, maintenance_window=None, assign_identity=False):
-    from azure.mgmt.rdbms import mysql
-
-    parameters = mysql.flexibleservers.models.Server(
-        sku=mysql.flexibleservers.models.Sku(name=sku_name, tier = tier),
-        administrator_login=administrator_login,
-        administrator_login_password=administrator_login_password,
-        version=version,
-        public_network_access=public_network_access,
-        storage_profile=mysql.flexibleservers.models.StorageProfile(
-            backup_retention_days=backup_retention,
-            # geo_redundant_backup=geo_redundant_backup,
-            storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
-        # storage_autogrow=auto_grow),
-        location=location,
-        create_mode="Default",
-        vnet_inj_args=mysql.flexibleservers.models.VnetInjArgs(
-            delegated_vnet_id=None,  # what should this value be?
-            delegated_subnet_name=subnet_name,
-            delegated_vnet_name=vnet_name,
-            # delegated_vnet_resource_group=None  # not in mysql
-        ),
-        tags=tags)
-
-    if assign_identity:
-        parameters.identity = mysql.models.flexibleservers.Identity(type=mysql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
-    return client.create(resource_group_name, server_name, parameters)
-"""
 
 # region create without args
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
@@ -72,6 +33,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
     try:
         location, resource_group_name, server_name, administrator_login_password = generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password)
+
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing MySQL Server \'%s\' in group \'%s\'',
