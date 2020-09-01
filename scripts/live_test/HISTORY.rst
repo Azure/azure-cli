@@ -7,7 +7,8 @@ Release History
 ++++++
 
 * Fix a tiny bug of sequential run.
-* Persistent testing results to database.
+* Save testing results to database.
+* Fix a bug of module name sorting.
 
 0.1.0
 ++++++

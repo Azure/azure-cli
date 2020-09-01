@@ -61,7 +61,8 @@ class TestData:
 
         print(self.modules)
         print('Sorting...')
-        sorted(self.modules, key=lambda x: x[0])
+        sorted_modules = sorted(self.modules, key=lambda x: x[0])
+        self.modules = sorted_modules
         print(self.modules)
 
         total_sum = passed_sum + failed_sum
