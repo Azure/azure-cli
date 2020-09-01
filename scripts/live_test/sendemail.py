@@ -138,7 +138,7 @@ def write_db(container, testdata):
     branch = USER_BRANCH
     commit = COMMIT_ID
     target = USER_TARGET
-    live = USER_LIVE
+    live = 1 if USER_LIVE == '--live' else 0
     user = REQUESTED_FOR_EMAIL
     pass0 = testdata.total[2]
     fail = testdata.total[1]
