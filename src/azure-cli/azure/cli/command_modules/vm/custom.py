@@ -2649,6 +2649,13 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
         return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+    return client.virtual_machine_scale_sets.get(resource_group_name, name)
+
+
+def get_vmss_modified(cmd, resource_group_name, name, instance_id=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if instance_id is not None:
+        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
     # To avoid unnecessary permission check of image
     vmss.virtual_machine_profile.storage_profile.image_reference = None
