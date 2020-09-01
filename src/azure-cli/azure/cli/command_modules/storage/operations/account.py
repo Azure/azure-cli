@@ -7,7 +7,7 @@
 
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
-from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -20,7 +20,7 @@ def str2bool(v):
     return v
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
@@ -28,7 +28,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
-                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None):
+                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
+                           require_infrastructure_encryption=None, allow_blob_public_access=None,
+                           min_tls_version=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -36,7 +38,12 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if kind is None:
         logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
                        "in the future")
-    params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags)
+    params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags,
+                                            encryption=Encryption())
+    # TODO: remove this part when server side remove the constraint
+    if encryption_services is None:
+        params.encryption.services = {'blob': {}}
+
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
     if encryption_services:
@@ -112,6 +119,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             publish_microsoft_endpoints=str2bool(publish_microsoft_endpoints),
             publish_internet_endpoints=str2bool(publish_internet_endpoints)
         )
+    if allow_blob_public_access is not None:
+        params.allow_blob_public_access = allow_blob_public_access
+
+    if require_infrastructure_encryption:
+        params.encryption.require_infrastructure_encryption = require_infrastructure_encryption
+
+    if min_tls_version:
+        params.minimum_tls_version = min_tls_version
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -187,7 +202,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
-                           publish_microsoft_endpoints=None, publish_internet_endpoints=None):
+                           publish_microsoft_endpoints=None, publish_internet_endpoints=None,
+                           allow_blob_public_access=None, min_tls_version=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet')
@@ -329,6 +345,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         if publish_internet_endpoints is not None:
             params.routing_preference.publish_internet_endpoints = str2bool(publish_internet_endpoints)
 
+    if allow_blob_public_access is not None:
+        params.allow_blob_public_access = allow_blob_public_access
+    if min_tls_version:
+        params.minimum_tls_version = min_tls_version
+
     return params
 
 
@@ -406,6 +427,8 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
             if new_status == "Approved" and old_status == "Rejected":
                 raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
                                  "Please create a new connection for approval.")
+            if new_status == "Approved" and old_status == "Approved":
+                raise CloudError(ex.response, "Your connection is already approved. No need to approve again.")
         raise ex
 
 
@@ -521,3 +544,126 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
 
     return client.patch(resource_group_name=resource_group_name, account_name=account_name,
                         encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
+
+
+# pylint: disable=no-member
+def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
+                     destination_account=None, policy_id="default", rule_id=None, source_container=None,
+                     destination_container=None, min_creation_time=None, prefix_match=None):
+    from msrest.exceptions import ClientException
+    ObjectReplicationPolicy = cmd.get_models('ObjectReplicationPolicy')
+
+    if properties is None:
+        rules = []
+        ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter = \
+            cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter')
+        if source_container and destination_container:
+            rule = ObjectReplicationPolicyRule(
+                rule_id=rule_id,
+                source_container=source_container,
+                destination_container=destination_container,
+                filters=ObjectReplicationPolicyFilter(prefix_match=prefix_match, min_creation_time=min_creation_time)
+            )
+            rules.append(rule)
+        or_policy = ObjectReplicationPolicy(source_account=source_account,
+                                            destination_account=destination_account,
+                                            rules=rules)
+    else:
+        or_policy = properties
+    try:
+        return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                       object_replication_policy_id=policy_id, properties=or_policy)
+    except ClientException as ex:
+        if ex.error.additional_properties['error']['code'] == 'InvalidRequestPropertyValue' and policy_id == 'default' \
+                and account_name == or_policy.source_account:
+            raise CLIError(
+                'ValueError: Please specify --policy-id with auto-generated policy id value on destination account.')
+
+
+def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
+                     properties=None, source_account=None, destination_account=None, ):
+
+    if source_account is not None:
+        parameters.source_account = source_account
+    if destination_account is not None:
+        parameters.destination_account = destination_account
+
+    if properties is not None:
+        parameters = properties
+        if "policyId" in properties.keys() and properties["policyId"]:
+            object_replication_policy_id = properties["policyId"]
+
+    return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                                   object_replication_policy_id=object_replication_policy_id, properties=parameters)
+
+
+def get_or_policy(client, resource_group_name, account_name, policy_id='default'):
+    return client.get(resource_group_name=resource_group_name, account_name=account_name,
+                      object_replication_policy_id=policy_id)
+
+
+def add_or_rule(cmd, client, resource_group_name, account_name, policy_id,
+                source_container, destination_container, min_creation_time=None, prefix_match=None):
+
+    """
+    Initialize rule for or policy
+    """
+    policy_properties = client.get(resource_group_name, account_name, policy_id)
+
+    ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter = \
+        cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter')
+    new_or_rule = ObjectReplicationPolicyRule(
+        source_container=source_container,
+        destination_container=destination_container,
+        filters=ObjectReplicationPolicyFilter(prefix_match=prefix_match, min_creation_time=min_creation_time)
+    )
+    policy_properties.rules.append(new_or_rule)
+    return client.create_or_update(resource_group_name, account_name, policy_id, policy_properties)
+
+
+def remove_or_rule(client, resource_group_name, account_name, policy_id, rule_id):
+
+    or_policy = client.get(resource_group_name=resource_group_name,
+                           account_name=account_name,
+                           object_replication_policy_id=policy_id)
+
+    rule = find_child_item(or_policy, rule_id, path='rules', key_path='rule_id')
+    or_policy.rules.remove(rule)
+
+    return client.create_or_update(resource_group_name, account_name, policy_id, or_policy)
+
+
+def get_or_rule(client, resource_group_name, account_name, policy_id, rule_id):
+    policy_properties = client.get(resource_group_name, account_name, policy_id)
+    for rule in policy_properties.rules:
+        if rule.rule_id == rule_id:
+            return rule
+    raise CLIError("{} does not exist.".format(rule_id))
+
+
+def list_or_rules(client, resource_group_name, account_name, policy_id):
+    policy_properties = client.get(resource_group_name, account_name, policy_id)
+    return policy_properties.rules
+
+
+def update_or_rule(client, resource_group_name, account_name, policy_id, rule_id, source_container=None,
+                   destination_container=None, min_creation_time=None, prefix_match=None):
+
+    policy_properties = client.get(resource_group_name, account_name, policy_id)
+
+    for i, rule in enumerate(policy_properties.rules):
+        if rule.rule_id == rule_id:
+            if destination_container is not None:
+                policy_properties.rules[i].destination_container = destination_container
+            if source_container is not None:
+                policy_properties.rules[i].source_container = source_container
+            if min_creation_time is not None:
+                policy_properties.rules[i].filters.min_creation_time = min_creation_time
+            if prefix_match is not None:
+                policy_properties.rules[i].filters.prefix_match = prefix_match
+
+    client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
+                            object_replication_policy_id=policy_id, properties=policy_properties)
+
+    return get_or_rule(client, resource_group_name=resource_group_name, account_name=account_name,
+                       policy_id=policy_id, rule_id=rule_id)

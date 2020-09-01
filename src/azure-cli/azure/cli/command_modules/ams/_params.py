@@ -85,6 +85,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', account_name_arg_type)
         c.argument('sp_name', name_arg_type,
                    help="The app name or app URI to associate the RBAC with. If not present, a default name like '{amsaccountname}-access-sp' will be generated.")
+        c.argument('new_sp_name', help="The new app name or app URI to update the RBAC with.")
         c.argument('sp_password', password_arg_type,
                    help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
         c.argument('role', help='The role of the service principal.', completer=get_role_definition_name_completion_list)
@@ -135,7 +136,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams asset get-sas-urls') as c:
         c.argument('permissions', arg_type=get_enum_type(AssetContainerPermission),
                    help='The permissions to set on the SAS URL.')
-        c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M:S'Z') at which the SAS becomes invalid.")
+        c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M:S'Z') at which the SAS becomes invalid. This must be less than 24 hours from the current time.")
 
     with self.argument_context('ams asset-filter') as c:
         c.argument('account_name', account_name_arg_type)

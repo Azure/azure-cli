@@ -198,18 +198,6 @@ class IoTHubTest(ScenarioTest):
             self.check('[0].name', '$Default')
         ])
 
-        # Test 'az iot hub job list'
-        self.cmd('iot hub job list --hub-name {0}'.format(hub), checks=self.is_empty())
-
-        # Test 'az iot hub job show'
-        job_id = 'fake-job'
-        self.cmd('iot hub job show --hub-name {0} --job-id {1}'.format(hub, job_id),
-                 expect_failure=True)
-
-        # Test 'az iot hub job cancel'
-        self.cmd('iot hub job cancel --hub-name {0} --job-id {1}'.format(hub, job_id),
-                 expect_failure=True)
-
         # Test 'az iot hub show-quota-metrics'
         self.cmd('iot hub show-quota-metrics -n {0}'.format(hub), checks=[
             self.check('length([*])', 2),
@@ -415,7 +403,7 @@ class IoTHubTest(ScenarioTest):
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
-        containerName = 'iothubcontainer1'
+        containerName = 'iothubcontainer'
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'

@@ -19,13 +19,11 @@ class CdnCommandsLoader(AzCommandsLoader):
                                                 custom_command_type=cdn_custom)
 
     def load_command_table(self, args):
-        super(CdnCommandsLoader, self).load_command_table(args)
         from azure.cli.command_modules.cdn.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        super(CdnCommandsLoader, self).load_arguments(command)
         from azure.cli.command_modules.cdn._params import load_arguments
         load_arguments(self, command)
 

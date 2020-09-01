@@ -78,8 +78,10 @@ class ResourceScenarioTest(ScenarioTest):
                  checks=self.check("length([?location == '{loc}']) == length(@)", True))
         self.cmd('resource list --resource-type {rt}',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-        self.cmd('resource list --name {vnet}',
-                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --name {vnet}', checks=[
+            self.check("length([?name=='{vnet}'])", vnet_count),
+            self.check('[0].provisioningState', 'Succeeded')
+        ])
         self.cmd('resource list --tag cli-test',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
         self.cmd('resource list --tag cli-test=test',
@@ -183,10 +185,10 @@ class TagScenarioTest(ScenarioTest):
             'tag': 'cli_test_tag'
         })
 
-        tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
-        for tag in tags:
-            self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
-        self.cmd('tag delete -n {tag}')
+        tag_values = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
+        for tag_value in tag_values:
+            self.cmd('tag remove-value --value {} -n {{tag}}'.format(tag_value))
+        self.cmd('tag delete -n {tag} -y')
 
         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
         self.cmd('tag create -n {tag}', checks=[
@@ -204,7 +206,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
-        self.cmd('tag delete -n {tag}')
+        self.cmd('tag delete -n {tag} -y')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
@@ -258,7 +260,7 @@ class DeploymentTest(ScenarioTest):
             'dn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -274,11 +276,11 @@ class DeploymentTest(ScenarioTest):
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
-        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -315,7 +317,7 @@ class DeploymentLiveTest(LiveScenarioTest):
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
         with force_progress_logging() as test_io:
-            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
+            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
         # very the progress
         lines = test_io.getvalue().splitlines()
@@ -336,7 +338,7 @@ class DeploymentNoWaitTest(ScenarioTest):
             'dn': 'azure-cli-deployment'
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @{params} --no-wait',
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --no-wait',
                  checks=self.is_empty())
 
         self.cmd('group deployment wait -g {rg} -n {dn} --created',
@@ -358,7 +360,7 @@ class DeploymentThruUriTest(LiveScenarioTest):
             'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
         })
-        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
         ]).get_output_in_json()['name']
@@ -524,7 +526,7 @@ class InvokeActionTest(ScenarioTest):
             'pass': self.create_random_name('Longpassword#1', 30)
         })
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
         self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')

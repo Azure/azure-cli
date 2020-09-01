@@ -81,7 +81,9 @@ def load_arguments(self, _):
         c.argument('scopes', nargs='+')
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('skip_assignment', arg_type=get_three_state_flag(),
-                   help='Skip creating the default assignment, which allows the service principal to access resources under the current subscription')
+                   help='Skip creating the default assignment, which allows the service principal to access resources under the current subscription. '
+                        'When specified, --scopes will be ignored. You may use `az role assignment create` to create '
+                        'role assignments for this service principal later.')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
@@ -144,6 +146,7 @@ def load_arguments(self, _):
         c.argument('mail_nickname', help='Mail nickname')
         c.argument('force', arg_type=get_three_state_flag(),
                    help='always create a new group instead of updating the one with same display and mail nickname')
+        c.argument('description', help='Group description')
 
     with self.argument_context('ad group show') as c:
         c.extra('cmd')

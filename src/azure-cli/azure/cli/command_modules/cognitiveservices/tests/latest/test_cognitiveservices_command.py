@@ -7,6 +7,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure_devtools.scenario_tests import AllowLargeResponse
 from knack.util import CLIError
 
 
@@ -26,11 +27,11 @@ class CognitiveServicesTests(ScenarioTest):
         })
 
         # test to create cognitive services account
-        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location}',
+        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # test to show the details of cognitive services account
         self.cmd('az cognitiveservices account show -n {sname} -g {rg}',
@@ -59,6 +60,7 @@ class CognitiveServicesTests(ScenarioTest):
         exitcode = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}').exit_code
         self.assertEqual(exitcode, 0)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_cognitiveservices_account_list_kinds(self, resource_group):
         # test to list cognitive services account kinds
@@ -76,16 +78,17 @@ class CognitiveServicesTests(ScenarioTest):
             'location': 'westeurope'
         })
 
-        self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location}',
+        self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
                  checks=[self.check('name', '{name}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         results = self.cmd('az cognitiveservices account list-skus -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(isinstance(results['value'], list))
         self.assertTrue(len(results['value']) > 0)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_cognitiveservices_account_list_skus(self, resource_group):
 
@@ -123,7 +126,7 @@ class CognitiveServicesTests(ScenarioTest):
                  checks=[self.check('name', '{name}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         results = self.cmd('az cognitiveservices account list-usage -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(isinstance(results, list))

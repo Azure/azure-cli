@@ -1,185 +1,222 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-08-13T20:59:32Z"}}'
+    body: '{"kind": "QnAMaker", "location": "westus", "properties": {"apiProperties":
+      {"qnaRuntimeEndpoint": "https://cs-cli-test-qnamaker.azurewebsites.net"}}, "sku":
+      {"name": "S0"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.1
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.44]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-08-13T20:59:32Z"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Mon, 13 Aug 2018 20:59:34 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
-    body: '{"sku": {"name": "S0"}, "kind": "QnAMaker", "location": "westus", "properties":
-      {"apiProperties": {"qnaRuntimeEndpoint": "https://cs-cli-test-qnamaker.azurewebsites.net"}}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [cognitiveservices account create]
-      Connection: [keep-alive]
-      Content-Length: ['172']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.1
-          msrest_azure/0.4.34 cognitiveservicesmanagementclient/1.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.44]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '172'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --kind --sku -l --api-properties --yes
+      User-Agent:
+      - python/3.7.3 (Darwin-19.5.0-x86_64-i386-64bit) msrest/0.6.13 msrest_azure/0.6.3
+        azure-mgmt-cognitiveservices/2.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2017-04-18
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"6900ddcd-0000-0000-0000-5b71f1370000\"","location":"westus","sku":{"name":"S0"},"kind":"QnAMaker","properties":{"endpoint":"https://westus.api.cognitive.microsoft.com/qnamaker/v4.0","internalId":"5b7a3f0503a14481bffdd72294e77ff1","dateCreated":"2018-08-13T20:59:35.8473162Z","apiProperties":{"qnaRuntimeEndpoint":"https://cs-cli-test-qnamaker.azurewebsites.net"},"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"0f00ab00-0000-0700-0000-5ed75f460000\"","location":"westus","sku":{"name":"S0"},"kind":"QnAMaker","properties":{"endpoint":"https://westus.api.cognitive.microsoft.com/qnamaker/v4.0","internalId":"adb5c76e92bf4638ac5c7ee93d96d4e7","dateCreated":"2020-06-03T08:28:53.9336974Z","apiProperties":{"qnaRuntimeEndpoint":"https://cs-cli-test-qnamaker.azurewebsites.net"},"callRateLimit":{"rules":[{"key":"default","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"*","method":"*"}]}]},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['693']
-      content-type: [application/json; charset=utf-8]
-      date: ['Mon, 13 Aug 2018 20:59:35 GMT']
-      etag: ['"6900ddcd-0000-0000-0000-5b71f1370000"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '878'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Jun 2020 08:28:54 GMT
+      etag:
+      - '"0f00ab00-0000-0700-0000-5ed75f460000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [cognitiveservices account delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.1
-          msrest_azure/0.4.34 cognitiveservicesmanagementclient/1.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.44]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.3 (Darwin-19.5.0-x86_64-i386-64bit) msrest/0.6.13 msrest_azure/0.6.3
+        azure-mgmt-cognitiveservices/2.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2017-04-18
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Mon, 13 Aug 2018 20:59:37 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 03 Jun 2020 08:28:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: '{"sku": {"name": "S0"}, "kind": "QnAMaker", "location": "westus", "properties":
-      {"apiProperties": {"qnaRuntimeEndpoint": "https://cs-cli-test-qnamaker.azurewebsites.net"}}}'
+    body: '{"kind": "QnAMaker", "location": "westus", "properties": {"apiProperties":
+      {"qnaRuntimeEndpoint": "https://cs-cli-test-qnamaker.azurewebsites.net"}}, "sku":
+      {"name": "S0"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [cognitiveservices account create]
-      Connection: [keep-alive]
-      Content-Length: ['172']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.1
-          msrest_azure/0.4.34 cognitiveservicesmanagementclient/1.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.44]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '172'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --kind --sku -l --api-properties --yes
+      User-Agent:
+      - python/3.7.3 (Darwin-19.5.0-x86_64-i386-64bit) msrest/0.6.13 msrest_azure/0.6.3
+        azure-mgmt-cognitiveservices/2.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2017-04-18
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"6900e1cd-0000-0000-0000-5b71f13a0000\"","location":"westus","sku":{"name":"S0"},"kind":"QnAMaker","properties":{"endpoint":"https://westus.api.cognitive.microsoft.com/qnamaker/v4.0","internalId":"8c302dd2c300473297d139048b8ed560","dateCreated":"2018-08-13T20:59:38.1208213Z","apiProperties":{"qnaRuntimeEndpoint":"https://cs-cli-test-qnamaker.azurewebsites.net"},"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002","name":"cs_cli_test_000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"0f00b500-0000-0700-0000-5ed75f480000\"","location":"westus","sku":{"name":"S0"},"kind":"QnAMaker","properties":{"endpoint":"https://westus.api.cognitive.microsoft.com/qnamaker/v4.0","internalId":"c5c453efbaf74d23b9c2b63ff9cf7d17","dateCreated":"2020-06-03T08:28:56.4064546Z","apiProperties":{"qnaRuntimeEndpoint":"https://cs-cli-test-qnamaker.azurewebsites.net"},"callRateLimit":{"rules":[{"key":"default","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"*","method":"*"}]}]},"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['693']
-      content-type: [application/json; charset=utf-8]
-      date: ['Mon, 13 Aug 2018 20:59:37 GMT']
-      etag: ['"6900e1cd-0000-0000-0000-5b71f13a0000"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '878'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Jun 2020 08:28:55 GMT
+      etag:
+      - '"0f00b500-0000-0700-0000-5ed75f480000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [cognitiveservices account delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.1
-          msrest_azure/0.4.34 cognitiveservicesmanagementclient/1.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.44]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.3 (Darwin-19.5.0-x86_64-i386-64bit) msrest/0.6.13 msrest_azure/0.6.3
+        azure-mgmt-cognitiveservices/2.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cs_cli_test_000002?api-version=2017-04-18
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Mon, 13 Aug 2018 20:59:38 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.1
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.44]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Mon, 13 Aug 2018 20:59:39 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLWUtQN1E3M1pBVzVRQ0lYUjZZNFpBQ1haUVNGQVJMT1RVMnwwQjQxMUJEQUMwOEY4OEZELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-07-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 03 Jun 2020 08:28:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 version: 1

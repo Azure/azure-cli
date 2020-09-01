@@ -641,7 +641,7 @@ def validate_autoscale_profile(schedule, start, end, recurrence):
         def _find_conflicting_profile(time):
             conflict_sched = None
             for sched_name, sched_values in schedule[day].items():
-                if time >= sched_values['start'] and time <= sched_values['end']:
+                if sched_values['start'] <= time <= sched_values['end']:
                     conflict_sched = sched_name
             return conflict_sched
 

@@ -207,7 +207,7 @@ parameters:
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.11.8" or "1.12.6".
+    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
   - name: --ssh-key-value
@@ -222,6 +222,12 @@ parameters:
   - name: --windows-admin-password
     type: string
     short-summary: Password to create on Windows node VMs.
+  - name: --enable-aad
+    type: bool
+    short-summary: Enable managed AAD feature for cluster.
+  - name: --aad-admin-group-object-ids
+    type: string
+    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
@@ -292,7 +298,6 @@ parameters:
             monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
                          Specify "--workspace-resource-id" to use an existing workspace.
                          If monitoring addon is enabled --no-wait argument will have no effect
-            virtual-node - enable AKS Virtual Node (PREVIEW). Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -350,16 +355,19 @@ parameters:
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
+  - name: --node-osdisk-diskencryptionset-id -d
+    type: string
+    short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
   - name: Create a Kubernetes cluster with a specific version.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.12.6
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.16.9
   - name: Create a Kubernetes cluster with a larger node pool.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
   - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
-  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSet).
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.16.9 --vm-set-type AvailabilitySet
+  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSets).
     text: az aks create -g MyResourceGroup -n MyManagedCluster
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -378,7 +386,11 @@ examples:
   - name: Create a kubernetes cluster with userDefinedRouting, standard load balancer SKU and a custom subnet preconfigured with a route table
     text: az aks create -g MyResourceGroup -n MyManagedCluster --outbound-type userDefinedRouting --load-balancer-sku standard --vnet-subnet-id customUserSubnetVnetID
   - name: Create a kubernetes cluster with supporting Windows agent pools.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --vm-set-type VirtualMachineScaleSet --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$'
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$'
+  - name: Create a kubernetes cluster with managed AAD enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Create a kubernetes cluster with server side encryption using your owned key.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
 """
 
 helps['aks update'] = """
@@ -400,6 +412,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --uptime-sla
+    type: bool
+    short-summary: Enable a paid managed cluster service with a financially backed SLA.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -429,6 +444,15 @@ parameters:
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+  - name: --enable-aad
+    type: bool
+    short-summary: Enable managed AAD feature for cluster.
+  - name: --aad-admin-group-object-ids
+    type: string
+    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
+  - name: --aad-tenant-id
+    type: string
+    short-summary: The ID of an Azure Active Directory tenant.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -446,6 +470,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges ""
   - name: Restrict apiserver traffic in a kubernetes cluster to agentpool nodes.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 0.0.0.0/32
+  - name: Update a AKS-managed AAD cluster with tenant ID or admin group object IDs.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Migrate a AKS AAD-Integrated cluster or a non-AAD cluster to a AKS-managed AAD cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
 """
 
 helps['aks delete'] = """
@@ -478,7 +506,7 @@ long-summary: |-
         http_application_routing - configure ingress with automatic public DNS name creation.
         monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
                      If monitoring addon is enabled --no-wait argument will have no effect
-        virtual-node - enable AKS Virtual Node (PREVIEW). Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+        virtual-node - enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
 parameters:
   - name: --addons -a
     type: string
@@ -534,7 +562,7 @@ examples:
 
 helps['aks install-cli'] = """
 type: command
-short-summary: Download and install kubectl, the Kubernetes command-line tool.
+short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
 helps['aks install-connector'] = """
@@ -611,7 +639,7 @@ parameters:
     short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
+    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
   - name: --node-osdisk-size
@@ -656,6 +684,19 @@ parameters:
 helps['aks nodepool delete'] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
+"""
+
+helps['aks nodepool get-upgrades'] = """
+type: command
+short-summary: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
+examples:
+  - name: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
+    text: az aks nodepool get-upgrades --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
+    crafted: true
+parameters:
+  - name: --nodepool-name
+    type: string
+    short-summary: name of the node pool.
 """
 
 helps['aks nodepool list'] = """
@@ -714,7 +755,7 @@ short-summary: Upgrade the node pool in a managed Kubernetes cluster.
 parameters:
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to upgrade the node pool to, such as "1.11.12".
+    short-summary: Version of Kubernetes to upgrade the node pool to, such as "1.16.9".
 """
 
 helps['aks remove-connector'] = """
@@ -817,7 +858,7 @@ long-summary: "Kubernetes will be unavailable during cluster upgrades."
 parameters:
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.11.8" or "1.12.6".
+    short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.16.9".
     populator-commands:
       - "`az aks get-upgrades`"
   - name: --control-plane-only
@@ -939,6 +980,39 @@ short-summary: Manage Azure Red Hat OpenShift Services.
 helps['openshift create'] = """
 type: command
 short-summary: Create a new managed OpenShift cluster.
+parameters:
+  - name: --compute-vm-size -s
+    type: string
+    short-summary: Size of Virtual Machines to create as OpenShift nodes.
+  - name: --compute-count -c
+    type: int
+    short-summary: Number of nodes in the OpenShift node pool.
+  - name: --aad-client-app-id
+    type: string
+    short-summary: The ID of an Azure Active Directory client application. If not specified, a new Azure Active Directory client is created.
+  - name: --aad-client-app-secret
+    type: string
+    short-summary: The secret of an Azure Active Directory client application.
+  - name: --aad-tenant-id
+    type: string
+    short-summary: The ID of an Azure Active Directory tenant.
+  - name: --vnet-peer
+    type: string
+    short-summary: The ID or the name of a subnet in an existing VNet into which to peer the cluster.
+  - name: --vnet-prefix
+    type: string
+    short-summary: The CIDR used on the VNet into which to deploy the cluster.
+  - name: --subnet-prefix
+    type: string
+    short-summary: The CIDR used on the Subnet into which to deploy the cluster.
+  - name: --customer-admin-group-id
+    type: string
+    short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
+  - name: --workspace-id
+    type: string
+    short-summary: The resource id of an existing Log Analytics Workspace to use for storing monitoring data.
+
+
 examples:
   - name: Create an OpenShift cluster and auto create an AAD Client
     text: az openshift create -g MyResourceGroup -n MyManagedCluster
@@ -946,10 +1020,10 @@ examples:
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --customer-admin-group-id {GROUP_ID}
   - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
+  - name: Create an Openshift cluster using a custom vnet
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
   - name: Create an Openshift cluster with Log Analytics monitoring enabled
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
-  - name: Create a private OpenShift cluster
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --private-cluster --management-subnet-cidr 10.0.1.0/24
 """
 
 helps['openshift delete'] = """
@@ -1019,16 +1093,4 @@ examples:
   - name: Disable Log Analytics monitoring.
     text: |-
         az openshift monitor disable -g MyResourceGroup -n MyManagedCluster
-"""
-
-helps['openshift update'] = """
-type: command
-short-summary: Commands to manage existing Openshift cluster.
-parameters:
-  - name: --refresh-cluster
-    type: boolean
-examples:
-  - name: Trigger nodes rotation.
-    text: az openshift update -g MyResourceGroup -n MyManagedCluster --refresh-cluster
-    crafted: true
 """

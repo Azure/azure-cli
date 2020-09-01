@@ -94,4 +94,6 @@ def patch_get_current_system_username(unit_test):
         from .utilities import create_random_name
         return create_random_name(prefix='example_')
 
-    mock_in_unit_test(unit_test, 'azure.cli.core.local_context._get_current_system_username', _get_current_system_username)
+    mock_in_unit_test(unit_test,
+                      'azure.cli.core.local_context._get_current_system_username',
+                      _get_current_system_username)

@@ -31,7 +31,7 @@ EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client'])
 
 
 # pylint:disable=too-many-lines
-class ArmTemplateBuilder(object):
+class ArmTemplateBuilder:
 
     def __init__(self):
         template = OrderedDict()
@@ -179,7 +179,6 @@ def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pyl
 def register_ids_argument(cli_ctx):
 
     from knack import events
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
     ids_metadata = {}
 
@@ -305,6 +304,7 @@ def register_ids_argument(cli_ctx):
         if full_id_list:
             setattr(namespace, '_ids', full_id_list)
 
+        from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
         for val in full_id_list:
             if not is_valid_resource_id(val):
                 raise CLIError('invalid resource ID: {}'.format(val))
@@ -636,6 +636,10 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
             properties = getattr(instance, 'properties', None)
             if properties:
                 provisioning_state = getattr(properties, 'provisioning_state', None)
+                # some SDK, like keyvault, has 'provisioningState' under 'properties.additional_properties'
+                if not provisioning_state:
+                    additional_properties = getattr(properties, 'additional_properties', {})
+                    provisioning_state = additional_properties.get('provisioningState')
         return provisioning_state
 
     def handler(args):
@@ -1164,11 +1168,11 @@ def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
             from azure.cli.core.parser import IncorrectUsageError
             raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
         try:
-            # if the service specifies, use the default API version
-            api_version = rt.default_api_version
-        except AttributeError:
-            # if the service doesn't specify, use the most recent non-preview API version unless there is only a
-            # single API version. API versions are returned by the service in a sorted list
+            # Use the most recent non-preview API version unless there is only a
+            # single API version. API versions are returned by the service in a sorted list.
             api_version = next((x for x in rt.api_versions if not x.endswith('preview')), rt.api_versions[0])
+        except AttributeError:
+            err = "No API versions found for resource type '{}'."
+            raise CLIError(err.format(resource_type_str))
 
     return client.resources.get_by_id(arm_id, api_version)

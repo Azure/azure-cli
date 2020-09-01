@@ -42,7 +42,7 @@ def load_command_table(self, _):
     )
 
     openshift_managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2019_10_27_preview.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2018_09_30_preview.operations.'
                         '_open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
         client_factory=cf_openshift_managed_clusters
     )
@@ -92,9 +92,7 @@ def load_command_table(self, _):
         g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces')
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
         g.custom_show_command('show', 'aks_show', table_transformer=aks_show_table_format)
-        g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True,
-                         confirmation='Kubernetes may be unavailable during cluster upgrades.\n' +
-                         'Are you sure you want to perform this operation?')
+        g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True)
         g.custom_command('upgrade-connector', 'k8s_upgrade_connector', is_preview=True)
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces')
         g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,
@@ -114,12 +112,12 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'aks_agentpool_upgrade', supports_no_wait=True)
         g.custom_command('update', 'aks_agentpool_update', supports_no_wait=True)
         g.custom_command('delete', 'aks_agentpool_delete', supports_no_wait=True)
+        g.custom_command('get-upgrades', 'aks_agentpool_get_upgrade_profile')
 
     # OSA commands
     with self.command_group('openshift', openshift_managed_clusters_sdk,
                             client_factory=cf_openshift_managed_clusters) as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
-        g.custom_command('update', 'openshift_update', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)
         g.custom_show_command('show', 'openshift_show')

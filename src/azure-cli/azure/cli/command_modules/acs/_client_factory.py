@@ -66,7 +66,7 @@ def get_container_service_client(cli_ctx, **_):
 def get_osa_container_service_client(cli_ctx, **_):
     from azure.mgmt.containerservice import ContainerServiceClient
 
-    return get_mgmt_service_client(cli_ctx, ContainerServiceClient, api_version='2019-10-27-preview')
+    return get_mgmt_service_client(cli_ctx, ContainerServiceClient, api_version='2019-09-30-preview')
 
 
 def get_graph_rbac_management_client(cli_ctx, **_):

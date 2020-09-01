@@ -116,7 +116,7 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
                 tar.addfile(docker_file_tarinfo, f)
 
 
-class IgnoreRule(object):  # pylint: disable=too-few-public-methods
+class IgnoreRule:  # pylint: disable=too-few-public-methods
     def __init__(self, rule):
 
         self.rule = rule
@@ -218,4 +218,8 @@ def check_remote_source_code(source_location):
             if requests.head(source_location).status_code < 400:
                 return source_location
             raise CLIError("'{}' doesn't exist.".format(source_location))
+
+    # oci
+    if lower_source_location.startswith("oci://"):
+        return source_location
     raise CLIError("'{}' doesn't exist.".format(source_location))

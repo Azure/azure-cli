@@ -15,9 +15,9 @@ import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
-import requests
 from pkg_resources import parse_version
 
+from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli,
@@ -46,7 +46,7 @@ LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli
 LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
-def _run_pip(pip_exec_args, extension_path):
+def _run_pip(pip_exec_args, extension_path=None):
     cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
     logger.debug('Running: %s', cmd)
     try:
@@ -57,12 +57,13 @@ def _run_pip(pip_exec_args, extension_path):
         logger.debug(e.output)
         logger.debug(e)
         if "PermissionError: [WinError 5]" in e.output:
-            logger.warning("You do not have the permission to add extensions in the target directory: %s. You may need to rerun on a shell as administrator.", os.path.split(extension_path)[0])
+            logger.warning("You do not have the permission to add extensions in the target directory%s. You may need to rerun on a shell as administrator.", ': ' + os.path.split(extension_path)[0] if extension_path else '')
         returncode = e.returncode
     return returncode
 
 
 def _whl_download_from_url(url_parse_result, ext_file):
+    import requests
     from azure.cli.core.util import should_disable_connection_verify
     url = url_parse_result.geturl()
     r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
@@ -84,8 +85,8 @@ def _validate_whl_extension(ext_file):
     check_version_compatibility(azext_metadata)
 
 
-def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
-    cmd.cli_ctx.get_progress_controller().add(message='Analyzing')
+def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
+    cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
@@ -105,8 +106,9 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
         tmp_dir = tempfile.mkdtemp()
         ext_file = os.path.join(tmp_dir, whl_filename)
         logger.debug('Downloading %s to %s', source, ext_file)
+        import requests
         try:
-            cmd.cli_ctx.get_progress_controller().add(message='Downloading')
+            cli_ctx.get_progress_controller().add(message='Downloading')
             _whl_download_from_url(url_parse_result, ext_file)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
             raise CLIError('Please ensure you have network connection. Error detail: {}'.format(str(err)))
@@ -128,7 +130,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
             raise CLIError("The checksum of the extension does not match the expected value. "
                            "Use --debug for more information.")
     try:
-        cmd.cli_ctx.get_progress_controller().add(message='Validating')
+        cli_ctx.get_progress_controller().add(message='Validating')
         _validate_whl_extension(ext_file)
     except AssertionError:
         logger.debug(traceback.format_exc())
@@ -138,7 +140,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
     logger.debug('Validation successful on %s', ext_file)
     # Check for distro consistency
     check_distro_consistency()
-    cmd.cli_ctx.get_progress_controller().add(message='Installing')
+    cli_ctx.get_progress_controller().add(message='Installing')
     # Install with pip
     extension_path = build_extension_path(extension_name, system)
     pip_args = ['install', '--target', extension_path, ext_file]
@@ -188,8 +190,8 @@ def _augment_telemetry_with_ext_info(extension_name, ext=None):
 
 def check_version_compatibility(azext_metadata):
     is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
+    # logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+    #              "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
         min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
                           "You have CLI core version {} and this extension " \
@@ -204,11 +206,15 @@ def check_version_compatibility(azext_metadata):
         raise CLIError(min_max_msg_fmt)
 
 
-def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
-                  pip_extra_index_urls=None, pip_proxy=None, system=None):
+def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+                  pip_extra_index_urls=None, pip_proxy=None, system=None,
+                  version=None, cli_ctx=None):
     ext_sha256 = None
+
+    version = None if version == 'latest' else version
+    cmd_cli_ctx = cli_ctx or cmd.cli_ctx
     if extension_name:
-        cmd.cli_ctx.get_progress_controller().add(message='Searching')
+        cmd_cli_ctx.get_progress_controller().add(message='Searching')
         ext = None
         try:
             ext = get_extension(extension_name)
@@ -220,11 +226,17 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-            raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
-    extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
+
+            if version:
+                err = "No matching extensions for '{} ({})'. Use --debug for more information.".format(extension_name, version)
+            else:
+                err = "No matching extensions for '{}'. Use --debug for more information.".format(extension_name)
+            raise CLIError(err)
+
+    extension_name = _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
         ext = get_extension(extension_name)
@@ -234,6 +246,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                            "Please use with discretion.", extension_name)
         elif extension_name and ext.preview:
             logger.warning("The installed extension '%s' is in preview.", extension_name)
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException:
         pass
 
@@ -253,6 +266,7 @@ def remove_extension(extension_name):
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name, ext)
         shutil.rmtree(ext.path, onerror=log_err)
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -275,15 +289,18 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None):
     try:
+        cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
             download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-            raise CLIError("No updates available for '{}'. Use --debug for more information.".format(extension_name))
+            msg = "No updates available for '{}'. Use --debug for more information.".format(extension_name)
+            logger.warning(msg)
+            return
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.
         backup_dir = os.path.join(tempfile.mkdtemp(), extension_name)
         extension_path = ext.path
@@ -293,7 +310,7 @@ def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=N
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(cmd=cmd, source=download_url, ext_sha256=ext_sha256,
+            _add_whl_ext(cli_ctx=cmd_cli_ctx, source=download_url, ext_sha256=ext_sha256,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)
@@ -305,6 +322,7 @@ def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=N
             logger.debug('Copying %s to %s', backup_dir, extension_path)
             shutil.copytree(backup_dir, extension_path)
             raise CLIError('Failed to update. Rolled {} back to {}.'.format(extension_name, cur_version))
+        CommandIndex().invalidate()
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -340,6 +358,45 @@ def list_available_extensions(index_url=None, show_details=False):
     return results
 
 
+def list_versions(extension_name, index_url=None):
+    index_data = get_index_extensions(index_url=index_url)
+
+    try:
+        exts = index_data[extension_name]
+    except Exception:
+        raise CLIError('Extension {} not found.'.format(extension_name))
+
+    try:
+        installed_ext = get_extension(extension_name, ext_type=WheelExtension)
+    except ExtensionNotInstalledException:
+        installed_ext = None
+
+    results = []
+    latest_compatible_version = None
+
+    for ext in sorted(exts, key=lambda c: parse_version(c['metadata']['version']), reverse=True):
+        compatible = ext_compat_with_cli(ext['metadata'])[0]
+        ext_version = ext['metadata']['version']
+        if latest_compatible_version is None and compatible:
+            latest_compatible_version = ext_version
+        installed = ext_version == installed_ext.version if installed_ext else False
+        if installed and parse_version(latest_compatible_version) > parse_version(installed_ext.version):
+            installed = str(True) + ' (upgrade available)'
+        version = ext['metadata']['version']
+        if latest_compatible_version == ext_version:
+            version = version + ' (max compatible version)'
+        results.append({
+            'name': extension_name,
+            'version': version,
+            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False),
+            'experimental': ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'installed': installed,
+            'compatible': compatible
+        })
+    results.reverse()
+    return results
+
+
 def reload_extension(extension_name, extension_module=None):
     return reload_module(extension_module if extension_module else get_extension_modname(ext_name=extension_name))
 
@@ -347,6 +404,24 @@ def reload_extension(extension_name, extension_module=None):
 def add_extension_to_path(extension_name, ext_dir=None):
     ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
+    # If this path update should have made a new "azure" module available,
+    # extend the existing module with its path. This allows extensions to
+    # include (or depend on) Azure SDK modules that are not yet part of
+    # the CLI. This applies to both the "azure" and "azure.mgmt" namespaces,
+    # but ensures that modules installed by the CLI take priority.
+    azure_dir = os.path.join(ext_dir, "azure")
+    if os.path.isdir(azure_dir):
+        import azure
+        azure.__path__.append(azure_dir)
+        azure_mgmt_dir = os.path.join(azure_dir, "mgmt")
+        if os.path.isdir(azure_mgmt_dir):
+            try:
+                # Should have been imported already, so this will be quick
+                import azure.mgmt
+            except ImportError:
+                pass
+            else:
+                azure.mgmt.__path__.append(azure_mgmt_dir)
 
 
 def get_lsb_release():

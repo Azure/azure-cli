@@ -7,17 +7,19 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type,
                                                 get_three_state_flag)
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
-                          validate_included_datasets, validate_custom_domain, validate_container_public_access,
+                          validate_included_datasets_validator, validate_custom_domain,
+                          validate_container_public_access,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
-                          validate_fs_public_access)
+                          validate_fs_public_access, validate_logging_version, validate_or_policy)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -42,7 +44,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     acct_name_type = CLIArgumentType(options_list=['--account-name', '-n'], help='The storage account name.',
                                      id_part='name',
-                                     completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+                                     completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'),
+                                     local_context_attribute=LocalContextAttribute(
+                                         name='storage_account_name', actions=[LocalContextAction.GET]))
     blob_name_type = CLIArgumentType(options_list=['--blob-name', '-b'], help='The blob name.',
                                      completer=get_storage_name_completion_list(t_base_blob_service, 'list_blobs',
                                                                                 parent='container_name'))
@@ -68,10 +72,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     action='store_true', validator=add_progress_callback)
     socket_timeout_type = CLIArgumentType(help='The socket timeout(secs), used by the service to regulate data flow.',
                                           type=int)
-    num_results_type = CLIArgumentType(
-        default=5000, help='Specifies the maximum number of results to return. Provide "*" to return all.',
-        validator=validate_storage_data_plane_list)
-
     large_file_share_type = CLIArgumentType(
         action='store_true', min_api='2019-04-01',
         help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
@@ -143,6 +143,27 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
     )
+    marker_type = CLIArgumentType(
+        help='A string value that identifies the portion of the list of containers to be '
+             'returned with the next listing operation. The operation returns the NextMarker value within '
+             'the response body if the listing operation did not return all containers remaining to be listed '
+             'with the current page. If specified, this generator will begin returning results from the point '
+             'where the previous generator stopped.')
+
+    marker_type = CLIArgumentType(
+        help='A string value that identifies the portion of the list of containers to be '
+             'returned with the next listing operation. The operation returns the NextMarker value within '
+             'the response body if the listing operation did not return all containers remaining to be listed '
+             'with the current page. If specified, this generator will begin returning results from the point '
+             'where the previous generator stopped.')
+
+    num_results_type = CLIArgumentType(
+        default=5000, validator=validate_storage_data_plane_list,
+        help='Specify the maximum number to return. If the request does not specify '
+        'num_results, or specifies a value greater than 5000, the server will return up to 5000 items. Note that '
+        'if the listing operation crosses a partition boundary, then the service will return a continuation token '
+        'for retrieving the remaining of the results. Provide "*" to return all.'
+    )
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -174,14 +195,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
 
+    with self.argument_context('storage account delete') as c:
+        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
+
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind = self.get_models('AccountType', 'SkuName', 'Kind',
-                                                             resource_type=ResourceType.MGMT_STORAGE)
+        t_account_type, t_sku_name, t_kind, t_tls_version = \
+            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion',
+                            resource_type=ResourceType.MGMT_STORAGE)
 
         c.register_common_storage_account_options()
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('account_type', help='The storage account type', arg_type=get_enum_type(t_account_type))
-        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None)
+        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None,
+                   local_context_attribute=LocalContextAttribute(
+                       name='storage_account_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('kind', help='Indicates the type of storage account.', min_api="2018-02-01",
                    arg_type=get_enum_type(t_kind), default='StorageV2')
         c.argument('kind', help='Indicates the type of storage account.', max_api="2017-10-01",
@@ -220,6 +247,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
+        c.argument('require_infrastructure_encryption', options_list=['--require-infrastructure-encryption', '-i'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
+                   'platform managed keys for data at rest.')
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
+                   help='Allow or disallow public access to all blobs or containers in the storage account. '
+                   'The default value for this property is null, which is equivalent to true. When true, containers '
+                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'not enable anonymous access to any data in the account. The additional step of configuring the '
+                   'public access setting for a container is required to enable anonymous access.')
+        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
+                   help='The minimum TLS version to be permitted on requests to storage. '
+                        'The default interpretation is TLS 1.0 for this property')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -239,6 +279,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('description', help='Comments for {} operation.'.format(item))
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
+        t_tls_version = self.get_models('MinimumTlsVersion', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
         c.argument('custom_domain',
                    help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear '
@@ -259,6 +300,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
+                   help='Allow or disallow public access to all blobs or containers in the storage account. '
+                   'The default value for this property is null, which is equivalent to true. When true, containers '
+                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'not enable anonymous access to any data in the account. The additional step of configuring the '
+                   'public access setting for a container is required to enable anonymous access.')
+        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
+                   help='The minimum TLS version to be permitted on requests to storage. '
+                        'The default interpretation is TLS 1.0 for this property')
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
@@ -402,6 +452,66 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_account_permissions))
         c.ignore('sas_token')
 
+    or_policy_type = CLIArgumentType(
+        options_list=['--policy', '-p'],
+        help='The object replication policy definition between two storage accounts, in JSON format. '
+             'Multiple rules can be defined in one policy.'
+    )
+    policy_id_type = CLIArgumentType(
+        options_list=['--policy-id'],
+        help='The ID of object replication policy or "default" if the policy ID is unknown. Policy Id will be '
+             'auto-generated when setting on destination account. Required when setting on source account.'
+    )
+    rule_id_type = CLIArgumentType(
+        options_list=['--rule-id', '-r'],
+        help='Rule Id is auto-generated for each new rule on destination account. It is required '
+             'for put policy on source account.'
+    )
+    prefix_math_type = CLIArgumentType(
+        nargs='+', arg_group='Filters', options_list=['--prefix-match', '--prefix'],
+        help='Optional. Filter the results to replicate only blobs whose names begin with the specified '
+             'prefix.'
+    )
+    min_creation_time_type = CLIArgumentType(
+        options_list=['--min-creation-time', '-t'], arg_group='Filters', type=get_datetime_type(True),
+        help="Blobs created after the time will be replicated to the destination. It must be in datetime format "
+             "'yyyy-MM-ddTHH:mm:ssZ'. Example: 2020-02-19T16:05:00Z")
+
+    with self.argument_context('storage account or-policy') as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('object_replication_policy_id', policy_id_type)
+        c.argument('policy_id', policy_id_type)
+        c.argument('source_account', options_list=['--source-account', '-s'],
+                   help='The source storage account name. Required when no --policy provided.')
+        c.argument('destination_account', options_list=['--destination-account', '-d'],
+                   help='The destination storage account name. Apply --account-name value as destination account '
+                   'when there is no destination account provided in --policy and --destination-account.')
+        c.argument('properties', or_policy_type)
+        c.argument('prefix_match', prefix_math_type)
+        c.argument('min_creation_time', min_creation_time_type)
+
+    for item in ['create', 'update']:
+        with self.argument_context('storage account or-policy {}'.format(item),
+                                   arg_group="Object Replication Policy Rule") as c:
+            c.argument('rule_id', help='Rule Id is auto-generated for each new rule on destination account. It is '
+                                       'required for put policy on source account.')
+            c.argument('source_container', options_list=['--source-container', '--scont'],
+                       help='The source storage container name. Required when no --policy provided.')
+            c.argument('destination_container', options_list=['--destination-container', '--dcont'],
+                       help='The destination storage container name. Required when no --policy provided.')
+
+    with self.argument_context('storage account or-policy create') as c:
+        c.argument('properties', or_policy_type, validator=validate_or_policy)
+
+    with self.argument_context('storage account or-policy rule') as c:
+        c.argument('policy_id', policy_id_type)
+        c.argument('source_container', options_list=['--source-container', '-s'],
+                   help='The source storage container name.')
+        c.argument('destination_container', options_list=['--destination-container', '-d'],
+                   help='The destination storage container name.')
+        c.argument('rule_id', rule_id_type)
+
     for item in ['show', 'off']:
         with self.argument_context('storage logging {}'.format(item)) as c:
             c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
@@ -411,7 +521,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 required=True)
         c.argument('log', validator=get_char_options_validator('rwd', 'log'))
         c.argument('retention', type=int)
-        c.argument('version', type=float)
+        c.argument('version', type=float, validator=validate_logging_version)
 
     with self.argument_context('storage metrics show') as c:
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt')
@@ -430,8 +540,24 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination_path', help='The destination path that will be appended to the blob name.')
 
     with self.argument_context('storage blob list') as c:
-        c.argument('include', validator=validate_included_datasets)
+        from ._validators import get_include_help_string
+        t_blob_include = self.get_sdk('_generated.models._azure_blob_storage_enums#ListBlobsIncludeItem',
+                                      resource_type=ResourceType.DATA_STORAGE_BLOB)
+        c.register_container_arguments()
+        c.argument('delimiter',
+                   help='When the request includes this parameter, the operation returns a BlobPrefix element in the '
+                   'result list that acts as a placeholder for all blobs whose names begin with the same substring '
+                   'up to the appearance of the delimiter character. The delimiter may be a single character or a '
+                   'string.')
+        c.argument('include', help="Specify one or more additional datasets to include in the response. "
+                   "Options include: {}. Can be combined.".format(get_include_help_string(t_blob_include)),
+                   validator=validate_included_datasets_validator(include_class=t_blob_include))
+        c.argument('marker', arg_type=marker_type)
         c.argument('num_results', arg_type=num_results_type)
+        c.argument('prefix',
+                   help='Filter the results to return only blobs whose name begins with the specified prefix.')
+        c.argument('show_next_marker', action='store_true',
+                   help='Show nextMarker in result when specified.')
 
     with self.argument_context('storage blob generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -461,6 +587,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
+        c.ignore('sas_token')
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
@@ -486,11 +613,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     'this query parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
-        from azure.cli.command_modules.storage._validators import blob_tier_validator
-
+        from azure.cli.command_modules.storage._validators import (blob_tier_validator,
+                                                                   blob_rehydrate_priority_validator)
+        c.register_blob_arguments()
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
         c.argument('tier', validator=blob_tier_validator)
         c.argument('timeout', type=int)
+        c.argument('rehydrate_priority', options_list=('--rehydrate-priority', '-r'),
+                   arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
+                   is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
+                                         "The priority can be set on a blob only once, default value is Standard.")
 
     with self.argument_context('storage blob service-properties delete-policy update') as c:
         c.argument('enable', arg_type=get_enum_type(['true', 'false']), help='Enables/disables soft-delete.')
@@ -510,12 +642,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Represents the path to the error document that should be shown when an error 404 is issued,'
                         ' in other words, when a browser requests a page that does not exist.')
 
+    with self.argument_context('storage blob show') as c:
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                 'specifies the blob snapshot to retrieve.')
+        c.argument('lease_id', help='Required if the blob has an active lease.')
+
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
         from .sdkutil import get_blob_types, get_blob_tier_names
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False)
+        c.register_blob_arguments()
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
         c.argument('max_connections', type=int)
@@ -580,9 +720,40 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('lease_id', help='The active lease id for the blob.')
 
     with self.argument_context('storage blob lease') as c:
-        c.argument('lease_duration', type=int)
-        c.argument('lease_break_period', type=int)
         c.argument('blob_name', arg_type=blob_name_type)
+
+    with self.argument_context('storage blob lease acquire') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.extra('lease_id', options_list='--proposed-lease-id', help='Proposed lease ID, in a GUID string format. '
+                'The Blob service returns 400 (Invalid request) if the proposed lease ID is not in the correct format.')
+        c.argument('lease_duration', help='Specify the duration of the lease, in seconds, or negative one (-1) for '
+                   'a lease that never expires. A non-infinite lease can be between 15 and 60 seconds. A lease '
+                   'duration cannot be changed using renew or change. Default is -1 (infinite lease)', type=int)
+
+    with self.argument_context('storage blob lease break') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.argument('lease_break_period', type=int,
+                   help="This is the proposed duration of seconds that the lease should continue before it is broken, "
+                   "between 0 and 60 seconds. This break period is only used if it is shorter than the time remaining "
+                   "on the lease. If longer, the time remaining on the lease is used. A new lease will not be "
+                   "available before the break period has expired, but the lease may be held for longer than the break "
+                   "period. If this header does not appear with a break operation, a fixed-duration lease breaks after "
+                   "the remaining lease period elapses, and an infinite lease breaks immediately.")
+
+    with self.argument_context('storage blob lease change') as c:
+        c.register_precondition_options()
+        c.register_blob_arguments()
+        c.extra('proposed_lease_id', help='Proposed lease ID, in a GUID string format. The Blob service returns 400 '
+                '(Invalid request) if the proposed lease ID is not in the correct format.', required=True)
+        c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
+
+    for item in ['release', 'renew']:
+        with self.argument_context('storage blob lease {}'.format(item)) as c:
+            c.register_precondition_options()
+            c.register_blob_arguments()
+            c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
 
     with self.argument_context('storage copy') as c:
         c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "
@@ -624,6 +795,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('include_path', include_path_type)
         c.argument('recursive', recursive_type)
         c.argument('content_type', arg_group='Additional Flags', help="Specify content type of the file. ")
+        c.argument('follow_symlinks', arg_group='Additional Flags', action='store_true',
+                   help='Follow symbolic links when uploading from local file system.')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
@@ -782,6 +955,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.ignore('sas_token')
+
     with self.argument_context('storage container lease') as c:
         c.argument('lease_duration', type=int)
         c.argument('lease_break_period', type=int)
@@ -789,17 +964,32 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
 
-    for item in ['create', 'delete', 'exists', 'list', 'show', 'update']:
+    with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('resource_group_name', required=False)
+        c.argument('account_name', storage_account_type)
+        c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
+        c.ignore('filter', 'maxpagesize')
+
+    for item in ['create', 'update']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
-            c.argument('resource_group_name', required=False)
-            c.argument('account_name', storage_account_type)
-            c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
-            c.argument('share_quota', type=int, options_list='--quota')
+            t_enabled_protocols, t_root_squash, t_access_tier = \
+                self.get_models('EnabledProtocols', 'RootSquashType', 'ShareAccessTier',
+                                resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('share_quota', type=int, options_list=['--quota', '-q'],
+                       help='The maximum size of the share in gigabytes. Must be greater than 0, and less than or '
+                            'equal to 5TB (5120). For Large File Shares, the maximum size is 102400.')
             c.argument('metadata', nargs='+',
                        help='Metadata in space-separated key=value pairs that is associated with the share. '
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
-            c.ignore('filter', 'maxpagesize', 'skip_token')
+            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols), is_preview=True,
+                       min_api='2019-06-01', help='Immutable property for file shares protocol. NFS protocol will be '
+                       'only available for premium file shares (file shares in the FileStorage account type).')
+            c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
+                       min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
+            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), is_preview=True, min_api='2019-06-01',
+                       help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
+                       '(default), Hot, and Cool. FileStorage account can choose Premium.')
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
@@ -848,6 +1038,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
+        c.ignore('sas_token')
 
     with self.argument_context('storage directory') as c:
         c.argument('directory_name', directory_type, options_list=('--name', '-n'))
@@ -898,6 +1089,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_file_permissions)),
                    validator=get_permission_validator(t_file_permissions))
+        c.ignore('sas_token')
 
     with self.argument_context('storage file list') as c:
         from .completers import dir_path_completer
@@ -1007,6 +1199,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
+        c.ignore('sas_token')
+        c.ignore('auth_mode')
 
     with self.argument_context('storage queue') as c:
         c.argument('queue_name', queue_name_type, options_list=('--name', '-n'))
@@ -1086,6 +1280,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
                    validator=table_permission_validator)
+        c.ignore('sas_token')
 
     with self.argument_context('storage entity') as c:
         c.ignore('property_resolver')

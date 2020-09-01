@@ -257,7 +257,12 @@ def get_location_type(cli_ctx):
         help="Location. Values from: `az account list-locations`. "
              "You can configure the default location using `az configure --defaults location=<location>`.",
         metavar='LOCATION',
-        configured_default='location')
+        configured_default='location',
+        local_context_attribute=LocalContextAttribute(
+            name='location',
+            actions=[LocalContextAction.SET, LocalContextAction.GET],
+            scopes=[ALL]
+        ))
     return location_type
 
 

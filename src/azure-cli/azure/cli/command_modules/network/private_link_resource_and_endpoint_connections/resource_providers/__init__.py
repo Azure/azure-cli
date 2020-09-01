@@ -13,7 +13,7 @@ RETRY_MAX = 20
 RETRY_INTERVAL = 10
 
 
-class PrivateEndpointClient(object):
+class PrivateEndpointClient:
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod

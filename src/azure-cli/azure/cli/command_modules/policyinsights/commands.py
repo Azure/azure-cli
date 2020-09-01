@@ -36,6 +36,8 @@ def load_command_table(self, _):
     with self.command_group('policy state', policy_states_sdk, client_factory=policy_states_operations) as g:
         g.custom_command('list', 'list_policy_states')
         g.custom_command('summarize', 'summarize_policy_states')
+        g.custom_command('trigger-scan', 'trigger_policy_scan',
+                         supports_no_wait=True)
 
     with self.command_group('policy remediation', policy_remediations_sdk,
                             client_factory=policy_remediations_operations) as g:
@@ -51,4 +53,4 @@ def load_command_table(self, _):
 
     with self.command_group('policy metadata', policy_metadata_sdk, client_factory=policy_metadata_operations) as g:
         g.custom_command('list', 'list_policy_metadata')
-        g.custom_command('show', 'show_policy_metadata')
+        g.custom_show_command('show', 'show_policy_metadata')

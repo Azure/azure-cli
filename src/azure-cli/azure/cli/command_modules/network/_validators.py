@@ -287,7 +287,7 @@ def validate_dns_record_type(namespace):
             return
 
 
-def validate_application_gateway_identity(cmd, namespace):
+def validate_user_assigned_identity(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
     if namespace.user_assigned_identity and not is_valid_resource_id(namespace.user_assigned_identity):
@@ -682,7 +682,7 @@ def get_servers_validator(camel_case=False):
                 servers.append({'ipAddress' if camel_case else 'ip_address': item})
             except socket.error:  # pylint:disable=no-member
                 servers.append({'fqdn': item})
-        namespace.servers = servers
+        namespace.servers = servers if servers else None
 
     return validate_servers
 
@@ -882,7 +882,7 @@ def process_ag_create_namespace(cmd, namespace):
     validate_tags(namespace)
     validate_custom_error_pages(namespace)
     validate_waf_policy(cmd, namespace)
-    validate_application_gateway_identity(cmd, namespace)
+    validate_user_assigned_identity(cmd, namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):
@@ -1053,6 +1053,7 @@ def process_vnet_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_ddos_name_or_id(cmd, namespace)
     validate_tags(namespace)
+    get_nsg_validator()(cmd, namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:
         if cmd.supported_api_version(min_api='2018-08-01'):
@@ -1902,7 +1903,7 @@ def process_private_endpoint_connection_id_argument(cmd, namespace):
                                             namespace.name,
                                             namespace.resource_provider,
                                             namespace.resource_name])):
-        raise CLIError("usage error: --connection-id / -g -n --type --service-name")
+        raise CLIError("usage error: --id / -g -n --type --resource-name")
 
     result = parse_proxy_resource_id(namespace.connection_id)
     cmd.cli_ctx.data['subscription_id'] = result['subscription']
@@ -1911,3 +1912,14 @@ def process_private_endpoint_connection_id_argument(cmd, namespace):
     namespace.resource_provider = '{}/{}'.format(result['namespace'], result['type'])
     namespace.name = result['child_name_1']
     del namespace.connection_id
+
+
+def process_vnet_name_or_id(cmd, namespace):
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
+    if namespace.vnet and not is_valid_resource_id(namespace.vnet):
+        namespace.vnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=namespace.vnet)

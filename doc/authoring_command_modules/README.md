@@ -55,10 +55,6 @@ Also, you can run `az` and if your command module contributes any commands, they
 If your commands aren't showing with `az`, use `az --debug` to help debug. There could have been an exception
 thrown whilst attempting to load your module.
 
-**Note for locally installed Azure SDKs:**  
-If you're receiving Azure import errors, run `pip install -I azure-nspkg==1.0.0` in your virtual environment
-after installing your SDK locally.
-
 
 <a name="heading_author_command_mod"></a>Authoring command modules
 ------
@@ -208,7 +204,7 @@ History notes are auto-generated based on PR titles and descriptions starting fr
     * If the component name is `Core`, the message will be written in `src/azure-cli-core/HISTORY.rst`. Otherwise, the message will be written in `src/azure-cli/HISTORY.rst`.
 2. [**Mandatory**] If it's a breaking change, the second part should be `BREAKING CHANGE` followed by a colon. In the case of hotfix, put `Hotfix` in this part. If it's related to fixing an issue, put `Fix #number` in this part. For other cases, this part could be empty.
 3. [**Recommendation**] If the change can be mapped into a command, then the next part could be the command name starting with `az`, followed by a colon.
-4. [**Recommendation**] Use the right verb with **present-tense** in **base form** and **capitalized first letter** to descibe what is done:
+4. [**Recommendation**] Use the right verb with **present-tense** in **base form** and **capitalized first letter** to describe what is done:
     * **Add** for new features.
     * **Change** for changes in existing functionality.
     * **Deprecate** for once-stable features removed in upcoming releases.

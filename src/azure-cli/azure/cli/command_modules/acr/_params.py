@@ -156,9 +156,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr replication create') as c:
         c.argument('replication_name', help='The name of the replication. Default to the location name.', completer=None)
 
+    for scope in ['acr replication create', 'acr replication update']:
+        help_str = "Allow routing to this replication. Requests will not be routed to a disabled replication." \
+                   " Data syncing will continue regardless of the region endpoint status."
+        help_str += ' Default: true.' if 'create' in scope else ''  # suffix help with default if command is for create
+
+        with self.argument_context(scope) as c:
+            c.argument('region_endpoint_enabled', arg_type=get_three_state_flag(), help=help_str, is_preview=True)
+
     with self.argument_context('acr run') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
-        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'). If '/dev/null' is specified, the value will be set to None and ignored.", completer=FilesCompleter())
+        c.positional('source_location', help="The local source code directory path (e.g., './src'), or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git'), or a remote tarball (e.g., 'http://server/context.tar.gz'), or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag'). If '/dev/null' is specified, the value will be set to None and ignored.", completer=FilesCompleter())
         c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context. It can be '-' to pipe a file from the standard input.")
         c.argument('values', help="The task values file path relative to the source context.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
@@ -171,12 +179,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('builder', options_list=['--builder', '-b'], help="The name and tag of a Buildpack builder image.")
         c.argument('pack_image_tag', options_list=['--pack-image-tag'], help="The tag of the 'pack' runner image ('mcr.microsoft.com/oryx/pack').", is_preview=True)
         c.argument('pull', options_list=['--pull'], help="Pull the latest builder and run images before use.", action='store_true')
-        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
+        c.positional('source_location', help="The local source code directory path (e.g., './src'), or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'), or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag').", completer=FilesCompleter())
         c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
 
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
-        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
+        c.positional('source_location', help="The local source code directory path (e.g., './src'), or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'), or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag').", completer=FilesCompleter())
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", action='store_true')
         c.argument('no_wait', help="Do not wait for the build to complete and return immediately after queuing the build.", action='store_true')
         c.argument('arg', options_list=['--build-arg'], help="Build argument in '--build-arg name[=value]' format. Multiples supported by passing --build-arg multiple times.", action='append', validator=validate_arg)
@@ -197,7 +205,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('values', help="The task values/parameters file path relative to the source context.")
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
-        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo). If '/dev/null' is specified, the value will be set to None and ignored.")
+        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo) or the repository of an OCI artifact in an Azure container registry (e.g., 'oci://myregistry.azurecr.io/myartifact:mytag'). If '/dev/null' is specified, the value will be set to None and ignored.")
         c.argument('arg', help="Build argument in '--arg name[=value]' format. Multiples supported by passing '--arg` multiple times.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret build argument in '--secret-arg name[=value]' format. Multiples supported by passing --secret-arg multiple times.", action='append', validator=validate_secret_arg)
         c.argument('set_value', options_list=['--set'], help="Task value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
@@ -346,7 +354,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('agent_pool_name', options_list=['--name', '-n'], help='The name of the agent pool.')
         c.argument('count', options_list=['--count', '-c'], type=int, help='The count of the agent pool.')
-        c.argument('tier', help='Sets the VM your agent pool will run on. Valid values are: S1(2 vCPUs, 3 MiB RAM), S2(4 vCPUs, 8 MiB RAM) or S3(8 vCPUs, 16 MiB RAM)')
+        c.argument('tier', help='Sets the VM your agent pool will run on. Valid values are: S1(2 vCPUs, 3 GiB RAM), S2(4 vCPUs, 8 GiB RAM), S3(8 vCPUs, 16 GiB RAM) or I6(64 vCPUs, 216 GiB RAM, Isolated)')
         c.argument('os_type', options_list=['--os'], help='The os of the agent pool.', deprecate_info=c.deprecate(hide=True))
         c.argument('subnet_id', options_list=['--subnet-id'], help='The Virtual Network Subnet Resource Id of the agent machine.')
         c.argument('no_wait', help="Do not wait for the Agent Pool to complete action and return immediately after queuing the request.", action='store_true')

@@ -9,15 +9,8 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-try:
-    from azure_bdist_wheel import cmdclass
-except ImportError:
-    from distutils import log as logger
+VERSION = "2.11.1"
 
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
-    cmdclass = {}
-
-VERSION = "2.6.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -56,7 +49,7 @@ DEPENDENCIES = [
     'colorama~=0.4.1',
     'humanfriendly>=4.7,<9.0',
     'jmespath',
-    'knack==0.7.1',
+    'knack==0.7.2',
     'msal~=1.0.0',
     'msal-extensions~=0.1.3',
     'msrest>=0.4.4',
@@ -67,8 +60,8 @@ DEPENDENCIES = [
     'requests~=2.22',
     'six~=1.12',
     'pkginfo>=1.5.0.1',
-    'azure-mgmt-resource==9.0.0',
-    'azure-mgmt-core==1.0.0'
+    'azure-mgmt-resource==10.2.0',
+    'azure-mgmt-core==1.2.0'
 ]
 
 TESTS_REQUIRE = [
@@ -92,8 +85,6 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure',
-        'azure.cli',
         'azure.cli.core',
         'azure.cli.core.commands',
         'azure.cli.core.extension',
@@ -107,6 +98,5 @@ setup(
         "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,
-    package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
-    cmdclass=cmdclass
+    package_data={'azure.cli.core': ['auth_landing_pages/*.html']}
 )

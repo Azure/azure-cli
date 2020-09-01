@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
-    (KeyType, AccessRights, SkuName) = self.get_models('KeyType', 'AccessRights', 'SkuName', resource_type=ResourceType.MGMT_EVENTHUB)
+    (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -44,6 +44,21 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
         c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
                    help='Default Action for Network Rule Set.')
+        c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
+                   help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
+        c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Managed Identity is enabled.')
+
+    with self.argument_context('eventhubs namespace create', min_api='2018-01-01-preview') as c:
+        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='luster ARM ID of the Namespace')
+
+    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2018-01-01-preview') as c:
+        c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
+                   help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
+        c.argument('key_name', is_preview=True, help='The name of the KeyVault key.', )
+        c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
+        c.argument('key_version', is_preview=True,
+                   help='The version of the KeyVault key to use.')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:
@@ -79,7 +94,7 @@ def load_arguments_eh(self, _):
             c.argument('skip_empty_archives', options_list=['--skip-empty-archives'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to Skip Empty.')
             c.argument('capture_interval_seconds', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')
             c.argument('capture_size_limit_bytes', arg_group='Capture', options_list=['--capture-size-limit'], type=int, help='Defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes')
-            c.argument('destination_name', arg_group='Capture-Destination', help='Name for capture destination')
+            c.argument('destination_name', arg_group='Capture-Destination', help='Name for capture destination, should be EventHubArchive.AzureBlockBlob.')
             c.argument('storage_account_resource_id', arg_group='Capture-Destination', validator=validate_storageaccount, options_list=['--storage-account'], help='Name (if within same resource group and not of type Classic Storage) or ARM id of the storage account to be used to create the blobs')
             c.argument('blob_container', arg_group='Capture-Destination', help='Blob container Name')
             c.argument('archive_name_format', arg_group='Capture-Destination', help='Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order')

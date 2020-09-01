@@ -10,15 +10,15 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
-    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type, get_three_state_flag)
+    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
 from knack.arguments import CLIArgumentType
 
 from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
-    validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodes_count,
+    validate_cluster_autoscaler_profile, validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
+    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels)
@@ -183,6 +183,7 @@ def load_arguments(self, _):
         c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                                                             CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
         c.argument('enable_cluster_autoscaler', action='store_true')
+        c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile, help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('vm_set_type', type=str, validator=validate_vm_set_type)
@@ -192,7 +193,7 @@ def load_arguments(self, _):
         c.argument('disable_rbac', action='store_true')
         c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
                    deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
-        c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
+        c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
         c.argument('network_plugin', arg_type=get_enum_type(['azure', 'kubenet']))
         c.argument('network_policy')
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
@@ -210,6 +211,7 @@ def load_arguments(self, _):
         c.argument('enable_node_public_ip', action='store_true', is_preview=True)
         c.argument('windows_admin_username', options_list=['--windows-admin-username'])
         c.argument('windows_admin_password', options_list=['--windows-admin-password'])
+        c.argument('node_osdisk_diskencryptionset_id', type=str, options_list=['--node-osdisk-diskencryptionset-id', '-d'])
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -219,8 +221,10 @@ def load_arguments(self, _):
         c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
         c.argument('disable_cluster_autoscaler', options_list=["--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
+        c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile, help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
+        c.argument('uptime_sla', action='store_true')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
@@ -244,8 +248,10 @@ def load_arguments(self, _):
 
     for scope in ['aks', 'acs kubernetes', 'acs dcos']:
         with self.argument_context('{} install-cli'.format(scope)) as c:
-            c.argument('client_version', validator=validate_k8s_client_version, help='Version of the client to install.')
+            c.argument('client_version', validator=validate_kubectl_version, help='Version of kubectl to install.')
             c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install kubectl.')
+            c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
+            c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin.')
 
     with self.argument_context('aks install-connector') as c:
         c.argument('aci_resource_group', help='The resource group to create the ACI container groups')
@@ -280,6 +286,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks upgrade') as c:
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks scale') as c:
         c.argument('nodepool_name', type=str,
@@ -293,7 +300,7 @@ def load_arguments(self, _):
             c.argument('nodepool_name', type=str, options_list=['--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
             c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
             c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
-            c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
+            c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
             c.argument('os_type', type=str)
             c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
             c.argument('node_taints', type=str, validator=validate_taints)
@@ -343,25 +350,9 @@ def load_arguments(self, _):
 
     with self.argument_context('openshift create') as c:
         c.argument('name', validator=validate_linux_host_name)
-        c.argument('aad_client_app_id', help='The ID of an Azure Active Directory client application. If not specified, a new Azure Active Directory client is created.')
-        c.argument('aad_client_app_secret', help='The secret of an Azure Active Directory client application.')
-        c.argument('aad_tenant_id', help='The ID of an Azure Active Directory tenant.')
-        c.argument('compute_count', options_list=['--compute-count', '-c'], help='Number of nodes in the OpenShift node pool.')
-        c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'], help='Size of Virtual Machines to create as OpenShift nodes.')
-        c.argument('customer_admin_group_id',
-                   help='The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins".'
-                        'If not specified, no cluster admin access will be granted.')
-        c.argument('management_subnet_cidr', help='CIDR of subnet used to create PLS needed for management of the cluster. If provided, also set --private-cluster flag.')
-        c.argument('private_cluster', arg_type=get_three_state_flag(), help='Create private Openshift cluster. If this flag is set, also supply --management-subnet-cidr.')
-        c.argument('subnet_prefix', help='The CIDR used on the Subnet into which to deploy the cluster.')
-        c.argument('vnet_peer',
-                   help='Vnet peering is no longer supported during cluster creation, instead it is possible to edit vnet properties after cluster creation')
-        c.argument('vnet_prefix', help='The CIDR used on the VNet into which to deploy the cluster.')
-        c.argument('workspace_id', help='The resource id of an existing Log Analytics Workspace to use for storing monitoring data.')
-
-    with self.argument_context('openshift update') as c:
-        c.argument('refresh_cluster', arg_type=get_three_state_flag(),
-                   help='Allow nodes to be rotated. Use this flag to trigger nodes rotation after DNS settings change.')
+        c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
+        c.argument('customer_admin_group_id', options_list=['--customer-admin-group-id'])
+        c.argument('workspace_id')
 
     with self.argument_context('openshift monitor enable') as c:
         c.argument('workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')

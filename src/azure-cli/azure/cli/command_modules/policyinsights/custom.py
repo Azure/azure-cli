@@ -6,6 +6,7 @@
 from msrestazure.tools import is_valid_resource_id, resource_id
 
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import sdk_no_wait
 
 from knack.util import CLIError
 
@@ -272,6 +273,21 @@ def summarize_policy_states(
             query_options)
 
     return summary.value[0]
+
+
+def trigger_policy_scan(
+        cmd,
+        client,
+        resource_group_name=None,
+        no_wait=False):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    if resource_group_name:
+        return sdk_no_wait(no_wait, client.trigger_resource_group_evaluation,
+                           subscription_id, resource_group_name)
+
+    return sdk_no_wait(no_wait, client.trigger_subscription_evaluation,
+                       subscription_id)
 
 
 def get_policy_remediation(

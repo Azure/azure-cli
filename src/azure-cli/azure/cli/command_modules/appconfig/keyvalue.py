@@ -7,6 +7,7 @@
 
 import json
 import time
+import sys
 
 from itertools import chain
 from knack.log import get_logger
@@ -22,7 +23,7 @@ from ._azconfig.models import (KeyValue,
                                QueryKeyValueCollectionOptions,
                                QueryKeyValueOptions)
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
-                          __write_kv_and_features_to_file, __read_kv_from_config_store,
+                          __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
                           __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
@@ -61,8 +62,25 @@ def import_config(cmd,
 
     # fetch key values from source
     if source == 'file':
-        src_kvs = __read_kv_from_file(
-            file_path=path, format_=format_, separator=separator, prefix_to_add=prefix, depth=depth)
+        if format_ and content_type:
+            # JSON content type is only supported with JSON format.
+            # Error out if user has provided JSON content type with any other format.
+            if format_ != 'json' and __is_json_content_type(content_type):
+                raise CLIError("Failed to import '{}' file format with '{}' content type. Please provide JSON file format to match your content type.".format(format_, content_type))
+
+        if separator:
+            # If separator is provided, use max depth by default unless depth is specified.
+            depth = sys.maxsize if depth is None else int(depth)
+        else:
+            if depth and int(depth) != 1:
+                logger.warning("Cannot flatten hierarchical data without a separator. --depth argument will be ignored.")
+            depth = 1
+        src_kvs = __read_kv_from_file(file_path=path,
+                                      format_=format_,
+                                      separator=separator,
+                                      prefix_to_add=prefix,
+                                      depth=depth,
+                                      content_type=content_type)
 
         if not skip_features:
             # src_features is a list of KeyValue objects
@@ -92,7 +110,7 @@ def import_config(cmd,
 
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
-            cmd, appservice_account=appservice_account, prefix_to_add=prefix)
+            cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
 
     # if customer needs preview & confirmation
     if not yes:
@@ -195,7 +213,7 @@ def export_config(cmd,
         # Get all Feature flags with matching label
         if (destination == 'file' and format_ == 'properties') or destination == 'appservice':
             skip_features = True
-            logger.warning("Exporting feature flag to yaml file or appservice is currently not supported.")
+            logger.warning("Exporting feature flags to properties file or appservice is currently not supported.")
         else:
             # src_features is a list of FeatureFlag objects
             src_features = list_feature(cmd,
@@ -283,12 +301,29 @@ def set_key(cmd,
             raise CLIError(str(exception))
 
         if retrieved_kv is None:
+            if content_type and __is_json_content_type(content_type):
+                try:
+                    # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
+                    value = 'null' if value is None else value
+                    json.loads(value)
+                except ValueError:
+                    raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
+
             set_kv = KeyValue(key, value, label, tags, content_type)
         else:
+            value = retrieved_kv.value if value is None else value
+            content_type = retrieved_kv.content_type if content_type is None else content_type
+            if content_type and __is_json_content_type(content_type):
+                try:
+                    # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
+                    json.loads(value)
+                except (TypeError, ValueError):
+                    raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
+
             set_kv = KeyValue(key=key,
                               label=label,
-                              value=retrieved_kv.value if value is None else value,
-                              content_type=retrieved_kv.content_type if content_type is None else content_type,
+                              value=value,
+                              content_type=content_type,
                               tags=retrieved_kv.tags if tags is None else tags)
             set_kv.etag = retrieved_kv.etag
 
@@ -344,7 +379,6 @@ def set_keyvault(cmd,
         if retrieved_kv is None:
             set_kv = KeyValue(key, keyvault_ref_value, label, tags, KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
         else:
-            logger.warning("This operation will result in overwriting existing key whose value is: %s", retrieved_kv.value)
             set_kv = KeyValue(key=key,
                               label=label,
                               value=keyvault_ref_value,
