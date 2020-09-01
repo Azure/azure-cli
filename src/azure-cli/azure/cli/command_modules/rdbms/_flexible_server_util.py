@@ -77,18 +77,18 @@ def create_vnet(cmd, servername, location, resource_group_name, delegation_servi
 
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
+    from datetime import datetime
     # allow access to azure ip addresses
     cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name
+    now = datetime.now()
+    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
     if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
         logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
                    'Azure resources...')
-        firewall_name = 'azure-access'
     elif start_ip == end_ip:
         logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip)
-        firewall_name = 'single-ip-firewall'
     else:
         logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip, end_ip)
-        firewall_name = 'multiple-ip-firewall'
     firewall_client = cf_firewall(cmd.cli_ctx, None)
     resolve_poller(
         firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
