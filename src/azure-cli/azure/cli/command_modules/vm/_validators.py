@@ -17,7 +17,8 @@ from knack.util import CLIError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
-from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api, get_storage_blob_uri
+from azure.cli.command_modules.vm._vm_utils import (
+    check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
 
@@ -337,7 +338,6 @@ def _get_storage_profile_description(profile):
 
 
 def _validate_location(cmd, namespace, zone_info, size_info):
-    from ._vm_utils import list_sku_info
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
         if zone_info:
@@ -706,42 +706,64 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
         size = getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None)
         size = size.lower()
 
-        # to refresh the list, run 'az vm create --accelerated-networking --size Standard_DS1_v2' and
-        # get it from the error
-        aval_sizes = ['Standard_D3_v2', 'Standard_D12_v2', 'Standard_D3_v2_Promo', 'Standard_D12_v2_Promo',
-                      'Standard_DS3_v2', 'Standard_DS12_v2', 'Standard_DS13-4_v2', 'Standard_DS14-4_v2',
-                      'Standard_DS3_v2_Promo', 'Standard_DS12_v2_Promo', 'Standard_DS13-4_v2_Promo',
-                      'Standard_DS14-4_v2_Promo', 'Standard_F4', 'Standard_F4s', 'Standard_D8_v3', 'Standard_D8s_v3',
-                      'Standard_D32-8s_v3', 'Standard_E8_v3', 'Standard_E8s_v3', 'Standard_D3_v2_ABC',
-                      'Standard_D12_v2_ABC', 'Standard_F4_ABC', 'Standard_F8s_v2', 'Standard_D4_v2',
-                      'Standard_D13_v2', 'Standard_D4_v2_Promo', 'Standard_D13_v2_Promo', 'Standard_DS4_v2',
-                      'Standard_DS13_v2', 'Standard_DS14-8_v2', 'Standard_DS4_v2_Promo', 'Standard_DS13_v2_Promo',
-                      'Standard_DS14-8_v2_Promo', 'Standard_F8', 'Standard_F8s', 'Standard_M64-16ms',
-                      'Standard_D16_v3', 'Standard_D16s_v3', 'Standard_D32-16s_v3', 'Standard_D64-16s_v3',
-                      'Standard_E16_v3', 'Standard_E16s_v3', 'Standard_E32-16s_v3', 'Standard_D4_v2_ABC',
-                      'Standard_D13_v2_ABC', 'Standard_F8_ABC', 'Standard_F16s_v2', 'Standard_D5_v2',
-                      'Standard_D14_v2', 'Standard_D5_v2_Promo', 'Standard_D14_v2_Promo', 'Standard_DS5_v2',
-                      'Standard_DS14_v2', 'Standard_DS5_v2_Promo', 'Standard_DS14_v2_Promo', 'Standard_F16',
-                      'Standard_F16s', 'Standard_M64-32ms', 'Standard_M128-32ms', 'Standard_D32_v3',
-                      'Standard_D32s_v3', 'Standard_D64-32s_v3', 'Standard_E32_v3', 'Standard_E32s_v3',
-                      'Standard_E32-8s_v3', 'Standard_E32-16_v3', 'Standard_D5_v2_ABC', 'Standard_D14_v2_ABC',
-                      'Standard_F16_ABC', 'Standard_F32s_v2', 'Standard_D15_v2', 'Standard_D15_v2_Promo',
-                      'Standard_D15_v2_Nested', 'Standard_DS15_v2', 'Standard_DS15_v2_Promo',
-                      'Standard_DS15_v2_Nested', 'Standard_D40_v3', 'Standard_D40s_v3', 'Standard_D15_v2_ABC',
-                      'Standard_M64ms', 'Standard_M64s', 'Standard_M128-64ms', 'Standard_D64_v3', 'Standard_D64s_v3',
-                      'Standard_E64_v3', 'Standard_E64s_v3', 'Standard_E64-16s_v3', 'Standard_E64-32s_v3',
-                      'Standard_F64s_v2', 'Standard_F72s_v2', 'Standard_M128s', 'Standard_M128ms', 'Standard_L8s_v2',
-                      'Standard_L16s_v2', 'Standard_L32s_v2', 'Standard_L64s_v2', 'Standard_L96s_v2', 'SQLGL',
-                      'SQLGLCore', 'Standard_D4_v3', 'Standard_D4s_v3', 'Standard_D2_v2', 'Standard_DS2_v2',
-                      'Standard_E4_v3', 'Standard_E4s_v3', 'Standard_F2', 'Standard_F2s', 'Standard_F4s_v2',
-                      'Standard_D11_v2', 'Standard_DS11_v2', 'AZAP_Performance_ComputeV17C',
-                      'AZAP_Performance_ComputeV17C_DDA', 'Standard_PB6s', 'Standard_PB12s', 'Standard_PB24s',
-                      'Standard_L80s_v2', 'Standard_M8ms', 'Standard_M8-4ms', 'Standard_M8-2ms', 'Standard_M16ms',
-                      'Standard_M16-8ms', 'Standard_M16-4ms', 'Standard_M32ms', 'Standard_M32-8ms',
-                      'Standard_M32-16ms', 'Standard_M32ls', 'Standard_M32ts', 'Standard_M64ls', 'Standard_E64i_v3',
-                      'Standard_E64is_v3', 'Standard_E4-2s_v3', 'Standard_E8-4s_v3', 'Standard_E8-2s_v3',
-                      'Standard_E16-4s_v3', 'Standard_E16-8s_v3', 'Standard_E20s_v3', 'Standard_E20_v3']
-        aval_sizes = [x.lower() for x in aval_sizes]
+        # Use the following code to refresh the list
+        # skus = list_sku_info(cli_ctx, namespace.location)
+        # aval_sizes = [x.name.lower() for x in skus if x.resource_type == 'virtualMachines' and
+        #               any(c.name == 'AcceleratedNetworkingEnabled' and c.value == 'True' for c in x.capabilities)]
+
+        aval_sizes = ['standard_b12ms', 'standard_b16ms', 'standard_b20ms', 'standard_ds2_v2', 'standard_ds3_v2',
+                      'standard_ds4_v2', 'standard_ds5_v2', 'standard_ds11-1_v2', 'standard_ds11_v2',
+                      'standard_ds12-1_v2', 'standard_ds12-2_v2', 'standard_ds12_v2', 'standard_ds13-2_v2',
+                      'standard_ds13-4_v2', 'standard_ds13_v2', 'standard_ds14-4_v2', 'standard_ds14-8_v2',
+                      'standard_ds14_v2', 'standard_ds15_v2', 'standard_ds2_v2_promo', 'standard_ds3_v2_promo',
+                      'standard_ds4_v2_promo', 'standard_ds5_v2_promo', 'standard_ds11_v2_promo',
+                      'standard_ds12_v2_promo', 'standard_ds13_v2_promo', 'standard_ds14_v2_promo', 'standard_f2s',
+                      'standard_f4s', 'standard_f8s', 'standard_f16s', 'standard_d4s_v3', 'standard_d8s_v3',
+                      'standard_d16s_v3', 'standard_d32s_v3', 'standard_d2_v2', 'standard_d3_v2', 'standard_d4_v2',
+                      'standard_d5_v2', 'standard_d11_v2', 'standard_d12_v2', 'standard_d13_v2', 'standard_d14_v2',
+                      'standard_d15_v2', 'standard_d2_v2_promo', 'standard_d3_v2_promo', 'standard_d4_v2_promo',
+                      'standard_d5_v2_promo', 'standard_d11_v2_promo', 'standard_d12_v2_promo', 'standard_d13_v2_promo',
+                      'standard_d14_v2_promo', 'standard_f2', 'standard_f4', 'standard_f8', 'standard_f16',
+                      'standard_d4_v3', 'standard_d8_v3', 'standard_d16_v3', 'standard_d32_v3', 'standard_d48_v3',
+                      'standard_d64_v3', 'standard_d48s_v3', 'standard_d64s_v3', 'standard_e4_v3', 'standard_e8_v3',
+                      'standard_e16_v3', 'standard_e20_v3', 'standard_e32_v3', 'standard_e48_v3', 'standard_e64i_v3',
+                      'standard_e64_v3', 'standard_e4-2s_v3', 'standard_e4s_v3', 'standard_e8-2s_v3',
+                      'standard_e8-4s_v3', 'standard_e8s_v3', 'standard_e16-4s_v3', 'standard_e16-8s_v3',
+                      'standard_e16s_v3', 'standard_e20s_v3', 'standard_e32-8s_v3', 'standard_e32-16s_v3',
+                      'standard_e32s_v3', 'standard_e48s_v3', 'standard_e64-16s_v3', 'standard_e64-32s_v3',
+                      'standard_e64is_v3', 'standard_e64s_v3', 'standard_l8s_v2', 'standard_l16s_v2',
+                      'standard_l32s_v2', 'standard_l48s_v2', 'standard_l64s_v2', 'standard_l80s_v2', 'standard_e4_v4',
+                      'standard_e8_v4', 'standard_e16_v4', 'standard_e20_v4', 'standard_e32_v4', 'standard_e48_v4',
+                      'standard_e64_v4', 'standard_e4d_v4', 'standard_e8d_v4', 'standard_e16d_v4', 'standard_e20d_v4',
+                      'standard_e32d_v4', 'standard_e48d_v4', 'standard_e64d_v4', 'standard_e4-2s_v4',
+                      'standard_e4s_v4', 'standard_e8-2s_v4', 'standard_e8-4s_v4', 'standard_e8s_v4',
+                      'standard_e16-4s_v4', 'standard_e16-8s_v4', 'standard_e16s_v4', 'standard_e20s_v4',
+                      'standard_e32-8s_v4', 'standard_e32-16s_v4', 'standard_e32s_v4', 'standard_e48s_v4',
+                      'standard_e64-16s_v4', 'standard_e64-32s_v4', 'standard_e64s_v4', 'standard_e4-2ds_v4',
+                      'standard_e4ds_v4', 'standard_e8-2ds_v4', 'standard_e8-4ds_v4', 'standard_e8ds_v4',
+                      'standard_e16-4ds_v4', 'standard_e16-8ds_v4', 'standard_e16ds_v4', 'standard_e20ds_v4',
+                      'standard_e32-8ds_v4', 'standard_e32-16ds_v4', 'standard_e32ds_v4', 'standard_e48ds_v4',
+                      'standard_e64-16ds_v4', 'standard_e64-32ds_v4', 'standard_e64ds_v4', 'standard_d4d_v4',
+                      'standard_d8d_v4', 'standard_d16d_v4', 'standard_d32d_v4', 'standard_d48d_v4', 'standard_d64d_v4',
+                      'standard_d4_v4', 'standard_d8_v4', 'standard_d16_v4', 'standard_d32_v4', 'standard_d48_v4',
+                      'standard_d64_v4', 'standard_d4ds_v4', 'standard_d8ds_v4', 'standard_d16ds_v4',
+                      'standard_d32ds_v4', 'standard_d48ds_v4', 'standard_d64ds_v4', 'standard_d4s_v4',
+                      'standard_d8s_v4', 'standard_d16s_v4', 'standard_d32s_v4', 'standard_d48s_v4', 'standard_d64s_v4',
+                      'standard_f4s_v2', 'standard_f8s_v2', 'standard_f16s_v2', 'standard_f32s_v2', 'standard_f48s_v2',
+                      'standard_f64s_v2', 'standard_f72s_v2', 'standard_m208ms_v2', 'standard_m208s_v2',
+                      'standard_m416-208s_v2', 'standard_m416s_v2', 'standard_m416-208ms_v2', 'standard_m416ms_v2',
+                      'standard_m64', 'standard_m64m', 'standard_m128', 'standard_m128m', 'standard_m8-2ms',
+                      'standard_m8-4ms', 'standard_m8ms', 'standard_m16-4ms', 'standard_m16-8ms', 'standard_m16ms',
+                      'standard_m32-8ms', 'standard_m32-16ms', 'standard_m32ls', 'standard_m32ms', 'standard_m32ts',
+                      'standard_m64-16ms', 'standard_m64-32ms', 'standard_m64ls', 'standard_m64ms', 'standard_m64s',
+                      'standard_m128-32ms', 'standard_m128-64ms', 'standard_m128ms', 'standard_m128s',
+                      'standard_d4a_v4', 'standard_d8a_v4', 'standard_d16a_v4', 'standard_d32a_v4', 'standard_d48a_v4',
+                      'standard_d64a_v4', 'standard_d96a_v4', 'standard_d4as_v4', 'standard_d8as_v4',
+                      'standard_d16as_v4', 'standard_d32as_v4', 'standard_d48as_v4', 'standard_d64as_v4',
+                      'standard_d96as_v4', 'standard_e4a_v4', 'standard_e8a_v4', 'standard_e16a_v4', 'standard_e20a_v4',
+                      'standard_e32a_v4', 'standard_e48a_v4', 'standard_e64a_v4', 'standard_e96a_v4',
+                      'standard_e4as_v4', 'standard_e8as_v4', 'standard_e16as_v4', 'standard_e20as_v4',
+                      'standard_e32as_v4', 'standard_e48as_v4', 'standard_e64as_v4', 'standard_e96as_v4']
         if size not in aval_sizes:
             return
 

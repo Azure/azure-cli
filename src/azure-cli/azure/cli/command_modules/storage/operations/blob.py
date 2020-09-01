@@ -21,6 +21,8 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
 from knack.log import get_logger
 from knack.util import CLIError
 
+logger = get_logger(__name__)
+
 
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
@@ -50,6 +52,29 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
     return client.delete_container(
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
+
+
+def list_blobs(client, delimiter=None, include=None, marker=None, num_results=None, prefix=None,
+               show_next_marker=None, **kwargs):
+    from ..track2_util import list_generator
+
+    if delimiter:
+        generator = client.walk_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
+    else:
+        generator = client.list_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
+
+    pages = generator.by_page(continuation_token=marker)  # BlobPropertiesPaged
+    result = list_generator(pages=pages, num_results=num_results)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
+
+    return result
 
 
 def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_restore, blob_ranges=None,
@@ -131,9 +156,8 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                             destination_path=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):
     """Copy a group of blob or files to a blob container."""
-    logger = None
+
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('copy files or blobs to blob container')
         logger.warning('    account %s', client.account_name)
         logger.warning('  container %s', container_name)
@@ -142,6 +166,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
         logger.warning('    pattern %s', pattern)
         logger.warning(' operations')
 
+    source_sas = source_sas.lstrip('?') if source_sas else source_sas
     if source_container:
         # copy blobs for blob container
 
@@ -216,7 +241,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         blobs_to_download[normalized_blob_name] = blob_name
 
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('download action: from %s to %s', source, destination)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
@@ -261,7 +285,6 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             'Last Modified': upload_result.last_modified if upload_result else None,
             'eTag': upload_result.etag if upload_result else None}
 
-    logger = get_logger(__name__)
     source_files = source_files or []
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
 
@@ -294,8 +317,8 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                 progress_callback.message = '{}/{}: "{}"'.format(
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
-            include, result = _upload_blob(cmd, client, destination_container_name,
-                                           normalize_blob_file_path(destination_path, dst), src,
+            include, result = _upload_blob(cmd, client, file_path=src, container_name=destination_container_name,
+                                           blob_name=normalize_blob_file_path(destination_path, dst),
                                            blob_type=blob_type, content_settings=guessed_content_settings,
                                            metadata=metadata, validate_content=validate_content,
                                            maxsize_condition=maxsize_condition, max_connections=max_connections,
@@ -488,7 +511,6 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         }
         return client.delete_blob(**delete_blob_args)
 
-    logger = get_logger(__name__)
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:

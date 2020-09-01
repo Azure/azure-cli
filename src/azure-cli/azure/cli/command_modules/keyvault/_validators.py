@@ -242,13 +242,14 @@ def validate_deleted_vault_name(cmd, ns):
     if not vault:
         raise CLIError('No deleted vault was found with name ' + ns.vault_name)
 
-    setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
+    if 'purge' not in cmd.name:
+        setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
 
-    # resource_group_name must match the resource group of the deleted vault
-    if id_comps['resource_group'] != ns.resource_group_name:
-        raise CLIError("The specified resource group does not match that of the deleted vault %s. The vault "
-                       "must be recovered to the original resource group %s."
-                       % (vault_name, id_comps['resource_group']))
+        # resource_group_name must match the resource group of the deleted vault
+        if id_comps['resource_group'] != ns.resource_group_name:
+            raise CLIError("The specified resource group does not match that of the deleted vault %s. The vault "
+                           "must be recovered to the original resource group %s."
+                           % (vault_name, id_comps['resource_group']))
 
 
 def validate_x509_certificate_chain(ns):

@@ -31,6 +31,9 @@ examples:
   - name: Queue a remote GitHub context as a Windows build, tag it, and push it to the registry.
     text: >
         az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --platform windows
+  - name: Queue a remote OCI Artifact context build.
+    text: >
+        az acr build -r MyRegistry oci://myregistry.azurecr.io/myartifact:mytag
   - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
     text: >
         az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry . --platform linux/arm/v7
@@ -508,6 +511,9 @@ examples:
   - name: Queue a remote git context with streaming logs and runs the task on Linux platform.
     text: >
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
+  - name: Queue a remote OCI Artifact context and runs the task.
+    text: >
+        az acr run -r MyRegistry oci://myregistry.azurecr.io/myartifact:mytag -f hello-world.yaml
 """
 
 helps['acr scope-map'] = """
