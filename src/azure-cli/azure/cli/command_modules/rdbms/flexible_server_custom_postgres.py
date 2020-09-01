@@ -71,9 +71,6 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     )
 
 
-# Need to replace source server name with source server id, so customer server restore function
-# The parameter list should be the same as that in factory to use the ParametersContext
-# arguments and validators
 def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
     if not is_valid_resource_id(source_server):
@@ -94,8 +91,7 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         create_mode="PointInTimeRestore",
         location=location)
 
-    # Here is a workaround that we don't support cross-region restore currently,
-    # so the location must be set as the same as source server (not the resource group)
+    # Retrieve location from same location as source server
     id_parts = parse_resource_id(source_server)
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
@@ -175,10 +171,9 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         public_network_access=public_network_access,
         storage_profile=postgresql.flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
-            geo_redundant_backup=geo_redundant_backup,
-            storage_mb=storage_mb),  ##!!! required I think otherwise data is null error seen in backend exceptions
+            storage_mb=storage_mb),  ##[TODO : required I think otherwise data is null error seen in backend exceptions
         delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=None  ##subnet_arm_resource_id
+            subnet_arm_resource_id=None
         ),
         location=location,
         create_mode="Default",  # can also be create
