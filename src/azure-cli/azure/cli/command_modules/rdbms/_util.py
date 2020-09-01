@@ -15,7 +15,7 @@ from ._client_factory import resource_client_factory, network_client_factory
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'southeastasia'
+DEFAULT_LOCATION = 'northeurope'
 
 
 class RdbmsArgumentContext(AzArgumentContext):  # pylint: disable=too-few-public-methods

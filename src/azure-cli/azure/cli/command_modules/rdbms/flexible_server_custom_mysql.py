@@ -87,7 +87,10 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
             tags, public_network_access, assign_identity, tier, subnet_name, vnet_name)
 
         if public_access is not None:
-            start_ip, end_ip = parse_public_access_input(public_access)
+            if public_access == 'on':
+                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+            else:
+                start_ip, end_ip = parse_public_access_input(public_access)
             create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
         # Create mysql database if it does not exist

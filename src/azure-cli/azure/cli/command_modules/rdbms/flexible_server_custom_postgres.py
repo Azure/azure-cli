@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 # region create without args
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, location=None, backup_retention=None,
                                    sku_name=None, tier=None, geo_redundant_backup=None, storage_mb=None, administrator_login=None,
-                                   administrator_login_password=None, version=None, ssl_enforcement=None, database_name=None, tags=None, public_access=None, infrastructure_encryption=None,
+                                   administrator_login_password=None, version=None, database_name=None, tags=None, public_access=None,
                                    assign_identity=False):
     from azure.mgmt.rdbms import postgresql
     db_context = DbContext(
@@ -44,10 +44,13 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, tier, geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
-            ssl_enforcement, tags, public_access, infrastructure_encryption, assign_identity)
+            tags, public_access, assign_identity)
 
         if public_access is not None:
-            start_ip, end_ip = parse_public_access_input(public_access)
+            if public_access == 'on':
+                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+            else:
+                start_ip, end_ip = parse_public_access_input(public_access)
             create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     rg = '{}'.format(resource_group_name)
@@ -182,10 +185,9 @@ def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     return client.servers.get(resource_group_name, server_name)
 
 
-
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
-                   ssl_enforcement, tags, public_network_access, infrastructure_encryption, assign_identity):
+                   tags, public_network_access, assign_identity):
     logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -202,9 +204,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
-        ssl_enforcement=ssl_enforcement,
         public_network_access=public_network_access,
-        infrastructure_encryption=infrastructure_encryption,
         storage_profile=postgresql.flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
             geo_redundant_backup=geo_redundant_backup,

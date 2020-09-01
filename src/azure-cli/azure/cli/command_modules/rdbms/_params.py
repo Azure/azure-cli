@@ -12,13 +12,14 @@ from azure.cli.core.commands.parameters import (
     tags_type, get_location_type,
     get_enum_type,
     get_three_state_flag)
-from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator
+from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator, public_access_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from .randomname.generate import generate_username
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list)
 from ._util import create_random_resource_name
+
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
 
@@ -202,9 +203,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('version', default='12', help='Server major version.')              
                 c.argument('zone', options_list=['--zone, -z'], help='To define which zone is used to provision the server ')
             elif command_group == 'mysql':
-                c.argument('tier', default='Burstable', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-                c.argument('storage_mb', default='10240', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
+                c.argument('tier', default='GeneralPurpose', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+                c.argument('storage_mb', default='524288', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
                 c.argument('version', default='5.7', help='Server major version.')
                 
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
@@ -219,7 +220,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
                        validator=retention_validator)
             c.argument('tags', tags_type)
-            c.argument('public_access', options_list=['--public-access'], help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ')
+            c.argument('public_access', options_list=['--public-access'],
+                        help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ',
+                        validator=public_access_validator)
             # c.argument('vnet_name', options_list=['--vnet'])
             # c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'])
             # c.argument('subnet_name', options_list=['--subnet'])

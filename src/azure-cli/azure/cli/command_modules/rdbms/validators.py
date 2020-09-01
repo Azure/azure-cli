@@ -114,3 +114,10 @@ def validate_private_endpoint_connection_id(cmd, namespace):
         raise CLIError('incorrect usage: [--id ID | --name NAME --server-name NAME]')
 
     del namespace.connection_id
+
+
+def public_access_validator(ns):
+    if ns.public_access:
+        val = ns.public_access
+        if val != 'on' and len(val.split('-')) != 1 and len(val.split('-')) != 2:
+            raise CLIError('incorrect usage: --public-access. Acceptable values are \'on\' or \'<startIP>\' or \'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
