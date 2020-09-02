@@ -36,6 +36,8 @@ from ._client_factory import get_client_factory, Clients
 from ._sdk_extensions import patch_akv_client
 from ._validators import _construct_vnet, secret_text_encoding_values
 from .security_domain.jwe import JWE
+from .security_domain.shared_secret import SharedSecret
+from .security_domain.utils import Utils
 
 logger = get_logger(__name__)
 
@@ -2086,7 +2088,7 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
         raise CLIError('Unsupported SharedKeys algorithm: {}. Supported: {}'.format(key_algorithm, 'shamir_share'))
 
     matched = 0
-    matched_keys = []
+    share_arrays = []
     ok = False
 
     for private_key_index, private_key_path in enumerate(sd_wrapping_keys):
@@ -2120,12 +2122,21 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
             for item in shared_keys['enc_shares']:
                 if x5tS256 == item['x5t_256']:
                     jwe = JWE(compact_jwe=item['enc_key'])
-                    share = jwe.decrypt(private_key)
+                    share = jwe.decrypt_using_private_key(private_key)
+                    if not share:
+                        logger.info('Got an empty share.')
+                        continue
+
+                    share_arrays.append(Utils.convert_to_uint16(share))
                     matched += 1
-                    matched_keys.append((cert, item['enc_key']))
                     if matched >= required:
                         ok = True
                         break
+
+    if matched < required:
+        raise CLIError('Insufficient shares available.')
+
+    # shared_secret = SharedSecret(required=required)
 
     return None
 

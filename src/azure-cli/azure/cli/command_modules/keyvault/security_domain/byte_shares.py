@@ -20,7 +20,7 @@ class Share:
         return Share(x, v)
 
     def to_uint16(self):
-        return (self.x << 9) | self.v
+        return (self.x << 8) | self.v
 
 
 class ByteShares:

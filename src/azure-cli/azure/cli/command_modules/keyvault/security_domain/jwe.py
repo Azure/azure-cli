@@ -55,19 +55,19 @@ class JWEHeader:
     def from_json_str(json_str):
         json_dict = json.loads(json_str)
         return JWEHeader(
-            alg=json_dict['alg'],
-            enc=json_dict['enc'],
-            zip=json_dict['zip'],
-            jku=json_dict['jku'],
-            jwk=json_dict['jwk'],
-            kid=json_dict['kid'],
-            x5u=json_dict['x5u'],
-            x5c=json_dict['x5c'],
-            x5t=json_dict['x5t'],
-            x5t_S256=json_dict['x5t#S256'],
-            typ=json_dict['typ'],
-            cty=json_dict['cty'],
-            crit=json_dict['crit']
+            alg=json_dict.get('alg', None),
+            enc=json_dict.get('enc', None),
+            zip=json_dict.get('zip', None),
+            jku=json_dict.get('jku', None),
+            jwk=json_dict.get('jwk', None),
+            kid=json_dict.get('kid', None),
+            x5u=json_dict.get('x5u', None),
+            x5c=json_dict.get('x5c', None),
+            x5t=json_dict.get('x5t', None),
+            x5t_S256=json_dict.get('x5t#S256', None),
+            typ=json_dict.get('typ', None),
+            cty=json_dict.get('cty', None),
+            crit=json_dict.get('crit', None)
         )
 
     def to_json_str(self):
@@ -104,12 +104,12 @@ class JWEDecode:
                 raise CLIError('Malformed input.')
 
             self.encoded_header = parts[0]
-            header = base64.urlsafe_b64decode(self.encoded_header)
+            header = base64.urlsafe_b64decode(self.encoded_header + '===').decode('ascii')  # Fix incorrect padding
             self.protected_header = JWEHeader.from_json_str(header)
-            self.encrypted_key = base64.urlsafe_b64decode(parts[1])
-            self.init_vector = base64.urlsafe_b64decode(parts[2])
-            self.ciphertext = base64.urlsafe_b64decode(parts[3])
-            self.auth_tag = base64.urlsafe_b64decode(parts[4])
+            self.encrypted_key = base64.urlsafe_b64decode(parts[1] + '===')
+            self.init_vector = base64.urlsafe_b64decode(parts[2] + '===')
+            self.ciphertext = base64.urlsafe_b64decode(parts[3] + '===')
+            self.auth_tag = base64.urlsafe_b64decode(parts[4] + '===')
 
     def encode_header(self):
         header_json = self.encoded_header.to_json_str()
@@ -173,19 +173,19 @@ class JWE:
     def dek_from_cek(cek):
         dek = bytearray()
         for i in range(32):
-            dek[i] = cek[i + 32]
+            dek.append(cek[i + 32])
         return dek
 
     @staticmethod
     def hmac_key_from_cek(cek):
         hk = bytearray()
         for i in range(32):
-            hk[i] = cek[i]
+            hk.append(cek[i])
         return hk
 
     def get_mac(self, hk):
         header_bytes = bytearray()
-        header_bytes.extend(map(ord, self.jwe_decode.encoded_header))
+        header_bytes.extend(self.jwe_decode.encoded_header.encode('ascii'))
         auth_bits = len(header_bytes) * 8
 
         hash_data = bytearray()
@@ -194,8 +194,7 @@ class JWE:
         hash_data.extend(self.jwe_decode.ciphertext)
         hash_data.extend(KDF.to_big_endian_64bits(auth_bits))
 
-        hMAC = hmac.HMAC(hk, digestmod=hashlib.sha512)
-        hMAC.update(hash_data)
+        hMAC = hmac.HMAC(hk, msg=hash_data, digestmod=hashlib.sha512)
         return hMAC.digest()
 
     def Aes256HmacSha512Decrypt(self, cek):
@@ -216,9 +215,24 @@ class JWE:
         aes_iv = self.jwe_decode.init_vector
         cipher = Cipher(algorithms.AES(aes_key), modes.CBC(aes_iv), backend=default_backend())
         decryptor = cipher.decryptor()
-        return decryptor.update(self.jwe_decode.ciphertext) + decryptor.finalize()
+        plaintext = decryptor.update(self.jwe_decode.ciphertext) + decryptor.finalize()
+        return plaintext
 
-    def decrypt(self, cek):
+    def decrypt_using_bytes(self, cek):
         if self.jwe_decode.protected_header.enc == 'A256CBC-HS512':
             return self.Aes256HmacSha512Decrypt(cek)
         return None
+
+    def get_cek_from_private_key(self, private_key):
+        return private_key.decrypt(self.jwe_decode.encrypted_key, self.get_padding_mode())
+
+    def decrypt_using_private_key(self, private_key):
+        cek = self.get_cek_from_private_key(private_key)
+        return self.decrypt_using_bytes(cek)
+
+
+if __name__ == '__main__':
+    s = 'eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwia2lkIjoibm90IHVzZWQifQ.ZmQxIgaWIh51a3Dj0g8zv483xixxpJa0lPDu2_BJPtnZqLGhpMfUC5buhk1bRcCUlfOT7Z4bQ33HFwHyzmwuTsszu0K35XuDgkbNfokSAvzjrCPMAqcSufmf-8Dxet_GHPbZFMa84by3tBpwzhcsiGgrfM2PVmwnTYtyLJKFLzprYMzMU4OkHCZ081Ygm9B3G27zmH3q9NPavBrJHRVHMZeCn_IKVr5osht_07uu27bXOwQORQhZvypuy0KHvBlpaF-lDwaHVoimy5I44CcSf0mHrTi52ntAf0XiOZBxOYQvDZXnqZ2O1-ccSvX6FAhH_7H1w7mXieslGosLSgrbYw.tGf9WK11119lwDgIm-W52w.AM3QQVv11vIp7rTZloawiuOqsK6c5Qs4tv4x-ESfMtLyU5No8Jro7adjjbE045a4pV9sp0EOLhk6wQnZo3E6PAdWASov_IQrg4BQYzAy2Ig.XKQHvRalM322ieVO75IL-n-_q9UEw3n9vl_nFOAB7vo'
+    j = JWE(s)
+    x = j.get_mac(b'xwadawdwadawd')
+    print(x)
