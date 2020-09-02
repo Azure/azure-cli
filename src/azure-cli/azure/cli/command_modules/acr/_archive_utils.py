@@ -69,8 +69,7 @@ def upload_source_code(cmd, client,
 def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_file_in_tar):
     logger.warning("Packing source code into tar to upload...")
 
-    # NOTE: os.path.basename is unable to parse "\" in the file path
-    original_docker_file_name = os.path.basename(docker_file_path.replace("\\", "/"))
+    original_docker_file_name = os.path.basename(docker_file_path.replace("\\", os.sep))
     ignore_list, ignore_list_size = _load_dockerignore_file(source_location, original_docker_file_name)
     common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
 
