@@ -60,7 +60,6 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
             database_name = DEFAULT_DB_NAME
         _create_database(db_context, cmd, resource_group_name, server_name, database_name)
 
-    rg = '{}'.format(resource_group_name)
     user = server_result.administrator_login
     id = server_result.id
     loc = server_result.location
@@ -73,7 +72,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
     _update_local_contexts(cmd, server_name, resource_group_name, location)
 
-    return _form_response(user, sku, loc, rg, id, host,version,
+    return _form_response(user, sku, loc, id, host,version,
                           administrator_login_password if administrator_login_password is not None else '*****',
                           _create_mysql_connection_string(host, database_name, user, administrator_login_password)
     )
@@ -282,14 +281,13 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         '{} Server Create'.format(logging_name))
 
 
-def _form_response(username, sku, location, resource_group_name, id, host, version, password, connection_string):
+def _form_response(username, sku, location, id, host, version, password, connection_string):
     return {
         'host': host,
         'username': username,
         'password': password,
         'skuname': sku,
         'location': location,
-        'resource group': resource_group_name,
         'id': id,
         'version': version,
         'connection string': connection_string
