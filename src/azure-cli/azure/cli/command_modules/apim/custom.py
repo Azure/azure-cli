@@ -167,9 +167,7 @@ def create_apim_api(client, resource_group_name, service_name, api_id, descripti
         subscription_required=subscription_required
     )
 
-    cms = client.api
-
-    return sdk_no_wait(no_wait, cms.create_or_update,
+    return sdk_no_wait(no_wait, client.api.create_or_update,
                        resource_group_name=resource_group_name,
                        service_name=service_name, api_id=api_id, parameters=resource)
 
@@ -463,6 +461,12 @@ def get_apim_nv(client, resource_group_name, service_name, named_value_id):
     return client.named_value.get(resource_group_name, service_name, named_value_id)
 
 
+def get_apim_nv_secret(client, resource_group_name, service_name, named_value_id):
+    """Gets the secret of the NamedValue."""
+
+    return client.named_value.list_value(resource_group_name, service_name, named_value_id)
+
+
 def list_apim_nv(client, resource_group_name, service_name):
     """List all Named Values of an API Management instance. """
 
@@ -568,15 +572,13 @@ def show_api_release(client, resource_group_name, service_name, api_id, release_
     return client.api_release.get(resource_group_name, service_name, api_id, release_id)
 
 
-def create_api_release(client, resource_group_name, service_name, api_id, api_revision=None, release_id=None, if_match=None, notes=None):
+def create_api_release(client, resource_group_name, service_name, api_id, api_revision, release_id=None, if_match=None, notes=None):
     """Creates a new Release for the API."""
 
     if release_id is None:
         release_id = uuid.uuid4().hex
 
-    api_id1 = None
-    if api_revision is not None:
-        api_id1 = "/apis/" + api_id + ";rev=" + api_revision
+    api_id1 = "/apis/" + api_id + ";rev=" + api_revision
 
     return client.api_release.create_or_update(resource_group_name, service_name, api_id, release_id, "*" if if_match is None else if_match, api_id1, notes)
 
@@ -599,6 +601,28 @@ def list_api_revision(client, resource_group_name, service_name, api_id):
     """Lists all revisions of an API."""
 
     return client.api_revision.list_by_service(resource_group_name, service_name, api_id)
+
+
+def create_apim_api_revision(client, resource_group_name, service_name, api_id, api_revision, api_revision_description=None,
+                             no_wait=False):
+    """Creates a new API Revision. """
+
+    cur_api = client.api.get(resource_group_name, service_name, api_id)
+
+    resource = ApiCreateOrUpdateParameter(
+        path=cur_api.path,
+        display_name=cur_api.display_name,
+        service_url=cur_api.service_url,
+        authentication_settings=cur_api.authentication_settings,
+        protocols=cur_api.protocols,
+        subscription_key_parameter_names=cur_api.subscription_key_parameter_names,
+        api_revision_description=api_revision_description,
+        source_api_id="/apis/" + api_id
+    )
+
+    return sdk_no_wait(no_wait, client.api.create_or_update,
+                       resource_group_name=resource_group_name, service_name=service_name,
+                       api_id=api_id + ";rev=" + api_revision, parameters=resource)
 
 
 def list_api_vs(client, resource_group_name, service_name):

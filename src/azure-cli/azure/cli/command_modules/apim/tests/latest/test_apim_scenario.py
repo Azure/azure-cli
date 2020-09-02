@@ -200,25 +200,25 @@ class ApimScenarioTest(ScenarioTest):
         # API operation operations
 
         # list operations in an API
-        initial_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+        initial_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json())
 
         # create an operation
-        self.cmd('apim api operation create -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}" --url-template "{url_template}" --method "{method}" --display-name {operation_name} --template-parameters {template_parameter1} --template-parameters {template_parameter2} --description {operation_description}', checks=[
+        self.cmd('apim api operation create -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}" --url-template "{url_template}" --method "{method}" --display-name {operation_name} --template-parameters {template_parameter1} --template-parameters {template_parameter2} --description "{operation_description}"', checks=[
             self.check('description', '{operation_description}'),
             self.check('displayName', '{operation_name}'),
             self.check('urlTemplate', '{url_template}'),
             self.check('method', '{method}'),
-            self.check('name', '{operation_name}')
+            self.check('name', '{operation_id}')
         ])
 
-        current_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+        current_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json())
         self.assertEqual(initial_operation_count + 1, current_operation_count)
 
         # get an operation
         self.cmd('apim api operation show -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}"')
 
         # update an operation
-        self.cmd('apim api operation update -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}" --description "{new_operation_name}" --method "{new_method}" --display-name {new_operation_name}', checks=[
+        self.cmd('apim api operation update -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}" --description "{new_operation_description}" --method "{new_method}" --display-name {new_operation_name}', checks=[
             self.check('description', '{new_operation_description}'),
             self.check('displayName', '{new_operation_name}'),
             self.check('urlTemplate', '{url_template}'),
@@ -228,9 +228,8 @@ class ApimScenarioTest(ScenarioTest):
         # delete an operation
         self.cmd('apim api operation delete -g "{rg}" -n "{service_name}" --api-id "{api_id}" --operation-id "{operation_id}"')
 
-        final_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+        final_operation_count = len(self.cmd('apim api operation list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json())
         self.assertEqual(final_operation_count + 1, current_operation_count)
-
 
         self.kwargs.update({
             'release_id': "releaseVersionOne",
@@ -241,17 +240,22 @@ class ApimScenarioTest(ScenarioTest):
             'version_query_name': 'QueryName',
             'vs_description': 'This is vs description',
             'vs_id': 'MyVSId',
-            'new_vs_name': 'MyNewVersionSet'
+            'new_vs_name': 'MyNewVersionSet',
+            'api_revision': '2',
+            'api_revision_description': "New API Revision"
         })
 
-        # list API release
-        initial_release_count = len(self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
-
         # list API revision
-        self.cmd('apim api revision create -g "{rg}" -n "{service_name}" --api-id "{api_id}"')
+        self.cmd('apim api revision list -g "{rg}" -n "{service_name}" --api-id "{api_id}"')
+
+        # create API revision
+        self.cmd('apim api revision create -g "{rg}" -n "{service_name}" --api-id "{api_id}"  --api-revision "{api_revision}" --api-revision-description "{api_revision_description}"')
+
+        # list API release
+        initial_release_count = len(self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json())
 
         # create API release
-        self.cmd('apim api release create -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}" --notes "{release_notes}"', checks=[
+        self.cmd('apim api release create -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}" --api-revision "{api_revision}" --notes "{release_notes}"', checks=[
             self.check('name', '{release_id}'),
             self.check('notes', '{release_notes}')
         ])
@@ -260,7 +264,7 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim api release show -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}"')
 
         # update API release
-        self.cmd('apim api release update -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}" --notes "{release_notes}"', checks=[
+        self.cmd('apim api release update -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}" --notes "{new_release_notes}"', checks=[
             self.check('name', '{release_id}'),
             self.check('notes', '{new_release_notes}')
         ])
@@ -268,11 +272,11 @@ class ApimScenarioTest(ScenarioTest):
         # delete API release
         self.cmd('apim api release delete -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}"')
 
-        final_release_count = len(self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"'))
+        final_release_count = len(self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json())
         self.assertEqual(final_release_count, initial_release_count)
 
         # list API version set
-        initial_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"'))
+        initial_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"').get_output_in_json())
 
         # create API version set
         self.cmd('apim api versionset create -g "{rg}" -n "{service_name}" --display-name "{versionset_name}" --version-set-id "{vs_id}" --versioning-scheme "{version_schema}" --description "{vs_description}" --version-query-name "{version_query_name}"', checks=[
@@ -290,11 +294,11 @@ class ApimScenarioTest(ScenarioTest):
             self.check('displayName', '{new_vs_name}')
         ])
 
-        # delete API version set 
+        # delete API version set
         self.cmd('apim api versionset delete -g "{rg}" -n "{service_name}" --version-set-id "{vs_id}"')
-        final_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"'))
+        final_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"').get_output_in_json())
         self.assertEqual(final_vs_count, initial_vs_count)
-        
+
         # product Apis operations
 
         # list APIs in a product
@@ -319,7 +323,7 @@ class ApimScenarioTest(ScenarioTest):
         self.assertEqual(final_product_count, initial_product_count)
 
         # api delete command
-        self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {api_id} -y')
+        self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {api_id} --delete-revisions true -y')
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
         self.assertEqual(api_count, 2)
 

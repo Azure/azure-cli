@@ -274,6 +274,11 @@ type: command
 short-summary: Show details of an API Management Named Value.
 """
 
+helps['apim nv show-secret'] = """
+type: command
+short-summary: Gets the secret of an API Management Named Value.
+"""
+
 helps['apim nv delete'] = """
 type: command
 short-summary: Delete an API Management Named Value.
@@ -421,6 +426,15 @@ examples:
   - name: Lists all revisions of an API.
     text: |-
         az apim api revision list --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId
+"""
+
+helps['apim api revision create'] = """
+type: command
+short-summary: Create API revision.
+examples:
+  - name: Create a revision for the specfic API.
+    text: |-
+        az apim api revision create --resource-group MyResourceGroup --service-name MyServiceName --api-id MyApiId --api-revision RevisionNumber --api-revision-description RevisionDescription
 """
 
 helps['apim api versionset list'] = """

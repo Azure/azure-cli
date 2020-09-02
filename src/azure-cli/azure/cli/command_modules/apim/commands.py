@@ -92,6 +92,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_apim_nv')
         g.custom_command('list', 'list_apim_nv')
         g.custom_command('delete', 'delete_apim_nv', confirmation=True)
+        g.custom_command('show-secret', 'get_apim_nv_secret')
         g.generic_update_command('update', custom_func_name='update_apim_nv')
 
     with self.command_group('apim api operation', apiops_sdk, is_preview=True) as g:
@@ -110,6 +111,7 @@ def load_command_table(self, _):
 
     with self.command_group('apim api revision', apirev_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_api_revision')
+        g.custom_command('create', 'create_apim_api_revision')
 
     with self.command_group('apim api versionset', apivs_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_api_vs')
