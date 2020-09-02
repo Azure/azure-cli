@@ -28,6 +28,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     db_context = DbContext(
         azure_sdk=postgresql, cf_firewall=cf_postgres_flexible_firewall_rules, logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
+    firewall_id = subnet_id = None
     try:
         location, resource_group_name, server_name, administrator_login_password = generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password)
         # The server name already exists in the resource group
@@ -49,7 +50,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                 start_ip, end_ip = '0.0.0.0', '255.255.255.255'
             else:
                 start_ip, end_ip = parse_public_access_input(public_access)
-            create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+            firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     user = server_result.administrator_login
     id = server_result.id
@@ -66,7 +67,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     return _form_response(
         user, sku, loc, id, host, version,
         administrator_login_password if administrator_login_password is not None else '*****',
-        _create_postgresql_connection_string(host, administrator_login_password)
+        _create_postgresql_connection_string(host, administrator_login_password), firewall_id, subnet_id
     )
 
 
@@ -179,6 +180,7 @@ def _flexible_parameter_update(client, ids, server_name, configuration_name, res
 
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 
+
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
                    tags, public_network_access, assign_identity):
@@ -223,8 +225,8 @@ def _create_postgresql_connection_string(host, password):
     return 'postgres://postgres:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
 
 
-def _form_response(username, sku, location, id, host, version, password, connection_string):
-    return {
+def _form_response(username, sku, location, id, host, version, password, connection_string, firewall_id=None, subnet_id=None):
+    output = {
         'host': host,
         'username': username,
         'password': password,
@@ -234,6 +236,11 @@ def _form_response(username, sku, location, id, host, version, password, connect
         'version': version,
         'connection string': connection_string
     }
+    if firewall_id is not None:
+        output['firewall id'] = firewall_id
+    if subnet_id is not None:
+        output['subnet id'] = subnet_id
+    return output
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):

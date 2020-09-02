@@ -31,6 +31,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     db_context = DbContext(
         azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
 
+    subnet_id = firewall_id = None
     try:
         location, resource_group_name, server_name, administrator_login_password = generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password)
 
@@ -53,7 +54,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                 start_ip, end_ip = '0.0.0.0', '255.255.255.255'
             else:
                 start_ip, end_ip = parse_public_access_input(public_access)
-            create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+            firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
         # Create mysql database if it does not exist
         if database_name is None:
@@ -74,7 +75,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
     return _form_response(user, sku, loc, id, host,version,
                           administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_mysql_connection_string(host, database_name, user, administrator_login_password)
+                          _create_mysql_connection_string(host, database_name, user, administrator_login_password), database_name, firewall_id, subnet_id
     )
 
 def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
@@ -295,8 +296,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         '{} Server Create'.format(logging_name))
 
 
-def _form_response(username, sku, location, id, host, version, password, connection_string):
-    return {
+def _form_response(username, sku, location, id, host, version, password, connection_string, database_name, firewall_id=None, subnet_id=None):
+    output = {
         'host': host,
         'username': username,
         'password': password,
@@ -304,8 +305,14 @@ def _form_response(username, sku, location, id, host, version, password, connect
         'location': location,
         'id': id,
         'version': version,
+        'database name': database_name,
         'connection string': connection_string
     }
+    if firewall_id is not None:
+        output['firewall id'] = firewall_id
+    if subnet_id is not None:
+        output['subnet id'] = subnet_id
+    return output
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):

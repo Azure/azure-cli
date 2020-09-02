@@ -90,10 +90,13 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     else:
         logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip, end_ip)
     firewall_client = cf_firewall(cmd.cli_ctx, None)
-    resolve_poller(
+    '''
+    return resolve_poller(
         firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
         cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
-
+    '''
+    firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip, end_ip).result()
+    return firewall.id
 
 def parse_public_access_input(public_access):
     allow_azure_services = False
