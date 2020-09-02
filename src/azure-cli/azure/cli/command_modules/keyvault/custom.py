@@ -21,8 +21,7 @@ from knack.util import CLIError
 from OpenSSL import crypto
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
-from cryptography.hazmat.primitives.serialization import \
-    load_pem_public_key, load_pem_private_key, Encoding, PublicFormat
+from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
 
@@ -36,6 +35,7 @@ from msrestazure.azure_exceptions import CloudError
 from ._client_factory import get_client_factory, Clients
 from ._sdk_extensions import patch_akv_client
 from ._validators import _construct_vnet, secret_text_encoding_values
+from .security_domain.jwe import JWE
 
 logger = get_logger(__name__)
 
@@ -2015,6 +2015,10 @@ def full_restore(client, storage_resource_uri, token, folder_to_restore,
 
 
 # region security domain
+def _security_domain_make_restore_blob():
+    pass
+
+
 def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
                                   identifier=None):  # pylint: disable=unused-argument
     if os.path.exists(sd_exchange_key):
@@ -2051,22 +2055,89 @@ def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
         raise ex
 
 
-def security_domain_upload(cmd, client, hsm_base_url, sd_file, sd_exchange_key, sd_wrapping_keys, no_wait=False):
-    if not os.path.exists(sd_file):
-        raise CLIError('File {} does not exist.'.format(sd_file))
-    if os.path.isdir(sd_file):
-        raise CLIError('{} is a directory. A file is required.'.format(sd_file))
+def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
+                           no_wait=False, identifier=None):  # pylint: disable=unused-argument):
+    resource_paths = [sd_file, sd_exchange_key]
+    for p in resource_paths:
+        if not os.path.exists(p):
+            raise CLIError('File {} does not exist.'.format(p))
+        if os.path.isdir(p):
+            raise CLIError('{} is a directory. A file is required.'.format(p))
+
+    if passwords is None:
+        passwords = []
 
     with open(sd_file) as f:
-        data = '\n'.join(f.readlines())
+        sd_data = json.load(f)
+        if not sd_data or 'EncData' not in sd_data or 'SharedKeys' not in sd_data:
+            raise CLIError('Invalid SD file.')
+        enc_data = sd_data['EncData']
+        shared_keys = sd_data['SharedKeys']
 
+    required = shared_keys['required']
+    if required < 2 or required > 10:
+        raise CLIError('Invalid SD file: the value of "required" should be in range [2, 10].')
+    if len(sd_wrapping_keys) < required:
+        raise CLIError('Length of --sd-wrapping-keys list should not less than {} for decrypting this SD file.'
+                       .format(required))
+
+    key_algorithm = shared_keys['key_algorithm']
+    if key_algorithm != 'shamir_share':
+        raise CLIError('Unsupported SharedKeys algorithm: {}. Supported: {}'.format(key_algorithm, 'shamir_share'))
+
+    matched = 0
+    matched_keys = []
+    ok = False
+
+    for private_key_index, private_key_path in enumerate(sd_wrapping_keys):
+        if ok:
+            break
+        if not os.path.exists(private_key_path):
+            raise CLIError('SD wrapping key {} does not exist.'.format(private_key_path))
+        if os.path.isdir(private_key_path):
+            raise CLIError('{} is a directory. A file is required.'.format(private_key_path))
+
+        logger.info('Processing private key: {}'.format(private_key_path))
+        prefix = '.'.join(private_key_path.split('.')[:-1])
+        logger.info('Prefix: {}'.format(prefix))
+        cert_path = prefix + '.cer'
+        if not os.path.exists(cert_path):
+            raise CLIError('Certificate {} does not exist. You should put it into the same folder with your wrapping '
+                           'keys'.format(cert_path))
+
+        with open(private_key_path, 'rb') as f:
+            pem_data = f.read()
+            password = passwords[private_key_index] if private_key_index < len(passwords) else None
+            logger.info('Key{} is {}under password protection.'.
+                        format(private_key_index, 'not ' if password is None else ''))
+            private_key = load_pem_private_key(pem_data, password=password, backend=default_backend())
+
+        with open(cert_path, 'rb') as f:
+            pem_data = f.read()
+            cert = load_pem_x509_certificate(pem_data, backend=default_backend())
+            public_bytes = cert.public_bytes(Encoding.DER)
+            x5tS256 = _security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
+            for item in shared_keys['enc_shares']:
+                if x5tS256 == item['x5t_256']:
+                    jwe = JWE(compact_jwe=item['enc_key'])
+                    share = jwe.decrypt(private_key)
+                    matched += 1
+                    matched_keys.append((cert, item['enc_key']))
+                    if matched >= required:
+                        ok = True
+                        break
+
+    return None
+
+    """
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     return sdk_no_wait(
         no_wait,
         client.begin_upload,
         vault_base_url=hsm_base_url,
-        security_domain=SecurityDomainObject(value=data)
+        security_domain=SecurityDomainObject(value=sd_data)
     )
+    """
 
 
 def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, security_domain_file, sd_quorum,
@@ -2080,6 +2151,13 @@ def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, secu
     for path in sd_wrapping_keys:
         if os.path.isdir(path):
             raise CLIError('{} is a directory. A file is required.'.format(path))
+
+    N = len(sd_wrapping_keys)
+    M = sd_quorum
+    if N < 3 or N > 10:
+        raise CLIError('The number of wrapping keys (N) should be in range [3, 10].')
+    if M < 2 or M > 10:
+        raise CLIError('The quorum of security domain (M) should be in range [2, 10].')
 
     certificates = []
     for path in sd_wrapping_keys:
