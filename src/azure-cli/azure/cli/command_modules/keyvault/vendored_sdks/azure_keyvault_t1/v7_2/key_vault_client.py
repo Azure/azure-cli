@@ -9,6 +9,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
+import json
+
 from msrest.service_client import SDKClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
@@ -5833,8 +5835,6 @@ class KeyVaultClient(SDKClient):
 
         # Construct body
         body_content = self._serialize.body(certificates, 'CertificateSet')
-        import json
-        # json.dumps(body_content)
 
         # Construct and send request
         request = self._client.post(url, query_parameters)
@@ -5900,14 +5900,14 @@ class KeyVaultClient(SDKClient):
         deserialized = None
 
         if response.status_code == 200:
-            deserialized = self._deserialize('TransferKey', response)
+            deserialized = response.text
 
         if raw:
             client_raw_response = ClientRawResponse(deserialized, response)
             return client_raw_response
 
         return deserialized
-    transfer_key.metadata = {'url': '/securitydomain/transferkey'}
+    transfer_key.metadata = {'url': '/securitydomain/upload'}
 
     def upload_pending(self, vault_base_url, custom_headers=None, raw=False, **operation_config):
         """Get Security domain upload operation status.

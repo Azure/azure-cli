@@ -1205,33 +1205,6 @@ def _bytes_to_int(b):
     return ans
 
 
-def _security_domain_jwk_to_dict(security_domain_jwk):
-    """Convert a `SecurityDomainJsonWebKey` struct to a python dict"""
-    d = {}
-    if security_domain_jwk.kid:
-        d['kid'] = security_domain_jwk.kid
-    if security_domain_jwk.kty:
-        d['kty'] = security_domain_jwk.kty
-    if security_domain_jwk.e:
-        d['e'] = _bytes_to_int(security_domain_jwk.e)
-    if security_domain_jwk.n:
-        d['n'] = _bytes_to_int(security_domain_jwk.n)
-    if security_domain_jwk.key_ops:
-        d['key_ops'] = security_domain_jwk.key_ops
-    if security_domain_jwk.x5c:
-        d['x5c'] = security_domain_jwk.x5c
-    if security_domain_jwk.use:
-        d['use'] = security_domain_jwk.use
-    if security_domain_jwk.x5t:
-        d['x5t'] = security_domain_jwk.x5t
-    if security_domain_jwk.x5tS256:
-        d['x5tS256'] = security_domain_jwk.x5tS256
-    if security_domain_jwk.alg:
-        d['alg'] = security_domain_jwk.alg
-
-    return d
-
-
 def _jwk_to_dict(jwk):
     """Convert a `JsonWebKey` struct to a python dict"""
     d = {}
@@ -2042,22 +2015,36 @@ def full_restore(client, storage_resource_uri, token, folder_to_restore,
 
 
 # region security domain
-def security_domain_init_recovery(client, hsm_base_url, sd_exchange_key):
+def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
+                                  identifier=None):  # pylint: disable=unused-argument
     if os.path.exists(sd_exchange_key):
         raise CLIError("File named '{}' already exists.".format(sd_exchange_key))
 
-    transfer_key = client.transfer_key(vault_base_url=hsm_base_url)
-    json_web_key = _security_domain_jwk_to_dict(transfer_key.transfer_key)
-    key_type = json_web_key['kty']
+    ret = client.transfer_key(vault_base_url=vault_base_url)
+    logger.info('Raw response of the transfer key request: {}'.format(ret))
 
-    if key_type in ['RSA', 'RSA-HSM']:
-        pub_key = _extract_rsa_public_key_from_jwk(json_web_key)
-    else:
-        raise CLIError('Unsupported key type: {}. (Supported key types: RSA, RSA-HSM)'.format(key_type))
+    exchange_key = json.loads(json.loads(ret)['transfer_key'])
+    logger.info('Successfully loaded the exchange key: {}'.format(exchange_key))
+
+    def get_x5c_as_pem():
+        x5c = exchange_key.get('x5c', [])
+        if len(x5c) < 1:
+            raise CLIError('Insufficient x5c.')
+        b64cert = x5c[0]
+        header = '-----BEGIN CERTIFICATE-----'
+        footer = '-----END CERTIFICATE-----'
+        pem = [header]
+        for i in range(0, len(b64cert), 65):
+            line_len = min(65, len(b64cert) - i)
+            line = b64cert[i: i + line_len]
+            pem.append(line)
+        pem.append(footer)
+        return '\n'.join(pem)
 
     try:
-        with open(sd_exchange_key, 'wb') as f:
-            f.write(_export_public_key_to_pem(pub_key))
+        with open(sd_exchange_key, 'w') as f:
+            f.write(get_x5c_as_pem())
+            logger.info('Exchange key file {} was successfully created.'.format(sd_exchange_key))
     except Exception as ex:  # pylint: disable=broad-except
         if os.path.isfile(sd_exchange_key):
             os.remove(sd_exchange_key)
@@ -2088,8 +2075,6 @@ def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, secu
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
     CertificateSet = cmd.get_models('CertificateSet', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
-    SecurityDomainCertificateItem = cmd.get_models('SecurityDomainCertificateItem',
-                                                   resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     SecurityDomainJsonWebKey = cmd.get_models('SecurityDomainJsonWebKey', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
     for path in sd_wrapping_keys:
@@ -2132,5 +2117,6 @@ def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, secu
             f.write(ret.value)
             logger.info('SD file {} was successfully downloaded.'.format(security_domain_file))
     except:  # pylint: disable=bare-except
-        os.remove(security_domain_file)
+        if os.path.isfile(security_domain_file):
+            os.remove(security_domain_file)
 # endregion
