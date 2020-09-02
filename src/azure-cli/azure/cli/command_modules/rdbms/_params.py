@@ -187,10 +187,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                         local_context_attribute=LocalContextAttribute(name='server_name', 
                                         actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
-        subscription_arg_type = CLIArgumentType(configured_default='web', options_list=['--subscription'], metvar='NAME', 
-                                        help="ID of subscription. You can configure the default subscription using az account set -s NAME_OR_ID",
-                                        local_context_attribute=LocalContextAttribute(name='subscription',
-                                        actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+        # subscription_arg_type = CLIArgumentType(configured_default='web', options_list=['--subscription'], metvar='NAME', 
+        #                                 help="ID of subscription. You can configure the default subscription using az account set -s NAME_OR_ID",
+        #                                 local_context_attribute=LocalContextAttribute(name='subscription',
+        #                                 actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
         with self.argument_context('{} flexible-server create'.format(command_group)) as c:
             # c.extra('generate_password', help='Generate a password.', arg_group='Authentication')
@@ -226,10 +226,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('public_access', options_list=['--public-access'],
                         help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ',
                         validator=public_access_validator)
-            c.argument('vnet_name', options_list=['--vnet'], help='Name of the virtual network when creating a new one or referencing an existing one. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
-            c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'], help='The IP address prefix to use when creating a new VNet in CIDR format. ')
-            c.argument('subnet_name', options_list=['--subnet'], help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If both vnet-name and subnet are omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created. The name must be between 1 to 80 characters. The name must begin with a letter or number, end with a letter, number, or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
-            c.argument('subnet_address_prefix', default='10.0.0.0/24', options_list=['--subnet-address-prefix'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. ')
+            # c.argument('vnet_name', options_list=['--vnet'], help='Name of the virtual network when creating a new one or referencing an existing one. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
+            # c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'], help='The IP address prefix to use when creating a new VNet in CIDR format. ')
+            # c.argument('subnet_name', options_list=['--subnet'], help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If both vnet-name and subnet are omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created. The name must be between 1 to 80 characters. The name must begin with a letter or number, end with a letter, number, or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
+            # c.argument('subnet_address_prefix', default='10.0.0.0/24', options_list=['--subnet-address-prefix'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. ')
             c.argument('high_availability', options_list=['--high-availability'], help='Enable or disable high availability feature')     
             c.ignore('database_name')
 
@@ -238,10 +238,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('ssl_enforcement', options_list=['--ssl-enforcement'], help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
             c.argument('assign-identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
-        for scope in ['delete', 'list', 'wait', 'show', 'restart', 'restore', 'update']:
+        for scope in ['delete', 'list', 'wait', 'show', 'restart', 'restore', 'update', 'start', 'stop']:
             argument_context_string = '{} flexible-server {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
+        
+        for scope in ['wait', 'show', 'restart', 'update', 'start', 'stop']:
+            argument_context_string = '{} flexible-server {}'.format(command_group, scope)
+            with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
@@ -249,6 +253,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='Delete the server without prompt')
 
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
+            c.argument('server_name', options_list=['--name', '-n'], help='The name of the new server that is created by the restore command.')
             c.argument('source_server', options_list=['--source-server'], help='The name or resource ID of the source server to restore from.')
             c.argument('restore_point_in_time', options_list=['--restore-point-in-time'], help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
         
@@ -270,7 +275,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('ids', options_list=['--ids'], help='One or more resource IDs (space-delimited). It should be a complete resource ID containing all information of \'Resource Id\' arguments. You should provide either --ids or other \'Resource Id\' arguments.')
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-                # c.argument('subscription_id', arg_type=subscription_arg_type)
                 c.argument('json', options_list=['--json'], help='Output in json format. true/false')
         
         for scope in ['show', 'set']:
@@ -290,16 +294,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-                # c.argument('subscription_id', arg_type=subscription_arg_type)
         
-        for scope in ['delete', 'show', 'update']:
+        for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name'], help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
+                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name, -n'], help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
         
         with self.argument_context('{} flexible-server firewall-rule create'.format(command_group)) as c:
             c.argument('end_ip_address', options_list=['--end-ip-address'], help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
-            c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name'], help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
             c.argument('start_ip_address', options_list=['--start-ip-address'], help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
         
         with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:

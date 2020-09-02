@@ -10,7 +10,6 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core._profile import Profile
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db
@@ -295,13 +294,12 @@ def _form_response(username, sku, location, id, host, version, password, connect
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):
-    cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server_name',
-                                  server_name)  # Setting the server name in the local context
-    cmd.cli_ctx.local_context.set([ALL], 'location',
-                                  location)  # Setting the location in the local context
-    cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    cmd.cli_ctx.local_context.set([ALL], 'subscription', profile.get_subscription()['id'])
+    if cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server_name',
+                                    server_name)  # Setting the server name in the local context
+        cmd.cli_ctx.local_context.set([ALL], 'location',
+                                    location)  # Setting the location in the local context
+        cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
 
 
 def _create_database(db_context, cmd, resource_group_name, server_name, database_name):

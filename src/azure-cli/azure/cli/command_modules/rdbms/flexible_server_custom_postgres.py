@@ -12,7 +12,6 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core._profile import Profile
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
 
@@ -223,13 +222,12 @@ def _form_response(username, sku, location, id, host, version, password, connect
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):
-    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
-                                  server_name)  # Setting the server name in the local context
-    cmd.cli_ctx.local_context.set([ALL], 'location',
-                                  location)  # Setting the location in the local context
-    cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    cmd.cli_ctx.local_context.set([ALL], 'subscription', profile.get_subscription()['id'])
+    if cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
+                                    server_name)  # Setting the server name in the local context
+        cmd.cli_ctx.local_context.set([ALL], 'location',
+                                    location)  # Setting the location in the local context
+        cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
