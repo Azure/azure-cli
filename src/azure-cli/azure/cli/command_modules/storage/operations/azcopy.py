@@ -4,79 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from azure.cli.command_modules.storage._client_factory import blob_data_service_factory, file_data_service_factory
-
 from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
 
-# pylint: disable=too-many-statements, too-many-locals
 
-
-def get_url_with_sas(cmd, url, account_name, container, blob, share, file_path, local_path, **kwargs):
-    import re
-    import os
-    from azure.cli.command_modules.storage._validators import _query_account_key
-    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
-    storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
-    account_key = kwargs.pop('account_key', None)
-    connection_string = kwargs.pop('connection_string', None)
-    sas_token = kwargs.pop('sas_token', None)
-    if connection_string:
-        from azure.cli.core.commands.validators import validate_key_value_pairs
-        conn_dict = validate_key_value_pairs(connection_string)
-        account_name = conn_dict.get('AccountName')
-        account_key = conn_dict.get('AccountKey')
-        sas_token = conn_dict.get('SharedAccessSignature')
-
-    if url is not None:
-        if "?" in url:  # sas token exists
-            return url
-        # validate source is uri or local path
-        storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
-        result = re.findall(storage_pattern, url)
-        if result:  # source is URL
-            storage_info = result[0]
-            account_name = storage_info[0]
-            if storage_info[1] in ['blob', 'dfs']:
-                service = 'blob'
-            elif storage_info[1] in ['file']:
-                service = 'file'
-            else:
-                raise ValueError('{} is not valid storage endpoint.'.format(url))
-        else:  # source is path
-            return url
-    elif account_name:
-        if container:
-            client = blob_data_service_factory(cmd.cli_ctx, {'account_name': account_name})
-            if blob is None:
-                blob = ''
-            source = client.make_blob_url(container, blob)
-            service = 'blob'
-        elif share:
-            client = file_data_service_factory(cmd.cli_ctx,
-                                               {'account_name': account_name, 'account_key': account_key})
-            dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
-            dir_name = None if dir_name in ('', '.') else dir_name
-            source = client.make_file_url(share, dir_name, file_name)
-            service = 'file'
-        else:  # In account level, only blob service is supported
-            service = 'blob'
-            source = 'https://{}.{}.{}'.format(account_name, service, storage_endpoint)
-    elif local_path is not None:
-        return local_path
-    else:
-        raise ValueError('Not valid file')
-
-    # Add sas in url
-    if sas_token:
-        sas_token = sas_token.lstrip('?')
-    if not account_key:
-        account_key = _query_account_key(cmd.cli_ctx, account_name)
-    if not sas_token:
-        sas_token = _generate_sas_token(cmd, account_name, account_key, service)
-    return _add_url_sas(source, sas_token)
-
-
-# pylint: disable=unused-argument
+# pylint: disable=too-many-statements, too-many-locals, disable=unused-argument
 def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=None,
                  preserve_s2s_access_tier=None, content_type=None, follow_symlinks=None,
                  exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None, **kwargs):
