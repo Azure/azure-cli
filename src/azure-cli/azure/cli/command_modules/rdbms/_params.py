@@ -243,7 +243,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
-        
+
+        with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
+            c.argument('force', options_list=['--force'], action='store_true',
+                       help='Delete the server without prompt')
+
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server'], help='The name or resource ID of the source server to restore from.')
             c.argument('restore_point_in_time', options_list=['--restore-point-in-time'], help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
