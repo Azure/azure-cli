@@ -130,6 +130,7 @@ def _flexible_server_update_custom_func(instance,
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
 
+    ## TODO: add ha_enabled, maintence window
     params = ServerForUpdate(sku=instance.sku,
                              storage_profile=instance.storage_profile,
                              administrator_login_password=administrator_login_password,
@@ -152,23 +153,17 @@ def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
-def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name=None, source=None, value=None):
-    print(client)
-    print("Entering the method correctly")
+def _flexible_parameter_update(client, ids, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
         # update the command with system default
-        print("here")
         try:
             parameter = client.get(resource_group_name, server_name, configuration_name)
             value = parameter.default_value # reset value to default
-            print(value)
             source = "system-default"
         except CloudError as e:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
     elif source is None:
         source = "user-override"
-    print(source)
-    print(value)
 
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 

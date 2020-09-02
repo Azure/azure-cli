@@ -117,8 +117,7 @@ def _flexible_server_update_custom_func(instance,
                                backup_retention=None,
                                administrator_login_password=None,
                                ssl_enforcement=None,
-                               vnet_name=None,
-                               subnet_name=None,
+                               subnet_arm_resource_id=None,
                                tags=None,
                                auto_grow=None,
                                assign_identity=False,
@@ -144,17 +143,15 @@ def _flexible_server_update_custom_func(instance,
     if auto_grow:
         instance.storage_profile.storage_autogrow = auto_grow
 
-    if subnet_name:
-        instance.vnet_inj_args.delegated_subnet_name = subnet_name
+    if subnet_arm_resource_id:
+        instance.delegated_subnet_arguments.subnet_arm_resource_id = subnet_arm_resource_id
 
-    if vnet_name:
-        instance.vnet_inj_args.delegated_vnet_name = vnet_name
-
+    # TODO: standby count = ha_enabled add here
     params = ServerForUpdate(sku=instance.sku,
                                     storage_profile=instance.storage_profile,
                                     administrator_login_password=administrator_login_password,
                                     ssl_enforcement=ssl_enforcement,
-                                    vnet_inj_args=instance.vnet_inj_args,
+                                    delegated_subnet_arguments=instance.delegated_subnet_arguments,
                                     tags=tags,
                                     replication_role=replication_role,
                                     public_network_access=public_network_access)
@@ -170,22 +167,17 @@ def _flexible_server_update_custom_func(instance,
     return params
 
 ## Parameter update command
-def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name=None, source=None, value=None):
-    print("Entering the method correctly")
+def _flexible_parameter_update(client, ids, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
         # update the command with system default
-        print("here")
         try:
             parameter = client.get(resource_group_name, server_name, configuration_name)
             value = parameter.default_value # reset value to default
-            print(value)
             source = "system-default"
         except CloudError as e:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
     elif source is None:
         source = "user-override"
-    print(source)
-    print(value)
 
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 
@@ -276,10 +268,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
             storage_mb=storage_mb),
         location=location,
         create_mode="Default",
-        vnet_inj_args=mysql.flexibleservers.models.VnetInjArgs(
-            delegated_vnet_id=None,  # TODO: fix vnet experience
-            delegated_subnet_name=subnet_name,
-            delegated_vnet_name=vnet_name,
+        delegated_subnet_arguments=mysql.flexibleservers.models.DelegatedSubnetArguments(
+            subnet_arm_resource_id=None
         ),
         tags=tags)
 

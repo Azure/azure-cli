@@ -114,7 +114,7 @@ def load_flexibleserver_command_table(self, _):
 
     # no custom commands needed
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk) as g:
-        g.command('set', 'update')
+        g.custom_command('set', '_flexible_parameter_update')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
@@ -128,7 +128,7 @@ def load_flexibleserver_command_table(self, _):
         g.command('stop', 'stop')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func')
+        g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom,
