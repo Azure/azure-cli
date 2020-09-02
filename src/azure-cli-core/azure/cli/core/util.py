@@ -28,7 +28,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#work-behind-a-proxy. '
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy. \n\n'
                      'Error detail: {}')
 
 _PROXYID_RE = re.compile(
@@ -58,6 +58,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
+    from requests.exceptions import SSLError
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
@@ -78,12 +79,13 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
         if isinstance(ex, ValidationError):
             logger.error('validation error: %s', ex)
             return 1
-        if isinstance(ex, ClientRequestError):
+        if isinstance(ex, (ClientRequestError, SSLError)):
             msg = str(ex)
             if 'SSLError' in msg:
-                logger.error("request failed: %s", SSLERROR_TEMPLATE.format(msg))
+                # SSL verification failed
+                logger.error("Request failed: %s", SSLERROR_TEMPLATE.format(msg))
             else:
-                logger.error("request failed: %s", ex)
+                logger.error("Request failed: %s", ex)
             return 1
         if isinstance(ex, KeyboardInterrupt):
             return 1
@@ -813,8 +815,8 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         _log_request(prepped)
         r = s.send(prepped, **settings)
         _log_response(r)
-    except Exception as ex:  # pylint: disable=broad-except
-        raise CLIError(ex)
+    except Exception:  # pylint: disable=broad-except
+        raise
 
     if not r.ok:
         reason = r.reason
