@@ -2453,6 +2453,27 @@ class VMSSUpdateTests(ScenarioTest):
         # test that cannot try to update protection policy on VMSS itself
         self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_')
+    def test_vmss_update_image(self):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'img': 'img1',
+            'vmss': 'vmss1'
+        })
+        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username clitest1 --generate-ssh-key --nsg-rule None')
+        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+        res = self.cmd('image create -g {rg} -n {img} --source {vm}').get_output_in_json()
+        self.kwargs.update({
+            'image_id': res['id']
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image_id}')
+        self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
+            self.check('tags.foo', 'bar')
+        ])
+
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_', location='westus2')
     def test_vmss_update_cross_tenant(self, resource_group):
@@ -2519,6 +2540,11 @@ class VMSSUpdateTests(ScenarioTest):
         ])
 
         self.cmd('group delete -n {another_rg} -y --subscription {aux_sub}')
+
+        # Test vmss can be update even if the image reference is not available
+        self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
+            self.check('tags.foo', 'bar')
+        ])
 
 
 class AcceleratedNetworkingTest(ScenarioTest):
