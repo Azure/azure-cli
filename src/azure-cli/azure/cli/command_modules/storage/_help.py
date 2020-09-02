@@ -1108,7 +1108,7 @@ examples:
   - name: Upload a single file to Azure Blob using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob]
   - name: Upload a single file to Azure Blob using account name and container name.
-    text: az storage copy --source-local-path /path/to/file.txt --destination-account-name mystorageaccount --destination-container mycontainer
+    text: az storage copy -s /path/to/file.txt --destination-account-name mystorageaccount --destination-container mycontainer
   - name: Upload a single file to Azure Blob with MD5 hash of the file content and save it as the blob's Content-MD5 property.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob] --put-md5
   - name: Upload an entire directory to Azure Blob using url.
@@ -1152,7 +1152,7 @@ examples:
   - name: Upload an entire directory to Azure File Share using account name and container name.
     text: az storage copy -s /path/to/dir --destination-account-name mystorageaccount --destination-share myshare --recursive
   - name: Upload a set of files to Azure File Share using wildcards with account name and share name.
-    text: az storage copy --source-local-path /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-share myshare
+    text: az storage copy -s /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-share myshare
   - name: Upload files and directories to Azure File Share using wildcards with url.
     text: az storage copy -s /path/*foo/*bar* -d https://[account].file.core.windows.net/[share]/[path/to/directory] --recursive
   - name: Upload files and directories to Azure File Share using wildcards with account name and share name.
