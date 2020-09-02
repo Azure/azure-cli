@@ -15,15 +15,9 @@ logger = get_logger(__name__)
 def register_global_query_recommend_argument(cli_ctx):
     '''Register --query-recommend argument, and register handler
     '''
-    # origin method to register a global argument
-    # def add_query_recommend_parameter(_, **kwargs):
-    #     arg_group = kwargs.get('arg_group')
-    #     arg_group.add_argument('--query-recommend', dest='_query_recommend',
-    #                            help="Recommend JMESPath string for you", nargs="*")
-
-    def handle_recommend_parameter(cli, **kwargs):
+    def handle_recommend_parameter(cli, **kwargs):   # pylint: disable=unused-argument
         args = kwargs['args']
-        if args._query_recommend is not None:
+        if args._query_recommend is not None:  # pylint: disable=protected-access
             if cli_ctx.invocation.data['output'] == 'json':
                 cli_ctx.invocation.data['output'] = 'table'
 
@@ -31,7 +25,7 @@ def register_global_query_recommend_argument(cli_ctx):
                 tree_builder = TreeBuilder()
                 tree_builder.build(kwargs['event_data']['result'])
                 kwargs['event_data']['result'] = tree_builder.generate_recommend(
-                    args._query_recommend)
+                    args._query_recommend, cli_ctx.invocation.data['output'])  # pylint: disable=protected-access
                 cli_ctx.unregister_event(
                     events.EVENT_INVOKER_FILTER_RESULT, analyze_output)
 
@@ -65,25 +59,26 @@ def register_global_query_recommend_argument(cli_ctx):
     cli_ctx.register_event(
         EVENT_INVOKER_PRE_LOAD_ARGUMENTS, register_query_recommend
     )
-    # cli_ctx.register_event(
-    #     events.EVENT_PARSER_GLOBAL_CREATE, add_query_recommend_parameter)
     cli_ctx.register_event(
         events.EVENT_INVOKER_POST_PARSE_ARGS, handle_recommend_parameter)
 
 
 class Recommendation:
-    def __init__(self, query_str, help_str="", group_name="default", max_length=80):
+    def __init__(self, query_str, help_str="", group_name="default", max_length=None):
         self._query_str = query_str
         self._help_str = help_str
         self._group = group_name
         self._max_length = max_length
 
+    def set_max_length(self, max_length):
+        self._max_length = max_length
+
     def _asdict(self):
         query_str = self._query_str
-        if len(query_str) > self._max_length:
+        if self._max_length and len(query_str) > self._max_length:
             query_str = query_str[:self._max_length] + '...'
         help_str = self._help_str
-        if len(help_str) > 2 * self._max_length:
+        if self._max_length and len(help_str) > 2 * self._max_length:
             help_str = help_str[: 1 * self._max_length] + '...'
         return {"query string": query_str, "help": help_str}
 
@@ -287,10 +282,10 @@ class TreeBuilder:
         elif isinstance(data, dict):
             self._root = self._do_parse('root', [data])
 
-    def generate_recommend(self, keywords_list):
+    def generate_recommend(self, keywords_list, output_format):
         recommendations = []
-        # only perform select on root node
-        recommendations.extend(self._root.get_select_string(keywords_list))
+        for node in self._all_nodes.values():
+            recommendations.extend(node.get_select_string(keywords_list))
         if self._root.from_list():
             recommendations.extend(
                 self._root.select_specific_number_string(keywords_list))
@@ -298,7 +293,10 @@ class TreeBuilder:
                 self._root.get_condition_recommend(keywords_list))
             recommendations.extend(
                 self._root.get_function_recommend(keywords_list))
-        recommendations.sort(key=lambda x: x._group)
+        recommendations.sort(key=lambda x: x._group)  # pylint: disable=protected-access
+        if output_format == 'table':
+            for item in recommendations:
+                item.set_max_length(80)
         return todict(recommendations)
 
     def _do_parse(self, name, data, from_list=False):
