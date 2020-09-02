@@ -227,7 +227,8 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
-        cli_ctx.data['_cache'] = None
+        cli_ctx.clear_cache()
+        # cli_ctx.data['_cache'] = None
 
         if os.environ.get(ENV_COMMAND_COVERAGE, None):
             with open(COVERAGE_FILE, 'a') as coverage_file:
