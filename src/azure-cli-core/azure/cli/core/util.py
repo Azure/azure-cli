@@ -804,19 +804,17 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         else:
             logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
                            "If access token is required, use --resource to specify the resource")
-    try:
-        # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
-        s = Session()
-        req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
-        prepped = s.prepare_request(req)
 
-        # Merge environment settings into session
-        settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
-        _log_request(prepped)
-        r = s.send(prepped, **settings)
-        _log_response(r)
-    except Exception:  # pylint: disable=broad-except
-        raise
+    # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
+    s = Session()
+    req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
+    prepped = s.prepare_request(req)
+
+    # Merge environment settings into session
+    settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
+    _log_request(prepped)
+    r = s.send(prepped, **settings)
+    _log_response(r)
 
     if not r.ok:
         reason = r.reason
