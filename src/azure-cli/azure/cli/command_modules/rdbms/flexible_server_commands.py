@@ -86,7 +86,8 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('restore', '_flexible_server_restore', supports_no_wait=True)
         g.command('start', 'start')
         g.command('stop', 'stop')
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', '_server_delete_func', custom_command_type=flexible_server_custom_common)
+        #g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
@@ -126,7 +127,8 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('restore', '_flexible_server_restore', supports_no_wait=True)
         g.command('start', 'start')
         g.command('stop', 'stop')
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', '_server_delete_func', custom_command_type=flexible_server_custom_common)
+        #g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
