@@ -1385,6 +1385,23 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
     import re
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
+    # usage check
+    if not any([url, container, blob, share, file_path]):
+        raise CLIError("incorrect usage: please specify one of url, container&blob, share&file_path information.")
+
+    if not container and blob:
+        raise CLIError('incorrect usage: please specify container information for your blob resource.')
+    if not share and file_path:
+        raise CLIError('incorrect usage: please specify share information for your file resource.')
+
+    if url and container:
+        raise CLIError('incorrect usage: you only can specify one between url and container information.')
+    if url and share:
+        raise CLIError('incorrect usage: you only can specify one between url and share information.')
+    if share and container:
+        raise CLIError('incorrect usage: you only can specify one between share and container information.')
+
+    # get url
     storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
 
     if url is not None:

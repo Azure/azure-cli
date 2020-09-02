@@ -230,7 +230,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_url(self, resource_group, first_account, second_account, test_dir):
-
+        import os
         first_account_info = self.get_account_info(resource_group, first_account)
         second_account_info = self.get_account_info(resource_group, second_account)
 
@@ -243,7 +243,10 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         first_container_url = '{}/{}'.format(first_account_url, first_container)
         second_container_url = '{}/{}'.format(second_account_url, second_container)
 
-        import os
+        # test validation
+        self.cmd('storage copy -s "{}" -d "{}" --destination-container test'
+                 .format(os.path.join(test_dir, 'readme'), first_container_url), expect_failure=True)
+
         # Upload a single file
         content_type = "application/json"
         self.cmd('storage copy -s "{}" -d "{}" --content-type {}'.format(
@@ -330,10 +333,19 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         first_container = self.create_container(first_account_info)
         second_container = self.create_container(second_account_info)
 
+        first_account_url = 'https://{}.blob.core.windows.net'.format(first_account)
+
         import os
+        # test validation
+        self.cmd(
+            'storage copy --source-local-path "{}" --destination-account-name {} --destination-container {} '
+            '--destination {} '.format(
+                os.path.join(test_dir, 'readme'), first_account, first_container, first_account_url),
+            expect_failure=True)
+
         # Upload a single file
-        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {}'.format(
-            os.path.join(test_dir, 'readme'), first_account, first_container))
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {}'
+                 .format(os.path.join(test_dir, 'readme'), first_account, first_container))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
 
