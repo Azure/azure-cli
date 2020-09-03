@@ -99,6 +99,22 @@ examples:
         az account get-access-token --resource-type ms-graph
 """
 
+helps['account export-msal-cache'] = """
+type: command
+short-summary: Export MSAL cache, by default to `~/.azure/msal.cache.snapshot.json`.
+long-summary: >
+    The exported cache is unencrypted. It contains login information of all logged-in users. Make sure you protect
+    it safely.
+    
+    You can mount the exported MSAL cache to a container at `~/.IdentityService/msal.cache`, so that Azure CLI
+    inside the container can automatically authenticate.
+examples:
+    - name: Export MSAL cache to the default path.
+      text: az account export-msal-cache
+    - name: Export MSAL cache to a custom path.
+      text: az account export-msal-cache --path ~/msal_cache.json
+"""
+
 helps['self-test'] = """
 type: command
 short-summary: Runs a self-test of the CLI.

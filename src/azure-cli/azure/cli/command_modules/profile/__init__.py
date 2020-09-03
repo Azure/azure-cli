@@ -38,6 +38,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             g.command('clear', 'account_clear')
             g.command('list-locations', 'list_locations')
             g.command('get-access-token', 'get_access_token')
+            g.command('export-msal-cache', 'export_msal_cache')
 
         return self.command_table
 
@@ -99,6 +100,9 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('account clear') as c:
             c.argument('clear_credential', clear_credential_type)
+
+        with self.argument_context('account export-msal-cache') as c:
+            c.argument('path', help='The path to export the MSAL cache.')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader

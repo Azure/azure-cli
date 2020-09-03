@@ -73,16 +73,18 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.credential_kwargs = {}
         self.credential_kwargs.update(change_ssl_cert_verification_track2())
 
+    def _load_msal_cache(self):
+        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
+        from azure.identity._internal.persistent_cache import load_user_cache
+        # Store for user token persistence
+        cache = load_user_cache(self.allow_unencrypted)
+        return cache
+
     def _build_persistent_msal_app(self, authority):
         # Initialize _msal_app for logout, token migration which Azure Identity doesn't support
         from msal import PublicClientApplication
-        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
-        from azure.identity._internal.persistent_cache import load_user_cache
-
-        # Store for user token persistence
-        cache = load_user_cache(self.allow_unencrypted)
         msal_app = PublicClientApplication(authority=authority, client_id=self.client_id,
-                                           token_cache=cache,
+                                           token_cache=self._load_msal_cache(),
                                            verify=self.credential_kwargs.get('connection_verify', True))
         return msal_app
 
@@ -407,11 +409,16 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         # TODO: Delete accessToken.json after migration (accessToken.json deprecation)
 
-    def _serialize_token_cache(self):
-        # ONLY FOR DEBUGGING PURPOSE. DO NOT USE IN PRODUCTION CODE.
-        logger.warning("Token cache is serialized as plain text and saved to `msal.cache.json`.")
-        with open(os.path.join(get_config_dir(), "msal.cache.json"), "w") as fd:
-            fd.write(self._msal_app.token_cache.serialize())
+    def serialize_token_cache(self, path=None):
+        path = path or os.path.join(get_config_dir(), "msal.cache.snapshot.json")
+        path = os.path.expanduser(path)
+        logger.warning("Token cache is exported to '%s'. The exported cache is unencrypted. "
+                       "It contains login information of all logged-in users. Make sure you protect it safely.", path)
+
+        cache = self._load_msal_cache()
+        cache._reload_if_necessary()
+        with open(path, "w") as fd:
+            fd.write(cache.serialize())
 
 
 TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',

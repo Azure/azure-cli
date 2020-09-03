@@ -203,6 +203,12 @@ def list_locations(cmd):
     return get_subscription_locations(cmd.cli_ctx)
 
 
+def export_msal_cache(cmd, path=None):
+    from azure.cli.core._identity import Identity
+    identity = Identity()
+    identity.serialize_token_cache(path)
+
+
 def check_cli(cmd):
     from azure.cli.core.file_util import (
         create_invoker_and_load_cmds_and_args, get_all_help)
