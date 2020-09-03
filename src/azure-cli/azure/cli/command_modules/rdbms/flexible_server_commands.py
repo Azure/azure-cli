@@ -95,10 +95,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_name='_server_update_set', setter_type=rdbms_custom,
                                  setter_arg_name='parameters',
                                  custom_func_name='_flexible_server_update_custom_func')
-        g.generic_update_command('reset-password',
-                                 getter_name='_server_update_get', getter_type=rdbms_custom,
-                                 setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
-                                 custom_func_name='_flexible_server_update_password')
+        g.custom_command('reset-password', '_flexible_server_update_password')
         g.custom_wait_command('wait', '_flexible_server_postgresql_get')
         g.command('restart', 'restart')
 
@@ -141,6 +138,7 @@ def load_flexibleserver_command_table(self, _):
                                  setter_name='_server_update_set', setter_type=rdbms_custom,
                                  setter_arg_name='parameters',
                                  custom_func_name='_flexible_server_update_custom_func')
+        g.custom_command('reset-password', '_flexible_server_update_password')
         g.custom_wait_command('wait', '_flexible_server_mysql_get')
         g.command('restart', 'restart')
 

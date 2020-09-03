@@ -159,8 +159,11 @@ def _server_delete_func(cmd, client, resource_group_name=None, server_name=None,
             logger.error(ex)
         return result
 
-def _flexible_server_update_password(instance, password):
-    return _flexible_server_update_custom_func(instance, administrator_login_password=password)
+def _flexible_server_update_password(instance, server_name, administrator_login, administrator_login_password):
+    return _flexible_server_update_custom_func(instance,
+                                               server_name=server_name,
+                                               administrator_login=administrator_login,
+                                               administrator_login_password=administrator_login_password)
 
 
 # Wait command
@@ -202,9 +205,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         storage_profile=postgresql.flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
             storage_mb=storage_mb),  ##[TODO : required I think otherwise data is null error seen in backend exceptions
-        delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=None
-        ),
+        delegated_subnet_arguments=None,
         location=location,
         create_mode="Default",  # can also be create
         tags=tags)

@@ -193,6 +193,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                         local_context_attribute=LocalContextAttribute(name='server_name', 
                                         actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
+        server_admin_username_arg_type = CLIArgumentType(configured_default='web', metavar='Username',
+                                        help="Server Administrator username",
+                                        local_context_attribute=LocalContextAttribute(name='administrator-user',
+                                        actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+
         # subscription_arg_type = CLIArgumentType(configured_default='web', options_list=['--subscription'], metvar='NAME', 
         #                                 help="ID of subscription. You can configure the default subscription using az account set -s NAME_OR_ID",
         #                                 local_context_attribute=LocalContextAttribute(name='subscription',
@@ -233,7 +238,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             #c.argument('resource_group_name', default=create_random_resource_name(default_string), arg_type=resource_group_name_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))#, validator=get_default_location_from_resource_group)
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication', 
-                        help='Administrator username for the server. Once set, it cannot be changed. ')
+                        help='Administrator username for the server. Once set, it cannot be changed. ', arg_type=server_admin_username_arg_type)
             #c.argument('administrator_login_password', options_list=['--admin-password, -p'], arg_group='Authentication')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
@@ -262,12 +267,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('assign_identity', options_list=['--assign-identity'], 
                         help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
-        for scope in ['delete', 'list', 'wait', 'show', 'restart', 'restore', 'update', 'start', 'stop']:
+        for scope in ['delete', 'list', 'wait', 'show', 'restart', 'restore', 'update', 'start', 'stop', 'reset-password']:
             argument_context_string = '{} flexible-server {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
         
-        for scope in ['wait', 'show', 'restart', 'update', 'start', 'stop']:
+        for scope in ['wait', 'show', 'restart', 'update', 'start', 'stop', 'reset-password']:
             argument_context_string = '{} flexible-server {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
@@ -300,11 +305,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
 
-        with self.argument_context('{} flexible-server reset-password'.format(command_group)) as c:
-            c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
-                       help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
+        #with self.argument_context('{} flexible-server reset-password'.format(command_group)) as c:
+        #    c.argument('administrator_login', options_list=['--admin-user, -u'], arg_type=server_admin_username_arg_type,
+        #               help='Administrator username for the server. Once set, it cannot be changed. ')
+        #    c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+        #               help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.')
 
-        
         # flexible-server parameter
         for scope in ['list', 'set', 'show']:
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)

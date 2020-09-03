@@ -264,10 +264,18 @@ type: command
 short-summary: Update a flexible server.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
-    text: az mysql server update --sku-name Standard_D4s_v3
-  - name: Update a server's tags.
-    text: az mysql server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
+    text: az mysql flexible-server update --sku-name Standard_D4s_v3
+  - name: Update a flexible server's tags.
+    text: az mysql flexible-server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
     crafted: true
+"""
+
+helps['mysql flexible-server reset-password'] = """
+type: command
+short-summary: Reset / update password for the flexible server administrator.
+examples:
+  - name: Update the password for the flexible server administrator
+    text: az mysql flexible-server reset-password
 """
 
 helps['mysql flexible-server wait'] = """
@@ -275,6 +283,6 @@ type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
 examples:
   - name: Wait for the flexible server to satisfy certain conditions. 
-    text: az mysql server wait --exists --resource-group testGroup --name testServer
+    text: az mysql flexible-server wait --exists --resource-group testGroup --name testServer
     crafted: true
 """

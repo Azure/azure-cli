@@ -165,6 +165,12 @@ def _flexible_server_update_custom_func(instance,
 
     return params
 
+def _flexible_server_update_password(instance, server_name, administrator_login, administrator_login_password):
+    return _flexible_server_update_custom_func(instance,
+                                               server_name=server_name,
+                                               administrator_login=administrator_login,
+                                               administrator_login_password=administrator_login_password)
+
 def _server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
     confirm = force
     if not force:
