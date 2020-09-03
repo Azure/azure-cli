@@ -13,7 +13,7 @@ from ._client_factory import resource_client_factory, network_client_factory
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'northeurope'
+DEFAULT_LOCATION = 'southeastasia' #'eastus2euap'
 
 
 def resolve_poller(result, cli_ctx, name):
@@ -28,7 +28,7 @@ def create_random_resource_name(prefix='azure', length=15):
     return prefix + ''.join(digits)
 
 
-def generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password):
+def generate_missing_parameters(cmd, location, resource_group_name, server_name):
     # if location is not passed as a parameter or is missing from local context
     if location is None:
         location = DEFAULT_LOCATION
@@ -48,16 +48,19 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
     if server_name is None:
         server_name = create_random_resource_name('server')
 
-    if administrator_login_password is None:
-        administrator_login_password = str(uuid.uuid4())
-
     # This is for the case when user does not pass a location but the resource group exists in the local context.
     #  In that case, the location needs to be set to the location of the rg, not the default one.
 
     ## TODO: Fix this because it changes the default location even when I pass in a location param
     # location = _update_location(cmd, resource_group_name)
 
-    return location, resource_group_name, server_name, administrator_login_password
+    return location, resource_group_name, server_name
+
+
+def generate_password(administrator_login_password):
+    if administrator_login_password is None:
+        administrator_login_password = str(uuid.uuid4())
+    return administrator_login_password
 
 
 def create_vnet(cmd, servername, location, resource_group_name, delegation_service_name):
@@ -98,6 +101,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip, end_ip).result()
     return firewall.id
 
+
 def parse_public_access_input(public_access):
     allow_azure_services = False
     if public_access is not None:
@@ -120,6 +124,11 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
     if end_ip_address is not None:
         instance.end_ip_address = end_ip_address
     return instance
+
+
+def update_kwargs(kwargs, key, value):
+    if value is not None:
+        kwargs[key] = value
 
 
 def _update_location(cmd, resource_group_name):
