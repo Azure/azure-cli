@@ -7,6 +7,7 @@
 import base64
 import codecs
 import hashlib
+import hmac
 import json
 import math
 import os
@@ -36,7 +37,9 @@ from ._client_factory import get_client_factory, Clients
 from ._sdk_extensions import patch_akv_client
 from ._validators import _construct_vnet, secret_text_encoding_values
 from .security_domain.jwe import JWE
+from .security_domain.security_domain import Datum, SecurityDomainRestoreData
 from .security_domain.shared_secret import SharedSecret
+from .security_domain.sp800_108 import KDF
 from .security_domain.utils import Utils
 
 logger = get_logger(__name__)
@@ -1089,14 +1092,6 @@ def _int_to_bytes(i):
     return codecs.decode(h, 'hex')
 
 
-def _security_domain_b64_url_encode_for_x5c(s):
-    return base64.b64encode(s).decode('ascii')
-
-
-def _security_domain_b64_url_encode(s):
-    return base64.b64encode(s).decode('ascii').strip('=').replace('+', '-').replace('/', '_')
-
-
 def _public_rsa_key_to_jwk(rsa_key, jwk, encoding=None):
     pubv = rsa_key.public_numbers()
     jwk.n = _int_to_bytes(pubv.n)
@@ -2118,7 +2113,7 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
             pem_data = f.read()
             cert = load_pem_x509_certificate(pem_data, backend=default_backend())
             public_bytes = cert.public_bytes(Encoding.DER)
-            x5tS256 = _security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
+            x5tS256 = Utils.security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
             for item in shared_keys['enc_shares']:
                 if x5tS256 == item['x5t_256']:
                     jwe = JWE(compact_jwe=item['enc_key'])
@@ -2137,11 +2132,45 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
         raise CLIError('Insufficient shares available.')
 
     # shared_secret = SharedSecret(required=required)
+    master_key = SharedSecret.get_plaintext(share_arrays, required=required)
 
-    return None
+    plaintext_list = []
+    for item in enc_data['data']:
+        compact_jwe = item['compact_jwe']
+        tag = item['tag']
+        enc_key = KDF.sp800_108(master_key, label=tag, context='', bit_length=512)
+        jwe_data = JWE(compact_jwe)
+        plaintext = jwe_data.decrypt_using_bytes(enc_key)
+        plaintext_list.append((plaintext, tag))
 
-    """
+    # encrypt
+    security_domain_restore_data = SecurityDomainRestoreData()
+    security_domain_restore_data.enc_data.kdf = 'sp108_kdf'
+    master_key = Utils.get_random(32)
+
+    for plaintext, tag in plaintext_list:
+        enc_key = KDF.sp800_108(master_key, label=tag, context='', bit_length=512)
+        jwe = JWE()
+        jwe.encrypt_using_bytes(enc_key, plaintext, alg_id='A256CBC-HS512', kid=tag)
+        datum = Datum(compact_jwe=jwe.encode_compact(), tag=tag)
+        security_domain_restore_data.enc_data.data.append(datum)
+
+    with open(sd_exchange_key, 'rb') as f:
+        pem_data = f.read()
+        exchange_cert = load_pem_x509_certificate(pem_data, backend=default_backend())
+
+    # make the wrapped key
+    jwe_wrapped = JWE()
+    jwe_wrapped.encrypt_using_cert(exchange_cert, master_key)
+    security_domain_restore_data.wrapped_key.enc_key = jwe_wrapped.encode_compact()
+    thumbprint = Utils.get_SHA256_thumbprint(exchange_cert)
+    security_domain_restore_data.wrapped_key.x5t_256 = base64.urlsafe_b64encode(thumbprint)
+
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    security_domain = SecurityDomainObject(value=json.dumps(security_domain_restore_data.to_json()))
+
+    return client.begin_upload(vault_base_url=vault_base_url, security_domain=security_domain)
+    """
     return sdk_no_wait(
         no_wait,
         client.begin_upload,
@@ -2179,16 +2208,16 @@ def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, secu
         cert = load_pem_x509_certificate(pem_data, backend=default_backend())
         public_key = cert.public_key()
         public_bytes = cert.public_bytes(Encoding.DER)
-        sd_jwk.x5c = [_security_domain_b64_url_encode_for_x5c(public_bytes)]  # only one cert, not a chain
-        sd_jwk.x5t = _security_domain_b64_url_encode(hashlib.sha1(public_bytes).digest())
-        sd_jwk.x5tS256 = _security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
+        sd_jwk.x5c = [Utils.security_domain_b64_url_encode_for_x5c(public_bytes)]  # only one cert, not a chain
+        sd_jwk.x5t = Utils.security_domain_b64_url_encode(hashlib.sha1(public_bytes).digest())
+        sd_jwk.x5tS256 = Utils.security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
         sd_jwk.key_ops = ['verify', 'encrypt', 'wrapKey']
 
         # populate key into jwk
         if isinstance(public_key, rsa.RSAPublicKey):
             sd_jwk.kty = 'RSA'
             sd_jwk.alg = 'RSA-OAEP-256'  # TODO
-            _public_rsa_key_to_jwk(public_key, sd_jwk, encoding=_security_domain_b64_url_encode)
+            _public_rsa_key_to_jwk(public_key, sd_jwk, encoding=Utils.security_domain_b64_url_encode)
         else:
             raise CLIError('Import failed: Unsupported key type, {}.'.format(type(public_key)))
 

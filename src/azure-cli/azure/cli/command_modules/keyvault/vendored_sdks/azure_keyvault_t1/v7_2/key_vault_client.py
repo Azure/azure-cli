@@ -5990,6 +5990,7 @@ class KeyVaultClient(SDKClient):
 
         # Construct and send request
         request = self._client.post(url, query_parameters)
+        request.body = json.dumps(body_content)
         response = self._client.send(
             request, header_parameters, body_content, stream=False, **operation_config)
 

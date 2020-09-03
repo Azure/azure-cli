@@ -12,9 +12,15 @@ from .byte_shares import ByteShares
 class SharedSecret:
     max_shares = 126
 
-    def __init__(self, shares, required):
-        if shares > SharedSecret.max_shares or required > shares or required < 2:
-            raise CLIError('Incorrect share or required count.')
+    def __init__(self, shares=None, required=0):
+        if required < 2:
+            raise CLIError('Incorrect required count.')
+
+        if shares is None:
+            shares = 0
+        else:
+            if shares > SharedSecret.max_shares or required > shares:
+                raise CLIError('Incorrect share or required count.')
 
         self.shares = shares
         self.required = required

@@ -16,9 +16,12 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from knack.util import CLIError
 
 from .sp800_108 import KDF
+from .utils import Utils
 
 
 class JWEHeader:
+    _fields = ['alg', 'enc', 'zip', 'jku', 'jwk', 'kid', 'x5u', 'x5c', 'x5t', 'x5t_S256', 'typ', 'cty', 'crit']
+
     def __init__(self, alg=None, enc=None, zip=None, jku=None, jwk=None, kid=None, x5u=None, x5c=None, x5t=None,
                  x5t_S256=None, typ=None, cty=None, crit=None):
         """
@@ -54,38 +57,25 @@ class JWEHeader:
     @staticmethod
     def from_json_str(json_str):
         json_dict = json.loads(json_str)
-        return JWEHeader(
-            alg=json_dict.get('alg', None),
-            enc=json_dict.get('enc', None),
-            zip=json_dict.get('zip', None),
-            jku=json_dict.get('jku', None),
-            jwk=json_dict.get('jwk', None),
-            kid=json_dict.get('kid', None),
-            x5u=json_dict.get('x5u', None),
-            x5c=json_dict.get('x5c', None),
-            x5t=json_dict.get('x5t', None),
-            x5t_S256=json_dict.get('x5t#S256', None),
-            typ=json_dict.get('typ', None),
-            cty=json_dict.get('cty', None),
-            crit=json_dict.get('crit', None)
-        )
+        jwe_header = JWEHeader()
+        for k in jwe_header._fields:
+            if k == 'x5t_S256':
+                v = json_dict.get('x5t#S256', None)
+            else:
+                v = json_dict.get(k, None)
+            if v is not None:
+                setattr(jwe_header, k, v)
+        return jwe_header
 
     def to_json_str(self):
-        json_dict = {
-            'alg': self.alg,
-            'enc': self.enc,
-            'zip': self.zip,
-            'jku': self.jku,
-            'jwk': self.jwk,
-            'kid': self.kid,
-            'x5u': self.x5u,
-            'x5c': self.x5c,
-            'x5t': self.x5t,
-            'x5t#256': self.x5t_S256,
-            'typ': self.typ,
-            'cty': self.cty,
-            'crit': self.crit
-        }
+        json_dict = {}
+        for k in self._fields:
+            v = getattr(self, k, None)
+            if v is not None:
+                if k == 'x5t_S256':
+                    json_dict['x5t#S256'] = v
+                else:
+                    json_dict[k] = v
         return json.dumps(json_dict)
 
 
@@ -112,26 +102,26 @@ class JWEDecode:
             self.auth_tag = base64.urlsafe_b64decode(parts[4] + '===')
 
     def encode_header(self):
-        header_json = self.encoded_header.to_json_str()
-        self.encoded_header = base64.urlsafe_b64encode(header_json)
+        header_json = self.protected_header.to_json_str()
+        self.encoded_header = Utils.security_domain_b64_url_encode(header_json.encode('ascii'))
 
     def encode_compact(self):
         ret = [self.encoded_header + '.']
 
         if self.encrypted_key is not None:
-            ret.append(base64.urlsafe_b64encode(self.encrypted_key))
+            ret.append(Utils.security_domain_b64_url_encode(self.encrypted_key))
         ret.append('.')
 
         if self.init_vector is not None:
-            ret.append(base64.urlsafe_b64encode(self.init_vector))
+            ret.append(Utils.security_domain_b64_url_encode(self.init_vector))
         ret.append('.')
 
         if self.ciphertext is not None:
-            ret.append(base64.urlsafe_b64encode(self.ciphertext))
+            ret.append(Utils.security_domain_b64_url_encode(self.ciphertext))
         ret.append('.')
 
         if self.auth_tag is not None:
-            ret.append(base64.urlsafe_b64encode(self.auth_tag))
+            ret.append(Utils.security_domain_b64_url_encode(self.auth_tag))
 
         return ''.join(ret)
 
@@ -167,7 +157,7 @@ class JWE:
 
     def set_cek(self, cert, cek):
         public_key = cert.public_key()
-        self.jwe_decode.encrypted_key = public_key.encrypt(cek, self.get_padding_mode())
+        self.jwe_decode.encrypted_key = public_key.encrypt(bytes(cek), self.get_padding_mode())
 
     @staticmethod
     def dek_from_cek(cek):
@@ -197,6 +187,22 @@ class JWE:
         hMAC = hmac.HMAC(hk, msg=hash_data, digestmod=hashlib.sha512)
         return hMAC.digest()
 
+    def Aes256HmacSha512Encrypt(self, cek, plaintext):
+        dek = JWE.dek_from_cek(cek)
+        hk = JWE.hmac_key_from_cek(cek)
+
+        aes_key = dek
+        aes_iv = Utils.get_random(16)
+        cipher = Cipher(algorithms.AES(aes_key), modes.CBC(aes_iv), backend=default_backend())
+        encryptor = cipher.encryptor()
+        self.jwe_decode.ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+        self.jwe_decode.init_vector = aes_iv
+
+        mac_value = self.get_mac(hk)
+        self.jwe_decode.auth_tag = bytearray()
+        for i in range(32):
+            self.jwe_decode.auth_tag.append(mac_value[i])
+
     def Aes256HmacSha512Decrypt(self, cek):
         dek = JWE.dek_from_cek(cek)
         hk = JWE.hmac_key_from_cek(cek)
@@ -215,7 +221,8 @@ class JWE:
         aes_iv = self.jwe_decode.init_vector
         cipher = Cipher(algorithms.AES(aes_key), modes.CBC(aes_iv), backend=default_backend())
         decryptor = cipher.decryptor()
-        plaintext = decryptor.update(self.jwe_decode.ciphertext) + decryptor.finalize()
+        plaintext = decryptor.update(self.jwe_decode.ciphertext)
+        plaintext += decryptor.finalize()
         return plaintext
 
     def decrypt_using_bytes(self, cek):
@@ -229,6 +236,23 @@ class JWE:
     def decrypt_using_private_key(self, private_key):
         cek = self.get_cek_from_private_key(private_key)
         return self.decrypt_using_bytes(cek)
+
+    def encrypt_using_bytes(self, cek, plaintext, alg_id, kid=None):
+        if kid is not None:
+            self.jwe_decode.protected_header.alg = 'dir'
+            self.jwe_decode.protected_header.kid = kid
+
+        if alg_id == 'A256CBC-HS512':
+            self.jwe_decode.protected_header.enc = alg_id
+            self.jwe_decode.encode_header()
+            self.Aes256HmacSha512Encrypt(cek, plaintext)
+
+    def encrypt_using_cert(self, cert, plaintext):
+        self.jwe_decode.protected_header.alg = 'RSA-OAEP-256'
+        self.jwe_decode.protected_header.kid = 'not used'
+        cek = Utils.get_random(64)
+        self.set_cek(cert, cek)
+        self.encrypt_using_bytes(cek, plaintext, alg_id='A256CBC-HS512')
 
 
 if __name__ == '__main__':

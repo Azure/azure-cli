@@ -41,13 +41,12 @@ class KDF:
         for i in range(32):
             key.append(0x41)
 
-        hMAC = hmac.HMAC(key, digestmod=hashlib.sha256)
-        new_key = KDF.sp800_108(key, label, context, hMAC, bit_length)
+        new_key = KDF.sp800_108(key, label, context, bit_length)
         hex_value = new_key.hex().replace('-', '')
         return hex_value.lower() == hex_result
 
     @staticmethod
-    def sp800_108(key_in: bytearray, label: str, context: str, hMAC: hmac.HMAC, bit_length):
+    def sp800_108(key_in: bytearray, label: str, context: str, bit_length):
         """
         Note - initialize out to be the number of bytes of keying material that you need
         This implements SP 800-108 in counter mode, see section 5.1
@@ -74,6 +73,7 @@ class KDF:
 
         L = bit_length
         bytes_needed = bit_length // 8
+        hMAC = hmac.HMAC(key_in, digestmod=hashlib.sha512)
         hash_bits = hMAC.digest_size
         n = L // hash_bits
         if L % hash_bits != 0:
@@ -90,8 +90,7 @@ class KDF:
             hmac_data = bytearray()
             hmac_data.extend(KDF.to_big_endian_32bits(i + 1))
             hmac_data.extend(hmac_data_suffix)
-
-            hMAC = hmac.HMAC(key_in, msg=hmac_data, digestmod=hashlib.sha512)
+            hMAC.update(hmac_data)
             hash_value = hMAC.digest()
 
             if bytes_needed > len(hash_value):
@@ -105,4 +104,4 @@ class KDF:
 
 
 if __name__ == '__main__':
-    KDF.test_sp800_108()
+    print(KDF.test_sp800_108())
