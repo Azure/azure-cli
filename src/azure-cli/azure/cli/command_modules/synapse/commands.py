@@ -55,6 +55,18 @@ def load_command_table(self, _):
         operation_tmpl='azure.synapse.artifacts.operations#LinkedServiceOperations.{}',
         client_factory=None)
 
+    synapse_dataset_sdk = CliCommandType(
+        operation_tmpl='azure.synapse.artifacts.operations#DatasetOperations.{}',
+        client_factory=None)
+
+    synapse_pipeline_sdk = CliCommandType(
+        operation_tmpl='azure.synapse.artifacts.operations#PipelineOperations.{}',
+        client_factory=None)
+
+    synapse_pipeline_run_sdk = CliCommandType(
+        operation_tmpl='azure.synapse.artifacts.operations#PipelineRunOperations.{}',
+        client_factory=None)
+
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
                             custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
@@ -149,6 +161,36 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_linked_service')
         g.custom_show_command('show', 'get_linked_service')
         g.custom_command('delete', 'delete_linked_service', confirmation=True, supports_no_wait=True)
+
+    # Data Plane Commands --Artifacts dataset operations
+    with self.command_group('synapse dataset', synapse_dataset_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('create', 'create_or_update_dataset', supports_no_wait=True)
+        g.custom_command('update', 'create_or_update_dataset', supports_no_wait=True)
+        g.custom_command('list', 'list_datasets')
+        g.custom_show_command('show', 'get_dataset')
+        g.custom_command('delete', 'delete_dataset', confirmation=True, supports_no_wait=True)
+
+    # Data Plane Commands --Artifacts pipeline operations
+    with self.command_group('synapse pipeline', synapse_pipeline_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('create', 'create_or_update_pipeline', supports_no_wait=True)
+        g.custom_command('update', 'create_or_update_pipeline', supports_no_wait=True)
+        g.custom_command('list', 'list_pipelines')
+        g.custom_show_command('show', 'get_pipeline')
+        g.custom_command('delete', 'delete_pipeline', confirmation=True, supports_no_wait=True)
+        g.custom_command('create-run', 'create_pipeline_run')
+
+    # Data Plane Commands --Artifacts pipeline run operations
+    with self.command_group('synapse pipeline-run', synapse_pipeline_run_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('query-by-workspace', 'query_pipeline_runs_by_workspace')
+        g.custom_show_command('show', 'get_pipeline_run')
+        g.custom_command('cancel', 'cancel_pipeline_run', confirmation=True)
+
+    with self.command_group('synapse activity-run', synapse_pipeline_run_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('query-by-pipeline-run', 'query_activity_runs')
 
     with self.command_group('synapse', is_preview=True):
         pass

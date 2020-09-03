@@ -593,3 +593,173 @@ examples:
         az synapse linked-service delete --workspace-name testsynapseworkspace \\
           --name testlinkedservice
 """
+
+helps['synapse dataset'] = """
+type: group
+short-summary: Manage Synapse's datasets.
+"""
+
+helps['synapse dataset create'] = """
+type: command
+short-summary: Create a dataset.
+examples:
+  - name: Create a dataset.
+    text: |-
+        az synapse dataset create --workspace-name testsynapseworkspace \\
+          --name testdataset --file @path/dataset.json
+"""
+
+helps['synapse dataset update'] = """
+type: command
+short-summary: Update an exist dataset.
+examples:
+  - name: Update an exist dataset.
+    text: |-
+        az synapse dataset update --workspace-name testsynapseworkspace \\
+          --name testdataset --file @path/dataset.json
+"""
+
+helps['synapse dataset show'] = """
+type: command
+short-summary: Get a dataset.
+examples:
+  - name: Get a dataset.
+    text: |-
+        az synapse dataset show --workspace-name testsynapseworkspace \\
+          --name testdataset
+"""
+
+helps['synapse dataset list'] = """
+type: command
+short-summary: List datasets.
+examples:
+  - name: List datasets.
+    text: |-
+        az synapse dataset list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse dataset delete'] = """
+type: command
+short-summary: Delete a dataset.
+examples:
+  - name: Delete a dataset.
+    text: |-
+        az synapse dataset delete --workspace-name testsynapseworkspace \\
+          --name testdataset
+"""
+
+helps['synapse pipeline'] = """
+type: group
+short-summary: Manage Synapse's pipelines.
+"""
+
+helps['synapse pipeline create'] = """
+type: command
+short-summary: Create a pipeline.
+examples:
+  - name: Create a pipeline.
+    text: |-
+        az synapse pipeline create --workspace-name testsynapseworkspace \\
+          --name testpipeline --file @path/pipeline.json
+"""
+
+helps['synapse pipeline update'] = """
+type: command
+short-summary: Update an exist pipeline.
+examples:
+  - name: Update an exist pipeline.
+    text: |-
+        az synapse pipeline update --workspace-name testsynapseworkspace \\
+          --name testpipeline --file @path/pipeline.json
+"""
+
+helps['synapse pipeline show'] = """
+type: command
+short-summary: Get a pipeline.
+examples:
+  - name: Get a pipeline.
+    text: |-
+        az synapse pipeline show --workspace-name testsynapseworkspace \\
+          --name testpipeline
+"""
+
+helps['synapse pipeline list'] = """
+type: command
+short-summary: List pipelines.
+examples:
+  - name: List pipelines.
+    text: |-
+        az synapse pipeline list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse pipeline delete'] = """
+type: command
+short-summary: Delete a pipeline.
+examples:
+  - name: Delete a pipeline.
+    text: |-
+        az synapse pipeline delete --workspace-name testsynapseworkspace \\
+          --name testpipeline
+"""
+
+helps['synapse pipeline create-run'] = """
+type: command
+short-summary: Creates a run of a pipeline.
+examples:
+  - name: Pipelines_CreateRun
+    text: |-
+        az synapse pipeline create-run --workspace-name testsynapseworkspace --name "myPipeline" \\
+          --parameters "{\\"OutputBlobNameList\\":[\\"exampleoutput.csv\\"]}"
+"""
+
+helps['synapse pipeline-run'] = """
+type: group
+short-summary: Manage Synapse's pipeline run.
+"""
+
+helps['synapse pipeline-run show'] = """
+type: command
+short-summary: Get a pipeline run by its run ID.
+examples:
+  - name: Get a pipeline run by its run ID.
+    text: |-
+        az synapse pipeline-run show --workspace-name testsynapseworkspace \\
+          --run-id "2f7fdb90-5df1-4b8e-ac2f-064cfa58202b"
+"""
+
+helps['synapse pipeline-run cancel'] = """
+type: command
+short-summary: Cancel a pipeline run by its run ID.
+examples:
+  - name: Cancel a pipeline run by its run ID.
+    text: |-
+        az synapse pipeline-run cancel --workspace-name testsynapseworkspace \\
+          --run-id "16ac5348-ff82-4f95-a80d-638c1d47b721"
+"""
+
+helps['synapse pipeline-run query-by-workspace'] = """
+type: command
+short-summary: Query pipeline runs in the workspace based on input filter conditions.
+examples:
+  - name: Query pipeline runs in the workspace based on input filter conditions.
+    text: |-
+        az synapse pipeline-run query-by-workspace --workspace-name testsynapseworkspace --filters \\
+          operand="PipelineName" operator="Equals" values="testpipeline" --last-updated-after "2020-09-03T00:36:44.3345758Z" \\
+          --last-updated-before "2020-09-03T00:49:48.3686473Z"
+"""
+
+helps['synapse activity-run'] = """
+type: group
+short-summary: synapse activity-run
+"""
+
+helps['synapse activity-run query-by-pipeline-run'] = """
+type: command
+short-summary: Query activity runs based on input filter conditions.
+examples:
+  - name: Query activity runs based on input filter conditions.
+    text: |-
+        az synapse activity-run query-by-pipeline-run --workspace-name testsynapseworkspace \\
+          --last-updated-after "2020-09-03T00:36:44.3345758Z" --last-updated-before "2020-09-03T00:49:48.3686473Z" \\
+          --name testpipeline --run-id "53eeed66-ec46-11ea-8bd5-448500a5b1ac"
+"""

@@ -102,3 +102,15 @@ def cf_synapse_client_artifacts_factory(cli_ctx, workspace_name):
 
 def cf_synapse_linked_service(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).linked_service
+
+
+def cf_synapse_dataset(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).dataset
+
+
+def cf_synapse_pipeline(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).pipeline
+
+
+def cf_synapse_pipeline_run(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).pipeline_run
