@@ -86,26 +86,34 @@ class Recommendation:
         return "{}\t{}".format(self._query_str, self._help_str)
 
 
-class TreeNode:
-    def __init__(self, name):
+class ListNode:
+    def __init__(self, name, parent):
         self._name = name
-        self._parent = None
+        self._parent = parent
+        self._child = []
+
+    def add_child(self, child_node):
+        if child_node:
+            self._child.append(child_node)
+
+
+class TreeNode:
+    def __init__(self, name, parent):
+        self._name = name
+        self._parent = parent
         self._data = None
-        self._keys = None
+        self._keys = []
         self._list_keys = set()  # child node which is list
         self._child = []  # list of child node
         self._from_list = False
         self._list_length = 5  # valid only when from_list is true
 
-    def update_node_data(self, data, from_list):
-        self._keys = list(data[0].keys())
+    def add_child(self, child_node):
+        if child_node:
+            self._child.append(child_node)
+
+    def update_node_data(self, data):
         self._data = data
-        self._from_list = from_list
-        for item in self._data:
-            if isinstance(item, dict):
-                for key, value in item.items():
-                    if isinstance(value, list):
-                        self._list_keys.add(key)
 
     def get_values(self, key):
         '''Get all values with given key'''
@@ -263,24 +271,17 @@ class TreeNode:
 
 
 class TreeBuilder:
-    '''Parse entry. Generate parse tree from json. And
-    then give recommendation
-    '''
+    '''Parse entry. Generate parse tree from json. And then give recommendation'''
 
     def __init__(self):
-        self._root = TreeNode('root')
+        self._root = None  # dummy root node
         self._all_nodes = {}
 
     def build(self, data):
         '''Build a query tree with a given json file
         :param str data: json format data
         '''
-        if isinstance(data, list):
-            if data:
-                self._root = self._do_parse('root', data, from_list=True)
-                self._root._list_length = len(data)
-        elif isinstance(data, dict):
-            self._root = self._do_parse('root', [data])
+        self._root = self._do_parse('root', data, None)
 
     def generate_recommend(self, keywords_list, output_format):
         recommendations = []
@@ -299,33 +300,71 @@ class TreeBuilder:
                 item.set_max_length(80)
         return todict(recommendations)
 
-    def _do_parse(self, name, data, from_list=False):
+    def _do_parse(self, name, data, parent):
         '''do parse for a single node
 
         :param str name:
-            name of the node
+            Name of the node
         :param list data:
-            all data in the json with same depth and same name
-        :param boolean from_list:
-            a list node or a dict node
+            All data in the json with the same depth and the same name
+        :param TreeNode parent:
+            The parent node of current node. None if this is the root node
         '''
-        node = TreeNode(name)
-        node.update_node_data(data, from_list)
-        for key in data[0].keys():
-            child_node = None
-            child_node_data = node.get_values(key)
-            child_item = node.get_one_value(key)
-            if child_item is None:
-                continue
-            if node.is_list(key):
-                if isinstance(child_item, dict):
-                    child_node = self._do_parse(
-                        key, child_node_data, from_list=True)
-            elif isinstance(child_item, dict):
-                child_node = self._do_parse(key, child_node_data)
-            if child_node:
-                node._child.append(child_node)
-                child_node._parent = node
-
-        self._all_nodes[name] = node
+        if not data:
+            return None
+        if all(isinstance(d, list) for d in data):
+            node = self._do_parse_list(name, data, parent)
+        elif all(isinstance(d, dict) for d in data):
+            node = self._do_parse_dict(name, data, parent)
+        elif any(isinstance(d, (dict, list)) for d in data):
+            node = None  # inhomogeneous type
+        else:
+            node = self._do_parse_leaf(name, data, parent)
         return node
+
+    def _do_parse_list(self, name, data, parent):
+        flatten_data = []
+        # flatten list of list to list of data
+        for d in data:
+            flatten_data.extend(d)
+        if not flatten_data:
+            return None
+        node = ListNode(name, parent)
+        child = self._do_parse(name, flatten_data, node)
+        node.add_child(child)
+        return node
+
+    def _do_parse_leaf(self, name, data, parent):
+        node = TreeNode(name, parent)
+        node.update_node_data(data)
+        self._record_node(name, node)
+        return node
+
+    def _do_parse_dict(self, name, data, parent):
+        node = TreeNode(name, parent)
+        all_keys = self._get_all_keys(data)
+        for key in all_keys:
+            values = self._get_not_none_values(data, key)
+            if not values:  # all values are None
+                continue
+            child_node = self._do_parse(key, values, node)
+            node.add_child(child_node)
+        self._record_node(name, node)
+        return node
+
+    def _get_all_keys(self, data):
+        '''Get all keys in a list of dict'''
+        return set().union(*(d.keys() for d in data))
+
+    def _get_not_none_values(self, data, key):
+        '''Get all not None values in a list of dict'''
+        return [d.get(key) for d in data if d.get(key, None) is not None]
+
+    def _record_node(self, name, node):
+        '''Recode name and node to a dict'''
+        if not node:
+            return
+        if name in self._all_nodes:
+            self._all_nodes[name].append(node)
+        else:
+            self._all_nodes[name] = [node]
