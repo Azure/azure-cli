@@ -259,8 +259,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql server audit-policy',
                             server_blob_auditing_policies_operations,
-                            client_factory=get_sql_server_blob_auditing_policies_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_server_blob_auditing_policies_operations) as g:
 
         g.show_command('show', 'get')
         g.generic_update_command('update',

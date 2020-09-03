@@ -64,13 +64,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:49:07 GMT
+      - Mon, 24 Aug 2020 13:13:39 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Mon, 20 Jul 2020 05:54:07 GMT
+      - Mon, 24 Aug 2020 13:18:39 GMT
       source-age:
-      - '33'
+      - '79'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -81,19 +81,19 @@ interactions:
       x-cache:
       - MISS, HIT
       x-cache-hits:
-      - 0, 1
+      - 0, 57
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 23ba57f7dbd6a60522d2b39d3efee272f6fe0476
+      - a0627acaf3642ff806213a76cde0da502cc9e1c0
       x-frame-options:
       - deny
       x-github-request-id:
-      - 7D50:7C67:29B570:2CAD32:5F152231
+      - 5C86:7ACB:6AADA:7B5C8:5F43B8CB
       x-served-by:
-      - cache-sin18027-SIN
+      - cache-sin18031-SIN
       x-timer:
-      - S1595224148.993682,VS0,VE1
+      - S1598274820.710019,VS0,VE0
       x-xss-protection:
       - 1; mode=block
     status:
@@ -112,10 +112,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-storage/11.1.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -131,7 +131,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:49:08 GMT
+      - Mon, 24 Aug 2020 13:13:39 GMT
       expires:
       - '-1'
       pragma:
@@ -158,10 +158,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -177,7 +177,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:49:08 GMT
+      - Mon, 24 Aug 2020 13:13:40 GMT
       expires:
       - '-1'
       pragma:
@@ -192,10 +192,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
       "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
-      [{"type": "Microsoft.Storage/storageAccounts", "name": "vhdstorage1bb0199cf18723",
+      [{"type": "Microsoft.Storage/storageAccounts", "name": "vhdstorage8ae09710814007",
       "apiVersion": "2015-06-15", "location": "westus", "tags": {}, "dependsOn": [],
       "properties": {"accountType": "Premium_LRS"}}, {"name": "vm-datadisk-testVNET",
       "type": "Microsoft.Network/virtualNetworks", "location": "westus", "apiVersion":
@@ -203,32 +203,28 @@ interactions:
       ["10.0.0.0/16"]}, "subnets": [{"name": "vm-datadisk-testSubnet", "properties":
       {"addressPrefix": "10.0.0.0/24"}}]}}, {"type": "Microsoft.Network/networkSecurityGroups",
       "name": "vm-datadisk-testNSG", "apiVersion": "2015-06-15", "location": "westus",
-      "tags": {}, "dependsOn": [], "properties": {"securityRules": [{"name": "default-allow-ssh",
-      "properties": {"protocol": "Tcp", "sourcePortRange": "*", "destinationPortRange":
-      "22", "sourceAddressPrefix": "*", "destinationAddressPrefix": "*", "access":
-      "Allow", "priority": 1000, "direction": "Inbound"}}]}}, {"apiVersion": "2018-01-01",
-      "type": "Microsoft.Network/publicIPAddresses", "name": "vm-datadisk-testPublicIP",
-      "location": "westus", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
-      null}}, {"apiVersion": "2015-06-15", "type": "Microsoft.Network/networkInterfaces",
-      "name": "vm-datadisk-testVMNic", "location": "westus", "tags": {}, "dependsOn":
-      ["Microsoft.Network/virtualNetworks/vm-datadisk-testVNET", "Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG",
-      "Microsoft.Network/publicIpAddresses/vm-datadisk-testPublicIP"], "properties":
-      {"ipConfigurations": [{"name": "ipconfigvm-datadisk-test", "properties": {"privateIPAllocationMethod":
-      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/virtualNetworks/vm-datadisk-testVNET/subnets/vm-datadisk-testSubnet"},
+      "tags": {}, "dependsOn": []}, {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      "name": "vm-datadisk-testPublicIP", "location": "westus", "tags": {}, "dependsOn":
+      [], "properties": {"publicIPAllocationMethod": null}}, {"apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces", "name": "vm-datadisk-testVMNic",
+      "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/virtualNetworks/vm-datadisk-testVNET",
+      "Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG", "Microsoft.Network/publicIpAddresses/vm-datadisk-testPublicIP"],
+      "properties": {"ipConfigurations": [{"name": "ipconfigvm-datadisk-test", "properties":
+      {"privateIPAllocationMethod": "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/virtualNetworks/vm-datadisk-testVNET/subnets/vm-datadisk-testSubnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/publicIPAddresses/vm-datadisk-testPublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG"}}},
       {"apiVersion": "2020-06-01", "type": "Microsoft.Compute/virtualMachines", "name":
-      "vm-datadisk-test", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Storage/storageAccounts/vhdstorage1bb0199cf18723",
+      "vm-datadisk-test", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Storage/storageAccounts/vhdstorage8ae09710814007",
       "Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"], "properties":
       {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile": {"networkInterfaces":
       [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"}]},
-      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": "osdisk_1bb0199cf1",
-      "caching": "ReadWrite", "vhd": {"uri": "https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd"}},
+      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": "osdisk_8ae0971081",
+      "caching": "ReadWrite", "vhd": {"uri": "https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd"}},
       "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer", "sku":
       "18.04-LTS", "version": "latest"}}, "osProfile": {"computerName": "vm-datadisk-test",
-      "adminUsername": "ubuntu", "adminPassword": "[parameters(\''adminPassword\'')]"}}}],
+      "adminUsername": "ubuntu", "adminPassword": "[parameters(''adminPassword'')]"}}}],
       "outputs": {}}, "parameters": {"adminPassword": {"value": "testPassword0"}},
-      "mode": "Incremental"}}'''
+      "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -239,25 +235,25 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3872'
+      - '3595'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/vm_deploy_txdfnUAA5ZvnPhh8eDfhQ3TatQjAhChE","name":"vm_deploy_txdfnUAA5ZvnPhh8eDfhQ3TatQjAhChE","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9632177501797868700","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-07-20T05:49:12.9636963Z","duration":"PT2.5826199S","correlationId":"b8a0b62f-1d06-4b6d-a28f-b31aca7a8262","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/virtualNetworks/vm-datadisk-testVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-datadisk-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-datadisk-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/publicIPAddresses/vm-datadisk-testPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-datadisk-testPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-datadisk-testVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Storage/storageAccounts/vhdstorage1bb0199cf18723","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vhdstorage1bb0199cf18723"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-datadisk-testVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-datadisk-test"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/vm_deploy_y6C4TV1R0l6iSHui1AU6N77wY7hF5xjD","name":"vm_deploy_y6C4TV1R0l6iSHui1AU6N77wY7hF5xjD","type":"Microsoft.Resources/deployments","properties":{"templateHash":"3870669331026609916","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-08-24T13:13:44.9089839Z","duration":"PT2.7600398S","correlationId":"27f90ce3-8e80-42db-bf8c-8cb86d99939e","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/virtualNetworks/vm-datadisk-testVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-datadisk-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-datadisk-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/publicIPAddresses/vm-datadisk-testPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-datadisk-testPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-datadisk-testVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Storage/storageAccounts/vhdstorage8ae09710814007","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vhdstorage8ae09710814007"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-datadisk-testVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-datadisk-test"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/vm_deploy_txdfnUAA5ZvnPhh8eDfhQ3TatQjAhChE/operationStatuses/08586063827350965571?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/vm_deploy_y6C4TV1R0l6iSHui1AU6N77wY7hF5xjD/operationStatuses/08586033320633286934?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -265,7 +261,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:49:13 GMT
+      - Mon, 24 Aug 2020 13:13:45 GMT
       expires:
       - '-1'
       pragma:
@@ -275,7 +271,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1170'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -292,12 +288,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586063827350965571?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586033320633286934?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -309,7 +305,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:49:44 GMT
+      - Mon, 24 Aug 2020 13:14:16 GMT
       expires:
       - '-1'
       pragma:
@@ -336,12 +332,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586063827350965571?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586033320633286934?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -353,7 +349,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:14 GMT
+      - Mon, 24 Aug 2020 13:14:47 GMT
       expires:
       - '-1'
       pragma:
@@ -380,12 +376,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586063827350965571?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586033320633286934?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -397,7 +393,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:45 GMT
+      - Mon, 24 Aug 2020 13:15:17 GMT
       expires:
       - '-1'
       pragma:
@@ -424,15 +420,15 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/vm_deploy_txdfnUAA5ZvnPhh8eDfhQ3TatQjAhChE","name":"vm_deploy_txdfnUAA5ZvnPhh8eDfhQ3TatQjAhChE","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9632177501797868700","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-20T05:50:40.5113942Z","duration":"PT1M30.1303178S","correlationId":"b8a0b62f-1d06-4b6d-a28f-b31aca7a8262","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/virtualNetworks/vm-datadisk-testVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-datadisk-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-datadisk-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/publicIPAddresses/vm-datadisk-testPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-datadisk-testPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-datadisk-testVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Storage/storageAccounts/vhdstorage1bb0199cf18723","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vhdstorage1bb0199cf18723"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-datadisk-testVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-datadisk-test"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/publicIPAddresses/vm-datadisk-testPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/virtualNetworks/vm-datadisk-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Storage/storageAccounts/vhdstorage1bb0199cf18723"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Resources/deployments/vm_deploy_y6C4TV1R0l6iSHui1AU6N77wY7hF5xjD","name":"vm_deploy_y6C4TV1R0l6iSHui1AU6N77wY7hF5xjD","type":"Microsoft.Resources/deployments","properties":{"templateHash":"3870669331026609916","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-08-24T13:14:58.9910752Z","duration":"PT1M16.8421311S","correlationId":"27f90ce3-8e80-42db-bf8c-8cb86d99939e","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/virtualNetworks/vm-datadisk-testVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-datadisk-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-datadisk-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/publicIPAddresses/vm-datadisk-testPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-datadisk-testPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-datadisk-testVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Storage/storageAccounts/vhdstorage8ae09710814007","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vhdstorage8ae09710814007"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-datadisk-testVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-datadisk-test"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/publicIPAddresses/vm-datadisk-testPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/virtualNetworks/vm-datadisk-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Storage/storageAccounts/vhdstorage8ae09710814007"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -441,7 +437,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:46 GMT
+      - Mon, 24 Aug 2020 13:15:18 GMT
       expires:
       - '-1'
       pragma:
@@ -468,10 +464,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -480,14 +476,14 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n      \"adminUsername\":
@@ -501,15 +497,15 @@ interactions:
         \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2020-07-20T05:50:45+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"osdisk_1bb0199cf1\",\r\n
+        \"2020-08-24T13:15:15+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"osdisk_8ae0971081\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2020-07-20T05:49:50.1251341+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2020-08-24T13:14:17.5818163+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2020-07-20T05:50:37.4535414+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2020-08-24T13:14:57.1911845+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -521,7 +517,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:47 GMT
+      - Mon, 24 Aug 2020 13:15:19 GMT
       expires:
       - '-1'
       pragma:
@@ -538,7 +534,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3950,Microsoft.Compute/LowCostGet30Min;31499
+      - Microsoft.Compute/LowCostGet3Min;3996,Microsoft.Compute/LowCostGet30Min;31987
     status:
       code: 200
       message: OK
@@ -555,10 +551,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -566,12 +562,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-testVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic\",\r\n
-        \ \"etag\": \"W/\\\"8893f647-ce2e-4856-aa69-e0a96149a12f\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"eefc449b-7bd2-4844-bf6d-67e89be7f190\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"e32e9f31-c788-4bd7-838e-7b5a7473e42f\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"c5c76e8c-e5bd-4939-bc9a-964b516b7a17\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-datadisk-test\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic/ipConfigurations/ipconfigvm-datadisk-test\",\r\n
-        \       \"etag\": \"W/\\\"8893f647-ce2e-4856-aa69-e0a96149a12f\\\"\",\r\n
+        \       \"etag\": \"W/\\\"eefc449b-7bd2-4844-bf6d-67e89be7f190\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -580,8 +576,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"y0ljdgighlauzi3y04odtyntae.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-22-48-06-D6-26\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"r4mhrhvqkp1elor2tpgkqdrivb.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-02-EB-45\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkSecurityGroups/vm-datadisk-testNSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -595,9 +591,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:47 GMT
+      - Mon, 24 Aug 2020 13:15:19 GMT
       etag:
-      - W/"8893f647-ce2e-4856-aa69-e0a96149a12f"
+      - W/"eefc449b-7bd2-4844-bf6d-67e89be7f190"
       expires:
       - '-1'
       pragma:
@@ -614,7 +610,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fd0260ba-7d0d-4c87-b771-df78a241090c
+      - 7372841a-c735-4b3c-b99e-135cff1d4190
     status:
       code: 200
       message: OK
@@ -631,10 +627,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --location -n --admin-username --image --admin-password --authentication-type
-        --use-unmanaged-disk
+        --use-unmanaged-disk --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -642,11 +638,11 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-testPublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/publicIPAddresses/vm-datadisk-testPublicIP\",\r\n
-        \ \"etag\": \"W/\\\"02321093-41b3-4eef-b046-cae488ea2657\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"8827e6f6-d507-4fa6-a909-72a0b7dc839e\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"e3c1b7de-5ed1-4f95-9e0b-9405e8f4457f\",\r\n
-        \   \"ipAddress\": \"104.210.56.94\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
-        \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"1d8ce577-5f7e-4595-86f0-c363ff5810c1\",\r\n
+        \   \"ipAddress\": \"104.42.224.199\",\r\n    \"publicIPAddressVersion\":
+        \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic/ipConfigurations/ipconfigvm-datadisk-test\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
@@ -654,13 +650,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1049'
+      - '1050'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:47 GMT
+      - Mon, 24 Aug 2020 13:15:19 GMT
       etag:
-      - W/"02321093-41b3-4eef-b046-cae488ea2657"
+      - W/"8827e6f6-d507-4fa6-a909-72a0b7dc839e"
       expires:
       - '-1'
       pragma:
@@ -677,7 +673,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 17e9cb8b-fd75-40a7-bd56-390478098949
+      - 0de3098b-e555-4534-a0af-40c2dc5e162e
     status:
       code: 200
       message: OK
@@ -695,8 +691,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -705,14 +701,14 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n      \"adminUsername\":
@@ -729,7 +725,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:48 GMT
+      - Mon, 24 Aug 2020 13:15:21 GMT
       expires:
       - '-1'
       pragma:
@@ -746,7 +742,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3949,Microsoft.Compute/LowCostGet30Min;31498
+      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31986
     status:
       code: 200
       message: OK
@@ -764,8 +760,8 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n --vhd --new --caching --size-gb --lun
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -774,14 +770,14 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n      \"adminUsername\":
@@ -798,7 +794,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:49 GMT
+      - Mon, 24 Aug 2020 13:15:22 GMT
       expires:
       - '-1'
       pragma:
@@ -815,22 +811,22 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3948,Microsoft.Compute/LowCostGet30Min;31497
+      - Microsoft.Compute/LowCostGet3Min;3994,Microsoft.Compute/LowCostGet30Min;31985
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"location": "westus", "tags": {}, "properties": {"hardwareProfile":
-      {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher":
-      "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "latest"},
-      "osDisk": {"osType": "Linux", "name": "osdisk_1bb0199cf1", "vhd": {"uri": "https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd"},
+    body: '{"location": "westus", "tags": {}, "properties": {"hardwareProfile": {"vmSize":
+      "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher": "Canonical",
+      "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "latest"}, "osDisk":
+      {"osType": "Linux", "name": "osdisk_8ae0971081", "vhd": {"uri": "https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd"},
       "caching": "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30}, "dataDisks":
-      [{"lun": 1, "name": "d7", "vhd": {"uri": "https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd"},
+      [{"lun": 1, "name": "d7", "vhd": {"uri": "https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd"},
       "caching": "ReadWrite", "createOption": "Empty", "diskSizeGB": 8}]}, "osProfile":
       {"computerName": "vm-datadisk-test", "adminUsername": "ubuntu", "linuxConfiguration":
       {"disablePasswordAuthentication": false, "provisionVMAgent": true}, "secrets":
       [], "allowExtensionOperations": true, "requireGuestProvisionSignal": true},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"}]}}}'''
+      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"}]}}}'
     headers:
       Accept:
       - application/json
@@ -847,8 +843,8 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n --vhd --new --caching --size-gb --lun
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: PUT
@@ -857,18 +853,18 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
         1,\r\n          \"name\": \"d7\",\r\n          \"createOption\": \"Empty\",\r\n
-        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd\"\r\n
+        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd\"\r\n
         \         },\r\n          \"caching\": \"ReadWrite\",\r\n          \"diskSizeGB\":
         8,\r\n          \"toBeDetached\": false\r\n        }\r\n      ]\r\n    },\r\n
         \   \"osProfile\": {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n
@@ -882,7 +878,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/ba3179d8-87d1-4d3d-99ef-c7da60fa7eac?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/3f6f1e7d-bb09-4791-8b07-763fb4ada44f?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -890,7 +886,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:50:53 GMT
+      - Mon, 24 Aug 2020 13:15:27 GMT
       expires:
       - '-1'
       pragma:
@@ -907,9 +903,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;235,Microsoft.Compute/PutVM30Min;1133
+      - Microsoft.Compute/PutVM3Min;238,Microsoft.Compute/PutVM30Min;1198
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -927,15 +923,15 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n --vhd --new --caching --size-gb --lun
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/ba3179d8-87d1-4d3d-99ef-c7da60fa7eac?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/3f6f1e7d-bb09-4791-8b07-763fb4ada44f?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-07-20T05:50:50.5473169+00:00\",\r\n  \"endTime\":
-        \"2020-07-20T05:50:58.7192775+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"ba3179d8-87d1-4d3d-99ef-c7da60fa7eac\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-08-24T13:15:23.4724591+00:00\",\r\n  \"endTime\":
+        \"2020-08-24T13:15:28.5974739+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"3f6f1e7d-bb09-4791-8b07-763fb4ada44f\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -944,7 +940,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:51:23 GMT
+      - Mon, 24 Aug 2020 13:15:57 GMT
       expires:
       - '-1'
       pragma:
@@ -961,7 +957,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14944,Microsoft.Compute/GetOperation30Min;29652
+      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29996
     status:
       code: 200
       message: OK
@@ -979,26 +975,26 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n --vhd --new --caching --size-gb --lun
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
         1,\r\n          \"name\": \"d7\",\r\n          \"createOption\": \"Empty\",\r\n
-        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd\"\r\n
+        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd\"\r\n
         \         },\r\n          \"caching\": \"ReadWrite\",\r\n          \"diskSizeGB\":
         8,\r\n          \"toBeDetached\": false\r\n        }\r\n      ]\r\n    },\r\n
         \   \"osProfile\": {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n
@@ -1016,7 +1012,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:51:23 GMT
+      - Mon, 24 Aug 2020 13:15:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1033,7 +1029,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3945,Microsoft.Compute/LowCostGet30Min;31487
+      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31982
     status:
       code: 200
       message: OK
@@ -1051,8 +1047,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -1061,18 +1057,18 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
         1,\r\n          \"name\": \"d7\",\r\n          \"createOption\": \"Empty\",\r\n
-        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd\"\r\n
+        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd\"\r\n
         \         },\r\n          \"caching\": \"ReadWrite\",\r\n          \"diskSizeGB\":
         8,\r\n          \"toBeDetached\": false\r\n        }\r\n      ]\r\n    },\r\n
         \   \"osProfile\": {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n
@@ -1090,7 +1086,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:51:25 GMT
+      - Mon, 24 Aug 2020 13:15:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1107,7 +1103,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3944,Microsoft.Compute/LowCostGet30Min;31486
+      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31981
     status:
       code: 200
       message: OK
@@ -1125,8 +1121,8 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -1135,18 +1131,18 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
         1,\r\n          \"name\": \"d7\",\r\n          \"createOption\": \"Empty\",\r\n
-        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd\"\r\n
+        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd\"\r\n
         \         },\r\n          \"caching\": \"ReadWrite\",\r\n          \"diskSizeGB\":
         8,\r\n          \"toBeDetached\": false\r\n        }\r\n      ]\r\n    },\r\n
         \   \"osProfile\": {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n
@@ -1164,7 +1160,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:51:25 GMT
+      - Mon, 24 Aug 2020 13:15:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1181,20 +1177,20 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3943,Microsoft.Compute/LowCostGet30Min;31485
+      - Microsoft.Compute/LowCostGet3Min;3989,Microsoft.Compute/LowCostGet30Min;31980
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"location": "westus", "tags": {}, "properties": {"hardwareProfile":
-      {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher":
-      "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "latest"},
-      "osDisk": {"osType": "Linux", "name": "osdisk_1bb0199cf1", "vhd": {"uri": "https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd"},
+    body: '{"location": "westus", "tags": {}, "properties": {"hardwareProfile": {"vmSize":
+      "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher": "Canonical",
+      "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "latest"}, "osDisk":
+      {"osType": "Linux", "name": "osdisk_8ae0971081", "vhd": {"uri": "https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd"},
       "caching": "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30}, "dataDisks":
       []}, "osProfile": {"computerName": "vm-datadisk-test", "adminUsername": "ubuntu",
       "linuxConfiguration": {"disablePasswordAuthentication": false, "provisionVMAgent":
       true}, "secrets": [], "allowExtensionOperations": true, "requireGuestProvisionSignal":
-      true}, "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"}]}}}'''
+      true}, "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"}]}}}'
     headers:
       Accept:
       - application/json
@@ -1211,8 +1207,8 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: PUT
@@ -1221,18 +1217,18 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
         1,\r\n          \"name\": \"d7\",\r\n          \"createOption\": \"Empty\",\r\n
-        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd\"\r\n
+        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd\"\r\n
         \         },\r\n          \"caching\": \"ReadWrite\",\r\n          \"diskSizeGB\":
         8,\r\n          \"toBeDetached\": true\r\n        }\r\n      ]\r\n    },\r\n
         \   \"osProfile\": {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n
@@ -1246,7 +1242,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/9f667316-c416-4b21-8f49-a81cfccfe8f1?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/abc2ebce-4347-4ddd-be0f-927651295d3c?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1254,7 +1250,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:51:31 GMT
+      - Mon, 24 Aug 2020 13:16:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1271,9 +1267,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;236,Microsoft.Compute/PutVM30Min;1132
+      - Microsoft.Compute/PutVM3Min;237,Microsoft.Compute/PutVM30Min;1197
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1183'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -1291,15 +1287,15 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/9f667316-c416-4b21-8f49-a81cfccfe8f1?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/abc2ebce-4347-4ddd-be0f-927651295d3c?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-07-20T05:51:28.4382105+00:00\",\r\n  \"endTime\":
-        \"2020-07-20T05:51:41.2195354+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"9f667316-c416-4b21-8f49-a81cfccfe8f1\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-08-24T13:16:00.9568358+00:00\",\r\n  \"endTime\":
+        \"2020-08-24T13:16:12.2693351+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"abc2ebce-4347-4ddd-be0f-927651295d3c\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1308,7 +1304,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:52:00 GMT
+      - Mon, 24 Aug 2020 13:16:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1325,7 +1321,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14948,Microsoft.Compute/GetOperation30Min;29642
+      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29994
     status:
       code: 200
       message: OK
@@ -1343,22 +1339,22 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n      \"adminUsername\":
@@ -1375,7 +1371,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:52:01 GMT
+      - Mon, 24 Aug 2020 13:16:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1392,7 +1388,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3948,Microsoft.Compute/LowCostGet30Min;31472
+      - Microsoft.Compute/LowCostGet3Min;3986,Microsoft.Compute/LowCostGet30Min;31977
     status:
       code: 200
       message: OK
@@ -1410,8 +1406,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -1420,14 +1416,14 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n      \"adminUsername\":
@@ -1444,7 +1440,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:52:02 GMT
+      - Mon, 24 Aug 2020 13:16:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1461,7 +1457,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3945,Microsoft.Compute/LowCostGet30Min;31469
+      - Microsoft.Compute/LowCostGet3Min;3985,Microsoft.Compute/LowCostGet30Min;31976
     status:
       code: 200
       message: OK
@@ -1479,8 +1475,8 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n --vhd --caching
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -1489,14 +1485,14 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n      \"adminUsername\":
@@ -1513,7 +1509,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:52:03 GMT
+      - Mon, 24 Aug 2020 13:16:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1530,22 +1526,22 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3944,Microsoft.Compute/LowCostGet30Min;31468
+      - Microsoft.Compute/LowCostGet3Min;3984,Microsoft.Compute/LowCostGet30Min;31975
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"location": "westus", "tags": {}, "properties": {"hardwareProfile":
-      {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher":
-      "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "latest"},
-      "osDisk": {"osType": "Linux", "name": "osdisk_1bb0199cf1", "vhd": {"uri": "https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd"},
+    body: '{"location": "westus", "tags": {}, "properties": {"hardwareProfile": {"vmSize":
+      "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher": "Canonical",
+      "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "latest"}, "osDisk":
+      {"osType": "Linux", "name": "osdisk_8ae0971081", "vhd": {"uri": "https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd"},
       "caching": "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30}, "dataDisks":
-      [{"lun": 0, "name": "d7", "vhd": {"uri": "https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd"},
+      [{"lun": 0, "name": "d7", "vhd": {"uri": "https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd"},
       "caching": "ReadOnly", "createOption": "Attach"}]}, "osProfile": {"computerName":
       "vm-datadisk-test", "adminUsername": "ubuntu", "linuxConfiguration": {"disablePasswordAuthentication":
       false, "provisionVMAgent": true}, "secrets": [], "allowExtensionOperations":
       true, "requireGuestProvisionSignal": true}, "networkProfile": {"networkInterfaces":
-      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"}]}}}'''
+      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Network/networkInterfaces/vm-datadisk-testVMNic"}]}}}'
     headers:
       Accept:
       - application/json
@@ -1562,8 +1558,8 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n --vhd --caching
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: PUT
@@ -1572,18 +1568,18 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
         0,\r\n          \"name\": \"d7\",\r\n          \"createOption\": \"Attach\",\r\n
-        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd\"\r\n
+        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd\"\r\n
         \         },\r\n          \"caching\": \"ReadOnly\",\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-datadisk-test\",\r\n      \"adminUsername\": \"ubuntu\",\r\n      \"linuxConfiguration\":
@@ -1596,7 +1592,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/191fe0b4-19d4-4e82-ae05-e7f54b085055?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/f392e5c1-ebbe-4519-ad7d-3fed394de6c5?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1604,7 +1600,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:52:07 GMT
+      - Mon, 24 Aug 2020 13:16:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1621,9 +1617,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;235,Microsoft.Compute/PutVM30Min;1131
+      - Microsoft.Compute/PutVM3Min;236,Microsoft.Compute/PutVM30Min;1196
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1168'
+      - '1195'
     status:
       code: 200
       message: OK
@@ -1641,15 +1637,15 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n --vhd --caching
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/191fe0b4-19d4-4e82-ae05-e7f54b085055?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/f392e5c1-ebbe-4519-ad7d-3fed394de6c5?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-07-20T05:52:05.7509193+00:00\",\r\n  \"endTime\":
-        \"2020-07-20T05:52:11.3915931+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"191fe0b4-19d4-4e82-ae05-e7f54b085055\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-08-24T13:16:37.2693251+00:00\",\r\n  \"endTime\":
+        \"2020-08-24T13:16:42.6287118+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"f392e5c1-ebbe-4519-ad7d-3fed394de6c5\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1658,7 +1654,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:52:38 GMT
+      - Mon, 24 Aug 2020 13:17:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1675,7 +1671,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14942,Microsoft.Compute/GetOperation30Min;29630
+      - Microsoft.Compute/GetOperation3Min;14992,Microsoft.Compute/GetOperation30Min;29992
     status:
       code: 200
       message: OK
@@ -1693,26 +1689,26 @@ interactions:
       ParameterSetName:
       - -g --vm-name -n --vhd --caching
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-datadisk-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-disk000001/providers/Microsoft.Compute/virtualMachines/vm-datadisk-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b753a6f2-92ab-4846-9197-df56f9a3a404\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"5519761c-1413-44ef-b56e-2e1921a45d40\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007160\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"osdisk_1bb0199cf1\",\r\n        \"createOption\":
-        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/osdisk_1bb0199cf1.vhd\"\r\n
+        \"18.04.202008180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"osdisk_8ae0971081\",\r\n        \"createOption\":
+        \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/osdisk_8ae0971081.vhd\"\r\n
         \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": [\r\n        {\r\n          \"lun\":
         0,\r\n          \"name\": \"d7\",\r\n          \"createOption\": \"Attach\",\r\n
-        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage1bb0199cf18723.blob.core.windows.net/vhds/d7.vhd\"\r\n
+        \         \"vhd\": {\r\n            \"uri\": \"https://vhdstorage8ae09710814007.blob.core.windows.net/vhds/d7.vhd\"\r\n
         \         },\r\n          \"caching\": \"ReadOnly\",\r\n          \"diskSizeGB\":
         8,\r\n          \"toBeDetached\": false\r\n        }\r\n      ]\r\n    },\r\n
         \   \"osProfile\": {\r\n      \"computerName\": \"vm-datadisk-test\",\r\n
@@ -1730,7 +1726,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 20 Jul 2020 05:52:38 GMT
+      - Mon, 24 Aug 2020 13:17:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1747,7 +1743,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3945,Microsoft.Compute/LowCostGet30Min;31461
+      - Microsoft.Compute/LowCostGet3Min;3980,Microsoft.Compute/LowCostGet30Min;31971
     status:
       code: 200
       message: OK

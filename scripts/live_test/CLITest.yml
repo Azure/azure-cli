@@ -7,13 +7,13 @@ trigger:
     exclude:
     - '*'
 
-schedules:
-- cron: "0 18 * * 5"
-  displayName: Weekly Friday test
-  branches:
-    include:
-    - CLITest
-  always: true
+#schedules:
+#- cron: "0 18 * * 5"
+#  displayName: Weekly Friday test
+#  branches:
+#    include:
+#    - CLITest
+#  always: true
 
 jobs:
 - job: LiveTestPython38
@@ -221,6 +221,7 @@ jobs:
 
 - job: SendEmail
   displayName: Send email
+  timeoutInMinutes: 180
   dependsOn: LiveTestPython38
   condition: succeededOrFailed()
   steps:
@@ -246,7 +247,7 @@ jobs:
         python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)"
         # python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
         # Clean resources
-        if [[ "$(USER_LIVE)" == "--live" ]]; then
+        if [[ "$(USER_LIVE)" == "--live" && "$(USER_TARGET)" == "" ]]; then
           python /home/vsts/work/1/s/scripts/live_test/clean.py
         fi
 #    - task: AzureCLI@2
