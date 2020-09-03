@@ -351,6 +351,7 @@ class Cloud:  # pylint: disable=too-few-public-methods
                    endpoints=CloudEndpoints(**json_str['endpoints']),
                    suffixes=CloudSuffixes(**json_str['suffixes']))
 
+
 AZURE_PUBLIC_CLOUD = Cloud(
     'AzureCloud',
     endpoints=CloudEndpoints(
@@ -466,32 +467,43 @@ AZURE_GERMAN_CLOUD = Cloud(
         postgresql_server_endpoint='.postgres.database.cloudapi.de',
         mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
 
-KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
-if 'ARM_CLOUD_METADATA_URL' in os.environ:
-    from azure.cli.core._session import CLOUD_ENDPOINTS
-    endpoints_file = os.path.join(GLOBAL_CONFIG_DIR, 'cloudEndpoints.json')
-    CLOUD_ENDPOINTS.load(endpoints_file)
-    if CLOUD_ENDPOINTS['clouds']:
-        try:
-            KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in CLOUD_ENDPOINTS['clouds']]
-            logger.info("Cloud endpoints loaded from local file: %s", endpoints_file)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.info("Failed to parse cloud endpoints from local file. CLI will clean it and reload from ARM_CLOUD_METADATA_URL. %s", str(ex))
-            CLOUD_ENDPOINTS['clouds'] = {}
+def get_known_clouds():
+    if 'ARM_CLOUD_METADATA_URL' in os.environ:
+        from azure.cli.core._session import CLOUD_ENDPOINTS
+        endpoints_file = os.path.join(GLOBAL_CONFIG_DIR, 'cloudEndpoints.json')
+        CLOUD_ENDPOINTS.load(endpoints_file)
+        clouds = []
+        if CLOUD_ENDPOINTS['clouds']:
+            try:
+                clouds = [Cloud.fromJSON(c) for c in CLOUD_ENDPOINTS['clouds']]
+                logger.info("Cloud endpoints loaded from local file: %s", endpoints_file)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info("Failed to parse cloud endpoints from local file. CLI will clean it and reload from ARM_CLOUD_METADATA_URL. %s", str(ex))
+                CLOUD_ENDPOINTS['clouds'] = {}
 
-    if not CLOUD_ENDPOINTS['clouds']:
-        try:
-            arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
-            cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
-            if 'AzureCloud' in cli_cloud_dict:
-                cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
-            KNOWN_CLOUDS = list(cli_cloud_dict.values())
-            CLOUD_ENDPOINTS['clouds'] = [c.toJSON() for c in KNOWN_CLOUDS]
-            logger.info("Cloud endpoints loaded from ARM_CLOUD_METADATA_URL: %s", os.getenv('ARM_CLOUD_METADATA_URL'))
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
-            raise ex
+        if not CLOUD_ENDPOINTS['clouds']:
+            try:
+                arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
+                cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
+                if 'AzureCloud' in cli_cloud_dict:
+                    cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
+                clouds = list(cli_cloud_dict.values())
+                CLOUD_ENDPOINTS['clouds'] = [c.toJSON() for c in clouds]
+                logger.info("Cloud endpoints loaded from ARM_CLOUD_METADATA_URL: %s", os.getenv('ARM_CLOUD_METADATA_URL'))
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
+                raise ex
+        return clouds
+    return [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+
+
+KNOWN_CLOUDS = get_known_clouds()
+
+
+def refresh_known_clouds():
+    global KNOWN_CLOUDS  # pylint:disable=global-statement
+    KNOWN_CLOUDS = get_known_clouds()
 
 
 def _set_active_cloud(cli_ctx, cloud_name):
@@ -507,12 +519,12 @@ def get_active_cloud_name(cli_ctx):
         _set_active_cloud(cli_ctx, default_cloud_name)
         return default_cloud_name
 
+
 def get_default_cloud_name():
     """ Pick AzureCloud as the default cloud if it is available, otherwise pick the first in the list"""
     if AZURE_PUBLIC_CLOUD.name in [c.name for c in KNOWN_CLOUDS]:
         return AZURE_PUBLIC_CLOUD.name
-    else:
-        return KNOWN_CLOUDS[0].name
+    return KNOWN_CLOUDS[0].name
 
 
 def _get_cloud(cli_ctx, cloud_name):
