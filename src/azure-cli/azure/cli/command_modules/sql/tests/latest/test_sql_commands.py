@@ -713,8 +713,8 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='southeastasia')
+    @SqlServerPreparer(location='southeastasia')
     def test_sql_db_short_term_retention(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb"
 
@@ -722,7 +722,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
         print('Creating sql db...\n')
         self.cmd('sql db create -g {} -s {} -n {}'
                  .format(resource_group, server, database_name))
-    
+
         # Update arguments
         print('Updating arguments...\n')
         self.kwargs.update({
@@ -740,7 +740,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
             checks=[
                 self.check('resourceGroup', '{resource_group}'),
                 self.check('retentionDays', '{retention_days}'),
-                self.check('diffbackupintervalinhours', '{diffbackup_hours}')])
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours}')])
 
         # Test get short term retention policy on live database
         print('Testing sql db str-policy show...\n')
@@ -749,7 +749,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
             checks=[
                 self.check('resourceGroup', '{resource_group}'),
                 self.check('retentionDays', '{retention_days}'),
-                self.check('diffbackupintervalinhours', '{diffbackup_hours}')])
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours}')])
 
         # Delete by group/server/name
         print('Deleting sql db...\n')
