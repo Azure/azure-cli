@@ -202,6 +202,12 @@ def load_arguments(self, _):
         c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-json')
         c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
 
+        # VM profile
+        c.argument('vm_size', help='Size of the virtual machine used to build, customize and capture images. Omit or specify empty string to use the default (Standard_D1_v2)')
+        c.argument('os_disk_size', type=int, help='Size of the OS disk in GB. Omit or specify 0 to use Azure\'s default OS disk size')
+        c.argument('vnet', help='Name of VNET to deploy the build virtual machine. You should only specify it when subnet is a name')
+        c.argument('subnet', help='Name or ID of subnet to deploy the build virtual machine')
+
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
         c.argument('checksum', arg_type=ib_source_type)
@@ -805,7 +811,7 @@ def load_arguments(self, _):
                           "To enable Azure Hybrid Benefit for Windows Server, use 'Windows_Server'. " \
                           "To enable Multitenant Hosting Rights for Windows 10, use 'Windows_Client'. " \
                           "For more information see the Azure Windows VM online docs."
-            c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
+            c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'None']))
             c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
                        arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
                        help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")

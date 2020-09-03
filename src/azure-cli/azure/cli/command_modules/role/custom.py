@@ -99,7 +99,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         if not role_name:
             raise CLIError("please provide role name")
 
-    if not for_update and 'assignableScopes' not in role_definition:
+    if not for_update and not role_definition.get('assignableScopes', None):
         raise CLIError("please provide 'assignableScopes'")
 
     return worker.create_role_definition(definitions_client, role_name, role_id, role_definition)
@@ -664,7 +664,7 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
 
 
-def create_group(cmd, display_name, mail_nickname, force=None):
+def create_group(cmd, display_name, mail_nickname, force=None, description=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     # workaround to ensure idempotent even AAD graph service doesn't support it
@@ -678,8 +678,10 @@ def create_group(cmd, display_name, mail_nickname, force=None):
                 raise CLIError(err.format(', '.join([x.object_id for x in matches])))
             logger.warning('A group with the same display name and mail nickname already exists, returning.')
             return matches[0]
-    group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
-                                                             mail_nickname=mail_nickname))
+        group_create_parameters = GroupCreateParameters(display_name=display_name, mail_nickname=mail_nickname)
+        if description is not None:
+            group_create_parameters.additional_properties = {'description': description}
+    group = graph_client.groups.create(group_create_parameters)
 
     return group
 
@@ -1499,6 +1501,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
         with open(cert_file, "rt") as f:
             cert_string = f.read()
             cf.write(cert_string)
+    os.chmod(creds_file, 0o600)  # make the file readable/writable only for current user
 
     # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
     cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()
