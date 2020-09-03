@@ -59,15 +59,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if not self.cli_ctx.local_context.is_on:
             self.cmd('local-context on')
 
-        if database_engine == 'postgres':
-            sku_name = 'Standard_D4s_v3'
-            storage_size = 131072
-            version = 12
-        elif database_engine == 'mysql':
-            sku_name =  'Standard_B1MS'
-            storage_size = 10240
-            version = 5.7
+        sku_name = 'Standard_D2s_v3'
         backup_retention = 7
+        storage_size = 131072
 
         default_list_checks = [JMESPathCheck('version', version),
                        JMESPathCheck('sku.name', sku_name),
@@ -193,7 +187,7 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         admin_user = 'cloudsa'
         admin_password = 'SecretPassword@123'
-        sku_name = 'Standard_D4s_v3'
+        sku_name = 'Standard_D2s_v3'
         tier = 'GeneralPurpose'
         location = self.location
         location_check = self.location_check

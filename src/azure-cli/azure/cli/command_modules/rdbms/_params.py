@@ -177,10 +177,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     # Flexible-server
     def _flexible_server_params(command_group):
+
         server_name_setter_arg_type = CLIArgumentType(configured_default='web', metavar='NAME', 
                                         help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
                                         local_context_attribute=LocalContextAttribute(name='server_name', 
                                         actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        
+        server_name_getter_arg_type = CLIArgumentType(configured_default='web', metavar='NAME', 
+                                        help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                        local_context_attribute=LocalContextAttribute(name='server_name', 
+                                        actions=[LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
         server_name_arg_type = CLIArgumentType(configured_default='web', metavar='NAME', 
                                         help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
@@ -196,25 +202,38 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             # c.extra('generate_password', help='Generate a password.', arg_group='Authentication')
             # Add create mode as a parameter
             if command_group == 'postgres':
-                c.argument('tier', default='GeneralPurpose', options_list=['--tier'], help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-                c.argument('storage_mb', default='131072', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
-                c.argument('version', default='12', options_list=['--version'], help='Server major version.')              
-                c.argument('zone', options_list=['--zone, -z'], help='Availability zone into which to provision the resource.')
+                c.argument('tier', default='GeneralPurpose', options_list=['--tier'], 
+                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], 
+                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+                c.argument('storage_mb', default='131072', options_list=['--storage-size'], type=int, 
+                            help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
+                c.argument('version', default='12', options_list=['--version'], 
+                            help='Server major version.')              
+                c.argument('zone', options_list=['--zone, -z'], 
+                            help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
-                c.argument('tier', default='Burstable', help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-                c.argument('storage_mb', default='10240', options_list=['--storage-size'], type=int, help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
-                c.argument('version', default='5.7', options_list=['--version'], help='Server major version.')
-                c.argument('zone', options_list=['--zone, -z'], help='Availability zone into which to provision the resource.')
-                c.argument('public_network_access', options_list=['--public-network-access'], help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
-                c.argument('maintenance_window', options_list=['--maintenance-window'], help='Period of time designated for maintenance')
+                c.argument('tier', default='Burstable', 
+                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], 
+                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+                c.argument('storage_mb', default='10240', options_list=['--storage-size'], type=int, 
+                            help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
+                c.argument('version', default='5.7', options_list=['--version'], 
+                            help='Server major version.')
+                c.argument('zone', options_list=['--zone, -z'], 
+                            help='Availability zone into which to provision the resource.')
+                c.argument('public_network_access', options_list=['--public-network-access'], 
+                            help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
+                c.argument('maintenance_window', options_list=['--maintenance-window'], 
+                            help='Period of time designated for maintenance')
                 
                 
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             #c.argument('resource_group_name', default=create_random_resource_name(default_string), arg_type=resource_group_name_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))#, validator=get_default_location_from_resource_group)
-            c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication', help='Administrator username for the server. Once set, it cannot be changed. ')
+            c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication', 
+                        help='Administrator username for the server. Once set, it cannot be changed. ')
             #c.argument('administrator_login_password', options_list=['--admin-password, -p'], arg_group='Authentication')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
@@ -230,13 +249,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             # c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'], help='The IP address prefix to use when creating a new VNet in CIDR format. ')
             # c.argument('subnet_name', options_list=['--subnet'], help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If both vnet-name and subnet are omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created. The name must be between 1 to 80 characters. The name must begin with a letter or number, end with a letter, number, or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
             # c.argument('subnet_address_prefix', default='10.0.0.0/24', options_list=['--subnet-address-prefix'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. ')
-            c.argument('high_availability', options_list=['--high-availability'], help='Enable or disable high availability feature')     
+            c.argument('high_availability', options_list=['--high-availability'], 
+                        help='Enable or disable high availability feature')     
             c.ignore('database_name')
 
-            c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
-            c.argument('infrastructure_encryption', options_list=['--infrastructure-encryption'], help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
-            c.argument('ssl_enforcement', options_list=['--ssl-enforcement'], help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
-            c.argument('assign-identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+            c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], 
+                        help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
+            c.argument('infrastructure_encryption', options_list=['--infrastructure-encryption'], 
+                        help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
+            c.argument('ssl_enforcement', options_list=['--ssl-enforcement'], 
+                        help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
+            c.argument('assign_identity', options_list=['--assign-identity'], 
+                        help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
         for scope in ['delete', 'list', 'wait', 'show', 'restart', 'restore', 'update', 'start', 'stop']:
             argument_context_string = '{} flexible-server {}'.format(command_group, scope)
@@ -249,21 +273,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
+            c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_getter_arg_type)
             c.argument('force', options_list=['--force'], action='store_true',
                        help='Delete the server without prompt')
 
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
-            c.argument('server_name', options_list=['--name', '-n'], help='The name of the new server that is created by the restore command.')
-            c.argument('source_server', options_list=['--source-server'], help='The name or resource ID of the source server to restore from.')
-            c.argument('restore_point_in_time', options_list=['--restore-point-in-time'], help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+            c.argument('server_name', options_list=['--name', '-n'], 
+                        help='The name of the new server that is created by the restore command.')
+            c.argument('source_server', options_list=['--source-server'], 
+                        help='The name or resource ID of the source server to restore from.')
+            c.argument('restore_point_in_time', options_list=['--restore-point-in-time'], 
+                        help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
         
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
-            c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
-            c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
-            c.argument('storage_mb', options_list=['--storage-size'], help ='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.') #storage size? storage mb?
-            c.argument('tags', options_list=['--tags'], help='Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.')
-            c.argument('backup_retention', options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
+            c.argument('sku_name', options_list=['--sku-name'], 
+                        help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
+            c.argument('assign_identity', options_list=['--assign-identity'], 
+                        help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
+            c.argument('storage_mb', options_list=['--storage-size'], 
+                        help ='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.') #storage size? storage mb?
+            c.argument('tags', options_list=['--tags'], 
+                        help='Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.')
+            c.argument('backup_retention', options_list=['--backup-retention'], 
+                        help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
         
@@ -272,7 +305,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         for scope in ['list', 'set', 'show']:
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('ids', options_list=['--ids'], help='One or more resource IDs (space-delimited). It should be a complete resource ID containing all information of \'Resource Id\' arguments. You should provide either --ids or other \'Resource Id\' arguments.')
+                c.argument('ids', options_list=['--ids'], 
+                            help='One or more resource IDs (space-delimited). It should be a complete resource ID containing all information of \'Resource Id\' arguments. You should provide either --ids or other \'Resource Id\' arguments.')
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('json', options_list=['--json'], help='Output in json format. true/false')
@@ -280,11 +314,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         for scope in ['show', 'set']:
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'], required=True, help='The name of the server configuration') # N/A
+                c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'], required=True, 
+                            help='The name of the server configuration') # N/A
     
         with self.argument_context('{} flexible-server parameter set'.format(command_group)) as c:
-            c.argument('value', options_list=['--value', '-v'], help='Value of the configuration.') 
-            c.argument('source', options_list=['--source'], help='Source of the configuration.') 
+            c.argument('value', options_list=['--value', '-v'], 
+                        help='Value of the configuration.') 
+            c.argument('source', options_list=['--source'], 
+                        help='Source of the configuration.') 
             # c.argument('apply_to_group', options_list=['--apply-to-group'], help='') # N/A
          
 
@@ -298,22 +335,31 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name, -n'], help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
+                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name', '-n'],
+                            help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
         
         with self.argument_context('{} flexible-server firewall-rule create'.format(command_group)) as c:
-            c.argument('end_ip_address', options_list=['--end-ip-address'], help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
-            c.argument('start_ip_address', options_list=['--start-ip-address'], help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+            c.argument('end_ip_address', options_list=['--end-ip-address'], 
+                        help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+            c.argument('start_ip_address', options_list=['--start-ip-address'], 
+                        help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
         
         with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:
-             c.argument('prompt', options_list=['--prompt'], help='Turn prompts on/off.')
+            c.argument('prompt', options_list=['--prompt'], help='Turn confirmation prompt on/off. If off, the rule will be deleted without confirmation')
 
         with self.argument_context('{} flexible-server firewall-rule update'.format(command_group)) as c:
-            c.argument('add', options_list=['--add'], help='Add an object to a list of objects by specifying a path and key value pairs. Example: --add property.listProperty <key=value, string or JSON string>.')
-            c.argument('end_ip_address', options_list=['--end-ip-address'], help='When using \'set\' or \'add\', preserve string literals instead of attempting to convert to JSON.')
-            c.argument('force_string', options_list=['--force-string'], help='When using \'set\' or \'add\', preserve string literals instead of attempting to convert to JSON.')
-            c.argument('remove', options_list=['--remove'], help='Remove a property or an element from a list. Example: --remove property.list OR --remove propertyToRemove.')
-            c.argument('set', options_list=['--set'], help='Update an object by specifying a property path and value to set. Example: --set property1.property2=.')
-            c.argument('start_ip_address', options_list=['--start-ip-address'], help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+            c.argument('add', options_list=['--add'], 
+                        help='Add an object to a list of objects by specifying a path and key value pairs. Example: --add property.listProperty <key=value, string or JSON string>.')
+            c.argument('end_ip_address', options_list=['--end-ip-address'], 
+                        help='When using \'set\' or \'add\', preserve string literals instead of attempting to convert to JSON.')
+            c.argument('force_string', options_list=['--force-string'], 
+                        help='When using \'set\' or \'add\', preserve string literals instead of attempting to convert to JSON.')
+            c.argument('remove', options_list=['--remove'], 
+                        help='Remove a property or an element from a list. Example: --remove property.list OR --remove propertyToRemove.')
+            c.argument('set', options_list=['--set'], 
+                        help='Update an object by specifying a property path and value to set. Example: --set property1.property2=.')
+            c.argument('start_ip_address', options_list=['--start-ip-address'], 
+                        help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
         
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')

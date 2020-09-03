@@ -14,6 +14,7 @@ from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
+from .flexible_server_custom_common import user_confirmation
 
 logger = get_logger(__name__)
 
@@ -143,6 +144,20 @@ def _flexible_server_update_custom_func(instance,
                     type=postgresql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
             params.identity = instance.identity
     return params
+
+def _server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
+    confirm = force
+    if not force:
+        confirm = user_confirmation("Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=force)
+    if (confirm):
+        try:
+            result = client.delete(resource_group_name, server_name)
+            if cmd.cli_ctx.local_context.is_on:
+                local_context_file = cmd.cli_ctx.local_context._get_local_context_file()
+                local_context_file.remove_option('postgres flexible-server', 'server_name')
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error(ex)
+        return result
 
 
 # Wait command
