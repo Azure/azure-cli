@@ -109,7 +109,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('hdinsight autoscale', hdinsight_clusters_sdk, client_factory=cf_hdinsight_clusters) as g:
         g.custom_command('create', 'create_autoscale', supports_no_wait=True)
         g.custom_command('update', 'update_autoscale', supports_no_wait=True)
-        g.custom_command('show', 'show_autoscale')
+        g.custom_show_command('show', 'show_autoscale')
         g.custom_command('delete', 'delete_autoscale', supports_no_wait=True, confirmation=True)
         g.custom_command('list-timezones', 'list_timezones')
         g.wait_command('wait')
