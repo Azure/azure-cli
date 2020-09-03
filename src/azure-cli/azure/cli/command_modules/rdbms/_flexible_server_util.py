@@ -58,8 +58,11 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name)
 
 
 def generate_password(administrator_login_password):
+    import string,random
     if administrator_login_password is None:
-        administrator_login_password = str(uuid.uuid4())
+        passwordLength = 16
+        password_character = string.ascii_letters + string.digits + '!@#,?;:$&*' # Allowing limited punctuations to avoid unicode errors
+        pwd = "".join(random.choice(password_character) for i in range(passwordLength))
     return administrator_login_password
 
 
