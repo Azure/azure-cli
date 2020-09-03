@@ -17,7 +17,7 @@ def register_global_query_recommend_argument(cli_ctx):
     '''
     def handle_recommend_parameter(cli, **kwargs):   # pylint: disable=unused-argument
         args = kwargs['args']
-        if args._query_recommend is not None:  # pylint: disable=protected-access
+        if hasattr(args, '_query_recommend') and args._query_recommend is not None:  # pylint: disable=protected-access
             if cli_ctx.invocation.data['output'] == 'json':
                 cli_ctx.invocation.data['output'] = 'table'
 
@@ -35,8 +35,6 @@ def register_global_query_recommend_argument(cli_ctx):
 
     def register_query_recommend(cli, **kwargs):
         from knack.experimental import ExperimentalItem
-        commands_loader = kwargs.get('commands_loader')
-        cmd_tbl = commands_loader.command_table
         experimental_info = ExperimentalItem(cli.local_context.cli_ctx,
                                              object_type='parameter', target='_query_recommend')
         default_kwargs = {
@@ -49,10 +47,16 @@ def register_global_query_recommend_argument(cli_ctx):
             'nargs': '*',
             'experimental_info': experimental_info
         }
-        block_list = ['create', 'add', 'update', 'remove', 'rm', 'delete']
+
+        allow_list = cli.config.get('query', 'allow_list', "list,show").split(',')
+        allow_list = [s.strip() for s in allow_list if s.strip()]  # remove empty string
+        if not allow_list:
+            return
+
+        commands_loader = kwargs.get('commands_loader')
+        cmd_tbl = commands_loader.command_table
         for cmd_name, cmd in cmd_tbl.items():
-            cmd_action = cmd_name.split()[-1]
-            if cmd_action not in block_list:
+            if any(cmd_name.endswith(suffix) for suffix in allow_list):
                 cmd.add_argument('_query_recommend', *
                                  ['--query-recommend'], **default_kwargs)
 
