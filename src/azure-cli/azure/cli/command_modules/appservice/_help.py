@@ -2163,6 +2163,59 @@ helps['appservice ase delete'] = """
       text: az appservice ase delete -n MyAseName
 """
 
+helps['appservice domain'] = """
+    type: group
+    short-summary: Manage custom domains.
+"""
+
+helps['appservice domain create'] = """
+    type: command
+    short-summary: Create and purchase a domain name.
+    examples:
+    - name: TODO
+      text: TODO
+"""
+
+helps['appservice domain update'] = """
+    type: command
+    short-summary: Update an existing domain.
+    examples:
+    - name: TODO
+      text: TODO
+"""
+
+helps['appservice domain show'] = """
+    type: command
+    short-summary: Get details of an existing domain.
+    examples:
+    - name: TODO
+      text: TODO
+"""
+
+helps['appservice domain list'] = """
+    type: command
+    short-summary: List all domains in a subscription, or in resource group if provided.
+    examples:
+    - name: TODO
+      text: TODO
+"""
+
+helps['appservice domain delete'] = """
+    type: command
+    short-summary: Delete an existing domain.
+    examples:
+    - name: TODO
+      text: TODO
+"""
+
+helps['appservice domain renew'] = """
+    type: command
+    short-summary: Renew an expiring domain.
+    examples:
+    - name: TODO
+      text: TODO
+"""
+
 helps['staticwebapp'] = """
     type: group
     short-summary: Manage static apps.

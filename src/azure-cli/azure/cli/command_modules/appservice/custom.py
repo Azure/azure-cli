@@ -51,7 +51,7 @@ from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
-from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
+from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory, dns_client_factory
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
@@ -3516,7 +3516,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False, logs=False,  # pylint: disable=too-many-statements,
+def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False, logs=False, hostname=None, # pylint: disable=too-many-statements,
               launch_browser=False, html=False):
     import os
     AppServicePlan = cmd.get_models('AppServicePlan')
@@ -3648,13 +3648,34 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     except OSError:
         pass
 
+    if hostname:
+        # Configure and attach custom hostname
+        logger.warning('Configuring and attaching hostname %s', hostname)
+        hostname_list = hostname.split('.')
+        tld = hostname_list[0]
+
+        add_hostname(cmd, rg_name, name, hostname)
+        create_managed_ssl_cert(cmd, rg_name, name, hostname)
+
+        certs = list_ssl_certs(cmd, rg_name)
+        cert_thumbprint = None
+        for c in certs:
+            if c.canonical_name == hostname:
+                cert_thumbprint = c.thumbprint
+
+        bind_ssl_cert(cmd, rg_name, name, cert_thumbprint, 'SNI')
+
     if launch_browser:
         logger.warning("Launching app using default browser")
         view_in_browser(cmd, rg_name, name, None, logs)
     else:
         _url = _get_url(cmd, rg_name, name)
-        logger.warning("You can launch the app at %s", _url)
-        create_json.update({'URL': _url})
+
+        if hostname:
+            _url = hostname
+
+        logger.warning("You can launch the app at https://%s", _url)
+        create_json.update({'URL': 'https://' + _url})
     if logs:
         _configure_default_logging(cmd, rg_name, name)
         return get_streaming_log(cmd, rg_name, name)
