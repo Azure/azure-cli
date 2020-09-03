@@ -4935,5 +4935,18 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
         ])
 
 
+class VMDiskLogicalSectorSize(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_logical_sector_size_')
+    def test_vm_disk_logical_sector_size(self, resource_group):
+        self.kwargs.update({
+            'disk': 'd1'
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --logical-sector-size 4096 --sku UltraSSD_LRS', checks=[
+            self.check('creationData.logicalSectorSize', 4096)
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
