@@ -134,7 +134,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK: '2020-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2020-05-01',
+            'disks': '2020-06-30',
             'disk_encryption_sets': '2020-05-01',
             'disk_accesses': '2020-05-01',
             'snapshots': '2020-05-01',
