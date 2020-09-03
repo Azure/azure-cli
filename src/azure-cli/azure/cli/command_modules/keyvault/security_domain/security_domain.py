@@ -4,9 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 
-from .utils import Utils
-
-
 class Key:
     def __init__(self, enc_key=None, x5t_256=None):
         self.enc_key = enc_key
@@ -14,8 +11,8 @@ class Key:
 
     def to_json(self):
         return {
-            'enc_key': Utils.security_domain_b64_url_encode(self.enc_key.encode('ascii')) if self.enc_key else '',
-            'x5t_256': Utils.security_domain_b64_url_encode(self.x5t_256) if self.x5t_256 else ''
+            'enc_key': self.enc_key if self.enc_key else '',
+            'x5t_256': self.x5t_256 if self.x5t_256 else ''
         }
 
 
@@ -38,8 +35,7 @@ class Datum:
 
     def to_json(self):
         return {
-            'compact_jwe':
-                Utils.security_domain_b64_url_encode(self.compact_jwe.encode('ascii')) if self.compact_jwe else '',
+            'compact_jwe': self.compact_jwe if self.compact_jwe else '',
             'tag': self.tag if self.tag else ''
         }
 

@@ -10,8 +10,8 @@ import hmac
 import json
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes, padding
+from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from knack.util import CLIError
 
@@ -102,7 +102,7 @@ class JWEDecode:
             self.auth_tag = base64.urlsafe_b64decode(parts[4] + '===')
 
     def encode_header(self):
-        header_json = self.protected_header.to_json_str()
+        header_json = self.protected_header.to_json_str().replace('": ', '":').replace('", ', '",')
         self.encoded_header = Utils.security_domain_b64_url_encode(header_json.encode('ascii'))
 
     def encode_compact(self):
@@ -138,14 +138,16 @@ class JWE:
 
         if alg == 'RSA-OAEP-256':
             algorithm = hashes.SHA256()
-            return padding.OAEP(mgf=padding.MGF1(algorithm=algorithm), algorithm=algorithm, label=None)
+            return asymmetric_padding.OAEP(
+                mgf=asymmetric_padding.MGF1(algorithm=algorithm), algorithm=algorithm, label=None)
 
         if alg == 'RSA-OAEP':
             algorithm = hashes.SHA1()
-            return padding.OAEP(mgf=padding.MGF1(algorithm=algorithm), algorithm=algorithm, label=None)
+            return asymmetric_padding.OAEP(
+                mgf=asymmetric_padding.MGF1(algorithm=algorithm), algorithm=algorithm, label=None)
 
         if alg == 'RSA1_5':
-            return padding.PKCS1v15()
+            return asymmetric_padding.PKCS1v15()
 
         return None
 
@@ -191,6 +193,9 @@ class JWE:
         dek = JWE.dek_from_cek(cek)
         hk = JWE.hmac_key_from_cek(cek)
 
+        padder = padding.PKCS7(128).padder()
+        plaintext = padder.update(bytes(plaintext)) + padder.finalize()
+
         aes_key = dek
         aes_iv = Utils.get_random(16)
         cipher = Cipher(algorithms.AES(aes_key), modes.CBC(aes_iv), backend=default_backend())
@@ -221,8 +226,11 @@ class JWE:
         aes_iv = self.jwe_decode.init_vector
         cipher = Cipher(algorithms.AES(aes_key), modes.CBC(aes_iv), backend=default_backend())
         decryptor = cipher.decryptor()
-        plaintext = decryptor.update(self.jwe_decode.ciphertext)
-        plaintext += decryptor.finalize()
+        plaintext = decryptor.update(self.jwe_decode.ciphertext) + decryptor.finalize()
+
+        unpadder = padding.PKCS7(128).unpadder()
+        plaintext = unpadder.update(bytes(plaintext)) + unpadder.finalize()
+
         return plaintext
 
     def decrypt_using_bytes(self, cek):
@@ -253,10 +261,3 @@ class JWE:
         cek = Utils.get_random(64)
         self.set_cek(cert, cek)
         self.encrypt_using_bytes(cek, plaintext, alg_id='A256CBC-HS512')
-
-
-if __name__ == '__main__':
-    s = 'eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwia2lkIjoibm90IHVzZWQifQ.ZmQxIgaWIh51a3Dj0g8zv483xixxpJa0lPDu2_BJPtnZqLGhpMfUC5buhk1bRcCUlfOT7Z4bQ33HFwHyzmwuTsszu0K35XuDgkbNfokSAvzjrCPMAqcSufmf-8Dxet_GHPbZFMa84by3tBpwzhcsiGgrfM2PVmwnTYtyLJKFLzprYMzMU4OkHCZ081Ygm9B3G27zmH3q9NPavBrJHRVHMZeCn_IKVr5osht_07uu27bXOwQORQhZvypuy0KHvBlpaF-lDwaHVoimy5I44CcSf0mHrTi52ntAf0XiOZBxOYQvDZXnqZ2O1-ccSvX6FAhH_7H1w7mXieslGosLSgrbYw.tGf9WK11119lwDgIm-W52w.AM3QQVv11vIp7rTZloawiuOqsK6c5Qs4tv4x-ESfMtLyU5No8Jro7adjjbE045a4pV9sp0EOLhk6wQnZo3E6PAdWASov_IQrg4BQYzAy2Ig.XKQHvRalM322ieVO75IL-n-_q9UEw3n9vl_nFOAB7vo'
-    j = JWE(s)
-    x = j.get_mac(b'xwadawdwadawd')
-    print(x)

@@ -439,6 +439,8 @@ def load_arguments(self, _):
         c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
                                                 'CLI will match them in order. Can be omitted if your keys are without '
                                                 'password protection.')
+        c.argument('restore_blob', help='Path to save the generated restore blob. If omitted, '
+                                        'blob will not be saved in your local machine.')
 
     with self.argument_context('keyvault security-domain download') as c:
         c.argument('sd_wrapping_keys', nargs='*',

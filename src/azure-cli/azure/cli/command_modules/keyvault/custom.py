@@ -2053,7 +2053,7 @@ def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
 
 
 def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           no_wait=False, identifier=None):  # pylint: disable=unused-argument):
+                           restore_blob=None, no_wait=False, identifier=None):  # pylint: disable=unused-argument):
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
         if not os.path.exists(p):
@@ -2164,10 +2164,17 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
     jwe_wrapped.encrypt_using_cert(exchange_cert, master_key)
     security_domain_restore_data.wrapped_key.enc_key = jwe_wrapped.encode_compact()
     thumbprint = Utils.get_SHA256_thumbprint(exchange_cert)
-    security_domain_restore_data.wrapped_key.x5t_256 = base64.urlsafe_b64encode(thumbprint)
+    security_domain_restore_data.wrapped_key.x5t_256 = Utils.security_domain_b64_url_encode(thumbprint)
+    restore_blob_value = json.dumps(security_domain_restore_data.to_json())
+
+    if restore_blob is not None:
+        if os.path.isdir(restore_blob):
+            raise CLIError('{} is a directory and it cannot be re-written.'.format(restore_blob))
+        with open(restore_blob, 'w') as f:
+            f.write(restore_blob_value)
 
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
-    security_domain = SecurityDomainObject(value=json.dumps(security_domain_restore_data.to_json()))
+    security_domain = SecurityDomainObject(value=restore_blob_value)
 
     return client.begin_upload(vault_base_url=vault_base_url, security_domain=security_domain)
     """
