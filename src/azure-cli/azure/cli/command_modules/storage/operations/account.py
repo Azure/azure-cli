@@ -489,8 +489,13 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
 
     if enable_last_access_tracking is not None:
         instance.last_access_time_tracking_policy = cmd.get_models('LastAccessTimeTrackingPolicy')(
-            enable=enable_last_access_tracking, name=tracking_policy_name,
-            tracking_granularity_in_days=tracking_granularity_in_days, blob_type=blob_type)
+            enable=enable_last_access_tracking if enable_last_access_tracking is not None else
+            instance.last_access_time_tracking_policy.enable,
+            name=tracking_policy_name if tracking_policy_name is not None else
+            instance.last_access_time_tracking_policy.name,
+            tracking_granularity_in_days=tracking_granularity_in_days if tracking_granularity_in_days else
+            instance.last_access_time_tracking_policy.tracking_granularity_in_days,
+            blob_type=blob_type if blob_type is not None else instance.last_access_time_tracking_policy.blob_type)
 
     return instance
 
