@@ -140,6 +140,15 @@ examples:
     text: az mysql flexible-server list --resource-group testGroup
 """
 
+helps['mysql flexible-server parameter'] = """
+type: group
+short-summary: Commands for managing server parameter values for flexible server.
+examples:
+  - name: List the parameter values for a flexible server. 
+    text: az mysql flexible-server parameter list
+    crafted: true
+"""
+
 helps['mysql flexible-server parameter list'] = """
 type: command
 short-summary: List the parameter values for a flexible server.

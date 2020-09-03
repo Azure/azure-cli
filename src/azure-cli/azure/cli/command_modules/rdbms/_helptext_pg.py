@@ -101,6 +101,15 @@ examples:
     text: az postgres flexible-server list --resource-group testGroup
 """
 
+helps['postgres flexible-server parameter'] = """
+type: group
+short-summary: Commands for managing server parameter values for flexible server.
+examples:
+  - name: List the parameter values for a flexible server. 
+    text: az postgres flexible-server parameter list
+    crafted: true
+"""
+
 helps['postgres flexible-server parameter list'] = """
 type: command
 short-summary: List the parameter values for a flexible server.
