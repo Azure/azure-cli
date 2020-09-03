@@ -1053,7 +1053,7 @@ def handle_version_update():
     because of a version update of Azure CLI
     """
     try:
-        from azure.cli.core._session import VERSIONS
+        from azure.cli.core._session import VERSIONS, CLOUD_ENDPOINTS
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         from azure.cli.core import __version__
         if not VERSIONS['versions']:
@@ -1061,5 +1061,6 @@ def handle_version_update():
         elif LooseVersion(VERSIONS['versions']['core']['local']) != LooseVersion(__version__):
             VERSIONS['versions'] = {}
             VERSIONS['update_time'] = ''
+            CLOUD_ENDPOINTS['clouds'] = {}
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)

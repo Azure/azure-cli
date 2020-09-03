@@ -74,7 +74,8 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  app_insights_resource_id=None,
                  app_insights_telemetry_channel_resource_id=None,
                  synapse_analytics_resource_id=None,
-                 attestation_resource_id=None):
+                 attestation_resource_id=None,
+                 **entries):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -94,6 +95,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
         self.synapse_analytics_resource_id = synapse_analytics_resource_id
         self.attestation_resource_id = attestation_resource_id
+        self.__dict__.update(entries)
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -129,7 +131,8 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
                  postgresql_server_endpoint=None,
                  mariadb_server_endpoint=None,
                  synapse_analytics_endpoint=None,
-                 attestation_endpoint=None):
+                 attestation_endpoint=None,
+                 **entries):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.storage_sync_endpoint = storage_sync_endpoint
@@ -143,6 +146,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
         self.acr_login_server_endpoint = acr_login_server_endpoint
         self.synapse_analytics_endpoint = synapse_analytics_endpoint
         self.attestation_endpoint = attestation_endpoint
+        self.__dict__.update(entries)
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -338,6 +342,14 @@ class Cloud:  # pylint: disable=too-few-public-methods
         }
         return pformat(o)
 
+    def toJSON(self):
+        return {'name': self.name, "endpoints": self.endpoints.__dict__, "suffixes": self.suffixes.__dict__}
+
+    @classmethod
+    def fromJSON(cls, json_str):
+        return cls(json_str['name'],
+                   endpoints=CloudEndpoints(**json_str['endpoints']),
+                   suffixes=CloudSuffixes(**json_str['suffixes']))
 
 AZURE_PUBLIC_CLOUD = Cloud(
     'AzureCloud',
@@ -457,15 +469,29 @@ AZURE_GERMAN_CLOUD = Cloud(
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
 if 'ARM_CLOUD_METADATA_URL' in os.environ:
-    try:
-        arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
-        cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
-        if 'AzureCloud' in cli_cloud_dict:
-            cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
-        KNOWN_CLOUDS = list(cli_cloud_dict.values())
-    except Exception as ex:  # pylint: disable=broad-except
-        logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
-        raise ex
+    from azure.cli.core._session import CLOUD_ENDPOINTS
+    endpoints_file = os.path.join(GLOBAL_CONFIG_DIR, 'cloudEndpoints.json')
+    CLOUD_ENDPOINTS.load(endpoints_file)
+    if CLOUD_ENDPOINTS['clouds']:
+        try:
+            KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in CLOUD_ENDPOINTS['clouds']]
+            logger.info("Cloud endpoints loaded from local file: %s", endpoints_file)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info("Failed to parse cloud endpoints from local file. CLI will clean it and reload from ARM_CLOUD_METADATA_URL. %s", str(ex))
+            CLOUD_ENDPOINTS['clouds'] = {}
+
+    if not CLOUD_ENDPOINTS['clouds']:
+        try:
+            arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
+            cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
+            if 'AzureCloud' in cli_cloud_dict:
+                cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
+            KNOWN_CLOUDS = list(cli_cloud_dict.values())
+            CLOUD_ENDPOINTS['clouds'] = [c.toJSON() for c in KNOWN_CLOUDS]
+            logger.info("Cloud endpoints loaded from ARM_CLOUD_METADATA_URL: %s", os.getenv('ARM_CLOUD_METADATA_URL'))
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
+            raise ex
 
 
 def _set_active_cloud(cli_ctx, cloud_name):
@@ -477,8 +503,16 @@ def get_active_cloud_name(cli_ctx):
     try:
         return cli_ctx.config.get('cloud', 'name')
     except (configparser.NoOptionError, configparser.NoSectionError):
-        _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
+        default_cloud_name = get_default_cloud_name()
+        _set_active_cloud(cli_ctx, default_cloud_name)
+        return default_cloud_name
+
+def get_default_cloud_name():
+    """ Pick AzureCloud as the default cloud if it is available, otherwise pick the first in the list"""
+    if AZURE_PUBLIC_CLOUD.name in [c.name for c in KNOWN_CLOUDS]:
         return AZURE_PUBLIC_CLOUD.name
+    else:
+        return KNOWN_CLOUDS[0].name
 
 
 def _get_cloud(cli_ctx, cloud_name):
@@ -551,9 +585,10 @@ def get_active_cloud(cli_ctx=None):
         return get_cloud(cli_ctx, get_active_cloud_name(cli_ctx))
     except CloudNotRegisteredException as err:
         logger.warning(err)
-        logger.warning("Resetting active cloud to'%s'.", AZURE_PUBLIC_CLOUD.name)
-        _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
-        return get_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
+        default_cloud_name = get_default_cloud_name()
+        logger.warning("Resetting active cloud to'%s'.", default_cloud_name)
+        _set_active_cloud(cli_ctx, default_cloud_name)
+        return get_cloud(cli_ctx, default_cloud_name)
 
 
 def get_cloud_subscription(cloud_name):
