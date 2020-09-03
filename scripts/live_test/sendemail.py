@@ -5,10 +5,9 @@
 
 import sys
 import os
-import json
 import traceback
 import datetime
-import mysql.connector
+# import mysql.connector
 import test_data
 
 from sendgrid import SendGridAPIClient
@@ -55,10 +54,10 @@ def main():
     testdata.collect()
 
     # Write database
-    try:
-        write_db(container, testdata)
-    except Exception:
-        print(traceback.format_exc())
+    # try:
+    #     write_db(container, testdata)
+    # except Exception:
+    #     print(traceback.format_exc())
 
     # Send email
     send_email(container, testdata)
