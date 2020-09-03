@@ -299,7 +299,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                         help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
-        
+
+        with self.argument_context('{} flexible-server reset-password'.format(command_group)) as c:
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+                       help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
+
         
         # flexible-server parameter
         for scope in ['list', 'set', 'show']:

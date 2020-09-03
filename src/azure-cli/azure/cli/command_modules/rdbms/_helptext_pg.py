@@ -198,6 +198,15 @@ examples:
     crafted: true
 """
 
+helps['postgres flexible-server reset-password'] = """
+type: command
+short-summary: Update the password for the server.
+examples:
+  - name: Update the password for the server.
+    text: az postgres flexible-server reset-password -p
+    crafted: true
+"""
+
 helps['postgres flexible-server wait'] = """
 type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
