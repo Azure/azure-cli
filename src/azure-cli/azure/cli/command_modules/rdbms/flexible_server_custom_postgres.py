@@ -12,9 +12,9 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core._profile import Profile
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, parse_public_access_input
+from .flexible_server_custom_common import user_confirmation
 
 logger = get_logger(__name__)
 
@@ -145,6 +145,20 @@ def _flexible_server_update_custom_func(instance,
             params.identity = instance.identity
     return params
 
+def _server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
+    confirm = force
+    if not force:
+        confirm = user_confirmation("Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=force)
+    if (confirm):
+        try:
+            result = client.delete(resource_group_name, server_name)
+            if cmd.cli_ctx.local_context.is_on:
+                local_context_file = cmd.cli_ctx.local_context._get_local_context_file()
+                local_context_file.remove_option('postgres flexible-server', 'server_name')
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error(ex)
+        return result
+
 
 # Wait command
 def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
@@ -223,13 +237,12 @@ def _form_response(username, sku, location, id, host, version, password, connect
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):
-    cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
-                                  server_name)  # Setting the server name in the local context
-    cmd.cli_ctx.local_context.set([ALL], 'location',
-                                  location)  # Setting the location in the local context
-    cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    cmd.cli_ctx.local_context.set([ALL], 'subscription', profile.get_subscription()['id'])
+    if cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
+                                    server_name)  # Setting the server name in the local context
+        cmd.cli_ctx.local_context.set([ALL], 'location',
+                                    location)  # Setting the location in the local context
+        cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
