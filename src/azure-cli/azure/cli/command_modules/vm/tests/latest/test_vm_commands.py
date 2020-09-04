@@ -754,6 +754,11 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('diskMbpsReadOnly', 30)
         ])
 
+        self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-only 250 --disk-mbps-read-only 40', checks=[
+            self.check('diskIopsReadOnly', 250),
+            self.check('diskMbpsReadOnly', 40)
+        ])
+
         self.cmd('disk create -g {rg} -n {disk2} --image-reference {image}', checks=[
             self.check('creationData.imageReference.id', '{image}')
         ])
@@ -776,6 +781,10 @@ class VMManagedDiskScenarioTest(ScenarioTest):
 
         self.cmd('disk create -g {rg} -n {disk6} --size-gb 256 --max-shares 2 -l centraluseuap', checks=[
             self.check('maxShares', 2)
+        ])
+
+        self.cmd('disk update -g {rg} -n {disk6} --max-shares 1', checks=[
+            self.check('maxShares', 1)
         ])
 
 

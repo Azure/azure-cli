@@ -392,7 +392,8 @@ def list_managed_disks(cmd, resource_group_name=None):
 
 def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
-                        network_access_policy=None, disk_access=None):
+                        network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
+                        disk_mbps_read_only=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -404,6 +405,12 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.disk_iops_read_write = disk_iops_read_write
     if disk_mbps_read_write is not None:
         instance.disk_mbps_read_write = disk_mbps_read_write
+    if disk_iops_read_only is not None:
+        instance.disk_iops_read_only = disk_iops_read_only
+    if disk_mbps_read_only is not None:
+        instance.disk_mbps_read_only = disk_mbps_read_only
+    if max_shares is not None:
+        instance.max_shares = max_shares
     if disk_encryption_set is not None:
         if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
                 encryption_type != 'EncryptionAtRestWithCustomerKey':
