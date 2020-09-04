@@ -78,13 +78,18 @@ def update_configstore(cmd,
                        encryption_key_name=None,
                        encryption_key_vault=None,
                        encryption_key_version=None,
-                       identity_client_id=None):
+                       identity_client_id=None,
+                       enable_public_network=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
+    public_network_access = None
+    if enable_public_network is not None:
+        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
     update_params = ConfigurationStoreUpdateParameters(tags=tags if tags else None,
-                                                       sku=Sku(name=sku) if sku else None)
+                                                       sku=Sku(name=sku) if sku else None,
+                                                       public_network_access=public_network_access)
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()
