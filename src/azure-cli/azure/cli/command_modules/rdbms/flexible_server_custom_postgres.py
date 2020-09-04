@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, location=None, backup_retention=None,
                                    sku_name=None, tier=None, geo_redundant_backup=None, storage_mb=None, administrator_login=None,
                                    administrator_login_password=None, version=None, tags=None, public_access=None,
-                                   assign_identity=False):
+                                   assign_identity=False, high_availability=None):
     from azure.mgmt.rdbms import postgresql
     db_context = DbContext(
         azure_sdk=postgresql, cf_firewall=cf_postgres_flexible_firewall_rules, logging_name='PostgreSQL', command_group='postgres', server_client=client)
@@ -36,13 +36,14 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                        server_name, resource_group_name)
     except CloudError:
         if public_access is None:
-            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
+            print("Commented out creating vnet")
+            #subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
 
         # Create postgresql
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, tier, geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
-            tags, public_access, assign_identity)
+            tags, public_access, assign_identity, high_availability)
 
         if public_access is not None:
             if public_access == 'on':
@@ -156,7 +157,9 @@ def _flexible_parameter_update(client, ids, server_name, configuration_name, res
         # update the command with system default
         try:
             parameter = client.get(resource_group_name, server_name, configuration_name)
+            print(parameter)
             value = parameter.default_value # reset value to default
+            print(value)
             source = "system-default"
         except CloudError as e:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
@@ -165,9 +168,12 @@ def _flexible_parameter_update(client, ids, server_name, configuration_name, res
 
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 
+def _flexible_list_skus(client, location):
+    return client.execute(location)
+
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    geo_redundant_backup, storage_mb, administrator_login, administrator_login_password, version,
-                   tags, public_network_access, assign_identity):
+                   tags, public_network_access, assign_identity, ha_enabled):
     logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -184,10 +190,13 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         public_network_access=public_network_access,
         storage_profile=postgresql.flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
-            storage_mb=storage_mb),  ##[TODO : required I think otherwise data is null error seen in backend exceptions
-        delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=None
-        ),
+            storage_mb=storage_mb),
+        # delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+        #     subnet_arm_resource_id=None #TODO what should this be?
+        # ),
+        delegated_subnet_arguments = None,
+        ha_enabled=ha_enabled,
+        availability_zone=None, #TODO: MOLJAIn
         location=location,
         create_mode="Default",  # can also be create
         tags=tags)
@@ -207,7 +216,6 @@ def _create_postgresql_connection_string(host, password):
         'password': password if password is not None else '{password}'
     }
     return 'postgres://postgres:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
-
 
 def _form_response(username, sku, location, id, host, version, password, connection_string):
     return {

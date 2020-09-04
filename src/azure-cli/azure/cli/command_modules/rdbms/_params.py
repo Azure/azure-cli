@@ -219,7 +219,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
                        arg_group='Authentication')
-            c.argument('backup_retention', type=int, options_list=['--backup-retention'],
+            c.argument('backup_retention', default='7', type=int, options_list=['--backup-retention'],
                        help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
                        validator=retention_validator)
             c.argument('tags', tags_type)
@@ -230,7 +230,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'], help='The IP address prefix to use when creating a new VNet in CIDR format. ')
             c.argument('subnet_name', options_list=['--subnet'], help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If both vnet-name and subnet are omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created. The name must be between 1 to 80 characters. The name must begin with a letter or number, end with a letter, number, or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
             c.argument('subnet_address_prefix', default='10.0.0.0/24', options_list=['--subnet-address-prefix'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. ')
-            c.argument('high_availability', options_list=['--high-availability'], help='Enable or disable high availability feature')     
+            c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
             c.ignore('database_name')
 
             c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
@@ -261,8 +261,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('backup_retention', options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
-        
-        
+
+        with self.argument_context('{} flexible-server list-skus'.format(command_group)) as c:
+            c.argument('location', arg_type=get_location_type(self.cli_ctx))
+
         # flexible-server parameter
         for scope in ['list', 'set', 'show']:
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)

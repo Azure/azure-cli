@@ -46,7 +46,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, storage_mb, administrator_login, administrator_login_password, version,
-            tags, public_network_access, assign_identity, tier, subnet_name, vnet_name)
+            tags, public_network_access, assign_identity, tier, high_availability, zone, subnet_name, vnet_name)
 
         if public_access is not None:
             if public_access == 'on':
@@ -243,10 +243,12 @@ def _flexible_server_mysql_get(cmd, resource_group_name, server_name):
     client = get_mysql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
+def _flexible_list_skus(client, location):
+    return client.list(location)
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name,
                    storage_mb, administrator_login, administrator_login_password, version,
-                   tags, public_network_access, assign_identity, tier, subnet_name, vnet_name):
+                   tags, public_network_access, assign_identity, tier, ha_enabled, availability_zone, subnet_name, vnet_name):
 
     logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
@@ -270,6 +272,9 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         delegated_subnet_arguments=mysql.flexibleservers.models.DelegatedSubnetArguments(
             subnet_arm_resource_id=None
         ),
+        ha_enabled=ha_enabled,
+        availability_zone=availability_zone,
+        maintenance_window=None,
         tags=tags)
 
     if assign_identity:
