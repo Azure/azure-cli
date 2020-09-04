@@ -68,7 +68,7 @@ def register_global_query_examples_argument(cli_ctx):
         events.EVENT_INVOKER_POST_PARSE_ARGS, handle_example_parameter)
 
 
-class Recommendation:
+class Example:
     def __init__(self, query_str, help_str="", max_length=None):
         self._query_str = query_str
         self._help_str = help_str
@@ -172,13 +172,13 @@ class TreeNode:
     def get_examples(self):
         ans = []
         select_string = self.get_trace_to_root()
-        ans.append(Recommendation(select_string, self.get_help_str('select')))
+        ans.append(Example(select_string, self.get_help_str('select')))
         filter_str = self.get_filter_str()
         if filter_str:
-            ans.append(Recommendation(filter_str, self.get_help_str('filter')))
+            ans.append(Example(filter_str, self.get_help_str('filter')))
         contains_str = self.get_contains_str()
         if contains_str:
-            ans.append(Recommendation(contains_str, self.get_help_str('contains')))
+            ans.append(Example(contains_str, self.get_help_str('contains')))
         return ans
 
 
@@ -196,17 +196,17 @@ class TreeBuilder:
         '''
         self._root = self._do_parse('', [data], None)
 
-    def generate_recommend(self, keywords_list, output_format):
-        recommendations = []
+    def generate_examples(self, keywords_list, output_format):
+        examples = []
         match_list = self._get_matched_nodes(keywords_list)
         for node_name in match_list:
             for node in self._all_nodes.get(node_name):
-                recommendations.extend(node.get_examples())
-        recommendations = recommendations[:self._config['max_examples']]
+                examples.extend(node.get_examples())
+        examples = examples[:self._config['max_examples']]
         if output_format == 'table':
-            for item in recommendations:
+            for item in examples:
                 item.set_max_length(self._config['examples_len'], self._config['help_len'])
-        return todict(recommendations)
+        return todict(examples)
 
     def update_config(self, config):
         self._config['examples_len'] = int(config.get('query', 'examples_len', '80'))
