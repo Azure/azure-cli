@@ -13,7 +13,8 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db
-from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, parse_public_access_input
+from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, \
+    parse_public_access_input, update_kwargs, generate_password, parse_maintenance_window
 from .flexible_server_custom_common import user_confirmation
 
 logger = get_logger(__name__)
@@ -24,36 +25,57 @@ DEFAULT_DB_NAME = 'flexibleserverdb'
 def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                                 location=None, storage_mb=None, administrator_login=None,
                                 administrator_login_password=None, version=None,
-                                backup_retention=None, tags=None, public_access=None, vnet_name=None, database_name=None,
-                                vnet_address_prefix=None, subnet_name=None, subnet_address_prefix=None, public_network_access=None,
-                                high_availability=None, zone=None, maintenance_window=None, assign_identity=False):
+                                backup_retention=None, tags=None, public_access=None, database_name=None,
+                                subnet_arm_resource_id=None, public_network_access=None,
+                                high_availability=None, zone=None, assign_identity=False):
     from azure.mgmt.rdbms import mysql
     db_context = DbContext(
         azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
 
+    subnet_id = firewall_id = None
+
+    if subnet_arm_resource_id is not None:
+        subnet_id = subnet_arm_resource_id  # set the subnet id to be the one passed in
+        delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
+            subnet_arm_resource_id=subnet_arm_resource_id
+        )
+    else:
+        delegated_subnet_arguments = None
+
     try:
-        location, resource_group_name, server_name, administrator_login_password = generate_missing_parameters(cmd, location, resource_group_name, server_name, administrator_login_password)
+        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
 
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing MySQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
+
+        # update server if needed
+        server_result = _update_server(
+            db_context, cmd, client, server_result, resource_group_name, server_name, backup_retention,
+            storage_mb, administrator_login_password)
+
     except CloudError:
+        administrator_login_password = generate_password(administrator_login_password)
         if public_access is None:
-            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.MySQL/flexibleServers")
+            print("**Commented out creating vnet until it is enabled**")
+            # subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.MySQL/flexibleServers")
+            # delegated_subnet_arguments=mysql.flexibleservers.models.DelegatedSubnetArguments(
+            #     subnet_arm_resource_id=subnet_id
+            # )
 
         # Create mysql server
         server_result = _create_server(
-            db_context, cmd, resource_group_name, server_name, location, backup_retention,
-            sku_name, storage_mb, administrator_login, administrator_login_password, version,
-            tags, public_network_access, assign_identity, tier, subnet_name, vnet_name)
+            db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, storage_mb,
+            administrator_login, administrator_login_password, version, tags, public_network_access, assign_identity,
+            tier, high_availability, zone, delegated_subnet_arguments)
 
         if public_access is not None:
             if public_access == 'on':
                 start_ip, end_ip = '0.0.0.0', '255.255.255.255'
             else:
                 start_ip, end_ip = parse_public_access_input(public_access)
-            create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+            firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
         # Create mysql database if it does not exist
         if database_name is None:
@@ -74,8 +96,9 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
     return _form_response(user, sku, loc, id, host,version,
                           administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_mysql_connection_string(host, database_name, user, administrator_login_password)
+                          _create_mysql_connection_string(host, database_name, user, administrator_login_password), database_name, firewall_id, subnet_id
     )
+
 
 def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
@@ -109,9 +132,9 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
-# 8/25: may need to update the update function per updates to swagger spec
 def _flexible_server_update_custom_func(instance,
                                sku_name=None,
+                               tier=None,
                                storage_mb=None,
                                backup_retention=None,
                                administrator_login_password=None,
@@ -121,7 +144,9 @@ def _flexible_server_update_custom_func(instance,
                                auto_grow=None,
                                assign_identity=False,
                                public_network_access=None,
-                               replication_role=None):
+                               ha_enabled=None,
+                               replication_role=None,
+                               maintenance_window=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path) # replacement not needed for update in flex servers
@@ -129,7 +154,7 @@ def _flexible_server_update_custom_func(instance,
 
     if sku_name:
         instance.sku.name = sku_name
-        instance.sku.tier = None
+        instance.sku.tier = tier
     else:
         instance.sku = None
 
@@ -145,15 +170,24 @@ def _flexible_server_update_custom_func(instance,
     if subnet_arm_resource_id:
         instance.delegated_subnet_arguments.subnet_arm_resource_id = subnet_arm_resource_id
 
+    if maintenance_window:
+        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+        instance.maintenance_window.day_of_week = day_of_week
+        instance.maintenance_window.start_hour = start_hour
+        instance.maintenance_window.start_minute = start_minute
+        instance.maintenance_window.custom_window = "Enabled"
+
     # TODO: standby count = ha_enabled add here
     params = ServerForUpdate(sku=instance.sku,
-                                    storage_profile=instance.storage_profile,
-                                    administrator_login_password=administrator_login_password,
-                                    ssl_enforcement=ssl_enforcement,
-                                    delegated_subnet_arguments=instance.delegated_subnet_arguments,
-                                    tags=tags,
-                                    replication_role=replication_role,
-                                    public_network_access=public_network_access)
+                                storage_profile=instance.storage_profile,
+                                administrator_login_password=administrator_login_password,
+                                ssl_enforcement=ssl_enforcement,
+                                delegated_subnet_arguments=instance.delegated_subnet_arguments,
+                                tags=tags,
+                                ha_enabled=ha_enabled,
+                                replication_role=replication_role,
+                                public_network_access=public_network_access,
+                                maintenance_window=instance.maintenance_window)
 
     if assign_identity:
         if server_module_path.find('mysql'):
@@ -184,6 +218,7 @@ def _server_delete_func(cmd, client, resource_group_name=None, server_name=None,
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
         return result
+
 
 ## Parameter update command
 def _flexible_parameter_update(client, ids, server_name, configuration_name, resource_group_name, source=None, value=None):
@@ -263,10 +298,12 @@ def _flexible_server_mysql_get(cmd, resource_group_name, server_name):
     client = get_mysql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
+def _flexible_list_skus(client, location):
+    return client.list(location)
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name,
-                   storage_mb, administrator_login, administrator_login_password, version,
-                   tags, public_network_access, assign_identity, tier, subnet_name, vnet_name):
+                   storage_mb, administrator_login, administrator_login_password, version, tags, public_network_access,
+                   assign_identity, tier, ha_enabled, availability_zone, delegated_subnet_arguments):
 
     logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
@@ -287,9 +324,9 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
             storage_mb=storage_mb),
         location=location,
         create_mode="Default",
-        delegated_subnet_arguments=mysql.flexibleservers.models.DelegatedSubnetArguments(
-            subnet_arm_resource_id=None
-        ),
+        delegated_subnet_arguments=delegated_subnet_arguments,
+        ha_enabled=ha_enabled,
+        availability_zone=availability_zone,
         tags=tags)
 
     if assign_identity:
@@ -301,8 +338,32 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         '{} Server Create'.format(logging_name))
 
 
-def _form_response(username, sku, location, id, host, version, password, connection_string):
-    return {
+def _update_server(db_context, cmd, client, server_result, resource_group_name, server_name, backup_retention,
+                   storage_mb, administrator_login_password):
+    # storage profile params
+    storage_profile_kwargs = {}
+    db_sdk, logging_name = db_context.azure_sdk, db_context.logging_name
+    if backup_retention is not None and backup_retention != server_result.storage_profile.backup_retention_days:
+        update_kwargs(storage_profile_kwargs, 'backup_retention_days', backup_retention)
+    if storage_mb != server_result.storage_profile.storage_mb:
+        update_kwargs(storage_profile_kwargs, 'storage_mb', storage_mb)
+
+    # update params
+    server_update_kwargs = {
+        'storage_profile': db_sdk.models.StorageProfile(**storage_profile_kwargs)
+    } if storage_profile_kwargs else {}
+    update_kwargs(server_update_kwargs, 'administrator_login_password', administrator_login_password)
+
+    if server_update_kwargs:
+        logger.warning('Updating existing %s Server \'%s\' with given arguments', logging_name, server_name)
+        params = db_sdk.models.ServerUpdateParameters(**server_update_kwargs)
+        return resolve_poller(client.update(
+            resource_group_name, server_name, params), cmd.cli_ctx, '{} Server Update'.format(logging_name))
+    return server_result
+
+
+def _form_response(username, sku, location, id, host, version, password, connection_string, database_name, firewall_id=None, subnet_id=None):
+    output = {
         'host': host,
         'username': username,
         'password': password,
@@ -310,8 +371,14 @@ def _form_response(username, sku, location, id, host, version, password, connect
         'location': location,
         'id': id,
         'version': version,
+        'database name': database_name,
         'connection string': connection_string
     }
+    if firewall_id is not None:
+        output['firewall id'] = firewall_id
+    if subnet_id is not None:
+        output['subnet id'] = subnet_id
+    return output
 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location):

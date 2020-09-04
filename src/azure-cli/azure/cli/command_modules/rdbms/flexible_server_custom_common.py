@@ -11,7 +11,13 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
-## Common functions imported by other providers
+## Common functions used by other providers
+def _flexible_server_update_get(client, resource_group_name, server_name):
+    return client.get(resource_group_name, server_name)
+
+def _flexible_server_update_set(client, resource_group_name, server_name, parameters):
+    return client.update(resource_group_name, server_name, parameters)
+
 def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -37,6 +43,18 @@ def _database_delete_func(client, resource_group_name=None, server_name=None, da
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
         return result
+
+def _flexible_firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
+    return client.get(resource_group_name, server_name, firewall_rule_name)
+
+
+def _flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
+    return client.create_or_update(
+        resource_group_name,
+        server_name,
+        firewall_rule_name,
+        parameters.start_ip_address,
+        parameters.end_ip_address)
 
 def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
     if start_ip_address is not None:

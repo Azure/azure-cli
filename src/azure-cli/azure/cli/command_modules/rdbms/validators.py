@@ -124,21 +124,39 @@ def public_access_validator(ns):
 
 
 def _validate_ip(ips):
+    """
+    # Regex not working for re.(regex, '255.255.255.255'). Hnece commenting it out for now
     import re
-    regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
-                25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
-                25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+    regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
+                25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
+                25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
                 25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$'''
+    """
     parsed_input = ips.split('-')
     if len(parsed_input) == 1:
-        if re.search(regex, parsed_input[0]):
+        if _validate_ranges_in_ip(parsed_input[0]):
             return True
         else:
             return False
     elif len(parsed_input) == 2:
-        if re.search(regex, parsed_input[0]) and re.search(regex, parsed_input[1]):
+        if _validate_ranges_in_ip(parsed_input[0]) and _validate_ranges_in_ip(parsed_input[1]):
             return True
         else:
             return False
+    else:
+        return False
+
+
+def _validate_ranges_in_ip(ip):
+    parsed_ip = ip.split('.')
+    if len(parsed_ip) == 4 and _valid_range(int(parsed_ip[0])) and _valid_range(int(parsed_ip[1])) and _valid_range(int(parsed_ip[2])) and _valid_range(int(parsed_ip[3])):
+        return True
+    else:
+        return False
+
+
+def _valid_range(range):
+    if range>=0 and range<=255:
+        return True
     else:
         return False
