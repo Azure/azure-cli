@@ -104,7 +104,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Reserved.ChannelUsed': 'AI',
             'Reserved.EventId': str(uuid.uuid4()),
             'Reserved.SequenceNumber': 1,
-            'Reserved.SessionId': str(uuid.uuid4()),
+            'Reserved.SessionId': _get_session_id(),
             'Reserved.TimeSinceSessionStart': 0,
 
             'Reserved.DataModel.Source': 'DataModelAPI',
@@ -405,6 +405,33 @@ def _get_core_version():
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_installation_id():
     return _get_profile().get_installation_id()
+
+
+@decorators.suppress_all_exceptions(fallback_return="")
+def _get_session_id():
+    # This function works as a workaround to get the terminal info: when the difference
+    # of create time between current process and its parent process is larger than a given
+    # threshold, the parent process will be viewed as a terminal process.
+
+    def get_hash_result(content):
+        import hashlib
+
+        hasher = hashlib.sha256()
+        hasher.update(content.encode('utf-8'))
+        return hasher.hexdigest()
+
+    # Usually, more than one layer of sub-process will be called when excuting a CLI command. While, the create time
+    # of these processes will be very close, usually in several milliseconds. We use 1 second as the threshold here.
+    time_threshold = 1
+    import psutil
+    process = psutil.Process()
+    while process and process.ppid() and process.pid != process.ppid():
+        parent_process = process.parent()
+        if parent_process and process.create_time() - parent_process.create_time() > time_threshold:
+            content = '{}{}{}'.format(_get_installation_id(), parent_process.create_time(), parent_process.pid)
+            return get_hash_result(content)
+        process = parent_process
+    return ""
 
 
 @decorators.call_once
