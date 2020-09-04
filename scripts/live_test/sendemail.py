@@ -7,10 +7,7 @@ import sys
 import os
 import traceback
 import datetime
-# import mysql.connector
 import test_data
-
-from sendgrid import SendGridAPIClient
 
 
 SENDGRID_KEY = sys.argv[1]
@@ -125,6 +122,7 @@ def write_db(container, testdata):
     );
 
     """
+    import mysql.connector
     print('Writing DB...')
     # Connect
     cnx = mysql.connector.connect(user='fey@clisqldbserver',
@@ -159,6 +157,7 @@ def write_db(container, testdata):
 
 
 def send_email(container, testdata):
+    from sendgrid import SendGridAPIClient
     print('Sending email...')
     # message = Mail(
     #     from_email='azclibot@microsoft.com',
@@ -232,7 +231,6 @@ def get_content(container, testdata):
     Word: https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd
     OneNote: https://microsoft.sharepoint.com/teams/IoTToolingTeam/_layouts/OneNote.aspx?id=%2Fteams%2FIoTToolingTeam%2FShared%20Documents%2FAzure%20Management%20Experience%2FAzure%20Management%20Experience&wd=target%28AZ%20CLI%2FKnowledge%20base.one%7C18BC64EE-9328-497D-804E-6436006CA9A5%2FUser%20Manual%20of%20Live%20Test%20Pipeline%7C243EFA3E-FC7F-4612-9DA5-8E6BB2A11BD3%2F%29
     </p>
-    
     """
 
     if container != '':
