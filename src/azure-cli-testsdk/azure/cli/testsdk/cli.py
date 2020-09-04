@@ -26,3 +26,6 @@ class CLIContext(object):
             return self.ctx.invoke(args, out_file=out_file)
         args.insert(0, self.ctx)
         return subprocess.call(args, stdout=out_file)
+
+def prepare_cli_context():
+    return CLIContext()
