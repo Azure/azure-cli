@@ -157,6 +157,24 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', None)])
 
+        # Enable public network access with update command
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', 'Enabled')])
+
+        # Disable public network access with update command
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network {enable_public_network}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', 'Disabled')])
+
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
 
