@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
+import array
 import base64
 import hashlib
 import secrets
@@ -13,17 +14,21 @@ from cryptography.hazmat.primitives.serialization import Encoding
 
 class Utils:
     @staticmethod
+    def is_little_endian():
+        a = array.array('H', [1]).tobytes()
+        # little endian: b'\x01\x00'
+        # big endian: b'\x00\x01'
+        if a[0] == 1:
+            return True
+        else:
+            return False
+
+    @staticmethod
     def convert_to_uint16(b: bytearray):
         ret = [0 for _ in range(len(b) // 2)]
         for i in range(0, len(b), 2):
-            tmp = bytearray()
-            tmp.append(b[i])
-            tmp.append(b[i + 1])
-
-            # It's already in the same byte order
-            # as the system that encrypted it, so don't reverse it
-            ret[i // 2] = (b[i + 1] << 8) | b[i]  # TODO
-
+            byte_order = 'little' if Utils.is_little_endian() else 'big'
+            ret[i // 2] = int.from_bytes(bytearray([b[i], b[i + 1]]), byteorder=byte_order, signed=False)
         return ret
 
     @staticmethod
@@ -48,7 +53,4 @@ class Utils:
 
 
 if __name__ == '__main__':
-    b = bytearray()
-    b.extend(b'swadawdawd')
-    x = Utils.convert_to_uint16(b)
-    print(x)
+    print(Utils.convert_to_uint16(bytearray([40, 30, 20, 10])))
