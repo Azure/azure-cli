@@ -240,31 +240,34 @@ def get_content(container, testdata):
     link = 'https://dev.azure.com/azure-sdk/internal/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(BUILD_ID)
     content += """
     <p>Hi Azure CLI team,</p>
+    <p>[Please move this mail to normal folder if it is in junk box, otherwise, the HTML and CSS content may not be displayed correctly]</p>
+    <p>
     Here are test results of Azure CLI.<br>
     Repository: {}<br>
     Branch: {}<br>
-    Link: {}<br>
+    Link: {}
+    </p>
     """.format(USER_REPO, USER_BRANCH, link)
 
     content += """
     <p>
-    User Manual of Live Test Pipeline<br>
-    <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd>Word</a><br> 
-    <a href=https://microsoft.sharepoint.com/teams/IoTToolingTeam/_layouts/OneNote.aspx?id=%2Fteams%2FIoTToolingTeam%2FShared%20Documents%2FAzure%20Management%20Experience%2FAzure%20Management%20Experience&wd=target%28AZ%20CLI%2FKnowledge%20base.one%7C18BC64EE-9328-497D-804E-6436006CA9A5%2FUser%20Manual%20of%20Live%20Test%20Pipeline%7C243EFA3E-FC7F-4612-9DA5-8E6BB2A11BD3%2F%29>OneNote</a><br>
+    <b>User Manual of Live Test Pipeline</b><br>
+    <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd>Word</a>  
+    <a href=https://microsoft.sharepoint.com/teams/IoTToolingTeam/_layouts/OneNote.aspx?id=%2Fteams%2FIoTToolingTeam%2FShared%20Documents%2FAzure%20Management%20Experience%2FAzure%20Management%20Experience&wd=target%28AZ%20CLI%2FKnowledge%20base.one%7C18BC64EE-9328-497D-804E-6436006CA9A5%2FUser%20Manual%20of%20Live%20Test%20Pipeline%7C243EFA3E-FC7F-4612-9DA5-8E6BB2A11BD3%2F%29>OneNote</a>
     </p>
     """
 
     if container != '':
         content += """
         <p>
-        Test results are saved to the following container.<br>
+        <b>Test results location</b><br>
         Storage account: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clitestresult/providers/Microsoft.Storage/storageAccounts/clitestresultstac <br>
         Container: {}
         </p>
         """.format(container)
 
     table = """
-    <p>Test results summary</p>
+    <p><b>Test results summary</b></p>
     <table>
       <tr>
         <th>Module</th>
