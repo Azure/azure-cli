@@ -24,6 +24,8 @@ DB_PWD = sys.argv[11]
 
 
 def main():
+    print('Enter main()')
+
     print(sys.argv)
     print(SENDGRID_KEY)
     print(BUILD_ID)
@@ -50,14 +52,19 @@ def main():
     testdata = test_data.TestData(ARTIFACT_DIR)
     testdata.collect()
 
+    # Send email
+    try:
+        send_email(container, testdata)
+    except Exception:
+        print(traceback.format_exc())
+
     # Write database
     try:
         write_db(container, testdata)
     except Exception:
         print(traceback.format_exc())
 
-    # Send email
-    send_email(container, testdata)
+    print('Exit main()')
 
 
 def get_container_name():
@@ -65,6 +72,8 @@ def get_container_name():
     Generate container name in storage account
     :return:
     """
+    print('Enter get_container_name()')
+
     date = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     name = date
     if USER_LIVE == '--live':
@@ -76,6 +85,7 @@ def get_container_name():
     name += mode
     # if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
     #     name += '_archive'
+    print('Exit get_container_name()')
     return name
 
 
@@ -85,6 +95,8 @@ def upload_files(container):
     :param container:
     :return:
     """
+    print('Enter upload_files()')
+
     # Create container
     cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {}'
     os.popen(cmd.format(container, ACCOUNT_KEY))
@@ -98,6 +110,8 @@ def upload_files(container):
                 cmd = cmd.format(fullpath, container, name)
                 print('Running: ' + cmd)
                 os.popen(cmd)
+
+    print('Exit upload_files()')
 
 
 def write_db(container, testdata):
@@ -122,6 +136,8 @@ def write_db(container, testdata):
     );
 
     """
+    print('Enter write_db()')
+
     import mysql.connector
     print('Writing DB...')
     # Connect
@@ -155,8 +171,12 @@ def write_db(container, testdata):
     cursor.close()
     cnx.close()
 
+    print('Exit write_db()')
+
 
 def send_email(container, testdata):
+    print('Enter send_email()')
+
     from sendgrid import SendGridAPIClient
     print('Sending email...')
     # message = Mail(
@@ -185,16 +205,15 @@ def send_email(container, testdata):
         data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
     if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
-    print(data)
-    try:
-        sendgrid_key = sys.argv[1]
-        sg = SendGridAPIClient(sendgrid_key)
-        response = sg.send(data)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        traceback.print_exc()
+
+    sendgrid_key = sys.argv[1]
+    sg = SendGridAPIClient(sendgrid_key)
+    response = sg.send(data)
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
+
+    print('Exit send_email()')
 
 
 def get_content(container, testdata):
@@ -202,6 +221,8 @@ def get_content(container, testdata):
     Compose content of email
     :return:
     """
+    print('Enter get_content()')
+
     content = """
     <!DOCTYPE html>
     <html>
@@ -281,6 +302,7 @@ def get_content(container, testdata):
     """
 
     print(content)
+    print('Exit get_content()')
     return content
 
 
