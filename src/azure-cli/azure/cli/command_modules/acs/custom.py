@@ -1609,8 +1609,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
     # verify the kube-dashboard addon was not disabled
     instance = client.get(resource_group_name, name)
-    addon_profiles = instance.addon_profiles or {}
-    addon_profile = addon_profiles.get("kubeDashboard", ManagedClusterAddonProfile(enabled=True))
+    addon_profiles = {k.lower():v for k, v in (instance.addon_profiles or {}).items()}
+    addon_profile = addon_profiles.get("kubedashboard", ManagedClusterAddonProfile(enabled=True))
     if not addon_profile.enabled:
         raise CLIError('The kube-dashboard addon was disabled for this managed cluster.\n'
                        'To use "az aks browse" first enable the add-on\n'
@@ -1954,6 +1954,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         workspace_resource_id
     )
     monitoring = False
+    # keys of addon_profiles are already lower cased in _handle_addons_args()
     if 'omsagent' in addon_profiles:
         monitoring = True
         _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
@@ -2111,6 +2112,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
+    # keys of addon_profiles are already lower cased in _update_addons()
     if 'omsagent' in instance.addon_profiles and instance.addon_profiles['omsagent'].enabled:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
         # adding a wait here since we rely on the result for role assignment
@@ -2154,12 +2156,12 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     except (IndexError, ValueError):
         raise CLIError("Fail to find kubeconfig file.")
 
-
+# To be consistent, values of ADDONS dict should all be lower case
 ADDONS = {
-    'http_application_routing': 'httpApplicationRouting',
+    'http_application_routing': 'httpapplicationrouting',
     'monitoring': 'omsagent',
-    'virtual-node': 'aciConnector',
-    'kube-dashboard': 'kubeDashboard'
+    'virtual-node': 'aciconnector',
+    'kube-dashboard': 'kubedashboard'
 }
 
 
@@ -2518,20 +2520,20 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
-    addon_profiles = instance.addon_profiles or {}
-    if 'kube-dashboard' in addon_args and 'kubeDashboard' not in addon_profiles:
-        addon_profiles['kubeDashboard'] = ManagedClusterAddonProfile(enabled=True)
+    addon_profiles = {k.lower():v for k, v in (instance.addon_profiles or {}).items()}
+    if 'kube-dashboard' in addon_args and 'kubedashboard' not in addon_profiles:
+        addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
 
-    os_type = 'Linux'
+    # To be consistent, os_type is lower case
+    os_type = 'linux'
 
     # for each addons argument
     for addon_arg in addon_args:
+        # addon variable is always lower case since values of ADDONS and os_type are all lower case
         addon = ADDONS[addon_arg]
-        if addon == 'aciConnector':
+        if addon == 'aciconnector':
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
-        # addon name is case insensitive
-        addon = next((x for x in addon_profiles.keys() if x.lower() == addon.lower()), addon)
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
@@ -2551,8 +2553,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                     workspace_resource_id = '/' + workspace_resource_id
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
-                addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
-            elif addon.lower() == ('aciConnector' + os_type).lower():
+                addon_profile.config = {'loganalyticsworkspaceresourceid': workspace_resource_id}
+            elif addon == ('aciconnector' + os_type).lower():
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
                                    'To change virtual-node configuration, run '
@@ -2560,7 +2562,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                                    'before enabling it again.')
                 if not subnet_name:
                     raise CLIError('The aci-connector addon requires setting a subnet name.')
-                addon_profile.config = {'SubnetName': subnet_name}
+                addon_profile.config = {'subnetname': subnet_name}
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -2592,14 +2594,13 @@ def _get_azext_module(extension_name, module_name):
 
 def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
                         workspace_resource_id=None):
-    if not addon_profiles:
-        addon_profiles = {}
+    addon_profiles = {k.lower():v for k, v in (addon_profiles or {}).items()}
     addons = addons_str.split(',') if addons_str else []
     if 'http_application_routing' in addons:
-        addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
+        addon_profiles['httpapplicationrouting'] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('http_application_routing')
     if 'kube-dashboard' in addons:
-        addon_profiles['kubeDashboard'] = ManagedClusterAddonProfile(enabled=True)
+        addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('kube-dashboard')
     # TODO: can we help the user find a workspace resource ID?
     if 'monitoring' in addons:
@@ -2614,7 +2615,7 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
         if workspace_resource_id.endswith('/'):
             workspace_resource_id = workspace_resource_id.rstrip('/')
         addon_profiles['omsagent'] = ManagedClusterAddonProfile(
-            enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
+            enabled=True, config={'loganalyticsworkspaceresourceid': workspace_resource_id})
         addons.remove('monitoring')
     # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
@@ -2825,11 +2826,10 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
-    # Workaround for this addon key which has been seen lowercased in the wild.
-    if 'loganalyticsworkspaceresourceid' in addon.config:
-        addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop('loganalyticsworkspaceresourceid')
+    # lower case the keys of the addon config
+    addon.config = {k.lower():v for k, v in (addon.config or {}).items()}
 
-    workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
+    workspace_resource_id = addon.config['loganalyticsworkspaceresourceid']
 
     workspace_resource_id = workspace_resource_id.strip()
 
