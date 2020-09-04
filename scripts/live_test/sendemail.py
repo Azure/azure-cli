@@ -5,13 +5,10 @@
 
 import sys
 import os
-import json
 import traceback
 import datetime
-
-from sendgrid import SendGridAPIClient
-
 import test_data
+
 
 SENDGRID_KEY = sys.argv[1]
 BUILD_ID = sys.argv[2]
@@ -22,9 +19,13 @@ USER_LIVE = sys.argv[6]
 ARTIFACT_DIR = sys.argv[7]
 REQUESTED_FOR_EMAIL = sys.argv[8]
 ACCOUNT_KEY = sys.argv[9]
+COMMIT_ID = sys.argv[10]
+DB_PWD = sys.argv[11]
 
 
 def main():
+    print('Enter main()')
+
     print(sys.argv)
     print(SENDGRID_KEY)
     print(BUILD_ID)
@@ -35,6 +36,8 @@ def main():
     print(ARTIFACT_DIR)
     print(REQUESTED_FOR_EMAIL)
     print(ACCOUNT_KEY)
+    print(COMMIT_ID)
+    print(DB_PWD)
 
     # Upload results to storage account, container
     container = ''
@@ -49,11 +52,19 @@ def main():
     testdata = test_data.TestData(ARTIFACT_DIR)
     testdata.collect()
 
-    # Write database
-    write_db()
-
     # Send email
-    send_email(container, testdata)
+    try:
+        send_email(container, testdata)
+    except Exception:
+        print(traceback.format_exc())
+
+    # Write database
+    try:
+        write_db(container, testdata)
+    except Exception:
+        print(traceback.format_exc())
+
+    print('Exit main()')
 
 
 def get_container_name():
@@ -61,6 +72,8 @@ def get_container_name():
     Generate container name in storage account
     :return:
     """
+    print('Enter get_container_name()')
+
     date = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     name = date
     if USER_LIVE == '--live':
@@ -72,6 +85,7 @@ def get_container_name():
     name += mode
     # if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
     #     name += '_archive'
+    print('Exit get_container_name()')
     return name
 
 
@@ -81,6 +95,8 @@ def upload_files(container):
     :param container:
     :return:
     """
+    print('Enter upload_files()')
+
     # Create container
     cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {}'
     os.popen(cmd.format(container, ACCOUNT_KEY))
@@ -95,16 +111,73 @@ def upload_files(container):
                 print('Running: ' + cmd)
                 os.popen(cmd)
 
+    print('Exit upload_files()')
 
-def write_db():
+
+def write_db(container, testdata):
     """
-    Insert data to database
-    :return:
+    Insert data to database.
+    Sql statements to create table:
+    USE clidb;
+    CREATE TABLE t1 (
+       repo       VARCHAR(200) COMMENT 'Repo URL',
+       branch     VARCHAR(200) COMMENT 'Branch name',
+       commit     VARCHAR(50) COMMENT 'Commit ID',
+       target     VARCHAR(2000) COMMENT 'Target modules to test. Splited by space, Empty string represents all modules',
+       live       TINYINT(1) COMMENT 'Live run or not',
+       user       VARCHAR(50) COMMENT 'User (email address) who triggers the run',
+       pass       INT COMMENT 'Number of passed tests',
+       fail       INT COMMENT 'Number of failed tests',
+       rate       VARCHAR(50) COMMENT 'Pass rate',
+       detail     VARCHAR(10000) COMMENT 'Detail',
+       container  VARCHAR(200) COMMENT 'Container URL',
+       date       VARCHAR(10) COMMENT 'Date. E.g. 20200801',
+       time       VARCHAR(10) COMMENT 'Time. E.g. 183000'
+    );
+
     """
-    pass
+    print('Enter write_db()')
+
+    import mysql.connector
+    print('Writing DB...')
+    # Connect
+    cnx = mysql.connector.connect(user='fey@clisqldbserver',
+                                  password=DB_PWD,
+                                  host='clisqldbserver.mysql.database.azure.com',
+                                  database='clidb')
+    cursor = cnx.cursor()
+    sql = 'INSERT INTO t1 (repo, branch, commit, target, live, user, pass, fail, rate, detail, container, date, time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
+    repo = USER_REPO
+    branch = USER_BRANCH
+    commit = COMMIT_ID
+    target = USER_TARGET
+    live = 1 if USER_LIVE == '--live' else 0
+    user = REQUESTED_FOR_EMAIL
+    pass0 = testdata.total[2]
+    fail = testdata.total[1]
+    rate = testdata.total[3]
+    detail = str(testdata.modules)
+    container = 'https://clitestresultstac.blob.core.windows.net/' + container
+    d = datetime.datetime.now()
+    date = d.strftime('%Y%m%d')
+    time = d.strftime('%H%M%S')
+    data = (repo, branch, commit, target, live, user, pass0, fail, rate, detail, container, date, time)
+    print(data)
+    cursor.execute(sql, data)
+
+    # Make sure data is committed to the database
+    cnx.commit()
+    # Close
+    cursor.close()
+    cnx.close()
+
+    print('Exit write_db()')
 
 
 def send_email(container, testdata):
+    print('Enter send_email()')
+
+    from sendgrid import SendGridAPIClient
     print('Sending email...')
     # message = Mail(
     #     from_email='azclibot@microsoft.com',
@@ -132,16 +205,15 @@ def send_email(container, testdata):
         data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
     if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
-    print(data)
-    try:
-        sendgrid_key = sys.argv[1]
-        sg = SendGridAPIClient(sendgrid_key)
-        response = sg.send(data)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        traceback.print_exc()
+
+    sendgrid_key = sys.argv[1]
+    sg = SendGridAPIClient(sendgrid_key)
+    response = sg.send(data)
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
+
+    print('Exit send_email()')
 
 
 def get_content(container, testdata):
@@ -149,6 +221,8 @@ def get_content(container, testdata):
     Compose content of email
     :return:
     """
+    print('Enter get_content()')
+
     content = """
     <!DOCTYPE html>
     <html>
@@ -166,23 +240,34 @@ def get_content(container, testdata):
     link = 'https://dev.azure.com/azure-sdk/internal/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(BUILD_ID)
     content += """
     <p>Hi Azure CLI team,</p>
+    <p>[Please move this mail to normal folder if it is in junk box, otherwise, the HTML and CSS content may not be displayed correctly]</p>
+    <p>
     Here are test results of Azure CLI.<br>
     Repository: {}<br>
     Branch: {}<br>
-    Link: {}<br>
+    Link: {}
+    </p>
     """.format(USER_REPO, USER_BRANCH, link)
+
+    content += """
+    <p>
+    <b>User Manual of Live Test Pipeline</b><br>
+    <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd>Word</a>  
+    <a href=https://microsoft.sharepoint.com/teams/IoTToolingTeam/_layouts/OneNote.aspx?id=%2Fteams%2FIoTToolingTeam%2FShared%20Documents%2FAzure%20Management%20Experience%2FAzure%20Management%20Experience&wd=target%28AZ%20CLI%2FKnowledge%20base.one%7C18BC64EE-9328-497D-804E-6436006CA9A5%2FUser%20Manual%20of%20Live%20Test%20Pipeline%7C243EFA3E-FC7F-4612-9DA5-8E6BB2A11BD3%2F%29>OneNote</a>
+    </p>
+    """
 
     if container != '':
         content += """
         <p>
-        Test results are saved to the following container.<br>
+        <b>Test results location</b><br>
         Storage account: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clitestresult/providers/Microsoft.Storage/storageAccounts/clitestresultstac <br>
         Container: {}
         </p>
         """.format(container)
 
     table = """
-    <p>Test results summary</p>
+    <p><b>Test results summary</b></p>
     <table>
       <tr>
         <th>Module</th>
@@ -220,6 +305,7 @@ def get_content(container, testdata):
     """
 
     print(content)
+    print('Exit get_content()')
     return content
 
 
