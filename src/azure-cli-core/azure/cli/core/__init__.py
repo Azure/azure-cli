@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.11.0"
+__version__ = "2.11.1"
 
 import os
 import sys
@@ -74,7 +74,6 @@ class AzCli(CLI):
         self.local_context = AzCLILocalContext(self)
         register_global_transforms(self)
         register_global_subscription_argument(self)
-
         register_global_query_examples_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
         register_cache_arguments(self)
