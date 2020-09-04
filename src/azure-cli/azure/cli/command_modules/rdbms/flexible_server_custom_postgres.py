@@ -19,6 +19,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
 
 logger = get_logger(__name__)
 
+
 # region create without args
 def _flexible_server_create(cmd, client,
                             resource_group_name=None, server_name=None,
