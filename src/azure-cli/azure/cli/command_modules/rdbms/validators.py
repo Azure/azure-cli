@@ -116,6 +116,22 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
+def pg_storage_validator(ns):
+    if ns.storage_mb:
+        if str(ns.storage_mb) in ['32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384']:
+            ns.storage_mb = int(ns.storage_mb) * 1024
+        else:
+            raise CLIError('Incorrect Value : Allowed values(in GB) : {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384}')
+
+
+def mysql_storage_validator(ns):
+    if ns.storage_mb:
+        if 5 <= int(ns.storage_mb) <= 16384:
+            ns.storage_mb = int(ns.storage_mb) * 1024
+        else:
+            raise CLIError('Incorrect Value : Allowed values(in GB) : Integers ranging 5-16384')
+
+
 def public_access_validator(ns):
     if ns.public_access:
         val = ns.public_access

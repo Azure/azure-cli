@@ -12,7 +12,7 @@ from azure.cli.core.commands.parameters import (
     tags_type, get_location_type,
     get_enum_type,
     get_three_state_flag)
-from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator, public_access_validator
+from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator, public_access_validator, pg_storage_validator, mysql_storage_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from .randomname.generate import generate_username
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
@@ -206,7 +206,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                             help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], 
                             help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-                c.argument('storage_mb', default='131072', options_list=['--storage-size'], type=int, 
+                c.argument('storage_mb', default='128', options_list=['--storage-size'], type=int,
+                           validator=pg_storage_validator,
                             help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
                 c.argument('version', default='12', options_list=['--version'], 
                             help='Server major version.')              
@@ -217,7 +218,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                             help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], 
                             help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-                c.argument('storage_mb', default='10240', options_list=['--storage-size'], type=int, 
+                c.argument('storage_mb', default='10', options_list=['--storage-size'], type=int,
+                           validator=mysql_storage_validator,
                             help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
                 c.argument('version', default='5.7', options_list=['--version'], 
                             help='Server major version.')
