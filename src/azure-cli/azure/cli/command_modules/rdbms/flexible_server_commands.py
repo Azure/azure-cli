@@ -189,6 +189,7 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_location_capabilities) as g:
         g.custom_command('list-skus', '_flexible_list_skus')
+        g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk) as g:
         g.command('list', 'list_by_server')
