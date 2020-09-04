@@ -457,6 +457,16 @@ def create_management_policies(client, resource_group_name, account_name, policy
     return client.create_or_update(resource_group_name, account_name, policy=policy)
 
 
+def add_management_policy_rule(cmd, client, resource_group_name, account_name, actions, filters):
+    ManagementPolicyRule = cmd.get_models('ManagementPolicyRule')
+    rule = ManagementPolicyRule(actions=actions, filters=filters)
+
+    policy = client.get(resource_group_name=resource_group_name, account_name=account_name)
+    policy.rules.append(rule)
+
+    return client.create_or_update(resource_group_name, account_name, policy=policy)
+
+
 def update_management_policies(client, resource_group_name, account_name, parameters=None):
     if parameters:
         parameters = parameters.policy

@@ -185,6 +185,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  setter_type=management_policy_custom_type)
         g.command('delete', 'delete')
 
+    with self.command_group('storage account management-policy rule', management_policy_sdk,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-11-01',
+                            custom_command_type=management_policy_custom_type) as g:
+        g.custom_command('add', 'add_management_policy_rule')
+
     with self.command_group('storage account network-rule', storage_account_sdk,
                             custom_command_type=storage_account_custom_type,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01') as g:
