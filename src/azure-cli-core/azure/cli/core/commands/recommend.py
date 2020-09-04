@@ -100,6 +100,13 @@ class ListNode:
         if child_node:
             self._child.append(child_node)
 
+    def get_trace_to_root(self, node_name):
+        if self._parent:
+            select_string = '{}.{}[]'.format(self._parent.get_trace_to_root(self._name), node_name)
+        else:
+            select_string = '{}[]'.format(node_name)
+        return select_string
+
 
 class TreeNode:
     def __init__(self, name, parent):
@@ -193,7 +200,7 @@ class TreeNode:
             trace_str += "[]"
         return trace_str
 
-    def get_select_string(self, select_items):
+    def get_select_string_deperated(self, select_items):
         ret = []
         trace_str = ""
         if self._parent or self._from_list:
@@ -273,6 +280,18 @@ class TreeNode:
             query_str, help_str="Get the number of the results", group_name="function"))
         return ret
 
+    def get_trace_to_root(self, node_name):
+        if self._parent:
+            select_string = '{}.{}'.format(self._parent.get_trace_to_root(self._name), self._name)
+        else:
+            select_string = self._name
+        return select_string
+
+    def get_examples(self):
+        select_string = self.get_trace_to_root(self._name)
+        ans = Recommendation(select_string)
+        return [ans]
+
 
 class TreeBuilder:
     '''Parse entry. Generate parse tree from json. And then give recommendation'''
@@ -285,24 +304,35 @@ class TreeBuilder:
         '''Build a query tree with a given json file
         :param str data: json format data
         '''
-        self._root = self._do_parse('root', data, None)
+        self._root = self._do_parse('', [data], None)
 
     def generate_recommend(self, keywords_list, output_format):
         recommendations = []
-        for node in self._all_nodes.values():
-            recommendations.extend(node.get_select_string(keywords_list))
-        if self._root.from_list():
-            recommendations.extend(
-                self._root.select_specific_number_string(keywords_list))
-            recommendations.extend(
-                self._root.get_condition_recommend(keywords_list))
-            recommendations.extend(
-                self._root.get_function_recommend(keywords_list))
-        recommendations.sort(key=lambda x: x._group)  # pylint: disable=protected-access
+        match_list = self._get_matched_nodes(keywords_list)
+        for node_name in match_list:
+            for node in self._all_nodes.get(node_name):
+                recommendations.extend(node.get_examples())
+
         if output_format == 'table':
             for item in recommendations:
                 item.set_max_length(80)
         return todict(recommendations)
+
+    def _get_matched_nodes(self, keywords_list):
+        def name_match(pattern, line):
+            return pattern.lower() in line.lower()
+
+        match_list = []
+        if not keywords_list:
+            suggest_list = ['location', 'resourcesGroup', 'name']
+        else:
+            suggest_list = keywords_list
+
+        for pattern in suggest_list:
+            for node_name in self._all_nodes:
+                if node_name not in match_list and name_match(pattern, node_name):
+                    match_list.append(node_name)
+        return match_list
 
     def _do_parse(self, name, data, parent):
         '''do parse for a single node
