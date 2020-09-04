@@ -149,8 +149,8 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
-                                 getter_name='_server_update_get', getter_type=flexible_server_custom_common,
-                                 setter_name='_server_update_set', setter_type=flexible_server_custom_common,
+                                 getter_name='_flexible_server_update_get', getter_type=flexible_server_custom_common,
+                                 setter_name='_flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='_flexible_server_update_custom_func')
         g.custom_wait_command('wait', '_flexible_server_mysql_get')

@@ -290,6 +290,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('family', 'capacity', 'tier')
             c.argument('sku_name', options_list=['--sku-name'], 
                         help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
+            c.argument('tier', default='GeneralPurpose', options_list=['--tier'],
+                       help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
             c.argument('assign_identity', options_list=['--assign-identity'], 
                         help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
             c.argument('storage_mb', options_list=['--storage-size'], 
@@ -300,6 +302,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                         help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
+            c.argument('ha_enabled', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
+            c.argument('maintenance_window', options_list=['--maintenance-window'],
+                       help='Period of time designated for maintenance. Examples: "0:8:30" to schedule on Monday, 8:30 UTC')
+            if command_group == 'mysql':
+                c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           options_list=['--public-network-access'],
+                           help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
+                c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'],
+                           help='Enable or disable autogrow of the storage. Default value is Enabled.')
+                c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           options_list=['--ssl-enforcement'],
+                           help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
+                c.argument('subnet_arm_resource_id', options_list=['--subnet-id'],
+                           help='Name or ID of the subnet that allows access to an Azure Flexible Server MySQL Server. ')
+                c.argument('replication_role', options_list=['--replication-role'],
+                           help='The replication role of the server.')
 
         with self.argument_context('{} flexible-server list-skus'.format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
