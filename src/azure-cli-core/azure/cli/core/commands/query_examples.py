@@ -130,15 +130,17 @@ class TreeNode:
             else:
                 outer_trace = self._name
             return outer_trace, inner_trace
-        else:
-            if self._parent:
-                if inner_trace:
-                    current_trace = self._name + '.' + inner_trace
-                else:
-                    current_trace = self._name
-                return self._parent.get_trace_to_array(current_trace)
+
+        # under a dict
+        if self._parent:
+            if inner_trace:
+                current_trace = self._name + '.' + inner_trace
             else:
-                return None, None
+                current_trace = self._name
+            return self._parent.get_trace_to_array(current_trace)
+
+        # no array found until root node
+        return None, None
 
     def get_trace_to_root(self):
         if self._parent:
@@ -279,11 +281,11 @@ class TreeBuilder:
         self._record_node(name, node)
         return node
 
-    def _get_all_keys(self, data):
+    def _get_all_keys(self, data):  # pylint: disable=no-self-use
         '''Get all keys in a list of dict'''
         return set().union(*(d.keys() for d in data))
 
-    def _get_not_none_values(self, data, key):
+    def _get_not_none_values(self, data, key):  # pylint: disable=no-self-use
         '''Get all not None values in a list of dict'''
         return [d.get(key) for d in data if d.get(key, None) is not None]
 
