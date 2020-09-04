@@ -38,13 +38,13 @@ def _flexible_server_create(cmd, client,
     if subnet_arm_resource_id is not None:
         subnet_id = subnet_arm_resource_id # set the subnet id to be the one passed in
         delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_arm_resource_id
+            subnet_arm_resource_id=subnet_id
         )
     else:
         delegated_subnet_arguments=None
 
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     try:
-        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing PostgreSQL Server \'%s\' in group \'%s\'',
@@ -64,6 +64,7 @@ def _flexible_server_create(cmd, client,
             # )
 
         # Create postgresql
+        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
         server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, tier, storage_mb, administrator_login, administrator_login_password, version,
             tags, public_access, assign_identity, delegated_subnet_arguments, high_availability, zone)
@@ -230,6 +231,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     from azure.mgmt.rdbms import postgresql
 
+    # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
+    # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
     parameters = postgresql.flexibleservers.models.Server(
         sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,

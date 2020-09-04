@@ -26,8 +26,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                                 location=None, storage_mb=None, administrator_login=None,
                                 administrator_login_password=None, version=None,
                                 backup_retention=None, tags=None, public_access=None, database_name=None,
-                                subnet_arm_resource_id=None, public_network_access=None,
-                                high_availability=None, zone=None, assign_identity=False):
+                                subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False):
     from azure.mgmt.rdbms import mysql
     db_context = DbContext(
         azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
@@ -37,14 +36,13 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     if subnet_arm_resource_id is not None:
         subnet_id = subnet_arm_resource_id  # set the subnet id to be the one passed in
         delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_arm_resource_id
+            subnet_arm_resource_id=subnet_id
         )
     else:
         delegated_subnet_arguments = None
 
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     try:
-        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
-
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing MySQL Server \'%s\' in group \'%s\'',
@@ -65,9 +63,10 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
             # )
 
         # Create mysql server
+        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
         server_result = _create_server(
             db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, storage_mb,
-            administrator_login, administrator_login_password, version, tags, public_network_access, assign_identity,
+            administrator_login, administrator_login_password, version, tags, public_access, assign_identity,
             tier, high_availability, zone, delegated_subnet_arguments)
 
         if public_access is not None:
@@ -292,8 +291,10 @@ def _flexible_server_mysql_get(cmd, resource_group_name, server_name):
     client = get_mysql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
+
 def _flexible_list_skus(client, location):
     return client.list(location)
+
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name,
                    storage_mb, administrator_login, administrator_login_password, version, tags, public_network_access,
@@ -307,6 +308,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     from azure.mgmt.rdbms import mysql
 
+    # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
+    # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
     parameters = mysql.flexibleservers.models.Server(
         sku=mysql.flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,
