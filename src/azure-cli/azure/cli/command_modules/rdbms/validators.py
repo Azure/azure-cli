@@ -126,10 +126,10 @@ def pg_storage_validator(ns):
 
 def mysql_storage_validator(ns):
     if ns.storage_mb:
-        if 5 <= int(ns.storage_mb) <= 16384:
+        if 10 <= int(ns.storage_mb) <= 16384:
             ns.storage_mb = int(ns.storage_mb) * 1024
         else:
-            raise CLIError('Incorrect Value : Allowed values(in GB) : Integers ranging 5-16384')
+            raise CLIError('Incorrect Value : Allowed values(in GB) : Integers ranging 10-16384')
 
 
 def public_access_validator(ns):
