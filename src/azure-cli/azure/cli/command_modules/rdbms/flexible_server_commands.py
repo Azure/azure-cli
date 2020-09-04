@@ -134,6 +134,7 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_location_capabilities) as g:
        # g.command('list-skus', 'execute')
         g.custom_command('list-skus', '_flexible_list_skus')
+        g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
 
     ## MySQL commands

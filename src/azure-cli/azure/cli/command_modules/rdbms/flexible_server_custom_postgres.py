@@ -279,6 +279,45 @@ def _update_server(db_context, cmd, client, server_result, resource_group_name, 
     return server_result
 
 
+def flexible_server_connection_string(
+        server_name='{server}', database_name='{database}', administrator_login='{login}',
+        administrator_login_password='{password}'):
+    user = '{}@{}'.format(administrator_login, server_name)
+    host = '{}.postgres.database.azure.com'.format(server_name)
+    return {
+        'connectionStrings': _create_postgresql_connection_strings(host, user, administrator_login_password, database_name)
+    }
+
+
+def _create_postgresql_connection_strings(host, user, password, database):
+    result = {
+        'psql_cmd': "psql --host={host} --port=5432 --username={user} --dbname={database}",
+        'ado.net': "Server={host};Database={database};Port=5432;User Id={user};Password={password};",
+        'jdbc': "jdbc:postgresql://{host}:5432/{database}?user={user}&password={password}",
+        'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:5432/{database}  "
+                       "spring.datasource.username={user}  "
+                       "spring.datasource.password={password}",
+        'node.js': "var client = new pg.Client('postgres://{user}:{password}@{host}:5432/{database}');",
+        'php': "host={host} port=5432 dbname={database} user={user} password={password}",
+        'python': "cnx = psycopg2.connect(database='{database}', user='{user}', host='{host}', password='{password}', "
+                  "port='5432')",
+        'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}', :dbname => '{database}', "
+                ":port => '5432', :password => '{password}')",
+        'webapp': "Database={database}; Data Source={host}; User Id={user}; Password={password}"
+    }
+
+    connection_kwargs = {
+        'host': host,
+        'user': user,
+        'password': password if password is not None else '{password}',
+        'database': database
+    }
+
+    for k, v in result.items():
+        result[k] = v.format(**connection_kwargs)
+    return result
+
+
 def _create_postgresql_connection_string(host, password):
     connection_kwargs = {
         'host': host,

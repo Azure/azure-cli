@@ -390,8 +390,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The login username of the administrator.')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The login password of the administrator.')
-            if command_group == 'mysql':
-                c.argument('database_name', options_list=['--database-name', '-d'], help='The name of a database.')
+            c.argument('database_name', options_list=['--database-name', '-d'], help='The name of a database.')
 
 
     _flexible_server_params('postgres')
