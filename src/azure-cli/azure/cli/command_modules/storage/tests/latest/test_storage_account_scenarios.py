@@ -980,6 +980,34 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['isVersioningEnabled'], True)
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_test")
+    @StorageAccountPreparer(name_prefix="clitest", location="eastus2euap", kind="StorageV2")
+    def test_storage_account_last_access_tracking(self):
+        # Update policy
+        self.cmd('storage account blob-service-properties update --enable-last-access-tracking -n {sa} -g {rg}',
+                 checks=[self.check('lastAccessTimeTrackingPolicy.enable', True)])
+        self.cmd('storage account blob-service-properties show -n {sa} -g {rg}',
+                 checks=[self.check('lastAccessTimeTrackingPolicy.enable', True),
+                         self.check('lastAccessTimeTrackingPolicy.name', 'AccessTimeTracking'),
+                         self.check('lastAccessTimeTrackingPolicy.trackingGranularityInDays', 1),
+                         self.check('lastAccessTimeTrackingPolicy.blobType[0]', 'blockBlob')])
+
+        # Update policy with false
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} --enable-last-access-tracking false ',
+                 checks=[self.check('lastAccessTimeTrackingPolicy', None)])
+
+        # Update policy with true
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} --enable-last-access-tracking True ',
+                 checks=[self.check('lastAccessTimeTrackingPolicy.enable', True),
+                         self.check('lastAccessTimeTrackingPolicy.name', 'AccessTimeTracking'),
+                         self.check('lastAccessTimeTrackingPolicy.trackingGranularityInDays', 1),
+                         self.check('lastAccessTimeTrackingPolicy.blobType[0]', 'blockBlob')])
+        self.cmd('storage account blob-service-properties show -n {sa} -g {rg} ',
+                 checks=[self.check('lastAccessTimeTrackingPolicy.enable', True),
+                         self.check('lastAccessTimeTrackingPolicy.name', 'AccessTimeTracking'),
+                         self.check('lastAccessTimeTrackingPolicy.trackingGranularityInDays', 1),
+                         self.check('lastAccessTimeTrackingPolicy.blobType[0]', 'blockBlob')])
 
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):

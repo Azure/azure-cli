@@ -466,9 +466,7 @@ def update_management_policies(client, resource_group_name, account_name, parame
 # TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
 def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
                                    delete_retention_days=None, enable_restore_policy=None, restore_days=None,
-                                   enable_versioning=None, enable_last_access_tracking=None,
-                                   tracking_policy_name=None, tracking_granularity_in_days=None,
-                                   blob_type=None):
+                                   enable_versioning=None, enable_last_access_tracking=None):
     if enable_change_feed is not None:
         instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
 
@@ -487,15 +485,10 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
     if enable_versioning is not None:
         instance.is_versioning_enabled = enable_versioning
 
+    # Update last access time tracking policy
     if enable_last_access_tracking is not None:
-        instance.last_access_time_tracking_policy = cmd.get_models('LastAccessTimeTrackingPolicy')(
-            enable=enable_last_access_tracking if enable_last_access_tracking is not None else
-            instance.last_access_time_tracking_policy.enable,
-            name=tracking_policy_name if tracking_policy_name is not None else
-            instance.last_access_time_tracking_policy.name,
-            tracking_granularity_in_days=tracking_granularity_in_days if tracking_granularity_in_days else
-            instance.last_access_time_tracking_policy.tracking_granularity_in_days,
-            blob_type=blob_type if blob_type is not None else instance.last_access_time_tracking_policy.blob_type)
+        LastAccessTimeTrackingPolicy = cmd.get_models('LastAccessTimeTrackingPolicy')
+        instance.last_access_time_tracking_policy = LastAccessTimeTrackingPolicy(enable=enable_last_access_tracking)
 
     return instance
 

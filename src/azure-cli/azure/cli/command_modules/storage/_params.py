@@ -423,18 +423,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.',
                    min_api='2019-06-01')
         c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(), min_api='2019-06-01',
-                   arg_group='Last Access Tracking Policy',
                    help='When set to true last access time based tracking policy is enabled.')
-        c.argument('tracking_policy_name', arg_type=get_enum_type(t_name), min_api='2019-06-01',
-                   arg_group='Last Access Tracking Policy',
-                   help='Name of the policy.')
-        c.argument('tracking_granularity_in_days', type=int, min_api='2019-06-01',
-                   arg_group='Last Access Tracking Policy',
-                   help='The field specifies blob object tracking granularity in days, typically how often the blob '
-                   'object should be tracked.')
-        c.argument('blob_type', nargs='+', arg_type=get_enum_type(["blockBlob", "pageBlob", "appendBlob"]),
-                   min_api='2019-06-01', arg_group='Last Access Tracking Policy',
-                   help='An array of predefined supported blob types.')
 
     with self.argument_context('storage account file-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
