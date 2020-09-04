@@ -23,13 +23,23 @@ def _server_list_custom_func(client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
     return client.list()
 
-def _server_delete_func(client, resource_group_name=None, server_name=None, force=None):
-    confirm = force
+def _firewall_rule_delete_func(client, resource_group_name=None, server_name=None, firewall_rule_name=None, prompt=None):
+    confirm = True
+    if not prompt or prompt ==' yes':
+        confirm = user_confirmation("Are you sure you want to delete the firewall-rule '{0}' in server '{1}', resource group '{2}'".format(firewall_rule_name, server_name, resource_group_name))
+    if confirm:
+        try:
+            result = client.delete(resource_group_name, server_name, firewall_rule_name)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error(ex)
+        return result
+
+def _database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, force=None):
     if not force:
         confirm = user_confirmation("Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=force)
     if (confirm):
         try:
-            result = client.delete(resource_group_name, server_name)
+            result = client.delete(resource_group_name, server_name, database_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
         return result
@@ -56,11 +66,13 @@ def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, 
 
 def user_confirmation(message, yes=False):
     if yes:
-        return
+        return True
     from knack.prompting import prompt_y_n, NoTTYException
     try:
         if not prompt_y_n(message):
             raise CLIError('Operation cancelled.')
+        else:
+            return True
     except NoTTYException:
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --force.')
