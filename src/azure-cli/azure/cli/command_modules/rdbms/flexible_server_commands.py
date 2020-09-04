@@ -15,9 +15,11 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_flexible_config,
     cf_mysql_flexible_db,
     cf_mysql_flexible_replica,
+    cf_mysql_flexible_location_capabilities,
     cf_postgres_flexible_servers,
     cf_postgres_flexible_firewall_rules,
-    cf_postgres_flexible_config)
+    cf_postgres_flexible_config,
+    cf_postgres_flexible_location_capabilities)
 
 from ._transformers import table_transform_output
 # from .transformers import table_transform_connection_string
@@ -25,8 +27,6 @@ from ._transformers import table_transform_output
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_flexibleserver_command_table(self, _):
-    rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
-
     ## Flexible server SDKs:
     mysql_flexible_servers_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#ServersOperations.{}',
@@ -48,12 +48,15 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_mysql_flexible_db
     )
 
-    ''' replica is currently not deployed
     mysql_flexible_replica_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#ReplicasOperations.{}',
         client_factory=cf_mysql_flexible_replica
     )
-    '''
+
+    mysql_flexible_location_capabilities_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms..mysql.flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
+        client_factory=cf_mysql_flexible_location_capabilities
+    )
 
     postgres_flexible_servers_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.flexibleservers.operations#ServersOperations.{}',
@@ -68,6 +71,11 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_config_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.flexibleservers.operations#ConfigurationsOperations.{}',
         client_factory=cf_postgres_flexible_config
+    )
+
+    postgres_flexible_location_capabilities_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms..postgresql.flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
+        client_factory=cf_postgres_flexible_location_capabilities
     )
 
     ### MERU COMMANDS
@@ -91,8 +99,8 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
-                                 getter_name='_server_update_get', getter_type=rdbms_custom,
-                                 setter_name='_server_update_set', setter_type=rdbms_custom,
+                                 getter_name='_flexible_server_update_get', getter_type=flexible_server_custom_common,
+                                 setter_name='_flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='_flexible_server_update_custom_func')
         g.custom_wait_command('wait', '_flexible_server_postgresql_get')
@@ -108,17 +116,25 @@ def load_flexibleserver_command_table(self, _):
         g.command('list', 'list_by_server')
         # g.custom_command('list', '_flexible_firewall_get_test') # this is setup solely for debugging
         g.generic_update_command('update',
-                                 getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
-                                 setter_name='_firewall_rule_custom_setter', setter_type=rdbms_custom,
+                                 getter_name='_flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
+                                 setter_name='_flexible_firewall_rule_custom_setter', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='_flexible_firewall_rule_update_custom_func',
                                  custom_func_type=flexible_server_custom_common)
 
-    # no custom commands needed
-    with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk) as g:
+    with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_config) as g:
         g.custom_command('set', '_flexible_parameter_update')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
+
+    with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_location_capabilities) as g:
+       # g.command('list-skus', 'execute')
+        g.custom_command('list-skus', '_flexible_list_skus')
+
 
     ## MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
@@ -133,8 +149,8 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
         g.generic_update_command('update',
-                                 getter_name='_server_update_get', getter_type=rdbms_custom,
-                                 setter_name='_server_update_set', setter_type=rdbms_custom,
+                                 getter_name='_flexible_server_update_get', getter_type=flexible_server_custom_common,
+                                 setter_name='_flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='_flexible_server_update_custom_func')
         g.custom_wait_command('wait', '_flexible_server_mysql_get')
@@ -149,8 +165,8 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.generic_update_command('update',
-                                 getter_name='_firewall_rule_custom_getter', getter_type=rdbms_custom,
-                                 setter_name='_firewall_rule_custom_setter', setter_type=rdbms_custom,
+                                 getter_name='_flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
+                                 setter_name='_flexible_firewall_rule_custom_setter', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='_flexible_firewall_rule_update_custom_func',
                                  custom_func_type=flexible_server_custom_common)
@@ -169,8 +185,11 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
-    ''' Replica not yet deployed 
-    # not working at the moment
+    with self.command_group('mysql flexible-server', mysql_flexible_location_capabilities_sdk,
+                            custom_command_type=flexible_servers_custom_mysql,
+                            client_factory=cf_mysql_flexible_location_capabilities) as g:
+        g.custom_command('list-skus', '_flexible_list_skus')
+
     with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk) as g:
         g.command('list', 'list_by_server')
 
@@ -179,4 +198,3 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', '_flexible_replica_create', supports_no_wait=True)
         g.custom_command('stop', '_flexible_replica_stop', confirmation=True)
-    '''

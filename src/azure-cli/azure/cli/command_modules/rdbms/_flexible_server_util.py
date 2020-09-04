@@ -131,6 +131,16 @@ def update_kwargs(kwargs, key, value):
         kwargs[key] = value
 
 
+def parse_maintenance_window(maintenance_window_string):
+    parsed_input = maintenance_window_string.split(':')
+    if len(parsed_input) == 1:
+        return parsed_input[0], None, None
+    elif len(parsed_input) == 2:
+        return parsed_input[0], parsed_input[1], None
+    elif len(parsed_input) == 3:
+        return parsed_input[0], parsed_input[1], parsed_input[2]
+    return None, None, None
+
 def _update_location(cmd, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)
     rg = resource_client.resource_groups.get(resource_group_name)

@@ -238,19 +238,20 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
                        arg_group='Authentication')
-            c.argument('backup_retention', type=int, options_list=['--backup-retention'],
+            c.argument('backup_retention', default='7', type=int, options_list=['--backup-retention'],
                        help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
                        validator=retention_validator)
             c.argument('tags', tags_type)
             c.argument('public_access', options_list=['--public-access'],
                         help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ',
                         validator=public_access_validator)
+
             # c.argument('vnet_name', options_list=['--vnet'], help='Name of the virtual network when creating a new one or referencing an existing one. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
             # c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'], help='The IP address prefix to use when creating a new VNet in CIDR format. ')
             # c.argument('subnet_name', options_list=['--subnet'], help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If both vnet-name and subnet are omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created. The name must be between 1 to 80 characters. The name must begin with a letter or number, end with a letter, number, or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
             # c.argument('subnet_address_prefix', default='10.0.0.0/24', options_list=['--subnet-address-prefix'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. ')
-            c.argument('high_availability', options_list=['--high-availability'], 
-                        help='Enable or disable high availability feature')     
+            c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
+
             c.ignore('database_name')
 
             c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], 
@@ -289,6 +290,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('family', 'capacity', 'tier')
             c.argument('sku_name', options_list=['--sku-name'], 
                         help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
+            c.argument('tier', default='GeneralPurpose', options_list=['--tier'],
+                       help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
             c.argument('assign_identity', options_list=['--assign-identity'], 
                         help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
             c.argument('storage_mb', options_list=['--storage-size'], 
@@ -299,8 +302,26 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                         help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
-        
-        
+            c.argument('ha_enabled', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
+            c.argument('maintenance_window', options_list=['--maintenance-window'],
+                       help='Period of time designated for maintenance. Examples: "0:8:30" to schedule on Monday, 8:30 UTC')
+            if command_group == 'mysql':
+                c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           options_list=['--public-network-access'],
+                           help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
+                c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'],
+                           help='Enable or disable autogrow of the storage. Default value is Enabled.')
+                c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           options_list=['--ssl-enforcement'],
+                           help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
+                c.argument('subnet_arm_resource_id', options_list=['--subnet-id'],
+                           help='Name or ID of the subnet that allows access to an Azure Flexible Server MySQL Server. ')
+                c.argument('replication_role', options_list=['--replication-role'],
+                           help='The replication role of the server.')
+
+        with self.argument_context('{} flexible-server list-skus'.format(command_group)) as c:
+            c.argument('location', arg_type=get_location_type(self.cli_ctx))
+
         # flexible-server parameter
         for scope in ['list', 'set', 'show']:
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
