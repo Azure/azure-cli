@@ -957,14 +957,13 @@ def cli_cosmosdb_sql_database_throughput_update(client,
 
 
 def cli_cosmosdb_sql_database_throughput_migrate(client,
-                                                resource_group_name,
-                                                account_name,
-                                                database_name,
-                                                throughput_type):
+                                                 resource_group_name,
+                                                 account_name,
+                                                 database_name,
+                                                 throughput_type):
     if throughput_type == "autoscale":
-       return client.migrate_sql_database_to_autoscale(resource_group_name, account_name, database_name)
-    elif  throughput_type == "manual":
-      return client.migrate_sql_database_to_manual_throughput(resource_group_name, account_name, database_name)
+        return client.migrate_sql_database_to_autoscale(resource_group_name, account_name, database_name)
+    return client.migrate_sql_database_to_manual_throughput(resource_group_name, account_name, database_name)
 
 
 def cli_cosmosdb_sql_container_throughput_update(client,
@@ -984,16 +983,15 @@ def cli_cosmosdb_sql_container_throughput_update(client,
 
 
 def cli_cosmosdb_sql_container_throughput_migrate(client,
-                                                 resource_group_name,
-                                                 account_name,
-                                                 database_name,
-                                                 container_name,
-                                                 throughput_type):
+                                                  resource_group_name,
+                                                  account_name,
+                                                  database_name,
+                                                  container_name,
+                                                  throughput_type):
     """Migrate an Azure Cosmos DB SQL container throughput"""
     if throughput_type == "autoscale":
         return client.migrate_sql_container_to_autoscale(resource_group_name, account_name, database_name, container_name)
-    elif  throughput_type == "manual":
-        return client.migrate_sql_container_to_manual_throughput(resource_group_name, account_name, database_name, container_name)                                             
+    return client.migrate_sql_container_to_manual_throughput(resource_group_name, account_name, database_name, container_name)
 
 
 def cli_cosmosdb_mongodb_database_throughput_update(client,
@@ -1010,15 +1008,14 @@ def cli_cosmosdb_mongodb_database_throughput_update(client,
                                                       throughput_update_resource)
 
 def cli_cosmosdb_mongodb_database_throughput_migrate(client,
-                                                    resource_group_name,
-                                                    account_name,
-                                                    database_name,
-                                                    throughput_type):
+                                                     resource_group_name,
+                                                     account_name,
+                                                     database_name,
+                                                     throughput_type):
     """Migrate an Azure Cosmos DB MongoDB database throughput"""
     if throughput_type == "autoscale":
-       return client.migrate_mongo_db_database_to_autoscale(resource_group_name, account_name, database_name)
-    elif  throughput_type == "manual":
-       return client.migrate_mongo_db_database_to_manual_throughput(resource_group_name, account_name, database_name)                                                   
+        return client.migrate_mongo_db_database_to_autoscale(resource_group_name, account_name, database_name)
+    return client.migrate_mongo_db_database_to_manual_throughput(resource_group_name, account_name, database_name)
 
 
 def cli_cosmosdb_mongodb_collection_throughput_update(client,
@@ -1038,16 +1035,15 @@ def cli_cosmosdb_mongodb_collection_throughput_update(client,
 
 
 def cli_cosmosdb_mongodb_collection_throughput_migrate(client,
-                                                      resource_group_name,
-                                                      account_name,
-                                                      database_name,
-                                                      collection_name,
-                                                      throughput_type):
+                                                       resource_group_name,
+                                                       account_name,
+                                                       database_name,
+                                                       collection_name,
+                                                       throughput_type):
     """Migrate an Azure Cosmos DB MongoDB collection throughput"""
     if throughput_type == "autoscale":
         return client.migrate_mongo_db_collection_to_autoscale(resource_group_name, account_name, database_name, collection_name)
-    elif  throughput_type == "manual":
-        return client.migrate_mongo_db_collection_to_manual_throughput(resource_group_name, account_name, database_name, collection_name)                                                     
+    return client.migrate_mongo_db_collection_to_manual_throughput(resource_group_name, account_name, database_name, collection_name)
 
 
 def cli_cosmosdb_cassandra_keyspace_throughput_update(client,
@@ -1065,15 +1061,14 @@ def cli_cosmosdb_cassandra_keyspace_throughput_update(client,
 
 
 def cli_cosmosdb_cassandra_keyspace_throughput_migrate(client,
-                                                      resource_group_name,
-                                                      account_name,
-                                                      keyspace_name,
-                                                      throughput_type):
+                                                       resource_group_name,
+                                                       account_name,
+                                                       keyspace_name,
+                                                       throughput_type):
     """Migrate an Azure Cosmos DB Cassandra keyspace throughput"""
     if throughput_type == "autoscale":
         return client.migrate_cassandra_keyspace_to_autoscale(resource_group_name, account_name, keyspace_name)
-    elif  throughput_type == "manual":
-        return client.migrate_cassandra_keyspace_to_manual_throughput(resource_group_name, account_name, keyspace_name)
+    return client.migrate_cassandra_keyspace_to_manual_throughput(resource_group_name, account_name, keyspace_name)
 
 
 def cli_cosmosdb_cassandra_table_throughput_update(client,
@@ -1093,16 +1088,15 @@ def cli_cosmosdb_cassandra_table_throughput_update(client,
 
 
 def cli_cosmosdb_cassandra_table_throughput_migrate(client,
-                                                   resource_group_name,
-                                                   account_name,
-                                                   keyspace_name,
-                                                   table_name,
-                                                   throughput_type):
+                                                    resource_group_name,
+                                                    account_name,
+                                                    keyspace_name,
+                                                    table_name,
+                                                    throughput_type):
     """Migrate an Azure Cosmos DB Cassandra table throughput"""
     if throughput_type == "autoscale":
         return client.migrate_cassandra_table_to_autoscale(resource_group_name, account_name, keyspace_name, table_name)
-    elif  throughput_type == "manual":
-        return client.migrate_cassandra_table_to_manual_throughput(resource_group_name, account_name, keyspace_name, table_name)
+    return client.migrate_cassandra_table_to_manual_throughput(resource_group_name, account_name, keyspace_name, table_name)
 
 
 def cli_cosmosdb_gremlin_database_throughput_update(client,
@@ -1119,15 +1113,14 @@ def cli_cosmosdb_gremlin_database_throughput_update(client,
                                                      throughput_update_resource)
 
 def cli_cosmosdb_gremlin_database_throughput_migrate(client,
-                                                    resource_group_name,
-                                                    account_name,
-                                                    database_name,
-                                                    throughput_type):
+                                                     resource_group_name,
+                                                     account_name,
+                                                     database_name,
+                                                     throughput_type):
     """Migrate an Azure Cosmos DB Gremlin database throughput"""
     if throughput_type == "autoscale":
         return client.migrate_gremlin_database_to_autoscale(resource_group_name, account_name, database_name)
-    elif throughput_type == "manual":
-        return client.migrate_gremlin_database_to_manual_throughput(resource_group_name, account_name, database_name)
+    return client.migrate_gremlin_database_to_manual_throughput(resource_group_name, account_name, database_name)
 
 
 def cli_cosmosdb_gremlin_graph_throughput_update(client,
@@ -1147,17 +1140,16 @@ def cli_cosmosdb_gremlin_graph_throughput_update(client,
 
 
 def cli_cosmosdb_gremlin_graph_throughput_migrate(client,
-                                                    resource_group_name,
-                                                    account_name,
-                                                    database_name,
-                                                    graph_name,
-                                                    throughput_type):
+                                                  resource_group_name,
+                                                  account_name,
+                                                  database_name,
+                                                  graph_name,
+                                                  throughput_type):
     """Migrate an Azure Cosmos DB Gremlin database throughput"""
     if throughput_type == "autoscale":
         return client.migrate_gremlin_graph_to_autoscale(resource_group_name, account_name, database_name, graph_name)
-    elif throughput_type == "manual":
-        return client.migrate_gremlin_graph_to_manual_throughput(resource_group_name, account_name, database_name, graph_name)
-                                                  
+    return client.migrate_gremlin_graph_to_manual_throughput(resource_group_name, account_name, database_name, graph_name)
+
 
 def cli_cosmosdb_table_throughput_update(client,
                                          resource_group_name,
@@ -1170,16 +1162,15 @@ def cli_cosmosdb_table_throughput_update(client,
     return client.update_table_throughput(resource_group_name, account_name, table_name, throughput_update_resource)
 
 def cli_cosmosdb_table_throughput_migrate(client,
-                                         resource_group_name,
-                                         account_name,
-                                         table_name,
-                                         throughput_type):
+                                          resource_group_name,
+                                          account_name,
+                                          table_name,
+                                          throughput_type):
     """Migrate an Azure Cosmos DB table throughput"""
     if throughput_type == "autoscale":
-            return client.migrate_table_to_autoscale(resource_group_name, account_name, table_name)
-    elif throughput_type == "manual":
-        return client.migrate_table_to_manual_throughput(resource_group_name, account_name, table_name)
-      
+        return client.migrate_table_to_autoscale(resource_group_name, account_name, table_name)
+    return client.migrate_table_to_manual_throughput(resource_group_name, account_name, table_name)
+
 
 def _get_throughput_settings_update_parameters(throughput=None, max_throughput=None):
 
