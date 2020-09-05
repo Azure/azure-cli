@@ -2522,8 +2522,6 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     addon_args = addons.split(',')
 
     addon_profiles = {k.lower():v for k, v in (instance.addon_profiles or {}).items()}
-    if 'kube-dashboard' in addon_args and 'kubedashboard' not in addon_profiles:
-        addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
 
     # To be consistent, os_type is lower case
     os_type = 'linux'
@@ -2531,6 +2529,9 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     # for each addons argument
     for addon_arg in addon_args:
         # addon variable is always lower case since values of ADDONS and os_type are all lower case
+        if addon_arg not in ADDONS:
+            raise CLIError("Invalid addon name: {}.".format(addon_arg))
+
         addon = ADDONS[addon_arg]
         if addon == 'aciconnector':
             # only linux is supported for now, in the future this will be a user flag
@@ -2567,7 +2568,10 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
-                raise CLIError("The addon {} is not installed.".format(addon))
+                if addon == 'kubedashboard':
+                    addon_profiles[addon] = ManagedClusterAddonProfile(enabled=False)
+                else:
+                    raise CLIError("The addon {} is not installed.".format(addon))
             addon_profiles[addon].config = None
         addon_profiles[addon].enabled = enable
 
