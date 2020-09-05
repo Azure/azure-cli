@@ -53,7 +53,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
-                 random_name_length=17, key='rg'):
+                 random_name_length=75, key='rg'):
         if ' ' in name_prefix:
             raise CliTestError('Error: Space character in resource group name prefix \'%s\'' % name_prefix)
         super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
