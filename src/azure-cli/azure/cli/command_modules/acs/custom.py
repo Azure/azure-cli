@@ -2159,7 +2159,8 @@ ADDONS = {
     'http_application_routing': 'httpApplicationRouting',
     'monitoring': 'omsagent',
     'virtual-node': 'aciConnector',
-    'kube-dashboard': 'kubeDashboard'
+    'kube-dashboard': 'kubeDashboard',
+    'azure-policy': 'azurepolicy'
 }
 
 
@@ -2619,6 +2620,9 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
         raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
+    if 'azure-policy' in addons:
+        addon_profiles['azurepolicy'] = ManagedClusterAddonProfile(enabled=True)
+        addons.remove('azure-policy')
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
