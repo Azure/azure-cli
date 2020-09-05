@@ -1609,7 +1609,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
     # verify the kube-dashboard addon was not disabled
     instance = client.get(resource_group_name, name)
-    addon_profiles = {k.lower():v for k, v in (instance.addon_profiles or {}).items()}
+    addon_profiles = {k.lower(): v for k, v in (instance.addon_profiles or {}).items()}
     addon_profile = addon_profiles.get("kubedashboard", ManagedClusterAddonProfile(enabled=True))
     if not addon_profile.enabled:
         raise CLIError('The kube-dashboard addon was disabled for this managed cluster.\n'
@@ -1719,7 +1719,7 @@ def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         service_principal_msi_id = result.service_principal_profile.client_id
         is_service_principal = True
     elif hasattr(result, 'addon_profiles'):
-        addon_profiles = {k.lower():v for k, v in (result.addon_profiles or {}).items()}
+        addon_profiles = {k.lower(): v for k, v in (result.addon_profiles or {}).items()}
         if (
                 ('omsagent' in addon_profiles) and
                 hasattr(addon_profiles['omsagent'], 'identity') and
@@ -2157,6 +2157,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     except (IndexError, ValueError):
         raise CLIError("Fail to find kubeconfig file.")
 
+
 # To be consistent, values of ADDONS dict should all be lower case
 ADDONS = {
     'http_application_routing': 'httpapplicationrouting',
@@ -2521,7 +2522,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
-    addon_profiles = {k.lower():v for k, v in (instance.addon_profiles or {}).items()}
+    addon_profiles = {k.lower(): v for k, v in (instance.addon_profiles or {}).items()}
 
     # To be consistent, os_type is lower case
     os_type = 'linux'
@@ -2599,7 +2600,7 @@ def _get_azext_module(extension_name, module_name):
 
 def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
                         workspace_resource_id=None):
-    addon_profiles = {k.lower():v for k, v in (addon_profiles or {}).items()}
+    addon_profiles = {k.lower(): v for k, v in (addon_profiles or {}).items()}
     addons = addons_str.split(',') if addons_str else []
     if 'http_application_routing' in addons:
         addon_profiles['httpapplicationrouting'] = ManagedClusterAddonProfile(enabled=True)
@@ -2832,7 +2833,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
     # lower case the keys of the addon config
-    addon.config = {k.lower():v for k, v in (addon.config or {}).items()}
+    addon.config = {k.lower(): v for k, v in (addon.config or {}).items()}
 
     workspace_resource_id = addon.config['loganalyticsworkspaceresourceid']
 

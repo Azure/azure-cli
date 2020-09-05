@@ -587,14 +587,14 @@ class AcsCustomCommandTest(unittest.TestCase):
         cmd = mock.MagicMock()
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'http_application_routing', enable=True)
-        self.assertIn('httpApplicationRouting', instance.addon_profiles)
-        addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertIn('httpapplicationrouting', instance.addon_profiles)
+        addon_profile = instance.addon_profiles['httpapplicationrouting']
         self.assertTrue(addon_profile.enabled)
 
         # http_application_routing enabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'http_application_routing', enable=False)
-        addon_profile = instance.addon_profiles['httpApplicationRouting']
+        addon_profile = instance.addon_profiles['httpapplicationrouting']
         self.assertFalse(addon_profile.enabled)
 
         # monitoring added
@@ -602,7 +602,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                                   'clitest000001', 'monitoring', enable=True)
         monitoring_addon_profile = instance.addon_profiles['omsagent']
         self.assertTrue(monitoring_addon_profile.enabled)
-        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        routing_addon_profile = instance.addon_profiles['httpapplicationrouting']
         self.assertFalse(routing_addon_profile.enabled)
 
         # monitoring disabled, routing enabled
@@ -612,9 +612,9 @@ class AcsCustomCommandTest(unittest.TestCase):
                                   'http_application_routing', enable=True)
         monitoring_addon_profile = instance.addon_profiles['omsagent']
         self.assertFalse(monitoring_addon_profile.enabled)
-        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        routing_addon_profile = instance.addon_profiles['httpapplicationrouting']
         self.assertTrue(routing_addon_profile.enabled)
-        self.assertEqual(sorted(list(instance.addon_profiles)), ['httpApplicationRouting', 'omsagent'])
+        self.assertEqual(sorted(list(instance.addon_profiles)), ['httpapplicationrouting', 'omsagent'])
 
         # monitoring enabled and then enabled again should error
         instance = mock.Mock()
