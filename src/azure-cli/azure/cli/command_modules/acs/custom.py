@@ -1718,15 +1718,16 @@ def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         logger.info('valid service principal exists, using it')
         service_principal_msi_id = result.service_principal_profile.client_id
         is_service_principal = True
-    elif (
-            (hasattr(result, 'addon_profiles')) and
-            ('omsagent' in result.addon_profiles) and
-            (hasattr(result.addon_profiles['omsagent'], 'identity')) and
-            (hasattr(result.addon_profiles['omsagent'].identity, 'object_id'))
-    ):
-        logger.info('omsagent MSI exists, using it')
-        service_principal_msi_id = result.addon_profiles['omsagent'].identity.object_id
-        is_service_principal = False
+    elif hasattr(result, 'addon_profiles'):
+        addon_profiles = {k.lower():v for k, v in (result.addon_profiles or {}).items()}
+        if (
+                ('omsagent' in addon_profiles) and
+                hasattr(addon_profiles['omsagent'], 'identity') and
+                hasattr(addon_profiles['omsagent'].identity, 'object_id')
+        ):
+            logger.info('omsagent MSI exists, using it')
+            service_principal_msi_id = addon_profiles['omsagent'].identity.object_id
+            is_service_principal = False
 
     if service_principal_msi_id is not None:
         if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
