@@ -270,12 +270,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('assign_identity', options_list=['--assign-identity'], 
                         help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
-        for scope in ['delete', 'list', 'wait', 'show', 'restart', 'restore', 'update', 'start', 'stop', 'reset-password']:
+        for scope in ['delete', 'list', 'wait', 'show', 'restart', 'restore', 'update', 'start', 'stop']:
             argument_context_string = '{} flexible-server {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
         
-        for scope in ['wait', 'show', 'restart', 'update', 'start', 'stop', 'reset-password']:
+        for scope in ['wait', 'show', 'restart', 'update', 'start', 'stop']:
             argument_context_string = '{} flexible-server {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)

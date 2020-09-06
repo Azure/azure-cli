@@ -270,12 +270,12 @@ examples:
     crafted: true
 """
 
-helps['mysql flexible-server reset-password'] = """
+helps['mysql flexible-server list-skus'] = """
 type: command
-short-summary: Reset / update password for the flexible server administrator.
+short-summary: Lists the available sku's in the given region. 
 examples:
-  - name: Update the password for the flexible server administrator
-    text: az mysql flexible-server reset-password
+  - name: Lists the available sku's in the given region.
+    text: az mysql flexible-server list-skus -l
 """
 
 helps['mysql flexible-server wait'] = """

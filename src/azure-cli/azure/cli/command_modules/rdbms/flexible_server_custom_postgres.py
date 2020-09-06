@@ -192,13 +192,6 @@ def _server_delete_func(cmd, client, resource_group_name=None, server_name=None,
             logger.error(ex)
         return result
 
-def _flexible_server_update_password(instance, server_name, administrator_login, administrator_login_password):
-    return _flexible_server_update_custom_func(instance,
-                                               server_name=server_name,
-                                               administrator_login=administrator_login,
-                                               administrator_login_password=administrator_login_password)
-
-
 # Wait command
 def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)

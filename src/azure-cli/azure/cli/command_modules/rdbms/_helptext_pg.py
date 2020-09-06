@@ -192,19 +192,20 @@ type: command
 short-summary: Update a flexible server.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
-    text: az postgres server update --sku-name Standard_D4s_v3
+    text: az postgres flexible-server update --sku-name Standard_D4s_v3
   - name: Update a server's tags.
-    text: az postgres server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
+    text: az postgres flexible-server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
+  - name: Reset password
+    text: az postgres flexible-server update --resource-group testGroup --name testServer -p password123
     crafted: true
 """
 
-helps['postgres flexible-server reset-password'] = """
+helps['mysql flexible-server list-skus'] = """
 type: command
-short-summary: Update the password for the server.
+short-summary: Lists the available sku's in the given region. 
 examples:
-  - name: Update the password for the server.
-    text: az postgres flexible-server reset-password -p
-    crafted: true
+  - name: Lists the available sku's in the given region.
+    text: az mysql flexible-server list-skus -l
 """
 
 helps['postgres flexible-server wait'] = """
