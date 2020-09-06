@@ -200,11 +200,11 @@ examples:
     crafted: true
 """
 
-helps['mysql flexible-server list-skus'] = """
+helps['postgres flexible-server list-skus'] = """
 type: command
-short-summary: Lists the available sku's in the given region. 
+short-summary: Lists available sku's in the given region. 
 examples:
-  - name: Lists the available sku's in the given region.
+  - name: Lists available sku's in the given region.
     text: az mysql flexible-server list-skus -l
 """
 
