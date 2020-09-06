@@ -388,6 +388,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                         help='Update an object by specifying a property path and value to set. Example: --set property1.property2=.')
             c.argument('start_ip_address', options_list=['--start-ip-address'], 
                         help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
-        
+
+        with self.argument_context('{} flexible-server show-connection-string'.format(command_group)) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the server.')
+            c.argument('administrator_login', options_list=['--admin-user', '-u'],
+                       help='The login username of the administrator.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+                       help='The login password of the administrator.')
+            c.argument('database_name', options_list=['--database-name', '-d'], help='The name of a database.')
+
+
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')

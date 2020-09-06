@@ -362,6 +362,46 @@ def _update_server(db_context, cmd, client, server_result, resource_group_name, 
     return server_result
 
 
+def flexible_server_connection_string(
+            server_name='{server}', database_name='{database}', administrator_login='{login}',
+            administrator_login_password='{password}'):
+    user = '{}@{}'.format(administrator_login, server_name)
+    host = '{}.mysql.database.azure.com'.format(server_name)
+    return {
+        'connectionStrings': _create_mysql_connection_strings(host, user, administrator_login_password, database_name)
+    }
+
+
+def _create_mysql_connection_strings(host, user, password, database):
+    result = {
+        'mysql_cmd': "mysql {database} --host {host} --user {user} --password={password}",
+        'ado.net': "Server={host}; Port=3306; Database={database}; Uid={user}; Pwd={password};",
+        'jdbc': "jdbc:mysql://{host}:3306/{database}?user={user}&password={password}",
+        'jdbc Spring': "spring.datasource.url=jdbc:mysql://{host}:3306/{database}  "
+                       "spring.datasource.username={user}  "
+                       "spring.datasource.password={password}",
+        'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}', "
+                   "password: {password}, database: {database}, port: 3306}});",
+        'php': "host={host} port=5432 dbname={database} user={user} password={password}",
+        'python': "cnx = mysql.connector.connect(user='{user}', password='{password}', host='{host}', "
+                  "port=3306, database='{database}')",
+        'ruby': "client = Mysql2::Client.new(username: '{user}', password: '{password}', "
+                "database: '{database}', host: '{host}', port: 3306)",
+        'webapp': "Database={database}; Data Source={host}; User Id={user}; Password={password}"
+    }
+
+    connection_kwargs = {
+        'host': host,
+        'user': user,
+        'password': password if password is not None else '{password}',
+        'database': database
+    }
+
+    for k, v in result.items():
+        result[k] = v.format(**connection_kwargs)
+    return result
+
+
 def _form_response(username, sku, location, id, host, version, password, connection_string, database_name, firewall_id=None, subnet_id=None):
     output = {
         'host': host,

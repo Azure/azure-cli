@@ -21,7 +21,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_config,
     cf_postgres_flexible_location_capabilities)
 
-from ._transformers import table_transform_output
+from ._transformers import table_transform_output, table_transform_output_list_servers
 # from .transformers import table_transform_connection_string
 # from .validators import db_up_namespace_processor
 
@@ -97,7 +97,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('delete', '_server_delete_func')
         #g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
+        g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',
                                  getter_name='_flexible_server_update_get', getter_type=flexible_server_custom_common,
                                  setter_name='_flexible_server_update_set', setter_type=flexible_server_custom_common,
@@ -134,6 +134,7 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_location_capabilities) as g:
        # g.command('list-skus', 'execute')
         g.custom_command('list-skus', '_flexible_list_skus')
+        g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
 
     ## MySQL commands
@@ -147,7 +148,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('delete', '_server_delete_func')
         #g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common)
+        g.custom_command('list', '_server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',
                                  getter_name='_flexible_server_update_get', getter_type=flexible_server_custom_common,
                                  setter_name='_flexible_server_update_set', setter_type=flexible_server_custom_common,
@@ -189,6 +190,7 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_location_capabilities) as g:
         g.custom_command('list-skus', '_flexible_list_skus')
+        g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk) as g:
         g.command('list', 'list_by_server')
