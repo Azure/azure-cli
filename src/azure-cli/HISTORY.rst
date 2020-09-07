@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**SQL**
+
+* `az sql server audit-policy`: Add sql server auditing support (#14726)
+
 2.11.0
 ++++++
 
