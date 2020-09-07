@@ -240,6 +240,7 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mysql_get')
         g.command('restart', 'restart')
+        g.command('upgrade', 'upgrade')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_server_create')
