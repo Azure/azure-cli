@@ -59,8 +59,7 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
-    SqlManagedInstanceMinimalTlsVersionType,
-    SqlManagedInstanceBackupStorageRedundancyType
+    SqlManagedInstanceMinimalTlsVersionType
 )
 
 from ._validators import (

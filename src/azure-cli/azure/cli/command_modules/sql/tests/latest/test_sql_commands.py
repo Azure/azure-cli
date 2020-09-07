@@ -3068,7 +3068,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_managed_instance_mgmt(self):
         managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
-        managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         families = ['Gen5']
@@ -3083,8 +3082,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         resource_group_1 = "toki"
         collation = "Serbian_Cyrillic_100_CS_AS"
         proxy_override = "Proxy"
-        proxy_override_update = "Redirect"
-        public_data_endpoint_enabled_update = "False"
+        # proxy_override_update = "Redirect"
+        # public_data_endpoint_enabled_update = "False"
         timezone_id = "Central European Standard Time"
         tls1_2 = "1.2"
         tls1_1 = "1.1"
@@ -3116,7 +3115,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('timezoneId', timezone_id),
                                           JMESPathCheck('minimalTlsVersion', tls1_2),
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
-                                          JMESPathCheck('storageAccountType', backup_storage_redundancy_internal),]).get_output_in_json()
+                                          JMESPathCheck('storageAccountType', backup_storage_redundancy_internal)]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
@@ -3140,10 +3139,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user)
                      # remove this check since there is an issue and the fix is being deployed currently
                      # JMESPathCheck('identity.type', 'SystemAssigned')
-                    ])
+                     JMESPathCheck('administratorLogin', user)])
 
         # test update without identity parameter, validate identity still exists
         # also use --id instead of -g/-n
@@ -3152,10 +3150,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user)
                      # remove this check since there is an issue and the fix is being deployed currently
                      # JMESPathCheck('identity.type', 'SystemAssigned')
-                    ])
+                     JMESPathCheck('administratorLogin', user)])
 
         # test update proxyOverride and publicDataEndpointEnabled
         # test is currently removed due to long execution time due to waiting for SqlAliasStateMachine completion to complete
@@ -3163,7 +3160,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         #         .format(resource_group_1, managed_instance_name_1, proxy_override_update, public_data_endpoint_enabled_update),
         #         checks=[
         #             JMESPathCheck('name', managed_instance_name_1),
-        #            JMESPathCheck('resourceGroup', resource_group_1),
+        #             JMESPathCheck('resourceGroup', resource_group_1),
         #             JMESPathCheck('proxyOverride', proxy_override_update),
         #             JMESPathCheck('publicDataEndpointEnabled', public_data_endpoint_enabled_update)])
 
@@ -3219,6 +3216,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         self.cmd('sql mi show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_1),
                  expect_failure=True)
+
 
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
@@ -3777,8 +3775,7 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
             'retention_days_inc': 14,
-            'retention_days_dec': 7,
-            'rg': 'v-urmila'
+            'retention_days_dec': 7
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
