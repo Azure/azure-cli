@@ -206,9 +206,17 @@ def check_version_compatibility(azext_metadata):
         raise CLIError(min_max_msg_fmt)
 
 
-def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
                   version=None, cli_ctx=None):
+    from knack.prompting import prompt_y_n, NoTTYException
+    if source:
+        try:
+            if not prompt_y_n('Are you sure you want to install this extension?'):
+                raise CLIError('Operation cancelled.')
+        except NoTTYException:
+            raise CLIError(
+                'Unable to prompt for confirmation as no tty available. Use --yes.')
     ext_sha256 = None
 
     version = None if version == 'latest' else version
@@ -222,7 +230,21 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
             pass
         if ext:
             if isinstance(ext, WheelExtension):
-                logger.warning("Extension '%s' is already installed.", extension_name)
+                logger.warning("Extension '%s' %s is already installed.", extension_name, ext.get_version())
+                if version and version == ext.get_version():
+                    return
+                prompt_msg = "Do you want to override it with version {}?".format(version) if version \
+                    else "Do you want to update it?"
+
+                try:
+                    go_on = True if yes else prompt_y_n(prompt_msg, default='y')
+                    if not go_on:
+                        return
+                except NoTTYException:
+                    raise CLIError("Unable to prompt for confirmation as no tty available. Please run with --yes.")
+                if yes:
+                    logger.warning("It will be overriden with version %s.", version)
+                update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=version)
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
@@ -289,16 +311,16 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None, version=None):
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
-            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-            msg = "No updates available for '{}'. Use --debug for more information.".format(extension_name)
+            msg = "Extension {} with version {} not found.".format(extension_name, version) if version else "No updates available for '{}'. Use --debug for more information.".format(extension_name)
             logger.warning(msg)
             return
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.

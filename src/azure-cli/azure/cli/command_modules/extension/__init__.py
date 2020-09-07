@@ -6,7 +6,6 @@
 import argparse
 from collections import OrderedDict
 
-from knack.prompting import prompt_y_n
 from knack.util import CLIError
 
 from azure.cli.core import AzCommandsLoader
@@ -23,9 +22,6 @@ class ExtensionCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
 
-        def ext_add_has_confirmed(command_args):
-            return bool(not command_args.get('source') or prompt_y_n('Are you sure you want to install this extension?'))
-
         def transform_extension_list_available(results):
             if isinstance(results, dict):
                 # For --show-details, transform the table
@@ -39,7 +35,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
         extension_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.extension.custom#{}')
 
         with self.command_group('extension', extension_custom) as g:
-            g.command('add', 'add_extension_cmd', confirmation=ext_add_has_confirmed, validator=validate_extension_add)
+            g.command('add', 'add_extension_cmd', validator=validate_extension_add)
             g.command('remove', 'remove_extension_cmd')
             g.command('list', 'list_extensions_cmd')
             g.show_command('show', 'show_extension_cmd')
