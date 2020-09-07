@@ -475,9 +475,6 @@ class ManagedHsmProperties(Model):
     :param tenant_id: The Azure Active Directory tenant ID that should be used
      for authenticating requests to the managed HSM pool.
     :type tenant_id: str
-    :param security_domain_id: The security domain id that should be used for
-     restoring data from this managed HSM pool to a new managed hsm pool.
-    :type security_domain_id: str
     :param initial_admin_object_ids: Array of initial administrators object
      ids for this managed hsm pool.
     :type initial_admin_object_ids: list[str]
@@ -521,7 +518,6 @@ class ManagedHsmProperties(Model):
 
     _attribute_map = {
         'tenant_id': {'key': 'tenantId', 'type': 'str'},
-        'security_domain_id': {'key': 'securityDomainId', 'type': 'str'},
         'initial_admin_object_ids': {'key': 'initialAdminObjectIds', 'type': '[str]'},
         'hsm_pool_uri': {'key': 'hsmPoolUri', 'type': 'str'},
         'enable_soft_delete': {'key': 'enableSoftDelete', 'type': 'bool'},
@@ -535,7 +531,6 @@ class ManagedHsmProperties(Model):
     def __init__(self, **kwargs):
         super(ManagedHsmProperties, self).__init__(**kwargs)
         self.tenant_id = kwargs.get('tenant_id', None)
-        self.security_domain_id = kwargs.get('security_domain_id', None)
         self.initial_admin_object_ids = kwargs.get('initial_admin_object_ids', None)
         self.hsm_pool_uri = kwargs.get('hsm_pool_uri', None)
         self.enable_soft_delete = kwargs.get('enable_soft_delete', True)

@@ -276,8 +276,9 @@ def load_arguments(self, _):
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 if cmd in ['list-deleted']:
                     c.extra('identifier', options_list=['--id'],
-                            help='Id of the Vault or HSM. '
-                                 'If specified all other \'Id\' arguments should be omitted.',
+                            help='Id of the Vault{}. '
+                                 'If specified all other \'Id\' arguments should be '
+                                 'omitted.'.format(' or HSM' if item == 'key' else ''),
                             validator=validate_vault_or_hsm)
     # endregion
 
@@ -294,13 +295,13 @@ def load_arguments(self, _):
                            help='Id of the Vault or HSM. '
                                 'If specified all other \'Id\' arguments should be omitted.',
                            validator=validate_key_id('key'))
+                c.argument('hsm_base_url', data_plane_hsm_name_type)
             else:
                 c.argument('identifier', options_list=['--id'],
                            help='Id of the Vault or HSM. '
                                 'If specified all other \'Id\' arguments should be omitted.',
                            validator=validate_vault_or_hsm)
-
-            c.argument('hsm_base_url', data_plane_hsm_name_type)
+                c.argument('hsm_base_url', data_plane_hsm_name_type, validator=None)
 
     # SDK functions
     for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover',
@@ -439,8 +440,6 @@ def load_arguments(self, _):
         c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
                                                 'CLI will match them in order. Can be omitted if your keys are without '
                                                 'password protection.')
-        c.argument('restore_blob', help='Path to save the generated restore blob. If omitted, '
-                                        'blob will not be saved in your local machine.')
 
     with self.argument_context('keyvault security-domain download') as c:
         c.argument('sd_wrapping_keys', nargs='*',

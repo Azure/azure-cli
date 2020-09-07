@@ -5909,6 +5909,46 @@ class KeyVaultClient(SDKClient):
         return deserialized
     transfer_key.metadata = {'url': '/securitydomain/upload'}
 
+    def upload(self, vault_base_url, security_domain, custom_headers=None, raw=False, **operation_config):
+        # Construct URL
+        url = self._upload_initial.metadata['url']
+        path_format_arguments = {
+            'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True)
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language",
+                                                                          self.config.accept_language, 'str')
+
+        # Construct body
+        body_content = self._serialize.body(security_domain, 'SecurityDomainObject')
+
+        # Construct and send request
+        request = self._client.post(url, query_parameters)
+        request.body = json.dumps(body_content)
+        response = self._client.send(
+            request, header_parameters, body_content, stream=False, **operation_config)
+
+        if response.status_code not in [200, 202]:
+            raise models.KeyVaultErrorException(self._deserialize, response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(None, response)
+            return client_raw_response
+    upload.metadata = {'url': '/securitydomain/upload'}
+
     def upload_pending(self, vault_base_url, custom_headers=None, raw=False, **operation_config):
         """Get Security domain upload operation status.
         :param vault_base_url: The vault name, for example https://myvault.vault.azure.net.
@@ -5990,11 +6030,11 @@ class KeyVaultClient(SDKClient):
 
         # Construct and send request
         request = self._client.post(url, query_parameters)
-        request.body = json.dumps({'value': security_domain.value})
+        request.body = json.dumps(body_content)
         response = self._client.send(
             request, header_parameters, body_content, stream=False, **operation_config)
 
-        if response.status_code not in [200]:
+        if response.status_code not in [200, 202]:
             raise models.KeyVaultErrorException(self._deserialize, response)
 
         if raw:

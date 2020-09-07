@@ -563,6 +563,8 @@ def create_hsm(cmd, client,
     if not administrators:
         raise CLIError('Please specify --administrators')
 
+    administrators = [admin.strip().replace('\r', '').replace('\n', '') for admin in administrators]
+
     from azure.cli.core._profile import Profile
 
     if not sku:
@@ -1074,11 +1076,10 @@ def backup_key(client, file_path, vault_base_url=None,
         output.write(backup)
 
 
-def restore_key(client, file_path, vault_base_url=None,
-                hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
+def restore_key(client, file_path, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    return client.restore_key(vault_base_url, data)
+    return client.restore_key(hsm_base_url, data)
 
 
 def _int_to_bytes(i):
@@ -2053,7 +2054,7 @@ def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
 
 
 def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           restore_blob=None, no_wait=False, identifier=None):  # pylint: disable=unused-argument):
+                           identifier=None):  # pylint: disable=unused-argument):
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
         if not os.path.exists(p):
@@ -2167,24 +2168,9 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
     security_domain_restore_data.wrapped_key.x5t_256 = Utils.security_domain_b64_url_encode(thumbprint)
     restore_blob_value = json.dumps(security_domain_restore_data.to_json())
 
-    if restore_blob is not None:
-        if os.path.isdir(restore_blob):
-            raise CLIError('{} is a directory and it cannot be re-written.'.format(restore_blob))
-        with open(restore_blob, 'w') as f:
-            f.write(restore_blob_value)
-
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
-
-    return client.begin_upload(vault_base_url=vault_base_url, security_domain=security_domain)
-    """
-    return sdk_no_wait(
-        no_wait,
-        client.begin_upload,
-        vault_base_url=hsm_base_url,
-        security_domain=SecurityDomainObject(value=sd_data)
-    )
-    """
+    return client.upload(vault_base_url=vault_base_url, security_domain=security_domain)
 
 
 def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, security_domain_file, sd_quorum,
@@ -2221,12 +2207,12 @@ def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, secu
         sd_jwk.key_ops = ['verify', 'encrypt', 'wrapKey']
 
         # populate key into jwk
-        if isinstance(public_key, rsa.RSAPublicKey):
+        if isinstance(public_key, rsa.RSAPublicKey) and public_key.key_size >= 2048:
             sd_jwk.kty = 'RSA'
-            sd_jwk.alg = 'RSA-OAEP-256'  # TODO
+            sd_jwk.alg = 'RSA-OAEP-256'
             _public_rsa_key_to_jwk(public_key, sd_jwk, encoding=Utils.security_domain_b64_url_encode)
         else:
-            raise CLIError('Import failed: Unsupported key type, {}.'.format(type(public_key)))
+            raise CLIError('Only RSA >= 2048 is supported.')
 
         certificates.append(sd_jwk)
 
