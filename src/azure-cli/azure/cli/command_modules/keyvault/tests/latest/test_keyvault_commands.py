@@ -187,11 +187,11 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa'
         })
 
-        hsm = self.cmd('keyvault create -g {rg} --hsm-name {hsm_hsm} -l {loc} '
+        hsm = self.cmd('keyvault create -g {rg} --hsm-name {hsm_name} -l {loc} '
                        '--administrators {init_admin}',
                        checks=[
                            self.check('location', '{loc}'),
-                           self.check('name', '{hsm_hsm}'),
+                           self.check('name', '{hsm_name}'),
                            self.check('resourceGroup', '{rg}'),
                            self.check('sku.name', 'Standard_B1'),
                            self.check('length(properties.initialAdminObjectIds)', 1),
@@ -200,20 +200,20 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
                        ]).get_output_in_json()
 
         self.kwargs['hsm_url'] = hsm['properties']['hsmUri']
-        self.cmd('keyvault show --hsm-name {hsm_hsm}',
+        self.cmd('keyvault show --hsm-name {hsm_name}',
                  checks=[
                      self.check('location', '{loc}'),
-                     self.check('name', '{hsm_hsm}'),
+                     self.check('name', '{hsm_name}'),
                      self.check('resourceGroup', '{rg}'),
                      self.check('sku.name', 'Standard_B1'),
                      self.check('length(properties.initialAdminObjectIds)', 1),
                      self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
                      self.exists('properties.hsmUri')
                  ])
-        self.cmd('keyvault show --hsm-name {hsm_hsm} -g {rg}',
+        self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}',
                  checks=[
                      self.check('location', '{loc}'),
-                     self.check('name', '{hsm_hsm}'),
+                     self.check('name', '{hsm_name}'),
                      self.check('resourceGroup', '{rg}'),
                      self.check('sku.name', 'Standard_B1'),
                      self.check('length(properties.initialAdminObjectIds)', 1),
@@ -224,7 +224,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
                  checks=[
                      self.check('length(@)', 1),
                      self.check('[0].location', '{loc}'),
-                     self.check('[0].name', '{hsm_hsm}'),
+                     self.check('[0].name', '{hsm_name}'),
                      self.check('[0].resourceGroup', '{rg}'),
                      self.check('[0].sku.name', 'Standard_B1'),
                      self.check('length([0].properties.initialAdminObjectIds)', 1),
@@ -235,7 +235,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
                  checks=[
                      self.check('length(@)', 1),
                      self.check('[0].location', '{loc}'),
-                     self.check('[0].name', '{hsm_hsm}'),
+                     self.check('[0].name', '{hsm_name}'),
                      self.check('[0].resourceGroup', '{rg}'),
                      self.check('[0].sku.name', 'Standard_B1'),
                      self.check('length([0].properties.initialAdminObjectIds)', 1),
