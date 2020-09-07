@@ -22,8 +22,7 @@ def register_global_query_examples_argument(cli_ctx):
                 cli_ctx.invocation.data['output'] = 'table'
 
             def analyze_output(cli_ctx, **kwargs):
-                tree_builder = TreeBuilder()
-                tree_builder.update_config(cli.config)
+                tree_builder = TreeBuilder(cli.config)
                 tree_builder.build(kwargs['event_data']['result'])
                 kwargs['event_data']['result'] = tree_builder.generate_examples(
                     args._query_examples, cli_ctx.invocation.data['output'])  # pylint: disable=protected-access
@@ -94,6 +93,7 @@ class Example:
 
 class TreeNode:
     def __init__(self, name, parent, under_array):
+        self.is_dummy = False
         self._name = name
         self._parent = parent
         self._under_array = under_array  # inside an JSON array
@@ -144,7 +144,10 @@ class TreeNode:
 
     def get_trace_to_root(self):
         if self._parent:
-            trace_str = '{}.{}'.format(self._parent.get_trace_to_root(), self._name)
+            if self._parent.is_dummy and not self._parent._under_array:  # pylint: disable=protected-access
+                trace_str = self._name
+            else:
+                trace_str = '{}.{}'.format(self._parent.get_trace_to_root(), self._name)
         else:
             trace_str = self._name
         if self._under_array:
@@ -187,16 +190,19 @@ class TreeNode:
 class TreeBuilder:
     '''Parse entry. Generate parse tree from json. And then give examples.'''
 
-    def __init__(self):
+    def __init__(self, config):
         self._root = None  # dummy root node
         self._all_nodes = {}
         self._config = {}
+        self.update_config(config)
 
     def build(self, data):
         '''Build a query tree with a given json file
         :param str data: json format data
         '''
         self._root = self._do_parse('', [data], None)
+        if self._root:
+            self._root.is_dummy = True
 
     def generate_examples(self, keywords_list, output_format):
         examples = []
@@ -221,14 +227,12 @@ class TreeBuilder:
 
         match_list = []
         if not keywords_list:
-            suggest_list = ['location', 'resourcesGroup', 'name']
-        else:
-            suggest_list = keywords_list
-
-        for pattern in suggest_list:
+            return self._all_nodes.keys()
+        for pattern in keywords_list:
             for node_name in self._all_nodes:
                 if node_name not in match_list and name_match(pattern, node_name):
                     match_list.append(node_name)
+
         return match_list
 
     def _do_parse(self, name, data, parent, under_array=False):
