@@ -3777,7 +3777,8 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
             'retention_days_inc': 14,
-            'retention_days_dec': 7
+            'retention_days_dec': 7,
+            'rg': 'v-urmila'
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
