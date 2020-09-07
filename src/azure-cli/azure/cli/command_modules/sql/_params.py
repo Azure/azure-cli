@@ -59,12 +59,14 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
-    SqlManagedInstanceMinimalTlsVersionType
+    SqlManagedInstanceMinimalTlsVersionType,
+    SqlManagedInstanceBackupStorageRedundancyType
 )
 
 from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
+    validate_managed_instance_backup_storage_redundancy,
     validate_subnet
 )
 
@@ -102,6 +104,13 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
             self.unit,
             ', '.join(sorted(self.unit_map, key=self.unit_map.__getitem__)))
 
+
+def get_internal_backup_storage_redundancy(self):
+    return {
+        'Local': 'LRS',
+        'Zone': 'ZRS',
+        'Geo': 'GRS',
+    }.get(self, 'Invalid')
 
 #####
 #        Reusable param type definitions
@@ -208,6 +217,12 @@ storage_param_type = CLIArgumentType(
                                                                     TB=1024)),
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
+
+backup_storage_redundancy_param_type = CLIArgumentType(
+    options_list=['--backup-storage-redundancy'],
+    type=get_internal_backup_storage_redundancy,
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
+    validator=validate_managed_instance_backup_storage_redundancy)
 
 grace_period_param_type = CLIArgumentType(
     help='Interval in hours before automatic failover is initiated '
@@ -1502,6 +1517,7 @@ def load_arguments(self, _):
                 'public_data_endpoint_enabled',
                 'timezone_id',
                 'tags',
+                'storage_account_type',
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1537,6 +1553,11 @@ def load_arguments(self, _):
                    options_list=['--assign-identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type,
+                   options_list=['--backup-storage-redundancy'],
+                   help='Backup storage redundancy used to store backups')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
