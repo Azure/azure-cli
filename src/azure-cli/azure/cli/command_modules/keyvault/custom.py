@@ -1848,6 +1848,9 @@ def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=Non
         assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee)
 
     role_definition_id = _resolve_role_id(client, role=role, hsm_base_url=hsm_base_url, scope=scope)
+    if not role_definition_id:
+        raise CLIError('Unknown role "{}". Please use "az keyvault role definition list" '
+                       'to check whether the role is existing.'.format(role))
 
     if role_assignment_name is None:
         role_assignment_name = str(uuid.uuid4())
