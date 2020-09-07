@@ -3451,7 +3451,7 @@ class VMDiskEncryptionTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption', location='westus')
     def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
-            'vault': self.create_random_name('vault', 10),
+            'vault': self.create_random_name('vault', 20),
             'vmss': 'vmss1'
         })
         self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
