@@ -165,7 +165,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('appservice plan create -g {rg} -n {plan_name} --debug')
+        self.cmd('appservice plan create -g {rg} -n {plan_name}')
         self.cmd('webapp create -g {rg} -n {app_name} --plan {plan_name}', checks=[
             JMESPathCheck('state', 'Running')
         ])
