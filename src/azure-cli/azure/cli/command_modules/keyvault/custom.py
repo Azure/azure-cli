@@ -1076,9 +1076,12 @@ def backup_key(client, file_path, vault_base_url=None,
         output.write(backup)
 
 
-def restore_key(client, file_path, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
+def restore_key(client, file_path, vault_base_url=None, hsm_base_url=None,
+                identifier=None):  # pylint: disable=unused-argument
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
+    if hsm_base_url is None:  # TODO: use a more graceful way to implement.
+        hsm_base_url = vault_base_url
     return client.restore_key(hsm_base_url, data)
 
 
