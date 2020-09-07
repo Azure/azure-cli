@@ -4539,6 +4539,10 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des2_pattern'])
         ])
 
+        self.cmd('disk-encryption-set list-associated-resources -g {rg} -n {des2}', checks=[
+            self.check('length(@)', 1)
+        ])
+
     @unittest.skip('disable temporarily, will fix in another PR')
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_double_encryption_', location='centraluseuap')
     @AllowLargeResponse(size_kb=99999)
