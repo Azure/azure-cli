@@ -53,3 +53,42 @@ examples:
   - name: Unset the configuration of key `core.no_color`.
     text: az config unset core.no_color
 """
+
+helps['config parampersist'] = """
+type: group
+short-summary: Manage parameter persist
+"""
+
+helps['config parampersist on'] = """
+type: command
+short-summary: Turn on parameter persist
+"""
+
+helps['config parampersist off'] = """
+type: command
+short-summary: Turn off parameter persist
+"""
+
+helps['config parampersist show'] = """
+type: command
+short-summary: Show parameter persist data
+examples:
+  - name: Show all parameter persist value
+    text: az config parampersist show
+  - name: Show resource_group_name parameter persist value
+    text: az config parampersist show resource_group_name
+"""
+
+helps['config parampersist delete'] = """
+type: command
+short-summary: Delete parameter persist data
+examples:
+  - name: Delete resource_group_name from parameter persist
+    text: az config parampersist delete resource_group_name
+  - name: Clear all parameter persist data
+    text: az config parampersist delete --all
+  - name: Delete parameter persist file
+    text: az config parampersist delete --all --purge
+  - name: Delete parameter persist file recursively
+    text: az config parampersist delete --all --purge --recursive
+"""
