@@ -1007,6 +1007,7 @@ def cli_cosmosdb_mongodb_database_throughput_update(client,
                                                       database_name,
                                                       throughput_update_resource)
 
+
 def cli_cosmosdb_mongodb_database_throughput_migrate(client,
                                                      resource_group_name,
                                                      account_name,
@@ -1112,6 +1113,7 @@ def cli_cosmosdb_gremlin_database_throughput_update(client,
                                                      database_name,
                                                      throughput_update_resource)
 
+
 def cli_cosmosdb_gremlin_database_throughput_migrate(client,
                                                      resource_group_name,
                                                      account_name,
@@ -1160,6 +1162,7 @@ def cli_cosmosdb_table_throughput_update(client,
     """Update an Azure Cosmos DB table throughput"""
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_table_throughput(resource_group_name, account_name, table_name, throughput_update_resource)
+
 
 def cli_cosmosdb_table_throughput_migrate(client,
                                           resource_group_name,

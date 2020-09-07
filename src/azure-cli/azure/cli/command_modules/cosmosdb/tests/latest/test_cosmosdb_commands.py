@@ -974,7 +974,6 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb sql container throughput migrate --throughput-type {manual} -g {rg} -a {acc} -d {db_name} -n {ctn_name}')
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_resource_throughput_autoscale')
     def test_cosmosdb_mongodb_resource_throughput_autoscale(self, resource_group):
         tp1 = 800
