@@ -3,14 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 
 from ._client_factory import (servicefabric_clusters_client_factory,
                               servicefabric_client_factory_all,
                               servicefabric_application_type_client_factory,
                               servicefabric_application_type_version_client_factory,
                               servicefabric_application_client_factory,
-                              servicefabric_service_client_factory)
+                              servicefabric_service_client_factory,
+                              servicefabric_managed_clusters_client_factory,
+                              servicefabric_node_types_client_factory)
 
 
 def load_command_table(self, _):
@@ -44,7 +46,8 @@ def load_command_table(self, _):
         client_factory=servicefabric_client_factory_all
     )
 
-    with self.command_group('sf cluster', cluster_mgmt_util, client_factory=servicefabric_clusters_client_factory) as g:
+    with self.command_group('sf cluster', cluster_mgmt_util,
+                            client_factory=servicefabric_clusters_client_factory) as g:
         g.show_command('show', 'get')
         g.custom_command('list', 'list_cluster')
         g.custom_command('create', 'new_cluster')
@@ -93,5 +96,63 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'create_service')
 
-    with self.command_group('sf', is_preview=True):
+    with self.command_group('sf', is_preview=False):
         pass
+
+    # Managed clusters
+
+    managed_cluster_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.servicefabric.operations.managed_clusters#{}',
+        client_factory=servicefabric_client_factory_all
+    )
+
+    managed_cluster_mgmt = CliCommandType(
+        operations_tmpl='azure.mgmt.servicefabric.operations#ManagedClustersOperations.{}',
+        client_factory=servicefabric_managed_clusters_client_factory
+    )
+
+    managed_node_type_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.servicefabric.operations.managed_node_types#{}',
+        client_factory=servicefabric_client_factory_all
+    )
+
+    node_type_mgmt = CliCommandType(
+        operations_tmpl='azure.mgmt.servicefabric.operations#NodeTypesOperations.{}',
+        client_factory=servicefabric_node_types_client_factory
+    )
+
+    with self.command_group('sf managed-cluster', managed_cluster_mgmt, is_preview=True,
+                            custom_command_type=managed_cluster_custom_type) as g:
+        g.custom_command('list', 'list_clusters')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_cluster')
+        g.custom_command('update', 'update_cluster')
+
+    with self.command_group('sf managed-cluster client-certificate', managed_cluster_mgmt,
+                            custom_command_type=managed_cluster_custom_type) as g:
+        g.custom_command('add', 'add_client_cert')
+        g.custom_command('remove', 'remove_client_cert')
+
+    with self.command_group('sf managed-node-type', node_type_mgmt, is_preview=True,
+                            custom_command_type=managed_node_type_custom_type) as g:
+        g.command('list', 'list_by_managed_clusters')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_node_type')
+        g.custom_command('update', 'update_node_type')
+
+    with self.command_group('sf managed-node-type node', node_type_mgmt,
+                            custom_command_type=managed_node_type_custom_type) as g:
+        g.custom_command('reimage', 'reimage_node')
+        g.custom_command('restart', 'restart_node')
+        g.custom_command('delete', 'delete_node')
+
+    with self.command_group('sf managed-node-type vm-extension', node_type_mgmt,
+                            custom_command_type=managed_node_type_custom_type) as g:
+        g.custom_command('add', 'add_vm_extension')
+        g.custom_command('delete', 'delete_vm_extension')
+
+    with self.command_group('sf managed-node-type vm-secret', node_type_mgmt,
+                            custom_command_type=managed_node_type_custom_type) as g:
+        g.custom_command('add', 'add_vm_secret')

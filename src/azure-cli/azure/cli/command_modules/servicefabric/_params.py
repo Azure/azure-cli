@@ -7,9 +7,19 @@
 import argparse
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import resource_group_name_type, get_enum_type, get_three_state_flag
+from azure.cli.core.commands.parameters import (
+    resource_group_name_type,
+    get_enum_type,
+    get_three_state_flag,
+    tags_type
+)
 from azure.cli.core.util import get_json_object
-from azure.cli.command_modules.servicefabric._validators import validate_create_service, validate_update_application, validate_create_application
+from azure.cli.command_modules.servicefabric._validators import (
+    validate_create_service,
+    validate_update_application,
+    validate_create_application,
+    validate_create_managed_cluster
+)
 from knack.arguments import CLIArgumentType
 
 
@@ -17,7 +27,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     # PARAMETER REGISTRATION
     application_parameters = CLIArgumentType(
         options_list=['--parameters', '--application-parameters'],
-        action=addAppParamsAction,
+        action=AddAppParamsAction,
         nargs='+',
         help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest. '
         'for example: --application-parameters param1=value1 param2=value2')
@@ -221,17 +231,137 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'UniformInt64 means that each partition owns a range of int64 keys. '
                    'Named is usually for services with data that can be bucketed, within a bounded set. Some common examples of data fields used as named partition keys would be regions, postal codes, customer groups, or other business boundaries.')
 
+    # managed cluster
+
+    with self.argument_context('sf managed-cluster create', validator=validate_create_managed_cluster) as c:
+        c.argument('admin_password', help='Admin password used for the virtual machines.')
+        c.argument('admin_user_name', help='Admin user used for the virtual machines.', default='vmadmin')
+        c.argument('dns_name', help='Cluster\'s dns name.')
+        c.argument('sku', help='Cluster\'s Sku, the options are Basic: it will have a minimum of 3 seed nodes and only allows 1 node type and Standard: it will have a minimum of 5 seed nodes and allows multiple node types.', default='Basic')
+        c.argument('client_connection_port', help='Port used for client connections to the cluster.', default=19000)
+        c.argument('gateway_connection_port', help='Port used for http connections to the cluster.', default=19080)
+        c.argument('upgrade_mode', arg_type=get_enum_type(['Automatic', 'Manual']), help='Cluster service fabric code version upgrade mode. Automatic or Manual.')
+        c.argument('code_version', help='Cluster service fabric code version. Only use if upgrade mode is Manual.')
+        c.argument('client_cert_is_admin', options_list=['--client-cert-is-admin', '--cert-is-admin'], arg_type=get_three_state_flag(), help='Client authentication type.')
+        c.argument('client_cert_thumbprint', options_list=['--client-cert-thumbprint', '--cert-thumbprint'], help='Client certificate thumbprint.')
+        c.argument('client_cert_common_name', options_list=['--client-cert-common_name', '--cert-common-name'], help='Client certificate common name.')
+        c.argument('client_cert_issuer_thumbprint', options_list=['--client-cert-issuer_thumbprint', '--cert-issuer-thumbprint'], nargs='+', help='Space-separated list of issuer thumbprints.')
+        c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('sf managed-cluster update') as c:
+        c.argument('client_connection_port', help='Port used for client connections to the cluster.')
+        c.argument('gateway_connection_port', help='Port used for http connections to the cluster.')
+        c.argument('upgrade_mode', arg_type=get_enum_type(['Automatic', 'Manual']), help='Cluster service fabric code version upgrade mode. Automatic or Manual.')
+        c.argument('code_version', help='Cluster service fabric code version. Only use if upgrade mode is Manual.')
+        c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('sf managed-cluster client-certificate add') as c:
+        c.argument('is_admin', arg_type=get_three_state_flag(), help='Client authentication type.')
+        c.argument('thumbprint', help='Client certificate thumbprint.')
+        c.argument('common_name', help='Client certificate common name.')
+        c.argument('issuer_thumbprint', nargs='+', help='Space-separated list of issuer thumbprints.')
+
+    with self.argument_context('sf cluster client-certificate remove') as c:
+        c.argument('thumbprint', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
+        c.argument('common_name', nargs='+', help='A single or Space-separated list of client certificate common name(s) to be remove.')
+
+    # managed node type
+
+    capacity = CLIArgumentType(
+        options_list=['--capacity'],
+        action=AddNodeTypeCapacityAction,
+        nargs='+',
+        help='Capacity tags applied to the nodes in the node type as key/value pairs, the cluster resource manager uses these tags to understand how much resource a node has. Updating this will override the current values.'
+             'for example: --capacity ClientConnections=65536 param2=value2')
+
+    placement_property = CLIArgumentType(
+        options_list=['--placement-property'],
+        action=AddNodeTypePlacementPropertyAction,
+        nargs='+',
+        help='Placement tags applied to nodes in the node type as key/value pairs, which can be used to indicate where certain services (workload) should run. Updating this will override the current values.'
+             'for example: --placement-property NodeColor=Green SomeProperty=5')
+
+    with self.argument_context('sf managed-node-type') as c:
+        c.argument('node_type_name', options_list=['-n', '--name', '--node-type-name'], help='node type name.')
+        c.argument('instance_count', help='essage = "The number of nodes in the node type.')
+        c.argument('primary', help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
+        c.argument('disk_size', help='Disk size for each vm in the node type in GBs.', default=100)
+        c.argument('application_start_port', help='Application start port of a range of ports.')
+        c.argument('application_end_port', help='Application End port of a range of ports.')
+        c.argument('ephemeral_start_port', help='Ephemeral start port of a range of ports.')
+        c.argument('ephemeral_end_port', help='Ephemeral end port of a range of ports.')
+        c.argument('vm_size', help='The size of virtual machines in the pool. All virtual machines in a pool are the same size.', default='Standard_D2')
+        c.argument('vm_image_publisher', help='The publisher of the Azure Virtual Machines Marketplace image.', default='MicrosoftWindowsServer')
+        c.argument('vm_image_offer', help='The offer type of the Azure Virtual Machines Marketplace image.', default='WindowsServer')
+        c.argument('vm_image_sku', help='The SKU of the Azure Virtual Machines Marketplace image.', default='2019-Datacenter')
+        c.argument('vm_image_version', help='The version of the Azure Virtual Machines Marketplace image. ', default='latest')
+        c.argument('capacity', arg_type=capacity)
+        c.argument('placement_property', arg_type=placement_property)
+
+    with self.argument_context('sf managed-node-type node') as c:
+        c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')
+        c.argument('force', arg_type=get_three_state_flag(), help='Using this flag will force the operation even if service fabric is unable to disable the nodes. Use with caution as this might cause data loss if stateful workloads are running on the node.')
+
+    with self.argument_context('sf managed-node-type vm-extension') as c:
+        c.argument('extension_name', help='extension name.')
+        c.argument('force_updatetag', help='If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed.')
+        c.argument('publisher', help='The name of the extension handler publisher.')
+        c.argument('extension_type', help='Specifies the type of the extension; an example is \"CustomScriptExtension\".')
+        c.argument('type_handler_version', help='Specifies the version of the script handler.')
+        c.argument('auto_upgrade_minor_version', arg_type=get_three_state_flag(), help='Indicates whether the extension should use a newer minor version if one is available at deployment time. Once deployed, however, the extension will not upgrade minor versions unless redeployed, even with this property set to true.')
+        c.argument('setting', help='Json formatted public settings for the extension.')
+        c.argument('protected_setting', help='The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.')
+        c.argument('provision_after_extension', help='Collection of extension names after which this extension needs to be provisioned.')
+
+    with self.argument_context('sf managed-node-type vm-secret') as c:
+        c.argument('source_vault_id', help='Key Vault resource id containing the certificates.')
+        c.argument('certificate_url', help='This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://docs.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>}/')
+        c.argument('certificate_store', help='Specifies the certificate store on the Virtual Machine to which the certificate should be added. The specified certificate store is implicitly in the LocalMachine account.')
+
+def paramToDictionary(values):
+    params = {}
+    for item in values:
+        key, value = item.split('=', 1)
+        params[key] = value
+    return params
 
 # pylint: disable=protected-access
 # pylint: disable=too-few-public-methods
-class addAppParamsAction(argparse._AppendAction):
+class AddAppParamsAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        params = {}
-        for item in values:
-            try:
-                key, value = item.split('=', 1)
-                params[key] = value
-            except ValueError:
-                raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
-        namespace.application_parameters = params
+        try:
+            namespace.application_parameters = paramToDictionary(values)
+        except ValueError:
+            raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+
+class ManagedClusterClientCertAddAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        ClientCertificate = namespace._cmd.get_models('ClientCertificate')
+        try:
+            kwargs = paramToDictionary(values.split())
+            return ClientCertificate(**kwargs)
+        except ValueError:
+            raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+
+# pylint: disable=protected-access
+# pylint: disable=too-few-public-methods
+class AddNodeTypeCapacityAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        try:
+            namespace.capacity = paramToDictionary(values)
+        except ValueError:
+            raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+
+# pylint: disable=protected-access
+# pylint: disable=too-few-public-methods
+class AddNodeTypePlacementPropertyAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        try:
+            namespace.placement_property = paramToDictionary(values)
+        except ValueError:
+            raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+

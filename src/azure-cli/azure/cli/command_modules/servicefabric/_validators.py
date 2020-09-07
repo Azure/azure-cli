@@ -93,6 +93,10 @@ def validate_create_application(cmd, namespace):
         if namespace.maximum_nodes < 0:
             raise CLIError("maximum_nodes should be a non-negative integer.")
 
+def validate_create_managed_cluster(namespace):
+    if namespace.client_cert_issuer_thumbprint is not None:
+        if namespace.client_cert_common_name is None:
+            raise CLIError("--client-cert-issuer-thumbprint should be used with --client-cert-common-name.")
 
 def _safe_get_resource(getResourceAction, params):
     try:
