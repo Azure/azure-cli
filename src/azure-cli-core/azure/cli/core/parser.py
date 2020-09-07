@@ -328,6 +328,8 @@ class AzCliCommandParser(CLICommandParser):
         """
 
         cmd_chain = self._get_extension_command_tree()
+        if not cmd_chain:
+            return None
         for part in command_str.split():
             try:
                 if isinstance(cmd_chain[part], str):
@@ -339,10 +341,11 @@ class AzCliCommandParser(CLICommandParser):
 
     def _get_extension_use_dynamic_install_config(self):
         cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        default_value = 'yes_prompt'
         use_dynamic_install = cli_ctx.config.get(
-            'extension', 'use_dynamic_install', 'no').lower() if cli_ctx else 'no'
+            'extension', 'use_dynamic_install', default_value).lower() if cli_ctx else default_value
         if use_dynamic_install not in ['no', 'yes_prompt', 'yes_without_prompt']:
-            use_dynamic_install = 'no'
+            use_dynamic_install = default_value
         return use_dynamic_install
 
     def _check_value(self, action, value):  # pylint: disable=too-many-statements, too-many-locals
@@ -404,7 +407,9 @@ class AzCliCommandParser(CLICommandParser):
                                                          "rerun automatically.".format(ext_name))
                                 self.exit(exit_code)
                             else:
-                                error_msg = 'Extension {} installed. Please rerun your command.'.format(ext_name)
+                                error_msg = "Extension {} installed. Please rerun your command. " \
+                                    "\nRun 'az config set extension.run_after_dynamic_install=yes' to allow rerunning " \
+                                    "the extension command automatically.".format(ext_name)
                         else:
                             error_msg = "The command requires the extension {ext_name}. " \
                                 "To install, run 'az extension add -n {ext_name}'.".format(ext_name=ext_name)
@@ -412,7 +417,7 @@ class AzCliCommandParser(CLICommandParser):
                     # parser has no `command_source`, value is part of command itself
                     error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'." \
                         .format(prog=self.prog, value=value)
-                    if use_dynamic_install.lower() == 'no':
+                    if use_dynamic_install == 'no':
                         extensions_link = 'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'
                         error_msg = ("{msg} "
                                      "If the command is from an extension, "
