@@ -33,8 +33,10 @@ def servicefabric_application_client_factory(cli_ctx, kwargs):
 def servicefabric_service_client_factory(cli_ctx, kwargs):
     return servicefabric_client_factory(cli_ctx, **kwargs).services
 
+
 def servicefabric_managed_clusters_client_factory(cli_ctx, kwargs):
     return servicefabric_client_factory(cli_ctx, **kwargs).managed_clusters
+
 
 def servicefabric_node_types_client_factory(cli_ctx, kwargs):
     return servicefabric_client_factory(cli_ctx, **kwargs).node_types

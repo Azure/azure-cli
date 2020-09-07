@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
+from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import (servicefabric_clusters_client_factory,
                               servicefabric_client_factory_all,

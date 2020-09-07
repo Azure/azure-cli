@@ -25,6 +25,7 @@ from .._client_factory import (resource_client_factory)
 
 logger = get_logger(__name__)
 
+
 def create_cluster(cmd,
                    client,
                    resource_group_name,
@@ -48,9 +49,9 @@ def create_cluster(cmd,
         rg = _get_resource_group_by_name(cmd.cli_ctx, resource_group_name)
         if rg is None:
             if location is None:
-                raise CLIError("Resource group {} doesn't exists and location is not provided. " \
-                               "Either create the resource group before running this command or provide the location parameter." \
-                	           .format(resource_group_name))
+                raise CLIError("Resource group {} doesn't exists and location is not provided. "
+                               "Either create the resource group before running this command or provide the location parameter."
+                               .format(resource_group_name))
             rg = _create_resource_group_name(cmd.cli_ctx, resource_group_name, location)
 
         #  set defult parameters

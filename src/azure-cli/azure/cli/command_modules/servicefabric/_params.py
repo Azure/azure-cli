@@ -261,7 +261,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('common_name', help='Client certificate common name.')
         c.argument('issuer_thumbprint', nargs='+', help='Space-separated list of issuer thumbprints.')
 
-    with self.argument_context('sf cluster client-certificate remove') as c:
+    with self.argument_context('sf managed-cluster client-certificate remove') as c:
         c.argument('thumbprint', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
         c.argument('common_name', nargs='+', help='A single or Space-separated list of client certificate common name(s) to be remove.')
 
@@ -304,7 +304,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf managed-node-type vm-extension') as c:
         c.argument('extension_name', help='extension name.')
-        c.argument('force_updatetag', help='If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed.')
+        c.argument('force_update_tag', help='If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed.')
         c.argument('publisher', help='The name of the extension handler publisher.')
         c.argument('extension_type', help='Specifies the type of the extension; an example is \"CustomScriptExtension\".')
         c.argument('type_handler_version', help='Specifies the version of the script handler.')
@@ -318,12 +318,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_url', help='This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://docs.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>}/')
         c.argument('certificate_store', help='Specifies the certificate store on the Virtual Machine to which the certificate should be added. The specified certificate store is implicitly in the LocalMachine account.')
 
+
 def paramToDictionary(values):
     params = {}
     for item in values:
         key, value = item.split('=', 1)
         params[key] = value
     return params
+
 
 # pylint: disable=protected-access
 # pylint: disable=too-few-public-methods
@@ -335,6 +337,7 @@ class AddAppParamsAction(argparse._AppendAction):
         except ValueError:
             raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
 
+
 class ManagedClusterClientCertAddAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
@@ -344,6 +347,7 @@ class ManagedClusterClientCertAddAction(argparse._AppendAction):
             return ClientCertificate(**kwargs)
         except ValueError:
             raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+
 
 # pylint: disable=protected-access
 # pylint: disable=too-few-public-methods
@@ -355,6 +359,7 @@ class AddNodeTypeCapacityAction(argparse._AppendAction):
         except ValueError:
             raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
 
+
 # pylint: disable=protected-access
 # pylint: disable=too-few-public-methods
 class AddNodeTypePlacementPropertyAction(argparse._AppendAction):
@@ -364,4 +369,3 @@ class AddNodeTypePlacementPropertyAction(argparse._AppendAction):
             namespace.placement_property = paramToDictionary(values)
         except ValueError:
             raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
-

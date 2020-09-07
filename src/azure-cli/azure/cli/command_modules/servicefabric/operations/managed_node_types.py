@@ -93,8 +93,10 @@ def update_node_type(cmd,
                      cluster_name,
                      node_type_name,
                      instance_count=None,
-                     application_ports=None,
-                     ephemeral_ports=None,
+                     application_start_port=None,
+                     application_end_port=None,
+                     ephemeral_start_port=None,
+                     ephemeral_end_port=None,
                      capacity=None,
                      placement_property=None):
     try:
@@ -102,12 +104,18 @@ def update_node_type(cmd,
 
         if instance_count is not None:
             node_type.vm_instance_count = instance_count
-        if application_ports is not None:
-            node_type.application_ports = application_ports
-        if ephemeral_ports is not None:
-            node_type.ephemeral_ports = ephemeral_ports
+
+        if application_start_port and application_end_port:
+            node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,
+                                                                       end_port=application_end_port)
+
+        if ephemeral_start_port and ephemeral_end_port:
+            node_type.ephemeral_ports = EndpointRangeDescription(start_port=ephemeral_start_port,
+                                                                     end_port=ephemeral_end_port)
+
         if capacity is not None:
             node_type.capacities = capacity
+
         if placement_property is not None:
             node_type.placement_properties = placement_property
 
@@ -133,6 +141,7 @@ def reimage_node(cmd,
         _log_error_exception(ex)
         raise
 
+
 def restart_node(cmd,
                  client,
                  resource_group_name,
@@ -148,6 +157,7 @@ def restart_node(cmd,
         _log_error_exception(ex)
         raise
 
+
 def delete_node(cmd,
                 client,
                 resource_group_name,
@@ -162,6 +172,7 @@ def delete_node(cmd,
     except ErrorModelException as ex:
         _log_error_exception(ex)
         raise
+
 
 def add_vm_extension(cmd,
                      client,
@@ -200,6 +211,7 @@ def add_vm_extension(cmd,
         _log_error_exception(ex)
         raise
 
+
 def delete_vm_extension(cmd,
                         client,
                         resource_group_name,
@@ -213,13 +225,14 @@ def delete_vm_extension(cmd,
             original_len = len(node_type.vm_extensions)
             node_type.vm_extensions = list(filter(lambda x: x.name.lower() != extension_name.lower(), node_type.vm_extensions))
             if original_len == len(node_type.vm_extensions):
-                raise 'Extension with name {} not found'.format(extension_name) 
+                raise 'Extension with name {} not found'.format(extension_name)
 
         poller = client.node_types.create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
     except ErrorModelException as ex:
         _log_error_exception(ex)
         raise
+
 
 def add_vm_secret(cmd,
                   client,
