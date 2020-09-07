@@ -7,9 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.config._validators import validate_param_persist, validate_param_persist_for_delete
 
 
-
 def load_command_table(self, _):
-
     config_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.config.custom#{}')
 
     with self.command_group('config', config_custom, is_experimental=True) as g:

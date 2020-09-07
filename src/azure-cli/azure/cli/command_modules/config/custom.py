@@ -112,7 +112,7 @@ def show_param_persist(cmd, name=None):
 
 def delete_param_persist(cmd, name=None, all=False, yes=False, purge=False, recursive=False):  # pylint: disable=redefined-builtin
     if name:
-        return cmd.cli_ctx.local_context.delete(name)
+        cmd.cli_ctx.local_context.delete(name)
 
     if all:
         from azure.cli.core.util import user_confirmation
