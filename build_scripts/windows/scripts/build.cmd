@@ -122,7 +122,7 @@ for /f %%a in ('dir /b /s *_py3.*.pyc') do (
 )
 popd
 
-:: Delete unused Network SDK API versions
+:: Remove unused Network SDK API versions
 pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt\network
 rmdir /s /q v2016_09_01 v2016_12_01 v2017_03_01 v2017_06_01 v2017_08_01 v2017_09_01 v2017_11_01 v2018_02_01 v2018_04_01 v2018_06_01 v2018_07_01 v2018_08_01 v2018_10_01 v2018_12_01 v2019_02_01 v2019_04_01 v2019_07_01 v2019_08_01 v2019_09_01 v2019_11_01 v2019_12_01 v2020_03_01 v2020_04_01
 popd
