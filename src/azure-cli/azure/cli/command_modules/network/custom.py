@@ -5043,6 +5043,10 @@ def update_nw_flow_log(cmd,
         if not workspace:
             raise CLIError('Name or ID of workspace is invalid')
 
+        if instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration is None:
+            analytics_conf = cmd.get_models('TrafficAnalyticsConfigurationProperties')
+            instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration = analytics_conf()
+
         with cmd.update_context(
                 instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
             c.set_param('enabled', traffic_analytics_enabled)
