@@ -1043,14 +1043,10 @@ def _validate_admin_password(password, os_type):
                              contains_digit, contains_special_char] if x])
 
     # pylint: disable=line-too-long
-    length_error = "The password length must be between {} and {}.".format(min_length, max_length)
-    complexity_error = "Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character."
-    if len(password) not in range(min_length, max_length + 1) and count < 3:
-        raise CLIError("{} {}".format(length_error, complexity_error))
-    if len(password) not in range(min_length, max_length + 1):
-        raise CLIError(length_error)
-    if count < 3:
-        raise CLIError(complexity_error)
+    error_msg = ("The password length must be between {} and {}. And the password must have the 3 of the following: "
+                 "1 lower case character, 1 upper case character, 1 number and 1 special character.").format(min_length, max_length)
+    if len(password) not in range(min_length, max_length + 1) or count < 3:
+        raise CLIError(error_msg)
 
 
 def validate_ssh_key(namespace):
