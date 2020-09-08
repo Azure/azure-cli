@@ -409,9 +409,7 @@ def _get_installation_id():
 
 @decorators.suppress_all_exceptions(fallback_return="")
 def _get_session_id():
-    # This function works as a workaround to get the terminal info: when the difference
-    # of create time between current process and its parent process is larger than a given
-    # threshold, the parent process will be viewed as a terminal process.
+    # As a workaround to get the terminal info as SessionId, this function may not be accurate.
 
     def get_hash_result(content):
         import hashlib
@@ -420,10 +418,12 @@ def _get_session_id():
         hasher.update(content.encode('utf-8'))
         return hasher.hexdigest()
 
-    # Usually, more than one layer of sub-process will be called when excuting a CLI command. While, the create time
-    # of these processes will be very close, usually in several milliseconds. We use 1 second as the threshold here.
-    time_threshold = 1
+    # Usually, more than one layer of sub-process will be started when excuting a CLI command. While, the create time
+    # of these sub-processes will be very close, usually in several milliseconds. We use 1 second as the threshold here.
+    # When the difference of create time between current process and its parent process is larger than the threshold, 
+    # the parent process will be viewed as the terminal process.
     import psutil
+    time_threshold = 1
     process = psutil.Process()
     while process and process.ppid() and process.pid != process.ppid():
         parent_process = process.parent()

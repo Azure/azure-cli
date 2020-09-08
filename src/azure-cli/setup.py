@@ -139,6 +139,10 @@ DEPENDENCIES = [
     'jsondiff==1.2.0'
 ]
 
+# dependencies for specific OSes
+if not sys.platform.startswith('cygwin'):
+    DEPENDENCIES.append('psutil~=5.7')
+
 TESTS_REQUIRE = [
     'mock~=4.0'
 ]
