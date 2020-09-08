@@ -5,8 +5,7 @@
 import unittest
 import json
 
-from azure.cli.core.commands.query_examples import TreeBuilder
-from azure.cli.core.commands.query_examples import TreeNode
+from azure.cli.core.commands.query_examples import QueryTreeBuilder
 
 
 class MockConfig:
@@ -23,7 +22,7 @@ class MockConfig:
         return self._config.get(field, default_value)
 
 
-class TestQueryExamplesTreeBuilder(unittest.TestCase):
+class TestQueryExamplesQueryTreeBuilder(unittest.TestCase):
     def examples_to_dict(self, examples):
         ans = {}
         for ex in examples:
@@ -41,7 +40,7 @@ class TestQueryExamplesTreeBuilder(unittest.TestCase):
         '''
         json_obj = json.loads(input_json)
         mock_config = MockConfig()
-        builder = TreeBuilder(mock_config)
+        builder = QueryTreeBuilder(mock_config)
         builder.build(json_obj)
         self.assertIsNotNone(builder._root)
         self.assertIsNotNone(builder._all_nodes)
@@ -61,7 +60,7 @@ class TestQueryExamplesTreeBuilder(unittest.TestCase):
         '''
         json_obj = json.loads(input_json)
         mock_config = MockConfig()
-        builder = TreeBuilder(mock_config)
+        builder = QueryTreeBuilder(mock_config)
         builder.build(json_obj)
         self.assertIsNotNone(builder._root)
         self.assertIsNotNone(builder._all_nodes)
@@ -76,20 +75,20 @@ class TestQueryExamplesTreeBuilder(unittest.TestCase):
         mock_config = MockConfig()
         empty_dict = '{}'
         json_obj = json.loads(empty_dict)
-        builder = TreeBuilder(mock_config)
+        builder = QueryTreeBuilder(mock_config)
         builder.build(json_obj)
         self.assertIsNotNone(builder._root)  # an empty node
         self.assertFalse(builder._root._child)
 
         empty_list = '[]'
         json_obj = json.loads(empty_list)
-        builder = TreeBuilder(mock_config)
+        builder = QueryTreeBuilder(mock_config)
         builder.build(json_obj)
         self.assertIsNone(builder._root)  # No node found
 
         empty_list = '[{},{}]'
         json_obj = json.loads(empty_list)
-        builder = TreeBuilder(mock_config)
+        builder = QueryTreeBuilder(mock_config)
         builder.build(json_obj)
         self.assertIsNotNone(builder._root)  # an empty node
         self.assertFalse(builder._root._child)
@@ -108,7 +107,7 @@ class TestQueryExamplesTreeBuilder(unittest.TestCase):
         }
         '''
         json_obj = json.loads(input_json)
-        builder = TreeBuilder(mock_config)
+        builder = QueryTreeBuilder(mock_config)
         builder.build(json_obj)
         examples_list = builder.generate_examples(keyword_list, output_format)
         examples = self.examples_to_dict(examples_list)
@@ -135,7 +134,7 @@ class TestQueryExamplesTreeBuilder(unittest.TestCase):
         }]
         '''
         json_obj = json.loads(input_json)
-        builder = TreeBuilder(mock_config)
+        builder = QueryTreeBuilder(mock_config)
         builder.build(json_obj)
         examples_list = builder.generate_examples(keyword_list, output_format)
         examples = self.examples_to_dict(examples_list)
