@@ -3812,8 +3812,8 @@ def _start_ssh_session(hostname, port, username, password):
 
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements
     import platform
-    if platform.system() == "Windows":
-        raise CLIError('webapp ssh is only supported on linux and mac')
+    # if platform.system() == "Windows":
+        # raise CLIError('webapp ssh is only supported on linux and mac')
 
     config = get_site_configs(cmd, resource_group_name, name, slot)
     if config.remote_debugging_enabled:
