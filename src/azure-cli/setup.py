@@ -106,7 +106,7 @@ DEPENDENCIES = [
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-recoveryservicesbackup~=0.6.0',
     'azure-mgmt-redhatopenshift==0.1.0',
-    'azure-mgmt-redis~=7.0.0rc1',
+    'azure-mgmt-redis~=7.0.0rc2',
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781

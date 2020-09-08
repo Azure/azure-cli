@@ -1622,7 +1622,7 @@ Release History
 
 * Add preview param `--ports` to `az redis force-reboot` command
 * Add preview param `--replicas-per-master` to `az redis create` command
-* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc1
+* Update azure-mgmt-redis from 6.0.0 to 7.0.0rc2
 
 **ServiceFabric**
 
