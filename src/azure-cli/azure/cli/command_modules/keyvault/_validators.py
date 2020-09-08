@@ -256,7 +256,7 @@ def validate_resource_group_name(cmd, ns):
     if not ns.resource_group_name:
         vault_name = getattr(ns, 'vault_name', None)
         hsm_name = getattr(ns, 'hsm_name', None)
-        if 'keyvault update-hsm' in cmd.name:
+        if 'keyvault update-hsm' in cmd.name or 'keyvault wait-hsm' in cmd.name:
             hsm_name = getattr(ns, 'name', None)
 
         if vault_name and hsm_name:

@@ -32,8 +32,12 @@ def _asn1_to_iso8601(asn1_date):
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
-ACTIVE_HSM_NAME = 'clitest0907b'
+SECURITY_DOMAIN_KEYS_DIR = os.path.join(TEST_DIR, 'security_domain_keys')
+
+ACTIVE_HSM_NAME = 'clitest0908c'
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
+NEXT_ACTIVE_HSM_NAME = 'clitest0908d'
+NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(NEXT_ACTIVE_HSM_NAME)
 
 
 def _create_keyvault(test, kwargs, additional_args=None):
@@ -344,6 +348,67 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-soft-delete true --enable-purge-protection true',
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
+
+
+class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
+    # @unittest.skip('Hard to make it idempotent to run recording/live.')
+    @AllowLargeResponse()
+    def test_keyvault_hsm_security_domain(self):
+        self.kwargs.update({
+            'hsm_url': ACTIVE_HSM_URL,
+            'hsm_name': ACTIVE_HSM_NAME,
+            'next_hsm_url': NEXT_ACTIVE_HSM_URL,
+            'next_hsm_name': NEXT_ACTIVE_HSM_NAME,
+            'loc': 'eastus2euap',
+            'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa',
+            'key_name': self.create_random_name('key', 10),
+            'rg': 'bim-rg',
+            'rg_lock': 'bim-lock',
+            'pem_dir': os.path.join(SECURITY_DOMAIN_KEYS_DIR, 'pem'),
+            'sdtest_dir': os.path.join(SECURITY_DOMAIN_KEYS_DIR, 'sdtest')
+        })
+        self.kwargs.update({
+            'sdfile': os.path.join(self.kwargs['sdtest_dir'], 'sdfile.json'),
+            'exchange_key': os.path.join(self.kwargs['sdtest_dir'], 'sdex.pem'),
+            'key_backup': os.path.join(self.kwargs['sdtest_dir'], 'key.bak')
+        })
+
+        for p in ['sdfile', 'exchange_key', 'key_backup']:
+            if os.path.exists(self.kwargs[p]):
+                os.remove(self.kwargs[p])
+
+        # create a new key and backup it
+        self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
+        self.cmd('az keyvault key backup --hsm-name {hsm_name} -n {key_name} -f "{key_backup}"')
+
+        # download SD
+        self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
+                 '--sd-quorum 2 --sd-wrapping-keys "{pem_dir}/sd1.cer" "{pem_dir}/sd2.cer" "{pem_dir}/sd3.cer"')
+
+        # delete the HSM
+        self.cmd('az group lock delete -g {rg} -n {rg_lock}')
+        self.cmd('az keyvault delete --hsm-name {hsm_name}')
+        self.cmd('az group lock create -g {rg} -n {rg_lock} -t CanNotDelete')
+
+        # create a new HSM
+        self.cmd('az keyvault create --hsm-name {next_hsm_name} -l {loc} -g {rg} --administrators {init_admin} '
+                 '--retention-days 7 --no-wait')
+
+        # wait until the HSM is ready for recovery
+        self.cmd('az keyvault wait-hsm -n {next_hsm_name} '
+                 '--custom "statusMessage!=\'Resource creation in progress. Allocating hardware...\'"')
+
+        # download the exchange key
+        self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
+                 '--sd-exchange-key "{exchange_key}"')
+
+        # upload the blob
+        self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
+                 '--sd-exchange-key "{exchange_key}" '
+                 '--sd-wrapping-keys "{pem_dir}/sd1.key" "{pem_dir}/sd2.key" "{pem_dir}/sd3.key"')
+
+        # restore the key
+        self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
 
 
 class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):

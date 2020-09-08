@@ -206,6 +206,7 @@ from .key_vault_client_enums import (
     JsonWebKeyEncryptionAlgorithm,
     JsonWebKeySignatureAlgorithm,
     SasTokenType,
+    OperationStatus
 )
 
 __all__ = [
@@ -315,5 +316,6 @@ __all__ = [
     'SasTokenType',
     'KeyReleaseAuthority',
     'KeyReleaseCondition',
-    'KeyReleasePolicy'
+    'KeyReleasePolicy',
+    'OperationStatus'
 ]

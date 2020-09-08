@@ -450,6 +450,15 @@ examples:
         az keyvault wait --name MyVault --created
 """
 
+helps['keyvault wait-hsm'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the HSM is met.
+examples:
+  - name: Pause CLI until the HSM is created.
+    text: |
+        az keyvault wait-hsm --name MyHSM --created
+"""
+
 helps['keyvault security-domain'] = """
 type: group
 short-summary: Manage security domains.
@@ -480,4 +489,13 @@ examples:
   - name: Security domain download (N=3, M=2).
     text: |
         az keyvault security-domain download --hsm-name MyHSM --security-domain-file "{SD_FILE_NAME}" --sd-quorum 2 --sd-wrapping-keys "{PEM_PUBLIC_KEY1_FILE_NAME}" "{PEM_PUBLIC_KEY2_FILE_NAME}" "{PEM_PUBLIC_KEY3_FILE_NAME}"
+"""
+
+helps['keyvault security-domain wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until HSM security domain operation is finished.
+examples:
+  - name: Pause CLI until the security domain operation is finished.
+    text: |
+        az keyvault security-domain wait --hsm-name MyHSM
 """

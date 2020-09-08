@@ -587,9 +587,14 @@ def create_hsm(cmd, client,
                             sku=ManagedHsmSku(name=sku),
                             properties=properties)
 
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   name=hsm_name,
-                                   parameters=parameters)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name=resource_group_name,
+                       name=hsm_name,
+                       parameters=parameters)
+
+
+def wait_hsm(client, name, resource_group_name):
+    return client.get(resource_group_name=resource_group_name, name=name)
 
 
 def create_vault(cmd, client,  # pylint: disable=too-many-locals
@@ -2059,8 +2064,25 @@ def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
         raise ex
 
 
+def _wait_security_domain_operation(client, hsm_base_url, identifier=None):  # pylint: disable=unused-argument
+    retries = 0
+    max_retries = 30
+    wait_second = 5
+    while retries < max_retries:
+        try:
+            ret = client.upload_pending(vault_base_url=hsm_base_url)
+            if ret and getattr(ret, 'status', None) in ['Succeeded', 'Failed']:
+                return ret
+        except:  # pylint: disable=bare-except
+            pass
+        time.sleep(wait_second)
+        retries += 1
+
+    return None
+
+
 def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           identifier=None):  # pylint: disable=unused-argument):
+                           identifier=None, no_wait=False):  # pylint: disable=unused-argument
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
         if not os.path.exists(p):
@@ -2176,7 +2198,16 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
 
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
-    return client.upload(vault_base_url=vault_base_url, security_domain=security_domain)
+    retval = client.upload(vault_base_url=vault_base_url, security_domain=security_domain)
+
+    if no_wait:
+        return retval
+
+    new_retval = _wait_security_domain_operation(client, vault_base_url)
+
+    if new_retval:
+        return new_retval
+    return retval
 
 
 def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, security_domain_file, sd_quorum,

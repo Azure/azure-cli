@@ -88,6 +88,7 @@ def load_command_table(self, _):
             'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
             custom_func_name='update_hsm', is_preview=True,
             doc_string_source=private_mgmt_vaults_entity.models_docs_tmpl.format('ManagedHsmProperties'))
+        g.custom_wait_command('wait-hsm', 'wait_hsm', is_preview=True)
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
@@ -133,8 +134,9 @@ def load_command_table(self, _):
 
     with self.command_group('keyvault security-domain', private_data_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
-        g.keyvault_custom('upload', 'security_domain_upload')
+        g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
         g.keyvault_custom('download', 'security_domain_download')
+        g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', private_data_entity.command_type) as g:
         g.keyvault_command('list', 'get_keys',

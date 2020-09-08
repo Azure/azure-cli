@@ -167,6 +167,11 @@ def load_arguments(self, _):
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
 
+    with self.argument_context('keyvault wait-hsm') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the HSM.')
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'],
+                   help='Proceed only if HSM belongs to the specified resource group.')
+
     with self.argument_context('keyvault recover') as c:
         c.argument('vault_name', deleted_vault_name_type, options_list=['--name', '-n'],
                    validator=validate_deleted_vault_or_hsm_name)
@@ -448,6 +453,13 @@ def load_arguments(self, _):
                    help='Path to a file where the JSON blob returned by this command is stored.')
         c.argument('sd_quorum', type=int, help='The minimum number of shares required to decrypt the security domain '
                                                'for recovery.')
+
+    with self.argument_context('keyvault security-domain wait') as c:
+        c.argument('hsm_base_url', hsm_name_type, help='Name of the HSM. Can be omitted if --id is specified.',
+                   required=False)
+        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'],
+                   help='Proceed only if HSM belongs to the specified resource group.')
     # endregion
 
     # region keyvault backup/restore
