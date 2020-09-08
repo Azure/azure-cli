@@ -408,8 +408,8 @@ class AzCliCommandParser(CLICommandParser):
                                 self.exit(exit_code)
                             else:
                                 error_msg = "Extension {} installed. Please rerun your command. " \
-                                    "\nRun 'az config set extension.run_after_dynamic_install=yes' to allow rerunning " \
-                                    "the extension command automatically.".format(ext_name)
+                                    "\nRun 'az config set extension.run_after_dynamic_install=yes' to allow " \
+                                    "rerunning the extension command automatically.".format(ext_name)
                         else:
                             error_msg = "The command requires the extension {ext_name}. " \
                                 "To install, run 'az extension add -n {ext_name}'.".format(ext_name=ext_name)
