@@ -713,7 +713,6 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
-    @live_only()
     def test_sql_db_long_term_retention(
             self):
 
@@ -4057,7 +4056,6 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_2", location='eastus')
-    @live_only()
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -4074,7 +4072,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "fgclitest1657"
+        failover_group_name = "fgclitest16578"
 
         database_name = "db1"
 
