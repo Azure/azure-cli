@@ -18,5 +18,5 @@ def load_command_table(self, _):
     with self.command_group('config parampersist', config_custom, is_experimental=True) as g:
         g.command('on', 'turn_param_persist_on')
         g.command('off', 'turn_param_persist_off')
-        g.command('show', 'show_param_persist', validator=validate_param_persist)
+        g.show_command('show', 'show_param_persist', validator=validate_param_persist)
         g.command('delete', 'delete_param_persist', validator=validate_param_persist_for_delete)
