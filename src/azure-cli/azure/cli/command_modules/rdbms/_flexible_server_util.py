@@ -13,7 +13,7 @@ from ._client_factory import resource_client_factory, network_client_factory
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'northeurope' #'eastus2euap'
+DEFAULT_LOCATION = 'eastus2euap' #'eastus2euap'
 
 
 def resolve_poller(result, cli_ctx, name):
@@ -74,13 +74,13 @@ def create_vnet(cmd, servername, location, resource_group_name, delegation_servi
     client = network_client_factory(cmd.cli_ctx)
     vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername)
 
-    logger.warning('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
+    logger.warning('Creating new vnet "%s" in resource group "%s"...', vnet_name, resource_group_name)
     client.virtual_networks.create_or_update(resource_group_name, vnet_name, VirtualNetwork(name=vnet_name, location=location, address_space=AddressSpace(
                                                                  address_prefixes=[vnet_address_prefix])))
     delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
     subnet = Subnet(name=subnet_name, location=location, address_prefix=subnet_prefix, delegations=[delegation])
 
-    logger.warning('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
+    logger.warning('Creating new subnet "%s" in resource group "%s" and delegating it to "%s"...', subnet_name, resource_group_name, delegation_service_name)
     subnet = client.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
     return subnet.id
 
@@ -105,7 +105,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
         cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
     '''
     firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip, end_ip).result()
-    return firewall.id
+    return firewall.name
 
 
 def parse_public_access_input(public_access):
