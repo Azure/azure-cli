@@ -66,7 +66,7 @@ def create_cluster(cmd,
 
         if sku is None:
             sku = 'Basic'
-        skuObj = Sku(name='Basic')
+        skuObj = Sku(name=sku)
 
         if client_connection_port is None:
             client_connection_port = 19000
@@ -166,7 +166,7 @@ def add_client_cert(cmd,
         raise
 
 
-def remove_client_cert(cmd,
+def delete_client_cert(cmd,
                        client,
                        resource_group_name,
                        cluster_name,
@@ -184,7 +184,7 @@ def remove_client_cert(cmd,
                 common_name = [x.lower() for x in common_name]
                 cluster.clients = [cert for cert in cluster.clients if cert.common_name.lower() not in common_name]
 
-            if initial_size < len(cluster.clients):
+            if initial_size > len(cluster.clients):
                 poller = client.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
                 return LongRunningOperation(cmd.cli_ctx)(poller)
         return cluster

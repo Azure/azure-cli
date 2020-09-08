@@ -107,11 +107,11 @@ def update_node_type(cmd,
 
         if application_start_port and application_end_port:
             node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,
-                                                                       end_port=application_end_port)
+                                                                   end_port=application_end_port)
 
         if ephemeral_start_port and ephemeral_end_port:
             node_type.ephemeral_ports = EndpointRangeDescription(start_port=ephemeral_start_port,
-                                                                     end_port=ephemeral_end_port)
+                                                                 end_port=ephemeral_end_port)
 
         if capacity is not None:
             node_type.capacities = capacity
@@ -180,14 +180,14 @@ def add_vm_extension(cmd,
                      cluster_name,
                      node_type_name,
                      extension_name,
-                     force_update_tag,
                      publisher,
                      extension_type,
                      type_handler_version,
-                     auto_upgrade_minor_version,
-                     setting,
-                     protected_setting,
-                     provision_after_extension):
+                     force_update_tag=None,
+                     auto_upgrade_minor_version=True,
+                     setting=None,
+                     protected_setting=None,
+                     provision_after_extension=None):
     try:
         node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
@@ -200,7 +200,8 @@ def add_vm_extension(cmd,
                                      type_handler_version=type_handler_version,
                                      force_update_tag=force_update_tag,
                                      auto_upgrade_minor_version=auto_upgrade_minor_version,
-                                     settings=setting, protected_settings=protected_setting,
+                                     settings=setting,
+                                     protected_settings=protected_setting,
                                      provision_after_extensions=provision_after_extension)
 
         node_type.vm_extensions.append(newExtension)
@@ -250,14 +251,17 @@ def add_vm_secret(cmd,
 
         vault = next((x for x in node_type.vm_secrets if x.source_vault.id.lower() == source_vault_id.lower()), None)
 
+        vault_certificate = VaultCertificate(certificate_store=certificate_store, certificate_url=certificate_url)
         new_vault_secret_group = False
         if vault is None:
             new_vault_secret_group = True
             source_vault = SubResource(id=source_vault_id)
-            vault = VaultSecretGroup(source_vault=source_vault)
+            vault = VaultSecretGroup(source_vault=source_vault, vault_certificates=[])
 
         if vault.vault_certificates is None:
-            vault.vault_certificates = VaultCertificate(certificate_store=certificate_store, certificate_url=certificate_url)
+            vault.vault_certificates = []
+
+        vault.vault_certificates.append(vault_certificate)
 
         if new_vault_secret_group:
             node_type.vm_secrets.append(vault)

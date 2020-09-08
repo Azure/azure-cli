@@ -26,7 +26,8 @@ def _add_selfsigned_cert_to_keyvault(test, kwargs):
 
 
 def _create_keyvault(test, kwargs):
-    test.cmd('keyvault create --resource-group {rg} -n {kv_name} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
+    kv = test.cmd('keyvault create --resource-group {rg} -n {kv_name} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
+    return kv
 
 
 def _create_cluster_with_separate_kv(test, kwargs):

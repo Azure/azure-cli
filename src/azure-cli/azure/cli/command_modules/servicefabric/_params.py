@@ -261,7 +261,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('common_name', help='Client certificate common name.')
         c.argument('issuer_thumbprint', nargs='+', help='Space-separated list of issuer thumbprints.')
 
-    with self.argument_context('sf managed-cluster client-certificate remove') as c:
+    with self.argument_context('sf managed-cluster client-certificate delete') as c:
         c.argument('thumbprint', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
         c.argument('common_name', nargs='+', help='A single or Space-separated list of client certificate common name(s) to be remove.')
 

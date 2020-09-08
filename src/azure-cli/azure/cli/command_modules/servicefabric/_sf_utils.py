@@ -41,5 +41,9 @@ def _log_error_exception(ex: ErrorModelException):
     logger.error("ErrorModelException: %s", ex)
     if ex.response.content:
         response_content = json.loads(ex.response.content)
-        if response_content and response_content['exception']:
-            logger.error("Exception: %s", response_content['exception'])
+        if response_content:
+            if 'exception' in response_content:
+                logger.error("Exception: %s", response_content['exception'])
+            else:
+                logger.error("Exception response content: %s", ex.response.content)
+

@@ -132,7 +132,7 @@ def load_command_table(self, _):
     with self.command_group('sf managed-cluster client-certificate', managed_cluster_mgmt,
                             custom_command_type=managed_cluster_custom_type) as g:
         g.custom_command('add', 'add_client_cert')
-        g.custom_command('remove', 'remove_client_cert')
+        g.custom_command('delete', 'delete_client_cert')
 
     with self.command_group('sf managed-node-type', node_type_mgmt, is_preview=True,
                             custom_command_type=managed_node_type_custom_type) as g:
