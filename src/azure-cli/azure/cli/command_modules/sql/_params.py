@@ -218,7 +218,7 @@ storage_param_type = CLIArgumentType(
     validator=validate_managed_instance_storage_size)
 
 backup_storage_redundancy_param_type = CLIArgumentType(
-    options_list=['--backup-storage-redundancy'],
+    options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
     help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
     validator=validate_managed_instance_backup_storage_redundancy)
