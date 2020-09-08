@@ -713,7 +713,7 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
-    @record_only()
+    @live_only()
     def test_sql_db_long_term_retention(
             self):
 
@@ -2407,8 +2407,10 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     @StorageAccountPreparer()
+    @AllowLargeResponse()
+    @live_only()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'westeurope'
+        location_long_name = 'westus'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -4055,6 +4057,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_2", location='eastus')
+    @live_only()
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,

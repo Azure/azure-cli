@@ -12,8 +12,8 @@ from azure.mgmt.sql.models import (
     Database,
     ElasticPool,
     ElasticPoolPerDatabaseSettings,
-    ImportExtensionRequest,
-    ExportRequest,
+    ImportExistingDatabaseDefinition,
+    ExportDatabaseDefinition,
     InstancePool,
     ManagedDatabase,
     ManagedInstance,
@@ -21,7 +21,6 @@ from azure.mgmt.sql.models import (
     Server,
     ServerAzureADAdministrator,
     Sku,
-    AuthenticationType,
     BlobAuditingPolicyState,
     CatalogCollationType,
     CreateMode,
@@ -59,7 +58,8 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
-    SqlManagedInstanceMinimalTlsVersionType
+    SqlManagedInstanceMinimalTlsVersionType,
+    AuthenticationType
 )
 
 from ._validators import (
@@ -638,7 +638,7 @@ def load_arguments(self, _):
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportRequest object
         create_args_for_complex_type(
-            c, 'parameters', ExportRequest, [
+            c, 'parameters', ExportDatabaseDefinition, [
                 'administrator_login',
                 'administrator_login_password',
                 'authentication_type',
@@ -661,8 +661,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(StorageKeyType))
 
     with self.argument_context('sql db import') as c:
-        # Create args that will be used to build up the ImportExtensionRequest object
-        create_args_for_complex_type(c, 'parameters', ImportExtensionRequest, [
+        # Create args that will be used to build up the ImportExportDatabaseDefinition object
+        create_args_for_complex_type(c, 'parameters', ImportExistingDatabaseDefinition, [
             'administrator_login',
             'administrator_login_password',
             'authentication_type',
