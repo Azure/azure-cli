@@ -34,7 +34,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 SECURITY_DOMAIN_KEYS_DIR = os.path.join(TEST_DIR, 'security_domain_keys')
 
-ACTIVE_HSM_NAME = 'clitest0908c'
+ACTIVE_HSM_NAME = 'clitest0907b'  # live: clitest0908c
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
 NEXT_ACTIVE_HSM_NAME = 'clitest0908d'
 NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(NEXT_ACTIVE_HSM_NAME)
@@ -351,7 +351,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
-    # @unittest.skip('Hard to make it idempotent to run recording/live.')
+    @unittest.skip('Hard to make it idempotent to run recording/live.')
     @AllowLargeResponse()
     def test_keyvault_hsm_security_domain(self):
         self.kwargs.update({
