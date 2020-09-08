@@ -243,7 +243,8 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
                 except NoTTYException:
                     raise CLIError("Unable to prompt for confirmation as no tty available. Please run with --yes.")
                 if yes:
-                    logger.warning("It will be overriden with version %s.", version)
+                    logger.warning("It will be overriden with version {}.".format(version) if version else "It will be updated if available.")
+
                 update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=version)
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
