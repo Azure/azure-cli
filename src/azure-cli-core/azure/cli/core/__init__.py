@@ -207,9 +207,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 # Perform module discovery
                 command_modules = []
                 if getattr(sys, 'frozen', False):
-                    # from PyInstaller.utils.hooks import collect_submodules
-                    # command_modules = collect_submodules('azure.cli.command_modules')
-                    command_modules = ['acr', 'acs', 'advisor', 'ams', 'apim', 'appconfig', 'appservice', 'aro', 'backup', 'batch', 'batchai', 'billing', 'botservice', 'cdn', 'cloud', 'cognitiveservices', 'configure', 'consumption', 'container', 'cosmosdb', 'deploymentmanager', 'dla', 'dls', 'dms', 'eventgrid', 'eventhubs', 'extension', 'feedback', 'find', 'hdinsight', 'interactive', 'iot', 'iotcentral', 'keyvault', 'kusto', 'lab', 'managedservices', 'maps', 'monitor', 'natgateway', 'netappfiles', 'network', 'policyinsights', 'privatedns', 'profile', 'rdbms', 'redis', 'relay', 'reservations', 'resource', 'role', 'search', 'security', 'servicebus', 'servicefabric', 'signalr', 'sql', 'sqlvm', 'storage', 'util', 'vm']
+                    command_modules = 'ALL_COMMAND_MODULES'
                 else:
                     command_modules = []
                     try:
