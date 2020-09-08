@@ -1555,7 +1555,7 @@ def load_arguments(self, _):
 
         c.argument('storage_account_type',
                    arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy'],
+                   options_list=['--backup-storage-redundancy', '--bsr'],
                    help='Backup storage redundancy used to store backups')
 
     with self.argument_context('sql mi update') as c:

@@ -30,7 +30,7 @@ Release History
  
 **SQL**
 
-* `az sql server audit-policy`: Add sql server auditing support (#14726)
+* Add backup storage redundancy optional parameter to MI create cmdlet (#15071)
 
 2.11.0
 ++++++
