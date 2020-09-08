@@ -535,11 +535,8 @@ def lock_key(cmd, key, label=None, name=None, connection_string=None, yes=False)
         confirmation_message = "Are you sure you want to lock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
 
-        # Due to a bug in the SDK, we need to enclose the etag in double quotes
-        # Bug: https://github.com/Azure/azure-sdk-for-python/issues/13276
-        match_etag = '"' + retrieved_kv.etag + '"'
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, if_match=match_etag)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified)
             return convert_configurationsetting_to_keyvalue(new_kv)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -570,11 +567,8 @@ def unlock_key(cmd, key, label=None, name=None, connection_string=None, yes=Fals
         confirmation_message = "Are you sure you want to unlock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
 
-        # Due to a bug in the SDK, we need to enclose the etag in double quotes
-        # Bug: https://github.com/Azure/azure-sdk-for-python/issues/13276
-        match_etag = '"' + retrieved_kv.etag + '"'
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, if_match=match_etag)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified)
             return convert_configurationsetting_to_keyvalue(new_kv)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:

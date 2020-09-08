@@ -308,11 +308,8 @@ def lock_feature(cmd,
         confirmation_message = "Are you sure you want to lock the feature '{}' with label '{}'".format(feature, label)
         user_confirmation(confirmation_message, yes)
 
-        # Due to a bug in the SDK, we need to enclose the etag in double quotes
-        # Bug: https://github.com/Azure/azure-sdk-for-python/issues/13276
-        match_etag = '"' + retrieved_kv.etag + '"'
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, if_match=match_etag)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified)
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
                                                show_conditions=False)
         except HttpResponseError as exception:
@@ -353,11 +350,8 @@ def unlock_feature(cmd,
         confirmation_message = "Are you sure you want to unlock the feature '{}' with label '{}'".format(feature, label)
         user_confirmation(confirmation_message, yes)
 
-        # Due to a bug in the SDK, we need to enclose the etag in double quotes
-        # Bug: https://github.com/Azure/azure-sdk-for-python/issues/13276
-        match_etag = '"' + retrieved_kv.etag + '"'
         try:
-            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, if_match=match_etag)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified)
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
                                                show_conditions=False)
         except HttpResponseError as exception:
