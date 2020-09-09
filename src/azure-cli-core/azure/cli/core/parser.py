@@ -373,7 +373,7 @@ class AzCliCommandParser(CLICommandParser):
                                                       extension_name=ext_name)
                         run_after_extension_installed = cli_ctx.config.getboolean('extension',
                                                                                   'run_after_dynamic_install',
-                                                                                  False) if cli_ctx else False
+                                                                                  True) if cli_ctx else True
                         if use_dynamic_install == 'yes_without_prompt':
                             logger.warning('The command requires the extension %s. '
                                            'It will be installed first.', ext_name)
@@ -407,9 +407,7 @@ class AzCliCommandParser(CLICommandParser):
                                                          "rerun automatically.".format(ext_name))
                                 self.exit(exit_code)
                             else:
-                                error_msg = "Extension {} installed. Please rerun your command. " \
-                                    "\nRun 'az config set extension.run_after_dynamic_install=yes' to allow " \
-                                    "rerunning the extension command automatically.".format(ext_name)
+                                error_msg = "Extension {} installed. Please rerun your command.".format(ext_name)
                         else:
                             error_msg = "The command requires the extension {ext_name}. " \
                                 "To install, run 'az extension add -n {ext_name}'.".format(ext_name=ext_name)
