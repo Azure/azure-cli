@@ -1214,7 +1214,7 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_
 def _handle_merge(existing, addition, key, replace):
     if not addition.get(key, False):
         return
-    if existing[key] is None:
+    if not existing.get(key):
         existing[key] = addition[key]
         return
 
@@ -1748,7 +1748,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                kubernetes_version='',
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
-               node_osdisk_diskencryptionset_id='',
+               node_osdisk_diskencryptionset_id=None,
                node_count=3,
                nodepool_name="nodepool1",
                nodepool_tags=None,

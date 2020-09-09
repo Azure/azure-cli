@@ -82,6 +82,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         commit_trigger_enabled = False
         pull_request_trigger_enabled = False
 
+    if context_path is not None and context_path.lower().startswith("oci://"):
+        commit_trigger_enabled = False
+        pull_request_trigger_enabled = False
+
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")

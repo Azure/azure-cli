@@ -801,9 +801,6 @@ examples:
 helps['storage blob list'] = """
 type: command
 short-summary: List blobs in a given container.
-parameters:
-  - name: --include
-    short-summary: 'Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots, (d)eleted-soft. Can be combined.'
 examples:
   - name: List all storage blobs in a container whose names start with 'foo'; will match names such as 'foo', 'foobar', and 'foo/bar'
     text: az storage blob list -c MyContainer --prefix foo
@@ -2045,6 +2042,14 @@ examples:
     text: az storage share-rm show --storage-account mystorageaccount --name myfileshare
   - name: Show the properties of an Azure file shares by resource id.
     text: az storage share-rm show --ids file-share-id
+"""
+
+helps['storage share-rm stats'] = """
+type: command
+short-summary: Get the usage bytes of the data stored on the share.
+examples:
+  - name: Get the usage bytes of the data stored on the share.
+    text: az storage share-rm stats -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
 """
 
 helps['storage share-rm update'] = """
