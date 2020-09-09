@@ -81,7 +81,7 @@ def run_tests(cmd, path):
         logger.warning(str(ex))
 
     import pytest
-    pytest_args = ['-x', '-v', '--boxed', '-p', 'no:warnings', '--log-level=WARN']
+    pytest_args = ['-x', '-v', '-p', 'no:warnings', '--log-level=WARN']
     pytest_parallel_args = pytest_args + ['-n', 'auto']
 
     for mod_name in mod_list:

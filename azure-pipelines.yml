@@ -850,7 +850,7 @@ jobs:
 - job: BuildPyinstallerDebPackages
   displayName: Build Pyinstaller Deb Packages
 
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -876,4 +876,35 @@ jobs:
     displayName: 'Publish Pyinstaller Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(deb_system)-$(distro)
+      ArtifactName: pyinstaller-$(deb_system)-$(distro)
+
+- job: BuildAndTestPyinstallerDebPackages
+  displayName: Build And Test Pyinstaller Deb Packages
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Xenial:
+        deb_system: ubuntu
+        distro: xenial
+      Bionic:
+        deb_system: ubuntu
+        distro: bionic
+  steps:
+  - task: Bash@3
+    displayName: 'Build And Test Pyinstaller $(deb_system) $(distro) Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/pyinstaller/test/debian/pipeline.sh
+    env:
+      DISTRO: $(distro)
+      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Pyinstaller Artifact: debian'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: pyinstaller-test-$(deb_system)-$(distro)
