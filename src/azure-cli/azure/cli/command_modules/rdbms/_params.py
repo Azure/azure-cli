@@ -244,8 +244,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                             help='Period of time designated for maintenance. Examples: "0:8:30" to schedule on Monday, 8:30 UTC')
                 c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'],
                            help='Enable or disable autogrow of the storage. Default value is Enabled.')
-                
-                
+
+            c.argument('subnet_arm_resource_id', options_list=['--subnet-id'],
+                       help='Name or ID of the subnet that allows access to an Azure Flexible Server. ')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))#, validator=get_default_location_from_resource_group)
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication', 
@@ -261,20 +262,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                         help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ',
                         validator=public_access_validator)
 
-            # c.argument('vnet_name', options_list=['--vnet'], help='Name of the virtual network when creating a new one or referencing an existing one. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
-            # c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'], help='The IP address prefix to use when creating a new VNet in CIDR format. ')
-            # c.argument('subnet_name', options_list=['--subnet'], help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If both vnet-name and subnet are omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created. The name must be between 1 to 80 characters. The name must begin with a letter or number, end with a letter, number, or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
-            # c.argument('subnet_address_prefix', default='10.0.0.0/24', options_list=['--subnet-address-prefix'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. ')
             c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
 
             c.ignore('database_name')
-            c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], 
-                        help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
-            c.argument('infrastructure_encryption', options_list=['--infrastructure-encryption'], 
-                        help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
-            c.argument('ssl_enforcement', options_list=['--ssl-enforcement'], 
-                        help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
-            c.argument('assign_identity', options_list=['--assign-identity'], 
+            c.argument('assign_identity', options_list=['--assign-identity'],
                         help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault. No need to enter extra argument.')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
