@@ -18,7 +18,6 @@ def _get_resource_group_by_name(cli_ctx, resource_group_name):
         return resource_client.get(resource_group_name)
     except Exception as ex:  # pylint: disable=broad-except
         azureError = getattr(ex, 'Azure Error', ex)
-        # todo alsantam: revisar si es == o !=
         if azureError.error.error == 'ResourceGroupNotFound':
             return None
         raise
