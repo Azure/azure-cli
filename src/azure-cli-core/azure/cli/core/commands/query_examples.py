@@ -221,8 +221,9 @@ class QueryTreeBuilder:
         examples = []
         match_list = self._get_matched_nodes(keywords_list)
         for node_name in match_list:
-            for node in self._all_nodes.get(node_name):
-                examples.extend(node.get_examples())
+            if node_name:  # skip root node
+                for node in self._all_nodes.get(node_name):
+                    examples.extend(node.get_examples())
         examples = examples[:self._config['max_examples']]
         if output_format == 'table':
             for item in examples:
