@@ -591,7 +591,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         addon_profile = instance.addon_profiles['httpApplicationRouting']
         self.assertTrue(addon_profile.enabled)
 
-        # http_application_routing enabled
+        # http_application_routing disabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'http_application_routing', enable=False)
         addon_profile = instance.addon_profiles['httpApplicationRouting']
@@ -615,6 +615,29 @@ class AcsCustomCommandTest(unittest.TestCase):
         routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
         self.assertTrue(routing_addon_profile.enabled)
         self.assertEqual(sorted(list(instance.addon_profiles)), ['httpApplicationRouting', 'omsagent'])
+
+        # azurepolicy added
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'azure-policy', enable=True)
+        azurepolicy_addon_profile = instance.addon_profiles['azurepolicy']
+        self.assertTrue(azurepolicy_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertTrue(routing_addon_profile.enabled)
+        monitoring_addon_profile = instance.addon_profiles['omsagent']
+        self.assertFalse(monitoring_addon_profile.enabled)
+
+        # azurepolicy disabled, routing enabled
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'azurepolicy', enable=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000', 'clitest000001',
+                                  'http_application_routing', enable=True)
+        azurepolicy_addon_profile = instance.addon_profiles['azurepolicy']
+        self.assertTrue(azurepolicy_addon_profile.enabled)
+        monitoring_addon_profile = instance.addon_profiles['omsagent']
+        self.assertFalse(monitoring_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        self.assertTrue(routing_addon_profile.enabled)
+        self.assertEqual(sorted(list(instance.addon_profiles)), ['azurepolicy','httpApplicationRouting', 'omsagent'])
 
         # monitoring enabled and then enabled again should error
         instance = mock.Mock()
