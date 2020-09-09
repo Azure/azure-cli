@@ -496,6 +496,8 @@ def get_known_clouds(refresh=False):
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
                 raise ex
+        if not clouds:
+            raise CLIError("No clouds available. Please ensure ARM_CLOUD_METADATA_URL is valid.")
         return clouds
     return [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
