@@ -627,28 +627,28 @@ parameters:
 examples:
   - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
     text: |
-        az role definition create --role-definition '{ 
-            "Name": "Contoso On-call", 
-            "Description": "Perform VM actions and read storage and network information.", 
-            "Actions": [ 
-                "Microsoft.Compute/*/read", 
-                "Microsoft.Compute/virtualMachines/start/action", 
-                "Microsoft.Compute/virtualMachines/restart/action", 
-                "Microsoft.Network/*/read", 
-                "Microsoft.Storage/*/read", 
-                "Microsoft.Authorization/*/read", 
-                "Microsoft.Resources/subscriptions/resourceGroups/read", 
-                "Microsoft.Resources/subscriptions/resourceGroups/resources/read", 
-                "Microsoft.Insights/alertRules/*", 
-                "Microsoft.Support/*" 
-            ], 
-            "DataActions": [ 
-                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*" 
-            ], 
-            "NotDataActions": [ 
-                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write" 
-            ], 
-            "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] 
+        az role definition create --role-definition '{
+            "Name": "Contoso On-call",
+            "Description": "Perform VM actions and read storage and network information.",
+            "Actions": [
+                "Microsoft.Compute/*/read",
+                "Microsoft.Compute/virtualMachines/start/action",
+                "Microsoft.Compute/virtualMachines/restart/action",
+                "Microsoft.Network/*/read",
+                "Microsoft.Storage/*/read",
+                "Microsoft.Authorization/*/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                "Microsoft.Insights/alertRules/*",
+                "Microsoft.Support/*"
+            ],
+            "DataActions": [
+                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+            ],
+            "NotDataActions": [
+                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+            ],
+            "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
         }'
   - name: Create a role from a file containing a JSON description.
     text: >
@@ -679,29 +679,29 @@ parameters:
 examples:
   - name: Update a role using the output of "az role definition list"
     text: |
-        az role definition update --role-definition '{ 
-            "roleName": "Contoso On-call", 
-            "Description": "Perform VM actions and read storage and network information.", 
-            "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/providers/Microsoft.Authorization/roleDefinitions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", 
-            "roleType": "CustomRole", 
-            "type": "Microsoft.Authorization/roleDefinitions", 
-            "Actions": [ 
-                "Microsoft.Compute/*/read", 
-                "Microsoft.Compute/virtualMachines/start/action", 
-                "Microsoft.Compute/virtualMachines/restart/action", 
-                "Microsoft.Network/*/read", 
-                "Microsoft.Storage/*/read", 
-                "Microsoft.Authorization/*/read", 
-                "Microsoft.Resources/subscriptions/resourceGroups/read", 
-                "Microsoft.Resources/subscriptions/resourceGroups/resources/read", 
-                "Microsoft.Support/*" 
-            ], 
-            "DataActions": [ 
-                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*" 
-            ], 
-            "NotDataActions": [ 
-                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write" 
-            ], 
-            "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] 
+        az role definition update --role-definition '{
+            "roleName": "Contoso On-call",
+            "Description": "Perform VM actions and read storage and network information.",
+            "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/providers/Microsoft.Authorization/roleDefinitions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "roleType": "CustomRole",
+            "type": "Microsoft.Authorization/roleDefinitions",
+            "Actions": [
+                "Microsoft.Compute/*/read",
+                "Microsoft.Compute/virtualMachines/start/action",
+                "Microsoft.Compute/virtualMachines/restart/action",
+                "Microsoft.Network/*/read",
+                "Microsoft.Storage/*/read",
+                "Microsoft.Authorization/*/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/read",
+                "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                "Microsoft.Support/*"
+            ],
+            "DataActions": [
+                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+            ],
+            "NotDataActions": [
+                "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+            ],
+            "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
         }'
 """
