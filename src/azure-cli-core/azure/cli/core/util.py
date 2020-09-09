@@ -1060,10 +1060,9 @@ def handle_version_update():
             get_cached_latest_versions()
         elif LooseVersion(VERSIONS['versions']['core']['local']) != LooseVersion(__version__):
             logger.debug("Azure CLI has been updated.")
-            logger.debug("Clean up version and cloud endpoints information in local files.")
+            logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
             VERSIONS['versions'] = {}
             VERSIONS['update_time'] = ''
-            CLOUD_ENDPOINTS['clouds'] = {}
             from azure.cli.core.cloud import refresh_known_clouds
             refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except

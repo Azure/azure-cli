@@ -468,11 +468,13 @@ AZURE_GERMAN_CLOUD = Cloud(
         mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
 
 
-def get_known_clouds():
+def get_known_clouds(refresh=False):
     if 'ARM_CLOUD_METADATA_URL' in os.environ:
         from azure.cli.core._session import CLOUD_ENDPOINTS
         endpoints_file = os.path.join(GLOBAL_CONFIG_DIR, 'cloudEndpoints.json')
         CLOUD_ENDPOINTS.load(endpoints_file)
+        if refresh:
+            CLOUD_ENDPOINTS['clouds'] = {}
         clouds = []
         if CLOUD_ENDPOINTS['clouds']:
             try:
@@ -503,7 +505,7 @@ KNOWN_CLOUDS = get_known_clouds()
 
 def refresh_known_clouds():
     global KNOWN_CLOUDS  # pylint:disable=global-statement
-    KNOWN_CLOUDS = get_known_clouds()
+    KNOWN_CLOUDS = get_known_clouds(refresh=True)
 
 
 def _set_active_cloud(cli_ctx, cloud_name):
