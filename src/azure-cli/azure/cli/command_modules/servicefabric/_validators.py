@@ -6,8 +6,8 @@
 from msrestazure.azure_exceptions import CloudError
 from knack.util import CLIError
 from knack.log import get_logger
-from ._client_factory import servicefabric_client_factory
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name
+from ._client_factory import servicefabric_client_factory
 
 logger = get_logger(__name__)
 

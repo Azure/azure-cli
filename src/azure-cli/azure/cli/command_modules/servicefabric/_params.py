@@ -239,7 +239,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('dns_name', help='Cluster\'s dns name.')
         c.argument('sku', help='Cluster\'s Sku, the options are Basic: it will have a minimum of 3 seed nodes and only allows 1 node type and Standard: it will have a minimum of 5 seed nodes and allows multiple node types.', default='Basic')
         c.argument('client_connection_port', options_list=['--client-connection-port', '--client-port'], help='Port used for client connections to the cluster.', default=19000)
-        c.argument('gateway_connection_port', options_list=['--gateway-connection-port', '--gateway-port'],  help='Port used for http connections to the cluster.', default=19080)
+        c.argument('gateway_connection_port', options_list=['--gateway-connection-port', '--gateway-port'], help='Port used for http connections to the cluster.', default=19080)
         c.argument('client_cert_is_admin', options_list=['--client-cert-is-admin', '--cert-is-admin'], arg_type=get_three_state_flag(), help='Client authentication type.')
         c.argument('client_cert_thumbprint', options_list=['--client-cert-thumbprint', '--cert-thumbprint'], help='Client certificate thumbprint.')
         c.argument('client_cert_common_name', options_list=['--client-cert-common-name', '--cert-common-name'], help='Client certificate common name.')
@@ -248,7 +248,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf managed-cluster update') as c:
         c.argument('client_connection_port', options_list=['--client-connection-port', '--client-port'], help='Port used for client connections to the cluster.')
-        c.argument('gateway_connection_port', options_list=['--gateway-connection-port', '--gateway-port'],  help='Port used for http connections to the cluster.')
+        c.argument('gateway_connection_port', options_list=['--gateway-connection-port', '--gateway-port'], help='Port used for http connections to the cluster.')
         c.argument('dns_name', help='Cluster\'s dns name')
         c.argument('tags', arg_type=tags_type)
 
