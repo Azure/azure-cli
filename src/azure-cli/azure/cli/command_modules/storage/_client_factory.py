@@ -229,6 +229,10 @@ def cf_blob_lease_client(cli_ctx, kwargs):
     return t_lease_service(client=blob_client, lease_id=kwargs.pop('lease_id', None))
 
 
+def cf_container_client(cli_ctx, kwargs):
+    return cf_blob_service(cli_ctx, kwargs).get_container_client(container=kwargs.pop('container_name', None))
+
+
 def cf_adls_service(cli_ctx, kwargs):
     t_adls_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                              '_data_lake_service_client#DataLakeServiceClient')
@@ -258,3 +262,7 @@ def cf_adls_directory(cli_ctx, kwargs):
 def cf_adls_file(cli_ctx, kwargs):
     return cf_adls_service(cli_ctx, kwargs).get_file_client(file_system=kwargs.pop('file_system_name', None),
                                                             file_path=kwargs.pop('path', None))
+
+
+def cf_or_policy(cli_ctx, _):
+    return storage_client_factory(cli_ctx).object_replication_policies

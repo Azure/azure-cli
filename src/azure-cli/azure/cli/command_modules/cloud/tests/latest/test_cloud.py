@@ -2,7 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# When tested locally, please use 'azdev test cloud -a "-n 1" to run in serial'
+
 from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk.decorators import serial_test
 
 
 class CloudTests(ScenarioTest):
@@ -17,30 +20,47 @@ class CloudTests(ScenarioTest):
         self.cli_ctx.cloud.name = ''
         self.cmd('az cloud set -n ' + self.cloudname)
 
+    @serial_test()
     def test_cloud_set_AzureCloud(self):
         self.cmd('az cloud set -n AzureCloud')
+        self.cmd('az cloud show -n AzureCloud', checks=[self.check('isActive', True)])
 
+    @serial_test()
     def test_cloud_set_AzureChinaCloud(self):
         self.cmd('az cloud set -n AzureChinaCloud')
+        self.cmd('az cloud show -n AzureChinaCloud', checks=[self.check('isActive', True)])
 
+    @serial_test()
     def test_cloud_set_AzureUSGovernment(self):
         self.cmd('az cloud set -n AzureUSGovernment')
+        self.cmd('az cloud show -n AzureUSGovernment', checks=[self.check('isActive', True)])
 
+    @serial_test()
     def test_cloud_set_AzureGermanCloud(self):
         self.cmd('az cloud set -n AzureGermanCloud')
+        self.cmd('az cloud show -n AzureGermanCloud', checks=[self.check('isActive', True)])
 
+    @serial_test()
     def test_cloud_set_azurecloud(self):
         self.cmd('az cloud set -n azurecloud')
+        self.cmd('az cloud show -n AzureCloud', checks=[self.check('isActive', True)])
 
+    @serial_test()
     def test_cloud_set_azurechinacloud(self):
         self.cmd('az cloud set -n azurechinacloud')
+        self.cmd('az cloud show -n AzureChinaCloud', checks=[self.check('isActive', True)])
 
+    @serial_test()
     def test_cloud_set_azureusgovernment(self):
         self.cmd('az cloud set -n azureusgovernment')
+        self.cmd('az cloud show -n AzureUSGovernment', checks=[self.check('isActive', True)])
 
+    @serial_test()
     def test_cloud_set_azuregermancloud(self):
         self.cmd('az cloud set -n azuregermancloud')
+        self.cmd('az cloud show -n AzureGermanCloud', checks=[self.check('isActive', True)])
 
+    @serial_test()
     def test_cloud_set_unregistered_cloud_name(self):
         self.cmd('az cloud set -n azCloud', expect_failure=True)
 

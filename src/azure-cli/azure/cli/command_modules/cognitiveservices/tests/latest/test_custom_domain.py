@@ -23,7 +23,7 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
         })
 
         # test to create cognitive services account
-        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location}'
+        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --yes'
                  ' --custom-domain {customdomain}',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
@@ -36,7 +36,7 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
         self.assertEqual(ret.exit_code, 0)
 
         # test to create cognitive services account
-        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location}',
+        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),

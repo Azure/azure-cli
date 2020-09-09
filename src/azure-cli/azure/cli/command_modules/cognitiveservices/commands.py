@@ -40,4 +40,4 @@ def load_command_table(self, _):
     with self.command_group('cognitiveservices account identity', mgmt_type, client_factory=cf_accounts) as g:
         g.custom_command('assign', 'identity_assign')
         g.custom_command('remove', 'identity_remove')
-        g.custom_command('show', 'identity_show')
+        g.custom_show_command('show', 'identity_show')

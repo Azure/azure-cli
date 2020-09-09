@@ -55,10 +55,10 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
     def test_keyvault_mgmt(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-keyvault-', 24),
-            'kv2': self.create_random_name('cli-keyvault-', 24),
-            'kv3': self.create_random_name('cli-keyvault-', 24),
-            'kv4': self.create_random_name('cli-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'kv2': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'kv3': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'kv4': self.create_random_name('cli-test-kv-mgmt-', 24),
             'loc': 'westus'
         })
 
@@ -136,12 +136,12 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
     def test_keyvault_key(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-key-', 24),
             'loc': 'westus',
             'key': 'key1'
         })
 
-        _create_keyvault(self, self.kwargs)
+        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false')
 
         # create a key
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
@@ -256,12 +256,12 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
     def test_keyvault_secret(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kevault-', 24),
+            'kv': self.create_random_name('cli-test-kv-se-', 24),
             'loc': 'westus',
             'sec': 'secret1'
         })
 
-        _create_keyvault(self, self.kwargs)
+        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete false')
 
         # create a secret
         secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
@@ -334,7 +334,7 @@ class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
     def test_keyvault_certificate_contacts(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-co-', 24),
             'loc': 'westus'
         })
 
@@ -357,7 +357,7 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
     def test_keyvault_certificate_issuers(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-is-', 24),
             'loc': 'westus'
         })
 
@@ -417,7 +417,7 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
     def test_keyvault_pending_certificate(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-pe-', 24),
             'loc': 'westus',
             'policy_path': os.path.join(TEST_DIR, 'policy_pending.json')
         })
@@ -452,7 +452,7 @@ class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
         import OpenSSL.crypto
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-dl-', 24),
             'loc': 'eastus2'
         })
 
@@ -502,9 +502,7 @@ class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
 
 
 class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_default_policy')
-    def test_keyvault_certificate_get_default_policy(self, resource_group):
+    def test_keyvault_certificate_get_default_policy(self):
         result = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
         self.assertEqual(result['keyProperties']['keyType'], 'RSA')
         self.assertEqual(result['issuerParameters']['name'], 'Self')
@@ -525,7 +523,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
     def test_keyvault_certificate_crud(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-', 24),
             'loc': 'westus'
         })
 
@@ -642,7 +640,7 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
     def test_keyvault_certificate_import(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-im-', 24),
             'loc': 'eastus2'
         })
 
@@ -673,7 +671,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
     def test_keyvault_softdelete(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-sd-', 24),
             'loc': 'eastus2'
         })
 
