@@ -57,11 +57,8 @@ def _flexible_server_create(cmd, client,
     except CloudError:
         administrator_login_password = generate_password(administrator_login_password)
         if public_access is None:
-            print("**Commented out creating vnet until it is enabled**")
-            #subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
-            # delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            #     subnet_arm_resource_id=subnet_id
-            # )
+            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
+            delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
 
         # Create postgresql
         server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
