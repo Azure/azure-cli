@@ -59,6 +59,7 @@ DEPENDENCIES = [
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1.0',
+    'azure-keyvault-administration~=4.0.0b1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement~=0.1.0',
     'azure-mgmt-applicationinsights~=0.1.1',
