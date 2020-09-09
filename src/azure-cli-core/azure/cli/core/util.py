@@ -28,7 +28,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy. \n\n'
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy.\n\n'
                      'Error detail: {}')
 
 _PROXYID_RE = re.compile(
@@ -59,6 +59,11 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError
+    import traceback
+
+    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
+    # Print the traceback and exception message
+    logger.debug(traceback.format_exc())
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):

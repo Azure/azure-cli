@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.2.0
+++++++
+
+* Fix a tiny bug of sequential run.
+* Save testing results to database.
+* Fix a bug of module name sorting.
+* Update notification email format.
+
 0.1.0
 ++++++
 
