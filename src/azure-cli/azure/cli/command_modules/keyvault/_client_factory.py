@@ -25,9 +25,6 @@ OPERATIONS_NAME = {
 KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.MGMT_KEYVAULT:
         'azure.mgmt.keyvault{api_version}.{module_name}#{class_name}{obj_name}',
-    ResourceType.MGMT_PRIVATE_KEYVAULT:
-        'azure.cli.command_modules.keyvault.vendored_sdks.azure_mgmt_keyvault{api_version}.'
-        '{module_name}#{class_name}{obj_name}',
     ResourceType.DATA_KEYVAULT:
         'azure.keyvault{api_version}.key_vault_client#{class_name}{obj_name}',
     ResourceType.DATA_PRIVATE_KEYVAULT:
@@ -40,7 +37,7 @@ KEYVAULT_TEMPLATE_STRINGS = {
 
 
 def is_mgmt_plane(resource_type):
-    return resource_type in [ResourceType.MGMT_KEYVAULT, ResourceType.MGMT_PRIVATE_KEYVAULT]
+    return resource_type == ResourceType.MGMT_KEYVAULT
 
 
 def get_operations_tmpl(resource_type, client_name):

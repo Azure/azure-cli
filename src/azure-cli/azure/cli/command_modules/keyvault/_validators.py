@@ -48,7 +48,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
                 return id_comps['resource_group']
 
     if hsm_name:
-        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT).managed_hsms
+        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).managed_hsms
         try:
             for hsm in client.list_by_subscription():
                 id_comps = parse_resource_id(hsm.id)
@@ -295,7 +295,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     if vault_name:
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     else:
-        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT).managed_hsms
+        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).managed_hsms
 
     # if the location is specified, use get_deleted rather than list_deleted
     if ns.location:

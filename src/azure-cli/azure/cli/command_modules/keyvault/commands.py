@@ -38,7 +38,7 @@ def load_command_table(self, _):
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
 
-    private_mgmt_vaults_entity = get_client(self.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)
+    mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
     private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
     private_data_entity_t2 = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT_T2)
 
@@ -48,7 +48,7 @@ def load_command_table(self, _):
     )
     kv_hsms_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
-        client_factory=get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)
+        client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
     )
     # endregion
 
@@ -82,12 +82,12 @@ def load_command_table(self, _):
             supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('keyvault', private_mgmt_vaults_entity.command_type,
-                            client_factory=private_mgmt_vaults_entity.client_factory) as g:
+    with self.command_group('keyvault', mgmt_hsms_entity.command_type,
+                            client_factory=mgmt_hsms_entity.client_factory) as g:
         g.generic_update_command(
             'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
-            custom_func_name='update_hsm', is_preview=True,
-            doc_string_source=private_mgmt_vaults_entity.models_docs_tmpl.format('ManagedHsmProperties'))
+            custom_func_name='update_hsm', is_preview=True, supports_no_wait=True,
+            doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
         g.custom_wait_command('wait-hsm', 'wait_hsm', is_preview=True)
 
     with self.command_group('keyvault network-rule',

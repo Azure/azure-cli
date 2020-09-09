@@ -35,8 +35,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_APIMANAGEMENT = ('azure.mgmt.apimanagement', 'ApiManagementClient')
     MGMT_KUSTO = ('azure.mgmt.kusto', 'KustoManagementClient')
     MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
-    MGMT_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_mgmt_keyvault',
-                             'KeyVaultManagementClient')
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
@@ -155,8 +153,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2019-10-01-preview',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2019-09-01',
-        ResourceType.MGMT_PRIVATE_KEYVAULT: '2020-04-01',
+        ResourceType.MGMT_KEYVAULT: '2020-04-01-preview',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-09-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
@@ -224,7 +221,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_PRIVATE_KEYVAULT: '2020-04-01',
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.DATA_PRIVATE_KEYVAULT_T2: '7.2',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
@@ -257,7 +253,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_PRIVATE_KEYVAULT: '2020-04-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
@@ -282,7 +277,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_PRIVATE_KEYVAULT: '2020-04-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
