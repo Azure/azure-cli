@@ -636,7 +636,7 @@ def load_arguments(self, _):
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
     with self.argument_context('sql db export') as c:
-        # Create args that will be used to build up the ExportRequest object
+        # Create args that will be used to build up the ExportDatabaseDefinition object
         create_args_for_complex_type(
             c, 'parameters', ExportDatabaseDefinition, [
                 'administrator_login',
@@ -661,7 +661,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(StorageKeyType))
 
     with self.argument_context('sql db import') as c:
-        # Create args that will be used to build up the ImportExportDatabaseDefinition object
+        # Create args that will be used to build up the ImportExistingDatabaseDefinition object
         create_args_for_complex_type(c, 'parameters', ImportExistingDatabaseDefinition, [
             'administrator_login',
             'administrator_login_password',
@@ -1517,6 +1517,7 @@ def load_arguments(self, _):
                 'timezone_id',
                 'tags',
                 'storage_account_type',
+                'yes'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1557,6 +1558,10 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type,
                    options_list=['--backup-storage-redundancy', '--bsr'],
                    help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object

@@ -132,4 +132,4 @@ def validate_managed_instance_backup_storage_redundancy(namespace):
             (namespace.storage_account_type and namespace.storage_account_type in ['LRS', 'ZRS', 'GRS'])):
         pass
     else:
-        raise CLIError('incorrect usage: --backup storage redundancy must be either Local, Zone or Geo')
+        raise CLIError('incorrect usage: --backup-storage-redundancy must be either Local, Zone or Geo')

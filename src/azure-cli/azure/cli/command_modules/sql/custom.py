@@ -1212,7 +1212,7 @@ def db_import(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.create_import_operation(
+    return client.import_method(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -2699,7 +2699,7 @@ def managed_instance_create(
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
 
-    if kwargs['location'] in ['southeastasia', 'brazilsouth', 'eastasia']:
+    if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
         if kwargs['storage_account_type'] == 'GRS':
             confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
              Note that database backups will be geo-replicated to the paired region.

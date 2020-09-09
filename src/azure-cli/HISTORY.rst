@@ -27,10 +27,6 @@ Release History
 **Storage**
 
 * `az storage blob list`: Support OR properties with new api version (#14832)
- 
-**SQL**
-
-* Add backup storage redundancy optional parameter to MI create cmdlet (#15071)
 
 2.11.0
 ++++++
