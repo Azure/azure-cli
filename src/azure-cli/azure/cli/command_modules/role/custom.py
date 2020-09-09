@@ -284,8 +284,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
     #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
     #   id: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c  # pylint: disable=line-too-long
-    role_defs = {d.name: [worker.get_role_property(d, 'role_name'), d.id.split('/')[-1]]
-                 for d in list_role_definitions(cmd)}
+    role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
 
     for op_id in start_events:
         e = end_events.get(op_id, None)
@@ -340,7 +339,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
                     entry['roleDefinitionId'] = role_resource_name
                     role_def = role_defs.get(role_resource_name)
                     if role_def:
-                        entry['roleName'] = role_def[0]
+                        entry['roleName'] = role_def
                     else:
                         # In case the role definition has been deleted.
                         entry['roleName'] = "N/A"
