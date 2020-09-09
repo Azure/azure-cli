@@ -304,7 +304,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
             c.argument('ha_enabled', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
             c.argument('maintenance_window', options_list=['--maintenance-window'],
-                       help='Period of time designated for maintenance. Examples: "0:8:30" to schedule on Monday, 8:30 UTC')
+                       help='Period of time (UTC) designated for maintenance. Examples: "0:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
             if command_group == 'mysql':
                 c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']),
                            options_list=['--public-network-access'],

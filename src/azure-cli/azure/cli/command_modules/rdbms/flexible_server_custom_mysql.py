@@ -171,11 +171,17 @@ def _flexible_server_update_custom_func(instance,
         instance.delegated_subnet_arguments.subnet_arm_resource_id = subnet_arm_resource_id
 
     if maintenance_window:
-        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-        instance.maintenance_window.day_of_week = day_of_week
-        instance.maintenance_window.start_hour = start_hour
-        instance.maintenance_window.start_minute = start_minute
-        instance.maintenance_window.custom_window = "Enabled"
+        if maintenance_window.lower() == "disabled":
+            instance.maintenance_window.day_of_week = 0
+            instance.maintenance_window.start_hour = 0
+            instance.maintenance_window.start_minute = 0
+            instance.maintenance_window.custom_window = "Disabled"
+        else:
+            day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+            instance.maintenance_window.day_of_week = day_of_week
+            instance.maintenance_window.start_hour = start_hour
+            instance.maintenance_window.start_minute = start_minute
+            instance.maintenance_window.custom_window = "Enabled"
 
     # TODO: standby count = ha_enabled add here
     params = ServerForUpdate(sku=instance.sku,
