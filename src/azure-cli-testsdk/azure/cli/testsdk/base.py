@@ -23,7 +23,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
 from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
-from .cli import prepare_cli_context
+from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
 
@@ -80,7 +80,7 @@ class CheckerMixin(object):
 class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
                  recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
@@ -210,7 +210,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
     def __init__(self, method_name):
         super(LiveScenarioTest, self).__init__(method_name)
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
         self.test_resources_count = 0
 
@@ -227,8 +227,7 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
-        cli_ctx.clear_cache()
-        # cli_ctx.data['_cache'] = None
+        cli_ctx.data['_cache'] = None
 
         if os.environ.get(ENV_COMMAND_COVERAGE, None):
             with open(COVERAGE_FILE, 'a') as coverage_file:
