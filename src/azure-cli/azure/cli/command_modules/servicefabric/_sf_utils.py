@@ -46,4 +46,3 @@ def _log_error_exception(ex: ErrorModelException):
                 logger.error("Exception: %s", response_content['exception'])
             else:
                 logger.error("Exception response content: %s", ex.response.content)
-

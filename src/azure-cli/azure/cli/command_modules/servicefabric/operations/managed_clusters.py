@@ -37,8 +37,6 @@ def create_cluster(cmd,
                    sku=None,
                    client_connection_port=None,
                    gateway_connection_port=None,
-                   upgrade_mode=None,
-                   code_version=None,
                    client_cert_is_admin=None,
                    client_cert_thumbprint=None,
                    client_cert_common_name=None,
@@ -48,10 +46,6 @@ def create_cluster(cmd,
 
         rg = _get_resource_group_by_name(cmd.cli_ctx, resource_group_name)
         if rg is None:
-            if location is None:
-                raise CLIError("Resource group {} doesn't exists and location is not provided. "
-                               "Either create the resource group before running this command or provide the location parameter."
-                               .format(resource_group_name))
             rg = _create_resource_group_name(cmd.cli_ctx, resource_group_name, location)
 
         #  set defult parameters
@@ -92,8 +86,6 @@ def create_cluster(cmd,
                                      sku=skuObj,
                                      client_connection_port=client_connection_port,
                                      http_gateway_connection_port=gateway_connection_port,
-                                     cluster_upgrade_mode=upgrade_mode,
-                                     cluster_code_version=code_version,
                                      clients=client_certs,
                                      tags=tags)
 
@@ -112,8 +104,7 @@ def update_cluster(cmd,
                    cluster_name,
                    client_connection_port=None,
                    gateway_connection_port=None,
-                   upgrade_mode=None,
-                   code_version=None,
+                   dns_name=None,
                    tags=None):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
@@ -122,10 +113,8 @@ def update_cluster(cmd,
             cluster.client_connection_port = client_connection_port
         if gateway_connection_port is not None:
             cluster.http_gateway_connection_port = gateway_connection_port
-        if upgrade_mode is not None:
-            cluster.cluster_upgrade_mode = upgrade_mode
-        if code_version is not None:
-            cluster.cluster_code_version = code_version
+        if dns_name is not None:
+            cluster.dns_name = dns_name
         if tags is not None:
             cluster.tags = tags
 

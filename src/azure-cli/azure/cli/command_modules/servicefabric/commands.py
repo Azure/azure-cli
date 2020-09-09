@@ -15,6 +15,7 @@ from ._client_factory import (servicefabric_clusters_client_factory,
                               servicefabric_node_types_client_factory)
 
 
+# pylint: disable=too-many-statements
 def load_command_table(self, _):
     cluster_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicefabric.operations#ClustersOperations.{}',

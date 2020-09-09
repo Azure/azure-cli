@@ -12,6 +12,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
 from azure.mgmt.servicefabric.models import ErrorModelException
 
+
 class ServiceFabricManagedClustersTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_basic_cluster(self):

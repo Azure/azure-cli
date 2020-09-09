@@ -7,6 +7,7 @@ from msrestazure.azure_exceptions import CloudError
 from knack.util import CLIError
 from knack.log import get_logger
 from ._client_factory import servicefabric_client_factory
+from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name
 
 logger = get_logger(__name__)
 
@@ -46,7 +47,7 @@ def validate_update_application(cmd, namespace):
                                            namespace.application_type_version))
         if type_version is None:
             raise CLIError("Application type version {}:{} not found. "
-                           "Create the type version before runnig this command."
+                           "Create the type version before running this command."
                            .format(app.type_name, namespace.application_type_version))
 
     if namespace.upgrade_replica_set_check_timeout:
@@ -81,7 +82,7 @@ def validate_create_application(cmd, namespace):
                                            namespace.application_type_version))
         if type_version is None:
             raise CLIError("Application type version {}:{} not found. "
-                           "Create the type version before runnig this command or use --package-url to create it."
+                           "Create the type version before running this command or use --package-url to create it."
                            .format(namespace.application_type_name, namespace.application_type_version))
 
     if namespace.minimum_nodes:
@@ -94,7 +95,13 @@ def validate_create_application(cmd, namespace):
             raise CLIError("maximum_nodes should be a non-negative integer.")
 
 
-def validate_create_managed_cluster(namespace):
+def validate_create_managed_cluster(cmd, namespace):
+    rg = _get_resource_group_by_name(cmd.cli_ctx, namespace.resource_group_name)
+    if rg is None and namespace.location is None:
+        raise CLIError("Resource group {} doesn't exists and location is not provided. "
+                       "Either create the resource group before running this command or provide the location parameter."
+                       .format(namespace.resource_group_name))
+
     if namespace.client_cert_issuer_thumbprint is not None:
         if namespace.client_cert_common_name is None:
             raise CLIError("--client-cert-issuer-thumbprint should be used with --client-cert-common-name.")
