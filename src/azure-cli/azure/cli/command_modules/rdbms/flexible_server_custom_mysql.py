@@ -215,7 +215,7 @@ def _server_delete_func(cmd, client, resource_group_name=None, server_name=None,
 
 
 ## Parameter update command
-def _flexible_parameter_update(client, ids, server_name, configuration_name, resource_group_name, source=None, value=None):
+def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
         # update the command with system default
         try:
