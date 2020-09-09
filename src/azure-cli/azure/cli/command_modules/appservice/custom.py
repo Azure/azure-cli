@@ -2028,7 +2028,8 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
                        docker_container_logging=None, detailed_error_messages=None,
                        failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       AzureBlobStorageApplicationLogsConfig, SiteLogsConfig,
+                                       HttpLogsConfig, FileSystemHttpLogsConfig,
                                        EnabledConfig)
     client = web_client_factory(cmd.cli_ctx)
     # TODO: ensure we call get_site only once
@@ -2038,13 +2039,18 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     location = site.location
 
     application_logs = None
-    if application_logging is not None:
-        if application_logging == 'true':
-            level = 'Error'
-        else:
-            level = 'Off'
-        fs_log = FileSystemApplicationLogsConfig(level=level)
-        application_logs = ApplicationLogsConfig(file_system=fs_log)
+    if application_logging:
+        fs_log = None
+        blob_log = None
+        level = application_logging != 'off'
+        if application_logging in ['filesystem', 'off']:
+            fs_log = FileSystemApplicationLogsConfig(level=level)
+        level = application_logging != 'off'
+        if application_logging in ['azureblobstorage', 'off']:
+            blob_log = AzureBlobStorageApplicationLogsConfig(level=level, retention_in_days=3,
+                                                             sas_url=None)
+        application_logs = ApplicationLogsConfig(file_system=fs_log,
+                                                 azure_blob_storage=blob_log)
 
     http_logs = None
     server_logging_option = web_server_logging or docker_container_logging
