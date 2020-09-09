@@ -82,7 +82,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(random_name_length=17, parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    #random_name_length is temporary until the bug fix in the API is deployed successfully & then should be removed.
+    # random_name_length is temporary until the bug fix in the API is deployed successfully & then should be removed.
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_add(self, resource_group, location):
         self.kwargs.update({
