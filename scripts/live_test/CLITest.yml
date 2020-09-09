@@ -202,13 +202,12 @@ jobs:
         pwd
         ls
         # Commit changes
-        if [[ "$(USER_USERNAME)" != "" || "$(USER_TOKEN)" != ""]]; then
+        if [[ "$(USER_USERNAME)" != "" || "$(USER_TOKEN)" != "" ]]; then
           cd azure-cli
           git add .
           git commit -m "auto commit"
           git push origin $(USER_BRANCH)
         fi
-
 
       condition: eq(variables.Match, '1')
     - task: PublishTestResults@2
