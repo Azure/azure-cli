@@ -74,9 +74,16 @@ def _flexible_server_create(cmd, client,
     user = server_result.administrator_login
     id = server_result.id
     loc = server_result.location
-    host = server_result.fully_qualified_domain_name
     version = server_result.version
     sku = server_result.sku.name
+    # This is a workaround for getting the hostname right .
+    # Without Vnet, the hostname returned by the API os <servername>.postgres.database.azure.com
+    # with Vnet enabled, the hostname returned by the API is <servername>.<servername>.postgres.database.azure.com
+    if len(server_result.fully_qualified_domain_name.split('.')) != 6:
+        host = server_result.fully_qualified_domain_name
+    else:
+        host = server_result.fully_qualified_domain_name[(server_result.fully_qualified_domain_name.index('.'))+1:]
+
 
     logger.warning('Make a note of your password. If you forget, you would have to'\
                    ' reset your password with CLI command for reset password')
@@ -302,6 +309,22 @@ def _create_postgresql_connection_string(host, password):
 
 
 def _form_response(username, sku, location, id, host, version, password, connection_string, firewall_id=None, subnet_id=None):
+    '''
+    from collections import OrderedDict
+    new_entry = OrderedDict()
+    new_entry['Id'] = id
+    if subnet_id is not None:
+        new_entry['SubnetId'] = subnet_id
+    new_entry['Location'] = location
+    new_entry['SkuName'] = sku
+    new_entry['Version'] = version
+    new_entry['Host'] = host
+    new_entry['UserName'] = username
+    new_entry['Password'] = password
+    new_entry['ConnectionString'] = connection_string
+    if firewall_id is not None:
+        new_entry['FirewallName'] = firewall_id
+    '''
     output = {
         'host': host,
         'username': username,
