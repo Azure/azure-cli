@@ -114,3 +114,19 @@ def cf_synapse_pipeline(cli_ctx, workspace_name):
 
 def cf_synapse_pipeline_run(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).pipeline_run
+
+
+def cf_synapse_trigger(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).trigger
+
+
+def cf_synapse_trigger_run(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).trigger_run
+
+
+def cf_synapse_data_flow(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).data_flow
+
+
+def cf_synapse_notebook(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).notebook

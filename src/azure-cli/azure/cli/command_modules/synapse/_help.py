@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-lines
 
 from knack.help_files import helps
 
@@ -762,4 +763,266 @@ examples:
         az synapse activity-run query-by-pipeline-run --workspace-name testsynapseworkspace \\
           --last-updated-after "2020-09-03T00:36:44.3345758Z" --last-updated-before "2020-09-03T00:49:48.3686473Z" \\
           --name testpipeline --run-id "53eeed66-ec46-11ea-8bd5-448500a5b1ac"
+"""
+
+helps['synapse trigger'] = """
+type: group
+short-summary: Manage Synapse's triggers.
+"""
+
+helps['synapse trigger create'] = """
+type: command
+short-summary: Create a trigger.
+examples:
+  - name: Create a trigger.
+    text: |-
+        az synapse trigger create --workspace-name testsynapseworkspace \\
+          --name testtrigger --file @path/trigger.json
+"""
+
+helps['synapse trigger update'] = """
+type: command
+short-summary: Update an exist trigger.
+examples:
+  - name: Update an exist trigger.
+    text: |-
+        az synapse trigger update --workspace-name testsynapseworkspace \\
+          --name testtrigger --file @path/trigger.json
+"""
+
+helps['synapse trigger show'] = """
+type: command
+short-summary: Get a trigger.
+examples:
+  - name: Get a trigger.
+    text: |-
+        az synapse trigger show --workspace-name testsynapseworkspace \\
+          --name testtrigger
+"""
+
+helps['synapse trigger list'] = """
+type: command
+short-summary: List triggers.
+examples:
+  - name: List triggers.
+    text: |-
+        az synapse trigger list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse trigger delete'] = """
+type: command
+short-summary: Delete a trigger.
+examples:
+  - name: Delete a trigger.
+    text: |-
+        az synapse trigger delete --workspace-name testsynapseworkspace \\
+          --name testtrigger
+"""
+
+helps['synapse trigger subscribe-to-event'] = """
+type: command
+short-summary: Subscribe event trigger to events.
+examples:
+  - name: Subscribe event trigger to events.
+    text: |-
+        az synapse trigger subscribe-to-event --workspace-name testsynapseworkspace \\
+          --name eventtrigger
+"""
+
+helps['synapse trigger get-event-subscription-status'] = """
+type: command
+short-summary: Get a trigger's event subscription status.
+examples:
+  - name:  Get a trigger's event subscription status.
+    text: |-
+        az synapse trigger get-event-subscription-status --workspace-name testsynapseworkspace \\
+          --name eventtrigger
+"""
+
+helps['synapse trigger unsubscribe-from-event'] = """
+type: command
+short-summary: Unsubscribe event trigger from events.
+examples:
+  - name: Unsubscribe event trigger from events.
+    text: |-
+        az synapse trigger unsubscribe-from-event --workspace-name testsynapseworkspace \\
+          --name eventtrigger
+"""
+
+helps['synapse trigger start'] = """
+type: command
+short-summary: Starts a trigger.
+examples:
+  - name: Starts a trigger.
+    text: |-
+        az synapse trigger start --workspace-name testsynapseworkspace \\
+          --name testtrigger
+"""
+
+helps['synapse trigger stop'] = """
+type: command
+short-summary: Stops a trigger.
+examples:
+  - name: Stops a trigger.
+    text: |-
+        az synapse trigger stop --workspace-name testsynapseworkspace \\
+          --name testtrigger
+"""
+
+helps['synapse trigger-run'] = """
+    type: group
+    short-summary: synapse trigger-run
+"""
+
+helps['synapse trigger-run rerun'] = """
+type: command
+short-summary: Rerun single trigger instance by runId.
+examples:
+  - name: Rerun single trigger instance by runId.
+    text: |-
+        az synapse trigger-run rerun --workspace-name testsynapseworkspace \\
+          --name testtrigger --run-id 08586024068106001417583731803CU31
+"""
+
+helps['synapse trigger-run query-by-workspace'] = """
+type: command
+short-summary: Query trigger runs in the workspace based on input filter conditions.
+examples:
+  - name: Query trigger runs in the workspace based on input filter conditions.
+    text: |-
+        az synapse trigger-run query-by-workspace --workspace-name testsynapseworkspace --filters \\
+          operand="TriggerName" operator="Equals" values="testtrigger" --last-updated-after "2020-09-03T00:36:44.3345758Z" \\
+          --last-updated-before "2020-09-03T00:49:48.3686473Z"
+"""
+
+helps['synapse data-flow'] = """
+type: group
+short-summary: Manage Synapse's data flows.
+"""
+
+helps['synapse data-flow create'] = """
+type: command
+short-summary: Create a data flow.
+examples:
+  - name: Create a data flow.
+    text: |-
+        az synapse data-flow create --workspace-name testsynapseworkspace \\
+          --name testdataflow --file @path/dataflow.json
+"""
+
+helps['synapse data-flow update'] = """
+type: command
+short-summary: Update an exist data flow.
+examples:
+  - name: Update an exist data flow.
+    text: |-
+        az synapse data-flow update --workspace-name testsynapseworkspace \\
+          --name testdataflow --file @path/dataflow.json
+"""
+
+helps['synapse data-flow show'] = """
+type: command
+short-summary: Get a data flow.
+examples:
+  - name: Get a data flow.
+    text: |-
+        az synapse data-flow show --workspace-name testsynapseworkspace \\
+          --name testdataflow
+"""
+
+helps['synapse data-flow list'] = """
+type: command
+short-summary: List data flows.
+examples:
+  - name: List data flows.
+    text: |-
+        az synapse data-flow list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse data-flow delete'] = """
+type: command
+short-summary: Delete a data flow.
+examples:
+  - name: Delete a data flow.
+    text: |-
+        az synapse data-flow delete --workspace-name testsynapseworkspace \\
+          --name testdataflow
+"""
+
+helps['synapse notebook'] = """
+type: group
+short-summary: Manage Synapse's notebooks.
+"""
+
+helps['synapse notebook create'] = """
+type: command
+short-summary: Create a notebook.
+examples:
+  - name: Create a notebook.
+    text: |-
+        az synapse notebook create --workspace-name testsynapseworkspace \\
+          --name testnotebook --file @path/notebook.json
+"""
+
+helps['synapse notebook update'] = """
+type: command
+short-summary: Update an exist notebook.
+examples:
+  - name: Update an exist notebook.
+    text: |-
+        az synapse notebook update --workspace-name testsynapseworkspace \\
+          --name testnotebook --file @path/notebook.json
+"""
+
+helps['synapse notebook import'] = """
+type: command
+short-summary: Import a notebook.
+examples:
+  - name: Import a notebook.
+    text: |-
+        az synapse notebook import --workspace-name testsynapseworkspace \\
+          --name testnotebook --file @path/notebook.json
+"""
+
+helps['synapse notebook show'] = """
+type: command
+short-summary: Get a notebook.
+examples:
+  - name: Get a notebook.
+    text: |-
+        az synapse notebook show --workspace-name testsynapseworkspace \\
+          --name testnotebook
+"""
+
+helps['synapse notebook list'] = """
+type: command
+short-summary: List notebooks.
+examples:
+  - name: List notebooks.
+    text: |-
+        az synapse notebook list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse notebook export'] = """
+type: command
+short-summary: Export notebooks.
+examples:
+  - name: Export a notebook.
+    text: |-
+        az synapse notebook export --workspace-name testsynapseworkspace \\
+          --name testnotebook --output-folder C:/output
+  - name: Export all notebooks under a workspace.
+    text: |-
+        az synapse notebook export --workspace-name testsynapseworkspace \\
+          --output-folder C:/output
+"""
+
+helps['synapse notebook delete'] = """
+type: command
+short-summary: Delete a notebook.
+examples:
+  - name: Delete a notebook.
+    text: |-
+        az synapse notebook delete --workspace-name testsynapseworkspace \\
+          --name testnotebook
 """
