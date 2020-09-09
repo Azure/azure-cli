@@ -1047,27 +1047,6 @@ def create_key(cmd, client, key_name=None, vault_base_url=None,
     if exportable is not None:
         key_attrs.exportable = exportable
 
-    """
-    if release_policy:
-        KeyReleasePolicy = cmd.get_models('KeyReleasePolicy', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
-        KeyReleaseCondition = cmd.get_models('KeyReleaseCondition', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
-        KeyReleaseAuthority = cmd.get_models('KeyReleaseAuthority', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
-        authorities = []
-        for raw_authority in release_policy.get('any_of', []):
-            authority_url = raw_authority['authority']
-            all_of = raw_authority.get('all_of', [])
-            conditions = []
-            for raw_cond in all_of:
-                claim_type = raw_cond['claim']
-                claim_condition = raw_cond['condition']
-                value = raw_cond['value']
-                condition = KeyReleaseCondition(claim_type=claim_type, claim_condition=claim_condition, value=value)
-                conditions.append(condition)
-            authority = KeyReleaseAuthority(authority_url=authority_url, all_of=all_of)
-            authorities.append(authority)
-        release_policy = KeyReleasePolicy(version=release_policy['version'], any_of=authorities)
-    """
-
     return client.create_key(vault_base_url=vault_base_url,
                              key_name=key_name,
                              kty=kty,
@@ -2009,18 +1988,15 @@ def full_backup(client, storage_resource_uri, token, vault_base_url=None, no_wai
     return sdk_no_wait(
         no_wait,
         client.begin_full_backup,
-        vault_base_url,
         storage_resource_uri,
         token
     )
 
 
-def full_restore(client, storage_resource_uri, token, folder_to_restore,
-                 vault_base_url=None, no_wait=False):
+def full_restore(client, storage_resource_uri, token, folder_to_restore, vault_base_url=None, no_wait=False):
     return sdk_no_wait(
         no_wait,
-        client.begin_full_restore_operation,
-        vault_base_url,
+        client.begin_full_restore,
         storage_resource_uri,
         token,
         folder_to_restore
@@ -2029,10 +2005,6 @@ def full_restore(client, storage_resource_uri, token, folder_to_restore,
 
 
 # region security domain
-def _security_domain_make_restore_blob():
-    pass
-
-
 def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
                                   identifier=None):  # pylint: disable=unused-argument
     if os.path.exists(sd_exchange_key):

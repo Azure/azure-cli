@@ -19,8 +19,6 @@ from .version import VERSION
 from . import KeyVaultAuthentication
 
 from .v7_2.version import VERSION as v7_2_VERSION
-from .v7_0.version import VERSION as v7_0_VERSION
-from .v2016_10_01.version import VERSION as v2016_10_01_VERSION
 
 
 class KeyVaultClientConfiguration(AzureConfiguration):
@@ -99,18 +97,10 @@ class KeyVaultClient(MultiApiClientMixin):
 
     @property
     def models(self):
-        """Module depends on the API version:
-            * 2016-10-01: :mod:`v2016_10_01.models<azure.keyvault.v2016_10_01.models>`
-            * 7.0: :mod:`v7_0.models<azure.keyvault.v7_0.models>`
-         """
         api_version = self._get_api_version(None)
 
         if api_version == v7_2_VERSION:
             from .v7_2 import models as implModels
-        elif api_version == v7_0_VERSION:
-            from .v7_0 import models as implModels
-        elif api_version == v2016_10_01_VERSION:
-            from .v2016_10_01 import models as implModels
         else:
             raise NotImplementedError("APIVersion {} is not available".format(api_version))
         return implModels
@@ -133,10 +123,6 @@ class KeyVaultClient(MultiApiClientMixin):
         """
         if api_version == v7_2_VERSION:
             from .v7_2 import KeyVaultClient as ImplClient
-        elif api_version == v7_0_VERSION:
-            from .v7_0 import KeyVaultClient as ImplClient
-        elif api_version == v2016_10_01_VERSION:
-            from .v2016_10_01 import KeyVaultClient as ImplClient
         else:
             raise NotImplementedError("APIVersion {} is not available".format(api_version))
 

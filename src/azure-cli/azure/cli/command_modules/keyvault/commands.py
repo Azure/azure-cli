@@ -40,7 +40,7 @@ def load_command_table(self, _):
 
     mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
     private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
-    private_data_entity_t2 = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT_T2)
+    data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -121,15 +121,15 @@ def load_command_table(self, _):
         g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
-    with self.command_group('keyvault backup', private_data_entity_t2.command_type, is_preview=True) as g:
+    with self.command_group('keyvault backup', data_backup_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('start', 'full_backup', supports_no_wait=True,
-                          doc_string_source=private_data_entity_t2.operations_docs_tmpl.format('begin_full_backup'))
+                          doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
         g.keyvault_command('status', 'full_backup_status')
 
-    with self.command_group('keyvault restore', private_data_entity_t2.command_type, is_preview=True) as g:
+    with self.command_group('keyvault restore', data_backup_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('start', 'full_restore', supports_no_wait=True,
-                          doc_string_source=private_data_entity_t2.operations_docs_tmpl.format(
-                              'begin_full_restore_operation'))
+                          doc_string_source=data_backup_entity.operations_docs_tmpl.format(
+                              'begin_full_restore'))
         g.keyvault_command('status', 'restore_status')
 
     with self.command_group('keyvault security-domain', private_data_entity.command_type, is_preview=True) as g:

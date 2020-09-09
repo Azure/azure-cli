@@ -30,9 +30,10 @@ KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.DATA_PRIVATE_KEYVAULT:
         'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1{api_version}.'
         'key_vault_client#{class_name}{obj_name}',
-    ResourceType.DATA_PRIVATE_KEYVAULT_T2:
-        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t2{api_version}.'
-        'key_vault_client#{class_name}{obj_name}'
+    ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
+        'azure.keyvault.administration._backup_client#KeyVaultBackupClient{obj_name}',
+    ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
+        'azure.keyvault.administration._access_control_client#KeyVaultAccessControlClient{obj_name}',
 }
 
 
@@ -41,6 +42,12 @@ def is_mgmt_plane(resource_type):
 
 
 def get_operations_tmpl(resource_type, client_name):
+    if resource_type in [
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL
+    ]:
+        return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
+
     class_name = OPERATIONS_NAME.get(client_name, '') if is_mgmt_plane(resource_type) else 'KeyVaultClient'
     return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(
         api_version='',
@@ -50,6 +57,12 @@ def get_operations_tmpl(resource_type, client_name):
 
 
 def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations'):
+    if resource_type in [
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL
+    ]:
+        return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
+
     api_version = '.v' + str(get_api_version(cli_ctx, resource_type)).replace('.', '_').replace('-', '_')
     if is_mgmt_plane(resource_type):
         class_name = OPERATIONS_NAME.get(client_name, '') + '.' if module_name == 'operations' else ''
@@ -69,8 +82,10 @@ def get_client_factory(resource_type, client_name=''):
         return keyvault_data_plane_factory
     if resource_type == ResourceType.DATA_PRIVATE_KEYVAULT:
         return keyvault_private_data_plane_factory_v7_2_preview
-    if resource_type == ResourceType.DATA_PRIVATE_KEYVAULT_T2:
-        return keyvault_private_data_plane_factory_v7_2_preview_t2
+    if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
+        return data_plane_azure_keyvault_administration_backup_client
+    if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
+        return data_plane_azure_keyvault_administration_access_control_client
 
 
 class ClientEntity:
@@ -176,14 +191,25 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     return client
 
 
-def keyvault_private_data_plane_factory_v7_2_preview_t2(cli_ctx, _):
-    from .vendored_sdks.azure_keyvault_t2 import KeyVaultClient
+def data_plane_azure_keyvault_administration_backup_client(cli_ctx, command_args):
+    from azure.keyvault.administration import KeyVaultBackupClient
     from azure.cli.core.profiles import ResourceType, get_api_version
     from azure.cli.core._profile import Profile
 
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT_T2))
-
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP))
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
-    client = KeyVaultClient(credentials=credential, api_version=version)
-    return client
+    return KeyVaultBackupClient(
+        vault_url=command_args['vault_base_url'], credential=credential, api_version=version)
+
+
+def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, command_args):
+    from azure.keyvault.administration import KeyVaultAccessControlClient
+    from azure.cli.core.profiles import ResourceType, get_api_version
+    from azure.cli.core._profile import Profile
+
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL))
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
+    return KeyVaultAccessControlClient(
+        vault_url=command_args['vault_base_url'], credential=credential, api_version=version)

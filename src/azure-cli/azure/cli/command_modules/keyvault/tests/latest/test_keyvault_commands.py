@@ -412,6 +412,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
+    @pytest.mark.serial()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_hsm_full_backup')
     @AllowLargeResponse()
     def test_keyvault_hsm_full_backup_restore(self):
@@ -435,21 +436,21 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                  '--storage-account-name {storage_account} '
                  '--storage-container-SAS-token "{sas}"',
                  checks=[
-                     self.check('status', 'InProgress'),
+                     self.check('status', 'Succeeded'),
                      self.exists('startTime'),
-                     self.exists('jobId')
+                     self.exists('id')
                  ]).get_output_in_json()
 
         backup_data = self.cmd('az keyvault backup start --hsm-name {hsm_name} --blob-container-name {blob} '
                                '--storage-account-name {storage_account} '
                                '--storage-container-SAS-token "{sas}"',
                                checks=[
-                                   self.check('status', 'InProgress'),
+                                   self.check('status', 'Succeeded'),
                                    self.exists('startTime'),
-                                   self.exists('jobId')
+                                   self.exists('id')
                                ]).get_output_in_json()
 
-        self.kwargs['backup_job_id'] = backup_data['jobId']
+        self.kwargs['backup_job_id'] = backup_data['id']
         max_retries = 10
         counter = 0
         while counter < max_retries:
@@ -457,13 +458,13 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                      checks=[
                          self.exists('status'),
                          self.exists('startTime'),
-                         self.check('jobId', '{backup_job_id}')
+                         self.check('id', '{backup_job_id}')
                      ]).get_output_in_json()
             backup_status = self.cmd('az keyvault backup status --id {hsm_url} --job-id {backup_job_id}',
                                      checks=[
                                          self.exists('status'),
                                          self.exists('startTime'),
-                                         self.check('jobId', '{backup_job_id}')
+                                         self.check('id', '{backup_job_id}')
                                      ]).get_output_in_json()
             if backup_status['status'] == 'Succeeded':
                 self.kwargs['backup_folder'] = backup_status['azureStorageBlobContainerUri'].split('/')[-1]
@@ -478,23 +479,23 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                                 '--storage-container-SAS-token "{sas}" '
                                 '--backup-folder {backup_folder}',
                                 checks=[
-                                    self.check('status', 'InProgress'),
+                                    self.check('status', 'Succeeded'),
                                     self.exists('startTime'),
-                                    self.exists('jobId')
+                                    self.exists('id')
                                 ]).get_output_in_json()
 
-        self.kwargs['restore_job_id'] = restore_data['jobId']
+        self.kwargs['restore_job_id'] = restore_data['id']
         self.cmd('az keyvault restore status --hsm-name {hsm_name} --job-id {restore_job_id}',
                  checks=[
                      self.exists('status'),
                      self.exists('startTime'),
-                     self.check('jobId', '{restore_job_id}')
+                     self.check('id', '{restore_job_id}')
                  ])
         self.cmd('az keyvault restore status --id {hsm_url} --job-id {restore_job_id}',
                  checks=[
                      self.exists('status'),
                      self.exists('startTime'),
-                     self.check('jobId', '{restore_job_id}')
+                     self.check('id', '{restore_job_id}')
                  ])
 
 
