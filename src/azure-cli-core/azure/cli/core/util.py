@@ -58,6 +58,11 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
+    import traceback
+
+    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
+    # Print the traceback and exception message
+    logger.debug(traceback.format_exc())
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
