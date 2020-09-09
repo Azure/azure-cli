@@ -628,11 +628,11 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         # azurepolicy disabled, routing enabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'azurepolicy', enable=False)
+                                  'clitest000001', 'azure-policy', enable=False)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000', 'clitest000001',
                                   'http_application_routing', enable=True)
         azurepolicy_addon_profile = instance.addon_profiles['azurepolicy']
-        self.assertTrue(azurepolicy_addon_profile.enabled)
+        self.assertFalse(azurepolicy_addon_profile.enabled)
         monitoring_addon_profile = instance.addon_profiles['omsagent']
         self.assertFalse(monitoring_addon_profile.enabled)
         routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
