@@ -38,29 +38,28 @@ def _flexible_server_create(cmd, client,
     if subnet_arm_resource_id is not None:
         subnet_id = subnet_arm_resource_id # set the subnet id to be the one passed in
         delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_arm_resource_id
+            subnet_arm_resource_id=subnet_id
         )
     else:
         delegated_subnet_arguments=None
 
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     try:
-        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing PostgreSQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
 
-        # update server if needed
-        server_result = _update_server(
-            db_context, cmd, client, server_result, resource_group_name, server_name, backup_retention,
-            storage_mb, administrator_login_password)
     except CloudError:
         administrator_login_password = generate_password(administrator_login_password)
         if public_access is None:
             subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
-            delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(subnet_arm_resource_id=subnet_id)
+            delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+                 subnet_arm_resource_id=subnet_id
+            )
 
         # Create postgresql
+        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
         server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, tier, storage_mb, administrator_login, administrator_login_password, version,
             tags, public_access, assign_identity, delegated_subnet_arguments, high_availability, zone)
@@ -175,6 +174,7 @@ def _flexible_server_update_custom_func(instance,
             params.identity = instance.identity
     return params
 
+
 def _server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
     confirm = force
     if not force:
@@ -212,8 +212,10 @@ def _flexible_parameter_update(client, ids, server_name, configuration_name, res
 
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 
+
 def _flexible_list_skus(client, location):
     return client.execute(location)
+
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    storage_mb, administrator_login, administrator_login_password, version, tags, public_network_access,
@@ -226,6 +228,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     from azure.mgmt.rdbms import postgresql
 
+    # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
+    # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
     parameters = postgresql.flexibleservers.models.Server(
         sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,
@@ -251,37 +255,12 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         '{} Server Create'.format(logging_name))
 
 
-def _update_server(db_context, cmd, client, server_result, resource_group_name, server_name, backup_retention,
-                   storage_mb, administrator_login_password):
-    # storage profile params
-    storage_profile_kwargs = {}
-    db_sdk, logging_name = db_context.azure_sdk, db_context.logging_name
-    if backup_retention is not None and backup_retention != server_result.storage_profile.backup_retention_days:
-        update_kwargs(storage_profile_kwargs, 'backup_retention_days', backup_retention)
-    if storage_mb != server_result.storage_profile.storage_mb:
-        update_kwargs(storage_profile_kwargs, 'storage_mb', storage_mb)
-
-    # update params
-    server_update_kwargs = {
-        'storage_profile': db_sdk.models.StorageProfile(**storage_profile_kwargs)
-    } if storage_profile_kwargs else {}
-    update_kwargs(server_update_kwargs, 'administrator_login_password', administrator_login_password)
-
-    if server_update_kwargs:
-        logger.warning('Updating existing %s Server \'%s\' with given arguments', logging_name, server_name)
-        params = db_sdk.models.ServerUpdateParameters(**server_update_kwargs)
-        return resolve_poller(client.update(
-            resource_group_name, server_name, params), cmd.cli_ctx, '{} Server Update'.format(logging_name))
-    return server_result
-
-
 def flexible_server_connection_string(
         server_name='{server}', database_name='{database}', administrator_login='{login}',
         administrator_login_password='{password}'):
-    user = '{}@{}'.format(administrator_login, server_name)
     host = '{}.postgres.database.azure.com'.format(server_name)
     return {
-        'connectionStrings': _create_postgresql_connection_strings(host, user, administrator_login_password, database_name)
+        'connectionStrings': _create_postgresql_connection_strings(host, administrator_login, administrator_login_password, database_name)
     }
 
 
@@ -299,7 +278,6 @@ def _create_postgresql_connection_strings(host, user, password, database):
                   "port='5432')",
         'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}', :dbname => '{database}', "
                 ":port => '5432', :password => '{password}')",
-        'webapp': "Database={database}; Data Source={host}; User Id={user}; Password={password}"
     }
 
     connection_kwargs = {
@@ -331,12 +309,12 @@ def _form_response(username, sku, location, id, host, version, password, connect
         'location': location,
         'id': id,
         'version': version,
-        'connection string': connection_string
+        'connectionString': connection_string
     }
     if firewall_id is not None:
-        output['firewall id'] = firewall_id
+        output['firewallName'] = firewall_id
     if subnet_id is not None:
-        output['subnet id'] = subnet_id
+        output['subnetId'] = subnet_id
     return output
 
 

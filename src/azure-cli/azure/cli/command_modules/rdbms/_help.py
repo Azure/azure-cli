@@ -831,3 +831,13 @@ examples:
   - name: Place the CLI in a waiting state until a creation of Active Directory Administrator in server testsvr.
     text: az postgres server ad-admin wait --server-name testsvr -g testgroup --created
 """
+
+helps['mysql flexible-server show-connection-string'] = """
+    type: command
+    short-summary: Show the connection strings for a MySQL flexible-server database.
+"""
+
+helps['postgres flexible-server show-connection-string'] = """
+    type: command
+    short-summary: Show the connection strings for a PostgreSQL flexible-server database.
+"""
