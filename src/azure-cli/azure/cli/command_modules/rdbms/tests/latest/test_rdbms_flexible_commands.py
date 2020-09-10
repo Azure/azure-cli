@@ -267,8 +267,10 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         location = self.location
+        tier = 'GeneralPurpose'
+        sku_name = 'Standard_D2s_v3'
 
-        self.cmd('{} flexible-server create -g {} --name {} -l {}'.format(database_engine, resource_group, server_name, location))
+        self.cmd('{} flexible-server create -g {} --name {} -l {} -tier {} -sku_name {}'.format(database_engine, resource_group, server_name, location, tier, sku_name))
 
         firewall_rule_name = 'firewall_test_rule'
         start_ip_address = '10.10.10.10'
