@@ -101,11 +101,11 @@ class QueryExample:
 
 
 class QueryTreeNode:
-    def __init__(self, name, parent, under_array):
+    def __init__(self, name, parent, is_array):
         self.is_dummy = False
         self._name = name
         self._parent = parent
-        self._under_array = under_array  # inside an JSON array
+        self._is_array = is_array  # inside an JSON array
         self._data = None
         self._child = []  # list of child node
 
@@ -140,7 +140,7 @@ class QueryTreeNode:
         inner trace and outer trace. The inner trace is the trace inside the brackets and the outer
         trace is the trace outside the brackets.
         """
-        if self._under_array:
+        if self._is_array:
             if self._parent:
                 outer_trace = '{}.{}'.format(self._parent.get_trace_to_root(), self._name)
             else:
@@ -161,13 +161,13 @@ class QueryTreeNode:
     def get_trace_to_root(self):
         """Return the trace string(aka, select string in JMESPath) to the root node."""
         if self._parent:
-            if self._parent.is_dummy and not self._parent._under_array:  # pylint: disable=protected-access
+            if self._parent.is_dummy and not self._parent._is_array:  # pylint: disable=protected-access
                 trace_str = self._name
             else:
                 trace_str = '{}.{}'.format(self._parent.get_trace_to_root(), self._name)
         else:
             trace_str = self._name
-        if self._under_array:
+        if self._is_array:
             trace_str += '[]'
         return trace_str
 
@@ -261,7 +261,7 @@ class QueryTreeBuilder:
                     match_list.append(node_name)
         return match_list
 
-    def _parse(self, name, data, parent, under_array=False):
+    def _parse(self, name, data, parent, is_array=False):
         """do parse for a single node
 
         :param str name:
@@ -271,7 +271,7 @@ class QueryTreeBuilder:
             This field must be a list.
         :param TreeNode parent:
             The parent node of current node. None if this is the root node.
-        :param bool under_array:
+        :param bool is_array:
             True if the value of this JSON node is an array.
         """
         if not data:
@@ -279,11 +279,11 @@ class QueryTreeBuilder:
         if all(isinstance(d, list) for d in data):
             node = self._parse_list(name, data, parent)
         elif all(isinstance(d, dict) for d in data):
-            node = self._parse_dict(name, data, parent, under_array)
+            node = self._parse_dict(name, data, parent, is_array)
         elif any(isinstance(d, (dict, list)) for d in data):
             node = None  # inhomogeneous type
         else:
-            node = self._parse_leaf(name, data, parent, under_array)
+            node = self._parse_leaf(name, data, parent, is_array)
         return node
 
     def _parse_list(self, name, data, parent):
@@ -293,23 +293,23 @@ class QueryTreeBuilder:
             flatten_data.extend(d)
         if not flatten_data:
             return None
-        node = self._parse(name, flatten_data, parent, under_array=True)
+        node = self._parse(name, flatten_data, parent, is_array=True)
         return node
 
-    def _parse_leaf(self, name, data, parent, under_array):
-        node = QueryTreeNode(name, parent, under_array)
+    def _parse_leaf(self, name, data, parent, is_array):
+        node = QueryTreeNode(name, parent, is_array)
         node.update_node_data(data)
         self._record_node(name, node)
         return node
 
-    def _parse_dict(self, name, data, parent, under_array):
-        node = QueryTreeNode(name, parent, under_array)
+    def _parse_dict(self, name, data, parent, is_array):
+        node = QueryTreeNode(name, parent, is_array)
         all_keys = self._get_all_keys(data)
         for key in all_keys:
             values = self._get_not_none_values(data, key)
             if not values:  # all values are None
                 continue
-            child_node = self._parse(key, values, node, under_array=False)
+            child_node = self._parse(key, values, node, is_array=False)
             node.add_child(child_node)
         self._record_node(name, node)
         return node

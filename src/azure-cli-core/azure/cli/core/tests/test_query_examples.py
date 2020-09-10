@@ -69,7 +69,7 @@ class TestQueryExamplesQueryTreeBuilder(unittest.TestCase):
         self.assertIn('firstName', builder._all_nodes)
         self.assertIn('lastName', builder._all_nodes)
         # check list
-        self.assertTrue(builder._root._under_array)
+        self.assertTrue(builder._root._is_array)
 
     def test_parse_empty(self):
         mock_config = MockConfig()
