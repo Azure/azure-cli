@@ -23,7 +23,7 @@ examples:
     text: |
         az mysql flexible-server create --location northeurope --resource-group testGroup --name testServer --admin-user username \\
             --admin-password password --sku-name Standard_B1ms --tier GeneralPurpose --public-access 0.0.0.0 \\
-            --storage-size 51200 --tags "key=value" --version 5.7
+            --storage-size 32 --tags "key=value" --version 5.7
 """
 
 helps['mysql flexible-server db'] = """

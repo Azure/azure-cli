@@ -240,14 +240,14 @@ def _flexible_parameter_update(client, ids, server_name, configuration_name, res
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
 def _flexible_replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
     provider = 'Microsoft.DBforMySQL'
-
+    backup_retention_days = storage_mb = None
     # set source server id
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                         resource_group=resource_group_name,
                                         namespace=provider,
-                                        type='servers',
+                                        type='flexibleServers',
                                         name=source_server)
         else:
             raise CLIError('The provided source-server {} is invalid.'.format(source_server))
@@ -267,11 +267,13 @@ def _flexible_replica_create(cmd, client, resource_group_name, server_name, sour
         tier = source_server_object.sku.tier
 
     from azure.mgmt.rdbms import mysql
+
     parameters = mysql.flexibleservers.models.Server(
         sku=mysql.flexibleservers.models.Sku(name=sku_name,tier=tier),
         source_server_id=source_server,
-        location=location)
-
+        location=location,
+        create_mode="Replica")
+    print(parameters)
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
@@ -286,7 +288,7 @@ def _flexible_replica_stop(client, resource_group_name, server_name):
 
     from importlib import import_module
     server_module_path = server_object.__module__
-    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    module = import_module(server_module_path)  # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
 
     params = ServerForUpdate(replication_role='None')

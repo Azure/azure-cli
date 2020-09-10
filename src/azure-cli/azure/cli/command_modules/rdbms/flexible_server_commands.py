@@ -197,4 +197,4 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', '_flexible_replica_create', supports_no_wait=True)
-        g.custom_command('stop', '_flexible_replica_stop', confirmation=True)
+        g.custom_command('stop-replication', '_flexible_replica_stop', confirmation=True)
