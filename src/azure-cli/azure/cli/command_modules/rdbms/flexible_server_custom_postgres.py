@@ -88,58 +88,8 @@ def _flexible_server_create(cmd, client,
         loc = server_result.location
         version = server_result.version
         sku = server_result.sku.name
-
-        # This is a workaround for getting the hostname right .
-        # Without Vnet, the hostname returned by the API os <servername>.postgres.database.azure.com
-        # with Vnet enabled, the hostname returned by the API is <servername>.<servername>.postgres.database.azure.com
-        if len(server_result.fully_qualified_domain_name.split('.')) != 6:
-            host = server_result.fully_qualified_domain_name
-        else:
-            host = server_result.fully_qualified_domain_name[
-                (server_result.fully_qualified_domain_name.index('.')) + 1:]
-
-        '''
-        try:
-            # The server name already exists in the resource group
-            server_result = client.get(resource_group_name, server_name)
-            logger.warning('Found existing PostgreSQL Server \'%s\' in group \'%s\'',
-                           server_name, resource_group_name)
-
-    except CloudError:
-        administrator_login_password = generate_password(administrator_login_password)
-        if public_access is None and subnet_arm_resource_id is None:
-            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
-            delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-                 subnet_arm_resource_id=subnet_id
-            )
-
-        # Create postgresql
-        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
-        server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
-            sku_name, tier, storage_mb, administrator_login, administrator_login_password, version,
-            tags, public_access, assign_identity, delegated_subnet_arguments, high_availability, zone)
-
-        if public_access is not None and public_access != 'none':
-            if public_access == 'all':
-                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-            else:
-                start_ip, end_ip = parse_public_access_input(public_access)
-            firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
-
-    user = server_result.administrator_login
-    id = server_result.id
-    loc = server_result.location
-    version = server_result.version
-    sku = server_result.sku.name
-    # This is a workaround for getting the hostname right .
-    # Without Vnet, the hostname returned by the API os <servername>.postgres.database.azure.com
-    # with Vnet enabled, the hostname returned by the API is <servername>.<servername>.postgres.database.azure.com
-    if len(server_result.fully_qualified_domain_name.split('.')) != 6:
         host = server_result.fully_qualified_domain_name
-    else:
-        host = server_result.fully_qualified_domain_name[(server_result.fully_qualified_domain_name.index('.'))+1:]
 
-    '''
         logger.warning('Make a note of your password. If you forget, you would have to' \
                        ' reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
                        server_name, resource_group_name)
