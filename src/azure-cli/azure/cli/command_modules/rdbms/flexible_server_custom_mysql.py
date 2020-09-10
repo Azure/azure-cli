@@ -100,7 +100,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                        ' reset your password with \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
                        server_name, resource_group_name)
 
-        _update_local_contexts(cmd, server_name, resource_group_name, location)
+        _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
         return _form_response(user, sku, loc, id, host, version,
                               administrator_login_password if administrator_login_password is not None else '*****',
@@ -404,13 +404,15 @@ def _form_response(username, sku, location, id, host, version, password, connect
     return output
 
 
-def _update_local_contexts(cmd, server_name, resource_group_name, location):
+def _update_local_contexts(cmd, server_name, resource_group_name, location, user):
     if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server_name',
                                     server_name)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                     location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
+        cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'administrator_login',
+                                      user)  # Setting the server name in the local context
 
 
 def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
