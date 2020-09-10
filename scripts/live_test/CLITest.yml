@@ -177,6 +177,7 @@ jobs:
           git clone -b $(USER_BRANCH) $(USER_REPO)
           #git clone https://github.com/Azure/azure-cli-extensions.git
         fi
+
         python -m venv env
         source env/bin/activate
         # pip install azdev
@@ -185,10 +186,13 @@ jobs:
         pip install pytest-json-report
         pip install pytest-html
         pip install pytest-rerunfailures
+
         azdev setup -c azure-cli
+        
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+
         # Commit changes
         if [[ "$(USER_USERNAME)" != "" || "$(USER_TOKEN)" != "" ]]; then
           azdev test $(Target) --no-exitfirst -a "-n $(USER_PARALLELISM)"
@@ -199,11 +203,13 @@ jobs:
           # Parallel
           azdev test $(Target) $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
         fi
+
         pwd
         ls
         # Commit changes
         if [[ "$(USER_USERNAME)" != "" || "$(USER_TOKEN)" != "" ]]; then
           cd azure-cli
+          git status
           git add .
           git commit -m "auto commit"
           git push origin $(USER_BRANCH)

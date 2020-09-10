@@ -240,3 +240,9 @@ def transform_immutability_policy(result):
     if result.immutability_period_since_creation_in_days:
         return result
     return None
+
+
+def transform_restore_policy_output(result):
+    if hasattr(result, 'restore_policy') and hasattr(result.restore_policy, 'last_enabled_time'):
+        del result.restore_policy.last_enabled_time
+    return result

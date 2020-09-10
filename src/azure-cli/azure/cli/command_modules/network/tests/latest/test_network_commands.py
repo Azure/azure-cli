@@ -3259,6 +3259,45 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql/managedInstances',
                  checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
 
+    @ResourceGroupPreparer(name_prefix='test_subnet_with_private_endpoint_option')
+    def test_subnet_with_private_endpoint_and_private_Link_options(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'MyVnet',
+            'subnet1': 'MySubnet1',
+            'subnet2': 'MySubnet2',
+            'subnet3': 'MySubnet3',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.1.0/24 '
+                 '--name {subnet1} '
+                 '--disable-private-endpoint-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.1.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Disabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Enabled')
+                 ])
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.2.0/24 '
+                 '--name {subnet2} '
+                 '--disable-private-link-service-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.2.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Enabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Disabled')
+                 ])
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.3.0/24 '
+                 '--name {subnet3} '
+                 '--disable-private-endpoint-network-policies true '
+                 '--disable-private-link-service-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.3.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Disabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Disabled')
+                 ])
+
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
