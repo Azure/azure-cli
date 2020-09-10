@@ -3,17 +3,6 @@
 Release History
 ===============
 
-**ServiceFabric**
-
-* Adding commands for managed clusters and node types.
-    - sf managed-cluster
-    - sf managed-cluster client-certificate
-    - sf managed-node-type
-    - sf managed-node-type node
-    - sf managed-node-type vm-extension
-    - sf managed-node-type vm-secret
-* Upgraded Service Fabric SDK to version 0.5.0 which uses service fabric resource provider api-version 2020-03-01 for the current model and 2020-01-01-preview for managed clusters.
-
 2.11.1
 ++++++
 
