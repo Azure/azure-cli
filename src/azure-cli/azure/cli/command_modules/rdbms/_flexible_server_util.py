@@ -58,11 +58,15 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name)
 
 
 def generate_password(administrator_login_password):
-    import string
+    import string,secrets
     if administrator_login_password is None:
         passwordLength = 16
-        password_character = string.ascii_letters + string.digits + '!@#,?;:$&*' # Allowing limited punctuations to avoid unicode errors
-        administrator_login_password = "".join(random.choice(password_character) for i in range(passwordLength))
+        special_character = random.choice('!@#,?;:$&*')
+        administrator_login_password = secrets.token_urlsafe(passwordLength)
+        random_position = random.randint(1, len(administrator_login_password)-1)
+        administrator_login_password = administrator_login_password[:random_position] + special_character + administrator_login_password[random_position + 1:]
+        #password_character = string.ascii_letters + string.digits + '!@#,?;:$&*' # Allowing limited punctuations to avoid unicode errors
+        #administrator_login_password = "".join(random.choice(password_character) for i in range(passwordLength))
     return administrator_login_password
 
 
