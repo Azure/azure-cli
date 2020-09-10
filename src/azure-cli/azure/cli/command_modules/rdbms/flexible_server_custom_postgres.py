@@ -19,6 +19,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
 
 logger = get_logger(__name__)
 
+
 # region create without args
 def _flexible_server_create(cmd, client,
                             resource_group_name=None, server_name=None,
@@ -37,32 +38,28 @@ def _flexible_server_create(cmd, client,
     if subnet_arm_resource_id is not None:
         subnet_id = subnet_arm_resource_id # set the subnet id to be the one passed in
         delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_arm_resource_id
+            subnet_arm_resource_id=subnet_id
         )
     else:
         delegated_subnet_arguments=None
 
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     try:
-        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
         # The server name already exists in the resource group
         server_result = client.get(resource_group_name, server_name)
         logger.warning('Found existing PostgreSQL Server \'%s\' in group \'%s\'',
                        server_name, resource_group_name)
 
-        # update server if needed
-        server_result = _update_server(
-            db_context, cmd, client, server_result, resource_group_name, server_name, backup_retention,
-            storage_mb, administrator_login_password)
     except CloudError:
         administrator_login_password = generate_password(administrator_login_password)
-        if public_access is None:
-            print("**Commented out creating vnet until it is enabled**")
-            #subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
-            # delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            #     subnet_arm_resource_id=subnet_id
-            # )
+        if public_access is None and subnet_arm_resource_id is None:
+            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforPostgreSQL/flexibleServers")
+            delegated_subnet_arguments=postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+                 subnet_arm_resource_id=subnet_id
+            )
 
         # Create postgresql
+        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
         server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
             sku_name, tier, storage_mb, administrator_login, administrator_login_password, version,
             tags, public_access, assign_identity, delegated_subnet_arguments, high_availability, zone)
@@ -77,14 +74,21 @@ def _flexible_server_create(cmd, client,
     user = server_result.administrator_login
     id = server_result.id
     loc = server_result.location
-    host = server_result.fully_qualified_domain_name
     version = server_result.version
     sku = server_result.sku.name
+    # This is a workaround for getting the hostname right .
+    # Without Vnet, the hostname returned by the API os <servername>.postgres.database.azure.com
+    # with Vnet enabled, the hostname returned by the API is <servername>.<servername>.postgres.database.azure.com
+    if len(server_result.fully_qualified_domain_name.split('.')) != 6:
+        host = server_result.fully_qualified_domain_name
+    else:
+        host = server_result.fully_qualified_domain_name[(server_result.fully_qualified_domain_name.index('.'))+1:]
 
-    logger.warning('Make a note of your password. If you forget, you would have to'\
-                   ' reset your password with CLI command for reset password')
+    logger.warning('Make a note of your password. If you forget, you would have to' \
+                   ' reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
+                   server_name, resource_group_name)
 
-    _update_local_contexts(cmd, server_name, resource_group_name, location)
+    _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, id, host, version,
         administrator_login_password if administrator_login_password is not None else '*****',
@@ -183,6 +187,7 @@ def _flexible_server_update_custom_func(instance,
             params.identity = instance.identity
     return params
 
+
 def _server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
     confirm = force
     if not force:
@@ -193,6 +198,7 @@ def _server_delete_func(cmd, client, resource_group_name=None, server_name=None,
             if cmd.cli_ctx.local_context.is_on:
                 local_context_file = cmd.cli_ctx.local_context._get_local_context_file()
                 local_context_file.remove_option('postgres flexible-server', 'server_name')
+                local_context_file.remove_option('postgres flexible-server', 'administrator_login')
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
         return result
@@ -204,7 +210,7 @@ def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     return client.servers.get(resource_group_name, server_name)
 
 
-def _flexible_parameter_update(client, ids, server_name, configuration_name, resource_group_name, source=None, value=None):
+def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
         # update the command with system default
         try:
@@ -221,8 +227,10 @@ def _flexible_parameter_update(client, ids, server_name, configuration_name, res
 
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 
+
 def _flexible_list_skus(client, location):
     return client.execute(location)
+
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    storage_mb, administrator_login, administrator_login_password, version, tags, public_network_access,
@@ -235,6 +243,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
     from azure.mgmt.rdbms import postgresql
 
+    # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
+    # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
     parameters = postgresql.flexibleservers.models.Server(
         sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,
@@ -260,28 +270,41 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         '{} Server Create'.format(logging_name))
 
 
-def _update_server(db_context, cmd, client, server_result, resource_group_name, server_name, backup_retention,
-                   storage_mb, administrator_login_password):
-    # storage profile params
-    storage_profile_kwargs = {}
-    db_sdk, logging_name = db_context.azure_sdk, db_context.logging_name
-    if backup_retention is not None and backup_retention != server_result.storage_profile.backup_retention_days:
-        update_kwargs(storage_profile_kwargs, 'backup_retention_days', backup_retention)
-    if storage_mb != server_result.storage_profile.storage_mb:
-        update_kwargs(storage_profile_kwargs, 'storage_mb', storage_mb)
+def flexible_server_connection_string(
+        server_name='{server}', database_name='{database}', administrator_login='{login}',
+        administrator_login_password='{password}'):
+    host = '{}.postgres.database.azure.com'.format(server_name)
+    return {
+        'connectionStrings': _create_postgresql_connection_strings(host, administrator_login, administrator_login_password, database_name)
+    }
 
-    # update params
-    server_update_kwargs = {
-        'storage_profile': db_sdk.models.StorageProfile(**storage_profile_kwargs)
-    } if storage_profile_kwargs else {}
-    update_kwargs(server_update_kwargs, 'administrator_login_password', administrator_login_password)
 
-    if server_update_kwargs:
-        logger.warning('Updating existing %s Server \'%s\' with given arguments', logging_name, server_name)
-        params = db_sdk.models.ServerUpdateParameters(**server_update_kwargs)
-        return resolve_poller(client.update(
-            resource_group_name, server_name, params), cmd.cli_ctx, '{} Server Update'.format(logging_name))
-    return server_result
+def _create_postgresql_connection_strings(host, user, password, database):
+    result = {
+        'psql_cmd': "psql --host={host} --port=5432 --username={user} --dbname={database}",
+        'ado.net': "Server={host};Database={database};Port=5432;User Id={user};Password={password};",
+        'jdbc': "jdbc:postgresql://{host}:5432/{database}?user={user}&password={password}",
+        'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:5432/{database}  "
+                       "spring.datasource.username={user}  "
+                       "spring.datasource.password={password}",
+        'node.js': "var client = new pg.Client('postgres://{user}:{password}@{host}:5432/{database}');",
+        'php': "host={host} port=5432 dbname={database} user={user} password={password}",
+        'python': "cnx = psycopg2.connect(database='{database}', user='{user}', host='{host}', password='{password}', "
+                  "port='5432')",
+        'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}', :dbname => '{database}', "
+                ":port => '5432', :password => '{password}')",
+    }
+
+    connection_kwargs = {
+        'host': host,
+        'user': user,
+        'password': password if password is not None else '{password}',
+        'database': database
+    }
+
+    for k, v in result.items():
+        result[k] = v.format(**connection_kwargs)
+    return result
 
 
 def _create_postgresql_connection_string(host, password):
@@ -293,6 +316,22 @@ def _create_postgresql_connection_string(host, password):
 
 
 def _form_response(username, sku, location, id, host, version, password, connection_string, firewall_id=None, subnet_id=None):
+    '''
+    from collections import OrderedDict
+    new_entry = OrderedDict()
+    new_entry['Id'] = id
+    if subnet_id is not None:
+        new_entry['SubnetId'] = subnet_id
+    new_entry['Location'] = location
+    new_entry['SkuName'] = sku
+    new_entry['Version'] = version
+    new_entry['Host'] = host
+    new_entry['UserName'] = username
+    new_entry['Password'] = password
+    new_entry['ConnectionString'] = connection_string
+    if firewall_id is not None:
+        new_entry['FirewallName'] = firewall_id
+    '''
     output = {
         'host': host,
         'username': username,
@@ -301,23 +340,24 @@ def _form_response(username, sku, location, id, host, version, password, connect
         'location': location,
         'id': id,
         'version': version,
-        'connection string': connection_string
+        'connectionString': connection_string
     }
     if firewall_id is not None:
-        output['firewall id'] = firewall_id
+        output['firewallName'] = firewall_id
     if subnet_id is not None:
-        output['subnet id'] = subnet_id
+        output['subnetId'] = subnet_id
     return output
 
 
-def _update_local_contexts(cmd, server_name, resource_group_name, location):
+def _update_local_contexts(cmd, server_name, resource_group_name, location, user):
     if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
                                     server_name)  # Setting the server name in the local context
+        cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'administrator_login',
+                                    user)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                     location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
-
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class DbContext:
