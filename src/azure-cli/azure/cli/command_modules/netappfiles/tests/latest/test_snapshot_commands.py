@@ -49,7 +49,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         rg = '{rg}'
 
         volume = self.create_volume(account_name, pool_name, volume_name, rg)
-        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s " % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION)).get_output_in_json()
         assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
         # check the created fields is populated. Checking exact dates are a little harder due to session records
         assert snapshot['created'] is not None
@@ -72,7 +73,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         rg = '{rg}'
 
         volume = self.create_volume(account_name, pool_name, volume_name, rg)
-        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION)).get_output_in_json()
         assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
         # check the created fields is populated. Checking exact dates are a little harder due to session records
         assert snapshot['created'] is not None
@@ -93,7 +95,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot_name = self.create_random_name(prefix='cli-sn-', length=24)
 
         volume = self.create_volume(account_name, pool_name, volume_name, rg)
-        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION)).get_output_in_json()
         assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
         # check the created fields is populated. Checking exact dates are a little harder due to session records
         assert snapshot['created'] is not None
@@ -114,8 +117,9 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot_name1 = self.create_random_name(prefix='cli-sn-', length=24)
         snapshot_name2 = self.create_random_name(prefix='cli-sn-', length=24)
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
-        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (account_name, pool_name, volume_name, snapshot_name1, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
-        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (account_name, pool_name, volume_name, snapshot_name2, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s" % (account_name, pool_name, volume_name, snapshot_name1, ANF_LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s" % (account_name, pool_name, volume_name, snapshot_name2, ANF_LOCATION)).get_output_in_json()
 
         snapshot_list = self.cmd("az netappfiles snapshot list -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 2
@@ -127,7 +131,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         snapshot_name = self.create_random_name(prefix='cli-sn-', length=24)
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
-        snapshot = self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        snapshot = self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s" % (account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION)).get_output_in_json()
 
         snapshot = self.cmd("az netappfiles snapshot show -g {rg} -a %s -p %s -v %s -s %s" % (account_name, pool_name, volume_name, snapshot_name)).get_output_in_json()
         assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name

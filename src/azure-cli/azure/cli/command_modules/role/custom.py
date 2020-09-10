@@ -99,7 +99,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         if not role_name:
             raise CLIError("please provide role name")
 
-    if not for_update and 'assignableScopes' not in role_definition:
+    if not for_update and not role_definition.get('assignableScopes', None):
         raise CLIError("please provide 'assignableScopes'")
 
     return worker.create_role_definition(definitions_client, role_name, role_id, role_definition)
@@ -280,8 +280,11 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
     start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
-    role_defs = {d.id: [worker.get_role_property(d, 'role_name'),
-                        d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
+
+    # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
+    #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
+    #   id: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c  # pylint: disable=line-too-long
+    role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
 
     for op_id in start_events:
         e = end_events.get(op_id, None)
@@ -331,8 +334,12 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
                         else:
                             entry['scopeType'] = 'Resource'
 
-                    entry['roleDefinitionId'] = role_defs[payload['roleDefinitionId']][1]
-                    entry['roleName'] = role_defs[payload['roleDefinitionId']][0]
+                    # Look up the resource `name`, like b24988ac-6180-42a0-ab88-20f7382dd24c
+                    role_resource_name = payload['roleDefinitionId'].split('/')[-1]
+                    entry['roleDefinitionId'] = role_resource_name
+                    # In case the role definition has been deleted.
+                    entry['roleName'] = role_defs.get(role_resource_name, "N/A")
+
             result.append(entry)
 
     # Fill in logical user/sp names as guid principal-id not readable
@@ -664,7 +671,7 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
 
 
-def create_group(cmd, display_name, mail_nickname, force=None):
+def create_group(cmd, display_name, mail_nickname, force=None, description=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     # workaround to ensure idempotent even AAD graph service doesn't support it
@@ -678,8 +685,10 @@ def create_group(cmd, display_name, mail_nickname, force=None):
                 raise CLIError(err.format(', '.join([x.object_id for x in matches])))
             logger.warning('A group with the same display name and mail nickname already exists, returning.')
             return matches[0]
-    group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
-                                                             mail_nickname=mail_nickname))
+        group_create_parameters = GroupCreateParameters(display_name=display_name, mail_nickname=mail_nickname)
+        if description is not None:
+            group_create_parameters.additional_properties = {'description': description}
+    group = graph_client.groups.create(group_create_parameters)
 
     return group
 
@@ -1499,6 +1508,7 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
         with open(cert_file, "rt") as f:
             cert_string = f.read()
             cf.write(cert_string)
+    os.chmod(creds_file, 0o600)  # make the file readable/writable only for current user
 
     # get rid of the header and tails for upload to AAD: ----BEGIN CERT....----
     cert_string = re.sub(r'\-+[A-z\s]+\-+', '', cert_string).strip()

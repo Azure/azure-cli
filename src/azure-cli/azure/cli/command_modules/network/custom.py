@@ -1942,11 +1942,11 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'cname':
                 record_obj.update({'alias': record.cname.rstrip('.') + '.'})
             elif record_type == 'mx':
-                record_obj.update({'preference': record.preference, 'host': record.exchange})
+                record_obj.update({'preference': record.preference, 'host': record.exchange.rstrip('.') + '.'})
             elif record_type == 'ns':
-                record_obj.update({'host': record.nsdname})
+                record_obj.update({'host': record.nsdname.rstrip('.') + '.'})
             elif record_type == 'ptr':
-                record_obj.update({'host': record.ptrdname})
+                record_obj.update({'host': record.ptrdname.rstrip('.') + '.'})
             elif record_type == 'soa':
                 record_obj.update({
                     'mname': record.host.rstrip('.') + '.',
@@ -1958,7 +1958,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 zone_obj['$ttl'] = record.minimum_ttl
             elif record_type == 'srv':
                 record_obj.update({'priority': record.priority, 'weight': record.weight,
-                                   'port': record.port, 'target': record.target})
+                                   'port': record.port, 'target': record.target.rstrip('.') + '.'})
             elif record_type == 'txt':
                 record_obj.update({'txt': ''.join(record.value)})
 
@@ -5043,6 +5043,10 @@ def update_nw_flow_log(cmd,
         if not workspace:
             raise CLIError('Name or ID of workspace is invalid')
 
+        if instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration is None:
+            analytics_conf = cmd.get_models('TrafficAnalyticsConfigurationProperties')
+            instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration = analytics_conf()
+
         with cmd.update_context(
                 instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
             c.set_param('enabled', traffic_analytics_enabled)
@@ -5521,7 +5525,9 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
                   route_table=None, service_endpoints=None, service_endpoint_policy=None,
-                  delegations=None, nat_gateway=None):
+                  delegations=None, nat_gateway=None,
+                  disable_private_endpoint_network_policies=None,
+                  disable_private_link_service_network_policies=None):
     NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -5550,6 +5556,16 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
             subnet.service_endpoint_policies.append(SubResource(id=policy))
     if delegations:
         subnet.delegations = delegations
+
+    if disable_private_endpoint_network_policies is True:
+        subnet.private_endpoint_network_policies = "Disabled"
+    if disable_private_endpoint_network_policies is False:
+        subnet.private_endpoint_network_policies = "Enabled"
+
+    if disable_private_link_service_network_policies is True:
+        subnet.private_link_service_network_policies = "Disabled"
+    if disable_private_link_service_network_policies is False:
+        subnet.private_link_service_network_policies = "Enabled"
 
     vnet = cached_get(cmd, ncf.virtual_networks.get, resource_group_name, virtual_network_name)
     upsert_to_collection(vnet, 'subnets', subnet, 'name')

@@ -1247,7 +1247,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1259,7 +1259,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1271,7 +1271,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_disabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1325,7 +1325,81 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_disabled),
-                     JMESPathCheck('storageAccountAccessKey', ''),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+
+class SqlServerSecurityScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    def _get_storage_key(self, storage_account, resource_group):
+        return self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ResourceGroupPreparer(location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
+    @SqlServerPreparer(location='westeurope')
+    @StorageAccountPreparer(location='westus')
+    @StorageAccountPreparer(parameter_name='storage_account_2',
+                            resource_group_parameter_name='resource_group_2')
+    def test_sql_server_security_mgmt(self, resource_group, resource_group_2,
+                                      resource_group_location, server,
+                                      storage_account, storage_account_2):
+
+        # get storage account endpoint and key
+        storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
+        key = self._get_storage_key(storage_account, resource_group)
+
+        # get audit policy
+        self.cmd('sql server audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('resourceGroup', resource_group)])
+
+        # update audit policy - enable
+        state_enabled = 'Enabled'
+        retention_days = 30
+        audit_actions_input = 'DATABASE_LOGOUT_GROUP DATABASE_ROLE_MEMBER_CHANGE_GROUP'
+        audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
+                                  'DATABASE_ROLE_MEMBER_CHANGE_GROUP']
+
+        self.cmd('sql server audit-policy update -g {} -n {}'
+                 ' --state {} --storage-key {} --storage-endpoint={}'
+                 ' --retention-days={} --actions {}'
+                 .format(resource_group, server, state_enabled, key,
+                         storage_endpoint, retention_days, audit_actions_input),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service return null
+                     JMESPathCheck('storageEndpoint', storage_endpoint),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        # update audit policy - specify storage account and resource group. use secondary key
+        storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
+        self.cmd('sql server audit-policy update -g {} -n {} --storage-account {}'
+                 .format(resource_group, server, storage_account_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service return null
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        # update audit policy - disable
+        state_disabled = 'Disabled'
+        self.cmd('sql server audit-policy update -g {} -n {} --state {}'
+                 .format(resource_group, server, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled),
+                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service return null
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -3440,9 +3514,9 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
         resource_prefix = 'MIDBShortTermRetention'
 
         self.kwargs.update({
-            'loc': resource_group_location,
-            'vnet_name': 'vcCliTestVnet',
-            'subnet_name': 'vcCliTestSubnet',
+            'loc': "westeurope",
+            'vnet_name': 'MIVirtualNetwork',
+            'subnet_name': 'ManagedInsanceSubnet',
             'route_table_name': 'vcCliTestRouteTable',
             'route_name_internet': 'vcCliTestRouteInternet',
             'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
@@ -3459,19 +3533,12 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
             'retention_days_inc': 14,
-            'retention_days_dec': 7
+            'retention_days_dec': 7,
+            'rg': 'v-urmila'
         })
 
-        # Create and prepare VNet and subnet for new virtual cluster
-        self.cmd('network route-table create -g {rg} -n {route_table_name}')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
         self.kwargs.update({
-            'subnet_id': subnet['id']
+            'subnet_id': '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
         })
 
         # create sql managed_instance
@@ -3549,10 +3616,10 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
             self):
 
         self.kwargs.update({
-            'rg': 'clitestxj6awmetud',
-            'loc': 'westus',
-            'managed_instance_name': 'ayang-ltr-mi',
-            'database_name': 'test-4',
+            'rg': 'v-urmila',
+            'loc': 'westeurope',
+            'managed_instance_name': 'v-urmila-mi-test',
+            'database_name': 'ReportServer',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
@@ -3608,13 +3675,13 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} -g {rg}',
             checks=[
-                self.check('length(@)', 1)])
+                self.check('length(@)', 2)])
 
         # without resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name}',
             checks=[
-                self.check('length(@)', 1)])
+                self.check('length(@)', 2)])
 
         # setup for test show long term retention backup
         backup = self.cmd(
@@ -3644,7 +3711,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'cli-restore-dest'
+            'dest_database_name': 'cli-restore-ltr-backup-test'
         })
 
         self.cmd(
@@ -3665,9 +3732,9 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
         resource_prefix = 'MIRestoreDeletedDB'
 
         self.kwargs.update({
-            'loc': resource_group_location,
-            'vnet_name': 'vcCliTestVnet',
-            'subnet_name': 'vcCliTestSubnet',
+            'loc': "westeurope",
+            'vnet_name': 'MIVirtualNetwork',
+            'subnet_name': 'ManagedInsanceSubnet',
             'route_table_name': 'vcCliTestRouteTable',
             'route_name_internet': 'vcCliTestRouteInternet',
             'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
@@ -3685,19 +3752,12 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
             'retention_days_inc': 14,
-            'retention_days_dec': 7
+            'retention_days_dec': 7,
+            'rg': 'v-urmila'
         })
 
-        # Create and prepare VNet and subnet for new virtual cluster
-        self.cmd('network route-table create -g {rg} -n {route_table_name}')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-
         self.kwargs.update({
-            'subnet_id': subnet['id']
+            'subnet_id': '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
         })
 
         # create sql managed_instance
@@ -3765,17 +3825,17 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
         else:
-            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
 
         license_type = 'LicenseIncluded'
-        loc = 'eastus2euap'
+        loc = 'westeurope'
         v_cores = 4
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group_1 = "DejanDuVnetRG"
+        resource_group_1 = "v-urmila"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
 

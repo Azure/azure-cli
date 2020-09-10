@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
-import antlr4
 
 from azure.cli.command_modules.monitor.util import (
     get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
@@ -91,6 +90,10 @@ def get_period_type(as_timedelta=False):
 class MetricAlertConditionAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
+        # antlr4 is not available everywhere, restrict the import scope so that commands
+        # that do not need it don't fail when it is absent
+        import antlr4
+
         from azure.cli.command_modules.monitor.grammar.metric_alert import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
 
@@ -231,6 +234,10 @@ class AutoscaleRemoveAction(argparse._AppendAction):
 
 class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-access
     def __call__(self, parser, namespace, values, option_string=None):
+        # antlr4 is not available everywhere, restrict the import scope so that commands
+        # that do not need it don't fail when it is absent
+        import antlr4
+
         from azure.cli.command_modules.monitor.grammar.autoscale import (
             AutoscaleConditionLexer, AutoscaleConditionParser, AutoscaleConditionValidator)
 

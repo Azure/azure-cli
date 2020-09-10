@@ -45,9 +45,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3',
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'PC2', 'PC3',
              'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -126,7 +126,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
@@ -142,6 +142,10 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
+
+    with self.argument_context('webapp list-instances') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
 
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps')
@@ -537,6 +541,8 @@ def load_arguments(self, _):
                    help='Application ID to integrate AAD organization account Sign-in into your web app')
         c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory',
                    help='AAD application secret')
+        c.argument('client_secret_certificate_thumbprint', options_list=['--aad-client-secret-certificate-thumbprint', '--thumbprint'], arg_group='Azure Active Directory',
+                   help='Alternative to AAD Client Secret, thumbprint of a certificate used for signing purposes')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'],
                    arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
@@ -592,7 +598,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name of the appserviceplan associated with the webapp",
@@ -612,11 +618,13 @@ def load_arguments(self, _):
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp create-remote-connection') as c:
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -768,6 +776,36 @@ def load_arguments(self, _):
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
+
+    with self.argument_context('functionapp keys', id_part=None) as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type,)
+        c.argument('name', arg_type=functionapp_name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                   help='Name of the function app')
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="The name of the slot. Defaults to the productions slot if not specified")
+    with self.argument_context('functionapp keys set', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+    with self.argument_context('functionapp keys delete', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+
+    with self.argument_context('functionapp function', id_part=None) as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type,)
+        c.argument('name', arg_type=functionapp_name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                   help='Name of the function app')
+        c.argument('function_name', help="Name of the Function")
+    with self.argument_context('functionapp function keys', id_part=None) as c:
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="The name of the slot. Defaults to the productions slot if not specified")
+    with self.argument_context('functionapp function keys set', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
+    with self.argument_context('functionapp function keys delete', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
 
     # Access Restriction Commands
     for scope in ['webapp', 'functionapp']:

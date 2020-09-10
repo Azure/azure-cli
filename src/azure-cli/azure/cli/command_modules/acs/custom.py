@@ -452,170 +452,6 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None):
                        install_dir, cli)
 
 
-def k8s_install_connector(cmd, client, name, resource_group_name, connector_name='aci-connector',
-                          location=None, service_principal=None, client_secret=None,
-                          chart_url=None, os_type='Linux', image_tag=None, aci_resource_group=None):
-    _k8s_install_or_upgrade_connector("install", cmd, client, name, resource_group_name, connector_name,
-                                      location, service_principal, client_secret, chart_url, os_type,
-                                      image_tag, aci_resource_group)
-
-
-def k8s_upgrade_connector(cmd, client, name, resource_group_name, connector_name='aci-connector',
-                          location=None, service_principal=None, client_secret=None,
-                          chart_url=None, os_type='Linux', image_tag=None, aci_resource_group=None):
-    _k8s_install_or_upgrade_connector("upgrade", cmd, client, name, resource_group_name, connector_name,
-                                      location, service_principal, client_secret, chart_url, os_type,
-                                      image_tag, aci_resource_group)
-
-
-def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_group_name, connector_name,
-                                      location, service_principal, client_secret, chart_url, os_type,
-                                      image_tag, aci_resource_group):
-    from subprocess import PIPE, Popen
-    instance = client.get(resource_group_name, name)
-    helm_not_installed = 'Helm not detected, please verify if it is installed.'
-    url_chart = chart_url
-    if image_tag is None:
-        image_tag = 'latest'
-    # Check if Helm is installed locally
-    try:
-        Popen(["helm"], stdout=PIPE, stderr=PIPE)
-    except OSError:
-        raise CLIError(helm_not_installed)
-    # If SPN is specified, the secret should also be specified
-    if service_principal is not None and client_secret is None:
-        raise CLIError('--client-secret must be specified when --service-principal is specified')
-    # Validate if the RG exists
-    rg_location = _get_rg_location(cmd.cli_ctx, aci_resource_group or resource_group_name)
-    # Auto assign the location
-    if location is None:
-        location = rg_location
-    norm_location = location.replace(' ', '').lower()
-    # Validate the location upon the ACI avaiable regions
-    _validate_aci_location(norm_location)
-    # Get the credentials from a AKS instance
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    # Get the TenantID
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    _, _, tenant_id = profile.get_login_credentials()
-    # Check if we want the linux connector
-    if os_type.lower() in ['linux', 'both']:
-        _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
-                                               client_secret, subscription_id, tenant_id, aci_resource_group,
-                                               norm_location, 'Linux', instance.enable_rbac, instance.fqdn)
-
-    # Check if we want the windows connector
-    if os_type.lower() in ['windows', 'both']:
-        _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
-                                               client_secret, subscription_id, tenant_id, aci_resource_group,
-                                               norm_location, 'Windows', instance.enable_rbac, instance.fqdn)
-
-
-def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
-                                           client_secret, subscription_id, tenant_id, aci_resource_group,
-                                           norm_location, os_type, use_rbac, masterFqdn):
-    rbac_install = "true" if use_rbac else "false"
-    node_taint = 'azure.com/aci'
-    helm_release_name = connector_name.lower() + '-' + os_type.lower() + '-' + norm_location
-    node_name = 'virtual-kubelet-' + helm_release_name
-    k8s_master = 'https://{}'.format(masterFqdn)
-    logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
-    try:
-        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={},rbac.install={}'.format(
-            node_name, node_taint, os_type, image_tag, rbac_install)
-        if service_principal:
-            values += ",env.azureClientId=" + service_principal
-        if client_secret:
-            values += ",env.azureClientKey=" + client_secret
-        if subscription_id:
-            values += ",env.azureSubscriptionId=" + subscription_id
-        if tenant_id:
-            values += ",env.azureTenantId=" + tenant_id
-        if aci_resource_group:
-            values += ",env.aciResourceGroup=" + aci_resource_group
-        if norm_location:
-            values += ",env.aciRegion=" + norm_location
-        # Currently, we need to set the master FQDN.
-        # This is temporary and we should remove it when possible
-        values += ",env.masterUri=" + k8s_master
-        if helm_cmd == "install":
-            subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", values])
-        elif helm_cmd == "upgrade":
-            subprocess.call(["helm", "upgrade", helm_release_name, url_chart, "--set", values])
-    except subprocess.CalledProcessError as err:
-        raise CLIError('Could not deploy the ACI connector Chart: {}'.format(err))
-
-
-def k8s_uninstall_connector(cmd, client, name, resource_group_name, connector_name='aci-connector',
-                            location=None, graceful=False, os_type='Linux'):
-    from subprocess import PIPE, Popen
-    helm_not_installed = "Error : Helm not detected, please verify if it is installed."
-    # Check if Helm is installed locally
-    try:
-        Popen(["helm"], stdout=PIPE, stderr=PIPE)
-    except OSError:
-        raise CLIError(helm_not_installed)
-    # Get the credentials from a AKS instance
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
-
-    # Validate if the RG exists
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
-    # Auto assign the location
-    if location is None:
-        location = rg_location
-    norm_location = location.replace(' ', '').lower()
-
-    if os_type.lower() in ['linux', 'both']:
-        helm_release_name = connector_name.lower() + '-linux-' + norm_location
-        node_name = 'virtual-kubelet-' + helm_release_name
-        _undeploy_connector(graceful, node_name, helm_release_name)
-
-    if os_type.lower() in ['windows', 'both']:
-        helm_release_name = connector_name.lower() + '-windows-' + norm_location
-        node_name = 'virtual-kubelet-' + helm_release_name
-        _undeploy_connector(graceful, node_name, helm_release_name)
-
-
-def _undeploy_connector(graceful, node_name, helm_release_name):
-    if graceful:
-        logger.warning('Graceful option selected, will try to drain the node first')
-        from subprocess import PIPE, Popen
-        kubectl_not_installed = 'Kubectl not detected, please verify if it is installed.'
-        try:
-            Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
-        except OSError:
-            raise CLIError(kubectl_not_installed)
-
-        try:
-            drain_node = subprocess.check_output(
-                ['kubectl', 'drain', node_name, '--force', '--delete-local-data'],
-                universal_newlines=True)
-
-            if not drain_node:
-                raise CLIError('Could not find the node, make sure you' +
-                               ' are using the correct --os-type')
-        except subprocess.CalledProcessError as err:
-            raise CLIError('Could not find the node, make sure you are using the correct' +
-                           ' --connector-name, --location and --os-type options: {}'.format(err))
-
-    logger.warning("Undeploying the '%s' using Helm", helm_release_name)
-    try:
-        subprocess.call(['helm', 'del', helm_release_name, '--purge'])
-    except subprocess.CalledProcessError as err:
-        raise CLIError('Could not undeploy the ACI connector Chart: {}'.format(err))
-
-    try:
-        subprocess.check_output(
-            ['kubectl', 'delete', 'node', node_name],
-            universal_newlines=True)
-    except subprocess.CalledProcessError as err:
-        raise CLIError('Could not delete the node, make sure you are using the correct' +
-                       ' --connector-name, --location and --os-type options: {}'.format(err))
-
-
 def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     # use get_progress_controller
     hook = cli_ctx.get_progress_controller(True)
@@ -1214,7 +1050,7 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_
 def _handle_merge(existing, addition, key, replace):
     if not addition.get(key, False):
         return
-    if existing[key] is None:
+    if not existing.get(key):
         existing[key] = addition[key]
         return
 
@@ -1748,6 +1584,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                kubernetes_version='',
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
+               node_osdisk_diskencryptionset_id=None,
                node_count=3,
                nodepool_name="nodepool1",
                nodepool_tags=None,
@@ -1759,6 +1596,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                vm_set_type=None,
                skip_subnet_role_assignment=False,
                enable_cluster_autoscaler=False,
+               cluster_autoscaler_profile=None,
                network_plugin=None,
                network_policy=None,
                uptime_sla=False,
@@ -1938,6 +1776,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 load_balancer_profile=load_balancer_profile,
                 outbound_type=outbound_type,
             )
+        if load_balancer_sku.lower() == "basic":
+            network_profile = ContainerServiceNetworkProfile(
+                load_balancer_sku=load_balancer_sku.lower(),
+            )
 
     addon_profiles = _handle_addons_args(
         cmd,
@@ -2006,8 +1848,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         network_profile=network_profile,
         addon_profiles=addon_profiles,
         aad_profile=aad_profile,
+        auto_scaler_profile=cluster_autoscaler_profile,
         api_server_access_profile=api_server_access_profile,
-        identity=identity
+        identity=identity,
+        disk_encryption_set_id=node_osdisk_diskencryptionset_id
     )
 
     if uptime_sla:
@@ -2151,7 +1995,8 @@ ADDONS = {
     'http_application_routing': 'httpApplicationRouting',
     'monitoring': 'omsagent',
     'virtual-node': 'aciConnector',
-    'kube-dashboard': 'kubeDashboard'
+    'kube-dashboard': 'kubeDashboard',
+    'azure-policy': 'azurepolicy'
 }
 
 
@@ -2227,6 +2072,7 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_cluster_autoscaler=False,
                disable_cluster_autoscaler=False,
                update_cluster_autoscaler=False,
+               cluster_autoscaler_profile=None,
                min_count=None, max_count=None,
                uptime_sla=False,
                load_balancer_managed_outbound_ip_count=None,
@@ -2249,7 +2095,8 @@ def aks_update(cmd, client, resource_group_name, name,
                                                           load_balancer_idle_timeout)
     update_aad_profile = not (aad_tenant_id is None and aad_admin_group_object_ids is None)
     # pylint: disable=too-many-boolean-expressions
-    if (update_autoscaler != 1 and not update_lb_profile and
+    if (update_autoscaler != 1 and cluster_autoscaler_profile is None and
+            not update_lb_profile and
             not attach_acr and
             not detach_acr and
             not uptime_sla and
@@ -2259,6 +2106,7 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
+                       '"--cluster-autoscaler-profile" or '
                        '"--load-balancer-managed-outbound-ip-count" or'
                        '"--load-balancer-outbound-ips" or '
                        '"--load-balancer-outbound-ip-prefixes" or'
@@ -2305,6 +2153,16 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.agent_pool_profiles[0].enable_auto_scaling = False
         instance.agent_pool_profiles[0].min_count = None
         instance.agent_pool_profiles[0].max_count = None
+
+    # if intention is to clear autoscaler profile
+    if cluster_autoscaler_profile == {}:
+        instance.auto_scaler_profile = {}
+    # else profile is provided, update instance profile if it exists
+    elif cluster_autoscaler_profile:
+        instance.auto_scaler_profile = _update_dict(instance.auto_scaler_profile.__dict__,
+                                                    dict((key.replace("-", "_"), value)
+                                                         for (key, value) in cluster_autoscaler_profile.items())) \
+            if instance.auto_scaler_profile else cluster_autoscaler_profile
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -2598,6 +2456,9 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
         raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
+    if 'azure-policy' in addons:
+        addon_profiles['azurepolicy'] = ManagedClusterAddonProfile(enabled=True)
+        addons.remove('azure-policy')
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
