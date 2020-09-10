@@ -63,7 +63,7 @@ long-summary: |
     This default policy can be used in conjunction with `az keyvault create` to create a self-signed certificate.
     The default policy can also be used as a starting point to create derivative policies.
 
-    For more details, see: https://docs.microsoft.com/rest/api/keyvault/certificates-and-policies
+    For more details, see: https://docs.microsoft.com/azure/key-vault/certificates/about-certificates#certificate-policy
 examples:
   - name: Create a self-signed certificate with the default policy
     text: |
@@ -176,6 +176,15 @@ short-summary: List key vaults.
 helps['keyvault network-rule'] = """
 type: group
 short-summary: Manage vault network ACLs.
+"""
+
+helps['keyvault network-rule wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vault is met.
+examples:
+  - name: Pause CLI until the network ACLs are updated.
+    text: |
+        az keyvault network-rule wait --name MyVault --updated
 """
 
 helps['keyvault private-endpoint-connection'] = """
@@ -387,4 +396,13 @@ examples:
     text: |
         az keyvault update --enabled-for-disk-encryption true --name MyKeyVault --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['keyvault wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vault is met.
+examples:
+  - name: Pause CLI until the vault is created.
+    text: |
+        az keyvault wait --name MyVault --created
 """

@@ -121,7 +121,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_new_kv_cert')
+    @KeyVaultPreparer(name_prefix='test-new-kv-cert')
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
         KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
@@ -156,7 +156,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
-    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_existing_kv_cert')
+    @KeyVaultPreparer(name_prefix='test-exist-kv-cert')
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
 
         import time
@@ -392,15 +392,15 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             base_dir = os.path.abspath(os.curdir)
 
             try:
-                temp_dir = self.create_temp_dir()
+                temp_dir = os.path.realpath(self.create_temp_dir())
                 os.chdir(temp_dir)
                 self.cmd('configure --default group={rg} --scope local')
-                local_defaults_config = self.cmd('configure --list-defaults --scope local', checks=[
-                    self.check('length([])', 1),
-                    self.check('[0].name', 'group'),
-                    self.check('[0].value', '{rg}')
-                ]).get_output_in_json()
-                self.assertTrue(temp_dir.lower() in local_defaults_config[0]['source'].lower())
+                local_defaults_config = self.cmd('configure --list-defaults --scope local').get_output_in_json()
+
+                self.assertGreaterEqual(len(local_defaults_config), 1)
+                actual = set([(x['name'], x['source'], x['value']) for x in local_defaults_config if x['name'] == 'group'])
+                expected = set([('group', os.path.join(temp_dir, '.azure', 'config'), self.kwargs['rg'])])
+                self.assertEqual(actual, expected)
 
                 # test role assignments on a resource group
                 rg_id = self.cmd('group show -n {rg}').get_output_in_json()['id']

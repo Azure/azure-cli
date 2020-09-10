@@ -95,7 +95,7 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
                       '--connection-name {pe_connection} --private-connection-resource-id {kv_id} '
-                      '--group-ids vault').get_output_in_json()
+                      '--group-id vault').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
 
         # Show the connection at vault side
@@ -753,7 +753,7 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_pending')
     def test_keyvault_pending_certificate(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-cr-pe-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-pe-', 24),
             'loc': 'westus',
             'policy_path': os.path.join(TEST_DIR, 'policy_pending.json')
         })

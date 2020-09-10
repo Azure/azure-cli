@@ -5043,6 +5043,10 @@ def update_nw_flow_log(cmd,
         if not workspace:
             raise CLIError('Name or ID of workspace is invalid')
 
+        if instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration is None:
+            analytics_conf = cmd.get_models('TrafficAnalyticsConfigurationProperties')
+            instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration = analytics_conf()
+
         with cmd.update_context(
                 instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
             c.set_param('enabled', traffic_analytics_enabled)
@@ -5521,7 +5525,9 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
                   route_table=None, service_endpoints=None, service_endpoint_policy=None,
-                  delegations=None, nat_gateway=None):
+                  delegations=None, nat_gateway=None,
+                  disable_private_endpoint_network_policies=None,
+                  disable_private_link_service_network_policies=None):
     NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -5550,6 +5556,16 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
             subnet.service_endpoint_policies.append(SubResource(id=policy))
     if delegations:
         subnet.delegations = delegations
+
+    if disable_private_endpoint_network_policies is True:
+        subnet.private_endpoint_network_policies = "Disabled"
+    if disable_private_endpoint_network_policies is False:
+        subnet.private_endpoint_network_policies = "Enabled"
+
+    if disable_private_link_service_network_policies is True:
+        subnet.private_link_service_network_policies = "Disabled"
+    if disable_private_link_service_network_policies is False:
+        subnet.private_link_service_network_policies = "Enabled"
 
     vnet = cached_get(cmd, ncf.virtual_networks.get, resource_group_name, virtual_network_name)
     upsert_to_collection(vnet, 'subnets', subnet, 'name')
