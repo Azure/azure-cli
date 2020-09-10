@@ -76,10 +76,16 @@ class QueryExample:
         self._help_str = help_str
         self._examples_len = max_length
         self._help_len = max_length
+        self.escape_char()
 
     def set_max_length(self, examples_len, help_len):
         self._examples_len = examples_len
         self._help_len = help_len
+
+    def escape_char(self):
+        """Escape special characters in JMESPath"""
+        # escape backslash
+        self._query_str = self._query_str.replace('`', '\\`')
 
     def _asdict(self):
         query_str = self._query_str
@@ -122,9 +128,9 @@ class QueryTreeNode:
     def get_help_str(self, help_type):
         """Return help string based on help_type."""
         help_table = {
-            'contains': "Display {} field that contains given string.".format(self._name),
-            'filter': "Display resources that satisfy the condition.",
-            'select': "Display value of {} field".format(self._name),
+            'contains': 'Show the {} field that contains given string.'.format(self._name),
+            'filter': 'Show the resources that satisfy the condition.',
+            'select': 'Show the value of {} field.'.format(self._name),
         }
         return help_table.get(help_type, '')
 
@@ -224,7 +230,8 @@ class QueryTreeBuilder:
             if node_name:  # skip root node
                 for node in self._all_nodes.get(node_name):
                     examples.extend(node.get_examples())
-        examples = examples[:self._config['max_examples']]
+        if self._config['max_examples'] >= 0:
+            examples = examples[:self._config['max_examples']]
         if output_format == 'table':
             for item in examples:
                 item.set_max_length(self._config['examples_len'], self._config['help_len'])
