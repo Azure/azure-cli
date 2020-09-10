@@ -348,6 +348,14 @@ class AzCliCommandParser(CLICommandParser):
             use_dynamic_install = default_value
         return use_dynamic_install
 
+    def _get_extension_run_after_dynamic_install_config(self):
+        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        default_value = False
+        run_after_extension_installed = cli_ctx.config.getboolean('extension',
+                                                                  'run_after_dynamic_install',
+                                                                  default_value) if cli_ctx else default_value
+        return run_after_extension_installed
+
     def _check_value(self, action, value):  # pylint: disable=too-many-statements, too-many-locals
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
@@ -371,9 +379,7 @@ class AzCliCommandParser(CLICommandParser):
                         telemetry.set_command_details(command_str,
                                                       parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
                                                       extension_name=ext_name)
-                        run_after_extension_installed = cli_ctx.config.getboolean('extension',
-                                                                                  'run_after_dynamic_install',
-                                                                                  True) if cli_ctx else True
+                        run_after_extension_installed = self._get_extension_run_after_dynamic_install_config()
                         if use_dynamic_install == 'yes_without_prompt':
                             logger.warning('The command requires the extension %s. '
                                            'It will be installed first.', ext_name)
@@ -407,7 +413,7 @@ class AzCliCommandParser(CLICommandParser):
                                                          "rerun automatically.".format(ext_name))
                                 self.exit(exit_code)
                             else:
-                                error_msg = "Extension {} installed. Please rerun your command.".format(ext_name)
+                                error_msg = 'Extension {} installed. Please rerun your command.'.format(ext_name)
                         else:
                             error_msg = "The command requires the extension {ext_name}. " \
                                 "To install, run 'az extension add -n {ext_name}'.".format(ext_name=ext_name)
