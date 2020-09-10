@@ -101,7 +101,7 @@ def validate_subnet(cmd, namespace):
             child_type_1='subnets',
             child_name_1=subnet)
     else:
-        raise CLIError('Incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')
 
 
@@ -115,7 +115,7 @@ def validate_private_endpoint_connection_id(cmd, namespace):
         namespace.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, namespace.server_name)
 
     if not all([namespace.server_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('Incorrect usage: [--id ID | --name NAME --server-name NAME]')
+        raise CLIError('incorrect usage: [--id ID | --name NAME --server-name NAME]')
 
     del namespace.connection_id
 
@@ -186,11 +186,11 @@ def maintenance_window_validator(ns):
         parsed_input = ns.maintenance_window.split(':')
         if len(parsed_input) < 1 or len(parsed_input) > 3:
             raise CLIError('Incorrect value for --maintenance_window. Enter <Day>:<Hour>:<Minute>. Example: "0:8:30" to schedule on Monday, 8:30 UTC')
-        elif len(parsed_input) >= 1 and (not parsed_input[0].isdigit() or int(parsed_input[0]) < 0 or int(parsed_input[0]) > 6): 
+        elif len(parsed_input) >= 1 and (not parsed_input[0].isdigit() or int(parsed_input[0]) < 0 or int(parsed_input[0]) > 6):
             raise CLIError('Incorrect value for --maintenance_window. The first number means the scheduled day in a week. Allowed values: {0, 1, 2, 3, 4, 5, 6}')
-        elif len(parsed_input) >= 2 and (not parsed_input[1].isdigit() or int(parsed_input[1]) < 0 or int(parsed_input[1]) > 23): 
+        elif len(parsed_input) >= 2 and (not parsed_input[1].isdigit() or int(parsed_input[1]) < 0 or int(parsed_input[1]) > 23):
             raise CLIError('Incorrect value for --maintenance_window. The second number means the scheduled hour in the scheduled day. Allowed values: {0, 1, ... 23}')
-        elif len(parsed_input) >= 3 and (not parsed_input[2].isdigit() or int(parsed_input[2]) < 0 or int(parsed_input[2]) > 59): 
+        elif len(parsed_input) >= 3 and (not parsed_input[2].isdigit() or int(parsed_input[2]) < 0 or int(parsed_input[2]) > 59):
             raise CLIError('Incorrect value for --maintenance_window. The third number means the scheduled minute in the scheduled hour. Allowed values: {0, 1, ... 59}')
 
 def ip_address_validator(ns):
@@ -200,8 +200,8 @@ def ip_address_validator(ns):
 def public_access_validator(ns):
     if ns.public_access:
         val = ns.public_access
-        if not(val == 'on' or (len(val.split('-')) == 1 and _validate_ip(val)) or (len(val.split('-')) == 2 and _validate_ip(val))):
-            raise CLIError('Incorrect usage: --public-access. Acceptable values are \'on\' or \'<startIP>\' or \'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
+        if not (val == 'all' or val == 'none' or (len(val.split('-')) == 1 and _validate_ip(val)) or (len(val.split('-')) == 2 and _validate_ip(val))):
+            raise CLIError('incorrect usage: --public-access. Acceptable values are \'all\', \'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
 
 
 def _validate_ip(ips):
