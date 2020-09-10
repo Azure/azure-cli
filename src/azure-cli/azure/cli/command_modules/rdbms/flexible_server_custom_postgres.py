@@ -62,17 +62,21 @@ def _flexible_server_create(cmd, client,
         if server_result is None:
             # If subnet is provided, use that subnet to create the server, else create subnet if public access is not enabled.
             if subnet_arm_resource_id is not None:
-                subnet_id = subnet_arm_resource_id # set the subnet id to be the one passed in
+                subnet_id = subnet_arm_resource_id  # set the subnet id to be the one passed in
+                delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+            subnet_arm_resource_id=subnet_id)
             elif public_access is None and subnet_arm_resource_id is None:
                 subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
                                         "Microsoft.DBforPostgreSQL/flexibleServers")
-            delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-                subnet_arm_resource_id=subnet_id)
+                delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+            subnet_arm_resource_id=subnet_id)
+            else:
+                delegated_subnet_arguments = None
             # Create postgresql
             # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
             server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
                                            sku_name, tier, storage_mb, administrator_login, administrator_login_password,
-                                           version, tags, delegated_subnet_arguments, assign_identity, subnet_id,
+                                           version, tags, subnet_id, assign_identity,delegated_subnet_arguments,
                                            high_availability, zone)
 
             # Adding firewall rule
