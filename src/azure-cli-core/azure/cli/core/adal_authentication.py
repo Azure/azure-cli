@@ -90,6 +90,6 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
 class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core.
-    def get_token(self):
+    def get_token(self, *scopes, **kwargs):
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
