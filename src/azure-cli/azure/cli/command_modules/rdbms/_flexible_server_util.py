@@ -91,13 +91,16 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     # allow access to azure ip addresses
     cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name
     now = datetime.now()
-    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
+    firewall_name = 'ClientIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
     if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
         logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
                    'Azure resources...')
+        firewall_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
     elif start_ip == end_ip:
         logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip)
     else:
+        if start_ip == '0.0.0.0' and end_ip == '255.255.255.255':
+            firewall_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
         logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip, end_ip)
     firewall_client = cf_firewall(cmd.cli_ctx, None)
     '''

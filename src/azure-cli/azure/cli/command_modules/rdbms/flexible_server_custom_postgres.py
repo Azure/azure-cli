@@ -64,8 +64,8 @@ def _flexible_server_create(cmd, client,
             sku_name, tier, storage_mb, administrator_login, administrator_login_password, version,
             tags, public_access, assign_identity, delegated_subnet_arguments, high_availability, zone)
 
-        if public_access is not None:
-            if public_access == 'on':
+        if public_access is not None and public_access != 'none':
+            if public_access == 'all':
                 start_ip, end_ip = '0.0.0.0', '255.255.255.255'
             else:
                 start_ip, end_ip = parse_public_access_input(public_access)
