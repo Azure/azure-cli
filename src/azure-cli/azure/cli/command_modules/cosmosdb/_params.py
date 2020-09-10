@@ -247,11 +247,6 @@ def load_arguments(self, _):
         c.argument('throughput', type=int, help='The throughput of SQL database (RU/s).')
         c.argument('max_throughput', max_throughput_type)
 
-    with self.argument_context('cosmosdb sql database throughput migrate') as c:
-        c.argument('account_name', account_name_type, id_part=None)
-        c.argument('database_name', options_list=['--name', '-n'], help="Database name")
-        c.argument('throughput_type', throughput_type)
-
     with self.argument_context('cosmosdb sql container throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', database_name_type)
@@ -259,17 +254,11 @@ def load_arguments(self, _):
         c.argument('throughput', type=int, help='The throughput of SQL container (RU/s).')
         c.argument('max_throughput', max_throughput_type)
 
-    with self.argument_context('cosmosdb sql container throughput migrate') as c:
-        c.argument('throughput_type', throughput_type)
-
     with self.argument_context('cosmosdb mongodb database throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', type=int, help='The throughput of MongoDB database (RU/s).')
         c.argument('max_throughput', max_throughput_type)
-
-    with self.argument_context('cosmosdb mongodb database throughput migrate') as c:
-        c.argument('throughput_type', throughput_type)
 
     with self.argument_context('cosmosdb mongodb collection throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -278,17 +267,11 @@ def load_arguments(self, _):
         c.argument('throughput', type=int, help='The throughput of MongoDB collection (RU/s).')
         c.argument('max_throughput', max_throughput_type)
 
-    with self.argument_context('cosmosdb mongodb collection throughput migrate') as c:
-        c.argument('throughput_type', throughput_type)
-
     with self.argument_context('cosmosdb cassandra keyspace throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('keyspace_name', options_list=['--name', '-n'], help="Keyspace name")
         c.argument('throughput', type=int, help='The throughput of Cassandra keyspace (RU/s).')
         c.argument('max_throughput', max_throughput_type)
-
-    with self.argument_context('cosmosdb cassandra keyspace throughput migrate') as c:
-        c.argument('throughput_type', throughput_type)
 
     with self.argument_context('cosmosdb cassandra table throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -297,17 +280,11 @@ def load_arguments(self, _):
         c.argument('throughput', type=int, help='The throughput of Cassandra table (RU/s).')
         c.argument('max_throughput', max_throughput_type)
 
-    with self.argument_context('cosmosdb cassandra table throughput migrate') as c:
-        c.argument('throughput_type', throughput_type)
-
     with self.argument_context('cosmosdb gremlin database throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', type=int, help='The throughput of Gremlin database (RU/s).')
         c.argument('max_throughput', max_throughput_type)
-
-    with self.argument_context('cosmosdb gremlin database throughput migrate') as c:
-        c.argument('throughput_type', throughput_type)
 
     with self.argument_context('cosmosdb gremlin graph throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -316,14 +293,16 @@ def load_arguments(self, _):
         c.argument('throughput', type=int, help='The throughput Gremlin graph (RU/s).')
         c.argument('max_throughput', max_throughput_type)
 
-    with self.argument_context('cosmosdb gremlin graph throughput migrate') as c:
-        c.argument('throughput_type', throughput_type)
-
     with self.argument_context('cosmosdb table throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', type=int, help='The throughput of Table (RU/s).')
         c.argument('max_throughput', max_throughput_type)
 
-    with self.argument_context('cosmosdb table throughput migrate') as c:
-        c.argument('throughput_type', throughput_type)
+    for scope in ['sql database throughput migrate', 'sql container throughput migrate',
+                  'gremlin database throughput migrate', 'gremlin graph throughput migrate',
+                  'cassandra table throughput migrate', 'cassandra keyspace throughput migrate',
+                  'mongodb collection throughput migrate', 'mongodb database throughput migrate',
+                  'table throughput migrate']:
+        with self.argument_context('cosmosdb {}'.format(scope)) as c:
+            c.argument('throughput_type', throughput_type)
