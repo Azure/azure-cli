@@ -27,7 +27,7 @@ Release History
 **Storage**
 
 * `az storage blob list`: Support OR properties with new api version (#14832)
-
+ 
 2.11.0
 ++++++
 
