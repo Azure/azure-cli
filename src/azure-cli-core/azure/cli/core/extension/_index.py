@@ -19,11 +19,22 @@ ERR_UNABLE_TO_GET_EXTENSIONS = 'Unable to get extensions from index. Improper in
 TRIES = 3
 
 
+def get_index_url(cli_ctx=None):
+    import posixpath
+    if cli_ctx:
+        url = cli_ctx.config.get('extension', 'index_url', None)
+    if url:
+        return url
+    ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
+    url = posixpath.join(ext_endpoint, 'index.json') if ext_endpoint else DEFAULT_INDEX_URL
+    return url
+
+
 # pylint: disable=inconsistent-return-statements
 def get_index(index_url=None, cli_ctx=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    index_url = index_url or (cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else DEFAULT_INDEX_URL)
+    index_url = index_url or get_index_url(cli_ctx=cli_ctx)
 
     for try_number in range(TRIES):
         try:

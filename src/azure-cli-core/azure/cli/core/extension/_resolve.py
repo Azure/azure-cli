@@ -88,6 +88,11 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     download_url, digest = chosen.get('downloadUrl'), chosen.get('sha256Digest')
     if not download_url:
         raise NoExtensionCandidatesError("No download url found.")
+    ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
+    if ext_endpoint:
+        import posixpath
+        whl_name = download_url.split('/')[-1]
+        download_url = posixpath.join(ext_endpoint, whl_name)
     return download_url, digest
 
 

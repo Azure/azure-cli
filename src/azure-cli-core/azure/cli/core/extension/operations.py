@@ -358,8 +358,8 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
     return results
 
 
-def list_versions(extension_name, index_url=None):
-    index_data = get_index_extensions(index_url=index_url)
+def list_versions(extension_name, index_url=None, cli_ctx=None):
+    index_data = get_index_extensions(index_url=index_url, cli_ctx=cli_ctx)
 
     try:
         exts = index_data[extension_name]

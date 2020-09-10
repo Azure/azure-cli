@@ -39,5 +39,5 @@ def list_available_extensions_cmd(cmd, index_url=None, show_details=False):
     return list_available_extensions(index_url=index_url, show_details=show_details, cli_ctx=cmd.cli_ctx)
 
 
-def list_versions_cmd(extension_name, index_url=None):
-    return list_versions(extension_name, index_url=index_url)
+def list_versions_cmd(cmd, extension_name, index_url=None):
+    return list_versions(extension_name, index_url=index_url, cli_ctx=cmd.cli_ctx)
