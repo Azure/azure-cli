@@ -30,7 +30,7 @@ def load_arguments(self, _):
                         'and unset the first occurrence.')
 
     with self.argument_context('config parampersist show') as c:
-        c.positional('name', nargs='*', help='Space-separated list of parameter persist names.')
+        c.positional('name', nargs='*', help='Space-separated list of parameter persistence names.')
 
     with self.argument_context('config parampersist delete') as c:
         c.positional('name', nargs='*', help='Space-separated list of parameter persistence names. Either positional name argument or --all can be specified.')
