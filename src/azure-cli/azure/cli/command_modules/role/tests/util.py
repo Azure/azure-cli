@@ -5,8 +5,11 @@
 
 from knack.util import CLIError
 
+ROLE_COMMAND_MAX_RETRY = 20
+ROLE_COMMAND_SLEEP_DURATION = 10
 
-def cmd_with_retry(self, *args, **kwargs):
+
+def cmd_with_retry(self, *args, sleep_duration=ROLE_COMMAND_SLEEP_DURATION, max_retry=ROLE_COMMAND_MAX_RETRY, **kwargs):
     """Retry self.cmd and checks until success."""
     # Due to unstable role definition ARIs: https://github.com/Azure/azure-cli/issues/3187
     import time
@@ -15,5 +18,9 @@ def cmd_with_retry(self, *args, **kwargs):
         try:
             result = self.cmd(*args, **kwargs)
         except (AssertionError, CLIError):
-            time.sleep(10)
+            if max_retry > 0:
+                max_retry -= 1
+                time.sleep(sleep_duration)
+            else:
+                raise
     return result
