@@ -84,7 +84,7 @@ class QueryExample:
 
     def escape_char(self):
         """Escape special characters in JMESPath"""
-        # escape backslash
+        # escape backtick
         self._query_str = self._query_str.replace('`', '\\`')
 
     def _asdict(self):
