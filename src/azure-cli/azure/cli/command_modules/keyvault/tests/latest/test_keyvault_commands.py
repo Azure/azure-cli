@@ -447,9 +447,15 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                                checks=[
                                    self.check('status', 'Succeeded'),
                                    self.exists('startTime'),
-                                   self.exists('id')
+                                   self.exists('id'),
+                                   self.exists('azureStorageBlobContainerUri')
                                ]).get_output_in_json()
 
+        # TODO: remove this line when SDK is ready
+        self.kwargs['backup_folder'] = backup_data['azureStorageBlobContainerUri'].split('/')[-1]
+
+        # TODO: enable this when SDK is ready
+        """
         self.kwargs['backup_job_id'] = backup_data['id']
         max_retries = 10
         counter = 0
@@ -473,7 +479,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                 raise CLIError('Backup failed')
             counter += 1
             time.sleep(10)
-
+        """
         restore_data = self.cmd('az keyvault restore start --hsm-name {hsm_name} --blob-container-name {blob} '
                                 '--storage-account-name {storage_account} '
                                 '--storage-container-SAS-token "{sas}" '
@@ -484,6 +490,8 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                                     self.exists('id')
                                 ]).get_output_in_json()
 
+        # TODO: enable this when SDK is ready
+        """
         self.kwargs['restore_job_id'] = restore_data['id']
         self.cmd('az keyvault restore status --hsm-name {hsm_name} --job-id {restore_job_id}',
                  checks=[
@@ -497,6 +505,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                      self.exists('startTime'),
                      self.check('id', '{restore_job_id}')
                  ])
+        """
 
 
 class KeyVaultHSMRoleScenarioTest(ScenarioTest):

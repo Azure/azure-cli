@@ -124,13 +124,13 @@ def load_command_table(self, _):
     with self.command_group('keyvault backup', data_backup_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('start', 'full_backup', supports_no_wait=True,
                           doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
-        g.keyvault_command('status', 'full_backup_status')
+        # g.keyvault_command('status', 'full_backup_status')
 
     with self.command_group('keyvault restore', data_backup_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('start', 'full_restore', supports_no_wait=True,
                           doc_string_source=data_backup_entity.operations_docs_tmpl.format(
                               'begin_full_restore'))
-        g.keyvault_command('status', 'restore_status')
+        # g.keyvault_command('status', 'restore_status')
 
     with self.command_group('keyvault security-domain', private_data_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
@@ -138,7 +138,7 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'security_domain_download')
         g.keyvault_custom('wait', '_wait_security_domain_operation')
 
-    with self.command_group('keyvault key', private_data_entity.command_type) as g:
+    with self.command_group('keyvault key', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_keys',
                            transform=multi_transformers(
                                filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
@@ -147,7 +147,7 @@ def load_command_table(self, _):
         g.keyvault_command('list-deleted', 'get_deleted_keys',
                            transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_custom('create', 'create_key',
-                          doc_string_source=private_data_entity.operations_docs_tmpl.format('create_key'))
+                          doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
@@ -162,9 +162,9 @@ def load_command_table(self, _):
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key',
-                          doc_string_source=private_data_entity.operations_docs_tmpl.format('backup_key'))
+                          doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
         g.keyvault_custom('restore', 'restore_key',
-                          doc_string_source=private_data_entity.operations_docs_tmpl.format('restore_key'))
+                          doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)

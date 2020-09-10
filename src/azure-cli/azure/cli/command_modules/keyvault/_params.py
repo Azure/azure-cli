@@ -43,7 +43,7 @@ def load_arguments(self, _):
          'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          'JsonWebKeyEncryptionAlgorithm',
-         resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+         resource_type=ResourceType.DATA_KEYVAULT)
 
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
@@ -329,14 +329,6 @@ def load_arguments(self, _):
                            type=datetime_type)
                 c.argument('not_before', default=None, type=datetime_type,
                            help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
-                c.argument('exportable', arg_type=get_three_state_flag(),
-                           is_preview=True,
-                           help='Indicates if the private key can be exported.')
-
-            c.argument('release_policy', options_list=['--policy'],
-                       help='The policy rules under which the key can be exported encoded with JSON. '
-                            'Use @{file} to load from a file(e.g. @my_policy.json).',
-                       type=get_json_object, is_preview=True)
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
@@ -464,7 +456,7 @@ def load_arguments(self, _):
 
     # region keyvault backup/restore
     for item in ['backup', 'restore']:
-        for scope in ['start', 'status']:
+        for scope in ['start']:  # TODO add 'status' when SDK is ready
             with self.argument_context('keyvault {} {}'.format(item, scope), arg_group='HSM Id') as c:
                 c.argument('vault_base_url', hsm_name_type, required=False,
                            help='Name of the HSM. Can be omitted if --id is specified.')
