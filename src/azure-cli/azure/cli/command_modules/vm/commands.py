@@ -210,6 +210,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_encryption_sets')
+        g.command('list-associated-resources', 'list_associated_resources')
 
     with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
