@@ -51,6 +51,9 @@ class ApimScenarioTest(ScenarioTest):
                          self.check('publisherName', '{publisher_name}'),
                          self.check('publisherEmail', '{publisher_email}')])
 
+        # wait
+        self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
+
         self.cmd('apim check-name -n {service_name}',
                  checks=[self.check('nameAvailable', False),
                          self.check('reason', 'AlreadyExists')])
@@ -124,6 +127,9 @@ class ApimScenarioTest(ScenarioTest):
             self.check('path', '{path}'),
             self.check('serviceUrl', '{service_url}')
         ])
+
+        # wait
+        self.cmd('apim api wait -g "{rg}" -n "{service_name}" --api-id "{api_id}" --created', checks=[self.is_empty()])
 
         # import api
         self.cmd('apim api import -g "{rg}" --service-name "{service_name}" --path "{path2}" --api-id "{api_id2}" --specification-url "{specification_url}" --specification-format "{specification_format}"', checks=[
@@ -334,7 +340,7 @@ class ApimScenarioTest(ScenarioTest):
             'display_name': self.create_random_name('nv-name', 14),
             'value': 'testvalue123',
             'nv_id': self.create_random_name('az-nv', 12),
-            'secret': False,
+            'secret': True,
             'tags': "foo=baz",
             'updatedtestvalue': 'updatedtestvalue123'
         })
@@ -342,18 +348,24 @@ class ApimScenarioTest(ScenarioTest):
         # create named value
         self.cmd('apim nv create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --value "{value}" --named-value-id "{nv_id}" --secret "{secret}" --tags "{tags}"', checks=[
             self.check('displayName', '{display_name}'),
-            self.check('value', '{value}'),
             self.check('secret', '{secret}')
+        ])
+
+        # get secret named value
+        self.cmd('apim nv show-secret -g "{rg}" --service-name "{service_name}" --named-value-id "{nv_id}"', checks=[
+            self.check('value', '{value}')
         ])
 
         # get named value
         self.cmd('apim nv show -g {rg} --service-name {service_name} --named-value-id {nv_id}', checks=[
-            self.check('displayName', '{display_name}'),
-            self.check('value', '{value}')
+            self.check('displayName', '{display_name}')
         ])
 
         # update named value
-        self.cmd('apim nv update -g "{rg}" --service-name "{service_name}" --named-value-id "{nv_id}" --value "{updatedtestvalue}"', checks=[
+        self.cmd('apim nv update -g "{rg}" --service-name "{service_name}" --named-value-id "{nv_id}" --value "{updatedtestvalue}"')
+
+        # get secret named value
+        self.cmd('apim nv show-secret -g "{rg}" --service-name "{service_name}" --named-value-id "{nv_id}"', checks=[
             self.check('value', '{updatedtestvalue}')
         ])
 

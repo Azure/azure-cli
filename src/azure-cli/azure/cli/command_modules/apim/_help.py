@@ -288,9 +288,6 @@ helps['apim nv create'] = """
 type: command
 short-summary: Create an API Management Named Value.
 parameters:
-  - name: --service-name
-    type: string
-    short-summary: name of the service instance
   - name: --named-value-id
     type: string
     short-summary: unique name for the Named Value to be created
@@ -312,9 +309,6 @@ helps['apim nv update'] = """
 type: command
 short-summary: Update an API Management Named Value.
 parameters:
-  - name: --service-name
-    type: string
-    short-summary: name of the service instance
   - name: --named-value-id
     type: string
     short-summary: unique name of the api to be created
