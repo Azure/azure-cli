@@ -1446,7 +1446,9 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     # verify the kube-dashboard addon was not disabled
     instance = client.get(resource_group_name, name)
     addon_profiles = instance.addon_profiles or {}
-    addon_profile = addon_profiles.get("kubeDashboard", ManagedClusterAddonProfile(enabled=True))
+    # addon name is case insensitive
+    addon_profile = next((addon_profiles[k] for k in addon_profiles if k.lower() == 'kubeDashboard'.lower()),
+                         ManagedClusterAddonProfile(enabled=True))
     if not addon_profile.enabled:
         raise CLIError('The kube-dashboard addon was disabled for this managed cluster.\n'
                        'To use "az aks browse" first enable the add-on\n'
@@ -2356,13 +2358,13 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     addon_args = addons.split(',')
 
     addon_profiles = instance.addon_profiles or {}
-    if 'kube-dashboard' in addon_args and 'kubeDashboard' not in addon_profiles:
-        addon_profiles['kubeDashboard'] = ManagedClusterAddonProfile(enabled=True)
 
     os_type = 'Linux'
 
     # for each addons argument
     for addon_arg in addon_args:
+        if addon_arg not in ADDONS:
+            raise CLIError("Invalid addon name: {}.".format(addon_arg))
         addon = ADDONS[addon_arg]
         if addon == 'aciConnector':
             # only linux is supported for now, in the future this will be a user flag
@@ -2401,7 +2403,10 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
-                raise CLIError("The addon {} is not installed.".format(addon))
+                if addon == 'kubeDashboard':
+                    addon_profiles[addon] = ManagedClusterAddonProfile(enabled=False)
+                else:
+                    raise CLIError("The addon {} is not installed.".format(addon))
             addon_profiles[addon].config = None
         addon_profiles[addon].enabled = enable
 
