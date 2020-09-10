@@ -50,8 +50,8 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
     except CloudError:
         administrator_login_password = generate_password(administrator_login_password)
-        if public_access is None:
-            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.MySQL/flexibleServers")
+        if public_access is None and subnet_arm_resource_id is None:
+            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforMySQL/flexibleServers")
             delegated_subnet_arguments=mysql.flexibleservers.models.DelegatedSubnetArguments(
                 subnet_arm_resource_id=subnet_id
             )
@@ -78,16 +78,23 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     user = server_result.administrator_login
     id = server_result.id
     loc = server_result.location
-    host = server_result.fully_qualified_domain_name
     version = server_result.version
     sku = server_result.sku.name
 
-    logger.warning('Make a note of your password. If you forget, you would have to'
-                   ' reset your password with CLI command for reset password')
+    # This is a workaround for getting the hostname right .
+    # Without Vnet, the hostname returned by the API os <servername>.postgres.database.azure.com
+    # with Vnet enabled, the hostname returned by the API is <servername>.<servername>.postgres.database.azure.com
+    if len(server_result.fully_qualified_domain_name.split('.')) != 6:
+        host = server_result.fully_qualified_domain_name
+    else:
+        host = server_result.fully_qualified_domain_name[(server_result.fully_qualified_domain_name.index('.')) + 1:]
+
+    logger.warning('Make a note of your password. If you forget, you would have to' \
+                   ' reset your password with \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.', server_name, resource_group_name)
 
     _update_local_contexts(cmd, server_name, resource_group_name, location)
 
-    return _form_response(user, sku, loc, id, host,version,
+    return _form_response(user, sku, loc, id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
                           _create_mysql_connection_string(host, database_name, user, administrator_login_password), database_name, firewall_id, subnet_id
     )
@@ -214,7 +221,7 @@ def _server_delete_func(cmd, client, resource_group_name=None, server_name=None,
 
 
 ## Parameter update command
-def _flexible_parameter_update(client, ids, server_name, configuration_name, resource_group_name, source=None, value=None):
+def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
         # update the command with system default
         try:

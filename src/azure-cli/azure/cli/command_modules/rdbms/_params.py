@@ -12,7 +12,9 @@ from azure.cli.core.commands.parameters import (
     tags_type, get_location_type,
     get_enum_type,
     get_three_state_flag)
-from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator, tls_validator, public_access_validator, pg_storage_validator, mysql_storage_validator
+from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
+    retention_validator, tls_validator, public_access_validator, pg_storage_validator, mysql_storage_validator, tier_validator, \
+    pg_sku_name_validator, mysql_sku_name_validator, pg_version_validator, mysql_version_validator, maintenance_window_validator, ip_address_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from .randomname.generate import generate_username
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
@@ -207,6 +209,27 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                         local_context_attribute=LocalContextAttribute(name='server_name', 
                                         actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
         
+        administrator_login_setter_arg_type = CLIArgumentType(metavar='NAME', 
+                                        local_context_attribute=LocalContextAttribute(name='administrator_login', 
+                                        actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        
+        administrator_login_arg_type = CLIArgumentType(metavar='NAME', 
+                                        local_context_attribute=LocalContextAttribute(name='administrator_login', 
+                                        actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        
+        database_name_setter_arg_type = CLIArgumentType(metavar='NAME', 
+                                        local_context_attribute=LocalContextAttribute(name='database_name', 
+                                        actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        
+        database_name_getter_arg_type = CLIArgumentType(metavar='NAME', 
+                                        local_context_attribute=LocalContextAttribute(name='database_name', 
+                                        actions=[LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+        
+        database_name_arg_type = CLIArgumentType(metavar='NAME', 
+                                        local_context_attribute=LocalContextAttribute(name='database_name', 
+                                        actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+                                
+        
         overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
 
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
@@ -215,40 +238,35 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server create'.format(command_group)) as c:
             # Add create mode as a parameter
             if command_group == 'postgres':
-                c.argument('tier', default='GeneralPurpose', options_list=['--tier'], 
+                c.argument('tier', default='GeneralPurpose', options_list=['--tier'], validator=tier_validator,
                             help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', default='Standard_D4s_v3', options_list=['--sku-name'], 
-                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-                c.argument('storage_mb', default='128', options_list=['--storage-size'], type=int,
-                           validator=pg_storage_validator,
+                c.argument('sku_name', default='Standard_D2s_v3', options_list=['--sku-name'], validator=pg_sku_name_validator,
+                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3 ')
+                c.argument('storage_mb', default='128', options_list=['--storage-size'], type=int, validator=pg_storage_validator,
                             help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
-                c.argument('version', default='12', options_list=['--version'], 
+                c.argument('version', default='12', options_list=['--version'], validator=pg_version_validator,
                             help='Server major version.')              
                 c.argument('zone', options_list=['--zone, -z'], 
                             help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
-                c.argument('tier', default='Burstable', 
+                c.argument('tier', default='Burstable', validator=tier_validator,
                             help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], 
+                c.argument('sku_name', default='Standard_B1ms', options_list=['--sku-name'], validator=mysql_sku_name_validator,
                             help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-                c.argument('storage_mb', default='10', options_list=['--storage-size'], type=int,
-                           validator=mysql_storage_validator,
+                c.argument('storage_mb', default='10', options_list=['--storage-size'], type=int, validator=mysql_storage_validator,
                             help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
-                c.argument('version', default='5.7', options_list=['--version'], 
+                c.argument('version', default='5.7', options_list=['--version'], validator=mysql_version_validator,
                             help='Server major version.')
                 c.argument('zone', options_list=['--zone, -z'], 
                             help='Availability zone into which to provision the resource.')
                 c.argument('public_network_access', options_list=['--public-network-access'], 
                             help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
-                c.argument('maintenance_window', options_list=['--maintenance-window'], 
-                            help='Period of time designated for maintenance. Examples: "0:8:30" to schedule on Monday, 8:30 UTC')
-                c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'],
-                           help='Enable or disable autogrow of the storage. Default value is Enabled.')
-                
-                
+
+            c.argument('subnet_arm_resource_id', options_list=['--subnet'],
+                       help='Name or ID of the subnet that allows access to an Azure Flexible Server. ')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))#, validator=get_default_location_from_resource_group)
-            c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication', 
+            c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'],  arg_group='Authentication', arg_type=administrator_login_setter_arg_type,
                         help='Administrator username for the server. Once set, it cannot be changed. ')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
@@ -260,22 +278,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('public_access', options_list=['--public-access'],
                         help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ',
                         validator=public_access_validator)
-
-            # c.argument('vnet_name', options_list=['--vnet'], help='Name of the virtual network when creating a new one or referencing an existing one. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
-            # c.argument('vnet_address_prefix', default='10.0.0.0/16', options_list=['--vnet-address-prefix'], help='The IP address prefix to use when creating a new VNet in CIDR format. ')
-            # c.argument('subnet_name', options_list=['--subnet'], help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If both vnet-name and subnet are omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created. The name must be between 1 to 80 characters. The name must begin with a letter or number, end with a letter, number, or underscore, and may contain only letters, numbers, underscores, periods, or hyphens ')
-            # c.argument('subnet_address_prefix', default='10.0.0.0/24', options_list=['--subnet-address-prefix'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. ')
             c.argument('high_availability', default="Disabled", options_list=['--high-availability'], help='Enable or disable high availability feature.  Default value is Disabled.')
-
-            c.ignore('database_name')
-            c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], 
-                        help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
-            c.argument('infrastructure_encryption', options_list=['--infrastructure-encryption'], 
-                        help='Add an optional second layer of encryption for data using new encryption algorithm. Default value is Disabled.')
-            c.argument('ssl_enforcement', options_list=['--ssl-enforcement'], 
-                        help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
-            c.argument('assign_identity', options_list=['--assign-identity'], 
+            c.argument('assign_identity', options_list=['--assign-identity'],
                         help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault. No need to enter extra argument.')
+            c.ignore('database_name')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
             c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_getter_arg_type)
@@ -291,23 +297,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                         help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
         
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
-            c.argument('sku_name', options_list=['--sku-name'], 
-                        help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
-            c.argument('tier', default='GeneralPurpose', options_list=['--tier'],
+            c.ignore('assign_identity') 
+            c.argument('tier', options_list=['--tier'], validator=tier_validator,
                        help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-            c.argument('assign_identity', options_list=['--assign-identity'], 
-                        help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault. No need to enter extra argument.')
-            c.argument('tags', options_list=['--tags'], 
-                        help='Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.')
             c.argument('backup_retention',  type=int, options_list=['--backup-retention'], 
                         help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
             c.argument('ha_enabled', default='Disabled', options_list=['--high-availability'], arg_type=get_enum_type(['Enabled', 'Disabled']), 
                         help='Enable or disable high availability feature.  Default value is Disabled.')
-            c.argument('maintenance_window', options_list=['--maintenance-window'],
+            c.argument('maintenance_window', options_list=['--maintenance-window'], validator=maintenance_window_validator,
                         help='Period of time designated for maintenance. Examples: "0:8:30" to schedule on Monday, 8:30 UTC')
+            c.argument('tags', tags_type)
             if command_group == 'mysql':
+                c.argument('sku_name', default='Standard_B1MS', options_list=['--sku-name'], validator=mysql_sku_name_validator,
+                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            validator=mysql_storage_validator,
                             help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
@@ -324,6 +328,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
             elif command_group == 'postgres':
+                c.argument('sku_name', default='Standard_D2s_v3', options_list=['--sku-name'], validator=pg_sku_name_validator,
+                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            validator=pg_storage_validator,
                             help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
@@ -335,7 +341,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         for scope in ['list', 'set', 'show']:
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                # c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('json', options_list=['--json'], help='Output in json format. true/false')
         
@@ -365,27 +370,39 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                             help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
         
         with self.argument_context('{} flexible-server firewall-rule create'.format(command_group)) as c:
-            c.argument('end_ip_address', options_list=['--end-ip-address'], 
+            c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
                         help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
-            c.argument('start_ip_address', options_list=['--start-ip-address'], 
+            c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,
                         help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
         
         with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:
             c.argument('prompt', options_list=['--prompt'], help='Turn confirmation prompt on/off. If off, the rule will be deleted without confirmation')
 
         with self.argument_context('{} flexible-server firewall-rule update'.format(command_group)) as c:
-            c.argument('end_ip_address', options_list=['--end-ip-address'], 
+            c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
                         help='When using \'set\' or \'add\', preserve string literals instead of attempting to convert to JSON.')
-            c.argument('start_ip_address', options_list=['--start-ip-address'], 
+            c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,
                         help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+        
+        # db
+        with self.argument_context('{} flexible-server db'.format(command_group)) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the server.')
+            c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+        
+        with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
+            c.argument('database_name',  arg_type=database_name_setter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+        
+        with self.argument_context('{} flexible-server db delete'.format(command_group)) as c:
+            c.argument('database_name',  arg_type=database_name_getter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+
 
         with self.argument_context('{} flexible-server show-connection-string'.format(command_group)) as c:
-            c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the server.')
-            c.argument('administrator_login', options_list=['--admin-user', '-u'],
+            c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type ,help='Name of the server.')
+            c.argument('administrator_login', arg_type=administrator_login_arg_type, options_list=['--admin-user', '-u'], 
                        help='The login username of the administrator.')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The login password of the administrator.')
-            c.argument('database_name', options_list=['--database-name', '-d'], help='The name of a database.')
+            c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
 
 
     _flexible_server_params('postgres')

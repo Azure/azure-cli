@@ -12,7 +12,11 @@ from azure.cli.core.util import parse_proxy_resource_id
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
+from knack.log import get_logger
 
+import re
+
+logger = get_logger(__name__)
 
 def _get_resource_group_from_server_name(cli_ctx, server_name):
     """
@@ -97,7 +101,7 @@ def validate_subnet(cmd, namespace):
             child_type_1='subnets',
             child_name_1=subnet)
     else:
-        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+        raise CLIError('Incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')
 
 
@@ -111,7 +115,7 @@ def validate_private_endpoint_connection_id(cmd, namespace):
         namespace.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, namespace.server_name)
 
     if not all([namespace.server_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage: [--id ID | --name NAME --server-name NAME]')
+        raise CLIError('Incorrect usage: [--id ID | --name NAME --server-name NAME]')
 
     del namespace.connection_id
 
@@ -121,7 +125,7 @@ def pg_storage_validator(ns):
         if str(ns.storage_mb) in ['32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384']:
             ns.storage_mb = int(ns.storage_mb) * 1024
         else:
-            raise CLIError('Incorrect Value : Allowed values(in GB) : {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384}')
+            raise CLIError('Incorrect value for --storage-size : Allowed values(in GB) : {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384}')
 
 
 def mysql_storage_validator(ns):
@@ -129,14 +133,75 @@ def mysql_storage_validator(ns):
         if 10 <= int(ns.storage_mb) <= 16384:
             ns.storage_mb = int(ns.storage_mb) * 1024
         else:
-            raise CLIError('Incorrect Value : Allowed values(in GB) : Integers ranging 10-16384')
+            raise CLIError('Incorrect value for --storage-size  : Allowed values(in GB) : Integers ranging 10-16384')
 
+def tier_validator(ns):
+    if ns.tier:
+        if str(ns.tier) not in ['Burstable', 'GeneralPurpose', 'MemoryOptimized']:
+            raise CLIError('Incorrect value for --tier. Allowed values : Burstable, GeneralPurpose, MemoryOptimized')
+
+        if re.match(r"^Standard_B\d", ns.sku_name) and ns.tier != 'Burstable':
+            raise CLIError('SKU and tier are not matching. SKU "{}" is in "Burstable" tier. Specify "--tier Burstable" argument to deploy with the SKU'.format(ns.sku_name))
+        elif re.match(r"^Standard_D\d+s_v3$", ns.sku_name) and ns.tier != 'GeneralPurpose':
+             raise CLIError('SKU and tier are not matching. SKU "{}" is in "General Purpose" tier. Specify "--tier GeneralPurpose" argument to deploy with the SKU'.format(ns.sku_name))
+        elif re.match(r"^Standard_E\d+s_v3$", ns.sku_name) and ns.tier != 'MemoryOptimized':
+            raise CLIError('SKU and tier are not matching. SKU "{}" is in "Memory Optimized" tier. Specify "--tier MemoryOptimized" argument to deploy with the SKU'.format(ns.sku_name))
+
+
+def pg_sku_name_validator(ns):
+    if ns.sku_name:
+        if len(ns.sku_name.split('_')) != 3:
+            raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. Examples: Standard_D4s_v3')
+        server_type, cpu, server_v3 = ns.sku_name.split('_')
+        if server_type != 'Standard' or server_v3 != 'v3':
+            raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. Examples: Standard_D4s_v3')
+        if not re.match(r"^(D|E)\d+s$", cpu) or (re.match(r"^(D|E)\d+s$", cpu) and int(cpu[1:-1]) not in [2, 4, 8, 16, 32, 48, 64]):
+            raise CLIError('Incorrect value for --sku-name.  Follow the convention Standard_{VM name}. Examples: Standard_D4s_v3. \nAllowed number of vCores: 2, 4, 8, 16, 32, 48, 64')
+
+def mysql_sku_name_validator(ns):
+    if ns.sku_name:
+        if len(ns.sku_name.split('_')) == 2:
+            server_type, cpu = ns.sku_name.split('_')
+            if server_type != 'Standard' or cpu not in ['B1ms', 'B2s', 'B1s']:
+                raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. Examples: Standard_D4s_v3 Standard_E8s_v3 Standard_B1ms')
+        elif len(ns.sku_name.split('_')) == 3:
+            server_type, cpu, server_v3 = ns.sku_name.split('_')
+            if server_type != 'Standard' or server_v3 != 'v3':
+                raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. Examples: Standard_D4s_v3 Standard_B1ms')
+            if not re.match(r"^(D|E)\d+s$", cpu) or (re.match(r"^(D|E)\d+s$", cpu) and int(cpu[1:-1]) not in [2, 4, 8, 16, 32, 48, 64]):
+                raise CLIError('Incorrect value for --sku-name.  Follow the convention Standard_{VM name}. Examples: Standard_D4s_v3 Standard_E8s_v3 Standard_B1ms. \nAllowed number of vCores: 2, 4, 8, 16, 32, 48, 64')
+
+def pg_version_validator(ns):
+    if ns.version:
+         if ns.version not in ['11', '12']:
+            raise CLIError('Incorrect value for --version. Allowed values : {11, 12}')
+
+def mysql_version_validator(ns):
+    if ns.version:
+         if ns.version not in ['5.6', '5.7', '8.0']:
+            raise CLIError('Incorrect value for --version. Allowed values : {5.6, 5.7, 8.0}')
+
+def maintenance_window_validator(ns):
+    if ns.maintenance_window:
+        parsed_input = ns.maintenance_window.split(':')
+        if len(parsed_input) < 1 or len(parsed_input) > 3:
+            raise CLIError('Incorrect value for --maintenance_window. Enter <Day>:<Hour>:<Minute>. Example: "0:8:30" to schedule on Monday, 8:30 UTC')
+        elif len(parsed_input) >= 1 and (not parsed_input[0].isdigit() or int(parsed_input[0]) < 0 or int(parsed_input[0]) > 6): 
+            raise CLIError('Incorrect value for --maintenance_window. The first number means the scheduled day in a week. Allowed values: {0, 1, 2, 3, 4, 5, 6}')
+        elif len(parsed_input) >= 2 and (not parsed_input[1].isdigit() or int(parsed_input[1]) < 0 or int(parsed_input[1]) > 23): 
+            raise CLIError('Incorrect value for --maintenance_window. The second number means the scheduled hour in the scheduled day. Allowed values: {0, 1, ... 23}')
+        elif len(parsed_input) >= 3 and (not parsed_input[2].isdigit() or int(parsed_input[2]) < 0 or int(parsed_input[2]) > 59): 
+            raise CLIError('Incorrect value for --maintenance_window. The third number means the scheduled minute in the scheduled hour. Allowed values: {0, 1, ... 59}')
+
+def ip_address_validator(ns):
+    if (ns.end_ip_address and not _validate_ip(ns.end_ip_address)) or (ns.start_ip_address and not _validate_ip(ns.start_ip_address)):
+        raise CLIError('Incorrect value for ip address. Ip address should be IPv4 format. Example: 12.12.12.12. ')
 
 def public_access_validator(ns):
     if ns.public_access:
         val = ns.public_access
         if not(val == 'on' or (len(val.split('-')) == 1 and _validate_ip(val)) or (len(val.split('-')) == 2 and _validate_ip(val))):
-            raise CLIError('incorrect usage: --public-access. Acceptable values are \'on\' or \'<startIP>\' or \'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
+            raise CLIError('Incorrect usage: --public-access. Acceptable values are \'on\' or \'<startIP>\' or \'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
 
 
 def _validate_ip(ips):
