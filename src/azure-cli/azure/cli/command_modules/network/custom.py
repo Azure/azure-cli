@@ -6269,16 +6269,62 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
 
 
 # region VirtualRouter
-def create_virtual_router(cmd, resource_group_name, virtual_router_name, hosted_gateway, location=None, tags=None):
-    VirtualRouter, SubResource = cmd.get_models('VirtualRouter', 'SubResource')
-    client = network_client_factory(cmd.cli_ctx).virtual_routers
-    virtual_router = VirtualRouter(virtual_router_asn=None,
-                                   virtual_router_ips=[],
-                                   hosted_subnet=None,
-                                   hosted_gateway=SubResource(id=hosted_gateway),
-                                   location=location,
-                                   tags=tags)
-    return client.create_or_update(resource_group_name, virtual_router_name, virtual_router)
+def create_virtual_router(cmd,
+                          resource_group_name,
+                          virtual_router_name,
+                          hosted_gateway=None,
+                          hosted_subnet=None,
+                          location=None,
+                          tags=None):
+    vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
+
+    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
+
+    existing_vrouters = vrouter_client.list()
+    existing_vhubs = vhub_client.list()
+
+    for vhub in existing_vhubs:
+        if vhub.name == virtual_router_name:
+            raise CLIError('VirtualRouter name "{}" is duplicated'.format(virtual_router_name))
+
+    for vrouter in existing_vrouters:
+        if vrouter.name == virtual_router_name:
+            raise CLIError('VirtualRouter name "{}" is duplicated'.format(virtual_router_name))
+
+    SubResource = cmd.get_models('SubResource')
+
+    # for old VirtualRouter
+    if hosted_gateway is not None:
+        VirtualRouter = cmd.get_models('VirtualRouter')
+        virtual_router = VirtualRouter(virtual_router_asn=None,
+                                       virtual_router_ips=[],
+                                       hosted_subnet=None,
+                                       hosted_gateway=SubResource(id=hosted_gateway),
+                                       location=location,
+                                       tags=tags)
+        return vrouter_client.create_or_update(resource_group_name, virtual_router_name, virtual_router)
+
+    # for VirtualHub
+    virtual_hub_name = virtual_router_name
+
+    VirtualHub, HubIpConfiguration = cmd.get_models('VirtualHub', 'HubIpConfiguration')
+
+    hub = VirtualHub(tags=tags, location=location, virtual_wan=None, sku='Standard')
+    ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
+
+    hub = vhub_client.create_or_update(resource_group_name, virtual_hub_name, hub)
+
+    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
+    try:
+        vhub_ip_config = vhub_ip_config_client.create_or_update(resource_group_name,
+                                                                virtual_hub_name,
+                                                                'Default',
+                                                                ip_config)
+    except Exception as ex:
+        vhub_client.delete(resource_group_name, virtual_hub_name)
+        raise ex
+
+    return vhub_ip_config
 
 
 def update_virtual_router(cmd, instance, tags=None):
@@ -6288,10 +6334,53 @@ def update_virtual_router(cmd, instance, tags=None):
 
 
 def list_virtual_router(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).virtual_routers
+    vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
+
+    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
+
     if resource_group_name is not None:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
+        vrouters = vrouter_client.list_by_resource_group(resource_group_name)
+        vhubs = vhub_client.list_by_resource_group(resource_group_name)
+    else:
+        vrouters = vrouter_client.list()
+        vhubs = vhub_client.list()
+
+    return list(vrouters) + list(vhubs)
+
+
+def show_virtual_router(cmd, resource_group_name, virtual_router_name):
+    vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
+
+    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
+
+    try:
+        item = vrouter_client.get(resource_group_name, virtual_router_name)
+    except:  # pylint: disable=bare-except
+        virtual_hub_name = virtual_router_name
+        item = vhub_client.get(resource_group_name, virtual_hub_name)
+
+    return item
+
+
+def delete_virtual_router(cmd, resource_group_name, virtual_router_name):
+    vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
+
+    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
+    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
+
+    try:
+        vrouter_client.get(resource_group_name, virtual_router_name)
+        item = vrouter_client.delete(resource_group_name, virtual_router_name)
+    except:  # pylint: disable=bare-except
+        from azure.cli.core.commands import LongRunningOperation
+
+        virtual_hub_name = virtual_router_name
+        poller = vhub_ip_config_client.delete(resource_group_name, virtual_hub_name, 'Default')
+        LongRunningOperation(cmd.cli_ctx)(poller)
+
+        item = vhub_client.delete(resource_group_name, virtual_hub_name)
+
+    return item
 
 
 def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name, peer_asn, peer_ip):

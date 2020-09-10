@@ -1225,8 +1225,8 @@ def load_command_table(self, _):
     with self.command_group('network vrouter', network_vrouter_sdk) as g:
         g.custom_command('create', 'create_virtual_router')
         g.generic_update_command('update', custom_func_name='update_virtual_router')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
+        g.custom_command('delete', 'delete_virtual_router')
+        g.custom_show_command('show', 'show_virtual_router')
         g.custom_command('list', 'list_virtual_router')
 
     with self.command_group('network vrouter peering', network_vrouter_peering_sdk) as g:
