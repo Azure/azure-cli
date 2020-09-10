@@ -74,7 +74,8 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  app_insights_resource_id=None,
                  app_insights_telemetry_channel_resource_id=None,
                  synapse_analytics_resource_id=None,
-                 attestation_resource_id=None):
+                 attestation_resource_id=None,
+                 extension_storage_account_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -94,6 +95,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
         self.synapse_analytics_resource_id = synapse_analytics_resource_id
         self.attestation_resource_id = attestation_resource_id
+        self.extension_storage_account_resource_id = extension_storage_account_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:

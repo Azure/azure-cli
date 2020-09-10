@@ -226,7 +226,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
 
@@ -295,7 +295,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
-            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, cli_ctx=cmd_cli_ctx)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             msg = "No updates available for '{}'. Use --debug for more information.".format(extension_name)
@@ -327,8 +327,8 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         raise CLIError(e)
 
 
-def list_available_extensions(index_url=None, show_details=False):
-    index_data = get_index_extensions(index_url=index_url)
+def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
+    index_data = get_index_extensions(index_url=index_url, cli_ctx=cli_ctx)
     if show_details:
         return index_data
     installed_extensions = get_extensions(ext_type=WheelExtension)

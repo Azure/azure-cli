@@ -20,10 +20,10 @@ TRIES = 3
 
 
 # pylint: disable=inconsistent-return-statements
-def get_index(index_url=None):
+def get_index(index_url=None, cli_ctx=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    index_url = index_url or DEFAULT_INDEX_URL
+    index_url = index_url or (cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else DEFAULT_INDEX_URL)
 
     for try_number in range(TRIES):
         try:
@@ -45,8 +45,8 @@ def get_index(index_url=None):
             continue
 
 
-def get_index_extensions(index_url=None):
-    index = get_index(index_url=index_url)
+def get_index_extensions(index_url=None, cli_ctx=None):
+    index = get_index(index_url=index_url, cli_ctx=cli_ctx)
     extensions = index.get('extensions')
     if extensions is None:
         logger.warning(ERR_UNABLE_TO_GET_EXTENSIONS)
