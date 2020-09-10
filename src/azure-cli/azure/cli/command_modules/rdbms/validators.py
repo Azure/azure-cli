@@ -194,7 +194,7 @@ def maintenance_window_validator(ns):
             raise CLIError('Incorrect value for --maintenance_window. The third number means the scheduled minute in the scheduled hour. Allowed values: {0, 1, ... 59}')
 
 def ip_address_validator(ns):
-    if ns.end_ip_address and not _validate_ip(ns.end_ip_address) or ns.start_ip_address and not _validate_ip(ns.start_ip_address):
+    if (ns.end_ip_address and not _validate_ip(ns.end_ip_address)) or (ns.start_ip_address and not _validate_ip(ns.start_ip_address)):
         raise CLIError('Incorrect value for ip address. Ip address should be IPv4 format. Example: 12.12.12.12. ')
 
 def public_access_validator(ns):
