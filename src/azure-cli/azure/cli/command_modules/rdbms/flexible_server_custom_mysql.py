@@ -154,9 +154,9 @@ def _flexible_server_update_custom_func(instance,
 
     if sku_name:
         instance.sku.name = sku_name
+
+    if tier:
         instance.sku.tier = tier
-    else:
-        instance.sku = None
 
     if storage_mb:
         instance.storage_profile.storage_mb = storage_mb
@@ -171,19 +171,30 @@ def _flexible_server_update_custom_func(instance,
         instance.delegated_subnet_arguments.subnet_arm_resource_id = subnet_arm_resource_id
 
     if maintenance_window:
+        # if disabled is pass in reset to default values
         if maintenance_window.lower() == "disabled":
-            instance.maintenance_window.day_of_week = 0
-            instance.maintenance_window.start_hour = 0
-            instance.maintenance_window.start_minute = 0
-            instance.maintenance_window.custom_window = "Disabled"
+            day_of_week = start_hour = start_minute = 0
+            custom_window = "Disabled"
         else:
             day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+            custom_window = "Enabled"
+
+        # set values - if maintenance_window when is None when created then create a new object
+        # TODO: by default the maintenance window should be 0:0:0 Disabled, can simplify once changes are in RP
+        if instance.maintenance_window is None:
+            from azure.mgmt.rdbms import mysql
+            instance.maintenance_window = mysql.flexibleservers.models.MaintenanceWindow(
+                day_of_week=day_of_week,
+                start_hour=start_hour,
+                start_minute=start_minute,
+                custom_window=custom_window
+            )
+        else:
             instance.maintenance_window.day_of_week = day_of_week
             instance.maintenance_window.start_hour = start_hour
             instance.maintenance_window.start_minute = start_minute
-            instance.maintenance_window.custom_window = "Enabled"
+            instance.maintenance_window.custom_window = custom_window
 
-    # TODO: standby count = ha_enabled add here
     params = ServerForUpdate(sku=instance.sku,
                                 storage_profile=instance.storage_profile,
                                 administrator_login_password=administrator_login_password,
@@ -240,7 +251,7 @@ def _flexible_parameter_update(client, server_name, configuration_name, resource
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
 def _flexible_replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
     provider = 'Microsoft.DBforMySQL'
-    backup_retention_days = storage_mb = None
+
     # set source server id
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -273,7 +284,6 @@ def _flexible_replica_create(cmd, client, resource_group_name, server_name, sour
         source_server_id=source_server,
         location=location,
         create_mode="Replica")
-    print(parameters)
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
