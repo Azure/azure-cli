@@ -33,8 +33,8 @@ def load_arguments(self, _):
         c.positional('name', nargs='*', help='Space-separated list of parameter persist names.')
 
     with self.argument_context('config parampersist delete') as c:
-        c.positional('name', nargs='*', help='Space-separated list of parameter persist names. Either positional name argument or --all can be specified.')
-        c.argument('all', help='Clear all parameter persist data. Either positional name argument  or --all can be specified.', action='store_true')
+        c.positional('name', nargs='*', help='Space-separated list of parameter persistence names. Either positional name argument or --all can be specified.')
+        c.argument('all', help='Clear all parameter persistence data. Either positional name argument  or --all can be specified.', action='store_true')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation. Only available when --all is specified.', action='store_true')
-        c.argument('purge', help='Delete parameter persist file from working directory. Only available when --all is specified.', action='store_true')
-        c.argument('recursive', help='Indicates this is recursive delete of parameter persist . Only available when --all is specified.', action='store_true')
+        c.argument('purge', help='Delete parameter persistence file from working directory. Only available when --all is specified.', action='store_true')
+        c.argument('recursive', help='Indicates this is recursive delete of parameter persistence. Only available when --all is specified.', action='store_true')

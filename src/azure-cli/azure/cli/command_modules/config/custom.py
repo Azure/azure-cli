@@ -91,17 +91,17 @@ def config_unset(cmd, key=None, local=False):
 def turn_param_persist_on(cmd):
     if not cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.turn_on()
-        logger.warning('Parameter persist is turned on, you can run `az config parampersist off` to turn it off.')
+        logger.warning('Parameter persistence is turned on, you can run `az config parampersist off` to turn it off.')
     else:
-        raise CLIError('Parameter persist is on already.')
+        raise CLIError('Parameter persistence is on already.')
 
 
 def turn_param_persist_off(cmd):
     if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.turn_off()
-        logger.warning('Parameter persist is turned off, you can run `az config parampersist on` to turn it on.')
+        logger.warning('Parameter persistence is turned off, you can run `az config parampersist on` to turn it on.')
     else:
-        raise CLIError('Parameter persist is off already.')
+        raise CLIError('Parameter persistence is off already.')
 
 
 def show_param_persist(cmd, name=None):
@@ -117,10 +117,10 @@ def delete_param_persist(cmd, name=None, all=False, yes=False, purge=False, recu
     if all:
         from azure.cli.core.util import user_confirmation
         if purge:
-            user_confirmation('You are going to delete parameter persist file. '
+            user_confirmation('You are going to delete parameter persistence file. '
                               'Are you sure you want to continue this operation ?', yes)
             cmd.cli_ctx.local_context.delete_file(recursive)
         else:
-            user_confirmation('You are going to clear all parameter persist values. '
+            user_confirmation('You are going to clear all parameter persistence values. '
                               'Are you sure you want to continue this operation ?', yes)
             cmd.cli_ctx.local_context.clear(recursive)

@@ -56,39 +56,39 @@ examples:
 
 helps['config parampersist'] = """
 type: group
-short-summary: Manage parameter persist
+short-summary: Manage parameter persistence.
 """
 
 helps['config parampersist on'] = """
 type: command
-short-summary: Turn on parameter persist
+short-summary: Turn on parameter persistence.
 """
 
 helps['config parampersist off'] = """
 type: command
-short-summary: Turn off parameter persist
+short-summary: Turn off parameter persistence.
 """
 
 helps['config parampersist show'] = """
 type: command
-short-summary: Show parameter persist data
+short-summary: Show parameter persistence data.
 examples:
-  - name: Show all parameter persist value
+  - name: Show all parameter persistence value
     text: az config parampersist show
-  - name: Show resource_group_name parameter persist value
+  - name: Show resource_group_name parameter persistence value
     text: az config parampersist show resource_group_name
 """
 
 helps['config parampersist delete'] = """
 type: command
-short-summary: Delete parameter persist data
+short-summary: Delete parameter persistence data.
 examples:
-  - name: Delete resource_group_name from parameter persist
+  - name: Delete resource_group_name from parameter persistence
     text: az config parampersist delete resource_group_name
-  - name: Clear all parameter persist data
+  - name: Clear all parameter persistence data
     text: az config parampersist delete --all
-  - name: Delete parameter persist file
+  - name: Delete parameter persistence file
     text: az config parampersist delete --all --purge
-  - name: Delete parameter persist file recursively
+  - name: Delete parameter persistence file recursively
     text: az config parampersist delete --all --purge --recursive
 """
