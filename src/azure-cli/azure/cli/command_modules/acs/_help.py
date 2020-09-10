@@ -298,6 +298,8 @@ parameters:
             monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
                          Specify "--workspace-resource-id" to use an existing workspace.
                          If monitoring addon is enabled --no-wait argument will have no effect
+            azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                         Learn more at aka.ms/aks/policy.
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -507,6 +509,8 @@ long-summary: |-
         monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
                      If monitoring addon is enabled --no-wait argument will have no effect
         virtual-node - enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+        azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                     Learn more at aka.ms/aks/policy.
 parameters:
   - name: --addons -a
     type: string
