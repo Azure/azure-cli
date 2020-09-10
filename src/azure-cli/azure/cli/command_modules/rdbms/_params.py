@@ -266,7 +266,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'],
                            help='Enable or disable autogrow of the storage. Default value is Enabled.')
 
-            c.argument('subnet_arm_resource_id', options_list=['--subnet-id'],
+            c.argument('subnet_arm_resource_id', options_list=['--subnet'],
                        help='Name or ID of the subnet that allows access to an Azure Flexible Server. ')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))#, validator=get_default_location_from_resource_group)

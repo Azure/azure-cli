@@ -89,8 +89,8 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
     else:
         host = server_result.fully_qualified_domain_name[(server_result.fully_qualified_domain_name.index('.')) + 1:]
 
-    logger.warning('Make a note of your password. If you forget, you would have to'
-                   ' reset your password with CLI command for reset password')
+    logger.warning('Make a note of your password. If you forget, you would have to' \
+                   ' reset your password with \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.', server_name, resource_group_name)
 
     _update_local_contexts(cmd, server_name, resource_group_name, location)
 
