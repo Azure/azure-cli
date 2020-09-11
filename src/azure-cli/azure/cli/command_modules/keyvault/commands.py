@@ -116,11 +116,11 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     with self.command_group('keyvault backup', data_backup_entity.command_type, is_preview=True) as g:
-        g.keyvault_custom('start', 'full_backup', supports_no_wait=True,
+        g.keyvault_custom('start', 'full_backup',
                           doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
 
     with self.command_group('keyvault restore', data_backup_entity.command_type, is_preview=True) as g:
-        g.keyvault_custom('start', 'full_restore', supports_no_wait=True,
+        g.keyvault_custom('start', 'full_restore',
                           doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_restore'))
 
     with self.command_group('keyvault security-domain', private_data_entity.command_type, is_preview=True) as g:

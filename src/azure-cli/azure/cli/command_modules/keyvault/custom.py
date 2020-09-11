@@ -1827,7 +1827,7 @@ def _reconstruct_role_definition(role_definition):
         del role_definition['properties']
 
 
-def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=None,
+def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
                            role_assignment_name=None, hsm_name=None, assignee=None,
                            assignee_principal_type=None, identifier=None):  # pylint: disable=unused-argument
     """ Create a new role assignment for a user, group, or service principal. """
@@ -1983,26 +1983,13 @@ def list_role_definitions(client, scope=None, hsm_name=None, identifier=None):  
 
 
 # region full backup/restore
-def full_backup(client, storage_resource_uri, token,
-                hsm_name=None, no_wait=False):  # pylint: disable=unused-argument
-    return sdk_no_wait(
-        no_wait,
-        client.begin_full_backup,
-        storage_resource_uri,
-        token
-    )
+def full_backup(client, storage_resource_uri, token, hsm_name=None):  # pylint: disable=unused-argument
+    return client.begin_full_backup(storage_resource_uri, token)
 
 
 def full_restore(client, storage_resource_uri, token, folder_to_restore,
-                 hsm_name=None, no_wait=False):  # pylint: disable=unused-argument
-
-    return sdk_no_wait(
-        no_wait,
-        client.begin_full_restore,
-        storage_resource_uri,
-        token,
-        folder_to_restore
-    )
+                 hsm_name=None):  # pylint: disable=unused-argument
+    return client.begin_full_restore(storage_resource_uri, token, folder_to_restore)
 # endregion
 
 

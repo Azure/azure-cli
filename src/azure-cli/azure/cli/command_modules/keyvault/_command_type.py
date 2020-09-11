@@ -105,7 +105,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
             try:
                 if command_type.settings.get('resource_type') == ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
                     abandoned_args = [
-                        'identifier', 'hsm_base_url', 'storage_account_name', 'blob_container_name'
+                        'identifier', 'vault_base_url', 'storage_account_name', 'blob_container_name'
                     ]
                     for arg in abandoned_args:
                         if arg in command_args:

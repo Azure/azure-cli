@@ -409,15 +409,15 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
             'hsm_name': ACTIVE_HSM_NAME,
             'storage_account': self.create_random_name('clitesthsmsa', 24),
             'blob': self.create_random_name('clitesthsmblob', 24),
-            'sas_start': (datetime.utcnow() - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'sas_expiry': (datetime.utcnow() + timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ')
+            'sas_start': (datetime.utcnow() - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'sas_expiry': (datetime.utcnow() + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
         })
         self.cmd('az storage account create -n {storage_account} -g {rg}')
         self.cmd('az storage container create -n {blob} --account-name {storage_account} -g {rg}')
 
         self.kwargs['sas'] = '?' + self.cmd('az storage account generate-sas --start {sas_start} --expiry {sas_expiry} '
                                             '--https-only '
-                                            '--permissions rwd --resource-types o --services b '
+                                            '--permissions rwdlacu --resource-types sco --services b '
                                             '--account-name {storage_account}').get_output_in_json().replace('%3A', ':')
 
         self.cmd('az keyvault backup start --id {hsm_url} --blob-container-name {blob} '
@@ -426,7 +426,8 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                  checks=[
                      self.check('status', 'Succeeded'),
                      self.exists('startTime'),
-                     self.exists('id')
+                     self.exists('id'),
+                     self.exists('azureStorageBlobContainerUri')
                  ]).get_output_in_json()
 
         backup_data = self.cmd('az keyvault backup start --hsm-name {hsm_name} --blob-container-name {blob} '
@@ -439,61 +440,16 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                                    self.exists('azureStorageBlobContainerUri')
                                ]).get_output_in_json()
 
-        # TODO: remove this line when SDK is ready
         self.kwargs['backup_folder'] = backup_data['azureStorageBlobContainerUri'].split('/')[-1]
-
-        # TODO: enable this when SDK is ready
-        """
-        self.kwargs['backup_job_id'] = backup_data['id']
-        max_retries = 10
-        counter = 0
-        while counter < max_retries:
-            self.cmd('az keyvault backup status --hsm-name {hsm_name} --job-id {backup_job_id}',
-                     checks=[
-                         self.exists('status'),
-                         self.exists('startTime'),
-                         self.check('id', '{backup_job_id}')
-                     ]).get_output_in_json()
-            backup_status = self.cmd('az keyvault backup status --id {hsm_url} --job-id {backup_job_id}',
-                                     checks=[
-                                         self.exists('status'),
-                                         self.exists('startTime'),
-                                         self.check('id', '{backup_job_id}')
-                                     ]).get_output_in_json()
-            if backup_status['status'] == 'Succeeded':
-                self.kwargs['backup_folder'] = backup_status['azureStorageBlobContainerUri'].split('/')[-1]
-                break
-            if backup_status['status'] == 'Failed':
-                raise CLIError('Backup failed')
-            counter += 1
-            time.sleep(10)
-        """
-        restore_data = self.cmd('az keyvault restore start --hsm-name {hsm_name} --blob-container-name {blob} '
-                                '--storage-account-name {storage_account} '
-                                '--storage-container-SAS-token "{sas}" '
-                                '--backup-folder {backup_folder}',
-                                checks=[
-                                    self.check('status', 'Succeeded'),
-                                    self.exists('startTime'),
-                                    self.exists('id')
-                                ]).get_output_in_json()
-
-        # TODO: enable this when SDK is ready
-        """
-        self.kwargs['restore_job_id'] = restore_data['id']
-        self.cmd('az keyvault restore status --hsm-name {hsm_name} --job-id {restore_job_id}',
+        self.cmd('az keyvault restore start --hsm-name {hsm_name} --blob-container-name {blob} '
+                 '--storage-account-name {storage_account} '
+                 '--storage-container-SAS-token "{sas}" '
+                 '--backup-folder "{backup_folder}"',
                  checks=[
-                     self.exists('status'),
+                     self.check('status', 'Succeeded'),
                      self.exists('startTime'),
-                     self.check('id', '{restore_job_id}')
-                 ])
-        self.cmd('az keyvault restore status --id {hsm_url} --job-id {restore_job_id}',
-                 checks=[
-                     self.exists('status'),
-                     self.exists('startTime'),
-                     self.check('id', '{restore_job_id}')
-                 ])
-        """
+                     self.exists('id')
+                 ]).get_output_in_json()
 
 
 class KeyVaultHSMRoleScenarioTest(ScenarioTest):
@@ -543,7 +499,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
         self.kwargs['role_assignment_id1'] = role_assignment1['id']
 
         role_assignment2 = self.cmd('keyvault role assignment create --hsm-name {hsm_name} --role "{role_name2}" '
-                                    '--assignee {user1} --name {role_assignment_name2}',
+                                    '--assignee {user1} --scope "/" --name {role_assignment_name2}',
                                     checks=[
                                         self.check('name', '{role_assignment_name2}'),
                                         self.check('roleDefinitionId', '{role_def_id2}'),
@@ -565,7 +521,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                  ]).get_output_in_json()
 
         self.cmd('keyvault role assignment create --id {hsm_url} --role "{role_name2}" '
-                 '--assignee {user2} --name {role_assignment_name4}',
+                 '--assignee {user2} --scope "/" --name {role_assignment_name4}',
                  checks=[
                      self.check('name', '{role_assignment_name4}'),
                      self.check('roleDefinitionId', '{role_def_id2}'),
@@ -587,7 +543,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                  ]).get_output_in_json()
 
         self.cmd('keyvault role assignment create --id {hsm_url} --role "{role_name2}" '
-                 '--assignee-object-id {user3_principal_id} --name {role_assignment_name6}',
+                 '--assignee-object-id {user3_principal_id} --scope "/" --name {role_assignment_name6}',
                  checks=[
                      self.check('name', '{role_assignment_name6}'),
                      self.check('principalId', '{user3_principal_id}'),
