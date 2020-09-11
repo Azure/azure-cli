@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs.custom import (merge_kubernetes_configuration
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
 from azure.cli.core.util import CLIError
 
 
