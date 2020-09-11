@@ -14,7 +14,7 @@ import sys
 def serializedATN():
     with StringIO() as buf:
         buf.write(u"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3")
-        buf.write(u"\32\u0081\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7")
+        buf.write(u"\34\u0081\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7")
         buf.write(u"\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t")
         buf.write(u"\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\3\2\3\2\3")
         buf.write(u"\2\3\2\3\2\7\2(\n\2\f\2\16\2+\13\2\3\2\3\2\3\2\3\2\3")
@@ -26,34 +26,34 @@ def serializedATN():
         buf.write(u"\3\16\3\16\3\16\3\17\3\17\3\17\3\20\3\20\3\20\3\20\7")
         buf.write(u"\20w\n\20\f\20\16\20z\13\20\3\21\6\21}\n\21\r\21\16\21")
         buf.write(u"~\3\21\2\2\22\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36")
-        buf.write(u" \2\b\4\2\3\4\32\32\5\2\3\13\30\30\32\32\4\2\n\n\21\21")
-        buf.write(u"\3\2\f\r\4\2\n\n\24\24\t\2\4\4\7\7\t\t\16\17\26\26\30")
-        buf.write(u"\30\32\32\2x\2)\3\2\2\2\4@\3\2\2\2\6D\3\2\2\2\bI\3\2")
-        buf.write(u"\2\2\nM\3\2\2\2\fP\3\2\2\2\16S\3\2\2\2\20U\3\2\2\2\22")
-        buf.write(u"X\3\2\2\2\24b\3\2\2\2\26f\3\2\2\2\30i\3\2\2\2\32l\3\2")
-        buf.write(u"\2\2\34o\3\2\2\2\36r\3\2\2\2 |\3\2\2\2\"#\7\27\2\2#$")
-        buf.write(u"\5\6\4\2$%\7\27\2\2%&\7\30\2\2&(\3\2\2\2\'\"\3\2\2\2")
-        buf.write(u"(+\3\2\2\2)\'\3\2\2\2)*\3\2\2\2*,\3\2\2\2+)\3\2\2\2,")
-        buf.write(u"-\5\b\5\2-.\7\30\2\2./\3\2\2\2/\60\5\n\6\2\60\61\5\f")
-        buf.write(u"\7\2\61\62\5\4\3\2\62\67\5\16\b\2\63\64\7\30\2\2\64\66")
-        buf.write(u"\5\22\n\2\65\63\3\2\2\2\669\3\2\2\2\67\65\3\2\2\2\67")
-        buf.write(u"8\3\2\2\28=\3\2\2\29\67\3\2\2\2:<\7\31\2\2;:\3\2\2\2")
-        buf.write(u"<?\3\2\2\2=;\3\2\2\2=>\3\2\2\2>\3\3\2\2\2?=\3\2\2\2@")
-        buf.write(u"A\7\32\2\2AB\7\30\2\2B\5\3\2\2\2CE\t\2\2\2DC\3\2\2\2")
-        buf.write(u"EF\3\2\2\2FD\3\2\2\2FG\3\2\2\2G\7\3\2\2\2HJ\t\3\2\2I")
-        buf.write(u"H\3\2\2\2JK\3\2\2\2KI\3\2\2\2KL\3\2\2\2L\t\3\2\2\2MN")
-        buf.write(u"\7\25\2\2NO\7\30\2\2O\13\3\2\2\2PQ\7\26\2\2QR\7\30\2")
-        buf.write(u"\2R\r\3\2\2\2ST\7\32\2\2T\17\3\2\2\2UV\7\20\2\2VW\7\30")
-        buf.write(u"\2\2W\21\3\2\2\2XY\5\20\t\2Y_\5\24\13\2Z[\5\26\f\2[\\")
-        buf.write(u"\5\24\13\2\\^\3\2\2\2]Z\3\2\2\2^a\3\2\2\2_]\3\2\2\2_")
-        buf.write(u"`\3\2\2\2`\23\3\2\2\2a_\3\2\2\2bc\5\34\17\2cd\5\30\r")
-        buf.write(u"\2de\5\36\20\2e\25\3\2\2\2fg\t\4\2\2gh\7\30\2\2h\27\3")
-        buf.write(u"\2\2\2ij\t\5\2\2jk\7\30\2\2k\31\3\2\2\2lm\t\6\2\2mn\7")
-        buf.write(u"\30\2\2n\33\3\2\2\2op\7\32\2\2pq\7\30\2\2q\35\3\2\2\2")
-        buf.write(u"rx\5 \21\2st\5\32\16\2tu\5 \21\2uw\3\2\2\2vs\3\2\2\2")
-        buf.write(u"wz\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\37\3\2\2\2zx\3\2\2\2")
-        buf.write(u"{}\t\7\2\2|{\3\2\2\2}~\3\2\2\2~|\3\2\2\2~\177\3\2\2\2")
-        buf.write(u"\177!\3\2\2\2\n)\67=FK_x~")
+        buf.write(u" \2\b\5\2\3\13\32\32\34\34\7\2\3\4\6\t\f\16\32\32\34")
+        buf.write(u"\34\4\2\r\r\23\23\3\2\17\20\4\2\r\r\26\26\b\2\4\6\b\b")
+        buf.write(u"\21\21\30\30\32\32\34\34\2x\2)\3\2\2\2\4@\3\2\2\2\6D")
+        buf.write(u"\3\2\2\2\bI\3\2\2\2\nM\3\2\2\2\fP\3\2\2\2\16S\3\2\2\2")
+        buf.write(u"\20U\3\2\2\2\22X\3\2\2\2\24b\3\2\2\2\26f\3\2\2\2\30i")
+        buf.write(u"\3\2\2\2\32l\3\2\2\2\34o\3\2\2\2\36r\3\2\2\2 |\3\2\2")
+        buf.write(u"\2\"#\7\31\2\2#$\5\6\4\2$%\7\31\2\2%&\7\32\2\2&(\3\2")
+        buf.write(u"\2\2\'\"\3\2\2\2(+\3\2\2\2)\'\3\2\2\2)*\3\2\2\2*,\3\2")
+        buf.write(u"\2\2+)\3\2\2\2,-\5\b\5\2-.\7\32\2\2./\3\2\2\2/\60\5\n")
+        buf.write(u"\6\2\60\61\5\f\7\2\61\62\5\4\3\2\62\67\5\16\b\2\63\64")
+        buf.write(u"\7\32\2\2\64\66\5\22\n\2\65\63\3\2\2\2\669\3\2\2\2\67")
+        buf.write(u"\65\3\2\2\2\678\3\2\2\28=\3\2\2\29\67\3\2\2\2:<\7\33")
+        buf.write(u"\2\2;:\3\2\2\2<?\3\2\2\2=;\3\2\2\2=>\3\2\2\2>\3\3\2\2")
+        buf.write(u"\2?=\3\2\2\2@A\7\34\2\2AB\7\32\2\2B\5\3\2\2\2CE\t\2\2")
+        buf.write(u"\2DC\3\2\2\2EF\3\2\2\2FD\3\2\2\2FG\3\2\2\2G\7\3\2\2\2")
+        buf.write(u"HJ\t\3\2\2IH\3\2\2\2JK\3\2\2\2KI\3\2\2\2KL\3\2\2\2L\t")
+        buf.write(u"\3\2\2\2MN\7\27\2\2NO\7\32\2\2O\13\3\2\2\2PQ\7\30\2\2")
+        buf.write(u"QR\7\32\2\2R\r\3\2\2\2ST\7\34\2\2T\17\3\2\2\2UV\7\22")
+        buf.write(u"\2\2VW\7\32\2\2W\21\3\2\2\2XY\5\20\t\2Y_\5\24\13\2Z[")
+        buf.write(u"\5\26\f\2[\\\5\24\13\2\\^\3\2\2\2]Z\3\2\2\2^a\3\2\2\2")
+        buf.write(u"_]\3\2\2\2_`\3\2\2\2`\23\3\2\2\2a_\3\2\2\2bc\5\34\17")
+        buf.write(u"\2cd\5\30\r\2de\5\36\20\2e\25\3\2\2\2fg\t\4\2\2gh\7\32")
+        buf.write(u"\2\2h\27\3\2\2\2ij\t\5\2\2jk\7\32\2\2k\31\3\2\2\2lm\t")
+        buf.write(u"\6\2\2mn\7\32\2\2n\33\3\2\2\2op\7\34\2\2pq\7\32\2\2q")
+        buf.write(u"\35\3\2\2\2rx\5 \21\2st\5\32\16\2tu\5 \21\2uw\3\2\2\2")
+        buf.write(u"vs\3\2\2\2wz\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\37\3\2\2\2")
+        buf.write(u"zx\3\2\2\2{}\t\7\2\2|{\3\2\2\2}~\3\2\2\2~|\3\2\2\2~\177")
+        buf.write(u"\3\2\2\2\177!\3\2\2\2\n)\67=FK_x~")
         return buf.getvalue()
 
 
@@ -67,16 +67,17 @@ class AutoscaleConditionParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ u"<INVALID>", u"'/'", u"'.'", u"'_'", u"'\\'", u"':'", 
-                     u"'%'", u"'-'", u"','", u"'|'", u"'=='", u"'!='", u"'*'", 
-                     u"'~'" ]
+    literalNames = [ u"<INVALID>", u"'/'", u"'.'", u"'*'", u"'-'", u"'_'", 
+                     u"':'", u"'%'", u"'#'", u"'@'", u"'\\'", u"','", u"'|'", 
+                     u"'=='", u"'!='", u"'~'" ]
 
     symbolicNames = [ u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
                       u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
                       u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"WHERE", u"AND", u"INCLUDES", 
-                      u"EXCLUDES", u"OR", u"OPERATOR", u"NUMBER", u"QUOTE", 
-                      u"WHITESPACE", u"NEWLINE", u"WORD" ]
+                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
+                      u"WHERE", u"AND", u"INCLUDES", u"EXCLUDES", u"OR", 
+                      u"OPERATOR", u"NUMBER", u"QUOTE", u"WHITESPACE", u"NEWLINE", 
+                      u"WORD" ]
 
     RULE_expression = 0
     RULE_aggregation = 1
@@ -114,17 +115,19 @@ class AutoscaleConditionParser ( Parser ):
     T__10=11
     T__11=12
     T__12=13
-    WHERE=14
-    AND=15
-    INCLUDES=16
-    EXCLUDES=17
-    OR=18
-    OPERATOR=19
-    NUMBER=20
-    QUOTE=21
-    WHITESPACE=22
-    NEWLINE=23
-    WORD=24
+    T__13=14
+    T__14=15
+    WHERE=16
+    AND=17
+    INCLUDES=18
+    EXCLUDES=19
+    OR=20
+    OPERATOR=21
+    NUMBER=22
+    QUOTE=23
+    WHITESPACE=24
+    NEWLINE=25
+    WORD=26
 
     def __init__(self, input, output=sys.stdout):
         super(AutoscaleConditionParser, self).__init__(input, output=output)
@@ -330,6 +333,12 @@ class AutoscaleConditionParser ( Parser ):
             else:
                 return self.getToken(AutoscaleConditionParser.WORD, i)
 
+        def WHITESPACE(self, i=None):
+            if i is None:
+                return self.getTokens(AutoscaleConditionParser.WHITESPACE)
+            else:
+                return self.getToken(AutoscaleConditionParser.WHITESPACE, i)
+
         def getRuleIndex(self):
             return AutoscaleConditionParser.RULE_namespace
 
@@ -357,7 +366,7 @@ class AutoscaleConditionParser ( Parser ):
             while True:
                 self.state = 65
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.WORD))) != 0)):
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__2) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__4) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__6) | (1 << AutoscaleConditionParser.T__7) | (1 << AutoscaleConditionParser.T__8) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -365,7 +374,7 @@ class AutoscaleConditionParser ( Parser ):
                 self.state = 68 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.WORD))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__2) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__4) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__6) | (1 << AutoscaleConditionParser.T__7) | (1 << AutoscaleConditionParser.T__8) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
                     break
 
         except RecognitionException as re:
@@ -423,7 +432,7 @@ class AutoscaleConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 70
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__2) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__4) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__6) | (1 << AutoscaleConditionParser.T__7) | (1 << AutoscaleConditionParser.T__8) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__0) | (1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__4) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__6) | (1 << AutoscaleConditionParser.T__9) | (1 << AutoscaleConditionParser.T__10) | (1 << AutoscaleConditionParser.T__11) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -671,7 +680,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 93
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutoscaleConditionParser.T__7 or _la==AutoscaleConditionParser.AND:
+            while _la==AutoscaleConditionParser.T__10 or _la==AutoscaleConditionParser.AND:
                 self.state = 88
                 self.dim_separator()
                 self.state = 89
@@ -777,7 +786,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 100
             _la = self._input.LA(1)
-            if not(_la==AutoscaleConditionParser.T__7 or _la==AutoscaleConditionParser.AND):
+            if not(_la==AutoscaleConditionParser.T__10 or _la==AutoscaleConditionParser.AND):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -825,7 +834,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 103
             _la = self._input.LA(1)
-            if not(_la==AutoscaleConditionParser.T__9 or _la==AutoscaleConditionParser.T__10):
+            if not(_la==AutoscaleConditionParser.T__12 or _la==AutoscaleConditionParser.T__13):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -876,7 +885,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 106
             _la = self._input.LA(1)
-            if not(_la==AutoscaleConditionParser.T__7 or _la==AutoscaleConditionParser.OR):
+            if not(_la==AutoscaleConditionParser.T__10 or _la==AutoscaleConditionParser.OR):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -1053,7 +1062,7 @@ class AutoscaleConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 121
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__4) | (1 << AutoscaleConditionParser.T__6) | (1 << AutoscaleConditionParser.T__11) | (1 << AutoscaleConditionParser.T__12) | (1 << AutoscaleConditionParser.NUMBER) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutoscaleConditionParser.T__1) | (1 << AutoscaleConditionParser.T__2) | (1 << AutoscaleConditionParser.T__3) | (1 << AutoscaleConditionParser.T__5) | (1 << AutoscaleConditionParser.T__14) | (1 << AutoscaleConditionParser.NUMBER) | (1 << AutoscaleConditionParser.WHITESPACE) | (1 << AutoscaleConditionParser.WORD))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
