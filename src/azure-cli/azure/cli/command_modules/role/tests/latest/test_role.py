@@ -13,9 +13,10 @@ import mock
 import unittest
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
+from ..util import cmd_with_retry
 
 
 class RoleScenarioTest(ScenarioTest):
@@ -121,7 +122,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer(name_prefix='test-new-kv-cert')
+    @KeyVaultPreparer(name_prefix='test-rbac-new-kv')
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
         KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
@@ -156,7 +157,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
-    @KeyVaultPreparer(name_prefix='test-exist-kv-cert')
+    @KeyVaultPreparer(name_prefix='test-rbac-exist-kv')
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
 
         import time
@@ -182,7 +183,11 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
                 self.cmd('ad sp create-for-rbac -n {display_name} --keyvault {kv} --cert {cert} --scopes {scope}/resourceGroups/{rg}')
             self.cmd('ad sp credential reset -n {sp} --keyvault {kv} --cert {cert}')
         finally:
-            self.cmd('ad app delete --id {sp}')
+            try:
+                self.cmd('ad app delete --id {sp}')
+            except:
+                # Mute the exception, otherwise the exception thrown in the `try` clause will be hidden
+                pass
 
         # test with cert that has too short a validity
         try:
@@ -191,12 +196,14 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
                 self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {display_name2}')
             self.cmd('ad sp credential reset -n {sp2} --keyvault {kv} --cert {cert}')
         finally:
-            self.cmd('ad app delete --id {sp2}')
+            try:
+                self.cmd('ad app delete --id {sp2}')
+            except:
+                pass
 
 
 class RoleCreateScenarioTest(RoleScenarioTest):
 
-    @record_only()  # workaround https://github.com/Azure/azure-cli/issues/3187
     @AllowLargeResponse()
     def test_role_create_scenario(self):
         subscription_id = self.get_subscription_id()
@@ -230,28 +237,26 @@ class RoleCreateScenarioTest(RoleScenarioTest):
             'role': role_name,
             'template': temp_file.replace('\\', '\\\\')
         })
+
         # a few 'sleep' here to handle server replicate latency. It is no-op under playback
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role definition create --role-definition {template}', checks=[
                 self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
                 self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
             ])
-            time.sleep(180)
-            role = self.cmd('role definition list -n {role}',
-                            checks=self.check('[0].roleName', '{role}')).get_output_in_json()
+
+            role = cmd_with_retry(self, 'role definition list -n {role}',
+                                  checks=self.check('[0].roleName', '{role}')).get_output_in_json()
+
             # verify we can update
             role[0]['permissions'][0]['actions'].append('Microsoft.Support/*')
             with open(temp_file, 'w') as f:
                 json.dump(role[0], f)
-            self.cmd('role definition update --role-definition {template}',
-                     checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
-            time.sleep(30)
+            cmd_with_retry(self, 'role definition update --role-definition {template}',
+                           checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
 
-            self.cmd('role definition delete -n {role}',
-                     checks=self.is_empty())
-            time.sleep(240)
-            self.cmd('role definition list -n {role}',
-                     checks=self.is_empty())
+            cmd_with_retry(self, 'role definition delete -n {role}', checks=self.is_empty())
+            cmd_with_retry(self, 'role definition list -n {role}', checks=self.is_empty())
 
 
 class RoleAssignmentScenarioTest(RoleScenarioTest):
@@ -413,6 +418,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 os.chdir(base_dir)
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
+    @unittest.skip("Known service random 403 issue")
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_mgmt_grp(self, resource_group):
