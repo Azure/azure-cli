@@ -75,7 +75,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  app_insights_telemetry_channel_resource_id=None,
                  synapse_analytics_resource_id=None,
                  attestation_resource_id=None,
-                 **entries):  # To support init with __dict__ for deserialization
+                 **kwargs):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -95,7 +95,6 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
         self.synapse_analytics_resource_id = synapse_analytics_resource_id
         self.attestation_resource_id = attestation_resource_id
-        self.__dict__.update(entries)
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -342,11 +341,11 @@ class Cloud:  # pylint: disable=too-few-public-methods
         }
         return pformat(o)
 
-    def toJSON(self):
+    def to_json(self):
         return {'name': self.name, "endpoints": self.endpoints.__dict__, "suffixes": self.suffixes.__dict__}
 
     @classmethod
-    def fromJSON(cls, json_str):
+    def from_json(cls, json_str):
         return cls(json_str['name'],
                    endpoints=CloudEndpoints(**json_str['endpoints']),
                    suffixes=CloudSuffixes(**json_str['suffixes']))
@@ -478,7 +477,7 @@ def get_known_clouds(refresh=False):
         clouds = []
         if CLOUD_ENDPOINTS['clouds']:
             try:
-                clouds = [Cloud.fromJSON(c) for c in CLOUD_ENDPOINTS['clouds']]
+                clouds = [Cloud.from_json(c) for c in CLOUD_ENDPOINTS['clouds']]
                 logger.info("Cloud endpoints loaded from local file: %s", endpoints_file)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.info("Failed to parse cloud endpoints from local file. CLI will clean it and reload from ARM_CLOUD_METADATA_URL. %s", str(ex))
@@ -491,7 +490,7 @@ def get_known_clouds(refresh=False):
                 if 'AzureCloud' in cli_cloud_dict:
                     cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
                 clouds = list(cli_cloud_dict.values())
-                CLOUD_ENDPOINTS['clouds'] = [c.toJSON() for c in clouds]
+                CLOUD_ENDPOINTS['clouds'] = [c.to_json() for c in clouds]
                 logger.info("Cloud endpoints loaded from ARM_CLOUD_METADATA_URL: %s", os.getenv('ARM_CLOUD_METADATA_URL'))
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
