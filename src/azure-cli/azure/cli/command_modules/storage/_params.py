@@ -900,22 +900,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('input_config')
         c.ignore('output_config')
 
-    with self.argument_context('storage blob config-query-format') as c:
-        c.argument('type', arg_type=get_enum_type(['csv', 'json']), help='The serialization format.')
-        c.argument('line_separator', arg_group='Delimited JSON Configuration',
-                   help="The string used to separate records. The default value is '\\n'.")
-        c.argument('column_separator', arg_group='Delimited CSV Configuration',
-                   help="The string used to separate columns. Default to ','.")
-        c.argument('quote_char', arg_group='Delimited CSV Configuration',
-                   help="The string used to quote a specific field. Default to '\"'.")
-        c.argument('record_separator', arg_group='Delimited CSV Configuration',
-                   help="The string used to separate records. Default to '\\n'")
-        c.argument('escape_char', arg_group='Delimited CSV Configuration',
-                   help='The string used as an escape character. Default to empty.')
-        c.argument('has_header', arg_group='Delimited CSV Configuration', arg_type=get_three_state_flag(),
-                   help='Whether the blob data includes headers in the first line. The default value is False, '
-                   'meaning that the data will be returned inclusive of the first line. If set to True, the data '
-                   'will be returned exclusive of the first line.')
 
     with self.argument_context('storage blob sync') as c:
         c.extra('destination_container', options_list=['--container', '-c'], required=True,
