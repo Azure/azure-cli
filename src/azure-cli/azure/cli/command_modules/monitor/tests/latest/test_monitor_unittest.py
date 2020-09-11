@@ -209,7 +209,7 @@ class MonitorAutoscaleActionTest(unittest.TestCase):
         self.check_dimension(ns, 2, 'Instance', 'NotEquals', ['instance1'])
 
         ns = self._build_namespace()
-        self.call_condition(ns,'"kubernetes custom metrics %#*@_-" tomcat.global.request.total.count > 0 avg 3m where App == app1 or app3 and Deployment == default and Instance != instance1')
+        self.call_condition(ns, '"kubernetes custom metrics %#*@_-" tomcat.global.request.total.count > 0 avg 3m where App == app1 or app3 and Deployment == default and Instance != instance1')
         self.check_condition(ns, "kubernetes custom metrics %#*@_-", 'tomcat.global.request.total.count', 'GreaterThan',
                              '0', 'Average', 'PT3M')
         self.check_dimension(ns, 0, 'App', 'Equals', ['app1', 'app3'])
