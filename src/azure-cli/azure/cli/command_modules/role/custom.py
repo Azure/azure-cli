@@ -1750,7 +1750,7 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
         setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
 
 
-# for injecting test seems to produce predicatable role assignment id for playback
+# for injecting test seems to produce predictable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
 
