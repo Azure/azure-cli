@@ -15,7 +15,7 @@ from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations impor
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, \
     parse_public_access_input, update_kwargs, generate_password, parse_maintenance_window
-from .flexible_server_custom_common import user_confirmation
+from .flexible_server_custom_common import user_confirmation, _server_list_custom_func
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -28,76 +28,87 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                                 backup_retention=None, tags=None, public_access=None, database_name=None,
                                 subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False):
     from azure.mgmt.rdbms import mysql
-    db_context = DbContext(
-        azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
-
-    subnet_id = firewall_id = None
-
-    if subnet_arm_resource_id is not None:
-        subnet_id = subnet_arm_resource_id  # set the subnet id to be the one passed in
-        delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id
-        )
-    else:
-        delegated_subnet_arguments = None
-
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     try:
-        # The server name already exists in the resource group
-        server_result = client.get(resource_group_name, server_name)
-        logger.warning('Found existing MySQL Server \'%s\' in group \'%s\'',
+        db_context = DbContext(
+            azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
+
+        # Raise error when user passes values for both parameters
+        if subnet_arm_resource_id is not None and public_access is not None:
+            raise CLIError("Incorrect usage : A combination of the parameters --subnet "
+                           "and --public_access is invalid. Use either one of them.")
+        server_result = firewall_id = subnet_id = None
+
+        # Populate desired parameters
+        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
+
+        # Get list of servers in the current sub
+        server_list = _server_list_custom_func(client)
+
+        # Ensure that the server name is not in the rg and in the subscription
+        for key in server_list:
+            if server_name == key.name and key.id.find(resource_group_name) != -1:
+                logger.warning('Found existing MySQL server \'%s\' in group \'%s\'',
+                               server_name, resource_group_name)
+                server_result = client.get(resource_group_name, server_name)
+            elif server_name == key.name:
+                raise CLIError("The server name '{}' exists in this subscription.Please re-run command with a "
+                               "valid server name.".format(server_name))
+
+        administrator_login_password = generate_password(administrator_login_password)
+        if server_result is None:
+            # If subnet is provided, use that subnet to create the server, else create subnet if public access is not enabled.
+            if subnet_arm_resource_id is not None:
+                subnet_id = subnet_arm_resource_id  # set the subnet id to be the one passed in
+                delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
+                    subnet_arm_resource_id=subnet_id)
+            elif public_access is None and subnet_arm_resource_id is None:
+                subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
+                                        "Microsoft.DBforPostgreSQL/flexibleServers")
+                delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
+                    subnet_arm_resource_id=subnet_id)
+            else:
+                delegated_subnet_arguments = None
+
+            # Create mysql server
+            # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
+            server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
+                                           sku_name, tier, storage_mb, administrator_login, administrator_login_password,
+                                           version, tags, delegated_subnet_arguments, assign_identity, public_access,
+                                           high_availability, zone)
+
+            # Adding firewall rule
+            if public_access is not None and str(public_access).lower() != 'none':
+                if str(public_access).lower() == 'all':
+                    start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+                else:
+                    start_ip, end_ip = parse_public_access_input(public_access)
+                firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+
+            # Create mysql database if it does not exist
+            if database_name is None:
+                database_name = DEFAULT_DB_NAME
+            _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+
+        user = server_result.administrator_login
+        id = server_result.id
+        loc = server_result.location
+        version = server_result.version
+        sku = server_result.sku.name
+        host = server_result.fully_qualified_domain_name
+
+        logger.warning('Make a note of your password. If you forget, you would have to' \
+                       ' reset your password with \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
                        server_name, resource_group_name)
 
-    except CloudError:
-        administrator_login_password = generate_password(administrator_login_password)
-        if public_access is None and subnet_arm_resource_id is None:
-            subnet_id = create_vnet(cmd, server_name, location, resource_group_name, "Microsoft.DBforMySQL/flexibleServers")
-            delegated_subnet_arguments=mysql.flexibleservers.models.DelegatedSubnetArguments(
-                subnet_arm_resource_id=subnet_id
-            )
+        _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
-        # Create mysql server
-        # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
-        server_result = _create_server(
-            db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, storage_mb,
-            administrator_login, administrator_login_password, version, tags, public_access, assign_identity,
-            tier, high_availability, zone, delegated_subnet_arguments)
+        return _form_response(user, sku, loc, id, host, version,
+                              administrator_login_password if administrator_login_password is not None else '*****',
+                              _create_mysql_connection_string(host, database_name, user, administrator_login_password),
+                              database_name, firewall_id, subnet_id)
 
-        if public_access is not None:
-            if public_access == 'on':
-                start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-            else:
-                start_ip, end_ip = parse_public_access_input(public_access)
-            firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
-
-        # Create mysql database if it does not exist
-        if database_name is None:
-            database_name = DEFAULT_DB_NAME
-        _create_database(db_context, cmd, resource_group_name, server_name, database_name)
-
-    user = server_result.administrator_login
-    id = server_result.id
-    loc = server_result.location
-    version = server_result.version
-    sku = server_result.sku.name
-
-    # This is a workaround for getting the hostname right .
-    # Without Vnet, the hostname returned by the API os <servername>.postgres.database.azure.com
-    # with Vnet enabled, the hostname returned by the API is <servername>.<servername>.postgres.database.azure.com
-    if len(server_result.fully_qualified_domain_name.split('.')) != 6:
-        host = server_result.fully_qualified_domain_name
-    else:
-        host = server_result.fully_qualified_domain_name[(server_result.fully_qualified_domain_name.index('.')) + 1:]
-
-    logger.warning('Make a note of your password. If you forget, you would have to' \
-                   ' reset your password with \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.', server_name, resource_group_name)
-
-    _update_local_contexts(cmd, server_name, resource_group_name, location)
-
-    return _form_response(user, sku, loc, id, host, version,
-                          administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_mysql_connection_string(host, database_name, user, administrator_login_password), database_name, firewall_id, subnet_id
-    )
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
 
 
 def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
@@ -297,9 +308,9 @@ def _flexible_list_skus(client, location):
     return client.list(location)
 
 
-def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name,
-                   storage_mb, administrator_login, administrator_login_password, version, tags, public_network_access,
-                   assign_identity, tier, ha_enabled, availability_zone, delegated_subnet_arguments):
+def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
+                   storage_mb, administrator_login, administrator_login_password, version, tags, delegated_subnet_arguments,
+                   assign_identity, public_network_access, ha_enabled, availability_zone):
 
     logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
@@ -355,7 +366,7 @@ def _create_mysql_connection_strings(host, user, password, database):
                        "spring.datasource.password={password}",
         'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}', "
                    "password: {password}, database: {database}, port: 3306}});",
-        'php': "host={host} port=5432 dbname={database} user={user} password={password}",
+        'php': "host={host} port=3306 dbname={database} user={user} password={password}",
         'python': "cnx = mysql.connector.connect(user='{user}', password='{password}', host='{host}', "
                   "port=3306, database='{database}')",
         'ruby': "client = Mysql2::Client.new(username: '{user}', password: '{password}', "
@@ -393,13 +404,15 @@ def _form_response(username, sku, location, id, host, version, password, connect
     return output
 
 
-def _update_local_contexts(cmd, server_name, resource_group_name, location):
+def _update_local_contexts(cmd, server_name, resource_group_name, location, user):
     if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server_name',
                                     server_name)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                     location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
+        cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'administrator_login',
+                                      user)  # Setting the server name in the local context
 
 
 def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
