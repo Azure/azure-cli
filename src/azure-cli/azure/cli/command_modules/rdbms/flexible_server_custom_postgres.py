@@ -31,7 +31,8 @@ def _flexible_server_create(cmd, client,
                             administrator_login_password=None, version=None,
                             tags=None, public_access=None,
                             assign_identity=False, subnet_arm_resource_id=None,
-                            high_availability=None, zone=None, vnet_resource_id=None):
+                            high_availability=None, zone=None, vnet_resource_id=None,
+                            vnet_address_prefix=None, subnet_address_prefix=None):
     from azure.mgmt.rdbms import postgresql
     try:
         db_context = DbContext(
@@ -46,9 +47,10 @@ def _flexible_server_create(cmd, client,
 
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
+
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-            subnet_id = prepareVnet(cmd, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME)
+            subnet_id = prepareVnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
             delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
                 subnet_arm_resource_id=subnet_id)
         elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
