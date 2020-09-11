@@ -340,10 +340,12 @@ def set_user_fault(summary=None):
     if summary:
         _session.result_summary = _remove_cmd_chars(summary)
 
+
 @decorators.suppress_all_exceptions()
 def set_debug_info(key, info):
     debug_info = '{}: {}'.format(key, info)
     _session.debug_info.append(debug_info)
+
 
 @decorators.suppress_all_exceptions()
 def set_application(application, arg_complete_env_name):

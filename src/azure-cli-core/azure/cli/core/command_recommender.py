@@ -4,13 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import difflib
+from enum import Enum
 
 import azure.cli.core.telemetry as telemetry
 from knack.log import get_logger
-from typing import Union
-from enum import Enum
+
 
 logger = get_logger(__name__)
+
 
 class AladdinUserFaultType(Enum):
     """Define the userfault types required by aladdin service
@@ -74,7 +75,7 @@ class CommandRecommender():
         import hashlib
         import json
         import requests
-        from requests import RequestException, HTTPError
+        from requests import RequestException
         from http import HTTPStatus
         from azure.cli.core import __version__ as version
 
@@ -91,7 +92,7 @@ class CommandRecommender():
         }
         context = {
             'versionNumber': version,
-            'errorType': self._get_error_type().value
+            'errorType': self._get_error_type()
         }
 
         if telemetry.is_telemetry_enabled():
@@ -241,7 +242,7 @@ class CommandRecommender():
 
         error_type = AladdinUserFaultType.Unknown
         if not self.error_msg:
-            return error_type
+            return error_type.value
 
         error_msg = self.error_msg.lower()
         if 'unrecognized' in error_msg:
@@ -265,7 +266,7 @@ class CommandRecommender():
             elif 'resource_group' in error_msg or 'resource group' in error_msg:
                 error_type = AladdinUserFaultType.ResourceGroupNotFound
         elif 'pattern' in error_msg or 'is not a valid value' in error_msg or 'invalid' in error_msg:
-            error_type = 'InvalidParameterValue'
+            error_type = AladdinUserFaultType.InvalidParameterValue
             if 'jmespath_type' in error_msg:
                 error_type = AladdinUserFaultType.InvalidJMESPathQuery
             elif 'datetime_type' in error_msg:
@@ -279,4 +280,4 @@ class CommandRecommender():
         elif "validation error" in error_msg:
             error_type = AladdinUserFaultType.ValidationError
 
-        return error_type
+        return error_type.value
