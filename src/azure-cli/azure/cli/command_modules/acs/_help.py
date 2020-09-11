@@ -301,8 +301,8 @@ parameters:
             azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
                          Learn more at aka.ms/aks/policy.
             virtual-node - enable AKS Virtual Node.
-                         Requires --virtual-node-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-                         virtual-node-subnet-name must be in the same vent which is specified by --vnet-subnet-id (required as well).
+                         Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+                         aci-subnet-name must be in the same vent which is specified by --vnet-subnet-id (required as well).
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -363,7 +363,7 @@ parameters:
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
-  - name: --virtual-node-subnet-name
+  - name: --aci-subnet-name
     type: string
     short-summary: The name of a subnet in an existing VNet into which to deploy the virtual nodes.
 examples:

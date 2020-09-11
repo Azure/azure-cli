@@ -452,6 +452,90 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    # TODO: Remove when issue #9392 is addressed.
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_service_with_virtual_node_addon(self, resource_group, resource_group_location, sp_name, sp_password):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': 'http://' + sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create cluster with virtual-node addon
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --enable-addons virtual-node' \
+                     '--aci-subnet-name foo --vnet-subnet-id bar'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.aciConnectorLinux.enabled', True),
+            self.check('addonProfiles.aciConnectorLinux.config.SubnetName', 'foo'),
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.check('addonProfiles.aciConnectorLinux.enabled', True),
+            self.check('addonProfiles.aciConnectorLinux.config.SubnetName', 'foo'),
+        ])
+
+        # disable virtual-node add-on
+        self.cmd('aks disable-addons -a virtual-node -g {resource_group} -n {name}', checks=[
+            self.check('addonProfiles.aciConnectorLinux.enabled', False),
+            self.check('addonProfiles.aciConnectorLinux.config', None)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('addonProfiles.aciConnectorLinux.enabled', False),
+            self.check('addonProfiles.aciConnectorLinux.config', None)
+
+        ])
+
+        # enable monitoring add-on
+        self.cmd('aks enable-addons -a virtual-node -g {resource_group} -n {name} --subnet-name foo1', checks=[
+            self.check('addonProfiles.aciConnectorLinux.enabled', True),
+            self.check('addonProfiles.aciConnectorLinux.config.SubnetName', 'foo1'),
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.check('addonProfiles.aciConnectorLinux.enabled', True),
+            self.check('addonProfiles.aciConnectorLinux.config.SubnetName', 'foo1'),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()

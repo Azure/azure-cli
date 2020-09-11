@@ -648,6 +648,22 @@ class AcsCustomCommandTest(unittest.TestCase):
             instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                       'clitest000001', 'monitoring', enable=True)
 
+        # virtual-node enabled
+        instance = mock.MagicMock()
+        instance.addon_profiles = None
+        cmd = mock.MagicMock()
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'virtual-node', enable=True, subnet_name='foo')
+        self.assertIn('aciConnectorLinux', instance.addon_profiles)
+        addon_profile = instance.addon_profiles['aciConnectorLinux']
+        self.assertTrue(addon_profile.enabled)
+
+        # virtual-node disabled
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'virtual-node', enable=False)
+        addon_profile = instance.addon_profiles['aciConnectorLinux']
+        self.assertFalse(addon_profile.enabled)
+
     @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.custom._invoke_deployment')
     def test_ensure_container_insights_for_monitoring(self, invoke_def, cf_resources):
