@@ -177,7 +177,3 @@ class KeyVaultArgumentContext(AzArgumentContext):
         if 'not_before' not in ignore:
             self.extra('not_before', default=None, type=datetime_type,
                        help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
-
-        if name == 'key':
-            self.extra('exportable', arg_type=get_three_state_flag(), is_preview=True,
-                       help='Indicates if the private key can be exported.')

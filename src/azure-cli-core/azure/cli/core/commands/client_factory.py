@@ -23,8 +23,10 @@ def resolve_client_arg_name(operation, kwargs):
         return kwargs['client_arg_name']
     path, op_path = operation.split('#', 1)
 
-    # Add special case support
-    if path.startswith('azure.cli.command_modules.keyvault.vendored_sdks'):
+    # Support vendored sdks
+    # eg: azure.cli.command_modules.keyvault.vendored_sdks
+    items = path.split('.')
+    if len(items) >= 5 and '.'.join(items[:3]) == 'azure.cli.command_modules' and items[4] == 'vendored_sdks':
         return 'self'
 
     path_comps = path.split('.')
