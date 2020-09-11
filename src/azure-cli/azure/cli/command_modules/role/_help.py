@@ -625,7 +625,7 @@ parameters:
     type: string
     short-summary: Description of a role as JSON, or a path to a file containing a JSON description.
 examples:
-  - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
+  - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs. (Bash)
     text: |
         az role definition create --role-definition '{
             "Name": "Contoso On-call",
@@ -677,7 +677,7 @@ parameters:
     type: string
     short-summary: Description of an existing role as JSON, or a path to a file containing a JSON description.
 examples:
-  - name: Update a role using the output of "az role definition list"
+  - name: Update a role using the output of "az role definition list". (Bash)
     text: |
         az role definition update --role-definition '{
             "roleName": "Contoso On-call",
