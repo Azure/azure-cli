@@ -900,7 +900,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('input_config')
         c.ignore('output_config')
 
-
     with self.argument_context('storage blob sync') as c:
         c.extra('destination_container', options_list=['--container', '-c'], required=True,
                 help='The sync destination container.')
