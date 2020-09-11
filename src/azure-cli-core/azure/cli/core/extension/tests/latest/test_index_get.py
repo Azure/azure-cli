@@ -98,12 +98,12 @@ class TestExtensionIndexGet(unittest.TestCase):
         with mock.patch('requests.get', side_effect=mock_index_get_generator(DEFAULT_INDEX_URL, default_data)):
             self.assertEqual(get_index_extensions(), {})
         # cli_ctx passed but endpoint not set
-        delattr(cli_ctx.cloud.endpoints, 'extension_index_resource_id')
+        delattr(cli_ctx.cloud.endpoints, 'extension_storage_account_resource_id')
         with mock.patch('requests.get', side_effect=mock_index_get_generator(DEFAULT_INDEX_URL, default_data)):
             self.assertEqual(get_index_extensions(cli_ctx=cli_ctx), {})
         # cli_ctx passed and the endpoint is set
-        cli_ctx.cloud.endpoints.extension_index_resource_id = 'http://contoso.com/cli-index'
-        with mock.patch('requests.get', side_effect=mock_index_get_generator('http://contoso.com/cli-index', cloud_data)):
+        cli_ctx.cloud.endpoints.extension_storage_account_resource_id = 'http://contoso.com/cli-index'
+        with mock.patch('requests.get', side_effect=mock_index_get_generator('http://contoso.com/cli-index/index.json', cloud_data)):
             self.assertEqual(get_index_extensions(cli_ctx=cli_ctx).get('myext'), obj)
 
 
