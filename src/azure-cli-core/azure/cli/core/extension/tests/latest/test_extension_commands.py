@@ -343,7 +343,7 @@ class TestExtensionCommands(unittest.TestCase):
 
     def test_list_available_extensions_show_details(self):
         with mock.patch('azure.cli.core.extension.operations.get_index_extensions', autospec=True) as c:
-            list_available_extensions(show_details=True， cli_ctx=self.cmd.cli_ctx)
+            list_available_extensions(show_details=True, cli_ctx=self.cmd.cli_ctx)
             c.assert_called_once_with(None, self.cmd.cli_ctx)
 
     def test_list_available_extensions_no_show_details(self):

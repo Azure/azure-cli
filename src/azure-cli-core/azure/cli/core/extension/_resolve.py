@@ -88,7 +88,8 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     download_url, digest = chosen.get('downloadUrl'), chosen.get('sha256Digest')
     if not download_url:
         raise NoExtensionCandidatesError("No download url found.")
-    ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
+    ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and \
+        cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
     config_index_url = cli_ctx.config.get('extension', 'index_url', None) if cli_ctx else None
     if ext_endpoint and not config_index_url:
         import posixpath

@@ -85,9 +85,9 @@ class TestExtensionIndexGet(unittest.TestCase):
                 self.assertEqual(get_index_extensions(), None)
                 logger_mock.assert_called_once_with(ERR_UNABLE_TO_GET_EXTENSIONS)
 
-
     # pylint: disable=line-too-long
     def test_get_index_cloud(self):
+
         from azure.cli.core.mock import DummyCli
         cli_ctx = DummyCli()
 

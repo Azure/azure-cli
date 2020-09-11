@@ -25,7 +25,8 @@ def get_index_url(cli_ctx=None):
         url = cli_ctx.config.get('extension', 'index_url', None)
         if url:
             return url
-    ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
+    ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and \
+        cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
     return posixpath.join(ext_endpoint, 'index.json') if ext_endpoint else DEFAULT_INDEX_URL
 
 

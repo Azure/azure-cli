@@ -295,8 +295,10 @@ class AzCliCommandParser(CLICommandParser):
             import requests
             from azure.cli.core.util import should_disable_connection_verify
             try:
-                ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
-                url = posixpath.join(ext_endpoint, 'extensionCommandTree.json') if ext_endpoint else 'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json'
+                ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and \
+                    cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
+                url = posixpath.join(ext_endpoint, 'extensionCommandTree.json') if ext_endpoint else \
+                    'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json'
                 response = requests.get(
                     url,
                     verify=(not should_disable_connection_verify()),
