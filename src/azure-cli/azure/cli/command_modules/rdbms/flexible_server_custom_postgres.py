@@ -43,6 +43,12 @@ def _flexible_server_create(cmd, client,
             raise CLIError("Incorrect usage : A combination of the parameters --subnet "
                            "and --public_access is invalid. Use either one of them.")
 
+        # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
+        if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
+            if ((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and ((vnet_resource_id is None) or (subnet_arm_resource_id is None))):
+               raise CLIError("Incorrect usage : "
+                              "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
+
         server_result = firewall_id = subnet_id = None
 
         # Populate desired parameters
