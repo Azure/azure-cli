@@ -4177,7 +4177,7 @@ def _create_nw_connection_monitor_v1(cmd,
         test_configurations=None,
         test_groups=None,
         outputs=None,
-        nots=None
+        notes=None
     )
 
     return cmv1
