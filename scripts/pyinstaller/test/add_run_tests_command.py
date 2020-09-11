@@ -16,9 +16,9 @@ helps['run-tests'] = """
 type: command
 short-summary: Run all tests
 examples:
-  - name: Run installed fulltests
+  - name: Run acs module tests
     text: >
-        az run-tests --path /path/to/installed/fulltests
+        az run-tests --path /path/to/installed/fulltests --module acs
 """
 
 
@@ -37,6 +37,7 @@ class PkgTestCommandsLoader(AzCommandsLoader):
     def load_arguments(self, command):
         with self.argument_context('run-tests') as c:
             c.argument('path', help='The site-packages path of installed fulltests')
+            c.argument('module', help='The module name to be tested')
 
 
 COMMAND_LOADER_CLS = PkgTestCommandsLoader
@@ -59,40 +60,36 @@ logger = get_logger(__name__)
 
 # pylint: disable=line-too-long
 # pylint: disable=unused-argument
-def run_tests(cmd, path):
-    path = os.path.abspath(path)
-    logger.warning('fulltests abspath is {}'.format(path))
-    mod_list = 'ALL_COMMAND_MODULES'
+def run_tests(cmd, path, module):
     sys.path.append(path)
+    logger.warning(str(sys.path))
     try:
         import azure.cli
         azure.cli.__path__.append(os.path.join(path, 'azure', 'cli'))
+        logger.warning('azure.cli.__path__: {}'.format(str(azure.cli.__path__)))
         import azure.cli.testsdk
         logger.warning('success to import azure.cli.testsdk')
-        for mod in mod_list:
-            mod_name = 'azure.cli.command_modules.{}'.format(mod)
-            module = importlib.import_module(mod_name)
-            if os.path.exists(os.path.join(path, 'azure', 'cli', 'command_modules', mod)):
-                module.__path__.append(os.path.join(path, 'azure', 'cli', 'command_modules', mod))
-                logger.warning('[{}] path are {}'.format(mod, str(module.__path__)))
-            else:
-                logger.warning('[{}] does not have full tests.'.format(mod))
+        module_imported = importlib.import_module('azure.cli.command_modules.{}'.format(module))
+        if os.path.exists(os.path.join(path, 'azure', 'cli', 'command_modules', module)):
+            module_imported.__path__.append(os.path.join(path, 'azure', 'cli', 'command_modules', module))
+            logger.warning('[{}] path are {}'.format(module, str(module_imported.__path__)))
+        else:
+            logger.warning('[{}] does not have full tests.'.format(module))
     except Exception as ex:  # pylint: disable=broad-except
+        import traceback
+        traceback.print_tb(ex)
         logger.warning(str(ex))
 
     import pytest
     pytest_args = ['-x', '-v', '-p', 'no:warnings', '--log-level=WARN']
-    pytest_parallel_args = pytest_args + ['-n', 'auto']
+    pytest_parallel_args = pytest_args  #+ ['-n', 'auto']
 
-    for mod_name in mod_list:
-        if mod_name in ['botservice', 'network', 'configure', 'monitor']:
-            module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(mod_name), '--pyargs', 'azure/cli/command_modules/{}/tests'.format(mod_name)]
-            pytest.main(module_args)
-        else:
-            module_args = pytest_parallel_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(mod_name), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(mod_name)]
-            pytest.main(module_args)
-    core_module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/azure-cli-core.xml', '--pyargs', 'azure.cli.core']
-    pytest.main(core_module_args)
+    if module in ['botservice', 'network', 'configure', 'monitor']:
+        module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
+        sys.exit(pytest.main(module_args))
+    else:
+        module_args = pytest_parallel_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
+        sys.exit(pytest.main(module_args))
 
 '''
 

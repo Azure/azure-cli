@@ -10,9 +10,12 @@ from PyInstaller.utils.hooks import collect_submodules
 
 _hiddenimports = collect_submodules('humanfriendly')
 _hiddenimports.extend(collect_submodules('pytest'))
-_hiddenimports.extend(collect_submodules('xdist'))
+_hiddenimports.extend(collect_submodules('unittest'))
+# _hiddenimports.extend(collect_submodules('xdist'))
 _hiddenimports.extend(collect_submodules('azure.mgmt.keyvault'))
+_hiddenimports.extend(collect_submodules('azure.mgmt.authorization'))
 _hiddenimports.extend(collect_submodules('azure.multiapi'))
+_hiddenimports.extend(collect_submodules('azure.cli.core'))
 
 mods_ns_pkg = importlib.import_module('azure.cli.command_modules')
 command_modules = [modname for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__)]

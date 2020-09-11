@@ -61,4 +61,11 @@ deb_file=$WORKDIR/../azure-cli_${CLI_VERSION}-${CLI_VERSION_REVISION:=1}_all.deb
 cp $deb_file /mnt/output/
 
 dpkg -i $deb_file
-az run-tests --path ${WORKDIR}/fulltests/lib/python3.7/site-packages
+
+shopt -s dotglob
+cd ${WORKDIR}/fulltests/lib/python3.7/site-packages/azure/cli/command_moduels
+find * -prune -type d | while IFS= read -r d; do
+    if [[ "$d" != \__* ]]; then
+        az run-tests --path ${WORKDIR}/fulltests/lib/python3.7/site-packages --module $d
+    fi
+done
