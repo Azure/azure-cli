@@ -61,13 +61,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vault_or_hsm')
         g.custom_show_command('show', 'get_vault_or_hsm',
                               doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('get'))
-        g.custom_command('delete', 'delete_vault_or_hsm', deprecate_info=g.deprecate(
-            tag_func=lambda x: '',
-            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, you will '
-                                   'not be able to reuse this key vault name until the key vault has been purged from '
-                                   'the soft deleted state. Please see the following documentation for additional '
-                                   'guidance.\n'
-                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+        g.custom_command('delete', 'delete_vault_or_hsm',
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('delete'))
         g.custom_command('purge', 'purge_vault_or_hsm', supports_no_wait=True,
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('begin_purge_deleted'))
@@ -148,14 +142,7 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
-        g.keyvault_command('delete', 'delete_key', deprecate_info=g.deprecate(
-            tag_func=lambda x: '',
-            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this key '
-                                   'will be moved to the soft deleted state. You will not be able to create a key with '
-                                   'the same name within this key vault until the key has been purged from the '
-                                   'soft-deleted state. Please see the following documentation for additional '
-                                   'guidance.\n'
-                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
+        g.keyvault_command('delete', 'delete_key')
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key',

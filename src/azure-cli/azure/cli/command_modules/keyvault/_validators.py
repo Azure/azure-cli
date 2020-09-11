@@ -8,8 +8,10 @@ import base64
 import binascii
 from datetime import datetime
 import re
+import sys
 
 from enum import Enum
+from knack.deprecation import Deprecated
 from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -157,10 +159,12 @@ def process_hsm_name(ns):
 
 
 def validate_vault_name_and_hsm_name(ns):
-    if getattr(ns, 'vault_name', None) and getattr(ns, 'hsm_name', None):
+    vault_name = getattr(ns, 'vault_name', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
+    if vault_name and hsm_name:
         raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
 
-    if not getattr(ns, 'vault_name', None) and not getattr(ns, 'hsm_name', None):
+    if not vault_name and not hsm_name:
         raise CLIError('Please specify --vault-name or --hsm-name.')
 
 # PARAMETER NAMESPACE VALIDATORS
@@ -253,11 +257,18 @@ def validate_resource_group_name(cmd, ns):
     if 'keyvault purge' in cmd.name or 'keyvault recover' in cmd.name:  # Do not add resource group name for these commands
         return
 
+    vault_name = getattr(ns, 'vault_name', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
+    if 'keyvault update-hsm' in cmd.name:
+        hsm_name = getattr(ns, 'name', None)
+
+    if vault_name and hsm_name:
+        raise CLIError('--name/-n and --hsm-name are mutually exclusive.')
+
+    if vault_name:
+        _show_vault_only_deprecate_message(ns)  # This is a temporary solution for showing deprecation message only for vaults
+
     if not ns.resource_group_name:
-        vault_name = getattr(ns, 'vault_name', None)
-        hsm_name = getattr(ns, 'hsm_name', None)
-        if vault_name and hsm_name:
-            raise CLIError('--name/-n and --hsm-name are mutually exclusive.')
         group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, vault_name, hsm_name)
         if group_name:
             ns.resource_group_name = group_name
@@ -442,9 +453,35 @@ def validate_vault_or_hsm(ns):
             raise CLIError('Please specify --vault-name or --hsm-name.')
 
 
+def _show_vault_only_deprecate_message(ns):
+    message_dict = {
+        'keyvault delete':
+            Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
+                       'Warning! If you have soft-delete protection enabled on this key vault, you will '
+                       'not be able to reuse this key vault name until the key vault has been purged from '
+                       'the soft deleted state. Please see the following documentation for additional '
+                       'guidance.\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+        'keyvault key delete':
+            Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
+                       'Warning! If you have soft-delete protection enabled on this key vault, this key '
+                       'will be moved to the soft deleted state. You will not be able to create a key with '
+                       'the same name within this key vault until the key has been purged from the '
+                       'soft-deleted state. Please see the following documentation for additional '
+                       'guidance.\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview')
+    }
+    cmds = ['keyvault delete', 'keyvault key delete']
+    for cmd in cmds:
+        if cmd == getattr(ns, 'command', None):
+            print(message_dict[cmd].message, file=sys.stderr)
+
+
 def set_vault_base_url(ns):
     vault_base_url = getattr(ns, 'vault_base_url', None)
     hsm_name = getattr(ns, 'hsm_name', None)
+
+    if not hsm_name:
+        _show_vault_only_deprecate_message(ns)  # This is a temporary solution for showing deprecation message only for vaults
+
     if hsm_name and not vault_base_url:
         setattr(ns, 'vault_base_url', hsm_name)
 

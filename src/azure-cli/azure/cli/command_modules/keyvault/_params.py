@@ -167,7 +167,7 @@ def load_arguments(self, _):
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault update-hsm') as c:
-        c.argument('hsm_name', hsm_name_type)
+        c.argument('name', hsm_name_type)
         c.argument('secondary_locations', nargs='+',
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
@@ -193,11 +193,11 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault list') as c:
         c.argument('resource_group_name', resource_group_name_type, validator=None)
-        c.argument('resource_type', help='When --resource-type is not present the command will list all vaults and HSMs.'
+        c.argument('resource_type', help='When --resource-type is not present the command will list all Vaults and HSMs.'
                                          ' Possible values for --resource-type are vault and hsm.')
 
     with self.argument_context('keyvault list-deleted') as c:
-        c.argument('resource_type', help='When --resource-type is not present the command will list all deleted vaults '
+        c.argument('resource_type', help='When --resource-type is not present the command will list all deleted Vaults '
                                          'and HSMs. Possible values for --resource-type are vault and hsm.')
 
     with self.argument_context('keyvault delete-policy') as c:
@@ -275,7 +275,7 @@ def load_arguments(self, _):
                         validator=validate_key_id('deleted' + item))
                 c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
                            required=False)
-                c.argument('vault_base_url', help='Name of the Key Vault. Required if --id is not specified.',
+                c.argument('vault_base_url', help='Name of the Vault. Required if --id is not specified.',
                            required=False)
                 c.argument(item + '_version', required=False)
 

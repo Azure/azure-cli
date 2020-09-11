@@ -755,11 +755,11 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                                 no_wait=no_wait)
 
 
-def update_hsm_setter(cmd, client, parameters, resource_group_name, hsm_name, no_wait=False):
+def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wait=False):
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
-                       name=hsm_name,
+                       name=name,
                        parameters=ManagedHsm(
                            sku=parameters.sku,
                            tags=parameters.tags,
