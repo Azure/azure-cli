@@ -65,8 +65,6 @@ def generate_password(administrator_login_password):
         administrator_login_password = secrets.token_urlsafe(passwordLength)
         random_position = random.randint(1, len(administrator_login_password)-1)
         administrator_login_password = administrator_login_password[:random_position] + special_character + administrator_login_password[random_position + 1:]
-        #password_character = string.ascii_letters + string.digits + '!@#,?;:$&*' # Allowing limited punctuations to avoid unicode errors
-        #administrator_login_password = "".join(random.choice(password_character) for i in range(passwordLength))
     return administrator_login_password
 
 
@@ -91,7 +89,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     # allow access to azure ip addresses
     cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name
     now = datetime.now()
-    firewall_name = 'ClientIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
+    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
     if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
         logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
                    'Azure resources...')
@@ -150,6 +148,7 @@ def parse_maintenance_window(maintenance_window_string):
     elif len(parsed_input) == 3:
         return parsed_input[0], parsed_input[1], parsed_input[2]
     return None, None, None
+
 
 def _update_location(cmd, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)

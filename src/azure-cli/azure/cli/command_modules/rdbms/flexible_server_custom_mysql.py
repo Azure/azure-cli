@@ -34,7 +34,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
         # Raise error when user passes values for both parameters
         if subnet_arm_resource_id is not None and public_access is not None:
-            raise CLIError("usage error : A combination of the parameters --subnet "
+            raise CLIError("Incorrect usage : A combination of the parameters --subnet "
                            "and --public_access is invalid. Use either one of them.")
         server_result = firewall_id = subnet_id = None
 
@@ -77,8 +77,8 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                                            high_availability, zone)
 
             # Adding firewall rule
-            if public_access is not None and public_access != 'none':
-                if public_access == 'all':
+            if public_access is not None and str(public_access).lower() != 'none':
+                if str(public_access).lower() == 'all':
                     start_ip, end_ip = '0.0.0.0', '255.255.255.255'
                 else:
                     start_ip, end_ip = parse_public_access_input(public_access)
