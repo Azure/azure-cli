@@ -405,7 +405,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         # upload the blob
         self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
                  '--sd-exchange-key "{exchange_key}" '
-                 '--sd-wrapping-keys "{pem_dir}/sd1.key" "{pem_dir}/sd2.key" "{pem_dir}/sd3.key"')
+                 '--sd-wrapping-keys "{pem_dir}/sd1.key" "{pem_dir}/sd2.key"')
 
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')

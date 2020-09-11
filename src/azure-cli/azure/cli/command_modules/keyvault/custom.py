@@ -211,7 +211,11 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        return hsm_client.delete(resource_group_name=resource_group_name, name=hsm_name)
+        return sdk_no_wait(
+            False, hsm_client.begin_delete,
+            resource_group_name=resource_group_name,
+            name=hsm_name
+        )
 
 
 def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None, no_wait=False):
@@ -2167,7 +2171,10 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
 
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
-    retval = client.upload(vault_base_url=vault_base_url, security_domain=security_domain)
+    try:
+        retval = client.upload(vault_base_url=vault_base_url, security_domain=security_domain)
+    except Exception as e:
+        raise CLIError(e)
 
     if no_wait:
         return retval
