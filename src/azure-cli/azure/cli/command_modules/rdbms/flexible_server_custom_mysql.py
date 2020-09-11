@@ -293,7 +293,7 @@ def _flexible_replica_stop(client, resource_group_name, server_name):
     except Exception as e:
         raise CLIError('Unable to get server: {}.'.format(str(e)))
 
-    if server_object.replication_role.lower() != "replica":
+    if server_object.replication_role is not None and server_object.replication_role.lower() != "replica":
         raise CLIError('Server {} is not a replica server.'.format(server_name))
 
     from importlib import import_module

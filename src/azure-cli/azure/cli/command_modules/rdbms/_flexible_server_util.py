@@ -141,11 +141,11 @@ def update_kwargs(kwargs, key, value):
 def parse_maintenance_window(maintenance_window_string):
     parsed_input = maintenance_window_string.split(':')
     if len(parsed_input) == 1:
-        return parsed_input[0], None, None
+        return _map_maintenance_window(parsed_input[0]), None, None
     elif len(parsed_input) == 2:
-        return parsed_input[0], parsed_input[1], None
+        return _map_maintenance_window(parsed_input[0]), parsed_input[1], None
     elif len(parsed_input) == 3:
-        return parsed_input[0], parsed_input[1], parsed_input[2]
+        return _map_maintenance_window(parsed_input[0]), parsed_input[1], parsed_input[2]
     return None, None, None
 
 def _update_location(cmd, resource_group_name):
@@ -176,3 +176,18 @@ def _create_vnet_metadata(servername):
     vnet_address_prefix = '10.0.0.0/16'
     subnet_prefix = '10.0.0.0/24'
     return vnet_name, subnet_name, vnet_address_prefix, subnet_prefix
+
+# Map day_of_week string to integer to day of week
+# Possible values can be 0 - 6
+def _map_maintenance_window(day_of_week):
+    options = {"Mon":1,
+               "Tue":2,
+               "Wed":3,
+               "Thu":4,
+               "Fri":5,
+               "Sat":6,
+               "Sun":0,
+               }
+    return options[day_of_week]
+
+
