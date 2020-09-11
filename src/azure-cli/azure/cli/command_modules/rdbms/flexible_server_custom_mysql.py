@@ -13,9 +13,10 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db
-from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_vnet, create_firewall_rule, \
+from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, update_kwargs, generate_password, parse_maintenance_window
 from .flexible_server_custom_common import user_confirmation, _server_list_custom_func
+from .flexible_server_virtual_network import create_vnet, prepareVnet
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
