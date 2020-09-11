@@ -84,7 +84,7 @@ def prepareVnet(cmd, server_name, vnet, subnet, resource_group_name, loc, delega
         else:
             raise CLIError("Incorrectly formed Vnet id or Vnet name")
     elif subnet is not None and vnet is not None and vnet_address_pref is not None and subnet_address_pref is not None:
-        if len(vnet.split('\\'))== 1 and len(subnet.split('\\'))== 1:
+        if (len(vnet.split('\\'))== 1) and (len(subnet.split('\\'))== 1):
             subnet_result = _create_with_resource_names(cmd, vnet, subnet, resource_group_name, delegation, nw_client,
                                                     delegation_service_name, server_name, VirtualNetwork, Subnet,
                                                     AddressSpace, loc, vnet_address_pref,
@@ -92,10 +92,13 @@ def prepareVnet(cmd, server_name, vnet, subnet, resource_group_name, loc, delega
         else:
             raise CLIError("If you pass an address prefix, please consider passing a name (instead of Id) for a subnet or vnet.")
     elif subnet is not None and vnet is not None:
-        subnet_result = _create_with_resource_names(cmd, vnet, subnet, resource_group_name, delegation, nw_client,
+        if (len(vnet.split('\\')) == 1) and (len(subnet.split('\\')) == 1):
+            subnet_result = _create_with_resource_names(cmd, vnet, subnet, resource_group_name, delegation, nw_client,
                                                     delegation_service_name, server_name, VirtualNetwork, Subnet,
                                                     AddressSpace, loc, DEFAULT_VNET_ADDRESS_PREFIX,
                                                     DEFAULT_SUBNET_PREFIX)
+        else:
+            raise CLIError("If you pass both --vnet and --subnet, consider passing names instead of ids.")
     else:
         return None
     return subnet_result.id
