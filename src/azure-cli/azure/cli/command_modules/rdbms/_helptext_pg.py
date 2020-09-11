@@ -101,6 +101,15 @@ examples:
     text: az postgres flexible-server list --resource-group testGroup
 """
 
+helps['postgres flexible-server parameter'] = """
+type: group
+short-summary: Commands for managing server parameter values for flexible server.
+examples:
+  - name: List the parameter values for a flexible server. 
+    text: az postgres flexible-server parameter list
+    crafted: true
+"""
+
 helps['postgres flexible-server parameter list'] = """
 type: command
 short-summary: List the parameter values for a flexible server.
@@ -183,10 +192,20 @@ type: command
 short-summary: Update a flexible server.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
-    text: az postgres server update --sku-name Standard_D4s_v3
+    text: az postgres flexible-server update --sku-name Standard_D4s_v3
   - name: Update a server's tags.
-    text: az postgres server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
+    text: az postgres flexible-server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
+  - name: Reset password
+    text: az postgres flexible-server update --resource-group testGroup --name testServer -p password123
     crafted: true
+"""
+
+helps['postgres flexible-server list-skus'] = """
+type: command
+short-summary: Lists available sku's in the given region. 
+examples:
+  - name: Lists available sku's in the given region.
+    text: az mysql flexible-server list-skus -l
 """
 
 helps['postgres flexible-server wait'] = """

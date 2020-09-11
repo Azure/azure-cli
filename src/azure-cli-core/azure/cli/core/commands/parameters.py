@@ -302,6 +302,7 @@ zones_type = CLIArgumentType(
 )
 
 zone_type = CLIArgumentType(
+
     options_list=['--zone', '-z'],
     help='Availability zone into which to provision the resource.',
     choices=['1', '2', '3'],

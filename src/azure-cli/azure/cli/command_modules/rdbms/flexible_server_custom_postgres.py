@@ -209,7 +209,6 @@ def _server_delete_func(cmd, client, resource_group_name=None, server_name=None,
             logger.error(ex)
         return result
 
-
 # Wait command
 def _flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     client = get_postgresql_flexible_management_client(cmd.cli_ctx)
