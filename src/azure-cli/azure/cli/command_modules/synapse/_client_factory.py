@@ -54,6 +54,30 @@ def cf_synapse_client_ipfirewallrules_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).ip_firewall_rules
 
 
+def cf_synapse_client_integrationruntimes_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtimes
+
+
+def cf_synapse_client_integrationruntimeauthkeys_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_auth_keys
+
+
+def cf_synapse_client_integrationruntimemonitoringdata_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_monitoring_data
+
+
+def cf_synapse_client_integrationruntimenodes_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_nodes
+
+
+def cf_synapse_client_integrationruntimenodeipaddress_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_node_ip_address
+
+
+def cf_synapse_client_integrationruntimecredentials_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_credentials
+
+
 def cf_synapse_client_operations_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).operations
 

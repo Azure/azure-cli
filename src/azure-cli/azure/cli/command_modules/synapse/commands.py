@@ -20,6 +20,12 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_sqlpool_blob_auditing_policies_factory
     from ._client_factory import cf_synapse_client_workspace_aad_admins_factory
     from ._client_factory import cf_synapse_client_sqlserver_blob_auditing_policies_factory
+    from ._client_factory import cf_synapse_client_integrationruntimes_factory
+    from ._client_factory import cf_synapse_client_integrationruntimeauthkeys_factory
+    from ._client_factory import cf_synapse_client_integrationruntimemonitoringdata_factory
+    from ._client_factory import cf_synapse_client_integrationruntimenodeipaddress_factory
+    from ._client_factory import cf_synapse_client_integrationruntimenodes_factory
+    from ._client_factory import cf_synapse_client_integrationruntimecredentials_factory
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -80,6 +86,30 @@ def load_command_table(self, _):
     synapse_firewallrules_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#IpFirewallRulesOperations.{}',
         client_factory=cf_synapse_client_ipfirewallrules_factory)
+
+    synapse_integrationruntimes_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimesOperations.{}',
+        client_factory=cf_synapse_client_integrationruntimes_factory)
+
+    synapse_integrationruntimeauthkeys_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimeAuthKeysOperations.{}',
+        client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
+
+    synapse_integrationruntimemonitoringdata_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimeMonitoringDataOperations.{}',
+        client_factory=cf_synapse_client_integrationruntimemonitoringdata_factory)
+
+    synapse_integrationruntimenodes_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimeNodesOperations.{}',
+        client_factory=cf_synapse_client_integrationruntimenodes_factory)
+
+    synapse_integrationruntimenodeipaddress_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimeNodeIpAddressOperations.{}',
+        client_factory=cf_synapse_client_integrationruntimenodeipaddress_factory)
+
+    synapse_integrationruntimecredentials_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimeCredentialsOperations.{}',
+        client_factory=cf_synapse_client_integrationruntimecredentials_factory)
 
     synapse_spark_session_sdk = CliCommandType(
         operations_tmpl='azure.synapse.spark.operations#SparkSessionOperations.{}',
@@ -246,6 +276,40 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_firewall_rule', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
+
+    # Management Plane Commands --IntegrationRuntime
+    with self.command_group('synapse integration-runtime', command_type=synapse_integrationruntimes_sdk,
+                            custom_command_type=get_custom_sdk('integrationruntime', cf_synapse_client_integrationruntimes_factory),
+                            client_factory=cf_synapse_client_integrationruntimes_factory) as g:
+        g.command('list', 'list_by_workspace')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create', supports_no_wait=True)
+        g.custom_command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('update', 'update')
+        g.command('upgrade', 'upgrade')
+
+    with self.command_group('synapse integration-runtime-key', command_type=synapse_integrationruntimeauthkeys_sdk,
+                            client_factory=cf_synapse_client_integrationruntimeauthkeys_factory) as g:
+        g.show_command('show', 'list')
+        g.command('regenerate', 'regenerate')
+
+    with self.command_group('synapse integration-runtime-metric', command_type=synapse_integrationruntimemonitoringdata_sdk,
+                            client_factory=cf_synapse_client_integrationruntimemonitoringdata_factory) as g:
+        g.show_command('show', 'get')
+
+    with self.command_group('synapse integration-runtime-node', command_type=synapse_integrationruntimenodes_sdk,
+                            client_factory=cf_synapse_client_integrationruntimenodes_factory) as g:
+        g.show_command('show', 'get')
+        g.command('update', 'update')
+        g.command('delete', 'delete', confirmation=True)
+
+    with self.command_group('synapse integration-runtime-node-ip', command_type=synapse_integrationruntimenodeipaddress_sdk,
+                            client_factory=cf_synapse_client_integrationruntimenodeipaddress_factory) as g:
+        g.show_command('show', 'get')
+
+    with self.command_group('synapse integration-runtime-credential', command_type=synapse_integrationruntimecredentials_sdk,
+                            client_factory=cf_synapse_client_integrationruntimecredentials_factory) as g:
+        g.show_command('sync', 'sync')
 
     # Data Plane Commands --Spark batch opertions
     with self.command_group('synapse spark job', command_type=synapse_spark_batch_sdk,
