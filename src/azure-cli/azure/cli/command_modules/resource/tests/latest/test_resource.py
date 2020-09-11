@@ -669,10 +669,11 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
-            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60)
+            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
-        self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters @"{params}" --parameters storageAccountName="{storage-account-name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -680,7 +681,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment sub create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
+        self.cmd('deployment sub create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}" --parameters storageAccountName="{storage-account-name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -703,7 +704,8 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
-        self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" --no-wait')
+        self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" '
+                 '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment sub cancel -n {dn2}')
 
@@ -720,10 +722,11 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
-            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60)
+            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
-        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters @"{params}" --parameters storageAccountName="{storage-account-name}" ', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -731,7 +734,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
+        self.cmd('deployment create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}" --parameters storageAccountName="{storage-account-name}" ', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -752,7 +755,8 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
-        self.cmd('deployment create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" --no-wait')
+        self.cmd('deployment create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" '
+                 '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment cancel -n {dn2}')
 
@@ -1437,7 +1441,9 @@ class FeatureScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     def test_feature_unregister(self):
-        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=self.check('properties.state', 'Unregistered'))
+        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=[
+            self.check_pattern('properties.state', 'Unregistering|Unregistered')
+        ])
 
 
 class PolicyScenarioTest(ScenarioTest):
@@ -1875,7 +1881,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, management_group_name)
 
             # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(IncorrectUsageError):
+            with self.assertRaises(SystemExit):
                 self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)

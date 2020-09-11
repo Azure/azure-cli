@@ -30,10 +30,11 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#work-behind-a-proxy. ')
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy.')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
                    "'https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest'")
+
 
 _PROXYID_RE = re.compile(
     '(?i)/subscriptions/(?P<subscription>[^/]*)(/resourceGroups/(?P<resource_group>[^/]*))?'
@@ -62,6 +63,12 @@ def handle_exception(ex):  # pylint: disable=too-many-statements
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
+    from requests.exceptions import SSLError
+    import traceback
+
+    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
+    # Print the traceback and exception message
+    logger.debug(traceback.format_exc())
 
     with CommandLoggerContext(logger):
         error_msg = getattr(ex, 'message', str(ex))
@@ -95,7 +102,7 @@ def handle_exception(ex):  # pylint: disable=too-many-statements
             exit_code = ex.args[1] if len(ex.args) >= 2 else 1
 
         # TODO: Fine-grained analysis
-        elif isinstance(ex, ClientRequestError):
+        elif isinstance(ex, (ClientRequestError, SSLError)):
             az_error = AzCLIError(AzCLIErrorType.ClientError, error_msg)
             if 'SSLError' in error_msg:
                 az_error.set_recommendation(SSLERROR_TEMPLATE)
@@ -152,8 +159,25 @@ def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
 
 
 def get_installed_cli_distributions():
-    from pkg_resources import working_set
-    return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
+    # Stop importing pkg_resources, because importing it is slow (~200ms).
+    # from pkg_resources import working_set
+    # return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
+
+    # Use the hard-coded version instead of querying all modules under site-packages.
+    from azure.cli.core import __version__ as azure_cli_core_version
+    from azure.cli.telemetry import __version__ as azure_cli_telemetry_version
+
+    class VersionItem:  # pylint: disable=too-few-public-methods
+        """A mock of pkg_resources.EggInfoDistribution to maintain backward compatibility."""
+        def __init__(self, key, version):
+            self.key = key
+            self.version = version
+
+    return [
+        VersionItem('azure-cli', azure_cli_core_version),
+        VersionItem('azure-cli-core', azure_cli_core_version),
+        VersionItem('azure-cli-telemetry', azure_cli_telemetry_version)
+    ]
 
 
 def _update_latest_from_pypi(versions):
@@ -215,7 +239,10 @@ def _update_latest_from_github(versions):
             success = False
         else:
             versions[pkg.replace(COMPONENT_PREFIX, '')]['pypi'] = version
-    versions[CLI_PACKAGE_NAME]['pypi'] = versions['core']['pypi']
+    try:
+        versions[CLI_PACKAGE_NAME]['pypi'] = versions['core']['pypi']
+    except KeyError:
+        pass
     return versions, success
 
 
@@ -235,9 +262,8 @@ def get_cached_latest_versions(versions=None):
                 return cache_versions.copy(), True
 
     versions, success = _update_latest_from_github(versions)
-    if success:
-        VERSIONS['versions'] = versions
-        VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
+    VERSIONS['versions'] = versions
+    VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
     return versions.copy(), success
 
 
@@ -807,19 +833,17 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         else:
             logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
                            "If access token is required, use --resource to specify the resource")
-    try:
-        # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
-        s = Session()
-        req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
-        prepped = s.prepare_request(req)
 
-        # Merge environment settings into session
-        settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
-        _log_request(prepped)
-        r = s.send(prepped, **settings)
-        _log_response(r)
-    except Exception as ex:  # pylint: disable=broad-except
-        raise CLIError(ex)
+    # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
+    s = Session()
+    req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
+    prepped = s.prepare_request(req)
+
+    # Merge environment settings into session
+    settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
+    _log_request(prepped)
+    r = s.send(prepped, **settings)
+    _log_response(r)
 
     if not r.ok:
         reason = r.reason

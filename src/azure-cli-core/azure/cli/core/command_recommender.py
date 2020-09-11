@@ -7,15 +7,39 @@ import difflib
 
 import azure.cli.core.telemetry as telemetry
 from knack.log import get_logger
+from typing import Union
+from enum import Enum
 
 logger = get_logger(__name__)
+
+class AladdinUserFaultType(Enum):
+    """Define the userfault types required by aladdin service
+    to get the command recommendations"""
+
+    ExpectedArgument = 'ExpectedArgument'
+    UnrecognizedArguments = 'UnrecognizedArguments'
+    ValidationError = 'ValidationError'
+    UnknownSubcommand = 'UnknownSubcommand'
+    MissingRequiredParameters = 'MissingRequiredParameters'
+    MissingRequiredSubcommand = 'MissingRequiredSubcommand'
+    StorageAccountNotFound = 'StorageAccountNotFound'
+    Unknown = 'Unknown'
+    InvalidJMESPathQuery = 'InvalidJMESPathQuery'
+    InvalidOutputType = 'InvalidOutputType'
+    InvalidParameterValue = 'InvalidParameterValue'
+    UnableToParseCommandInput = 'UnableToParseCommandInput'
+    ResourceGroupNotFound = 'ResourceGroupNotFound'
+    InvalidDateTimeArgumentValue = 'InvalidDateTimeArgumentValue'
+    InvalidResourceGroupName = 'InvalidResourceGroupName'
+    AzureResourceNotFound = 'AzureResourceNotFound'
+    InvalidAccountName = 'InvalidAccountName'
 
 
 class CommandRecommender():
     """Recommend a command for user when user's command fails.
     It combines alladin recommendations and examples in help files."""
 
-    def __init__(self, command, parameters, extension, cli_ctx):
+    def __init__(self, command, parameters, extension, error_msg, cli_ctx):
         """
         :param command: The command name in user's input, which should be corrected if misspelled.
         :type command: str
@@ -23,11 +47,14 @@ class CommandRecommender():
         :type parameters: list
         :param extension: The extension name in user's input if the command comes from an extension.
         :type extension: str
+        :param error_msg: The error message of the failed command.
+        :type error_msg: str
         :param cli_ctx: CLI context when parser fails.
         :type cli_ctx: knack.cli.CLI
         """
         self.command = command.strip()
         self.extension = extension
+        self.error_msg = error_msg
         self.cli_ctx = cli_ctx
 
         self.parameters = self._normalize_parameters(parameters)
@@ -44,27 +71,36 @@ class CommandRecommender():
         Call the aladdin service API, parse the response and set the recommendations.
         """
 
+        import hashlib
         import json
         import requests
-        from requests import RequestException
+        from requests import RequestException, HTTPError
         from http import HTTPStatus
         from azure.cli.core import __version__ as version
 
         api_url = 'https://app.aladdin.microsoft.com/api/v1.0/suggestions'
-        headers = {'Content-Type': 'application/json'}
         correlation_id = telemetry._session.correlation_id  # pylint: disable=protected-access
         subscription_id = telemetry._get_azure_subscription_id()  # pylint: disable=protected-access
+        # Used for DDOS protection and rate limiting
+        user_id = telemetry._get_user_azure_id()  # pylint: disable=protected-access
+        hashed_user_id = hashlib.sha256(user_id.encode('utf-8')).hexdigest()
 
-        context = {
-            'versionNumber': version
+        headers = {
+            'Content-Type': 'application/json',
+            'X-UserId': hashed_user_id
         }
+        context = {
+            'versionNumber': version,
+            'errorType': self._get_error_type().value
+        }
+
         if telemetry.is_telemetry_enabled():
             if correlation_id:
                 context['correlationId'] = correlation_id
             if subscription_id:
                 context['subscriptionId'] = subscription_id
 
-        parameters = [item for item in self.parameters if item not in ['--debug', '--verbose']]
+        parameters = [item for item in self.parameters if item not in ['--debug', '--verbose', '--only-show-errors']]
         query = {
             "command": self.command,
             "parameters": ','.join(parameters)
@@ -83,6 +119,7 @@ class CommandRecommender():
                 timeout=1)
         except RequestException as ex:
             logger.debug('Recommendation requests.get() exception: %s', ex)
+            telemetry.set_debug_info('AladdinRecommendationService', ex.__class__.__name__)
 
         recommendations = []
         if response and response.status_code == HTTPStatus.OK:
@@ -132,6 +169,8 @@ class CommandRecommender():
         if candidates:
             index = filtered_choices.index(candidates[0])
             recommend_command = filtered_commands[index]
+        elif self.aladdin_recommendations:
+            recommend_command = self.aladdin_recommendations[0]
 
         return recommend_command
 
@@ -194,3 +233,50 @@ class CommandRecommender():
                     logger.debug('"%s" is an invalid parameter for command "%s".', parameter, self.command)
 
         return sorted(normalized_parameters)
+
+    def _get_error_type(self):
+        """The the error type of the failed command from the error message.
+        The error types are only consumed by aladdin service for better recommendations.
+        """
+
+        error_type = AladdinUserFaultType.Unknown
+        if not self.error_msg:
+            return error_type
+
+        error_msg = self.error_msg.lower()
+        if 'unrecognized' in error_msg:
+            error_type = AladdinUserFaultType.UnrecognizedArguments
+        elif 'expected one argument' in error_msg or 'expected at least one argument' in error_msg \
+                or 'value required' in error_msg:
+            error_type = AladdinUserFaultType.ExpectedArgument
+        elif 'misspelled' in error_msg:
+            error_type = AladdinUserFaultType.UnknownSubcommand
+        elif 'arguments are required' in error_msg or 'argument required' in error_msg:
+            error_type = AladdinUserFaultType.MissingRequiredParameters
+            if '_subcommand' in error_msg:
+                error_type = AladdinUserFaultType.MissingRequiredSubcommand
+            elif '_command_package' in error_msg:
+                error_type = AladdinUserFaultType.UnableToParseCommandInput
+        elif 'not found' in error_msg or 'could not be found' in error_msg \
+                or 'resource not found' in error_msg:
+            error_type = AladdinUserFaultType.AzureResourceNotFound
+            if 'storage_account' in error_msg or 'storage account' in error_msg:
+                error_type = AladdinUserFaultType.StorageAccountNotFound
+            elif 'resource_group' in error_msg or 'resource group' in error_msg:
+                error_type = AladdinUserFaultType.ResourceGroupNotFound
+        elif 'pattern' in error_msg or 'is not a valid value' in error_msg or 'invalid' in error_msg:
+            error_type = 'InvalidParameterValue'
+            if 'jmespath_type' in error_msg:
+                error_type = AladdinUserFaultType.InvalidJMESPathQuery
+            elif 'datetime_type' in error_msg:
+                error_type = AladdinUserFaultType.InvalidDateTimeArgumentValue
+            elif '--output' in error_msg:
+                error_type = AladdinUserFaultType.InvalidOutputType
+            elif 'resource_group' in error_msg:
+                error_type = AladdinUserFaultType.InvalidResourceGroupName
+            elif 'storage_account' in error_msg:
+                error_type = AladdinUserFaultType.InvalidAccountName
+        elif "validation error" in error_msg:
+            error_type = AladdinUserFaultType.ValidationError
+
+        return error_type

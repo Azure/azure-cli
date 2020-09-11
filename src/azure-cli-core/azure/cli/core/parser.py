@@ -163,7 +163,8 @@ class AzCliCommandParser(CLICommandParser):
     def error(self, message):
         # Get a recommended command from the CommandRecommender
         command_arguments = self._get_failure_recovery_arguments()
-        recommender = CommandRecommender(*command_arguments, self.cli_ctx)
+        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        recommender = CommandRecommender(*command_arguments, message, cli_ctx)
         recommender.set_help_examples(self.get_examples(self.prog))
         recommendation = recommender.recommend_a_command()
 
@@ -378,6 +379,7 @@ class AzCliCommandParser(CLICommandParser):
 
             caused_by_extension_not_installed = False
             command_name_inferred = self.prog
+            error_msg = None
             if not self.command_source:
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 if candidates:
@@ -386,7 +388,6 @@ class AzCliCommandParser(CLICommandParser):
                     args_inferred = [item if item != value else candidates[0] for item in args]
                     command_name_inferred = ' '.join(args_inferred).split('-')[0]
 
-                error_msg = None
                 use_dynamic_install = self._get_extension_use_dynamic_install_config()
                 if use_dynamic_install != 'no' and not candidates:
                     # Check if the command is from an extension
@@ -458,7 +459,7 @@ class AzCliCommandParser(CLICommandParser):
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
             # recommand a command for user
-            recommender = CommandRecommender(command_name_inferred[3:].strip(), params, extension, cli_ctx)
+            recommender = CommandRecommender(command_name_inferred[3:].strip(), params, extension, error_msg, cli_ctx)
             recommender.set_help_examples(self.get_examples(command_name_inferred))
             recommended_command = recommender.recommend_a_command()
             if recommended_command:

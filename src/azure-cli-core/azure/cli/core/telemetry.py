@@ -53,6 +53,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.stack_trace = 'None'
         self.init_time_elapsed = None
         self.invoke_time_elapsed = None
+        self.debug_info = []
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
@@ -195,6 +196,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'error_type', self.error_type)
         set_custom_properties(result, 'exception_name', self.exception_name)
         set_custom_properties(result, 'stack_trace', self.stack_trace)
+        set_custom_properties(result, 'debug_info', ','.join(self.debug_info))
 
         return result
 
@@ -338,6 +340,10 @@ def set_user_fault(summary=None):
     if summary:
         _session.result_summary = _remove_cmd_chars(summary)
 
+@decorators.suppress_all_exceptions()
+def set_debug_info(key, info):
+    debug_info = '{}: {}'.format(key, info)
+    _session.debug_info.append(debug_info)
 
 @decorators.suppress_all_exceptions()
 def set_application(application, arg_complete_env_name):
