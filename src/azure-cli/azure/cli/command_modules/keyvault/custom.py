@@ -4,10 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
-import base64
 import codecs
 import hashlib
-import hmac
 import json
 import math
 import os
@@ -371,7 +369,8 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
                              client=client,
                              resource_group_name=resource_group_name,
                              location=location,
-                             vault_name=vault_name)
+                             vault_name=vault_name,
+                             no_wait=no_wait)
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -379,10 +378,11 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
                            client=hsm_client,
                            resource_group_name=resource_group_name,
                            location=location,
-                           hsm_name=hsm_name)
+                           hsm_name=hsm_name,
+                           no_wait=no_wait)
 
 
-def recover_hsm(cmd, client, hsm_name, resource_group_name, location):
+def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=False):
     from azure.cli.core._profile import Profile
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -398,9 +398,12 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location):
                             sku=ManagedHsmSku(name='Standard_B1'),
                             properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value})
 
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   name=hsm_name,
-                                   parameters=parameters)
+    return sdk_no_wait(
+        no_wait, client.begin_create_or_update,
+        resource_group_name=resource_group_name,
+        name=hsm_name,
+        parameters=parameters
+    )
 
 
 def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wait=False):
@@ -600,8 +603,8 @@ def create_hsm(cmd, client,
                        parameters=parameters)
 
 
-def wait_hsm(client, name, resource_group_name):
-    return client.get(resource_group_name=resource_group_name, name=name)
+def wait_hsm(client, hsm_name, resource_group_name):
+    return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
 def create_vault(cmd, client,  # pylint: disable=too-many-locals
@@ -752,11 +755,11 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                                 no_wait=no_wait)
 
 
-def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wait=False):
+def update_hsm_setter(cmd, client, parameters, resource_group_name, hsm_name, no_wait=False):
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
-                       name=name,
+                       name=hsm_name,
                        parameters=ManagedHsm(
                            sku=parameters.sku,
                            tags=parameters.tags,
@@ -1042,7 +1045,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 # region KeyVault Key
 def create_key(cmd, client, key_name=None, vault_base_url=None,
-               hsm_base_url=None, protection=None, identifier=None,  # pylint: disable=unused-argument
+               hsm_name=None, protection=None, identifier=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None):
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
@@ -1059,19 +1062,19 @@ def create_key(cmd, client, key_name=None, vault_base_url=None,
 
 
 def backup_key(client, file_path, vault_base_url=None,
-               key_name=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
+               key_name=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
-def restore_key(client, file_path, vault_base_url=None, hsm_base_url=None,
+def restore_key(client, file_path, vault_base_url=None, hsm_name=None,
                 identifier=None):  # pylint: disable=unused-argument
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    if hsm_base_url is None:  # TODO: use a more graceful way to implement.
-        hsm_base_url = vault_base_url
-    return client.restore_key(hsm_base_url, data)
+    if hsm_name is None:  # TODO: use a more graceful way to implement.
+        hsm_name = vault_base_url
+    return client.restore_key(hsm_name, data)
 
 
 def _int_to_bytes(i):
@@ -1126,7 +1129,7 @@ def _private_ec_key_to_jwk(ec_key, jwk):
 
 
 def import_key(cmd, client, key_name=None, vault_base_url=None,
-               hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
+               hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None):
@@ -1271,7 +1274,7 @@ def _export_public_key_to_pem(k):
     return _export_public_key(k, encoding=Encoding.PEM)
 
 
-def download_key(client, file_path, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
+def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                  vault_base_url=None, key_name=None, key_version='', encoding=None):
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
@@ -1747,7 +1750,7 @@ def _is_guid(guid):
         return False
 
 
-def _resolve_role_id(client, role, hsm_base_url, scope):
+def _resolve_role_id(client, role, hsm_name, scope):
     role_id = None
     if re.match(r'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/.+', role, re.I):
         last_part = role.split('/')[-1]
@@ -1756,7 +1759,7 @@ def _resolve_role_id(client, role, hsm_base_url, scope):
     elif _is_guid(role):
         role_id = 'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/{}'.format(role)
     else:
-        all_roles = list_role_definitions(client, hsm_base_url=hsm_base_url, scope=scope)
+        all_roles = list_role_definitions(client, hsm_name=hsm_name, scope=scope)
         for _role in all_roles:
             if _role.get('roleName') == role:
                 role_id = _role.get('id')
@@ -1825,7 +1828,7 @@ def _reconstruct_role_definition(role_definition):
 
 
 def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=None,
-                           role_assignment_name=None, hsm_base_url=None, assignee=None,
+                           role_assignment_name=None, hsm_name=None, assignee=None,
                            assignee_principal_type=None, identifier=None):  # pylint: disable=unused-argument
     """ Create a new role assignment for a user, group, or service principal. """
     patch_akv_client(client)
@@ -1835,7 +1838,7 @@ def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=Non
     if assignee_object_id is None:
         assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee)
 
-    role_definition_id = _resolve_role_id(client, role=role, hsm_base_url=hsm_base_url, scope=scope)
+    role_definition_id = _resolve_role_id(client, role=role, hsm_name=hsm_name, scope=scope)
     if not role_definition_id:
         raise CLIError('Unknown role "{}". Please use "az keyvault role definition list" '
                        'to check whether the role is existing.'.format(role))
@@ -1847,11 +1850,11 @@ def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=Non
         scope = ''
 
     role_assignment = client.create_role_assignment(
-        client, vault_base_url=hsm_base_url, scope=scope, name=role_assignment_name,
+        client, vault_base_url=hsm_name, scope=scope, name=role_assignment_name,
         principal_id=assignee_object_id, role_definition_id=role_definition_id
     )
 
-    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url, identifier=identifier)
+    role_defs = list_role_definitions(client, hsm_name=hsm_name, identifier=identifier)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, [role_assignment])
 
@@ -1864,7 +1867,7 @@ def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=Non
     return role_assignment
 
 
-def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=None, scope=None, assignee=None,
+def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_name=None, scope=None, assignee=None,
                            role=None, assignee_object_id=None, ids=None, identifier=None):
     """ Delete a role assignment. """
     patch_akv_client(client)
@@ -1879,27 +1882,27 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
             cnt_name = cnt_id.split('/')[-1]
             deleted_role_assignments.append(
                 client.delete_role_assignment(
-                    client, vault_base_url=hsm_base_url, scope=query_scope, name=cnt_name
+                    client, vault_base_url=hsm_name, scope=query_scope, name=cnt_name
                 )
             )
     else:
         if role_assignment_name is not None:
-            return [client.delete_role_assignment(client, vault_base_url=hsm_base_url, scope=query_scope,
+            return [client.delete_role_assignment(client, vault_base_url=hsm_name, scope=query_scope,
                                                   name=role_assignment_name)]
 
         matched_role_assignments = list_role_assignments(
-            cmd, client, hsm_base_url=hsm_base_url, scope=scope,
+            cmd, client, hsm_name=hsm_name, scope=scope,
             role=role, assignee_object_id=assignee_object_id, assignee=assignee
         )
 
         for role_assignment in matched_role_assignments:
             deleted_role_assignments.append(
                 client.delete_role_assignment(
-                    client, vault_base_url=hsm_base_url, scope=query_scope, name=role_assignment['name']
+                    client, vault_base_url=hsm_name, scope=query_scope, name=role_assignment['name']
                 )
             )
 
-    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url, identifier=identifier)
+    role_defs = list_role_definitions(client, hsm_name=hsm_name, identifier=identifier)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, deleted_role_assignments)
 
@@ -1913,7 +1916,7 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
     return deleted_role_assignments
 
 
-def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=None, role=None,
+def list_role_assignments(cmd, client, hsm_name=None, scope=None, assignee=None, role=None,
                           assignee_object_id=None, identifier=None):
     """ List role assignments. """
     patch_akv_client(client)
@@ -1929,10 +1932,10 @@ def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=N
 
     role_definition_id = None
     if role is not None:
-        role_definition_id = _resolve_role_id(client, role=role, hsm_base_url=hsm_base_url, scope=query_scope)
+        role_definition_id = _resolve_role_id(client, role=role, hsm_name=hsm_name, scope=query_scope)
 
     all_role_assignments = \
-        client.list_role_assignments_for_scope(client, vault_base_url=hsm_base_url, scope=query_scope)
+        client.list_role_assignments_for_scope(client, vault_base_url=hsm_name, scope=query_scope)
     matched_role_assignments = []
     for role_assignment in all_role_assignments.get('value', []):
         if role_definition_id is not None:
@@ -1947,7 +1950,7 @@ def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=N
                 continue
         matched_role_assignments.append(role_assignment)
 
-    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url, identifier=identifier)
+    role_defs = list_role_definitions(client, hsm_name=hsm_name, identifier=identifier)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, matched_role_assignments)
 
@@ -1961,7 +1964,7 @@ def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=N
     return matched_role_assignments
 
 
-def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
+def list_role_definitions(client, scope=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
     """ List role definitions. """
     patch_akv_client(client)
 
@@ -1970,7 +1973,7 @@ def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None
         query_scope = ''
 
     raw_definitions = \
-        client.list_role_definitions(client, vault_base_url=hsm_base_url, scope=query_scope).get('value', [])
+        client.list_role_definitions(client, vault_base_url=hsm_name, scope=query_scope).get('value', [])
 
     for i in raw_definitions:
         _reconstruct_role_definition(i)
@@ -1980,7 +1983,8 @@ def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None
 
 
 # region full backup/restore
-def full_backup(client, storage_resource_uri, token, vault_base_url=None, no_wait=False):
+def full_backup(client, storage_resource_uri, token,
+                hsm_name=None, no_wait=False):  # pylint: disable=unused-argument
     return sdk_no_wait(
         no_wait,
         client.begin_full_backup,
@@ -1989,7 +1993,9 @@ def full_backup(client, storage_resource_uri, token, vault_base_url=None, no_wai
     )
 
 
-def full_restore(client, storage_resource_uri, token, folder_to_restore, vault_base_url=None, no_wait=False):
+def full_restore(client, storage_resource_uri, token, folder_to_restore,
+                 hsm_name=None, no_wait=False):  # pylint: disable=unused-argument
+
     return sdk_no_wait(
         no_wait,
         client.begin_full_restore,
@@ -2001,12 +2007,12 @@ def full_restore(client, storage_resource_uri, token, folder_to_restore, vault_b
 
 
 # region security domain
-def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
+def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
                                   identifier=None):  # pylint: disable=unused-argument
     if os.path.exists(sd_exchange_key):
         raise CLIError("File named '{}' already exists.".format(sd_exchange_key))
 
-    ret = client.transfer_key(vault_base_url=vault_base_url)
+    ret = client.transfer_key(vault_base_url=hsm_name)
     logger.info('Raw response of the transfer key request: {}'.format(ret))
 
     exchange_key = json.loads(json.loads(ret)['transfer_key'])
@@ -2037,13 +2043,13 @@ def security_domain_init_recovery(client, vault_base_url, sd_exchange_key,
         raise ex
 
 
-def _wait_security_domain_operation(client, hsm_base_url, identifier=None):  # pylint: disable=unused-argument
+def _wait_security_domain_operation(client, hsm_name, identifier=None):  # pylint: disable=unused-argument
     retries = 0
     max_retries = 30
     wait_second = 5
     while retries < max_retries:
         try:
-            ret = client.upload_pending(vault_base_url=hsm_base_url)
+            ret = client.upload_pending(vault_base_url=hsm_name)
             if ret and getattr(ret, 'status', None) in ['Succeeded', 'Failed']:
                 return ret
         except:  # pylint: disable=bare-except
@@ -2054,7 +2060,7 @@ def _wait_security_domain_operation(client, hsm_base_url, identifier=None):  # p
     return None
 
 
-def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
+def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
                            identifier=None, no_wait=False):  # pylint: disable=unused-argument
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
@@ -2171,22 +2177,19 @@ def security_domain_upload(cmd, client, vault_base_url, sd_file, sd_exchange_key
 
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
-    try:
-        retval = client.upload(vault_base_url=vault_base_url, security_domain=security_domain)
-    except Exception as e:
-        raise CLIError(e)
+    retval = client.upload(vault_base_url=hsm_name, security_domain=security_domain)
 
     if no_wait:
         return retval
 
-    new_retval = _wait_security_domain_operation(client, vault_base_url)
+    new_retval = _wait_security_domain_operation(client, hsm_name)
 
     if new_retval:
         return new_retval
     return retval
 
 
-def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, security_domain_file, sd_quorum,
+def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,
                              identifier=None):  # pylint: disable=unused-argument
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
@@ -2232,7 +2235,7 @@ def security_domain_download(cmd, client, vault_base_url, sd_wrapping_keys, secu
     logger.info('Certificates was successfully added.')
 
     ret = client.download(
-        vault_base_url=vault_base_url,
+        vault_base_url=hsm_name,
         certificates=CertificateSet(certificates=certificates, required=sd_quorum)
     )
 

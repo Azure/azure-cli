@@ -40,9 +40,12 @@ def keyvault_exception_handler(cmd, ex):
             raise CLIError(ex)
     elif isinstance(ex, ClientRequestError):
         if 'Failed to establish a new connection' in str(ex.inner_exception):
-            raise CLIError('Max retries exceeded attempting to connect to vault. '
-                           'The vault may not exist or you may need to flush your DNS cache '
-                           'and try again later.')
+            instance_type = 'Vault'
+            if 'managedhsm' in str(ex.inner_exception):
+                instance_type = 'HSM'
+            raise CLIError('Max retries exceeded attempting to connect to {instance_type}. '
+                           'The {instance_type} may not exist or you may need to flush your DNS cache '
+                           'and try again later.'.format(instance_type=instance_type))
         raise CLIError(ex)
     else:
         raise CLIError(ex)

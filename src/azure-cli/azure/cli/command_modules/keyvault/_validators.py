@@ -149,11 +149,11 @@ def process_sas_token_parameter(cmd, ns):
     return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
 
 
-def process_hsm_base_url(ns):
-    if not ns.identifier and not ns.hsm_base_url:
+def process_hsm_name(ns):
+    if not ns.identifier and not ns.hsm_name:
         raise CLIError('Please specify --hsm-name or --id.')
     if ns.identifier:
-        ns.hsm_base_url = ns.identifier
+        ns.hsm_name = ns.identifier
 
 
 def validate_vault_name_and_hsm_name(ns):
@@ -256,9 +256,6 @@ def validate_resource_group_name(cmd, ns):
     if not ns.resource_group_name:
         vault_name = getattr(ns, 'vault_name', None)
         hsm_name = getattr(ns, 'hsm_name', None)
-        if 'keyvault update-hsm' in cmd.name or 'keyvault wait-hsm' in cmd.name:
-            hsm_name = getattr(ns, 'name', None)
-
         if vault_name and hsm_name:
             raise CLIError('--name/-n and --hsm-name are mutually exclusive.')
         group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, vault_name, hsm_name)
@@ -425,11 +422,11 @@ def validate_subnet(cmd, namespace):
 def validate_vault_or_hsm(ns):
     identifier = getattr(ns, 'identifier', None)
     vault_base_url = getattr(ns, 'vault_base_url', None)
-    hsm_base_url = getattr(ns, 'hsm_base_url', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
     if identifier:
         if vault_base_url:
             raise CLIError('--vault-name and --id are mutually exclusive.')
-        if hsm_base_url:
+        if hsm_name:
             raise CLIError('--hsm-name and --id are mutually exclusive.')
 
         items = identifier.split('/')
@@ -438,18 +435,18 @@ def validate_vault_or_hsm(ns):
 
         ns.vault_base_url = ns.identifier = '/'.join(items[:3])
     else:
-        if vault_base_url and hsm_base_url:
+        if vault_base_url and hsm_name:
             raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
 
-        if not vault_base_url and not hsm_base_url:
+        if not vault_base_url and not hsm_name:
             raise CLIError('Please specify --vault-name or --hsm-name.')
 
 
 def set_vault_base_url(ns):
     vault_base_url = getattr(ns, 'vault_base_url', None)
-    hsm_base_url = getattr(ns, 'hsm_base_url', None)
-    if hsm_base_url and not vault_base_url:
-        setattr(ns, 'vault_base_url', hsm_base_url)
+    hsm_name = getattr(ns, 'hsm_name', None)
+    if hsm_name and not vault_base_url:
+        setattr(ns, 'vault_base_url', hsm_name)
 
 
 def validate_key_id(entity_type):
@@ -460,15 +457,15 @@ def validate_key_id(entity_type):
         name = getattr(ns, pure_entity_type + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
         if not vault:
-            vault = getattr(ns, 'hsm_base_url', None)
+            vault = getattr(ns, 'hsm_name', None)
         identifier = getattr(ns, 'identifier', None)
 
         if identifier:
             vault_base_url = getattr(ns, 'vault_base_url', None)
-            hsm_base_url = getattr(ns, 'hsm_base_url', None)
+            hsm_name = getattr(ns, 'hsm_name', None)
             if vault_base_url:
                 raise CLIError('--vault-name and --id are mutually exclusive.')
-            if hsm_base_url:
+            if hsm_name:
                 raise CLIError('--hsm-name and --id are mutually exclusive.')
 
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')

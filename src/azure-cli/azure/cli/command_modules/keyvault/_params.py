@@ -27,7 +27,7 @@ from ._validators import (
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
     validate_vault_name_and_hsm_name, set_vault_base_url,
-    process_hsm_base_url, KeyEncryptionDataType)
+    process_hsm_name, KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
 
@@ -80,8 +80,10 @@ def load_arguments(self, _):
     deleted_vault_name_type = CLIArgumentType(
         help='Name of the deleted Vault.', options_list=['--vault-name'], metavar='NAME', id_part=None)
 
-    hsm_name_type = CLIArgumentType(help='Name of the HSM.', type=get_hsm_base_url_type(self.cli_ctx),
+    hsm_name_type = CLIArgumentType(help='Name of the HSM.',
                                     options_list=['--hsm-name'], id_part=None, is_preview=True)
+    hsm_url_type = CLIArgumentType(help='Name of the HSM.', type=get_hsm_base_url_type(self.cli_ctx),
+                                   options_list=['--hsm-name'], id_part=None, is_preview=True)
 
     mgmt_plane_hsm_name_type = CLIArgumentType(help='Name of the HSM. (--hsm-name and --name/-n are mutually '
                                                     'exclusive, please specify just one of them)',
@@ -109,15 +111,24 @@ def load_arguments(self, _):
         c.argument('spn', help='name of a service principal that will receive permissions')
         c.argument('upn', help='name of a user principal that will receive permissions')
         c.argument('tags', tags_type)
-        c.argument('enabled_for_deployment', arg_type=get_three_state_flag())
-        c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag())
-        c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag())
+        c.argument('enabled_for_deployment', arg_type=get_three_state_flag(),
+                   help='[Vault Only] Property to specify whether Azure Virtual Machines are permitted to retrieve '
+                        'certificates stored as secrets from the key vault.')
+        c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(),
+                   help='[Vault Only] Property to specify whether Azure Disk Encryption is permitted to retrieve '
+                        'secrets from the vault and unwrap keys.')
+        c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(),
+                   help='[Vault Only] Property to specify whether Azure Resource Manager is permitted to retrieve '
+                        'secrets from the key vault.')
         c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=c.deprecate(
             message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
                                    'deprecated by December 2020. All key vaults will be required to have soft delete '
                                    'enabled. Please see the following documentation for additional guidance.\n'
-                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'))
+                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'),
+                   help='[Vault Only] Property to specify whether the \'soft delete\' functionality is enabled for '
+                        'this key vault. If it\'s not set to any value (true or false) when creating new key vault, it '
+                        'will be set to true by default. Once set to true, it cannot be reverted to false.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
@@ -134,15 +145,14 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
         c.argument('administrators', nargs='+', is_preview=True,
-                   help='Administrator role for data plane operations for Managed HSM. It accepts a space separated '
-                        'list of OIDs that will be assigned. Only valid when --hsm-name is used.')
+                   help='[HSM Only] Administrator role for data plane operations for Managed HSM. '
+                        'It accepts a space separated list of OIDs that will be assigned.')
         c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'
-                               ' Allowed values for Managed HSM: Standard_B1, Custom_B32. Default: Standard_B1')
+                               ' Allowed values for HSM: Standard_B1, Custom_B32. Default: Standard_B1')
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
-                   help="Don't add permissions for the current user/service principal in the new vault.")
+                   help='[Vault Only] Don\'t add permissions for the current user/service principal in the new vault.')
         c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90. '
-                                          'Only valid when --name/-n is used', default='90')
+        c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,
@@ -154,21 +164,16 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault update') as c:
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=c.deprecate(
-            message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
-                                   'deprecated by December 2020. All key vaults will be required to have soft delete '
-                                   'enabled. Please see the following documentation for additional guidance.\n'
-                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-change'))
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault update-hsm') as c:
-        c.argument('name', options_list=['--hsm-name'], help='Name of the HSM.')
+        c.argument('hsm_name', hsm_name_type)
         c.argument('secondary_locations', nargs='+',
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
 
     with self.argument_context('keyvault wait-hsm') as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the HSM.')
+        c.argument('hsm_name', hsm_name_type)
         c.argument('resource_group_name', options_list=['--resource-group', '-g'],
                    help='Proceed only if HSM belongs to the specified resource group.')
 
@@ -300,13 +305,13 @@ def load_arguments(self, _):
                            help='Id of the Vault or HSM. '
                                 'If specified all other \'Id\' arguments should be omitted.',
                            validator=validate_key_id('key'))
-                c.argument('hsm_base_url', data_plane_hsm_name_type)
+                c.argument('hsm_name', data_plane_hsm_name_type)
             else:
                 c.argument('identifier', options_list=['--id'],
                            help='Id of the Vault or HSM. '
                                 'If specified all other \'Id\' arguments should be omitted.',
                            validator=validate_vault_or_hsm)
-                c.argument('hsm_base_url', data_plane_hsm_name_type, validator=None)
+                c.argument('hsm_name', data_plane_hsm_name_type, validator=None)
 
     # SDK functions
     for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover',
@@ -315,7 +320,7 @@ def load_arguments(self, _):
             c.ignore('cls')
             if item in ['list', 'list-deleted']:
                 c.argument('vault_base_url', vault_name_type, required=False)
-            c.extra('hsm_base_url', data_plane_hsm_name_type)
+            c.extra('hsm_name', data_plane_hsm_name_type)
 
     for item in ['create', 'import', 'set-attributes']:
         with self.argument_context('keyvault key {}'.format(item)) as c:
@@ -421,7 +426,7 @@ def load_arguments(self, _):
     # region keyvault security-domain
     for scope in ['init-recovery', 'download', 'upload']:
         with self.argument_context('keyvault security-domain {}'.format(scope), arg_group='HSM Id') as c:
-            c.argument('vault_base_url', hsm_name_type, required=False,
+            c.argument('hsm_name', hsm_url_type, required=False,
                        help='Name of the HSM. Can be omitted if --id is specified.')
             c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
 
@@ -447,7 +452,7 @@ def load_arguments(self, _):
                                                'for recovery.')
 
     with self.argument_context('keyvault security-domain wait') as c:
-        c.argument('hsm_base_url', hsm_name_type, help='Name of the HSM. Can be omitted if --id is specified.',
+        c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
                    required=False)
         c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
         c.argument('resource_group_name', options_list=['--resource-group', '-g'],
@@ -458,7 +463,7 @@ def load_arguments(self, _):
     for item in ['backup', 'restore']:
         for scope in ['start']:  # TODO add 'status' when SDK is ready
             with self.argument_context('keyvault {} {}'.format(item, scope), arg_group='HSM Id') as c:
-                c.argument('vault_base_url', hsm_name_type, required=False,
+                c.argument('hsm_name', hsm_url_type, required=False,
                            help='Name of the HSM. Can be omitted if --id is specified.')
                 c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
                 c.ignore('cls')
@@ -650,10 +655,10 @@ def load_arguments(self, _):
                         'e.g., "/" or "/keys" or "/keys/{keyname}"')
 
     with self.argument_context('keyvault role', arg_group='Id') as c:
-        c.argument('hsm_base_url', hsm_name_type)
+        c.argument('hsm_name', hsm_url_type)
         c.argument('identifier', options_list=['--id'],
                    help='Id of the HSM. If specified all other \'Id\' arguments should be omitted.',
-                   validator=process_hsm_base_url)
+                   validator=process_hsm_name)
 
     with self.argument_context('keyvault role assignment') as c:
         c.argument('role_assignment_name', options_list=['--name', '-n'], help='Name of the role assignment.')

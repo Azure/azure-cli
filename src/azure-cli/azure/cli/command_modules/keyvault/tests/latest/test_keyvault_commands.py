@@ -34,9 +34,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 SECURITY_DOMAIN_KEYS_DIR = os.path.join(TEST_DIR, 'security_domain_keys')
 
-ACTIVE_HSM_NAME = 'clitest0908c'  # live: clitest0908c
+ACTIVE_HSM_NAME = 'clitest0908d'  # live: clitest0908d
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
-NEXT_ACTIVE_HSM_NAME = 'clitest0908d'
+NEXT_ACTIVE_HSM_NAME = 'clitest0908e'
 NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(NEXT_ACTIVE_HSM_NAME)
 
 
@@ -186,24 +186,12 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
     def test_keyvault_hsm_mgmt(self):
         self.kwargs.update({
             'hsm_name': ACTIVE_HSM_NAME,
+            'hsm_url': ACTIVE_HSM_URL,
             'rg': 'bim-rg',
             'loc': 'eastus2euap',
             'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa'
         })
 
-        hsm = self.cmd('keyvault create -g {rg} --hsm-name {hsm_name} -l {loc} '
-                       '--administrators {init_admin}',
-                       checks=[
-                           self.check('location', '{loc}'),
-                           self.check('name', '{hsm_name}'),
-                           self.check('resourceGroup', '{rg}'),
-                           self.check('sku.name', 'Standard_B1'),
-                           self.check('length(properties.initialAdminObjectIds)', 1),
-                           self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
-                           self.exists('properties.hsmUri')
-                       ]).get_output_in_json()
-
-        self.kwargs['hsm_url'] = hsm['properties']['hsmUri']
         self.cmd('keyvault show --hsm-name {hsm_name}',
                  checks=[
                      self.check('location', '{loc}'),

@@ -124,13 +124,10 @@ def load_command_table(self, _):
     with self.command_group('keyvault backup', data_backup_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('start', 'full_backup', supports_no_wait=True,
                           doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
-        # g.keyvault_command('status', 'full_backup_status')
 
     with self.command_group('keyvault restore', data_backup_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('start', 'full_restore', supports_no_wait=True,
-                          doc_string_source=data_backup_entity.operations_docs_tmpl.format(
-                              'begin_full_restore'))
-        # g.keyvault_command('status', 'restore_status')
+                          doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_restore'))
 
     with self.command_group('keyvault security-domain', private_data_entity.command_type, is_preview=True) as g:
         g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
