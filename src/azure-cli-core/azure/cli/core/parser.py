@@ -291,13 +291,16 @@ class AzCliCommandParser(CLICommandParser):
             return None
         EXT_CMD_TREE.load(os.path.join(cli_ctx.config.config_dir, 'extensionCommandTree.json'), VALID_SECOND)
         if not EXT_CMD_TREE.data:
+            import posixpath
             import requests
             from azure.cli.core.util import should_disable_connection_verify
             try:
+                ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
+                url = posixpath.join(ext_endpoint, 'extensionCommandTree.json') if ext_endpoint else 'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json'
                 response = requests.get(
-                    'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json',
+                    url,
                     verify=(not should_disable_connection_verify()),
-                    timeout=300)
+                    timeout=10)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.info("Request failed for extension command tree: %s", str(ex))
                 return None
