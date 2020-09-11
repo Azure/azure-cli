@@ -56,7 +56,7 @@ class CloudSuffixNotSetException(CLIError):
 
 class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
-    def __init__(self,
+    def __init__(self,  # pylint: disable=unused-argument
                  management=None,
                  resource_manager=None,
                  sql_management=None,
