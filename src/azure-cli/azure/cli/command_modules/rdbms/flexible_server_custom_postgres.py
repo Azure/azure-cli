@@ -14,10 +14,12 @@ from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from .flexible_server_custom_common import user_confirmation, _server_list_custom_func
-from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_vnet, create_firewall_rule, \
+from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, update_kwargs, generate_password, parse_maintenance_window
+from .flexible_server_virtual_network import create_vnet, prepareVnet
 
 logger = get_logger(__name__)
+DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 
 
 # region create without args
@@ -29,7 +31,8 @@ def _flexible_server_create(cmd, client,
                             administrator_login_password=None, version=None,
                             tags=None, public_access=None,
                             assign_identity=False, subnet_arm_resource_id=None,
-                            high_availability=None, zone=None):
+                            high_availability=None, zone=None, vnet_resource_id=None,
+                            vnet_address_prefix=None, subnet_address_prefix=None):
     from azure.mgmt.rdbms import postgresql
     try:
         db_context = DbContext(
@@ -40,10 +43,29 @@ def _flexible_server_create(cmd, client,
             raise CLIError("Incorrect usage : A combination of the parameters --subnet "
                            "and --public_access is invalid. Use either one of them.")
 
+        # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
+        if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
+            if ((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and ((vnet_resource_id is None) or (subnet_arm_resource_id is None))):
+               raise CLIError("Incorrect usage : "
+                              "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
+
         server_result = firewall_id = subnet_id = None
 
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
+
+        # Handle Vnet scenario
+        if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
+            subnet_id = prepareVnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+            delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+                subnet_arm_resource_id=subnet_id)
+        elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
+            subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
+                                    DELEGATION_SERVICE_NAME)
+            delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+                subnet_arm_resource_id=subnet_id)
+        else:
+            delegated_subnet_arguments = None
 
         # Get list of servers in the current sub
         server_list = _server_list_custom_func(client)
@@ -60,18 +82,6 @@ def _flexible_server_create(cmd, client,
 
         administrator_login_password = generate_password(administrator_login_password)
         if server_result is None:
-            # If subnet is provided, use that subnet to create the server, else create subnet if public access is not enabled.
-            if subnet_arm_resource_id is not None:
-                subnet_id = subnet_arm_resource_id  # set the subnet id to be the one passed in
-                delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
-            elif public_access is None and subnet_arm_resource_id is None:
-                subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
-                                        "Microsoft.DBforPostgreSQL/flexibleServers")
-                delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
-            subnet_arm_resource_id=subnet_id)
-            else:
-                delegated_subnet_arguments = None
             # Create postgresql
             # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
             server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,

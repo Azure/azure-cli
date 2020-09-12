@@ -262,6 +262,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('public_network_access', options_list=['--public-network-access'], 
                             help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
 
+            c.argument('vnet_resource_id', options_list=['--vnet'], help='The virtual network name.')
+            c.argument('vnet_address_prefix', options_list=['--vnet-address-prefix'], help='The virtual network address prefix.')
+            c.argument('subnet_address_prefix', options_list=['--subnet-address-prefix'], help='The subnet address prefix.')
             c.argument('subnet_arm_resource_id', options_list=['--subnet'],
                        help='Name or ID of the subnet that allows access to an Azure Flexible Server. ')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
