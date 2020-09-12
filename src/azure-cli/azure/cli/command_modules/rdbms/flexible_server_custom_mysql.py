@@ -20,6 +20,7 @@ from .flexible_server_virtual_network import create_vnet, prepareVnet
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
+DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 
 
 # region create without args
@@ -27,7 +28,8 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                                 location=None, storage_mb=None, administrator_login=None,
                                 administrator_login_password=None, version=None,
                                 backup_retention=None, tags=None, public_access=None, database_name=None,
-                                subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False):
+                                subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
+                                vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None):
     from azure.mgmt.rdbms import mysql
     try:
         db_context = DbContext(
@@ -37,10 +39,31 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         if subnet_arm_resource_id is not None and public_access is not None:
             raise CLIError("Incorrect usage : A combination of the parameters --subnet "
                            "and --public_access is invalid. Use either one of them.")
+
+        # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
+        if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
+            if ((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and ((vnet_resource_id is None) or (subnet_arm_resource_id is None))):
+               raise CLIError("Incorrect usage : "
+                              "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
+
         server_result = firewall_id = subnet_id = None
 
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
+
+        # Handle Vnet scenario
+        if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
+            subnet_id = prepareVnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
+                                    location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+            delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
+                    subnet_arm_resource_id=subnet_id)
+        elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
+            subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
+                                    DELEGATION_SERVICE_NAME)
+            delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
+                    subnet_arm_resource_id=subnet_id)
+        else:
+            delegated_subnet_arguments = None
 
         # Get list of servers in the current sub
         server_list = _server_list_custom_func(client)
@@ -57,19 +80,6 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
         administrator_login_password = generate_password(administrator_login_password)
         if server_result is None:
-            # If subnet is provided, use that subnet to create the server, else create subnet if public access is not enabled.
-            if subnet_arm_resource_id is not None:
-                subnet_id = subnet_arm_resource_id  # set the subnet id to be the one passed in
-                delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
-                    subnet_arm_resource_id=subnet_id)
-            elif public_access is None and subnet_arm_resource_id is None:
-                subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
-                                        "Microsoft.DBforPostgreSQL/flexibleServers")
-                delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
-                    subnet_arm_resource_id=subnet_id)
-            else:
-                delegated_subnet_arguments = None
-
             # Create mysql server
             # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
             server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
