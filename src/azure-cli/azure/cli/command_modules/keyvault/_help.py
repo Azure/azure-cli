@@ -579,7 +579,7 @@ short-summary: Update the properties of a HSM.
 examples:
   - name: Update the properties of a HSM.
     text: |
-        az keyvault update-hsm --enable-purge-protection true --name MyHSM --resource-group MyResourceGroup
+        az keyvault update-hsm --enable-purge-protection true --hsm-name MyHSM --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -598,7 +598,7 @@ short-summary: Place the CLI in a waiting state until a condition of the HSM is 
 examples:
   - name: Pause CLI until the HSM is created.
     text: |
-        az keyvault wait-hsm --name MyHSM --created
+        az keyvault wait-hsm --hsm-name MyHSM --created
 """
 
 helps['keyvault security-domain'] = """

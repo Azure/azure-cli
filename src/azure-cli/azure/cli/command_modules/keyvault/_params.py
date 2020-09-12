@@ -481,7 +481,8 @@ def load_arguments(self, _):
                        help='The SAS token pointing to an Azure Blob storage container')
 
     with self.argument_context('keyvault restore start') as c:
-        c.argument('folder_to_restore', options_list=['--backup-folder'])
+        c.argument('folder_to_restore', options_list=['--backup-folder'],
+                   help='Name of the blob container which contains the backup')
 
     with self.argument_context('keyvault restore start', arg_group='Storage Id') as c:
         c.extra('storage_resource_uri', required=False, validator=process_storage_uri,
