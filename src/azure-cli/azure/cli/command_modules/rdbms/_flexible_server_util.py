@@ -10,6 +10,9 @@ from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.profiles import ResourceType
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, network_client_factory
+from msrestazure.tools import is_valid_resource_id, parse_resource_id# pylint: disable=import-error
+from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -66,22 +69,6 @@ def generate_password(administrator_login_password):
         random_position = random.randint(1, len(administrator_login_password)-1)
         administrator_login_password = administrator_login_password[:random_position] + special_character + administrator_login_password[random_position + 1:]
     return administrator_login_password
-
-
-def create_vnet(cmd, servername, location, resource_group_name, delegation_service_name):
-    Subnet, VirtualNetwork, AddressSpace, Delegation = cmd.get_models('Subnet', 'VirtualNetwork', 'AddressSpace', 'Delegation', resource_type=ResourceType.MGMT_NETWORK)
-    client = network_client_factory(cmd.cli_ctx)
-    vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername)
-
-    logger.warning('Creating new vnet "%s" in resource group "%s"...', vnet_name, resource_group_name)
-    client.virtual_networks.create_or_update(resource_group_name, vnet_name, VirtualNetwork(name=vnet_name, location=location, address_space=AddressSpace(
-                                                                 address_prefixes=[vnet_address_prefix])))
-    delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
-    subnet = Subnet(name=subnet_name, location=location, address_prefix=subnet_prefix, delegations=[delegation])
-
-    logger.warning('Creating new subnet "%s" in resource group "%s" and delegating it to "%s"...', subnet_name, resource_group_name, delegation_service_name)
-    subnet = client.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
-    return subnet.id
 
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
@@ -172,13 +159,6 @@ def _check_resource_group_existence(cmd, resource_group_name):
     return  resource_client.resource_groups.check_existence(resource_group_name)
 
 
-def _create_vnet_metadata(servername):
-    vnet_name = servername + 'VNET'
-    subnet_name = servername + 'Subnet'
-    vnet_address_prefix = '10.0.0.0/16'
-    subnet_prefix = '10.0.0.0/24'
-    return vnet_name, subnet_name, vnet_address_prefix, subnet_prefix
-
 # Map day_of_week string to integer to day of week
 # Possible values can be 0 - 6
 def _map_maintenance_window(day_of_week):
@@ -191,5 +171,3 @@ def _map_maintenance_window(day_of_week):
                "Sun":0,
                }
     return options[day_of_week]
-
-
