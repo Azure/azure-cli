@@ -182,16 +182,18 @@ def mysql_version_validator(ns):
             raise CLIError('Incorrect value for --version. Allowed values : {5.6, 5.7, 8.0}')
 
 def maintenance_window_validator(ns):
+    options = ["Sun","Mon", "Tue","Wed","Thu","Fri","Sat", "Disabled"]
     if ns.maintenance_window:
         parsed_input = ns.maintenance_window.split(':')
         if len(parsed_input) < 1 or len(parsed_input) > 3:
-            raise CLIError('Incorrect value for --maintenance_window. Enter <Day>:<Hour>:<Minute>. Example: "0:8:30" to schedule on Monday, 8:30 UTC')
-        elif len(parsed_input) >= 1 and (not parsed_input[0].isdigit() or int(parsed_input[0]) < 0 or int(parsed_input[0]) > 6):
-            raise CLIError('Incorrect value for --maintenance_window. The first number means the scheduled day in a week. Allowed values: {0, 1, 2, 3, 4, 5, 6}')
+            raise CLIError('Incorrect value for --maintenance-window. Enter <Day>:<Hour>:<Minute>. Example: "Mon:8:30" to schedule on Monday, 8:30 UTC')
+        elif len(parsed_input) >= 1 and parsed_input[0] not in options:
+            raise CLIError('Incorrect value for --maintenance-window. The first value means the scheduled day in a week or can be "Disabled" to reset maintenance window.'
+                           '. Allowed values: {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"}')
         elif len(parsed_input) >= 2 and (not parsed_input[1].isdigit() or int(parsed_input[1]) < 0 or int(parsed_input[1]) > 23):
-            raise CLIError('Incorrect value for --maintenance_window. The second number means the scheduled hour in the scheduled day. Allowed values: {0, 1, ... 23}')
+            raise CLIError('Incorrect value for --maintenance-window. The second number means the scheduled hour in the scheduled day. Allowed values: {0, 1, ... 23}')
         elif len(parsed_input) >= 3 and (not parsed_input[2].isdigit() or int(parsed_input[2]) < 0 or int(parsed_input[2]) > 59):
-            raise CLIError('Incorrect value for --maintenance_window. The third number means the scheduled minute in the scheduled hour. Allowed values: {0, 1, ... 59}')
+            raise CLIError('Incorrect value for --maintenance-window. The third number means the scheduled minute in the scheduled hour. Allowed values: {0, 1, ... 59}')
 
 def ip_address_validator(ns):
     if (ns.end_ip_address and not _validate_ip(ns.end_ip_address)) or (ns.start_ip_address and not _validate_ip(ns.start_ip_address)):

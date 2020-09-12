@@ -24,7 +24,7 @@ examples:
     text: |
         az postgres flexible-server create --location northeurope --resource-group testGroup --name testServer --admin-user username \\
             --admin-password password --sku-name Standard_D4s_v3 --tier GeneralPurpose --public-access 0.0.0.0 \\
-            --storage-size 131072 --tags "key=value" --version 12
+            --storage-size 512 --tags "key=value" --version 12
 """
 
 helps['postgres flexible-server delete'] = """

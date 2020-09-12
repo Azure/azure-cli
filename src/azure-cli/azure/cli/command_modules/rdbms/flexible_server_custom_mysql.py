@@ -176,9 +176,9 @@ def _flexible_server_update_custom_func(instance,
 
     if sku_name:
         instance.sku.name = sku_name
+
+    if tier:
         instance.sku.tier = tier
-    else:
-        instance.sku = None
 
     if storage_mb:
         instance.storage_profile.storage_mb = storage_mb
@@ -193,13 +193,30 @@ def _flexible_server_update_custom_func(instance,
         instance.delegated_subnet_arguments.subnet_arm_resource_id = subnet_arm_resource_id
 
     if maintenance_window:
-        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-        instance.maintenance_window.day_of_week = day_of_week
-        instance.maintenance_window.start_hour = start_hour
-        instance.maintenance_window.start_minute = start_minute
-        instance.maintenance_window.custom_window = "Enabled"
+        # if disabled is pass in reset to default values
+        if maintenance_window.lower() == "disabled":
+            day_of_week = start_hour = start_minute = 0
+            custom_window = "Disabled"
+        else:
+            day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+            custom_window = "Enabled"
 
-    # TODO: standby count = ha_enabled add here
+        # set values - if maintenance_window when is None when created then create a new object
+        # TODO: by default the maintenance window should be 0:0:0 Disabled, can simplify once changes are in RP
+        if instance.maintenance_window is None:
+            from azure.mgmt.rdbms import mysql
+            instance.maintenance_window = mysql.flexibleservers.models.MaintenanceWindow(
+                day_of_week=day_of_week,
+                start_hour=start_hour,
+                start_minute=start_minute,
+                custom_window=custom_window
+            )
+        else:
+            instance.maintenance_window.day_of_week = day_of_week
+            instance.maintenance_window.start_hour = start_hour
+            instance.maintenance_window.start_minute = start_minute
+            instance.maintenance_window.custom_window = custom_window
+
     params = ServerForUpdate(sku=instance.sku,
                                 storage_profile=instance.storage_profile,
                                 administrator_login_password=administrator_login_password,
@@ -269,7 +286,7 @@ def _flexible_replica_create(cmd, client, resource_group_name, server_name, sour
             source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                         resource_group=resource_group_name,
                                         namespace=provider,
-                                        type='servers',
+                                        type='flexibleServers',
                                         name=source_server)
         else:
             raise CLIError('The provided source-server {} is invalid.'.format(source_server))
@@ -289,11 +306,12 @@ def _flexible_replica_create(cmd, client, resource_group_name, server_name, sour
         tier = source_server_object.sku.tier
 
     from azure.mgmt.rdbms import mysql
+
     parameters = mysql.flexibleservers.models.Server(
         sku=mysql.flexibleservers.models.Sku(name=sku_name,tier=tier),
         source_server_id=source_server,
-        location=location)
-
+        location=location,
+        create_mode="Replica")
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
@@ -303,12 +321,12 @@ def _flexible_replica_stop(client, resource_group_name, server_name):
     except Exception as e:
         raise CLIError('Unable to get server: {}.'.format(str(e)))
 
-    if server_object.replication_role.lower() != "replica":
+    if server_object.replication_role is not None and server_object.replication_role.lower() != "replica":
         raise CLIError('Server {} is not a replica server.'.format(server_name))
 
     from importlib import import_module
     server_module_path = server_object.__module__
-    module = import_module(server_module_path.replace('server', 'server_update_parameters'))
+    module = import_module(server_module_path)  # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
 
     params = ServerForUpdate(replication_role='None')

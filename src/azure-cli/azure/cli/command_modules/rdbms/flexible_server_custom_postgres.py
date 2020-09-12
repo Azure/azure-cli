@@ -123,7 +123,7 @@ def _flexible_server_restore(cmd, client,
     provider = 'Microsoft.DBforPostgreSQL'
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
-            source_server = resource_id(
+            source_server_id = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
                 resource_group=resource_group_name,
                 namespace=provider,
@@ -135,18 +135,17 @@ def _flexible_server_restore(cmd, client,
     from azure.mgmt.rdbms import postgresql
     parameters = postgresql.flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
-        source_server_name=source_server,
+        source_server_name=source_server, # this should be the source server name, not id
         create_mode="PointInTimeRestore",
         location=location)
 
     # Retrieve location from same location as source server
-    id_parts = parse_resource_id(source_server)
+    id_parts = parse_resource_id(source_server_id)
     try:
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
         parameters.location = source_server_object.location
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
-
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
@@ -168,9 +167,9 @@ def _flexible_server_update_custom_func(instance,
 
     if sku_name:
         instance.sku.name = sku_name
+
+    if tier:
         instance.sku.tier = tier
-    else:
-        instance.sku = None
 
     if storage_mb:
         instance.storage_profile.storage_mb = storage_mb
@@ -179,11 +178,30 @@ def _flexible_server_update_custom_func(instance,
         instance.storage_profile.backup_retention_days = backup_retention
 
     if maintenance_window:
-        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-        instance.maintenance_window.day_of_week = day_of_week
-        instance.maintenance_window.start_hour = start_hour
-        instance.maintenance_window.start_minute = start_minute
-        instance.maintenance_window.custom_window = "Enabled"
+        # if disabled is pass in reset to default values
+        if maintenance_window.lower() == "disabled":
+            day_of_week = start_hour = start_minute = 0
+            custom_window = "Disabled"
+        else:
+            day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+            custom_window = "Enabled"
+
+        # set values - if maintenance_window when is None when created then create a new object
+        if instance.maintenance_window is None:
+            from azure.mgmt.rdbms import postgresql
+            instance.maintenance_window = postgresql.flexibleservers.models.MaintenanceWindow(
+                day_of_week=day_of_week,
+                start_hour=start_hour,
+                start_minute=start_minute,
+                custom_window=custom_window
+            )
+        else:
+            instance.maintenance_window.day_of_week = day_of_week
+            instance.maintenance_window.start_hour = start_hour
+            instance.maintenance_window.start_minute = start_minute
+            instance.maintenance_window.custom_window = custom_window
+
+
 
     params = ServerForUpdate(sku=instance.sku,
                              storage_profile=instance.storage_profile,
