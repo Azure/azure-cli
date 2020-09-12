@@ -136,6 +136,8 @@ def process_storage_uri(ns):
             ns.storage_resource_uri = 'https://{}.blob.core.windows.net/{}'.format(
                 ns.storage_account_name, ns.blob_container_name
             )
+            del ns.storage_account_name
+            del ns.blob_container_name
         else:
             raise CLIError('Incorrect usage: [--storage-resource-uri URI | '
                            '--storage-account-name NAME --blob-container-name NAME]')

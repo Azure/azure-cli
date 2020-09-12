@@ -31,8 +31,7 @@ from azure.graphrbac.models import GraphErrorException
 
 from msrestazure.azure_exceptions import CloudError
 
-from ._client_factory import get_client_factory, Clients
-from ._sdk_extensions import patch_akv_client
+from ._client_factory import get_client_factory, Clients, is_azure_stack_profile
 from ._validators import _construct_vnet, secret_text_encoding_values
 from .security_domain.jwe import JWE
 from .security_domain.security_domain import Datum, SecurityDomainRestoreData
@@ -204,7 +203,7 @@ def _scaffold_certificate_profile(cmd):
 
 
 def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, hsm_name=None):
-    if vault_name:
+    if is_azure_stack_profile(cmd) or vault_name:
         return client.delete(resource_group_name=resource_group_name, vault_name=vault_name)
 
     if hsm_name:
@@ -217,7 +216,7 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
 
 
 def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None, no_wait=False):
-    if vault_name:
+    if is_azure_stack_profile(cmd) or vault_name:
         return sdk_no_wait(
             no_wait,
             client.begin_purge_deleted,
@@ -231,6 +230,9 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
+    if is_azure_stack_profile(cmd):
+        return client.list_deleted()
+
     if resource_type is None:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         deleted_resources = []
@@ -251,6 +253,9 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
 
 
 def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None):
+    if is_azure_stack_profile(cmd):
+        return list_vault(client, resource_group_name)
+
     if resource_type is None:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         resources = []
@@ -364,7 +369,7 @@ def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-a
 
 def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, vault_name=None, hsm_name=None,
                          no_wait=False):
-    if vault_name:
+    if is_azure_stack_profile(cmd) or vault_name:
         return recover_vault(cmd=cmd,
                              client=client,
                              resource_group_name=resource_group_name,
@@ -484,7 +489,7 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
 
 
 def get_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
-    if vault_name:
+    if is_azure_stack_profile(cmd) or vault_name:
         return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
 
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -510,7 +515,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         no_self_perms=None,
                         tags=None,
                         no_wait=False):
-    if vault_name:
+    if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
                             client=client,
                             resource_group_name=resource_group_name,
@@ -1750,7 +1755,7 @@ def _is_guid(guid):
         return False
 
 
-def _resolve_role_id(client, role, hsm_name, scope):
+def _resolve_role_id(client, role, scope):
     role_id = None
     if re.match(r'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/.+', role, re.I):
         last_part = role.split('/')[-1]
@@ -1759,22 +1764,20 @@ def _resolve_role_id(client, role, hsm_name, scope):
     elif _is_guid(role):
         role_id = 'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/{}'.format(role)
     else:
-        all_roles = list_role_definitions(client, hsm_name=hsm_name, scope=scope)
+        all_roles = list_role_definitions(client, scope=scope)
         for _role in all_roles:
-            if _role.get('roleName') == role:
-                role_id = _role.get('id')
+            if getattr(_role, 'role_name', None) == role:
+                role_id = _role.id
                 break
     return role_id
 
 
 def _get_role_dics(role_defs):
-    return {i['id']: i.get('roleName') for i in role_defs}
+    return {i.id: getattr(i, 'role_name', None) for i in role_defs}
 
 
 def _get_principal_dics(cli_ctx, role_assignments):
-    principal_ids = {i['properties']['principalId']
-                     for i in role_assignments if i.get('properties', {}).get('principalId')}
-
+    principal_ids = {i.principal_id for i in role_assignments if getattr(i, 'principal_id', None)}
     if principal_ids:
         try:
             from azure.cli.command_modules.role._client_factory import _graph_client_factory
@@ -1792,53 +1795,45 @@ def _get_principal_dics(cli_ctx, role_assignments):
 
 
 def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
-    # https://github.com/Azure/azure-cli/blob/3d2c62d6c0ee21830f2af83bd5840b0bb85a4ecd/src/azure-cli/azure/cli/command_modules/role/custom.py#L194-L229
-    # 1. Flatten the `properties`
-    # 2. fill in logic names to get things understandable.
-    # (it's possible that associated roles and principals were deleted, and we just do nothing.)
-    # 3. fill in role name
-    if 'properties' in role_assignment:
-        for k, v in role_assignment['properties'].items():
-            role_assignment[k] = v
-        del role_assignment['properties']
-
-    if not role_assignment.get('roleDefinitionName'):
-        role_definition_id = role_assignment.get('roleDefinitionId')
-        if role_definition_id:
-            role_assignment['roleDefinitionName'] = role_dics.get(role_definition_id)
-        else:
-            role_assignment['roleDefinitionName'] = None  # the role definition might have been deleted
+    ret = {
+        'id': role_assignment.assignment_id,
+        'name': role_assignment.name,
+        'scope': role_assignment.scope,
+        'type': role_assignment.type
+    }
+    role_definition_id = getattr(role_assignment, 'role_definition_id', None)
+    ret['roleDefinitionId'] = role_definition_id
+    if role_definition_id:
+        ret['roleDefinitionName'] = role_dics.get(role_definition_id)
+    else:
+        ret['roleDefinitionName'] = None  # the role definition might have been deleted
 
     # fill in principal names
-    if role_assignment.get('principalId'):
-        principal_info = principal_dics.get(role_assignment['principalId'])
+    principal_id = getattr(role_assignment, 'principal_id', None)
+    ret['principalId'] = principal_id
+    if principal_id:
+        principal_info = principal_dics.get(principal_id)
         if principal_info:
-            role_assignment['principalName'], role_assignment['principalType'] = principal_info
+            ret['principalName'], ret['principalType'] = principal_info
         else:
-            role_assignment['principalName'] = role_assignment['principalType'] = 'Unknown'
+            ret['principalName'] = ret['principalType'] = 'Unknown'
 
-
-def _reconstruct_role_definition(role_definition):
-    if 'properties' in role_definition:
-        for k, v in role_definition['properties'].items():
-            if k == 'type':
-                k = 'roleType'
-            role_definition[k] = v
-        del role_definition['properties']
+    return ret
 
 
 def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
-                           role_assignment_name=None, hsm_name=None, assignee=None,
-                           assignee_principal_type=None, identifier=None):  # pylint: disable=unused-argument
+                           role_assignment_name=None, assignee=None,
+                           assignee_principal_type=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
     """ Create a new role assignment for a user, group, or service principal. """
-    patch_akv_client(client)
-
     from azure.cli.command_modules.role.custom import _resolve_object_id
 
     if assignee_object_id is None:
-        assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee)
+        if _is_guid(assignee):
+            assignee_object_id = assignee
+        else:
+            assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee)
 
-    role_definition_id = _resolve_role_id(client, role=role, hsm_name=hsm_name, scope=scope)
+    role_definition_id = _resolve_role_id(client, role=role, scope=scope)
     if not role_definition_id:
         raise CLIError('Unknown role "{}". Please use "az keyvault role definition list" '
                        'to check whether the role is existing.'.format(role))
@@ -1850,28 +1845,24 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
         scope = ''
 
     role_assignment = client.create_role_assignment(
-        client, vault_base_url=hsm_name, scope=scope, name=role_assignment_name,
+        role_scope=scope, role_assignment_name=role_assignment_name,
         principal_id=assignee_object_id, role_definition_id=role_definition_id
     )
 
-    role_defs = list_role_definitions(client, hsm_name=hsm_name, identifier=identifier)
+    role_defs = list_role_definitions(client)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, [role_assignment])
 
-    _reconstruct_role_assignment(
+    return _reconstruct_role_assignment(
         role_dics=role_dics,
         principal_dics=principal_dics,
         role_assignment=role_assignment
     )
 
-    return role_assignment
 
-
-def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_name=None, scope=None, assignee=None,
-                           role=None, assignee_object_id=None, ids=None, identifier=None):
+def delete_role_assignment(cmd, client, role_assignment_name=None, scope=None, assignee=None, role=None,
+                           assignee_object_id=None, ids=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
     """ Delete a role assignment. """
-    patch_akv_client(client)
-
     query_scope = scope
     if query_scope is None:
         query_scope = ''
@@ -1881,46 +1872,42 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_name=None
         for cnt_id in ids:
             cnt_name = cnt_id.split('/')[-1]
             deleted_role_assignments.append(
-                client.delete_role_assignment(
-                    client, vault_base_url=hsm_name, scope=query_scope, name=cnt_name
-                )
+                client.delete_role_assignment(role_scope=query_scope, role_assignment_name=cnt_name)
             )
     else:
         if role_assignment_name is not None:
-            return [client.delete_role_assignment(client, vault_base_url=hsm_name, scope=query_scope,
-                                                  name=role_assignment_name)]
-
-        matched_role_assignments = list_role_assignments(
-            cmd, client, hsm_name=hsm_name, scope=scope,
-            role=role, assignee_object_id=assignee_object_id, assignee=assignee
-        )
-
-        for role_assignment in matched_role_assignments:
             deleted_role_assignments.append(
-                client.delete_role_assignment(
-                    client, vault_base_url=hsm_name, scope=query_scope, name=role_assignment['name']
-                )
+                client.delete_role_assignment(role_scope=query_scope, role_assignment_name=role_assignment_name)
             )
+        else:
+            matched_role_assignments = list_role_assignments(
+                cmd, client, scope=scope, role=role, assignee_object_id=assignee_object_id, assignee=assignee
+            )
+            for role_assignment in matched_role_assignments:
+                deleted_role_assignments.append(
+                    client.delete_role_assignment(
+                        role_scope=query_scope, role_assignment_name=role_assignment.get('name')
+                    )
+                )
 
-    role_defs = list_role_definitions(client, hsm_name=hsm_name, identifier=identifier)
+    role_defs = list_role_definitions(client)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, deleted_role_assignments)
 
+    ret = []
     for i in deleted_role_assignments:
-        _reconstruct_role_assignment(
+        ret.append(_reconstruct_role_assignment(
             role_dics=role_dics,
             principal_dics=principal_dics,
             role_assignment=i
-        )
+        ))
 
-    return deleted_role_assignments
+    return ret
 
 
-def list_role_assignments(cmd, client, hsm_name=None, scope=None, assignee=None, role=None,
-                          assignee_object_id=None, identifier=None):
+def list_role_assignments(cmd, client, scope=None, assignee=None, role=None, assignee_object_id=None,
+                          hsm_name=None, identifier=None):  # pylint: disable=unused-argument
     """ List role assignments. """
-    patch_akv_client(client)
-
     from azure.cli.command_modules.role.custom import _resolve_object_id
 
     if assignee_object_id is None and assignee is not None:
@@ -1932,53 +1919,44 @@ def list_role_assignments(cmd, client, hsm_name=None, scope=None, assignee=None,
 
     role_definition_id = None
     if role is not None:
-        role_definition_id = _resolve_role_id(client, role=role, hsm_name=hsm_name, scope=query_scope)
+        role_definition_id = _resolve_role_id(client, role=role, scope=query_scope)
 
-    all_role_assignments = \
-        client.list_role_assignments_for_scope(client, vault_base_url=hsm_name, scope=query_scope)
+    all_role_assignments = client.list_role_assignments(role_scope=query_scope)
     matched_role_assignments = []
-    for role_assignment in all_role_assignments.get('value', []):
+    for role_assignment in all_role_assignments:
         if role_definition_id is not None:
-            if role_assignment.get('properties', {}).get('roleDefinitionId') != role_definition_id:
+            if role_assignment.role_definition_id != role_definition_id:
                 continue
         if scope is not None:
-            cnt_scope = role_assignment.get('properties', {}).get('scope')
+            cnt_scope = role_assignment.scope
             if cnt_scope not in [scope, '/' + scope]:
                 continue
         if assignee_object_id is not None:
-            if role_assignment.get('properties', {}).get('principalId') != assignee_object_id:
+            if role_assignment.principal_id != assignee_object_id:
                 continue
         matched_role_assignments.append(role_assignment)
 
-    role_defs = list_role_definitions(client, hsm_name=hsm_name, identifier=identifier)
+    role_defs = list_role_definitions(client)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, matched_role_assignments)
 
+    ret = []
     for i in matched_role_assignments:
-        _reconstruct_role_assignment(
+        ret.append(_reconstruct_role_assignment(
             role_dics=role_dics,
             principal_dics=principal_dics,
             role_assignment=i
-        )
+        ))
 
-    return matched_role_assignments
+    return ret
 
 
-def list_role_definitions(client, scope=None, hsm_name=None, identifier=None):  # pylint: disable=unused-argument
+def list_role_definitions(client, scope=None, hsm_name=None):  # pylint: disable=unused-argument
     """ List role definitions. """
-    patch_akv_client(client)
-
     query_scope = scope
     if query_scope is None:
         query_scope = ''
-
-    raw_definitions = \
-        client.list_role_definitions(client, vault_base_url=hsm_name, scope=query_scope).get('value', [])
-
-    for i in raw_definitions:
-        _reconstruct_role_definition(i)
-
-    return raw_definitions
+    return client.list_role_definitions(role_scope=query_scope)
 # endregion
 
 
@@ -1987,8 +1965,7 @@ def full_backup(client, storage_resource_uri, token, hsm_name=None):  # pylint: 
     return client.begin_full_backup(storage_resource_uri, token)
 
 
-def full_restore(client, storage_resource_uri, token, folder_to_restore,
-                 hsm_name=None):  # pylint: disable=unused-argument
+def full_restore(client, storage_resource_uri, token, folder_to_restore, hsm_name=None):  # pylint: disable=unused-argument
     return client.begin_full_restore(storage_resource_uri, token, folder_to_restore)
 # endregion
 

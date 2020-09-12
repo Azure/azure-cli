@@ -108,6 +108,14 @@ def get_client(cli_ctx, resource_type, client_name=''):
     return ClientEntity(client_factory, command_type, operations_docs_tmpl, models_docs_tmpl)
 
 
+def is_azure_stack_profile(cmd):
+    return cmd.cli_ctx.cloud.profile in [
+        '2019-03-01-hybrid',
+        '2018-03-01-hybrid',
+        '2017-03-09-profile'
+    ]
+
+
 def keyvault_mgmt_client_factory(resource_type, client_name):
     def _keyvault_mgmt_client_factory(cli_ctx, _):
         from azure.cli.core.commands.client_factory import get_mgmt_service_client

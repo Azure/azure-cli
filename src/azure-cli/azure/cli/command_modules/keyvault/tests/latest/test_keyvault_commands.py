@@ -34,9 +34,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 SECURITY_DOMAIN_KEYS_DIR = os.path.join(TEST_DIR, 'security_domain_keys')
 
-ACTIVE_HSM_NAME = 'clitest0908d'  # live: clitest0908d
+ACTIVE_HSM_NAME = 'clitest0911'  # live: clitest0908d
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
-NEXT_ACTIVE_HSM_NAME = 'clitest0908e'
+NEXT_ACTIVE_HSM_NAME = 'clitest0911b'
 NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(NEXT_ACTIVE_HSM_NAME)
 
 
@@ -804,26 +804,6 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.cmd('keyvault key recover --hsm-name {hsm_name} -n {key}',
                  checks=self.check('key.kid', '{hsm_kid1}'))
 
-        # backup and then delete key
-        key_file = 'backup-hsm.key'
-        self.kwargs['key_file'] = key_file
-        self.cmd('keyvault key backup --hsm-name {hsm_name} -n {key} --file {key_file}')
-        self.cmd('keyvault key delete --hsm-name {hsm_name} -n {key}')
-        self.cmd('keyvault key purge --hsm-name {hsm_name} -n {key}')
-        self.cmd('keyvault key list --hsm-name {hsm_name}', checks=self.is_empty())
-        self.cmd('keyvault key list --hsm-name {hsm_name} --maxresults 10', checks=self.is_empty())
-
-        # restore key from backup
-        self.cmd('keyvault key restore --hsm-name {hsm_name} --file {key_file}')
-        self.cmd('keyvault key list --hsm-name {hsm_name}',
-                 checks=[
-                     self.check('length(@)', 1),
-                     self.check('[0].name', '{key}')
-                 ])
-
-        if os.path.isfile(key_file):
-            os.remove(key_file)
-
         # list keys
         self.cmd('keyvault key list --hsm-name {hsm_name}',
                  checks=self.check('length(@)', 1))
@@ -865,6 +845,26 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
             self.check('key.kid', '{hsm_kid2}'),
             self.check('attributes.enabled', True)
         ])
+
+        # backup and then delete key
+        key_file = 'backup-hsm.key'
+        self.kwargs['key_file'] = key_file
+        self.cmd('keyvault key backup --hsm-name {hsm_name} -n {key} --file {key_file}')
+        self.cmd('keyvault key delete --hsm-name {hsm_name} -n {key}')
+        self.cmd('keyvault key purge --hsm-name {hsm_name} -n {key}')
+        self.cmd('keyvault key list --hsm-name {hsm_name}', checks=self.is_empty())
+        self.cmd('keyvault key list --hsm-name {hsm_name} --maxresults 10', checks=self.is_empty())
+
+        # restore key from backup
+        self.cmd('keyvault key restore --hsm-name {hsm_name} --file {key_file}')
+        self.cmd('keyvault key list --hsm-name {hsm_name}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].name', '{key}')
+                 ])
+
+        if os.path.isfile(key_file):
+            os.remove(key_file)
 
         # import PEM
         self.kwargs.update({
@@ -958,26 +958,6 @@ class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
         self.cmd('keyvault key recover --id {hsm_recovery_id}',
                  checks=self.check('key.kid', '{hsm_kid1}'))
 
-        # backup and then delete key
-        key_file = 'backup-hsm.key'
-        self.kwargs['key_file'] = key_file
-        self.cmd('keyvault key backup --id {hsm_url}/keys/{key} --file {key_file}')
-        self.cmd('keyvault key delete --id {hsm_url}/keys/{key}')
-        self.cmd('keyvault key purge --id {hsm_url}/deletedkeys/{key}')
-        self.cmd('keyvault key list --id {hsm_url}', checks=self.is_empty())
-        self.cmd('keyvault key list --id {hsm_url} --maxresults 10', checks=self.is_empty())
-
-        # restore key from backup
-        self.cmd('keyvault key restore --id {hsm_url} --file {key_file}')
-        self.cmd('keyvault key list --id {hsm_url}',
-                 checks=[
-                     self.check('length(@)', 1),
-                     self.check('[0].name', '{key}')
-                 ])
-
-        if os.path.isfile(key_file):
-            os.remove(key_file)
-
         # list keys
         self.cmd('keyvault key list --id {hsm_url}',
                  checks=self.check('length(@)', 1))
@@ -1021,6 +1001,26 @@ class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
             self.check('key.kid', '{hsm_kid2}'),
             self.check('attributes.enabled', True)
         ])
+
+        # backup and then delete key
+        key_file = 'backup-hsm.key'
+        self.kwargs['key_file'] = key_file
+        self.cmd('keyvault key backup --id {hsm_url}/keys/{key} --file {key_file}')
+        self.cmd('keyvault key delete --id {hsm_url}/keys/{key}')
+        self.cmd('keyvault key purge --id {hsm_url}/deletedkeys/{key}')
+        self.cmd('keyvault key list --id {hsm_url}', checks=self.is_empty())
+        self.cmd('keyvault key list --id {hsm_url} --maxresults 10', checks=self.is_empty())
+
+        # restore key from backup
+        self.cmd('keyvault key restore --id {hsm_url} --file {key_file}')
+        self.cmd('keyvault key list --id {hsm_url}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].name', '{key}')
+                 ])
+
+        if os.path.isfile(key_file):
+            os.remove(key_file)
 
         # import PEM
         self.kwargs.update({

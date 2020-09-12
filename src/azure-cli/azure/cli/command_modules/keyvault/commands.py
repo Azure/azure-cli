@@ -8,7 +8,7 @@ from collections import OrderedDict
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
-from ._client_factory import get_client, get_client_factory, Clients
+from ._client_factory import get_client, get_client_factory, Clients, is_azure_stack_profile
 
 from ._transformers import (
     extract_subresource_name, filter_out_managed_resources,
@@ -38,18 +38,25 @@ def load_command_table(self, _):
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
 
-    mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
-    private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
-    data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
+    if not is_azure_stack_profile(self):
+        mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
+        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
+        data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
+        data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
+    else:
+        mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = None
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
         client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.vaults)
     )
-    kv_hsms_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
-        client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
-    )
+    if not is_azure_stack_profile(self):
+        kv_hsms_custom = CliCommandType(
+            operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
+            client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
+        )
+    else:
+        kv_hsms_custom = None
     # endregion
 
     # Management Plane Commands
@@ -76,13 +83,14 @@ def load_command_table(self, _):
             supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('keyvault', mgmt_hsms_entity.command_type,
-                            client_factory=mgmt_hsms_entity.client_factory) as g:
-        g.generic_update_command(
-            'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
-            custom_func_name='update_hsm', is_preview=True, supports_no_wait=True,
-            doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
-        g.custom_wait_command('wait-hsm', 'wait_hsm', is_preview=True)
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault', mgmt_hsms_entity.command_type,
+                                client_factory=mgmt_hsms_entity.client_factory) as g:
+            g.generic_update_command(
+                'update-hsm', setter_name='update_hsm_setter', setter_type=kv_hsms_custom,
+                custom_func_name='update_hsm', is_preview=True, supports_no_wait=True,
+                doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
+            g.custom_wait_command('wait-hsm', 'wait_hsm', is_preview=True)
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
@@ -115,19 +123,23 @@ def load_command_table(self, _):
         g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
-    with self.command_group('keyvault backup', data_backup_entity.command_type, is_preview=True) as g:
-        g.keyvault_custom('start', 'full_backup',
-                          doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault backup', data_backup_entity.command_type,
+                                is_preview=True) as g:
+            g.keyvault_custom('start', 'full_backup',
+                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_backup'))
 
-    with self.command_group('keyvault restore', data_backup_entity.command_type, is_preview=True) as g:
-        g.keyvault_custom('start', 'full_restore',
-                          doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_restore'))
+        with self.command_group('keyvault restore', data_backup_entity.command_type,
+                                is_preview=True) as g:
+            g.keyvault_custom('start', 'full_restore',
+                              doc_string_source=data_backup_entity.operations_docs_tmpl.format('begin_full_restore'))
 
-    with self.command_group('keyvault security-domain', private_data_entity.command_type, is_preview=True) as g:
-        g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
-        g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
-        g.keyvault_custom('download', 'security_domain_download')
-        g.keyvault_custom('wait', '_wait_security_domain_operation')
+        with self.command_group('keyvault security-domain', private_data_entity.command_type,
+                                is_preview=True) as g:
+            g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
+            g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
+            g.keyvault_custom('download', 'security_domain_download')
+            g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_keys',
@@ -230,16 +242,18 @@ def load_command_table(self, _):
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
-    with self.command_group('keyvault role', data_entity.command_type, is_preview=True):
-        pass
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault role', data_access_control_entity.command_type,
+                                is_preview=True):
+            pass
 
-    with self.command_group('keyvault role assignment', data_entity.command_type) as g:
-        g.keyvault_custom('delete', 'delete_role_assignment')
-        g.keyvault_custom('list', 'list_role_assignments', table_transformer=transform_assignment_list)
-        g.keyvault_custom('create', 'create_role_assignment')
+        with self.command_group('keyvault role assignment', data_access_control_entity.command_type) as g:
+            g.keyvault_custom('delete', 'delete_role_assignment')
+            g.keyvault_custom('list', 'list_role_assignments', table_transformer=transform_assignment_list)
+            g.keyvault_custom('create', 'create_role_assignment')
 
-    with self.command_group('keyvault role definition', data_entity.command_type) as g:
-        g.keyvault_custom('list', 'list_role_definitions', table_transformer=transform_definition_list)
+        with self.command_group('keyvault role definition', data_access_control_entity.command_type) as g:
+            g.keyvault_custom('list', 'list_role_definitions', table_transformer=transform_definition_list)
 
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
         replace('.', '_').replace('-', '_')

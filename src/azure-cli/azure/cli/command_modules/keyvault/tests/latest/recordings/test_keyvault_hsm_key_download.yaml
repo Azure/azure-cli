@@ -18,7 +18,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/keys?api-version=7.0
   response:
     body:
       string: OK
@@ -41,9 +41,9 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
+      - 1.0.20200909-2-c73be597-develop
       x-ms-server-latency:
-      - '0'
+      - '1'
     status:
       code: 401
       message: Unauthorized
@@ -66,7 +66,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/keys?api-version=7.0
   response:
     body:
       string: '{"value":[]}'
@@ -86,13 +86,13 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
+      - 1.0.20200909-2-c73be597-develop
       x-ms-keyvault-network-info:
-      - addr=167.220.255.56
+      - addr=167.220.255.120
       x-ms-keyvault-region:
       - eastus2euap
       x-ms-server-latency:
-      - '67'
+      - '68'
     status:
       code: 200
       message: OK
@@ -113,7 +113,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/deletedkeys?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/deletedkeys?api-version=7.0
   response:
     body:
       string: '{"value":[]}'
@@ -133,13 +133,13 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
+      - 1.0.20200909-2-c73be597-develop
       x-ms-keyvault-network-info:
-      - addr=167.220.255.56
+      - addr=167.220.255.120
       x-ms-keyvault-region:
       - eastus2euap
       x-ms-server-latency:
-      - '67'
+      - '68'
     status:
       code: 200
       message: OK
@@ -162,59 +162,15 @@ interactions:
       accept-language:
       - en-US
     method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/ec-p256-hsm-file/create?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/keys/ec-p256-hsm-file/create?api-version=7.0
   response:
     body:
-      string: '{"error":{"code":"UnknownError","message":"Unknown error (Activity
-        ID: 06f5f39a-f3ef-11ea-b50a-0242ac120003)"}}'
+      string: '{"attributes":{"created":1599888908,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888908},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://clitest0911.managedhsm.azure.net/keys/ec-p256-hsm-file/2be29f866d2707e98ffd0ded5a2ad0cc","kty":"EC-HSM","x":"u1BS98mVp3pHHEQ_OA-uqXI3lGro35T3JLIFAHZwt9U","y":"SRdF053M4m301wFp8rSS-Sh-cl4snYcdLDHtfv5lxJg"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '111'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-server-latency:
-      - '240'
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: '{"kty": "EC-HSM", "attributes": {"enabled": true}, "crv": "P-256"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '66'
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/ec-p256-hsm-file/create?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823721,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823721},"key":{"crv":"P-256","key_ops":["verify","sign"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/ec-p256-hsm-file/46cd2da441d14da789d545252b90a203","kty":"EC-HSM","x":"3oa3RGiwrmeGM1dmaPrlH3cOvn9v7r7qAx2zM08I6ck","y":"qec_boApnaCL0mDKhg_EDb_ElhEmMsnsms4n9F1Wug8"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '432'
+      - '431'
       content-security-policy:
       - default-src 'self'
       content-type:
@@ -226,11 +182,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - addr=167.220.255.56
+      - addr=167.220.255.120
       x-ms-keyvault-region:
       - eastus2euap
       x-ms-server-latency:
-      - '244'
+      - '256'
     status:
       code: 200
       message: OK
@@ -251,15 +207,15 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/ec-p256-hsm-file/?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/keys/ec-p256-hsm-file/?api-version=7.0
   response:
     body:
-      string: '{"attributes":{"created":1599823721,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823721},"key":{"crv":"P-256","key_ops":["sign","verify"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/ec-p256-hsm-file/46cd2da441d14da789d545252b90a203","kty":"EC-HSM","x":"3oa3RGiwrmeGM1dmaPrlH3cOvn9v7r7qAx2zM08I6ck","y":"qec_boApnaCL0mDKhg_EDb_ElhEmMsnsms4n9F1Wug8"}}'
+      string: '{"attributes":{"created":1599888908,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888908},"key":{"crv":"P-256","key_ops":["sign","verify"],"kid":"https://clitest0911.managedhsm.azure.net/keys/ec-p256-hsm-file/2be29f866d2707e98ffd0ded5a2ad0cc","kty":"EC-HSM","x":"u1BS98mVp3pHHEQ_OA-uqXI3lGro35T3JLIFAHZwt9U","y":"SRdF053M4m301wFp8rSS-Sh-cl4snYcdLDHtfv5lxJg"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '432'
+      - '431'
       content-security-policy:
       - default-src 'self'
       content-type:
@@ -271,379 +227,9 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
+      - 1.0.20200909-2-c73be597-develop
       x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '1'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/ec-p256-hsm-file/?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823721,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823721},"key":{"crv":"P-256","key_ops":["sign","verify"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/ec-p256-hsm-file/46cd2da441d14da789d545252b90a203","kty":"EC-HSM","x":"3oa3RGiwrmeGM1dmaPrlH3cOvn9v7r7qAx2zM08I6ck","y":"qec_boApnaCL0mDKhg_EDb_ElhEmMsnsms4n9F1Wug8"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '432'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '17'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"kty": "EC-HSM", "attributes": {"enabled": true}, "crv": "P-384"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '66'
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/ec-p384-hsm-file/create?api-version=7.0
-  response:
-    body:
-      string: '{"error":{"code":"UnknownError","message":"Unknown error (Activity
-        ID: 0b3c562e-f3ef-11ea-8d61-0242ac120006)"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '111'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-server-latency:
-      - '329'
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: '{"kty": "EC-HSM", "attributes": {"enabled": true}, "crv": "P-384"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '66'
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/ec-p384-hsm-file/create?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823729,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823729},"key":{"crv":"P-384","key_ops":["verify","sign"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/ec-p384-hsm-file/a6a8475c60330be81287ccff8c41dcd4","kty":"EC-HSM","x":"w1gfq3MeRhbV7SWOd7m3gh1Rc5Mzfyoa9-Dt_gist1PBnxfU3ELVH1n_MZDn5OAb","y":"8KUEJB9HU-3P-2qMN5bLSTaTv6MTjFuxgs6cULzMNh1Td44PFkWFjhwJwtcJ4w-1"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '474'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '319'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/ec-p384-hsm-file/?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823729,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823729},"key":{"crv":"P-384","key_ops":["sign","verify"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/ec-p384-hsm-file/a6a8475c60330be81287ccff8c41dcd4","kty":"EC-HSM","x":"w1gfq3MeRhbV7SWOd7m3gh1Rc5Mzfyoa9-Dt_gist1PBnxfU3ELVH1n_MZDn5OAb","y":"8KUEJB9HU-3P-2qMN5bLSTaTv6MTjFuxgs6cULzMNh1Td44PFkWFjhwJwtcJ4w-1"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '474'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '15'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/ec-p384-hsm-file/?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599804452,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599804452},"key":{"crv":"P-384","key_ops":["sign","verify"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/ec-p384-hsm-file/cce650521dd141ff2379c411d9d63cbd","kty":"EC-HSM","x":"T0pqBw2jg2oCE1mdU8SYM1AYi9Z0ejqpn0Lic8oaUsbiS-pmHJTKo8ge3fiePwyz","y":"6DvlaGNB9FrQ4AuBqyVk9Vl5UzOVEU5FEEr_rsgLrmcIUQchakoDfLY9SUH7jT-T"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '474'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '1'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"kty": "RSA-HSM", "key_size": 2048, "attributes": {"enabled": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '69'
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-2048-hsm-file/create?api-version=7.0
-  response:
-    body:
-      string: '{"error":{"code":"UnknownError","message":"Unknown error (Activity
-        ID: fe32600e-f3ee-11ea-9620-0242ac120003)"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '111'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-server-latency:
-      - '198'
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: '{"kty": "RSA-HSM", "key_size": 2048, "attributes": {"enabled": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '69'
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-2048-hsm-file/create?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823737,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823737},"key":{"e":"AQAB","key_ops":["wrapKey","decrypt","encrypt","unwrapKey","sign","verify"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-2048-hsm-file/f9489fd7c1d0479480d95552394ed371","kty":"RSA-HSM","n":"i_M7T4IGcNSCRyRhi5AJ2sLAylf2cavk96fQhULvZ4oQeqV3E7rhTaNdlWGl8OOTdDJ0Wfc2jb3rWwE83AKh-XiwMeGYUcS6s021Dt2jUmuYeZu2u3XbzWM1ZessSKRUgodaZCkJzjlh6LmOTCKQVWQlOpwNtExh_KyMxoz5QZrfjdQXGt8_JHTY9YLMuvP1xUjV2Zc-nhG1C3JySSpDYqgrXfMuLUhjWg4c9TBbaJ8Dxx7N9rEaZGgPJ8Eb8P3JyKpSJCQmQKUNSGfBBuzABSdBOM4OIn6AfYAismaAKVU26HXf2jvtcflDGMJwrUtI79bGMvQ01k7VihSP2qYBmQ"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '722'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '227'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-2048-hsm-file/?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823737,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823737},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-2048-hsm-file/f9489fd7c1d0479480d95552394ed371","kty":"RSA-HSM","n":"i_M7T4IGcNSCRyRhi5AJ2sLAylf2cavk96fQhULvZ4oQeqV3E7rhTaNdlWGl8OOTdDJ0Wfc2jb3rWwE83AKh-XiwMeGYUcS6s021Dt2jUmuYeZu2u3XbzWM1ZessSKRUgodaZCkJzjlh6LmOTCKQVWQlOpwNtExh_KyMxoz5QZrfjdQXGt8_JHTY9YLMuvP1xUjV2Zc-nhG1C3JySSpDYqgrXfMuLUhjWg4c9TBbaJ8Dxx7N9rEaZGgPJ8Eb8P3JyKpSJCQmQKUNSGfBBuzABSdBOM4OIn6AfYAismaAKVU26HXf2jvtcflDGMJwrUtI79bGMvQ01k7VihSP2qYBmQ"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '722'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
+      - addr=167.220.255.120
       x-ms-keyvault-region:
       - eastus2euap
       x-ms-server-latency:
@@ -668,15 +254,15 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-2048-hsm-file/?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/keys/ec-p256-hsm-file/?api-version=7.0
   response:
     body:
-      string: '{"attributes":{"created":1599823737,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823737},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-2048-hsm-file/f9489fd7c1d0479480d95552394ed371","kty":"RSA-HSM","n":"i_M7T4IGcNSCRyRhi5AJ2sLAylf2cavk96fQhULvZ4oQeqV3E7rhTaNdlWGl8OOTdDJ0Wfc2jb3rWwE83AKh-XiwMeGYUcS6s021Dt2jUmuYeZu2u3XbzWM1ZessSKRUgodaZCkJzjlh6LmOTCKQVWQlOpwNtExh_KyMxoz5QZrfjdQXGt8_JHTY9YLMuvP1xUjV2Zc-nhG1C3JySSpDYqgrXfMuLUhjWg4c9TBbaJ8Dxx7N9rEaZGgPJ8Eb8P3JyKpSJCQmQKUNSGfBBuzABSdBOM4OIn6AfYAismaAKVU26HXf2jvtcflDGMJwrUtI79bGMvQ01k7VihSP2qYBmQ"}}'
+      string: '{"attributes":{"created":1599888908,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888908},"key":{"crv":"P-256","key_ops":["sign","verify"],"kid":"https://clitest0911.managedhsm.azure.net/keys/ec-p256-hsm-file/2be29f866d2707e98ffd0ded5a2ad0cc","kty":"EC-HSM","x":"u1BS98mVp3pHHEQ_OA-uqXI3lGro35T3JLIFAHZwt9U","y":"SRdF053M4m301wFp8rSS-Sh-cl4snYcdLDHtfv5lxJg"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '722'
+      - '431'
       content-security-policy:
       - default-src 'self'
       content-type:
@@ -688,13 +274,295 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
+      - 1.0.20200909-2-c73be597-develop
       x-ms-keyvault-network-info:
-      - addr=167.220.255.56
+      - addr=167.220.255.120
       x-ms-keyvault-region:
       - eastus2euap
       x-ms-server-latency:
-      - '1'
+      - '12'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"kty": "EC-HSM", "attributes": {"enabled": true}, "crv": "P-384"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '66'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://clitest0911.managedhsm.azure.net/keys/ec-p384-hsm-file/create?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888914,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888914},"key":{"crv":"P-384","key_ops":["verify","sign"],"kid":"https://clitest0911.managedhsm.azure.net/keys/ec-p384-hsm-file/95e59e6dc79a4ddf290d19fca61af6ca","kty":"EC-HSM","x":"YG1GR-O19tgp-4YLLzXgowL5aOWJYVl-v5m7usYEW0VdWmJBTXwUJvCEaiI22Rr1","y":"Vsvrsuxal6L2IpliNhJHXbB7Odtk0x5V6Nd-RN0KjIohZOf3fA0DvEMU-sEASus9"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '473'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '309'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://clitest0911.managedhsm.azure.net/keys/ec-p384-hsm-file/?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888914,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888914},"key":{"crv":"P-384","key_ops":["sign","verify"],"kid":"https://clitest0911.managedhsm.azure.net/keys/ec-p384-hsm-file/95e59e6dc79a4ddf290d19fca61af6ca","kty":"EC-HSM","x":"YG1GR-O19tgp-4YLLzXgowL5aOWJYVl-v5m7usYEW0VdWmJBTXwUJvCEaiI22Rr1","y":"Vsvrsuxal6L2IpliNhJHXbB7Odtk0x5V6Nd-RN0KjIohZOf3fA0DvEMU-sEASus9"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '473'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20200909-2-c73be597-develop
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '14'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://clitest0911.managedhsm.azure.net/keys/ec-p384-hsm-file/?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888914,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888914},"key":{"crv":"P-384","key_ops":["sign","verify"],"kid":"https://clitest0911.managedhsm.azure.net/keys/ec-p384-hsm-file/95e59e6dc79a4ddf290d19fca61af6ca","kty":"EC-HSM","x":"YG1GR-O19tgp-4YLLzXgowL5aOWJYVl-v5m7usYEW0VdWmJBTXwUJvCEaiI22Rr1","y":"Vsvrsuxal6L2IpliNhJHXbB7Odtk0x5V6Nd-RN0KjIohZOf3fA0DvEMU-sEASus9"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '473'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20200909-2-c73be597-develop
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"kty": "RSA-HSM", "key_size": 2048, "attributes": {"enabled": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-2048-hsm-file/create?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888920,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888920},"key":{"e":"AQAB","key_ops":["wrapKey","decrypt","encrypt","unwrapKey","sign","verify"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-2048-hsm-file/eb23f9443855478116f1f6d795586a6b","kty":"RSA-HSM","n":"sw4Wj0O7zD9X2ez_zEqSqvFAwu9s7HzhU-VWSa68ug1wXQWK6LyxiX6wUIMKhfbENJyNG1-658JgNrDzlqFuQG6qojlTts27H9H9xUXT8gHd6D-Bb1V4UB7NuzfNNx3os-NM73HaJ4Vu7q-G6eg-fHKxPl8mwsnOIB5WeCVjTqtdZeEFpXrnky8LqytSQxX5rB9K1qwB_o-w2MDsEk8Lym6zldBU-sMHU61C4efjRfkNe_szQnn4svvCrZ2vkEtWQGgLvA3S7KwS0z1W9GQawnowDcSTH9XDD2776ozisnUbQxh8AjM0eicnbwCX54VCxd-dzp9spOizt5L_MHrVvQ"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '234'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-2048-hsm-file/?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888920,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888920},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-2048-hsm-file/eb23f9443855478116f1f6d795586a6b","kty":"RSA-HSM","n":"sw4Wj0O7zD9X2ez_zEqSqvFAwu9s7HzhU-VWSa68ug1wXQWK6LyxiX6wUIMKhfbENJyNG1-658JgNrDzlqFuQG6qojlTts27H9H9xUXT8gHd6D-Bb1V4UB7NuzfNNx3os-NM73HaJ4Vu7q-G6eg-fHKxPl8mwsnOIB5WeCVjTqtdZeEFpXrnky8LqytSQxX5rB9K1qwB_o-w2MDsEk8Lym6zldBU-sMHU61C4efjRfkNe_szQnn4svvCrZ2vkEtWQGgLvA3S7KwS0z1W9GQawnowDcSTH9XDD2776ozisnUbQxh8AjM0eicnbwCX54VCxd-dzp9spOizt5L_MHrVvQ"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20200909-2-c73be597-develop
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '15'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-2048-hsm-file/?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888920,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888920},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-2048-hsm-file/eb23f9443855478116f1f6d795586a6b","kty":"RSA-HSM","n":"sw4Wj0O7zD9X2ez_zEqSqvFAwu9s7HzhU-VWSa68ug1wXQWK6LyxiX6wUIMKhfbENJyNG1-658JgNrDzlqFuQG6qojlTts27H9H9xUXT8gHd6D-Bb1V4UB7NuzfNNx3os-NM73HaJ4Vu7q-G6eg-fHKxPl8mwsnOIB5WeCVjTqtdZeEFpXrnky8LqytSQxX5rB9K1qwB_o-w2MDsEk8Lym6zldBU-sMHU61C4efjRfkNe_szQnn4svvCrZ2vkEtWQGgLvA3S7KwS0z1W9GQawnowDcSTH9XDD2776ozisnUbQxh8AjM0eicnbwCX54VCxd-dzp9spOizt5L_MHrVvQ"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '721'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20200909-2-c73be597-develop
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '0'
     status:
       code: 200
       message: OK
@@ -717,15 +585,15 @@ interactions:
       accept-language:
       - en-US
     method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-3072-hsm-file/create?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-3072-hsm-file/create?api-version=7.0
   response:
     body:
-      string: '{"attributes":{"created":1599823743,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823743},"key":{"e":"AQAB","key_ops":["wrapKey","decrypt","encrypt","unwrapKey","sign","verify"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-3072-hsm-file/61175a7916ef44d0252e2ab329736c7a","kty":"RSA-HSM","n":"kb3tDrMsmRehD4FcyglnrjpUQ4r09CIC6FDfBjAktQljLcnrnHZEXMKeQRyPnkrIbeMhpQ-V0nY121kipJERLAh2gzWd9SO6wSDajO8C3WSkSmPQO5v3FLhIopyzxYqQpBFDh1vmHNwOxM6hKnLveNuCWEV3reFg7hZsicK0SGDmL1Kh1v13-y_mBGUERVNmnXKSn2wlU3Re0Td6Pkar6JVfDNiBZMy6xCO7-F0HsIuuWOEb0jHIJDwyxKrgMPlQLmPDD7-v5k-5-RllwuziJYCTxGNrR9u80rOy-tEMHvPlmtkbZO07Q5bozZ_Nb8RrvlHMTIgb6KeQUJETYhBuMgfPr-LmVawbcxjzVQUdAILM3fB2FDezj94_nhxZeFvwUGbIydamFztnx3ba8mFFexjZv85Ww3txd_35PmvcV1CDEVQVG_bdOUQnkFKb1jfZzxaEk6o5jQb1zq3zVy7jyR7YVewtLTbwJ3-Ekdbu1vTXNKL0RxRgCwEf0ThJKaRT"}}'
+      string: '{"attributes":{"created":1599888926,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888926},"key":{"e":"AQAB","key_ops":["wrapKey","decrypt","encrypt","unwrapKey","sign","verify"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-3072-hsm-file/cf81a90a9ddf0ae13f53e4044a4a8ed0","kty":"RSA-HSM","n":"sTWOdwL57MmvQGllfOO6xRpIVT0QsuAzU7OO2mMwOJ7wrfAexTCVBO9xxNcLyKn6l8_71OS6c57uBZQ_lHRKgPeeNwwG0oTXsOhpE_NGvLKoKFg-OwR4YiTjIY7-AMl0fxbfrJ3EJ3uem4CrcqGGxf3093EjnNdBsWk8Twwe7kK0Z13-JCJVTZMfqB_ew7pbzEMvEWLsf83fhYXP0y7XFy1VYRxp26gH_hP_I0wJDvI5kG7tgJ2a_PDAWDL-Itq5YQUvbsU3y_F08tRdmzUprPgn64AvesmlP6QgqijTAla8ldO_BYJMB8vIMtTahLkIuWwdTWgiQdB2pGwc2nW2I9djdVtuMmyA3aY3LKua74KFc9YJppJsoEG4VSgXev5_y9rqYl69AAFaHNK9ZMovW2bQFreCfUFxI1H_oTb1k_LQAOfIebwS-rlmisHeLTRoXUTnL15Ell30jwsCMKl2HAUuF58AyAZL9IEvtyEQhBhyAKAv_Rkv5sLIPhDzrMT1"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '892'
+      - '891'
       content-security-policy:
       - default-src 'self'
       content-type:
@@ -737,11 +605,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - addr=167.220.255.56
+      - addr=167.220.255.120
       x-ms-keyvault-region:
       - eastus2euap
       x-ms-server-latency:
-      - '224'
+      - '240'
     status:
       code: 200
       message: OK
@@ -762,15 +630,15 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-3072-hsm-file/?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-3072-hsm-file/?api-version=7.0
   response:
     body:
-      string: '{"attributes":{"created":1599823743,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823743},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-3072-hsm-file/61175a7916ef44d0252e2ab329736c7a","kty":"RSA-HSM","n":"kb3tDrMsmRehD4FcyglnrjpUQ4r09CIC6FDfBjAktQljLcnrnHZEXMKeQRyPnkrIbeMhpQ-V0nY121kipJERLAh2gzWd9SO6wSDajO8C3WSkSmPQO5v3FLhIopyzxYqQpBFDh1vmHNwOxM6hKnLveNuCWEV3reFg7hZsicK0SGDmL1Kh1v13-y_mBGUERVNmnXKSn2wlU3Re0Td6Pkar6JVfDNiBZMy6xCO7-F0HsIuuWOEb0jHIJDwyxKrgMPlQLmPDD7-v5k-5-RllwuziJYCTxGNrR9u80rOy-tEMHvPlmtkbZO07Q5bozZ_Nb8RrvlHMTIgb6KeQUJETYhBuMgfPr-LmVawbcxjzVQUdAILM3fB2FDezj94_nhxZeFvwUGbIydamFztnx3ba8mFFexjZv85Ww3txd_35PmvcV1CDEVQVG_bdOUQnkFKb1jfZzxaEk6o5jQb1zq3zVy7jyR7YVewtLTbwJ3-Ekdbu1vTXNKL0RxRgCwEf0ThJKaRT"}}'
+      string: '{"attributes":{"created":1599888926,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888926},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-3072-hsm-file/cf81a90a9ddf0ae13f53e4044a4a8ed0","kty":"RSA-HSM","n":"sTWOdwL57MmvQGllfOO6xRpIVT0QsuAzU7OO2mMwOJ7wrfAexTCVBO9xxNcLyKn6l8_71OS6c57uBZQ_lHRKgPeeNwwG0oTXsOhpE_NGvLKoKFg-OwR4YiTjIY7-AMl0fxbfrJ3EJ3uem4CrcqGGxf3093EjnNdBsWk8Twwe7kK0Z13-JCJVTZMfqB_ew7pbzEMvEWLsf83fhYXP0y7XFy1VYRxp26gH_hP_I0wJDvI5kG7tgJ2a_PDAWDL-Itq5YQUvbsU3y_F08tRdmzUprPgn64AvesmlP6QgqijTAla8ldO_BYJMB8vIMtTahLkIuWwdTWgiQdB2pGwc2nW2I9djdVtuMmyA3aY3LKua74KFc9YJppJsoEG4VSgXev5_y9rqYl69AAFaHNK9ZMovW2bQFreCfUFxI1H_oTb1k_LQAOfIebwS-rlmisHeLTRoXUTnL15Ell30jwsCMKl2HAUuF58AyAZL9IEvtyEQhBhyAKAv_Rkv5sLIPhDzrMT1"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '892'
+      - '891'
       content-security-policy:
       - default-src 'self'
       content-type:
@@ -782,194 +650,9 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
+      - 1.0.20200909-2-c73be597-develop
       x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '1'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-3072-hsm-file/?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823743,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823743},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-3072-hsm-file/61175a7916ef44d0252e2ab329736c7a","kty":"RSA-HSM","n":"kb3tDrMsmRehD4FcyglnrjpUQ4r09CIC6FDfBjAktQljLcnrnHZEXMKeQRyPnkrIbeMhpQ-V0nY121kipJERLAh2gzWd9SO6wSDajO8C3WSkSmPQO5v3FLhIopyzxYqQpBFDh1vmHNwOxM6hKnLveNuCWEV3reFg7hZsicK0SGDmL1Kh1v13-y_mBGUERVNmnXKSn2wlU3Re0Td6Pkar6JVfDNiBZMy6xCO7-F0HsIuuWOEb0jHIJDwyxKrgMPlQLmPDD7-v5k-5-RllwuziJYCTxGNrR9u80rOy-tEMHvPlmtkbZO07Q5bozZ_Nb8RrvlHMTIgb6KeQUJETYhBuMgfPr-LmVawbcxjzVQUdAILM3fB2FDezj94_nhxZeFvwUGbIydamFztnx3ba8mFFexjZv85Ww3txd_35PmvcV1CDEVQVG_bdOUQnkFKb1jfZzxaEk6o5jQb1zq3zVy7jyR7YVewtLTbwJ3-Ekdbu1vTXNKL0RxRgCwEf0ThJKaRT"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '892'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '15'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"kty": "RSA-HSM", "key_size": 4096, "attributes": {"enabled": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '69'
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-4096-hsm-file/create?api-version=7.0
-  response:
-    body:
-      string: '{"error":{"code":"UnknownError","message":"Unknown error (Activity
-        ID: 06f5f39a-f3ef-11ea-b50a-0242ac120003)"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '111'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-server-latency:
-      - '222'
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: '{"kty": "RSA-HSM", "key_size": 4096, "attributes": {"enabled": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '69'
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-4096-hsm-file/create?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823751,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823751},"key":{"e":"AQAB","key_ops":["wrapKey","decrypt","encrypt","unwrapKey","sign","verify"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-4096-hsm-file/0dbbc56db11a417da61d077473b490f0","kty":"RSA-HSM","n":"uIB-8b7Y4mEPOm0EGCtfDs3EkO28AcknAbBVp9vKmW0mEe38jscq1fAbP1D6hkhL_HXCgr1CTtyGorZ-BdXP0saej1aeGYtb5Mzd35pPCZBR_6j-0eP3lFhHoPvt5Bx3OgVAqIsaWs7L31_xkUZw3jVgqm8ZSI_pj1zS1B6G__tSL4Dqt2W7SmbbSLr9Cu7Vu2BRfsAy1WEz9z1attNi06WjcT-eHKhykA_OfE0agOJ7GoDHa4AdAXXCiVaMXQQZo8xPgVSW7jxemahQxkgZxkhutUZydDENNPSV7CQC6XMkIulZEk22Yk9bo_WVuA4VkOHmZ2WA3SP7spp-85gm9rKeKNswW2tGU_QPH1GRW-gVN45bK-Rmrb9bV_yC4qlgiEkC4Axvpw2UOXXAKIEmPW-M3ODTwCTvbBIkK6uz6MO9MPuXCNBCMPkk8zwvss1KJbrHmwdYn1Glipdk1yS-RhNIyQcLdLbG736tvuB6BMCGsftDe74_ISXh0A8_xwxow1PtAunA7ggrSRrZoEsAV_gVHe6f7IYGUgrtMC2s0nwDhxDpysvZ4wZWOerbuLgEmFqdVAhEKSRhbmz-zwGTvwa8W-y2WUfe5XnKc3IUwy-pCIQYXqyAK537FUZxkp8hLfAoCmXWM3mh7uojxHEh7pRFJWH7wE-1lysSRwkwDGU"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1063'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
-      x-ms-keyvault-region:
-      - eastus2euap
-      x-ms-server-latency:
-      - '237'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
-      User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-4096-hsm-file/?api-version=7.0
-  response:
-    body:
-      string: '{"attributes":{"created":1599823751,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823751},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-4096-hsm-file/0dbbc56db11a417da61d077473b490f0","kty":"RSA-HSM","n":"uIB-8b7Y4mEPOm0EGCtfDs3EkO28AcknAbBVp9vKmW0mEe38jscq1fAbP1D6hkhL_HXCgr1CTtyGorZ-BdXP0saej1aeGYtb5Mzd35pPCZBR_6j-0eP3lFhHoPvt5Bx3OgVAqIsaWs7L31_xkUZw3jVgqm8ZSI_pj1zS1B6G__tSL4Dqt2W7SmbbSLr9Cu7Vu2BRfsAy1WEz9z1attNi06WjcT-eHKhykA_OfE0agOJ7GoDHa4AdAXXCiVaMXQQZo8xPgVSW7jxemahQxkgZxkhutUZydDENNPSV7CQC6XMkIulZEk22Yk9bo_WVuA4VkOHmZ2WA3SP7spp-85gm9rKeKNswW2tGU_QPH1GRW-gVN45bK-Rmrb9bV_yC4qlgiEkC4Axvpw2UOXXAKIEmPW-M3ODTwCTvbBIkK6uz6MO9MPuXCNBCMPkk8zwvss1KJbrHmwdYn1Glipdk1yS-RhNIyQcLdLbG736tvuB6BMCGsftDe74_ISXh0A8_xwxow1PtAunA7ggrSRrZoEsAV_gVHe6f7IYGUgrtMC2s0nwDhxDpysvZ4wZWOerbuLgEmFqdVAhEKSRhbmz-zwGTvwa8W-y2WUfe5XnKc3IUwy-pCIQYXqyAK537FUZxkp8hLfAoCmXWM3mh7uojxHEh7pRFJWH7wE-1lysSRwkwDGU"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1063'
-      content-security-policy:
-      - default-src 'self'
-      content-type:
-      - application/json; charset=utf-8
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
-      x-ms-keyvault-network-info:
-      - addr=167.220.255.56
+      - addr=167.220.255.120
       x-ms-keyvault-region:
       - eastus2euap
       x-ms-server-latency:
@@ -994,15 +677,15 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://clitest0908d.managedhsm.azure.net/keys/rsa-4096-hsm-file/?api-version=7.0
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-3072-hsm-file/?api-version=7.0
   response:
     body:
-      string: '{"attributes":{"created":1599823751,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599823751},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0908d.managedhsm.azure.net/keys/rsa-4096-hsm-file/0dbbc56db11a417da61d077473b490f0","kty":"RSA-HSM","n":"uIB-8b7Y4mEPOm0EGCtfDs3EkO28AcknAbBVp9vKmW0mEe38jscq1fAbP1D6hkhL_HXCgr1CTtyGorZ-BdXP0saej1aeGYtb5Mzd35pPCZBR_6j-0eP3lFhHoPvt5Bx3OgVAqIsaWs7L31_xkUZw3jVgqm8ZSI_pj1zS1B6G__tSL4Dqt2W7SmbbSLr9Cu7Vu2BRfsAy1WEz9z1attNi06WjcT-eHKhykA_OfE0agOJ7GoDHa4AdAXXCiVaMXQQZo8xPgVSW7jxemahQxkgZxkhutUZydDENNPSV7CQC6XMkIulZEk22Yk9bo_WVuA4VkOHmZ2WA3SP7spp-85gm9rKeKNswW2tGU_QPH1GRW-gVN45bK-Rmrb9bV_yC4qlgiEkC4Axvpw2UOXXAKIEmPW-M3ODTwCTvbBIkK6uz6MO9MPuXCNBCMPkk8zwvss1KJbrHmwdYn1Glipdk1yS-RhNIyQcLdLbG736tvuB6BMCGsftDe74_ISXh0A8_xwxow1PtAunA7ggrSRrZoEsAV_gVHe6f7IYGUgrtMC2s0nwDhxDpysvZ4wZWOerbuLgEmFqdVAhEKSRhbmz-zwGTvwa8W-y2WUfe5XnKc3IUwy-pCIQYXqyAK537FUZxkp8hLfAoCmXWM3mh7uojxHEh7pRFJWH7wE-1lysSRwkwDGU"}}'
+      string: '{"attributes":{"created":1599888926,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888926},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-3072-hsm-file/cf81a90a9ddf0ae13f53e4044a4a8ed0","kty":"RSA-HSM","n":"sTWOdwL57MmvQGllfOO6xRpIVT0QsuAzU7OO2mMwOJ7wrfAexTCVBO9xxNcLyKn6l8_71OS6c57uBZQ_lHRKgPeeNwwG0oTXsOhpE_NGvLKoKFg-OwR4YiTjIY7-AMl0fxbfrJ3EJ3uem4CrcqGGxf3093EjnNdBsWk8Twwe7kK0Z13-JCJVTZMfqB_ew7pbzEMvEWLsf83fhYXP0y7XFy1VYRxp26gH_hP_I0wJDvI5kG7tgJ2a_PDAWDL-Itq5YQUvbsU3y_F08tRdmzUprPgn64AvesmlP6QgqijTAla8ldO_BYJMB8vIMtTahLkIuWwdTWgiQdB2pGwc2nW2I9djdVtuMmyA3aY3LKua74KFc9YJppJsoEG4VSgXev5_y9rqYl69AAFaHNK9ZMovW2bQFreCfUFxI1H_oTb1k_LQAOfIebwS-rlmisHeLTRoXUTnL15Ell30jwsCMKl2HAUuF58AyAZL9IEvtyEQhBhyAKAv_Rkv5sLIPhDzrMT1"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1063'
+      - '891'
       content-security-policy:
       - default-src 'self'
       content-type:
@@ -1014,13 +697,154 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-build-version:
-      - 1.0.20200827-3-83ffcc79-develop
+      - 1.0.20200909-2-c73be597-develop
       x-ms-keyvault-network-info:
-      - addr=167.220.255.56
+      - addr=167.220.255.120
       x-ms-keyvault-region:
       - eastus2euap
       x-ms-server-latency:
-      - '1'
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"kty": "RSA-HSM", "key_size": 4096, "attributes": {"enabled": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-4096-hsm-file/create?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888931,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888931},"key":{"e":"AQAB","key_ops":["wrapKey","decrypt","encrypt","unwrapKey","sign","verify"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-4096-hsm-file/dfb40232d13b4b2130c30e9aa9cbc586","kty":"RSA-HSM","n":"no-x74OiWe84fSzxiy5f2lqsfNcoI9l7-EIahxD2v7hRUbMmuoWRpT6GXF_bSs_HOJrhdKF60MfS5ueG5vuaecxiKdytXj8uKiVHPhAjrjguKLPbyvVxWeSWuJkwgXSt8UlUwC7x3yJQR827tg7YE3dYkPfStsXo8T6IHrrz1Ymef0YieIHqtP347KxP2htTToShY-WpjXqheu1TBM8OC1xpRtwF7ArKlWosD5hpk2_4LsJi1YpVCS8HKstZjjOtW6heKzwmLBZ9mxQ5CdUgGbk9Krk93qKcu_yLnhLb30PgXLTJPnnTBD20a55iPNwo3OamHRBYFOILA8BGSaqnAlhs0pcVZ_AuWhI1effw7sPyTn_lWSEnFmzdTdOykTBjZkS-XbxWf3iAWh4DKSwo90ezXz7iZdpV_UNfEGLylzZuS6aQXsenYS9pmpDbmXdYnTNCv-8ZQlmDj9hcfqwKe5giEN_w-UNZ1uZVKsqt5zwOyM5s9sVOncbcs5SsUzIoK-fh-MCt6FQ1BRQwxkEf-W18dmumloEgidvNc7gqnw0Lpc6tjdHjf593-XbulDbgHAYURQX9x_LIuGQo4hkLirZ_DUmVNMnUUMnciveMr9Kcpt0yciQozGHPT7SMr0wfVFS8zE3dca-K3gsNuFMnIQJNW8OxzO6qw-xUYh3cv70"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1062'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '253'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-4096-hsm-file/?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888931,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888931},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-4096-hsm-file/dfb40232d13b4b2130c30e9aa9cbc586","kty":"RSA-HSM","n":"no-x74OiWe84fSzxiy5f2lqsfNcoI9l7-EIahxD2v7hRUbMmuoWRpT6GXF_bSs_HOJrhdKF60MfS5ueG5vuaecxiKdytXj8uKiVHPhAjrjguKLPbyvVxWeSWuJkwgXSt8UlUwC7x3yJQR827tg7YE3dYkPfStsXo8T6IHrrz1Ymef0YieIHqtP347KxP2htTToShY-WpjXqheu1TBM8OC1xpRtwF7ArKlWosD5hpk2_4LsJi1YpVCS8HKstZjjOtW6heKzwmLBZ9mxQ5CdUgGbk9Krk93qKcu_yLnhLb30PgXLTJPnnTBD20a55iPNwo3OamHRBYFOILA8BGSaqnAlhs0pcVZ_AuWhI1effw7sPyTn_lWSEnFmzdTdOykTBjZkS-XbxWf3iAWh4DKSwo90ezXz7iZdpV_UNfEGLylzZuS6aQXsenYS9pmpDbmXdYnTNCv-8ZQlmDj9hcfqwKe5giEN_w-UNZ1uZVKsqt5zwOyM5s9sVOncbcs5SsUzIoK-fh-MCt6FQ1BRQwxkEf-W18dmumloEgidvNc7gqnw0Lpc6tjdHjf593-XbulDbgHAYURQX9x_LIuGQo4hkLirZ_DUmVNMnUUMnciveMr9Kcpt0yciQozGHPT7SMr0wfVFS8zE3dca-K3gsNuFMnIQJNW8OxzO6qw-xUYh3cv70"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1062'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20200909-2-c73be597-develop
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '15'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://clitest0911.managedhsm.azure.net/keys/rsa-4096-hsm-file/?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1599888931,"enabled":true,"exportable":false,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1599888931},"key":{"e":"AQAB","key_ops":["verify","sign","unwrapKey","decrypt","encrypt","wrapKey"],"kid":"https://clitest0911.managedhsm.azure.net/keys/rsa-4096-hsm-file/dfb40232d13b4b2130c30e9aa9cbc586","kty":"RSA-HSM","n":"no-x74OiWe84fSzxiy5f2lqsfNcoI9l7-EIahxD2v7hRUbMmuoWRpT6GXF_bSs_HOJrhdKF60MfS5ueG5vuaecxiKdytXj8uKiVHPhAjrjguKLPbyvVxWeSWuJkwgXSt8UlUwC7x3yJQR827tg7YE3dYkPfStsXo8T6IHrrz1Ymef0YieIHqtP347KxP2htTToShY-WpjXqheu1TBM8OC1xpRtwF7ArKlWosD5hpk2_4LsJi1YpVCS8HKstZjjOtW6heKzwmLBZ9mxQ5CdUgGbk9Krk93qKcu_yLnhLb30PgXLTJPnnTBD20a55iPNwo3OamHRBYFOILA8BGSaqnAlhs0pcVZ_AuWhI1effw7sPyTn_lWSEnFmzdTdOykTBjZkS-XbxWf3iAWh4DKSwo90ezXz7iZdpV_UNfEGLylzZuS6aQXsenYS9pmpDbmXdYnTNCv-8ZQlmDj9hcfqwKe5giEN_w-UNZ1uZVKsqt5zwOyM5s9sVOncbcs5SsUzIoK-fh-MCt6FQ1BRQwxkEf-W18dmumloEgidvNc7gqnw0Lpc6tjdHjf593-XbulDbgHAYURQX9x_LIuGQo4hkLirZ_DUmVNMnUUMnciveMr9Kcpt0yciQozGHPT7SMr0wfVFS8zE3dca-K3gsNuFMnIQJNW8OxzO6qw-xUYh3cv70"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1062'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20200909-2-c73be597-develop
+      x-ms-keyvault-network-info:
+      - addr=167.220.255.120
+      x-ms-keyvault-region:
+      - eastus2euap
+      x-ms-server-latency:
+      - '16'
     status:
       code: 200
       message: OK
