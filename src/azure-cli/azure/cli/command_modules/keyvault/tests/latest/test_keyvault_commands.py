@@ -34,9 +34,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 SECURITY_DOMAIN_KEYS_DIR = os.path.join(TEST_DIR, 'security_domain_keys')
 
-ACTIVE_HSM_NAME = 'clitest0911'  # live: clitest0908d
+ACTIVE_HSM_NAME = 'clitest0913'
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
-NEXT_ACTIVE_HSM_NAME = 'clitest0911b'
+NEXT_ACTIVE_HSM_NAME = 'clitest0913b'
 NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(NEXT_ACTIVE_HSM_NAME)
 
 
