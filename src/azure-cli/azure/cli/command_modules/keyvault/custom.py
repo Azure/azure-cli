@@ -1137,11 +1137,11 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name=None, vault_base_url=None,
+def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disable=too-many-locals
                hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None):  # pylint: disable=too-many-locals
+               byok_string=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
