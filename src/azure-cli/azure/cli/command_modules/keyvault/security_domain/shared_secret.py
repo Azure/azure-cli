@@ -38,8 +38,8 @@ class SharedSecret:
 
     def make_shares(self, plaintext):
         share_arrays = []
-        for i in range(len(plaintext)):
-            share_array = self.make_byte_shares(plaintext[i])
+        for i, p in enumerate(plaintext):
+            share_array = self.make_byte_shares(p)
             for sa in share_array:
                 if i == 0:
                     share_arrays.append(array.array('H'))

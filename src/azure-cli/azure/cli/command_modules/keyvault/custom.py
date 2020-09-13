@@ -1985,7 +1985,7 @@ def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
 
     def get_x5c_as_pem():
         x5c = exchange_key.get('x5c', [])
-        if len(x5c) < 1:
+        if not x5c:
             raise CLIError('Insufficient x5c.')
         b64cert = x5c[0]
         header = '-----BEGIN CERTIFICATE-----'
@@ -2024,36 +2024,12 @@ def _wait_security_domain_operation(client, hsm_name, identifier=None):  # pylin
     return None
 
 
-def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           identifier=None, no_wait=False):  # pylint: disable=unused-argument
-    resource_paths = [sd_file, sd_exchange_key]
-    for p in resource_paths:
-        if not os.path.exists(p):
-            raise CLIError('File {} does not exist.'.format(p))
-        if os.path.isdir(p):
-            raise CLIError('{} is a directory. A file is required.'.format(p))
+def _security_domain_make_restore_blob(sd_wrapping_keys, passwords, sd_exchange_key, enc_data, shared_keys, required):
+    share_arrays = _security_domain_gen_share_arrays(sd_wrapping_keys, passwords, shared_keys, required)
+    return _security_domain_gen_blob(sd_exchange_key, share_arrays, enc_data, required)
 
-    if passwords is None:
-        passwords = []
 
-    with open(sd_file) as f:
-        sd_data = json.load(f)
-        if not sd_data or 'EncData' not in sd_data or 'SharedKeys' not in sd_data:
-            raise CLIError('Invalid SD file.')
-        enc_data = sd_data['EncData']
-        shared_keys = sd_data['SharedKeys']
-
-    required = shared_keys['required']
-    if required < 2 or required > 10:
-        raise CLIError('Invalid SD file: the value of "required" should be in range [2, 10].')
-    if len(sd_wrapping_keys) < required:
-        raise CLIError('Length of --sd-wrapping-keys list should not less than {} for decrypting this SD file.'
-                       .format(required))
-
-    key_algorithm = shared_keys['key_algorithm']
-    if key_algorithm != 'shamir_share':
-        raise CLIError('Unsupported SharedKeys algorithm: {}. Supported: {}'.format(key_algorithm, 'shamir_share'))
-
+def _security_domain_gen_share_arrays(sd_wrapping_keys, passwords, shared_keys, required):
     matched = 0
     share_arrays = []
     ok = False
@@ -2067,7 +2043,6 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
             raise CLIError('{} is a directory. A file is required.'.format(private_key_path))
 
         prefix = '.'.join(private_key_path.split('.')[:-1])
-        logger.info('Prefix: {}'.format(prefix))
         cert_path = prefix + '.cer'
         if not os.path.exists(cert_path):
             raise CLIError('Certificate {} does not exist. You should put it into the same folder with your wrapping '
@@ -2099,7 +2074,10 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     if matched < required:
         raise CLIError('Insufficient shares available.')
 
-    # shared_secret = SharedSecret(required=required)
+    return share_arrays
+
+
+def _security_domain_gen_blob(sd_exchange_key, share_arrays, enc_data, required):
     master_key = SharedSecret.get_plaintext(share_arrays, required=required)
 
     plaintext_list = []
@@ -2133,8 +2111,47 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     security_domain_restore_data.wrapped_key.enc_key = jwe_wrapped.encode_compact()
     thumbprint = Utils.get_SHA256_thumbprint(exchange_cert)
     security_domain_restore_data.wrapped_key.x5t_256 = Utils.security_domain_b64_url_encode(thumbprint)
-    restore_blob_value = json.dumps(security_domain_restore_data.to_json())
+    return json.dumps(security_domain_restore_data.to_json())
 
+
+def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
+                           identifier=None, no_wait=False):  # pylint: disable=unused-argument
+    resource_paths = [sd_file, sd_exchange_key]
+    for p in resource_paths:
+        if not os.path.exists(p):
+            raise CLIError('File {} does not exist.'.format(p))
+        if os.path.isdir(p):
+            raise CLIError('{} is a directory. A file is required.'.format(p))
+
+    with open(sd_file) as f:
+        sd_data = json.load(f)
+        if not sd_data or 'EncData' not in sd_data or 'SharedKeys' not in sd_data:
+            raise CLIError('Invalid SD file.')
+        enc_data = sd_data['EncData']
+        shared_keys = sd_data['SharedKeys']
+
+    required = shared_keys['required']
+    if required < 2 or required > 10:
+        raise CLIError('Invalid SD file: the value of "required" should be in range [2, 10].')
+    if len(sd_wrapping_keys) < required:
+        raise CLIError('Length of --sd-wrapping-keys list should not less than {} for decrypting this SD file.'
+                       .format(required))
+
+    key_algorithm = shared_keys['key_algorithm']
+    if key_algorithm != 'shamir_share':
+        raise CLIError('Unsupported SharedKeys algorithm: {}. Supported: {}'.format(key_algorithm, 'shamir_share'))
+
+    if passwords is None:
+        passwords = []
+
+    restore_blob_value = _security_domain_make_restore_blob(
+        sd_wrapping_keys=sd_wrapping_keys,
+        passwords=passwords,
+        sd_exchange_key=sd_exchange_key,
+        enc_data=enc_data,
+        shared_keys=shared_keys,
+        required=required
+    )
     SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
     retval = client.upload(vault_base_url=hsm_name, security_domain=security_domain)
@@ -2143,7 +2160,6 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
         return retval
 
     new_retval = _wait_security_domain_operation(client, hsm_name)
-
     if new_retval:
         return new_retval
     return retval

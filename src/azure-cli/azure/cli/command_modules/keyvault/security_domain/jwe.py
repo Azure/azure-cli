@@ -19,7 +19,7 @@ from .sp800_108 import KDF
 from .utils import Utils
 
 
-class JWEHeader:
+class JWEHeader:  # pylint: disable=too-many-instance-attributes
     _fields = ['alg', 'enc', 'zip', 'jku', 'jwk', 'kid', 'x5u', 'x5c', 'x5t', 'x5t_S256', 'typ', 'cty', 'crit']
 
     def __init__(self, alg=None, enc=None, zip=None,  # pylint: disable=redefined-builtin
