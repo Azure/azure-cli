@@ -4437,7 +4437,7 @@ def add_nw_connection_monitor_v2_endpoint(cmd,
                                          address=address,
                                          type=endpoint_type,
                                          coverage_level=coverage_level,
-                                         scope=endpoint_scope)
+                                         scope=endpoint_scope if address_include or address_exclude else None)
 
     if filter_type and filter_items:
         endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
