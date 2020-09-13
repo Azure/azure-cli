@@ -168,6 +168,7 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault update-hsm') as c:
         c.argument('name', hsm_name_type)
+        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-e'])
         c.argument('secondary_locations', nargs='+',
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
