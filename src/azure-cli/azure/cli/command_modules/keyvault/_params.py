@@ -67,9 +67,9 @@ def load_arguments(self, _):
 
     JsonWebKeyType = CLIJsonWebKeyType  # TODO: Remove this patch when new SDK is released
 
-    (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
+    (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
-         'SkuName', 'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
+         'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
          'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
     # ARGUMENT DEFINITIONS
@@ -477,7 +477,7 @@ def load_arguments(self, _):
 
     for command_group in ['backup', 'restore']:
         with self.argument_context('keyvault {} start'.format(command_group)) as c:
-            c.argument('token', options_list=['--storage-container-SAS-token'], required=True,
+            c.argument('token', options_list=['--storage-container-SAS-token', '-t'], required=True,
                        help='The SAS token pointing to an Azure Blob storage container')
 
     with self.argument_context('keyvault restore start') as c:
@@ -686,6 +686,6 @@ def load_arguments(self, _):
         everyone = "Everyone"
 
     with self.argument_context('keyvault role assignment create') as c:
-        c.argument('assignee_principal_type', arg_type=get_enum_type(PrincipalType),
-                   help='The principal type of assignee.')
+        c.argument('assignee_principal_type', options_list=['--assignee-principal-type', '-t'],
+                   arg_type=get_enum_type(PrincipalType), help='The principal type of assignee.')
     # endregion

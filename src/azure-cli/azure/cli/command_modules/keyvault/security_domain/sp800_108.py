@@ -38,8 +38,7 @@ class KDF:
         bit_length = 256
         hex_result = 'f0ca51f6308791404bf68b56024ee7c64d6c737716f81d47e1e68b5c4e399575'
         key = bytearray()
-        for i in range(32):
-            key.append(0x41)
+        key.extend([0x41] * 32)
 
         new_key = KDF.sp800_108(key, label, context, bit_length)
         hex_value = new_key.hex().replace('-', '')

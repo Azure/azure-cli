@@ -22,7 +22,8 @@ from .utils import Utils
 class JWEHeader:
     _fields = ['alg', 'enc', 'zip', 'jku', 'jwk', 'kid', 'x5u', 'x5c', 'x5t', 'x5t_S256', 'typ', 'cty', 'crit']
 
-    def __init__(self, alg=None, enc=None, zip=None, jku=None, jwk=None, kid=None, x5u=None, x5c=None, x5t=None,
+    def __init__(self, alg=None, enc=None, zip=None,  # pylint: disable=redefined-builtin
+                 jku=None, jwk=None, kid=None, x5u=None, x5c=None, x5t=None,
                  x5t_S256=None, typ=None, cty=None, crit=None):
         """
             JWE header

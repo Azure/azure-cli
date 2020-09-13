@@ -256,7 +256,7 @@ def validate_resource_group_name(cmd, ns):
     """
     Populate resource_group_name, if not provided
     """
-    if 'keyvault purge' in cmd.name or 'keyvault recover' in cmd.name:  # Do not add resource group name for these commands
+    if 'keyvault purge' in cmd.name or 'keyvault recover' in cmd.name:
         return
 
     vault_name = getattr(ns, 'vault_name', None)
@@ -268,7 +268,8 @@ def validate_resource_group_name(cmd, ns):
         raise CLIError('--name/-n and --hsm-name are mutually exclusive.')
 
     if vault_name:
-        _show_vault_only_deprecate_message(ns)  # This is a temporary solution for showing deprecation message only for vaults
+        # This is a temporary solution for showing deprecation message only for vaults
+        _show_vault_only_deprecate_message(ns)
 
     if not ns.resource_group_name:
         group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, vault_name, hsm_name)
@@ -482,7 +483,8 @@ def set_vault_base_url(ns):
     hsm_name = getattr(ns, 'hsm_name', None)
 
     if not hsm_name:
-        _show_vault_only_deprecate_message(ns)  # This is a temporary solution for showing deprecation message only for vaults
+        # This is a temporary solution for showing deprecation message only for vaults
+        _show_vault_only_deprecate_message(ns)
 
     if hsm_name and not vault_base_url:
         setattr(ns, 'vault_base_url', hsm_name)

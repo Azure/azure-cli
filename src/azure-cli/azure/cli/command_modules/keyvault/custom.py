@@ -206,13 +206,13 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
     if is_azure_stack_profile(cmd) or vault_name:
         return client.delete(resource_group_name=resource_group_name, vault_name=vault_name)
 
-    if hsm_name:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        return sdk_no_wait(
-            False, hsm_client.begin_delete,
-            resource_group_name=resource_group_name,
-            name=hsm_name
-        )
+    assert hsm_name
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return sdk_no_wait(
+        False, hsm_client.begin_delete,
+        resource_group_name=resource_group_name,
+        name=hsm_name
+    )
 
 
 def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None, no_wait=False):
@@ -224,9 +224,9 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
             vault_name=vault_name
         )
 
-    if hsm_name:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        return hsm_client.purge_deleted(rlocation=location, name=hsm_name)
+    assert hsm_name
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return hsm_client.purge_deleted(rlocation=location, name=hsm_name)
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
@@ -239,8 +239,10 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         try:
             deleted_resources.extend(client.list_deleted())
             deleted_resources.extend(hsm_client.list_deleted())
-        finally:
-            return deleted_resources
+        except:  # pylint: disable=bare-except
+            pass
+
+        return deleted_resources
 
     if resource_type == 'hsm':
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -262,8 +264,10 @@ def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None)
         try:
             resources.extend(list_vault(client, resource_group_name))
             resources.extend(list_hsm(hsm_client, resource_group_name))
-        finally:
-            return resources
+        except:  # pylint: disable=bare-except
+            pass
+
+        return resources
 
     if resource_type == 'hsm':
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -1137,7 +1141,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,
                hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None):
+               byok_string=None):  # pylint: disable=too-many-locals
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
@@ -1977,10 +1981,7 @@ def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
         raise CLIError("File named '{}' already exists.".format(sd_exchange_key))
 
     ret = client.transfer_key(vault_base_url=hsm_name)
-    logger.info('Raw response of the transfer key request: {}'.format(ret))
-
     exchange_key = json.loads(json.loads(ret)['transfer_key'])
-    logger.info('Successfully loaded the exchange key: {}'.format(exchange_key))
 
     def get_x5c_as_pem():
         x5c = exchange_key.get('x5c', [])
@@ -2000,7 +2001,6 @@ def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
     try:
         with open(sd_exchange_key, 'w') as f:
             f.write(get_x5c_as_pem())
-            logger.info('Exchange key file {} was successfully created.'.format(sd_exchange_key))
     except Exception as ex:  # pylint: disable=broad-except
         if os.path.isfile(sd_exchange_key):
             os.remove(sd_exchange_key)
@@ -2066,7 +2066,6 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
         if os.path.isdir(private_key_path):
             raise CLIError('{} is a directory. A file is required.'.format(private_key_path))
 
-        logger.info('Processing private key: {}'.format(private_key_path))
         prefix = '.'.join(private_key_path.split('.')[:-1])
         logger.info('Prefix: {}'.format(prefix))
         cert_path = prefix + '.cer'
@@ -2077,8 +2076,6 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
         with open(private_key_path, 'rb') as f:
             pem_data = f.read()
             password = passwords[private_key_index] if private_key_index < len(passwords) else None
-            logger.info('Key{} is {}under password protection.'.
-                        format(private_key_index, 'not ' if password is None else ''))
             private_key = load_pem_private_key(pem_data, password=password, backend=default_backend())
 
         with open(cert_path, 'rb') as f:
@@ -2091,7 +2088,6 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
                     jwe = JWE(compact_jwe=item['enc_key'])
                     share = jwe.decrypt_using_private_key(private_key)
                     if not share:
-                        logger.info('Got an empty share.')
                         continue
 
                     share_arrays.append(Utils.convert_to_uint16(share))
@@ -2159,7 +2155,8 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
 
     CertificateSet = cmd.get_models('CertificateSet', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
-    SecurityDomainJsonWebKey = cmd.get_models('SecurityDomainJsonWebKey', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    SecurityDomainJsonWebKey = cmd.get_models('SecurityDomainJsonWebKey',
+                                              resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
     for path in sd_wrapping_keys:
         if os.path.isdir(path):
@@ -2196,8 +2193,6 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
 
         certificates.append(sd_jwk)
 
-    logger.info('Certificates was successfully added.')
-
     ret = client.download(
         vault_base_url=hsm_name,
         certificates=CertificateSet(certificates=certificates, required=sd_quorum)
@@ -2206,7 +2201,6 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
     try:
         with open(security_domain_file, 'w') as f:
             f.write(ret.value)
-            logger.info('SD file {} was successfully downloaded.'.format(security_domain_file))
     except:  # pylint: disable=bare-except
         if os.path.isfile(security_domain_file):
             os.remove(security_domain_file)

@@ -8,7 +8,8 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
-
+# pylint: skip-file
+# flake8: noqa
 from . import http_bearer_challenge_cache as HttpBearerChallengeCache
 from .http_challenge import HttpChallenge
 from .http_bearer_challenge import HttpBearerChallenge

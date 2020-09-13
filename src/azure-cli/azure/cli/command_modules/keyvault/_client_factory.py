@@ -3,9 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from enum import Enum
+from knack.util import CLIError
+
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
-from enum import Enum
+from azure.cli.core._profile import Profile
 
 
 class Clients(str, Enum):
@@ -42,10 +45,8 @@ def is_mgmt_plane(resource_type):
 
 
 def get_operations_tmpl(resource_type, client_name):
-    if resource_type in [
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL
-    ]:
+    if resource_type in [ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
+                         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
     class_name = OPERATIONS_NAME.get(client_name, '') if is_mgmt_plane(resource_type) else 'KeyVaultClient'
@@ -57,10 +58,8 @@ def get_operations_tmpl(resource_type, client_name):
 
 
 def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations'):
-    if resource_type in [
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL
-    ]:
+    if resource_type in [ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
+                         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
     api_version = '.v' + str(get_api_version(cli_ctx, resource_type)).replace('.', '_').replace('-', '_')
@@ -86,9 +85,10 @@ def get_client_factory(resource_type, client_name=''):
         return data_plane_azure_keyvault_administration_backup_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
         return data_plane_azure_keyvault_administration_access_control_client
+    raise CLIError('Unsupported resource type: {}'.format(resource_type))
 
 
-class ClientEntity:
+class ClientEntity:  # pylint: disable=too-few-public-methods
     def __init__(self, client_factory, command_type, operations_docs_tmpl, models_docs_tmpl):
         self.client_factory = client_factory
         self.command_type = command_type
@@ -125,7 +125,6 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
 
 def keyvault_data_plane_factory(cli_ctx, _):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    from azure.cli.core.profiles import ResourceType, get_api_version
     from azure.cli.core.util import should_disable_connection_verify
 
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
@@ -163,7 +162,6 @@ def keyvault_data_plane_factory(cli_ctx, _):
 
 def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     from .vendored_sdks.azure_keyvault_t1 import KeyVaultAuthentication, KeyVaultClient
-    from azure.cli.core.profiles import ResourceType, get_api_version
     from azure.cli.core.util import should_disable_connection_verify
 
     version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))
@@ -201,8 +199,6 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
 
 def data_plane_azure_keyvault_administration_backup_client(cli_ctx, command_args):
     from azure.keyvault.administration import KeyVaultBackupClient
-    from azure.cli.core.profiles import ResourceType, get_api_version
-    from azure.cli.core._profile import Profile
 
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP))
     profile = Profile(cli_ctx=cli_ctx)
@@ -216,8 +212,6 @@ def data_plane_azure_keyvault_administration_backup_client(cli_ctx, command_args
 
 def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, command_args):
     from azure.keyvault.administration import KeyVaultAccessControlClient
-    from azure.cli.core.profiles import ResourceType, get_api_version
-    from azure.cli.core._profile import Profile
 
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL))
     profile = Profile(cli_ctx=cli_ctx)

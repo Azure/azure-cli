@@ -8,7 +8,8 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
-
+# pylint: skip-file
+# flake8: noqa
 
 from .security_domain_certificate_item_py3 import SecurityDomainCertificateItem
 from .security_domain_json_web_key_py3 import SecurityDomainJsonWebKey

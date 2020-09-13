@@ -18,10 +18,7 @@ class Utils:
         a = array.array('H', [1]).tobytes()
         # little endian: b'\x01\x00'
         # big endian: b'\x00\x01'
-        if a[0] == 1:
-            return True
-        else:
-            return False
+        return a[0] == 1
 
     @staticmethod
     def convert_to_uint16(b: bytearray):
@@ -34,7 +31,7 @@ class Utils:
     @staticmethod
     def get_random(cb):
         ret = bytearray()
-        for i in range(cb):
+        for _ in range(cb):
             ret.append(secrets.randbits(8))
         return ret
 

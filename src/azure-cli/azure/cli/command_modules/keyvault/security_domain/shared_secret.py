@@ -40,11 +40,11 @@ class SharedSecret:
         share_arrays = []
         for i in range(len(plaintext)):
             share_array = self.make_byte_shares(plaintext[i])
-            for j in range(len(share_array)):
+            for sa in share_array:
                 if i == 0:
                     share_arrays.append(array.array('H'))
-                current_share_array = share_arrays[j]
-                current_share_array.append(share_array[j])
+                current_share_array = sa
+                current_share_array.append(sa)
         return share_arrays
 
     @staticmethod

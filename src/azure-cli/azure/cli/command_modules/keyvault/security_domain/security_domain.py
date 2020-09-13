@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-class Key:
+class Key:  # pylint: disable=too-few-public-methods
     def __init__(self, enc_key=None, x5t_256=None):
         self.enc_key = enc_key
         self.x5t_256 = x5t_256
@@ -16,7 +16,7 @@ class Key:
         }
 
 
-class EncData:
+class EncData:  # pylint: disable=too-few-public-methods
     def __init__(self):
         self.data = []
         self.kdf = None
@@ -28,7 +28,7 @@ class EncData:
         }
 
 
-class Datum:
+class Datum:  # pylint: disable=too-few-public-methods
     def __init__(self, compact_jwe=None, tag=None):
         self.compact_jwe = compact_jwe
         self.tag = tag
@@ -40,7 +40,7 @@ class Datum:
         }
 
 
-class SecurityDomainRestoreData:
+class SecurityDomainRestoreData:  # pylint: disable=too-few-public-methods
     def __init__(self):
         self.enc_data = EncData()
         self.wrapped_key = Key()

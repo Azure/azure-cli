@@ -30,7 +30,7 @@ class ByteShares:
     @staticmethod
     def init_coefficients(required, secret_byte):
         coefficients = array.array('H')
-        for i in range(required - 1):
+        for _ in range(required - 1):
             coefficients.append(ModMath.get_random())
         coefficients.append(secret_byte)
         return coefficients
