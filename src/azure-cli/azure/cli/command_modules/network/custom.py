@@ -6280,8 +6280,8 @@ def create_virtual_router(cmd,
 
     vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
 
-    existing_vrouters = vrouter_client.list()
-    existing_vhubs = vhub_client.list()
+    existing_vrouters = vrouter_client.list_by_resource_group(resource_group_name)
+    existing_vhubs = vhub_client.list_by_resource_group(resource_group_name)
 
     for vhub in existing_vhubs:
         if vhub.name == virtual_router_name:
@@ -6316,15 +6316,12 @@ def create_virtual_router(cmd,
 
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
-        vhub_ip_config = vhub_ip_config_client.create_or_update(resource_group_name,
-                                                                virtual_hub_name,
-                                                                'Default',
-                                                                ip_config)
+        vhub_ip_config_client.create_or_update(resource_group_name, virtual_hub_name, 'Default', ip_config)
     except Exception as ex:
         vhub_client.delete(resource_group_name, virtual_hub_name)
         raise ex
 
-    return vhub_ip_config
+    return hub
 
 
 def update_virtual_router(cmd, instance, tags=None):

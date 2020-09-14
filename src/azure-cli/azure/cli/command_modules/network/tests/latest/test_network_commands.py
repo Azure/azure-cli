@@ -3190,6 +3190,39 @@ class NetworkVirtualRouter(ScenarioTest):
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='eastus2euap')
+    def test_vrouter_with_virtual_hub_support(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'rg': 'test_vrouter_with_virtual_hub_support',    # the subscription needs to be a specified on from service team
+            'location': resource_group_location,
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'vrouter': 'vrouter1',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} '
+                 '--location {location} '
+                 '--subnet-name {subnet1} '
+                 '--address-prefix 10.0.0.0/24')
+        vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
+
+        print(self.kwargs['rg'])
+
+        self.kwargs.update({
+            'subnet1_id': vnet['subnets'][0]['id']
+        })
+
+        self.cmd('network vrouter create -g {rg} -l {location} -n {vrouter} --hosted-subnet {subnet1_id}', checks=[
+            self.check('type', 'Microsoft.Network/virtualHubs')
+        ])
+
+        self.cmd('network vrouter list -g {rg}')
+
+        self.cmd('network vrouter show -g {rg} -n {vrouter}')
+
+        self.cmd('network vrouter delete -g {rg} -n {vrouter}')
+
 
 class NetworkSubnetScenarioTests(ScenarioTest):
 
