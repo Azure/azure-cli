@@ -863,7 +863,7 @@ type: command
 short-summary: Enable the boot diagnostics on a VM.
 parameters:
   - name: --storage
-    short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/)
+    short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/). If not specified, managed storage is used.
 examples:
   - name: Enable boot diagnostics on all VMs in a resource group.
     text: >
