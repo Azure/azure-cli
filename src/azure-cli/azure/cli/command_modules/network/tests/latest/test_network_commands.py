@@ -3193,7 +3193,7 @@ class NetworkVirtualRouter(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='eastus2euap')
     def test_vrouter_with_virtual_hub_support(self, resource_group, resource_group_location):
         self.kwargs.update({
-            'rg': 'test_vrouter_with_virtual_hub_support',    # the subscription needs to be a specified on from service team
+            'rg': 'test_vrouter_with_virtual_hub_support',    # the subscription needs to be a specified one given by service team
             'location': resource_group_location,
             'vnet': 'vnet1',
             'subnet1': 'subnet1',
@@ -3206,8 +3206,6 @@ class NetworkVirtualRouter(ScenarioTest):
                  '--subnet-name {subnet1} '
                  '--address-prefix 10.0.0.0/24')
         vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
-
-        print(self.kwargs['rg'])
 
         self.kwargs.update({
             'subnet1_id': vnet['subnets'][0]['id']
