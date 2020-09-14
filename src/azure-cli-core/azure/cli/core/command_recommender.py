@@ -126,9 +126,9 @@ class CommandRecommender():
         if response and response.status_code == HTTPStatus.OK:
             for result in response.json():
                 # parse the reponse and format the recommendation
-                command, parameters, placeholders = result['SuccessCommand'],\
-                    result['SuccessCommand_Parameters'].split(','),\
-                    result['SuccessCommand_ArgumentPlaceholders'].split('♠')
+                command, parameters, placeholders = result['command'],\
+                    result['parameters'].split(','),\
+                    result['placeholders'].split('♠')
                 recommendation = 'az {} '.format(command)
                 for parameter, placeholder in zip(parameters, placeholders):
                     recommendation += '{} {} '.format(parameter, placeholder)
