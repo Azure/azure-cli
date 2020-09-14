@@ -849,24 +849,20 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         ])
 
         # backup and then delete key
-        key_file = 'backup-hsm.key'
-        self.kwargs['key_file'] = key_file
-        self.cmd('keyvault key backup --hsm-name {hsm_name} -n {key} --file {key_file}')
+        self.kwargs['key_file'] = os.path.join(tempfile.mkdtemp(), 'backup-hsm.key')
+        self.cmd('keyvault key backup --hsm-name {hsm_name} -n {key} --file "{key_file}"')
         self.cmd('keyvault key delete --hsm-name {hsm_name} -n {key}')
         self.cmd('keyvault key purge --hsm-name {hsm_name} -n {key}')
         self.cmd('keyvault key list --hsm-name {hsm_name}', checks=self.is_empty())
         self.cmd('keyvault key list --hsm-name {hsm_name} --maxresults 10', checks=self.is_empty())
 
         # restore key from backup
-        self.cmd('keyvault key restore --hsm-name {hsm_name} --file {key_file}')
+        self.cmd('keyvault key restore --hsm-name {hsm_name} --file "{key_file}"')
         self.cmd('keyvault key list --hsm-name {hsm_name}',
                  checks=[
                      self.check('length(@)', 1),
                      self.check('[0].name', '{key}')
                  ])
-
-        if os.path.isfile(key_file):
-            os.remove(key_file)
 
         # import PEM
         self.kwargs.update({
@@ -1005,24 +1001,20 @@ class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
         ])
 
         # backup and then delete key
-        key_file = 'backup-hsm.key'
-        self.kwargs['key_file'] = key_file
-        self.cmd('keyvault key backup --id {hsm_url}/keys/{key} --file {key_file}')
+        self.kwargs['key_file'] = os.path.join(tempfile.mkdtemp(), 'backup-hsm.key')
+        self.cmd('keyvault key backup --id {hsm_url}/keys/{key} --file "{key_file}"')
         self.cmd('keyvault key delete --id {hsm_url}/keys/{key}')
         self.cmd('keyvault key purge --id {hsm_url}/deletedkeys/{key}')
         self.cmd('keyvault key list --id {hsm_url}', checks=self.is_empty())
         self.cmd('keyvault key list --id {hsm_url} --maxresults 10', checks=self.is_empty())
 
         # restore key from backup
-        self.cmd('keyvault key restore --id {hsm_url} --file {key_file}')
+        self.cmd('keyvault key restore --id {hsm_url} --file "{key_file}"')
         self.cmd('keyvault key list --id {hsm_url}',
                  checks=[
                      self.check('length(@)', 1),
                      self.check('[0].name', '{key}')
                  ])
-
-        if os.path.isfile(key_file):
-            os.remove(key_file)
 
         # import PEM
         self.kwargs.update({
