@@ -479,7 +479,7 @@ examples:
   - name: Create a role assignment using user principal name.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee username@consoso.com
+        --role "Sql Admin" --assignee username@contoso.com
   - name: Create a role assignment using objectId of the User, Group or Service Principal.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
@@ -505,7 +505,7 @@ examples:
   - name: Delete role assignments by user principal name.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
-        --assignee username@consoso.com
+        --assignee username@contoso.com
   - name: Delete role assignments by objectId of the User, Group or Service Principal.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
