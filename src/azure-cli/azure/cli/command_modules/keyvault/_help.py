@@ -188,7 +188,7 @@ short-summary: Manage keys.
 
 helps['keyvault key delete'] = """
 type: command
-short-summary: Deletes a key of any type from storage in Vault or HSM.
+short-summary: Delete a key of any type from storage in Vault or HSM.
 long-summary: The delete key operation cannot be used to remove individual versions of a key. This
     operation removes the cryptographic material associated with the key, which means the key is
     not usable for Sign/Verify, Wrap/Unwrap or Encrypt/Decrypt operations. This operation requires
