@@ -33,10 +33,10 @@ def _flexible_server_create(cmd, client,
                             assign_identity=False, subnet_arm_resource_id=None,
                             high_availability=None, zone=None, vnet_resource_id=None,
                             vnet_address_prefix=None, subnet_address_prefix=None):
-    from azure.mgmt.rdbms import postgresql
+    from azure.mgmt.rdbms import postgresql_flexibleservers
     try:
         db_context = DbContext(
-            azure_sdk=postgresql, cf_firewall=cf_postgres_flexible_firewall_rules, logging_name='PostgreSQL', command_group='postgres', server_client=client)
+            azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules, logging_name='PostgreSQL', command_group='postgres', server_client=client)
 
         # Raise error when user passes values for both parameters
         if subnet_arm_resource_id is not None and public_access is not None:
@@ -57,12 +57,12 @@ def _flexible_server_create(cmd, client,
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
             subnet_id = prepareVnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
-            delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+            delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
                 subnet_arm_resource_id=subnet_id)
         elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
             subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
                                     DELEGATION_SERVICE_NAME)
-            delegated_subnet_arguments = postgresql.flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
+            delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
                 subnet_arm_resource_id=subnet_id)
         else:
             delegated_subnet_arguments = None
@@ -132,8 +132,8 @@ def _flexible_server_restore(cmd, client,
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
-    from azure.mgmt.rdbms import postgresql
-    parameters = postgresql.flexibleservers.models.Server(
+    from azure.mgmt.rdbms import postgresql_flexibleservers
+    parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=restore_point_in_time,
         source_server_name=source_server, # this should be the source server name, not id
         create_mode="PointInTimeRestore",
@@ -188,8 +188,8 @@ def _flexible_server_update_custom_func(instance,
 
         # set values - if maintenance_window when is None when created then create a new object
         if instance.maintenance_window is None:
-            from azure.mgmt.rdbms import postgresql
-            instance.maintenance_window = postgresql.flexibleservers.models.MaintenanceWindow(
+            from azure.mgmt.rdbms import postgresql_flexibleservers
+            instance.maintenance_window = postgresql_flexibleservers.models.MaintenanceWindow(
                 day_of_week=day_of_week,
                 start_hour=start_hour,
                 start_minute=start_minute,
@@ -212,12 +212,10 @@ def _flexible_server_update_custom_func(instance,
 
     if assign_identity:
         if server_module_path.find('postgres'):
-            from azure.mgmt.rdbms import postgresql
+            from azure.mgmt.rdbms import postgresql_flexibleservers
             if instance.identity is None:
-                instance.identity = postgresql.models.ResourceIdentity(
-                    type=postgresql.models.IdentityType.system_assigned.value)
-                instance.identity = postgresql.models.flexibleservers.Identity(
-                    type=postgresql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
+                instance.identity = postgresql_flexibleservers.models.Identity(
+                    type=postgresql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
             params.identity = instance.identity
     return params
 
@@ -274,17 +272,17 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                    'Please refer to https://aka.ms/postgres-pricing for pricing details', server_name, sku_name)
 
-    from azure.mgmt.rdbms import postgresql
+    from azure.mgmt.rdbms import postgresql_flexibleservers
 
     # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
     # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
-    parameters = postgresql.flexibleservers.models.Server(
-        sku=postgresql.flexibleservers.models.Sku(name=sku_name, tier=tier),
+    parameters = postgresql_flexibleservers.models.Server(
+        sku=postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
         public_network_access=public_network_access,
-        storage_profile=postgresql.flexibleservers.models.StorageProfile(
+        storage_profile=postgresql_flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
             storage_mb=storage_mb),
         delegated_subnet_arguments=delegated_subnet_arguments,
@@ -295,8 +293,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         tags=tags)
 
     if assign_identity:
-        parameters.identity = postgresql.models.ResourceIdentity(
-            type=postgresql.models.IdentityType.system_assigned.value)
+        parameters.identity = postgresql_flexibleservers.models.ResourceIdentity(
+            type=postgresql_flexibleservers.models.IdentityType.system_assigned.value)
 
     return resolve_poller(
         server_client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,

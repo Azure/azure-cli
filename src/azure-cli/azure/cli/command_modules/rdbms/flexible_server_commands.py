@@ -29,52 +29,52 @@ from ._transformers import table_transform_output, table_transform_output_list_s
 def load_flexibleserver_command_table(self, _):
     ## Flexible server SDKs:
     mysql_flexible_servers_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#ServersOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ServersOperations.{}',
         client_factory=cf_mysql_flexible_servers
     )
 
     mysql_flexible_firewall_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#FirewallRulesOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#FirewallRulesOperations.{}',
         client_factory=cf_mysql_flexible_firewall_rules
     )
 
     mysql_flexible_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#ConfigurationsOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ConfigurationsOperations.{}',
         client_factory=cf_mysql_flexible_config
     )
 
     mysql_flexible_db_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#DatabasesOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#DatabasesOperations.{}',
         client_factory=cf_mysql_flexible_db
     )
 
     mysql_flexible_replica_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql.flexibleservers.operations#ReplicasOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ReplicasOperations.{}',
         client_factory=cf_mysql_flexible_replica
     )
 
     mysql_flexible_location_capabilities_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms..mysql.flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_mysql_flexible_location_capabilities
     )
 
     postgres_flexible_servers_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql.flexibleservers.operations#ServersOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ServersOperations.{}',
         client_factory=cf_postgres_flexible_servers
     )
 
     postgres_flexible_firewall_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql.flexibleservers.operations#FirewallRulesOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#FirewallRulesOperations.{}',
         client_factory=cf_postgres_flexible_firewall_rules
     )
 
     postgres_flexible_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql.flexibleservers.operations#ConfigurationsOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ConfigurationsOperations.{}',
         client_factory=cf_postgres_flexible_config
     )
 
     postgres_flexible_location_capabilities_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms..postgresql.flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms..postgresql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_postgres_flexible_location_capabilities
     )
 
