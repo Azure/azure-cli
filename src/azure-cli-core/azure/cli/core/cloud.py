@@ -524,7 +524,7 @@ def get_active_cloud_name(cli_ctx):
 
 def get_default_cloud_name():
     """ Pick AzureCloud as the default cloud if it is available, otherwise pick the first in the list"""
-    if AZURE_PUBLIC_CLOUD.name in [c.name for c in KNOWN_CLOUDS]:
+    if AZURE_PUBLIC_CLOUD.name.lower() in [c.name.lower() for c in KNOWN_CLOUDS]:
         return AZURE_PUBLIC_CLOUD.name
     return KNOWN_CLOUDS[0].name
 
