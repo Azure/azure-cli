@@ -39,4 +39,12 @@ network vnet subnet create:
         disable_private_link_service_network_policies:
             rule_exclusions:
             - option_length_too_long
+network watcher connection-monitor create:
+    parameters:
+        endpoint_dest_coverage_level:
+            rule_exclusions:
+            - option_length_too_long
+        endpoint_source_coverage_level:
+            rule_exclusions:
+            - option_length_too_long
 ...

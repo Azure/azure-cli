@@ -132,11 +132,11 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
-        ResourceType.MGMT_NETWORK: '2020-05-01',
+        ResourceType.MGMT_NETWORK: '2020-06-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2020-05-01',
-            'disk_encryption_sets': '2020-05-01',
+            'disks': '2020-06-30',
+            'disk_encryption_sets': '2020-06-30',
             'disk_accesses': '2020-05-01',
             'snapshots': '2020-05-01',
             'galleries': '2019-12-01',
@@ -154,7 +154,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2019-06-01-preview',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2019-09-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-09-01-preview', {
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'

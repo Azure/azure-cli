@@ -15,6 +15,7 @@ import unittest
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
+from ..util import cmd_with_retry
 
 
 class RoleScenarioTest(ScenarioTest):
@@ -92,7 +93,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_new_kv_cert')
+    @KeyVaultPreparer(name_prefix='test-rbac-new-kv')
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
         KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
@@ -127,7 +128,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
-    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_existing_kv_cert')
+    @KeyVaultPreparer(name_prefix='test-rbac-exist-kv')
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
 
         import time
@@ -167,7 +168,6 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
 
 class RoleCreateScenarioTest(RoleScenarioTest):
 
-    @record_only()  # workaround https://github.com/Azure/azure-cli/issues/3187
     @AllowLargeResponse()
     def test_role_create_scenario(self):
         subscription_id = self.get_subscription_id()
@@ -195,21 +195,18 @@ class RoleCreateScenarioTest(RoleScenarioTest):
             'role': role_name,
             'template': temp_file.replace('\\', '\\\\')
         })
-        # a few 'sleep' here to handle server replicate latency. It is no-op under playback
+
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('role definition create --role-definition {template}', checks=[
-                self.check('properties.permissions[0].actions[0]', 'Microsoft.Compute/*/read')
+            cmd_with_retry(self, 'role definition create --role-definition {template}', checks=[
+                self.check('permissions[0].actions[0]', 'Microsoft.Compute/*/read')
             ])
-            time.sleep(180)
-            self.cmd('role definition list -n {role}', checks=self.check('[0].properties.roleName', '{role}'))
+            cmd_with_retry(self, 'role definition list -n {role}', checks=self.check('[0].roleName', '{role}'))
             # verify we can update
             template['Actions'].append('Microsoft.Support/*')
             with open(temp_file, 'w') as f:
                 json.dump(template, f)
-            self.cmd('role definition update --role-definition {template}', checks=self.check('properties.permissions[0].actions[-1]', 'Microsoft.Support/*'))
-            time.sleep(30)
-
-            self.cmd('role definition delete -n {role}', checks=self.is_empty())
+            cmd_with_retry(self, 'role definition update --role-definition {template}', checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
+            cmd_with_retry(self, 'role definition delete -n {role}', checks=self.is_empty())
 
 
 class RoleAssignmentScenarioTest(RoleScenarioTest):
