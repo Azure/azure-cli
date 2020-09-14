@@ -1644,9 +1644,9 @@ def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resourc
                                                                               resource_type,
                                                                               resource_name)]
 
-    return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).tag(
-            tags, is_incremental) for id_dict in parsed_ids])
+    return _single_or_collection([LongRunningOperation(cmd.cli_ctx)(
+        _get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).tag(
+            tags, is_incremental)) for id_dict in parsed_ids])
 
 
 # pylint: unused-argument
