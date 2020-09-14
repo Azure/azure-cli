@@ -91,7 +91,7 @@ def config_unset(cmd, key=None, local=False):
 def turn_param_persist_on(cmd):
     if not cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.turn_on()
-        logger.warning('Parameter persistence is turned on, you can run `az config parampersist off` to turn it off.')
+        logger.warning('Parameter persistence is turned on, you can run `az config param-persist off` to turn it off.')
     else:
         raise CLIError('Parameter persistence is on already.')
 
@@ -99,7 +99,7 @@ def turn_param_persist_on(cmd):
 def turn_param_persist_off(cmd):
     if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.turn_off()
-        logger.warning('Parameter persistence is turned off, you can run `az config parampersist on` to turn it on.')
+        logger.warning('Parameter persistence is turned off, you can run `az config param-persist on` to turn it on.')
     else:
         raise CLIError('Parameter persistence is off already.')
 

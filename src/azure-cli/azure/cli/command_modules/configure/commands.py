@@ -28,7 +28,7 @@ def load_command_table(self, _):
         return msg
 
     with self.command_group('local-context', configure_custom, is_experimental=True,
-                            deprecate_info=self.deprecate(redirect="config parampersist",
+                            deprecate_info=self.deprecate(redirect="config param-persist",
                                                           message_func=_local_context_deprecate_message)) as g:
         g.command('on', 'turn_local_context_on')
         g.command('off', 'turn_local_context_off')

@@ -54,41 +54,41 @@ examples:
     text: az config unset core.no_color
 """
 
-helps['config parampersist'] = """
+helps['config param-persist'] = """
 type: group
 short-summary: Manage parameter persistence.
 """
 
-helps['config parampersist on'] = """
+helps['config param-persist on'] = """
 type: command
 short-summary: Turn on parameter persistence.
 """
 
-helps['config parampersist off'] = """
+helps['config param-persist off'] = """
 type: command
 short-summary: Turn off parameter persistence.
 """
 
-helps['config parampersist show'] = """
+helps['config param-persist show'] = """
 type: command
 short-summary: Show parameter persistence data.
 examples:
   - name: Show all parameter persistence value
-    text: az config parampersist show
+    text: az config param-persist show
   - name: Show resource_group_name parameter persistence value
-    text: az config parampersist show resource_group_name
+    text: az config param-persist show resource_group_name
 """
 
-helps['config parampersist delete'] = """
+helps['config param-persist delete'] = """
 type: command
 short-summary: Delete parameter persistence data.
 examples:
   - name: Delete resource_group_name from parameter persistence
-    text: az config parampersist delete resource_group_name
+    text: az config param-persist delete resource_group_name
   - name: Clear all parameter persistence data
-    text: az config parampersist delete --all
+    text: az config param-persist delete --all
   - name: Delete parameter persistence file
-    text: az config parampersist delete --all --purge
+    text: az config param-persist delete --all --purge
   - name: Delete parameter persistence file recursively
-    text: az config parampersist delete --all --purge --recursive
+    text: az config param-persist delete --all --purge --recursive
 """

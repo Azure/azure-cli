@@ -29,10 +29,10 @@ def load_arguments(self, _):
                    help='Include local configuration. Scan from the working directory up to the root drive, then the global configuration '
                         'and unset the first occurrence.')
 
-    with self.argument_context('config parampersist show') as c:
+    with self.argument_context('config param-persist show') as c:
         c.positional('name', nargs='*', help='Space-separated list of parameter persistence names.')
 
-    with self.argument_context('config parampersist delete') as c:
+    with self.argument_context('config param-persist delete') as c:
         c.positional('name', nargs='*', help='Space-separated list of parameter persistence names. Either positional name argument or --all can be specified.')
         c.argument('all', help='Clear all parameter persistence data. Either positional name argument  or --all can be specified.', action='store_true')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation. Only available when --all is specified.', action='store_true')

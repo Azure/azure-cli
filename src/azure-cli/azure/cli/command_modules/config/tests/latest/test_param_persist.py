@@ -7,19 +7,19 @@ import unittest
 from azure.cli.testsdk import LocalContextScenarioTest
 
 
-class ParamPersistScenarioTest(LocalContextScenarioTest):
+class param-persistScenarioTest(LocalContextScenarioTest):
 
     def test_param_persist_commands(self):
-        self.cmd('config parampersist show')
-        self.cmd('config parampersist show resource_group_name vnet_name')
-        self.cmd('config parampersist delete resource_group_name vnet_name')
-        self.cmd('config parampersist delete --all -y')
-        self.cmd('config parampersist delete --all --purge -y')
-        self.cmd('config parampersist delete --all --purge -y --recursive')
+        self.cmd('config param-persist show')
+        self.cmd('config param-persist show resource_group_name vnet_name')
+        self.cmd('config param-persist delete resource_group_name vnet_name')
+        self.cmd('config param-persist delete --all -y')
+        self.cmd('config param-persist delete --all --purge -y')
+        self.cmd('config param-persist delete --all --purge -y --recursive')
 
         from knack.util import CLIError
         with self.assertRaises(CLIError):
-            self.cmd('config parampersist delete resource_group_name --all')
+            self.cmd('config param-persist delete resource_group_name --all')
 
 
 if __name__ == '__main__':

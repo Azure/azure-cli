@@ -152,7 +152,7 @@ class AzCLILocalContext:  # pylint: disable=too-many-instance-attributes
             for scope in local_context_file.sections():
                 for name in names:
                     local_context_file.remove_option(scope, name)
-        logger.warning('Parameter persistence value is deleted. You can run `az config parampersist show` to show all '
+        logger.warning('Parameter persistence value is deleted. You can run `az config param-persist show` to show all '
                        'available values.')
 
     def get_value(self, names=None):
