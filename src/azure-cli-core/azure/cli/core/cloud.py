@@ -118,7 +118,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
 
 class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
-    def __init__(self,
+    def __init__(self,  # pylint: disable=unused-argument
                  storage_endpoint=None,
                  storage_sync_endpoint=None,
                  keyvault_dns=None,
@@ -131,7 +131,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
                  mariadb_server_endpoint=None,
                  synapse_analytics_endpoint=None,
                  attestation_endpoint=None,
-                 **entries):  # To support init with __dict__ for deserialization
+                 **kwargs):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.storage_sync_endpoint = storage_sync_endpoint
@@ -145,7 +145,6 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
         self.acr_login_server_endpoint = acr_login_server_endpoint
         self.synapse_analytics_endpoint = synapse_analytics_endpoint
         self.attestation_endpoint = attestation_endpoint
-        self.__dict__.update(entries)
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
