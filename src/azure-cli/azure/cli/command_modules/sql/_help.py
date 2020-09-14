@@ -640,6 +640,8 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen5
   - name: Create managed instance with specified parameters and tags
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen5 --tags tagName1=tagValue1 tagName2=tagValue2
+  - name: Create managed instance with specified parameters and backup storage redundancy specified
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen5 --backup-storage-redundancy Local
 """
 
 helps['sql mi delete'] = """
@@ -911,6 +913,36 @@ short-summary: Create a new server Active Directory administrator.
 helps['sql server ad-admin update'] = """
 type: command
 short-summary: Update an existing server Active Directory administrator.
+"""
+
+helps['sql server audit-policy'] = """
+type: group
+short-summary: Manage a server's auditing policy.
+"""
+
+helps['sql server audit-policy update'] = """
+type: command
+short-summary: Update a server's auditing policy.
+long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
+examples:
+  - name: Enable by storage account name.
+    text: az sql server audit-policy update -g mygroup -n myserver --state Enabled --storage-account mystorage
+  - name: Enable by storage endpoint and key.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+  - name: Set the list of audit actions.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver \\
+            --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on server::myserver by public'
+  - name: Add an audit action.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver \\
+            --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
+  - name: Remove an audit action by list index.
+    text: az sql server audit-policy update -g mygroup -n myserver --remove auditActionsAndGroups 0
+  - name: Disable an auditing policy.
+    text: az sql server audit-policy update -g mygroup -n myserver --state Disabled
 """
 
 helps['sql server conn-policy'] = """

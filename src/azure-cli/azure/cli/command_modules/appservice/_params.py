@@ -45,9 +45,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3',
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'PC2', 'PC3',
              'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -126,7 +126,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
@@ -395,8 +395,8 @@ def load_arguments(self, _):
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
     with self.argument_context('webapp log config') as c:
-        c.argument('application_logging', help='configure application logging to file system',
-                   arg_type=get_three_state_flag(return_label=True))
+        c.argument('application_logging', help='configure application logging',
+                   arg_type=get_enum_type(['filesystem', 'azureblobstorage', 'off']))
         c.argument('detailed_error_messages', help='configure detailed error messages',
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('failed_request_tracing', help='configure failed request tracing',
@@ -598,7 +598,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name of the appserviceplan associated with the webapp",

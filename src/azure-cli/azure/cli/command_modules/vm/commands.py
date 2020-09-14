@@ -210,6 +210,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_encryption_sets')
+        g.command('list-associated-resources', 'list_associated_resources')
 
     with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
@@ -288,6 +289,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
+        g.command('assess-patches', 'assess_patches', min_api='2020-06-01')
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
@@ -487,7 +489,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
 
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
-        g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)
+        g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)  # pylint: disable=show-command
 
     with self.command_group('vm monitor metrics', custom_command_type=monitor_custom, command_type=metric_definitions_sdk, resource_type=ResourceType.MGMT_MONITOR, operation_group='metric_definitions', min_api='2018-01-01', is_preview=True) as g:
         from azure.cli.command_modules.monitor.transformers import metrics_table, metrics_definitions_table

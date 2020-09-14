@@ -1,4 +1,4 @@
-﻿# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -14,6 +14,9 @@ from azure.cli.core.util import parse_proxy_resource_id, CLIError
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
 from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
+
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
@@ -1203,7 +1206,6 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         self.cmd('network private-endpoint delete -g {rg} -n {appgw_pe}')
 
-    @live_only()
     @ResourceGroupPreparer(name_prefix='test_manage_appgw_private_endpoint')
     def test_manage_appgw_private_endpoint(self, resource_group):
         """
@@ -1277,8 +1279,6 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--private-connection-resource-id {appgw_id} '
                  '--group-id {private_link_group_id_for_public}')
 
-        # list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
-
         # ------------------------------------------------------------------------------------------
 
         # Add another frontend IP
@@ -1300,46 +1300,61 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--name {appgw_private_link_for_private}')
         self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
 
+        self.cmd('network application-gateway frontend-port create -g {rg} '
+                 '--gateway {appgw} '
+                 '--name privatePort '
+                 '--port 8080 ')
+        # The another http listener for private IP is necessary to setup an private link properly
+        self.cmd('network application-gateway http-listener create -g {rg} '
+                 '--gateway-name {appgw} '
+                 '--name privateHTTPListener '
+                 '--frontend-port privatePort '
+                 '--frontend-ip {appgw_private_ip} ')
+        # Associate a rule for private http listener
+        self.cmd('network application-gateway rule create -g {rg} '
+                 '--gateway {appgw} '
+                 '--name privateRule '
+                 '--http-listener privateHTTPListener')
+
         private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
         self.assertEqual(len(private_link_resource), 2)
         self.assertEqual(private_link_resource[1]['name'], self.kwargs['appgw_private_ip'])
 
-        # self.kwargs.update({
-        #     'private_link_group_id_for_private': private_link_resource[1]['properties']['groupId']
-        # })
+        self.kwargs.update({
+            'private_link_group_id_for_private': private_link_resource[1]['properties']['groupId']
+        })
 
-        # The rest of code is not working, service is 500 while creating another private endpoint
-        # on the settings below. It's a bug.
-        # If want to use like below, currently have to create a request routing rule to use the private frontend
-        # ------------------------------------------------------------------
-        # # Prepare the second vnet to be connected to
-        # self.cmd('network vnet subnet create -g {rg} '
-        #          '--vnet-name {appgw_private_endpoint_vnet} '
-        #          '--name {appgw_private_endpoint_subnet_for_private} '
-        #          '--address-prefixes 10.0.6.0/24')
-        # # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
-        # self.cmd('network vnet subnet update -g {rg} '
-        #          '--vnet-name {appgw_private_endpoint_vnet} '
-        #          '--name {appgw_private_endpoint_subnet_for_private} '
-        #          '--disable-private-endpoint-network-policies true')
-        # # Create the second private endpoint against this application gateway's public IP
-        # self.cmd('network private-endpoint create -g {rg} '
-        #          '--name {appgw_private_endpoint_for_private} '
-        #          '--connection-name {appgw_private_endpoint_connection_for_private} '
-        #          '--vnet-name {appgw_private_endpoint_vnet} '
-        #          '--subnet {appgw_private_endpoint_subnet_for_private} '
-        #          '--private-connection-resource-id {appgw_id} '
-        #          '--group-id {private_link_group_id_for_private}')
+        # Prepare the second vnet to be connected to
+        self.cmd('network vnet subnet create -g {rg} '
+                 '--vnet-name {appgw_private_endpoint_vnet} '
+                 '--name {appgw_private_endpoint_subnet_for_private} '
+                 '--address-prefixes 10.0.6.0/24')
+        # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        self.cmd('network vnet subnet update -g {rg} '
+                 '--vnet-name {appgw_private_endpoint_vnet} '
+                 '--name {appgw_private_endpoint_subnet_for_private} '
+                 '--disable-private-endpoint-network-policies true')
+        # Create the second private endpoint against this application gateway's private IP
+        self.cmd('network private-endpoint create -g {rg} '
+                 '--name {appgw_private_endpoint_for_private} '
+                 '--connection-name {appgw_private_endpoint_connection_for_private} '
+                 '--vnet-name {appgw_private_endpoint_vnet} '
+                 '--subnet {appgw_private_endpoint_subnet_for_private} '
+                 '--private-connection-resource-id {appgw_id} '
+                 '--group-id {private_link_group_id_for_private}')
 
-        # self.cmd('network applicatin-gateway private-link remove -g {rg} '
+        # Could not remove unless remove all private endpoint connections
+        # self.cmd('network application-gateway private-link remove -g {rg} '
         #          '--gateway-name {appgw} '
-        #          '--name {appgw_private_link_subnet_for_public}')
+        #          '--name {appgw_private_link_for_public} '
+        #          '--yes')
 
-        # self.cmd('network applicatin-gateway private-link remove -g {rg} '
+        # self.cmd('network application-gateway private-link remove -g {rg} '
         #          '--gateway-name {appgw} '
-        #          '--name {appgw_private_link_for_private}')
+        #          '--name {appgw_private_link_for_private} '
+        #          '--yes')
 
-        # self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
+        self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
 
 
 class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
@@ -1389,6 +1404,93 @@ class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
                      self.check('@[0].properties.privateEndpoint.id', '{pe_id}'),
                      self.check('@[0].properties.privateLinkServiceConnectionState.status', 'Approved')
                  ])
+
+
+class NetworkARMTemplateBasedScenarioTest(ScenarioTest):
+    def _test_private_endpoint_connection_scenario(self, resource_group, target_resource_name, resource_type):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'target_resource_name': target_resource_name,
+            'target_resource_id': resource_id(subscription=self.get_subscription_id(),
+                                              resource_group=resource_group,
+                                              namespace=resource_type.split('/')[0],
+                                              type=resource_type.split('/')[1],
+                                              name=target_resource_name),
+            'rg': resource_group,
+            'resource_type': resource_type,
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        param_file_name = "{}_{}_parameters.json".format(resource_type.split('/')[0].split('.')[1].lower(), resource_type.split('/')[1].lower())
+        template_file_name = "{}_{}_template.json".format(resource_type.split('/')[0].split('.')[1].lower(), resource_type.split('/')[1].lower())
+        self.kwargs.update({
+            'param_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', param_file_name),
+            'template_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', template_file_name)
+        })
+        self.cmd('az deployment group create -g {rg} -p "@{param_path}" target_resource_name={target_resource_name} -f "{template_path}"')
+
+        self.cmd('az network vnet create -n {vnet} -g {rg} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        target_private_link_resource = self.cmd('az network private-link-resource list --name {target_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
+            '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+            '--group-id {group_id}').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at cosmos db side
+        list_private_endpoint_conn = self.cmd('az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type}').get_output_in_json()
+        self.kwargs.update({
+            "pec_id": list_private_endpoint_conn[0]['id']
+        })
+
+        self.kwargs.update({
+            "pec_name": self.kwargs['pec_id'].split('/')[-1]
+        })
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {target_resource_name} --name {pec_name} --resource-group {rg} --type {resource_type}')
+        self.cmd('az network private-endpoint-connection show --resource-name {target_resource_name} -n {pec_name} -g {rg} --type {resource_type}')
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {target_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
+            '--description "{approval_desc}"', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd(
+            'az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type}',
+            checks=[
+                self.check('length(@)', 1)
+            ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+
+    @ResourceGroupPreparer(location='westus2')
+    def test_private_endpoint_connection_app_configuration(self, resource_group):
+        self._test_private_endpoint_connection_scenario(resource_group, 'clitestappconfig', 'Microsoft.AppConfiguration/configurationStores')
 
 
 if __name__ == '__main__':

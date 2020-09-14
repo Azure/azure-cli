@@ -280,8 +280,11 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
     start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
-    role_defs = {d.id: [worker.get_role_property(d, 'role_name'),
-                        d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
+
+    # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
+    #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
+    #   id: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c  # pylint: disable=line-too-long
+    role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
 
     for op_id in start_events:
         e = end_events.get(op_id, None)
@@ -331,8 +334,12 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
                         else:
                             entry['scopeType'] = 'Resource'
 
-                    entry['roleDefinitionId'] = role_defs[payload['roleDefinitionId']][1]
-                    entry['roleName'] = role_defs[payload['roleDefinitionId']][0]
+                    # Look up the resource `name`, like b24988ac-6180-42a0-ab88-20f7382dd24c
+                    role_resource_name = payload['roleDefinitionId'].split('/')[-1]
+                    entry['roleDefinitionId'] = role_resource_name
+                    # In case the role definition has been deleted.
+                    entry['roleName'] = role_defs.get(role_resource_name, "N/A")
+
             result.append(entry)
 
     # Fill in logical user/sp names as guid principal-id not readable
@@ -1763,7 +1770,7 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
         setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
 
 
-# for injecting test seems to produce predicatable role assignment id for playback
+# for injecting test seems to produce predictable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
 

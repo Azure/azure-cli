@@ -31,6 +31,10 @@ examples:
     text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl --pip-proxy https://user:pass@proxy.server:8080
   - name: Add extension to system directory
     text: az extension add --name anextension --system
+  - name: Add a specific version of extension
+    text: az extension add --name anextension --version 1.0.0
+  - name: Upgrade the extension if already installed
+    text: az extension add --upgrade --name anextension
 """
 
 helps['extension list'] = """
@@ -74,4 +78,12 @@ examples:
     text: az extension update --name anextension
   - name: Update an extension by name and use pip proxy for dependencies
     text: az extension update --name anextension --pip-proxy https://user:pass@proxy.server:8080
+"""
+
+helps['extension list-versions'] = """
+type: command
+short-summary: List available versions for an extension.
+examples:
+  - name: List available versions for an extension
+    text: az extension list-versions --name anextension
 """

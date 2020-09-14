@@ -17,16 +17,12 @@ from knack.arguments import CLIArgumentType
 from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
-    validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodes_count,
+    validate_cluster_autoscaler_profile, validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
+    validate_list_of_integers, validate_ssh_key, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels)
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-
-aci_connector_os_type = ['Windows', 'Linux', 'Both']
-
-aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-latest.tgz'
 
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
@@ -183,6 +179,7 @@ def load_arguments(self, _):
         c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
                                                             CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
         c.argument('enable_cluster_autoscaler', action='store_true')
+        c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile, help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('vm_set_type', type=str, validator=validate_vm_set_type)
@@ -192,7 +189,7 @@ def load_arguments(self, _):
         c.argument('disable_rbac', action='store_true')
         c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
                    deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
-        c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
+        c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
         c.argument('network_plugin', arg_type=get_enum_type(['azure', 'kubenet']))
         c.argument('network_policy')
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
@@ -220,6 +217,7 @@ def load_arguments(self, _):
         c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
         c.argument('disable_cluster_autoscaler', options_list=["--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
+        c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile, help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('uptime_sla', action='store_true')
@@ -251,25 +249,6 @@ def load_arguments(self, _):
             c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
             c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin.')
 
-    with self.argument_context('aks install-connector') as c:
-        c.argument('aci_resource_group', help='The resource group to create the ACI container groups')
-        c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
-        c.argument('client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
-        c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)
-        c.argument('image_tag', help='The image tag of the virtual kubelet')
-        c.argument('location', help='The location to create the ACI container groups')
-        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
-        c.argument('service_principal',
-                   help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
-
-    with self.argument_context('aks remove-connector') as c:
-        c.argument('connector_name', default='aci-connector',
-                   help='The name for the ACI Connector', validator=validate_connector_name)
-        c.argument('graceful', action='store_true',
-                   help='Mention if you want to drain/uncordon your aci-connector to move your applications')
-        c.argument('os_type', get_enum_type(aci_connector_os_type),
-                   help='The OS type of the connector')
-
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')
         c.argument('service_principal')
@@ -298,7 +277,7 @@ def load_arguments(self, _):
             c.argument('nodepool_name', type=str, options_list=['--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')
             c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
             c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
-            c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
+            c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
             c.argument('os_type', type=str)
             c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
             c.argument('node_taints', type=str, validator=validate_taints)
@@ -317,16 +296,6 @@ def load_arguments(self, _):
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(nodepool_mode_type))
-
-    with self.argument_context('aks upgrade-connector') as c:
-        c.argument('aci_resource_group')
-        c.argument('chart_url', default=aci_connector_chart_url)
-        c.argument('client_secret')
-        c.argument('connector_name', default='aci-connector', validator=validate_connector_name)
-        c.argument('image_tag')
-        c.argument('location')
-        c.argument('os_type', get_enum_type(aci_connector_os_type))
-        c.argument('service_principal')
 
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('update', options_list=['--update'], action='store_true')
