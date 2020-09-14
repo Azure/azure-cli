@@ -178,6 +178,19 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     def test_nw_connection_monitor_v2_test_configuration(self, resource_group, resource_group_location):
         self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
+        # add a TCP test configuration
+        self.cmd('network watcher connection-monitor test-configuration add '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name TCPConfig '
+                 '--protocol Tcp '
+                 '--test-groups DefaultTestGroup '
+                 '--tcp-port 8080 '
+                 '--tcp-port-behavior ListenIfAvailable '
+                 '--tcp-disable-trace-route true '
+                 '--frequency 120 '
+                 '--threshold-round-trip-time 1200')
+
         # add a HTTP test configuration
         self.cmd('network watcher connection-monitor test-configuration add '
                  '--connection-monitor {cmv2} '
@@ -194,7 +207,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor test-configuration list '
                  '--connection-monitor {cmv2} '
                  '--location {location} ',
-                 checks=self.check('length(@)', 2))
+                 checks=self.check('length(@)', 3))
         self.cmd('network watcher connection-monitor test-configuration show '
                  '--connection-monitor {cmv2} '
                  '--location {location} '
@@ -210,7 +223,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor test-configuration list '
                  '--connection-monitor {cmv2} '
                  '--location {location} ',
-                 checks=self.check('length(@)', 3))
+                 checks=self.check('length(@)', 4))
         self.cmd('network watcher connection-monitor test-configuration show '
                  '--connection-monitor {cmv2} '
                  '--location {location} '
@@ -223,7 +236,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor test-configuration list '
                  '--connection-monitor {cmv2} '
                  '--location {location} ',
-                 checks=self.check('length(@)', 2))
+                 checks=self.check('length(@)', 3))
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
