@@ -18,12 +18,12 @@ def _flexible_server_update_get(client, resource_group_name, server_name):
 def _flexible_server_update_set(client, resource_group_name, server_name, parameters):
     return client.update(resource_group_name, server_name, parameters)
 
-def _server_list_custom_func(client, resource_group_name=None):
+def server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
 
-def _firewall_rule_delete_func(client, resource_group_name=None, server_name=None, firewall_rule_name=None, prompt=None):
+def firewall_rule_delete_func(client, resource_group_name=None, server_name=None, firewall_rule_name=None, prompt=None):
     confirm = True
     if not prompt or prompt ==' yes':
         confirm = user_confirmation("Are you sure you want to delete the firewall-rule '{0}' in server '{1}', resource group '{2}'".format(firewall_rule_name, server_name, resource_group_name))
@@ -34,7 +34,7 @@ def _firewall_rule_delete_func(client, resource_group_name=None, server_name=Non
             logger.error(ex)
         return result
 
-def _database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, force=None):
+def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, force=None):
     if not force:
         confirm = user_confirmation("Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=force)
     if (confirm):
@@ -56,7 +56,7 @@ def _flexible_firewall_rule_custom_setter(client, resource_group_name, server_na
         parameters.start_ip_address,
         parameters.end_ip_address)
 
-def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
+def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
     if start_ip_address is not None:
         instance.start_ip_address = start_ip_address
     if end_ip_address is not None:
