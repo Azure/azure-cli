@@ -254,7 +254,7 @@ class AzCliCommandParser(CLICommandParser):
             extension = self.command_source.extension_name
         # Otherwise, the command may have not been in a command group. The command source will not be
         # set in this case.
-        elif action and action.dest == '_subcommand':
+        elif action and action.dest in ('_subcommand', '_command_package'):
             # Get all parsers in the set of possible actions.
             parsers = list(action.choices.values())
             parser = parsers[0] if parsers else None
@@ -432,11 +432,15 @@ class AzCliCommandParser(CLICommandParser):
                                 import subprocess
                                 import platform
                                 exit_code = subprocess.call(cmd_list, shell=platform.system() == 'Windows')
+                                error_msg = ("Extension {} dynamically installed and commands will be "
+                                            "rerun automatically.").format(ext_name)
+                                telemetry.set_user_fault(error_msg)
                                 self.exit(exit_code)
                             else:
                                 with CommandLoggerContext(logger):
-                                    reminder = 'Extension {} installed. Please rerun your command.'.format(ext_name)
-                                    logger.error(reminder)
+                                    error_msg = 'Extension {} installed. Please rerun your command.'.format(ext_name)
+                                    logger.error(error_msg)
+                                    telemetry.set_user_fault(error_msg)
                                 self.exit(2)
                         else:
                             error_msg = "The command requires the extension {ext_name}. " \
@@ -454,7 +458,7 @@ class AzCliCommandParser(CLICommandParser):
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 az_error = AzCLIError(AzCLIErrorType.ArgumentParseError, error_msg, command=self.prog)
 
-            _, params, extension = self._get_failure_recovery_arguments()
+            _, params, extension = self._get_failure_recovery_arguments(action)
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
@@ -467,7 +471,8 @@ class AzCliCommandParser(CLICommandParser):
 
             # remind user to check extensions if we can not find a command to recommend
             if az_error.error_type == AzCLIErrorType.CommandNotFoundError \
-                    and not az_error.recommendations and self.prog == 'az':
+                    and not az_error.recommendations and self.prog == 'az' \
+                    and use_dynamic_install == 'no':
                 az_error.set_recommendation(EXTENSION_REFERENCE)
 
             az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
