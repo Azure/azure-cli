@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
+
 # pylint: disable=line-too-long, too-many-lines
 
 
@@ -56,7 +57,7 @@ helps['postgres flexible-server firewall-rule delete'] = """
 type: command
 short-summary: Delete a firewall rule.
 examples:
-  - name: Delete a firewall rule. 
+  - name: Delete a firewall rule.
     text: az postgres flexible-server firewall-rule delete --firewall-rule-name testRule --resource-group testGroup --server-name testServer
     crafted: true
 """
@@ -65,7 +66,7 @@ helps['postgres flexible-server firewall-rule list'] = """
 type: command
 short-summary: List all firewall rules for a flexible server.
 examples:
-  - name: List all firewall rules for a server. 
+  - name: List all firewall rules for a server.
     text: az postgres server firewall-rule list --resource-group testGroup --server-name testServer
     crafted: true
 """
@@ -74,7 +75,7 @@ helps['postgres flexible-server firewall-rule show'] = """
 type: command
 short-summary: Get the details of a firewall rule.
 examples:
-  - name: Get the details of a firewall rule. 
+  - name: Get the details of a firewall rule.
     text: az postgres flexible-server firewall-rule show --firewall-rule-name testRule --resource-group testGroup --server-name testServer
     crafted: true
 """
@@ -105,7 +106,7 @@ helps['postgres flexible-server parameter'] = """
 type: group
 short-summary: Commands for managing server parameter values for flexible server.
 examples:
-  - name: List the parameter values for a flexible server. 
+  - name: List the parameter values for a flexible server.
     text: az postgres flexible-server parameter list
     crafted: true
 """
@@ -114,7 +115,7 @@ helps['postgres flexible-server parameter list'] = """
 type: command
 short-summary: List the parameter values for a flexible server.
 examples:
-  - name: List the parameter values for a flexible server. 
+  - name: List the parameter values for a flexible server.
     text: az postgres flexible-server parameter list
     crafted: true
 """
@@ -143,7 +144,7 @@ type: command
 short-summary: Restart a flexible server.
 examples:
   - name: Restart a flexible server.
-    text: az postgres flexible-server restart --resource-group testGroup --name testServer 
+    text: az postgres flexible-server restart --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -174,7 +175,7 @@ type: command
 short-summary: Start a flexible server.
 examples:
   - name: Start a flexible server.
-    text: az postgres flexible-server start --resource-group testGroup --name testServer 
+    text: az postgres flexible-server start --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -183,7 +184,7 @@ type: command
 short-summary: Stop a flexible server.
 examples:
   - name: Stop a flexible server.
-    text: az postgres flexible-server stop --resource-group testGroup --name testServer 
+    text: az postgres flexible-server stop --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -202,7 +203,7 @@ examples:
 
 helps['postgres flexible-server list-skus'] = """
 type: command
-short-summary: Lists available sku's in the given region. 
+short-summary: Lists available sku's in the given region.
 examples:
   - name: Lists available sku's in the given region.
     text: az mysql flexible-server list-skus -l
@@ -212,7 +213,7 @@ helps['postgres flexible-server wait'] = """
 type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
 examples:
-  - name: Wait for the flexible server to satisfy certain conditions. 
+  - name: Wait for the flexible server to satisfy certain conditions.
     text: az postgres server wait --exists --resource-group testGroup --name testServer
     crafted: true
 """

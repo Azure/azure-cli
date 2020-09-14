@@ -35,5 +35,3 @@ class RdbmsArgumentContext(AzArgumentContext):  # pylint: disable=too-few-public
                           validator=get_combined_validator(self.validators))
         else:
             self.argument(dest, options_list=dest_option, arg_type=ignore_type, validator=None)
-
-
