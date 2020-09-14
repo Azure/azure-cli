@@ -20,8 +20,8 @@ logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
-# Add names of clouds that don't allow telemetry data collection here such as JEDI.
-CLOUDS_FORBIDDING_TELEMETRY = []
+# Add names of clouds that don't allow telemetry data collection here such as some air-gapped clouds.
+CLOUDS_FORBIDDING_TELEMETRY = ['USSec', 'USNat']
 
 # Add names of clouds that don't allow Aladdin requests for command recommendations here
 CLOUDS_FORBIDDING_ALADDIN_REQUEST = ['USSec', 'USNat']
