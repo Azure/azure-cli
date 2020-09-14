@@ -10,10 +10,8 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
-from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
-from ._client_factory import get_mariadb_management_client, get_mysql_management_client, get_postgresql_management_client, \
-    get_postgresql_flexible_management_client, get_mysql_flexible_management_client
+from ._client_factory import get_mariadb_management_client, get_mysql_management_client, get_postgresql_management_client
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 

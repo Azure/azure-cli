@@ -11,7 +11,6 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
-from azure.mgmt.rdbms.mysql.flexibleservers.operations._servers_operations import ServersOperations as MySqlFlexibleServersOperations
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, update_kwargs, generate_password, parse_maintenance_window
@@ -30,10 +29,10 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
                                 backup_retention=None, tags=None, public_access=None, database_name=None,
                                 subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
                                 vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None):
-    from azure.mgmt.rdbms import mysql
+    from azure.mgmt.rdbms import mysql_flexibleservers
     try:
         db_context = DbContext(
-            azure_sdk=mysql, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
+            azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
 
         # Raise error when user passes values for both parameters
         if subnet_arm_resource_id is not None and public_access is not None:
@@ -55,12 +54,12 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
             subnet_id = prepareVnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
                                     location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
-            delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
+            delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
                     subnet_arm_resource_id=subnet_id)
         elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
             subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
                                     DELEGATION_SERVICE_NAME)
-            delegated_subnet_arguments = mysql.flexibleservers.models.DelegatedSubnetArguments(
+            delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
                     subnet_arm_resource_id=subnet_id)
         else:
             delegated_subnet_arguments = None
@@ -136,8 +135,8 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
-    from azure.mgmt.rdbms import mysql
-    parameters = mysql.flexibleservers.models.Server(
+    from azure.mgmt.rdbms import mysql_flexibleservers
+    parameters = mysql_flexibleservers.models.Server(
         source_server_id=source_server,
         restore_point_in_time=restore_point_in_time,
         location=location,
@@ -202,10 +201,9 @@ def _flexible_server_update_custom_func(instance,
             custom_window = "Enabled"
 
         # set values - if maintenance_window when is None when created then create a new object
-        # TODO: by default the maintenance window should be 0:0:0 Disabled, can simplify once changes are in RP
         if instance.maintenance_window is None:
-            from azure.mgmt.rdbms import mysql
-            instance.maintenance_window = mysql.flexibleservers.models.MaintenanceWindow(
+            from azure.mgmt.rdbms import mysql_flexibleservers
+            instance.maintenance_window = mysql_flexibleservers.models.MaintenanceWindow(
                 day_of_week=day_of_week,
                 start_hour=start_hour,
                 start_minute=start_minute,
@@ -230,10 +228,10 @@ def _flexible_server_update_custom_func(instance,
 
     if assign_identity:
         if server_module_path.find('mysql'):
-            from azure.mgmt.rdbms import mysql
+            from azure.mgmt.rdbms import mysql_flexibleservers
             if instance.identity is None:
-                instance.identity = mysql.models.flexibleservers.Identity(
-                    type=mysql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
+                instance.identity = mysql_flexibleservers.models.Identity(
+                    type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
             params.identity = instance.identity
 
     return params
@@ -305,10 +303,10 @@ def _flexible_replica_create(cmd, client, resource_group_name, server_name, sour
     if tier is None:
         tier = source_server_object.sku.tier
 
-    from azure.mgmt.rdbms import mysql
+    from azure.mgmt.rdbms import mysql_flexibleservers
 
-    parameters = mysql.flexibleservers.models.Server(
-        sku=mysql.flexibleservers.models.Sku(name=sku_name,tier=tier),
+    parameters = mysql_flexibleservers.models.Server(
+        sku=mysql_flexibleservers.models.Sku(name=sku_name,tier=tier),
         source_server_id=source_server,
         location=location,
         create_mode="Replica")
@@ -353,17 +351,17 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
                    'Please refer to https://aka.ms/mysql-pricing for pricing details', server_name, sku_name)
 
-    from azure.mgmt.rdbms import mysql
+    from azure.mgmt.rdbms import mysql_flexibleservers
 
     # Note : passing public-network-access has no effect as the accepted values are 'Enabled' and 'Disabled'.
     # So when you pass an IP here(from the CLI args of public_access), it ends up being ignored.
-    parameters = mysql.flexibleservers.models.Server(
-        sku=mysql.flexibleservers.models.Sku(name=sku_name, tier=tier),
+    parameters = mysql_flexibleservers.models.Server(
+        sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         administrator_login=administrator_login,
         administrator_login_password=administrator_login_password,
         version=version,
         public_network_access=public_network_access,
-        storage_profile=mysql.flexibleservers.models.StorageProfile(
+        storage_profile=mysql_flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
             storage_mb=storage_mb),
         location=location,
@@ -374,8 +372,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         tags=tags)
 
     if assign_identity:
-        parameters.identity = mysql.models.flexibleservers.Identity(
-            type=mysql.models.flexibleservers.ResourceIdentityType.system_assigned.value)
+        parameters.identity = mysql_flexibleservers.Identity(
+            type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
 
     return resolve_poller(
         server_client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,

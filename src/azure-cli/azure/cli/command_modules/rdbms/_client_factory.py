@@ -72,7 +72,7 @@ def get_mysql_management_client(cli_ctx, **_):
 
 def get_mysql_flexible_management_client(cli_ctx, **_):
     from os import getenv
-    from azure.mgmt.rdbms.mysql.flexibleservers import MySQLManagementClient
+    from azure.mgmt.rdbms.mysql_flexibleservers import MySQLManagementClient
 
     # Allow overriding resource manager URI using environment variable
     # for testing purposes. Subscription id is also determined by environment
@@ -127,8 +127,7 @@ def get_postgresql_management_client(cli_ctx, **_):
 
 def get_postgresql_flexible_management_client(cli_ctx, **_):
     from os import getenv
-    from azure.mgmt.rdbms.postgresql.flexibleservers import PostgreSQLManagementClient
-
+    from azure.mgmt.rdbms.postgresql_flexibleservers import PostgreSQLManagementClient
     # Allow overriding resource manager URI using environment variable
     # for testing purposes. Subscription id is also determined by environment
     # variable.
