@@ -1206,6 +1206,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         self.cmd('network private-endpoint delete -g {rg} -n {appgw_pe}')
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_manage_appgw_private_endpoint')
     def test_manage_appgw_private_endpoint(self, resource_group):
         """
