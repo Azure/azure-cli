@@ -22,7 +22,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
                           validate_key, validate_feature,
-                          validate_identity,
+                          validate_identity, validate_auth_mode,
                           validate_resolve_keyvault)
 
 
@@ -72,6 +72,12 @@ def load_arguments(self, _):
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
         c.argument('sku', help='The sku of App Configuration', arg_type=get_enum_type(['Free', 'Standard']))
+        c.argument('endpoint', help='Endpoint of the App Configuration in the format "https://storename.azconfig.io". Required if --auth-mode is "aad". You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
+        c.argument('auth_mode', arg_type=get_enum_type(['aad', 'hmac']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
+                   help='This parameter can be used for selecting the authorization method. When connection string or store name is provided, the auth mode is HMAC by default. ' +
+                   'For AAD mode, provide the store endpoint. Your "az login" credentials will be used for authorization. ' +
+                   'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
+                   'For more information, see https://docs.microsoft.com/en-us/azure/azure-app-configuration/concept-enable-rbac')
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -120,6 +126,9 @@ def load_arguments(self, _):
         c.argument('src_key', help='If no key specified, import all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be imported.')
         c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no value specified, import keys with null label by default. Support star sign as filters, for instance * means all labels, abc* means labels with abc as prefix.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --label.")
+        c.argument('src_endpoint', help='Endpoint of the source App Configuration in the format "https://storename.azconfig.io". Required if --src-auth-mode is "aad".')
+        c.argument('src_auth_mode', arg_type=get_enum_type(['aad', 'hmac']),
+                   help='Auth mode for connecting to source App Configuration. For details, refer to "--auth-mode" argument.')
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
@@ -147,6 +156,9 @@ def load_arguments(self, _):
         c.argument('dest_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the destination store.")
         c.argument('dest_label', help="Exported KVs will be labeled with this destination label. If neither --dest-label nor --preserve-labels is specified, will assign null label.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --dest-label.")
+        c.argument('dest_endpoint', help='Endpoint of the destination App Configuration in the format "https://storename.azconfig.io". Required if --dest-auth-mode is "aad".')
+        c.argument('dest_auth_mode', arg_type=get_enum_type(['aad', 'hmac']),
+                   help='Auth mode for connecting to destination App Configuration. For details, refer to "--auth-mode" argument.')
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')

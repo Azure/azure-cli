@@ -6,10 +6,15 @@ from __future__ import print_function
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
+from azure.appconfiguration import AzureAppConfigurationClient
 
 from ._client_factory import cf_configstore
+from ._constants import HttpHeaders
+
+logger = get_logger(__name__)
 
 
 def construct_connection_string(cmd, config_store_name):
@@ -86,7 +91,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 
     if not string:
         raise CLIError(
-            'Please specify config store name or connection string(suggested).')
+            'For HMAC authorization, please specify config store name or connection string(suggested).')
     return string
 
 
@@ -118,3 +123,27 @@ def prep_null_label_for_url_encoding(label=None):
         label = '"{0}"'.format(label)
         label = ast.literal_eval(label)
     return label
+
+
+def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
+    azconfig_client = None
+    if auth_mode == "hmac":
+        connection_string = resolve_connection_string(cmd, name, connection_string)
+        azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
+                                                                             user_agent=HttpHeaders.USER_AGENT)
+    if auth_mode == "aad":
+        if not endpoint:
+            raise CLIError("App Configuration endpoint should be provided if auth mode is 'aad'.")
+        from azure.cli.core._profile import Profile
+        profile = Profile(cli_ctx=cmd.cli_ctx)
+        # Due to this bug in get_login_credentials: https://github.com/Azure/azure-cli/issues/15179,
+        # we need to manage the AAD scope by passing appconfig endpoint as resource
+        cred, _, _ = profile.get_login_credentials(resource=endpoint)
+        azconfig_client = AzureAppConfigurationClient(credential=cred,
+                                                      base_url=endpoint,
+                                                      user_agent=HttpHeaders.USER_AGENT)
+
+    if not azconfig_client:
+        raise CLIError("Could not get App Configuration client due to insufficient permissions.")
+
+    return azconfig_client

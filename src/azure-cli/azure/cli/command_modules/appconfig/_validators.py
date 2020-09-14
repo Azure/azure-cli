@@ -33,6 +33,14 @@ def validate_connection_string(namespace):
 Correct format should be Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xxxx ''')
 
 
+def validate_auth_mode(namespace):
+    auth_mode = namespace.auth_mode
+    if auth_mode == "aad" and not namespace.endpoint:
+        raise CLIError("App Configuration endpoint should be provided if auth mode is 'aad'.")
+    if auth_mode == "aad" and (namespace.connection_string or namespace.name):
+        raise CLIError("Auth mode should be 'hmac' when connection string or store name is provided.")
+
+
 def validate_import_depth(namespace):
     depth = namespace.depth
     if depth is not None:

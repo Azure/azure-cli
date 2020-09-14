@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-statements
+# pylint: disable=line-too-long, too-many-statements, too-many-locals
 
 import json
 import time
@@ -13,20 +13,18 @@ import copy
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.appconfiguration import (AzureAppConfigurationClient,
-                                    ConfigurationSetting,
+from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
 from azure.core import MatchConditions
 from azure.core.exceptions import (HttpResponseError,
                                    ResourceNotFoundError,
                                    ResourceModifiedError)
 
-from ._constants import (FeatureFlagConstants, SearchFilterOptions,
-                         StatusCodes, HttpHeaders)
+from ._constants import (FeatureFlagConstants, SearchFilterOptions, StatusCodes)
 from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
-from ._utils import (resolve_connection_string, user_confirmation,
+from ._utils import (get_appconfig_data_client, user_confirmation,
                      prep_null_label_for_url_encoding)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
@@ -44,7 +42,9 @@ def set_feature(cmd,
                 label=None,
                 description=None,
                 yes=False,
-                connection_string=None):
+                connection_string=None,
+                auth_mode="hmac",
+                endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
 
     # when creating a new Feature flag, these defaults will be used
@@ -58,9 +58,8 @@ def set_feature(cmd,
         "conditions": default_conditions
     }
 
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
     retry_times = 3
     retry_interval = 1
 
@@ -144,10 +143,10 @@ def delete_feature(cmd,
                    name=None,
                    label=None,
                    yes=False,
-                   connection_string=None):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+                   connection_string=None,
+                   auth_mode="hmac",
+                   endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
                                                feature=feature,
@@ -198,11 +197,11 @@ def show_feature(cmd,
                  name=None,
                  label=None,
                  fields=None,
-                 connection_string=None):
+                 connection_string=None,
+                 auth_mode="hmac",
+                 endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
         config_setting = azconfig_client.get_configuration_setting(key=key, label=label)
@@ -239,10 +238,10 @@ def list_feature(cmd,
                  fields=None,
                  connection_string=None,
                  top=None,
-                 all_=False):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+                 all_=False,
+                 auth_mode="hmac",
+                 endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     try:
         retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
                                                    feature=feature if feature else SearchFilterOptions.ANY_KEY,
@@ -286,11 +285,11 @@ def lock_feature(cmd,
                  name=None,
                  label=None,
                  connection_string=None,
-                 yes=False):
+                 yes=False,
+                 auth_mode="hmac",
+                 endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
@@ -328,11 +327,11 @@ def unlock_feature(cmd,
                    name=None,
                    label=None,
                    connection_string=None,
-                   yes=False):
+                   yes=False,
+                   auth_mode="hmac",
+                   endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
@@ -370,11 +369,11 @@ def enable_feature(cmd,
                    name=None,
                    label=None,
                    connection_string=None,
-                   yes=False):
+                   yes=False,
+                   auth_mode="hmac",
+                   endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
@@ -423,11 +422,11 @@ def disable_feature(cmd,
                     name=None,
                     label=None,
                     connection_string=None,
-                    yes=False):
+                    yes=False,
+                    auth_mode="hmac",
+                    endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
@@ -482,11 +481,11 @@ def add_filter(cmd,
                filter_parameters=None,
                yes=False,
                index=None,
-               connection_string=None):
+               connection_string=None,
+               auth_mode="hmac",
+               endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
         index = float("-inf")
@@ -560,11 +559,11 @@ def delete_filter(cmd,
                   index=None,
                   yes=False,
                   connection_string=None,
-                  all_=False):
+                  all_=False,
+                  auth_mode="hmac",
+                  endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
         index = float("-inf")
@@ -669,11 +668,11 @@ def show_filter(cmd,
                 index=None,
                 name=None,
                 label=None,
-                connection_string=None):
+                connection_string=None,
+                auth_mode="hmac",
+                endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
         index = float("-inf")
@@ -726,11 +725,11 @@ def list_filter(cmd,
                 label=None,
                 connection_string=None,
                 top=None,
-                all_=False):
+                all_=False,
+                auth_mode="hmac",
+                endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
         retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)

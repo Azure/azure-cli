@@ -13,8 +13,7 @@ from itertools import chain
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.appconfiguration import (AzureAppConfigurationClient,
-                                    ConfigurationSetting,
+from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
 from azure.core import MatchConditions
 from azure.core.exceptions import (HttpResponseError,
@@ -22,10 +21,10 @@ from azure.core.exceptions import (HttpResponseError,
                                    ResourceModifiedError)
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
-                         SearchFilterOptions, StatusCodes, HttpHeaders)
+                         SearchFilterOptions, StatusCodes)
 from ._models import (convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
-from ._utils import resolve_connection_string, user_confirmation, prep_null_label_for_url_encoding
+from ._utils import get_appconfig_data_client, user_confirmation, prep_null_label_for_url_encoding
 
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
@@ -46,6 +45,8 @@ def import_config(cmd,
                   yes=False,
                   skip_features=False,
                   content_type=None,
+                  auth_mode="hmac",
+                  endpoint=None,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -57,6 +58,8 @@ def import_config(cmd,
                   src_key=None,
                   src_label=None,
                   preserve_labels=False,
+                  src_auth_mode="hmac",
+                  src_endpoint=None,
                   # from-appservice parameters
                   appservice_account=None):
     src_features = []
@@ -65,9 +68,8 @@ def import_config(cmd,
     source = source.lower()
     format_ = format_.lower() if format_ else None
 
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
     # fetch key values from source
     if source == 'file':
         if format_ and content_type:
@@ -95,9 +97,7 @@ def import_config(cmd,
             src_features = __read_features_from_file(file_path=path, format_=format_)
 
     elif source == 'appconfig':
-        src_connection_string = resolve_connection_string(cmd, src_name, src_connection_string)
-        src_azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=src_connection_string,
-                                                                                 user_agent=HttpHeaders.USER_AGENT)
+        src_azconfig_client = get_appconfig_data_client(cmd, src_name, src_connection_string, src_auth_mode, src_endpoint)
 
         if label is not None and preserve_labels:
             raise CLIError("Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'. See 'az appconfig kv import -h' for examples.")
@@ -180,6 +180,8 @@ def export_config(cmd,
                   yes=False,
                   skip_features=False,
                   skip_keyvault=False,
+                  auth_mode="hmac",
+                  endpoint=None,
                   # to-file parameters
                   path=None,
                   format_=None,
@@ -191,6 +193,8 @@ def export_config(cmd,
                   dest_connection_string=None,
                   dest_label=None,
                   preserve_labels=False,
+                  dest_auth_mode="hmac",
+                  dest_endpoint=None,
                   # to-app-service parameters
                   appservice_account=None):
     src_features = []
@@ -200,9 +204,8 @@ def export_config(cmd,
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
 
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
     dest_azconfig_client = None
     if destination == 'appconfig':
         if dest_label is not None and preserve_labels:
@@ -212,9 +215,7 @@ def export_config(cmd,
             # This will have no effect on label while writing to config store
             # as we check preserve_labels again before labelling KVs.
             dest_label = label
-        dest_connection_string = resolve_connection_string(cmd, dest_name, dest_connection_string)
-        dest_azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=dest_connection_string,
-                                                                                  user_agent=HttpHeaders.USER_AGENT)
+        dest_azconfig_client = get_appconfig_data_client(cmd, dest_name, dest_connection_string, dest_auth_mode, dest_endpoint)
 
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(azconfig_client,
@@ -300,10 +301,10 @@ def set_key(cmd,
             tags=None,
             value=None,
             yes=False,
-            connection_string=None):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+            connection_string=None,
+            auth_mode="hmac",
+            endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if content_type:
         if content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
@@ -397,10 +398,10 @@ def set_keyvault(cmd,
                  label=None,
                  tags=None,
                  yes=False,
-                 connection_string=None):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+                 connection_string=None,
+                 auth_mode="hmac",
+                 endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
     retry_times = 3
@@ -470,10 +471,10 @@ def delete_key(cmd,
                name=None,
                label=None,
                yes=False,
-               connection_string=None):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+               connection_string=None,
+               auth_mode="hmac",
+               endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     # list_configuration_settings returns kv with null label when:
     # label = ASCII null 0x00, or URL encoded %00
@@ -517,10 +518,15 @@ def delete_key(cmd,
     return deleted_entries
 
 
-def lock_key(cmd, key, label=None, name=None, connection_string=None, yes=False):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+def lock_key(cmd,
+             key,
+             label=None,
+             name=None,
+             connection_string=None,
+             yes=False,
+             auth_mode="hmac",
+             endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
@@ -549,10 +555,15 @@ def lock_key(cmd, key, label=None, name=None, connection_string=None, yes=False)
     raise CLIError("Failed to lock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
 
 
-def unlock_key(cmd, key, label=None, name=None, connection_string=None, yes=False):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+def unlock_key(cmd,
+               key,
+               label=None,
+               name=None,
+               connection_string=None,
+               yes=False,
+               auth_mode="hmac",
+               endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
@@ -581,11 +592,15 @@ def unlock_key(cmd, key, label=None, name=None, connection_string=None, yes=Fals
     raise CLIError("Failed to unlock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
 
 
-def show_key(cmd, key, name=None, label=None, datetime=None, connection_string=None):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
-
+def show_key(cmd,
+             key,
+             name=None,
+             label=None,
+             datetime=None,
+             connection_string=None,
+             auth_mode="hmac",
+             endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     try:
         key_value = azconfig_client.get_configuration_setting(key=key, label=label, accept_datetime=datetime)
         if key_value is None:
@@ -608,13 +623,13 @@ def list_key(cmd,
              connection_string=None,
              top=None,
              all_=False,
-             resolve_keyvault=False):
+             resolve_keyvault=False,
+             auth_mode="hmac",
+             endpoint=None):
     if fields and resolve_keyvault:
         raise CLIError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
 
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     keyvalues = __read_kv_from_config_store(azconfig_client,
                                             key=key if key else SearchFilterOptions.ANY_KEY,
@@ -633,11 +648,10 @@ def restore_key(cmd,
                 name=None,
                 label=None,
                 connection_string=None,
-                yes=False):
-
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+                yes=False,
+                auth_mode="hmac",
+                endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     exception_messages = []
     try:
@@ -709,10 +723,10 @@ def list_revision(cmd,
                   datetime=None,
                   connection_string=None,
                   top=None,
-                  all_=False):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                         user_agent=HttpHeaders.USER_AGENT)
+                  all_=False,
+                  auth_mode="hmac",
+                  endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     key = key if key else SearchFilterOptions.ANY_KEY
     label = label if label else SearchFilterOptions.ANY_LABEL
