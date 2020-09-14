@@ -4055,9 +4055,13 @@ def create_nw_connection_monitor(cmd,
                                  endpoint_source_name=None,
                                  endpoint_source_resource_id=None,
                                  endpoint_source_address=None,
+                                 endpoint_source_type=None,
+                                 endpoint_source_coverage_level=None,
                                  endpoint_dest_name=None,
                                  endpoint_dest_resource_id=None,
                                  endpoint_dest_address=None,
+                                 endpoint_dest_type=None,
+                                 endpoint_dest_coverage_level=None,
                                  test_config_name=None,
                                  test_config_frequency=None,
                                  test_config_protocol=None,
@@ -4084,8 +4088,8 @@ def create_nw_connection_monitor(cmd,
     ]
 
     v2_required_parameter_set = [
-        endpoint_source_name, endpoint_source_resource_id,
-        endpoint_dest_name, endpoint_dest_address,
+        endpoint_source_name, endpoint_source_resource_id, endpoint_source_type, endpoint_source_coverage_level,
+        endpoint_dest_name, endpoint_dest_address, endpoint_dest_type, endpoint_dest_coverage_level,
         test_config_name, test_config_protocol,
         output_type, workspace_ids,
     ]
@@ -4115,9 +4119,13 @@ def create_nw_connection_monitor(cmd,
                                                               endpoint_source_name,
                                                               endpoint_source_resource_id,
                                                               endpoint_source_address,
+                                                              endpoint_source_type,
+                                                              endpoint_source_coverage_level,
                                                               endpoint_dest_name,
                                                               endpoint_dest_resource_id,
                                                               endpoint_dest_address,
+                                                              endpoint_dest_type,
+                                                              endpoint_dest_coverage_level,
                                                               test_config_name,
                                                               test_config_frequency,
                                                               test_config_protocol,
@@ -4191,9 +4199,13 @@ def _create_nw_connection_monitor_v2(cmd,
                                      endpoint_source_name=None,
                                      endpoint_source_resource_id=None,
                                      endpoint_source_address=None,
+                                     endpoint_source_type=None,
+                                     endpoint_source_coverage_level=None,
                                      endpoint_dest_name=None,
                                      endpoint_dest_resource_id=None,
                                      endpoint_dest_address=None,
+                                     endpoint_dest_type=None,
+                                     endpoint_dest_coverage_level=None,
                                      test_config_name=None,
                                      test_config_frequency=None,
                                      test_config_protocol=None,
@@ -4216,12 +4228,16 @@ def _create_nw_connection_monitor_v2(cmd,
                                      notes=None):
     src_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
                                                              endpoint_source_name,
-                                                             endpoint_source_resource_id,
-                                                             endpoint_source_address)
+                                                             endpoint_resource_id=endpoint_source_resource_id,
+                                                             address=endpoint_source_address,
+                                                             endpoint_type=endpoint_source_type,
+                                                             coverage_level=endpoint_source_coverage_level)
     dst_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
                                                              endpoint_dest_name,
-                                                             endpoint_dest_resource_id,
-                                                             endpoint_dest_address)
+                                                             endpoint_resource_id=endpoint_dest_resource_id,
+                                                             address=endpoint_dest_address,
+                                                             endpoint_type=endpoint_dest_type,
+                                                             coverage_level=endpoint_dest_coverage_level)
     test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
                                                                       test_config_name,
                                                                       test_config_frequency,
@@ -4271,7 +4287,9 @@ def _create_nw_connection_monitor_v2_endpoint(cmd,
                                               endpoint_resource_id=None,
                                               address=None,
                                               filter_type=None,
-                                              filter_items=None):
+                                              filter_items=None,
+                                              endpoint_type=None,
+                                              coverage_level=None):
     if (filter_type and not filter_items) or (not filter_type and filter_items):
         raise CLIError('usage error: '
                        '--filter-type and --filter-item for endpoint filter must be present at the same time.')
@@ -4279,7 +4297,11 @@ def _create_nw_connection_monitor_v2_endpoint(cmd,
     ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
         'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
 
-    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=endpoint_resource_id, address=address)
+    endpoint = ConnectionMonitorEndpoint(name=name,
+                                         resource_id=endpoint_resource_id,
+                                         address=address,
+                                         type=endpoint_type,
+                                         coverage_level=coverage_level)
 
     if filter_type and filter_items:
         endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
@@ -4387,16 +4409,35 @@ def add_nw_connection_monitor_v2_endpoint(cmd,
                                           connection_monitor_name,
                                           location,
                                           name,
+                                          coverage_level=None,
+                                          endpoint_type=None,
                                           source_test_groups=None,
                                           dest_test_groups=None,
                                           endpoint_resource_id=None,
                                           address=None,
                                           filter_type=None,
-                                          filter_items=None):
-    ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
-        'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
+                                          filter_items=None,
+                                          address_include=None,
+                                          address_exclude=None):
+    (ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter,
+     ConnectionMonitorEndpointScope, ConnectionMonitorEndpointScopeItem) = cmd.get_models(
+         'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter',
+         'ConnectionMonitorEndpointScope', 'ConnectionMonitorEndpointScopeItem')
 
-    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=endpoint_resource_id, address=address)
+    endpoint_scope = ConnectionMonitorEndpointScope(include=[], exclude=[])
+    for ip in address_include or []:
+        include_item = ConnectionMonitorEndpointScopeItem(address=ip)
+        endpoint_scope.include.append(include_item)
+    for ip in address_exclude or []:
+        exclude_item = ConnectionMonitorEndpointScopeItem(address=ip)
+        endpoint_scope.exclude.append(exclude_item)
+
+    endpoint = ConnectionMonitorEndpoint(name=name,
+                                         resource_id=endpoint_resource_id,
+                                         address=address,
+                                         type=endpoint_type,
+                                         coverage_level=coverage_level,
+                                         scope=endpoint_scope if address_include or address_exclude else None)
 
     if filter_type and filter_items:
         endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
