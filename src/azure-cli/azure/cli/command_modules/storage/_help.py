@@ -811,6 +811,16 @@ type: group
 short-summary: Manage blob metadata.
 """
 
+helps['storage blob query'] = """
+type: command
+short-summary: Enable users to select/project on blob or blob snapshot data by providing simple query expressions.
+examples:
+  - name: Enable users to select/project on blob by providing simple query expressions.
+    text: az storage blob query -c mycontainer -n myblob --query-expression "SELECT _2 from BlobStorage"
+  - name: Enable users to select/project on blob by providing simple query expressions and save in target file.
+    text: az storage blob query -c mycontainer -n myblob --query-expression "SELECT _2 from BlobStorage" --result-file result.csv
+"""
+
 helps['storage blob restore'] = """
 type: command
 short-summary: Restore blobs in the specified blob ranges.
@@ -2042,6 +2052,14 @@ examples:
     text: az storage share-rm show --storage-account mystorageaccount --name myfileshare
   - name: Show the properties of an Azure file shares by resource id.
     text: az storage share-rm show --ids file-share-id
+"""
+
+helps['storage share-rm stats'] = """
+type: command
+short-summary: Get the usage bytes of the data stored on the share.
+examples:
+  - name: Get the usage bytes of the data stored on the share.
+    text: az storage share-rm stats -g MyResourceGroup --storage-account mystorageaccount --name myfileshare
 """
 
 helps['storage share-rm update'] = """

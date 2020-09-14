@@ -423,7 +423,7 @@ class AcrCommandsTests(ScenarioTest):
         self.kwargs['second_identity_id'] = result.get_output_in_json()['id']
 
         # add identities
-        self.cmd('acr identity assign --name {registry_name} --identities {system_identity} {identity_id}')
+        self.cmd('acr identity assign --name {registry_name} --identities "{system_identity}" "{identity_id}"')
 
         # show identity
         result = self.cmd('acr identity show --name {registry_name}').get_output_in_json()
@@ -433,7 +433,7 @@ class AcrCommandsTests(ScenarioTest):
         self.assertEquals(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
 
         # remove identities
-        self.cmd('acr identity remove --name {registry_name} --identities {system_identity} {identity_id}', self.check('identity', None))
+        self.cmd('acr identity remove --name {registry_name} --identities "{system_identity}" "{identity_id}"', self.check('identity', None))
 
         # try different combinations of adds and deletes
         # system
@@ -444,7 +444,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity', None))
 
         # add multiple identities
-        result = self.cmd('acr identity assign --name {registry_name} --identities {system_identity} {identity_id}',
+        result = self.cmd('acr identity assign --name {registry_name} --identities "{system_identity}" "{identity_id}"',
                           self.check('identity.type', 'SystemAssigned, UserAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower()], result['identity'])
         # add another user identity to existing

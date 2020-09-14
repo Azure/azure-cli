@@ -83,7 +83,7 @@ class WebappBasicE2ETest(ScenarioTest):
         ])
         # turn on diagnostics
         test_cmd = ('webapp log config -g {} -n {} --level verbose'.format(resource_group, webapp_name) + ' '
-                    '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
+                    '--application-logging filesystem --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
         self.cmd(test_cmd)
         self.cmd('webapp log show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorMessages.enabled', True),
@@ -2665,7 +2665,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
 
 # Disabled due to issue https://github.com/Azure/azure-cli/issues/10705
 # class FunctionappRemoteBuildScenarioTest(ScenarioTest):
-#    @ResourceGroupPreparer()
+#    @ResourceGroupPreparer(random_name_length=24)
 #    @StorageAccountPreparer()
 #    def test_functionapp_remote_build(self, resource_group, storage_account):
 #        functionapp_name = self.create_random_name(prefix='faremotebuildapp', length=24)
@@ -2713,7 +2713,7 @@ class WebappImplictIdentityTest(ScenarioTest):
                                                            webapp_name), checks=self.is_empty())
 
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     def test_webapp_assign_user_identity(self, resource_group):
         plan_name = self.create_random_name('web-msi-plan', 20)
         webapp_name = self.create_random_name('web-msi', 20)
@@ -2742,7 +2742,7 @@ class WebappImplictIdentityTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     def test_webapp_remove_identity(self, resource_group):
         plan_name = self.create_random_name('web-msi-plan', 20)
         webapp_name = self.create_random_name('web-msi', 20)
@@ -2792,7 +2792,7 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
 
 class WebappTriggeredWebJobListTest(ScenarioTest):
     @record_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     def test_webapp_triggeredWebjob_list(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
@@ -2811,7 +2811,7 @@ class WebappTriggeredWebJobListTest(ScenarioTest):
 
 
 class WebappContinuousWebJobE2ETest(ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     @record_only()
     def test_webapp_continuousWebjob_e2e(self, resource_group):
         # testing this using a webjob already created
