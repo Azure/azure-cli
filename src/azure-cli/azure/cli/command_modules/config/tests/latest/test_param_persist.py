@@ -7,7 +7,7 @@ import unittest
 from azure.cli.testsdk import LocalContextScenarioTest
 
 
-class param-persistScenarioTest(LocalContextScenarioTest):
+class ParamPersistScenarioTest(LocalContextScenarioTest):
 
     def test_param_persist_commands(self):
         self.cmd('config param-persist show')
