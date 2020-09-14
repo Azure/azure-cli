@@ -8,7 +8,6 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
-import os
 import sys
 
 try:
@@ -140,9 +139,7 @@ DEPENDENCIES = [
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
-    'jsondiff==1.2.0',
-    'azure-mgmt-core~=1.2.0',
-    'azure-core~=1.7.0'
+    'jsondiff==1.2.0'
 ]
 
 TESTS_REQUIRE = [

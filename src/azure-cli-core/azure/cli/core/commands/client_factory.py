@@ -23,18 +23,15 @@ def resolve_client_arg_name(operation, kwargs):
         return kwargs['client_arg_name']
     path, op_path = operation.split('#', 1)
 
-    # Support vendored sdks
-    # eg: azure.cli.command_modules.keyvault.vendored_sdks
-    items = path.split('.')
-    if len(items) >= 5 and '.'.join(items[:3]) == 'azure.cli.command_modules' and items[4] == 'vendored_sdks':
-        return 'self'
-
     path_comps = path.split('.')
     if path_comps[0] == 'azure':
-        # for CLI command modules
-        # SDK method: azure.mgmt.foo... or azure.foo...
-        # custom method: azure.cli.command_modules.foo...
-        client_arg_name = 'client' if path_comps[1] == 'cli' else 'self'
+        if path_comps[1] != 'cli' or len(path_comps) >= 5 and path_comps[4] == 'vendored_sdks':
+            # Public SDK: azure.mgmt.resource... (mgmt-plane) or azure.storage.blob... (data-plane)
+            # Vendored SDK: azure.cli.command_modules.keyvault.vendored_sdks...
+            client_arg_name = 'self'
+        else:
+            # CLI custom method: azure.cli.command_modules.resource...
+            client_arg_name = 'client'
     elif path_comps[0].startswith(EXTENSIONS_MOD_PREFIX):
         # for CLI extensions
         # SDK method: the operation takes the form '<class name>.<method_name>'
