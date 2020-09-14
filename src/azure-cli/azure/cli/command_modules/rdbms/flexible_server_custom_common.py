@@ -34,7 +34,13 @@ def firewall_rule_delete_func(client, resource_group_name=None, server_name=None
             logger.error(ex)
         return result
 
+
 def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, force=None):
+    if resource_group_name is None or server_name is None or database_name is None:
+        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
+                       "If your local context is turned ON, make sure these three parameters exist in local context "
+                       "using \'az local-context show\' If your local context is turned ON, but they are missing or "
+                       "If your local context is turned OFF, consider passing them explicitly.")
     if not force:
         confirm = user_confirmation("Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=force)
     if (confirm):

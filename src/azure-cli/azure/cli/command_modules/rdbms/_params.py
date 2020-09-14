@@ -397,6 +397,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         
         with self.argument_context('{} flexible-server db delete'.format(command_group)) as c:
             c.argument('database_name',  arg_type=database_name_getter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+            c.argument('server_name', options_list=['--server-name', '-s'], arg_type= server_name_getter_arg_type, help='Name of the server.')
 
 
         with self.argument_context('{} flexible-server show-connection-string'.format(command_group)) as c:
