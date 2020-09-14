@@ -32,4 +32,4 @@ def load_arguments(self, _):
         c.argument('all', help='Clear all local context data. Either --name or --all can be specified.', action='store_true')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation. Only available when --all is specified.', action='store_true')
         c.argument('purge', help='Delete local context file from working directory. Only available when --all is specified.', action='store_true')
-        c.argument('recursive', help='Indicates this is recursive delete of local context. Only available when --all is specified.', action='store_true')
+        c.argument('recursive', help='Indicate this is recursive delete of local context. Only available when --all is specified.', action='store_true')
