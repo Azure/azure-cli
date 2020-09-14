@@ -138,16 +138,23 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
         self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
+        self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet1 --address-prefix 10.0.0.0/24')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet1').get_output_in_json()
+        self.kwargs.update({
+            'cm_subnet_endpoint': 'cm_subnet_endpoint',
+            'subnet_id': subnet['id']
+        })
+
         # add an endpoint as source
         self.cmd('network watcher connection-monitor endpoint add '
                  '--connection-monitor {cmv2} '
                  '--location {location} '
                  '--source-test-groups {test_group} '
-                 '--name vm02 '
-                 '--resource-id {vm2_id} '
-                 '--filter-type Include '
-                 '--filter-item type=AgentAddress address=10.0.0.1 '
-                 '--filter-item type=AgentAddress address=10.0.0.2 ')
+                 '--name {cm_subnet_endpoint} '
+                 '--resource-id {subnet_id} '
+                 '--type AzureSubnet '
+                 '--address-exclude 10.0.0.25 '
+                 '--coverage-level BelowAverage')
 
         # add an endpoint as destination
         self.cmd('network watcher connection-monitor endpoint add '
@@ -155,7 +162,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--location {location} '
                  '--dest-test-groups {test_group} '
                  '--name Github '
-                 '--address github.com ')
+                 '--address github.com '
+                 '--type ExternalAddress')
 
         self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
                  checks=self.check('length(@)', 4))
@@ -168,7 +176,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor endpoint remove '
                  '--connection-monitor {cmv2} '
                  '--location {location} '
-                 '--name vm02 '
+                 '--name {cm_subnet_endpoint} '
                  '--test-groups DefaultTestGroup ')
         self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
                  checks=self.check('length(@)', 3))
