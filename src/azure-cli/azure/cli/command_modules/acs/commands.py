@@ -30,7 +30,7 @@ def load_command_table(self, _):
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2020_03_01.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2020_09_01.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
         client_factory=cf_managed_clusters
     )

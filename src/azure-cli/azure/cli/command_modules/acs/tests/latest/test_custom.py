@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs.custom import (merge_kubernetes_configuration
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
 from azure.cli.core.util import CLIError
 
 
@@ -638,6 +639,37 @@ class AcsCustomCommandTest(unittest.TestCase):
         routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
         self.assertTrue(routing_addon_profile.enabled)
         self.assertEqual(sorted(list(instance.addon_profiles)), ['azurepolicy', 'httpApplicationRouting', 'omsagent'])
+
+        # kube-dashboard disabled, no existing dashboard addon profile
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'kube-dashboard', enable=False)
+        dashboard_addon_profile = instance.addon_profiles['kubeDashboard']
+        self.assertFalse(dashboard_addon_profile.enabled)
+
+        # kube-dashboard enabled, no existing dashboard addon profile
+        instance.addon_profiles.pop('kubeDashboard', None)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'kube-dashboard', enable=True)
+        dashboard_addon_profile = instance.addon_profiles['kubeDashboard']
+        self.assertTrue(dashboard_addon_profile.enabled)
+
+        # kube-dashboard disabled, there's existing dashboard addon profile
+        instance.addon_profiles.pop('kubeDashboard', None)
+        # test lower cased key name
+        instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'kube-dashboard', enable=False)
+        dashboard_addon_profile = instance.addon_profiles['kubedashboard']
+        self.assertFalse(dashboard_addon_profile.enabled)
+
+        # kube-dashboard enabled, there's existing dashboard addon profile
+        instance.addon_profiles.pop('kubedashboard', None)
+        # test lower cased key name
+        instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'kube-dashboard', enable=True)
+        dashboard_addon_profile = instance.addon_profiles['kubedashboard']
+        self.assertTrue(dashboard_addon_profile.enabled)
 
         # monitoring enabled and then enabled again should error
         instance = mock.Mock()

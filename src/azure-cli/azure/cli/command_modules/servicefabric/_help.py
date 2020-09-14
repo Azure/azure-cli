@@ -410,3 +410,213 @@ examples:
     text: >
         az sf cluster upgrade-type set -g group-name -c cluster1 --upgrade-mode Automatic
 """
+
+helps['sf managed-cluster'] = """
+type: group
+short-summary: Manage an Azure Service Fabric managed cluster.
+"""
+
+helps['sf managed-cluster show'] = """
+type: command
+short-summary: Show the properties of an Azure Service Fabric managed cluster.
+examples:
+  - name: Get cluster.
+    text: >
+        az sf managed-cluster show -g testRG -c testCluster
+"""
+
+helps['sf managed-cluster list'] = """
+type: command
+short-summary: List managed clusters.
+examples:
+  - name: List clusters by resource group.
+    text: >
+        az sf managed-cluster list -g testRG
+  - name: List clusters by subscription.
+    text: >
+        az sf managed-cluster list
+"""
+
+helps['sf managed-cluster create'] = """
+type: command
+short-summary: Delete a managed cluster.
+examples:
+  - name: Create cluster with standard sku and client cert by thumbprint.
+    text: >
+        az sf managed-cluster create -g testRG -c testCluster -l eastus2 --cert-thumbprint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --cert-is-admin --admin-password PassTest123@ --sku Standard
+  - name: Create cluster with standard sku and client cert by common name.
+    text: >
+        az sf managed-cluster create -g testRG -c testCluster -l eastus2 --cert-common-name Contoso.com --cert-issuer-thumbprint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --cert-is-admin --admin-password PassTest123@ --sku Standard
+"""
+
+helps['sf managed-cluster update'] = """
+type: command
+short-summary: Update a managed cluster.
+examples:
+  - name: Update cluster client port and dns name.
+    text: >
+        az sf managed-cluster update -g testRG -c testCluster --client-port 50000 --dns-name testnewdns
+"""
+
+helps['sf managed-cluster delete'] = """
+type: command
+short-summary: Delete a managed cluster.
+examples:
+  - name: Delete cluster.
+    text: >
+        az sf managed-cluster delete -g testRG -c testCluster
+"""
+
+helps['sf managed-cluster client-certificate'] = """
+type: group
+short-summary: Manage client certificates of a manged cluster.
+"""
+
+helps['sf managed-cluster client-certificate add'] = """
+type: command
+short-summary: Add a new client certificate to the managed cluster.
+examples:
+  - name: Add admin client certificate by thumbprint.
+    text: >
+        az sf managed-cluster client-certificate add -g testRG -c testCluster --thumbprint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --is-admin
+  - name: Add non admin client certificate by common name.
+    text: >
+        az sf managed-cluster client-certificate add -g testRG -c testCluster --common-name Contoso.com --issuer-thumbprint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+"""
+
+helps['sf managed-cluster client-certificate delete'] = """
+type: command
+short-summary: Delete a client certificate from the managed cluster.
+examples:
+  - name: Delete client certificate by thumbprint.
+    text: >
+        az sf managed-cluster client-certificate delete -g testRG -c testCluster --thumbprint XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  - name: Delete client certificate by common name.
+    text: >
+        az sf managed-cluster client-certificate delete -g testRG -c testCluster --common-name Contoso.com
+"""
+
+helps['sf managed-node-type'] = """
+type: group
+short-summary: Manage a node type of an Azure Service Fabric managed cluster.
+"""
+
+helps['sf managed-node-type show'] = """
+type: command
+short-summary: Show the properties of a node type.
+examples:
+  - name: Get node type.
+    text: >
+        az sf managed-node-type show -g testRG -c testCluster -n pnt
+"""
+
+helps['sf managed-node-type list'] = """
+type: command
+short-summary: List node types of a managed cluster.
+examples:
+  - name: List node types by cluster.
+    text: >
+        az sf managed-node-type list -g testRG -c testCluster
+"""
+
+helps['sf managed-node-type create'] = """
+type: command
+short-summary: Delete a managed cluster.
+examples:
+  - name: Create primary node type with 5 nodes.
+    text: >
+        az sf managed-node-type create -g testRG -c testCluster -n pnt --instance-count 5 --primary
+  - name: Create non primary node type with placement properities, capacities and ports.
+    text: >
+        az sf managed-node-type create -g testRG -c testCluster -n snt --instance-count 5 --placement-property NodeColor=Green SomeProperty=5 --capacity ClientConnections=65536 --app-start-port 20575 --app-end-port 20605 --ephemeral-start-port 20606 --ephemeral-end-port 20861
+"""
+
+helps['sf managed-node-type update'] = """
+type: command
+short-summary: Update a managed cluster.
+examples:
+  - name: Update the instance count of the node type.
+    text: >
+        az sf managed-node-type update -g testRG -c testCluster -n snt --instance-count 7
+  - name: Update placement properties of the node type. This will overwrite older placement properties if any.
+    text: >
+        az sf managed-node-type update -g testRG -c testCluster -n snt --placement-property NodeColor=Red SomeProperty=6
+"""
+
+helps['sf managed-node-type delete'] = """
+type: command
+short-summary: Delete node type from a cluster.
+examples:
+  - name: Delete cluster.
+    text: >
+        az sf managed-node-type delete -g testRG -c testCluster -n snt
+"""
+
+helps['sf managed-node-type node'] = """
+type: group
+short-summary: Perform operations on nodes of a node type on managed clusters.
+"""
+
+helps['sf managed-node-type node restart'] = """
+type: command
+short-summary: Restart nodes of a node type.
+examples:
+  - name: Restart 2 nodes.
+    text: >
+        az sf managed-node-type node restart -g testRG -c testCluster -n snt --node-name snt_0 snt_1
+"""
+
+helps['sf managed-node-type node reimage'] = """
+type: command
+short-summary: Reimage nodes of a node type.
+examples:
+  - name: Reimage 2 nodes.
+    text: >
+        az sf managed-node-type node reimage -g testRG -c testCluster -n snt --node-name snt_0 snt_1
+"""
+
+helps['sf managed-node-type node delete'] = """
+type: command
+short-summary: Delete nodes of a node type.
+examples:
+  - name: Delete 2 nodes.
+    text: >
+        az sf managed-node-type node delete -g testRG -c testCluster -n snt --node-name snt_0 snt_1
+"""
+
+helps['sf managed-node-type vm-extension'] = """
+type: group
+short-summary: Managed vm extension on a node type on managed clusters.
+"""
+
+helps['sf managed-node-type vm-extension add'] = """
+type: command
+short-summary: Add an extension to the node type.
+examples:
+  - name: Add bg extension.
+    text: >
+        az sf managed-node-type vm-extension add -g testRG -c testCluster -n snt --extension-name csetest --publisher Microsoft.Compute --extension-type BGInfo --type-handler-version 2.1 --auto-upgrade-minor-version
+"""
+
+helps['sf managed-node-type vm-extension delete'] = """
+type: command
+short-summary: Delete an extension to the node type.
+examples:
+  - name: Delete extension by name.
+    text: >
+        az sf managed-node-type vm-extension delete -g testRG -c testCluster -n snt --extension-name csetest
+"""
+
+helps['sf managed-node-type vm-secret'] = """
+type: group
+short-summary: Managed vm secrets on a node type on managed clusters.
+"""
+
+helps['sf managed-node-type vm-secret add'] = """
+type: command
+short-summary: Add a secret to the node type.
+examples:
+  - name: Add certificate to the node type as a secret.
+    text: >
+        az sf managed-node-type vm-secret add -g testRG -c testCluster -n snt --source-vault-id /subscriptions/XXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/resourceGroups/testRG/providers/Microsoft.KeyVault/vaults/testkv --certificate-url https://testskv.vault.azure.net:443/secrets/TestCert/xxxxxxxxxxxxxxxxxxxxxxxx --certificate-store my
+"""
