@@ -15,6 +15,10 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
+def _is_vendored_sdk_path(path_comps):
+    return len(path_comps) >= 5 and path_comps[4] == 'vendored_sdks'
+
+
 def resolve_client_arg_name(operation, kwargs):
     if not isinstance(operation, str):
         raise CLIError("operation should be type 'str'. Got '{}'".format(type(operation)))
@@ -25,7 +29,7 @@ def resolve_client_arg_name(operation, kwargs):
 
     path_comps = path.split('.')
     if path_comps[0] == 'azure':
-        if path_comps[1] != 'cli' or len(path_comps) >= 5 and path_comps[4] == 'vendored_sdks':
+        if path_comps[1] != 'cli' or _is_vendored_sdk_path(path_comps):
             # Public SDK: azure.mgmt.resource... (mgmt-plane) or azure.storage.blob... (data-plane)
             # Vendored SDK: azure.cli.command_modules.keyvault.vendored_sdks...
             client_arg_name = 'self'

@@ -173,12 +173,12 @@ examples:
 
 helps['keyvault list-deleted'] = """
 type: command
-short-summary: Gets information about the deleted Vaults or HSMs in a subscription.
+short-summary: Get information about the deleted Vaults or HSMs in a subscription.
 """
 
 helps['keyvault purge'] = """
 type: command
-short-summary: Permanently deletes the specified Vault or HSM. Aka Purges the deleted Vault or HSM.
+short-summary: Permanently delete the specified Vault or HSM. Aka Purges the deleted Vault or HSM.
 """
 
 helps['keyvault key'] = """
@@ -197,7 +197,7 @@ long-summary: The delete key operation cannot be used to remove individual versi
 
 helps['keyvault key encrypt'] = """
 type: command
-short-summary: Encrypts an arbitrary sequence of bytes using an encryption key that
+short-summary: Encrypt an arbitrary sequence of bytes using an encryption key that
     is stored in a Vault or HSM.
 long-summary: The ENCRYPT operation encrypts an arbitrary sequence of bytes using an encryption key that
     is stored in Vault or HSM. Note that the ENCRYPT operation only supports a single block
@@ -211,7 +211,7 @@ long-summary: The ENCRYPT operation encrypts an arbitrary sequence of bytes usin
 
 helps['keyvault key decrypt'] = """
 type: command
-short-summary: Decrypts a single block of encrypted data.
+short-summary: Decrypt a single block of encrypted data.
 long-summary: The DECRYPT operation decrypts a well-formed block of ciphertext using the target encryption
     key and specified algorithm. This operation is the reverse of the ENCRYPT operation; only a
     single block of data may be decrypted, the size of this block is dependent on the target key
@@ -222,7 +222,7 @@ long-summary: The DECRYPT operation decrypts a well-formed block of ciphertext u
 
 helps['keyvault key backup'] = """
 type: command
-short-summary: Requests that a backup of the specified key be downloaded to the client.
+short-summary: Request that a backup of the specified key be downloaded to the client.
 long-summary: The Key Backup operation exports a key from Vault or HSM in a protected form. Note that
     this operation does NOT return key material in a form that can be used outside the Vault or HSM
     system, the returned key material is either protected to a HSM or to Vault itself. The intent
@@ -237,14 +237,14 @@ long-summary: The Key Backup operation exports a key from Vault or HSM in a prot
 
 helps['keyvault key create'] = """
 type: command
-short-summary: Creates a new key, stores it, then returns key parameters and attributes to the client.
+short-summary: Create a new key, stores it, then returns key parameters and attributes to the client.
 long-summary: The create key operation can be used to create any key type in Vault or HSM. If the named
     key already exists, Vault or HSM creates a new version of the key. It requires the keys/create permission.
 """
 
 helps['keyvault key download'] = """
 type: command
-short-summary: Downloads the public part of a stored key.
+short-summary: Download the public part of a stored key.
 examples:
   - name: Save the key with PEM encoding.
     text: |
@@ -256,8 +256,8 @@ examples:
 
 helps['keyvault key list'] = """
 type: command
-short-summary: Lists keys in the specified Vault or HSM.
-long-summary: Retrieves a list of the keys in the Vault or HSM as JSON Web Key structures that contain the
+short-summary: List keys in the specified Vault or HSM.
+long-summary: Retrieve a list of the keys in the Vault or HSM as JSON Web Key structures that contain the
     public part of a stored key. The LIST operation is applicable to all key types, however only the base
     key identifier, attributes, and tags are provided in the response. Individual versions of a key are not
     listed in the response. This operation requires the keys/list permission.
@@ -265,8 +265,8 @@ long-summary: Retrieves a list of the keys in the Vault or HSM as JSON Web Key s
 
 helps['keyvault key list-deleted'] = """
 type: command
-short-summary: Lists the deleted keys in the specified Vault or HSM.
-long-summary: Retrieves a list of the keys in the Vault or HSM as JSON Web Key structures that contain the
+short-summary: List the deleted keys in the specified Vault or HSM.
+long-summary: Retrieve a list of the keys in the Vault or HSM as JSON Web Key structures that contain the
     public part of a deleted key. This operation includes deletion-specific information. The Get Deleted Keys
     operation is applicable for vaults enabled for soft-delete. While the operation can be invoked on any
     Vault or HSM, it will return an error if invoked on a non soft-delete enabled Vault or HSM. This operation
@@ -275,7 +275,7 @@ long-summary: Retrieves a list of the keys in the Vault or HSM as JSON Web Key s
 
 helps['keyvault key purge'] = """
 type: command
-short-summary: Permanently deletes the specified key.
+short-summary: Permanently delete the specified key.
 long-summary: The Purge Deleted Key operation is applicable for soft-delete enabled Vaults or HSMs. While the
     operation can be invoked on any Vault or HSM, it will return an error if invoked on a non soft-delete enabled
     Vault or HSM. This operation requires the keys/purge permission.
@@ -283,7 +283,7 @@ long-summary: The Purge Deleted Key operation is applicable for soft-delete enab
 
 helps['keyvault key recover'] = """
 type: command
-short-summary: Recovers the deleted key to its latest version.
+short-summary: Recover the deleted key to its latest version.
 long-summary: The Recover Deleted Key operation is applicable for deleted keys in soft-delete enabled
     Vaults or HSMs. It recovers the deleted key back to its latest version under /keys. An attempt to recover
     an non-deleted key will return an error. Consider this the inverse of the delete operation on soft-delete
@@ -292,8 +292,8 @@ long-summary: The Recover Deleted Key operation is applicable for deleted keys i
 
 helps['keyvault key restore'] = """
 type: command
-short-summary: Restores a backed up key to a Vault or HSM.
-long-summary: Imports a previously backed up key into Vault or HSM, restoring the key, its key identifier, attributes
+short-summary: Restore a backed up key to a Vault or HSM.
+long-summary: Import a previously backed up key into Vault or HSM, restoring the key, its key identifier, attributes
     and access control policies. The RESTORE operation may be used to import a previously backed up key. Individual
     versions of a key cannot be restored. The key is restored in its entirety with the same key name as it had when
     it was backed up. If the key name is not available in the target Key Vault, the RESTORE operation will be rejected.
@@ -314,7 +314,7 @@ long-summary: In order to perform this operation, the key must already exist in 
 
 helps['keyvault key show-deleted'] = """
 type: command
-short-summary: Gets the public part of a deleted key.
+short-summary: Get the public part of a deleted key.
 long-summary: The Get Deleted Key operation is applicable for soft-delete enabled Vaults or HSMs. While the
     operation can be invoked on any Vault or HSM, it will return an error if invoked on a non soft-delete enabled
     Vault or HSM. This operation requires the keys/get permission.
@@ -322,7 +322,7 @@ long-summary: The Get Deleted Key operation is applicable for soft-delete enable
 
 helps['keyvault key get-policy-template'] = """
 type: command
-short-summary: Returns policy template as JSON encoded policy definition.
+short-summary: Return policy template as JSON encoded policy definition.
 """
 
 helps['keyvault list'] = """
@@ -458,7 +458,7 @@ examples:
 helps['keyvault recover'] = """
 type: command
 short-summary: Recover a Vault or HSM.
-long-summary: Recovers a previously deleted Vault or HSM for which soft delete was enabled.
+long-summary: Recover a previously deleted Vault or HSM for which soft delete was enabled.
 examples:
   - name: Recover a key vault. (autogenerated)
     text: |
@@ -471,18 +471,15 @@ type: group
 short-summary: Manage user roles for access control.
 """
 
-
 helps['keyvault role assignment'] = """
 type: group
 short-summary: Manage role assignments.
 """
 
-
 helps['keyvault role definition'] = """
 type: group
 short-summary: Manage role definitions.
 """
-
 
 helps['keyvault secret'] = """
 type: group

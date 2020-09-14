@@ -8,12 +8,13 @@ from __future__ import print_function
 import json
 import os
 import pytest
+import tempfile
 import time
 import unittest
 from datetime import datetime, timedelta
 from dateutil import tz
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
 
 from knack.util import CLIError
@@ -34,10 +35,15 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 SECURITY_DOMAIN_KEYS_DIR = os.path.join(TEST_DIR, 'security_domain_keys')
 
-ACTIVE_HSM_NAME = 'clitest0913'
+# for other HSM operations live/playback
+ACTIVE_HSM_NAME = 'clitest0914b'
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
-NEXT_ACTIVE_HSM_NAME = 'clitest0913b'
-NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(NEXT_ACTIVE_HSM_NAME)
+
+# For security domain playback
+SD_ACTIVE_HSM_NAME = 'clitest0914'
+SD_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(SD_ACTIVE_HSM_NAME)
+SD_NEXT_ACTIVE_HSM_NAME = 'clitest0914b'
+SD_NEXT_ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(SD_NEXT_ACTIVE_HSM_NAME)
 
 
 def _create_keyvault(test, kwargs, additional_args=None):
@@ -339,31 +345,28 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
-    @unittest.skip('Hard to make it idempotent to run recording/live.')
+    @record_only()
     @AllowLargeResponse()
     def test_keyvault_hsm_security_domain(self):
+        sdtest_dir = tempfile.mkdtemp()
         self.kwargs.update({
-            'hsm_url': ACTIVE_HSM_URL,
-            'hsm_name': ACTIVE_HSM_NAME,
-            'next_hsm_url': NEXT_ACTIVE_HSM_URL,
-            'next_hsm_name': NEXT_ACTIVE_HSM_NAME,
+            'hsm_url': SD_ACTIVE_HSM_NAME,
+            'hsm_name': SD_ACTIVE_HSM_NAME,
+            'next_hsm_url': SD_NEXT_ACTIVE_HSM_URL,
+            'next_hsm_name': SD_NEXT_ACTIVE_HSM_NAME,
             'loc': 'eastus2euap',
             'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa',
             'key_name': self.create_random_name('key', 10),
             'rg': 'bim-rg',
             'rg_lock': 'bim-lock',
             'pem_dir': os.path.join(SECURITY_DOMAIN_KEYS_DIR, 'pem'),
-            'sdtest_dir': os.path.join(SECURITY_DOMAIN_KEYS_DIR, 'sdtest')
+            'sdtest_dir': sdtest_dir
         })
         self.kwargs.update({
             'sdfile': os.path.join(self.kwargs['sdtest_dir'], 'sdfile.json'),
             'exchange_key': os.path.join(self.kwargs['sdtest_dir'], 'sdex.pem'),
             'key_backup': os.path.join(self.kwargs['sdtest_dir'], 'key.bak')
         })
-
-        for p in ['sdfile', 'exchange_key', 'key_backup']:
-            if os.path.exists(self.kwargs[p]):
-                os.remove(self.kwargs[p])
 
         # create a new key and backup it
         self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
@@ -383,8 +386,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
                  '--retention-days 7 --no-wait')
 
         # wait until the HSM is ready for recovery
-        self.cmd('az keyvault wait-hsm -n {next_hsm_name} '
-                 '--custom "statusMessage!=\'Resource creation in progress. Allocating hardware...\'"')
+        self.cmd('az keyvault wait-hsm --hsm-name {next_hsm_name} --created')
 
         # download the exchange key
         self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
@@ -428,7 +430,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                      self.exists('startTime'),
                      self.exists('id'),
                      self.exists('azureStorageBlobContainerUri')
-                 ]).get_output_in_json()
+                 ])
 
         backup_data = self.cmd('az keyvault backup start --hsm-name {hsm_name} --blob-container-name {blob} '
                                '--storage-account-name {storage_account} '
@@ -449,7 +451,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                      self.check('status', 'Succeeded'),
                      self.exists('startTime'),
                      self.exists('id')
-                 ]).get_output_in_json()
+                 ])
 
 
 class KeyVaultHSMRoleScenarioTest(ScenarioTest):
