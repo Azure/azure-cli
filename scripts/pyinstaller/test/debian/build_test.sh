@@ -63,7 +63,7 @@ cp $deb_file /mnt/output/
 dpkg -i $deb_file
 
 shopt -s dotglob
-cd ${WORKDIR}/fulltests/lib/python3.7/site-packages/azure/cli/command_moduels
+cd ${WORKDIR}/fulltests/lib/python3.7/site-packages/azure/cli/command_modules
 find * -prune -type d | while IFS= read -r d; do
     if [[ "$d" != \__* ]]; then
         az run-tests --path ${WORKDIR}/fulltests/lib/python3.7/site-packages --module $d
