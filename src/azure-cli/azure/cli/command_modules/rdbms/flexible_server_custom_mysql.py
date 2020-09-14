@@ -15,7 +15,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, update_kwargs, generate_password, parse_maintenance_window
 from .flexible_server_custom_common import user_confirmation, _server_list_custom_func
-from .flexible_server_virtual_network import create_vnet, prepareVnet
+from .flexible_server_virtual_network import create_vnet, prepare_vnet
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -52,7 +52,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-            subnet_id = prepareVnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
+            subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
                                     location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
             delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
                     subnet_arm_resource_id=subnet_id)

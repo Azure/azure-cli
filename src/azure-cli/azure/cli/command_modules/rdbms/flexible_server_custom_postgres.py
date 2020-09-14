@@ -16,7 +16,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
 from .flexible_server_custom_common import user_confirmation, _server_list_custom_func
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, update_kwargs, generate_password, parse_maintenance_window
-from .flexible_server_virtual_network import create_vnet, prepareVnet
+from .flexible_server_virtual_network import create_vnet, prepare_vnet
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
@@ -56,7 +56,7 @@ def _flexible_server_create(cmd, client,
 
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-            subnet_id = prepareVnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+            subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name, location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
             delegated_subnet_arguments = postgresql_flexibleservers.models.ServerPropertiesDelegatedSubnetArguments(
                 subnet_arm_resource_id=subnet_id)
         elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
@@ -312,17 +312,17 @@ def flexible_server_connection_string(
 
 def _create_postgresql_connection_strings(host, user, password, database):
     result = {
-        'psql_cmd': "psql --host={host} --port=5432 --username={user} --dbname={database}",
-        'ado.net': "Server={host};Database={database};Port=5432;User Id={user};Password={password};",
-        'jdbc': "jdbc:postgresql://{host}:5432/{database}?user={user}&password={password}",
-        'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:5432/{database}  "
+        'psql_cmd': "psql --host={host} --port=5432 --username={user} --dbname=postgres",
+        'ado.net': "Server={host};Database=postgres;Port=5432;User Id={user};Password={password};",
+        'jdbc': "jdbc:postgresql://{host}:5432/postgres?user={user}&password={password}",
+        'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:5432/postgres  "
                        "spring.datasource.username={user}  "
                        "spring.datasource.password={password}",
-        'node.js': "var client = new pg.Client('postgres://{user}:{password}@{host}:5432/{database}');",
-        'php': "host={host} port=5432 dbname={database} user={user} password={password}",
-        'python': "cnx = psycopg2.connect(database='{database}', user='{user}', host='{host}', password='{password}', "
+        'node.js': "var client = new pg.Client('postgres://{user}:{password}@{host}:5432/postgres');",
+        'php': "host={host} port=5432 dbname=postgres user={user} password={password}",
+        'python': "cnx = psycopg2.connect(database='postgres', user='{user}', host='{host}', password='{password}', "
                   "port='5432')",
-        'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}', :dbname => '{database}', "
+        'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}', :dbname => 'postgres', "
                 ":port => '5432', :password => '{password}')",
     }
 
