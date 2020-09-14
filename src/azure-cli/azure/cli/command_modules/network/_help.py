@@ -5379,9 +5379,19 @@ type: command
 short-summary: Update a virtual router.
 """
 
+helps['network vrouter show'] = """
+type: command
+short-summary: Show a virtual router.
+"""
+
 helps['network vrouter list'] = """
 type: command
 short-summary: List all virtual routers under a subscription or a resource group.
+"""
+
+helps['network vrouter delete'] = """
+type: command
+short-summary: Delete a virtual router under a resource group.
 """
 
 helps['network vrouter peering'] = """
@@ -5397,6 +5407,21 @@ short-summary: Create a virtual router peering.
 helps['network vrouter peering update'] = """
 type: command
 short-summary: Update a virtual router peering.
+"""
+
+helps['network vrouter peering list'] = """
+type: command
+short-summary: List all virtual router peerings under a resource group.
+"""
+
+helps['network vrouter peering show'] = """
+type: command
+short-summary: Show a virtual router peering
+"""
+
+helps['network vrouter peering delete'] = """
+type: command
+short-summary: Delete a virtual router peering.
 """
 
 helps['network watcher'] = """
