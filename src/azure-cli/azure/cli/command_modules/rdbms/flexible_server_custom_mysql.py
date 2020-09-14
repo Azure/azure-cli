@@ -412,7 +412,7 @@ def _create_mysql_connection_strings(host, user, password, database):
         'host': host,
         'user': user,
         'password': password if password is not None else '{password}',
-        'database': database if database is not None else 'mysql'
+        'database': database
     }
 
     for k, v in result.items():
