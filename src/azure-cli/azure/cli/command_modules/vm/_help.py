@@ -889,6 +889,18 @@ examples:
     crafted: true
 """
 
+helps['vm boot-diagnostics get-sas'] = """
+type: command
+short-summary: Get SAS URIs for a virtual machine's boot diagnostic logs.
+parameters:
+  - name: --expire
+    short-summary: Expiration duration in minutes for the SAS URIs with a value between 1 to 1440 minutes. If not specified, SAS URIs will be generated with a default expiration duration of 120 minutes.
+examples:
+  - name: Get SAS URIs for a virtual machine's boot diagnostic logs.
+    text: >
+        az vm boot-diagnostics get-sas -g MyResourceGroup -n MyVirtualMachine
+"""
+
 helps['vm capture'] = """
 type: command
 short-summary: Capture information for a stopped VM.

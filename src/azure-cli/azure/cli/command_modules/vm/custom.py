@@ -1491,6 +1491,12 @@ def get_boot_log(cmd, resource_group_name, vm_name):
 
     # our streamwriter not seekable, so no parallel.
     storage_client.get_blob_to_stream(container, blob, BootLogStreamWriter(sys.stdout), max_connections=1)
+
+
+def get_sas(cmd, resource_group_name, vm_name, expire=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machines.retrieve_boot_diagnostics_data(
+        resource_group_name, vm_name, sas_uri_expiration_time_in_minutes=expire)
 # endregion
 
 
