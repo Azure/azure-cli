@@ -351,7 +351,7 @@ helps['cosmosdb gremlin graph throughput migrate'] = """
 type: command
 short-summary: Migrate the throughput of the Gremlin Graph between autoscale and manually provisioned.
 examples:
-  -name: Migrate to autoscale
+  - name: Migrate to autoscale
   text: az cosmosdb gremlin graph throughput migrate -g MyResourceGroup -a MyAccount -d MyDatabase -n MyGraph --throughput-type "autoscale"
 """
 
@@ -459,8 +459,8 @@ helps['cosmosdb mongodb collection throughput migrate'] = """
 type: command
 short-summary: Migrate the throughput of the MongoDB collection between autoscale and manually provisioned.
 examples:
-  -name: Migrate to autoscale
-  text: az cosmosdb mongodb collection throughput migrate -g MyResourceGroup -a MyAccount -d MyDatabase -n MyCollection --throughput-type "autoscale"
+  - name: Migrate to autoscale
+    text: az cosmosdb mongodb collection throughput migrate -g MyResourceGroup -a MyAccount -d MyDatabase -n MyCollection --throughput-type "autoscale"
 """
 
 helps['cosmosdb mongodb collection update'] = """
@@ -525,8 +525,8 @@ helps['cosmosdb mongodb database throughput migrate'] = """
 type: command
 short-summary: Migrate the throughput of the MongoDB database between autoscale and manually provisioned.
 examples:
-  -name: Migrate to autoscale
-  text: az cosmosdb mongodb database throughput migrate -g MyResourceGroup -a MyAccount -d MyDatabase -n MyCollection --throughput-type "autoscale"
+  - name: Migrate to autoscale
+    text: az cosmosdb mongodb database throughput migrate -g MyResourceGroup -a MyAccount -d MyDatabase -n MyCollection --throughput-type "autoscale"
 """
 
 helps['cosmosdb network-rule'] = """
@@ -748,8 +748,8 @@ helps['cosmosdb sql container throughput migrate'] = """
 type: command
 short-summary: Migrate the throughput of the SQL container between autoscale and manually provisioned.
 examples: 
-  -name: Migrate to autoscale
-  text: az cosmosdb sql container throughput migrate -g MyResourceGroup -a MyAccount -d MyDatabase -n MyContainer --throughput-type "autoscale"
+  - name: Migrate to autoscale
+    text: az cosmosdb sql container throughput migrate -g MyResourceGroup -a MyAccount -d MyDatabase -n MyContainer --throughput-type "autoscale"
 """
 
 helps['cosmosdb sql container update'] = """
@@ -805,8 +805,8 @@ helps['cosmosdb sql database throughput migrate'] = """
 type: command
 short-summary: Migrate the throughput of the SQL database between autoscale and manually provisioned.
 examples: 
-  -name: Migrate to autoscale
-  text: az cosmosdb sql database throughput migrate -g MyResourceGroup -a MyAccount -n MyDatabase --throughput-type "autoscale"
+  - name: Migrate to autoscale
+    text: az cosmosdb sql database throughput migrate -g MyResourceGroup -a MyAccount -n MyDatabase --throughput-type "autoscale"
 """
 
 helps['cosmosdb table'] = """
@@ -853,8 +853,8 @@ helps['cosmosdb table throughput migrate'] = """
 type: command
 short-summary: Migrate the throughput of the Table between autoscale and manually provisioned.
 examples: 
-  -name: Migrate to autoscale
-  text: az cosmosdb table throughput migrate -g MyResourceGroup -a MyAccount -n MyTable --throughput-type "autoscale"
+  - name: Migrate to autoscale
+    text: az cosmosdb table throughput migrate -g MyResourceGroup -a MyAccount -n MyTable --throughput-type "autoscale"
 """
 
 helps['cosmosdb update'] = """
