@@ -171,6 +171,7 @@ jobs:
         # Commit changes
         if [[ "$(USER_USERNAME)" != "" || "$(USER_TOKEN)" != "" ]]; then
           REPO="$(USER_REPO)"
+          # Pass username and token so that we can commit changes
           git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
           #git clone https://github.com/Azure/azure-cli-extensions.git
         else
@@ -211,7 +212,7 @@ jobs:
           cd azure-cli
           git status
           git add .
-          git commit -m "auto commit"
+          git commit -m "Upload recording files"
           git push origin $(USER_BRANCH)
         fi
 
