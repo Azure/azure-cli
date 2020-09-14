@@ -108,3 +108,19 @@ def validate_sqlmanagement(namespace):
 
     if (sql_mgmt_mode == "NoAgent" and (namespace.sql_image_sku is None or namespace.sql_image_offer is None)):
         raise CLIError("usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME")
+
+
+# pylint: disable=too-many-statements,line-too-long
+def validate_expand(namespace):
+    '''
+    Validates if expand passes accepted values.
+    '''
+    allowed_values = ['*', 'AutoBackupSettings', 'AutoPatchingSettings', 'KeyVaultCredentialSettings', 'ServerConfigurationsManagementSettings']
+
+    if namespace.expand is not None:
+        items = namespace.expand.split(",")
+        if "*" not in items:
+            for item in items:
+                if item.lower() not in map(str.lower, allowed_values):
+                    raise CLIError(
+                        "%s item is not a valid value for '--expand'. \nAllowed values: *, AutoBackupSettings, AutoPatchingSettings, KeyVaultCredentialSettings, ServerConfigurationsManagementSettings." % item)

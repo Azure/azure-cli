@@ -68,7 +68,9 @@ def transform_sqlvm_output(result):
         if result.auto_backup_settings is not None:
             output['autoBackupSettings'] = format_auto_backup_settings(result.auto_backup_settings)
         if result.server_configurations_management_settings is not None:
-            output['serverConfigurationManagementSettings'] = format_server_configuration_management_settings(result.server_configurations_management_settings)
+            output['serverConfigurationsManagementSettings'] = format_server_configuration_management_settings(result.server_configurations_management_settings)
+        if result.key_vault_credential_settings is not None:
+            output['keyVaultCredentialSettings'] = format_key_vault_credential_settings(result.key_vault_credential_settings)
 
         return output
     except AttributeError:

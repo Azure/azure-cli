@@ -1609,6 +1609,7 @@ Release History
 
 **SQL VM**
 
+* Added more arguments to `az sql vm show --expand` command 
 * New package upgrade 0.5.
 * Add new --license-type supporting Disaster Recovery Benefit (DR).
 
