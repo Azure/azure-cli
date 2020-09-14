@@ -33,7 +33,6 @@ def _asn1_to_iso8601(asn1_date):
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
-SECURITY_DOMAIN_KEYS_DIR = os.path.join(TEST_DIR, 'security_domain_keys')
 
 # for other HSM operations live/playback
 ACTIVE_HSM_NAME = 'clitest0914b'
@@ -359,7 +358,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
             'key_name': self.create_random_name('key', 10),
             'rg': 'bim-rg',
             'rg_lock': 'bim-lock',
-            'pem_dir': os.path.join(SECURITY_DOMAIN_KEYS_DIR, 'pem'),
+            'pem_dir': os.path.join(KEYS_DIR, 'security_domain_pem'),
             'sdtest_dir': sdtest_dir
         })
         self.kwargs.update({
