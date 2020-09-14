@@ -796,7 +796,7 @@ class AzCliCommandInvoker(CommandInvoker):
             for d in deprecations:
                 print(d.message, file=sys.stderr)
             for p in previews:
-                print(p.message, file=sys.stderr, flush=True)
+                print(p.message, file=sys.stderr)
             for e in experimentals:
                 print(e.message, file=sys.stderr)
             return
