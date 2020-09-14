@@ -12,10 +12,10 @@ logger = get_logger(__name__)
 
 
 ## Common functions used by other providers
-def _flexible_server_update_get(client, resource_group_name, server_name):
+def flexible_server_update_get(client, resource_group_name, server_name):
     return client.get(resource_group_name, server_name)
 
-def _flexible_server_update_set(client, resource_group_name, server_name, parameters):
+def flexible_server_update_set(client, resource_group_name, server_name, parameters):
     return client.update(resource_group_name, server_name, parameters)
 
 def server_list_custom_func(client, resource_group_name=None):
@@ -50,11 +50,11 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
             logger.error(ex)
         return result
 
-def _flexible_firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
+def flexible_firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
-def _flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
+def flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
     return client.create_or_update(
         resource_group_name,
         server_name,

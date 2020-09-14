@@ -99,8 +99,8 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',
-                                 getter_name='_flexible_server_update_get', getter_type=flexible_server_custom_common,
-                                 setter_name='_flexible_server_update_set', setter_type=flexible_server_custom_common,
+                                 getter_name='flexible_server_update_get', getter_type=flexible_server_custom_common,
+                                 setter_name='flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
         g.custom_wait_command('wait', 'flexible_server_postgresql_get')
@@ -116,8 +116,8 @@ def load_flexibleserver_command_table(self, _):
         g.command('list', 'list_by_server')
         # g.custom_command('list', '_flexible_firewall_get_test') # this is setup solely for debugging
         g.generic_update_command('update',
-                                 getter_name='_flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
-                                 setter_name='_flexible_firewall_rule_custom_setter', setter_type=flexible_server_custom_common,
+                                 getter_name='flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
+                                 setter_name='flexible_firewall_rule_custom_setter', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_firewall_rule_update_custom_func',
                                  custom_func_type=flexible_server_custom_common)
@@ -150,8 +150,8 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'server_list_custom_func', custom_command_type=flexible_server_custom_common, table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',
-                                 getter_name='_flexible_server_update_get', getter_type=flexible_server_custom_common,
-                                 setter_name='_flexible_server_update_set', setter_type=flexible_server_custom_common,
+                                 getter_name='flexible_server_update_get', getter_type=flexible_server_custom_common,
+                                 setter_name='flexible_server_update_set', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_server_update_custom_func')
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
@@ -166,8 +166,8 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.generic_update_command('update',
-                                 getter_name='_flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
-                                 setter_name='_flexible_firewall_rule_custom_setter', setter_type=flexible_server_custom_common,
+                                 getter_name='flexible_firewall_rule_custom_getter', getter_type=flexible_server_custom_common,
+                                 setter_name='flexible_firewall_rule_custom_setter', setter_type=flexible_server_custom_common,
                                  setter_arg_name='parameters',
                                  custom_func_name='flexible_firewall_rule_update_custom_func',
                                  custom_func_type=flexible_server_custom_common)
