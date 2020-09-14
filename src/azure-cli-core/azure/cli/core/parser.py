@@ -433,7 +433,7 @@ class AzCliCommandParser(CLICommandParser):
                                 import platform
                                 exit_code = subprocess.call(cmd_list, shell=platform.system() == 'Windows')
                                 error_msg = ("Extension {} dynamically installed and commands will be "
-                                            "rerun automatically.").format(ext_name)
+                                             "rerun automatically.").format(ext_name)
                                 telemetry.set_user_fault(error_msg)
                                 self.exit(exit_code)
                             else:
