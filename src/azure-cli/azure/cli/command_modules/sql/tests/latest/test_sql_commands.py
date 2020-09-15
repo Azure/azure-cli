@@ -4775,7 +4775,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         })
 
         # Start Log Replay Service
-        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} -ss {storage_sas} -su {storage_uri} --no-wait',
+        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --ss {storage_sas} --su {storage_uri} --no-wait',
                  checks=NoneCheck())
 
         if self.in_recording or self.is_live:
@@ -4868,7 +4868,7 @@ class SqlManagedDatabaseLogReplayCancelScenarionTest(ScenarioTest):
         })
 
         # Start Log Replay Service
-        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} -ss {storage_sas} -su {storage_uri} --no-wait',
+        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --ss {storage_sas} --su {storage_uri} --no-wait',
                  checks=NoneCheck())
 
         # Wait a minute to start restoring

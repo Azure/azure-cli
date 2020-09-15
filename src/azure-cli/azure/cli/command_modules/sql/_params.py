@@ -1833,12 +1833,12 @@ def load_arguments(self, _):
 
         c.argument('storage_container_uri',
                    required=True,
-                   options_list=['--storage-uri', '-su'],
+                   options_list=['--storage-uri', '--su'],
                    help='The URI of the storage container where backups are.')
 
         c.argument('storage_container_sas_token',
                    required=True,
-                   options_list=['--storage-sas', '-ss'],
+                   options_list=['--storage-sas', '--ss'],
                    help='The authorization Sas token to access storage container where backups are.')
 
     with self.argument_context('sql midb log-replay complete') as c:
