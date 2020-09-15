@@ -257,13 +257,13 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=location)
-    def test_postgres_flexible_server_firewall_rule(self, resource_group):
+    def test_postgres_flexible_server_proxy_resource(self, resource_group):
         self._test_firewall_rule_mgmt('postgres', resource_group)
         self._test_parameter_mgmt('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=location)
-    def test_mysql_flexible_server_firewall_rule(self, resource_group):
+    def test_mysql_flexible_server_proxy_resource(self, resource_group):
         self._test_firewall_rule_mgmt('mysql', resource_group)
         self._test_parameter_mgmt('mysql', resource_group)
 
