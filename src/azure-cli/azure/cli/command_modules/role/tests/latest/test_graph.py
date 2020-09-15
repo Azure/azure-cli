@@ -760,7 +760,7 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
             self.assertEqual(permissions, [])
 
-            # Test delete non existing api permission from existing api
+            # Test delete non-existing api permission from existing api
             self.cmd('ad app permission add --id {app_id} --api {ms_graph_resource} '
                      '--api-permissions {ms_target_api}=Scope {ms_target_api2}=Scope')
             self.cmd('ad app permission delete --id {app_id} --api {ms_graph_resource} --api-permissions 22222222-0000-0000-c000-000000000000')
