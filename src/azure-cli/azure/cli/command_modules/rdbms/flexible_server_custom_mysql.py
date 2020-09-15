@@ -347,9 +347,7 @@ def flexible_server_mysql_get(cmd, resource_group_name, server_name):
     return client.servers.get(resource_group_name, server_name)
 
 
-def flexible_list_skus(cmd, client, location, json=None):
-    if not json or json.lower() == 'false':
-        set_output_format(cmd.cli_ctx, 'table')
+def flexible_list_skus(cmd, client, location):
     result = client.list(location)
     logger.warning('For prices please refer to https://aka.ms/mysql-pricing')
     return result

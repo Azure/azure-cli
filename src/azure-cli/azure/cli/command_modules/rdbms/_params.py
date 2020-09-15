@@ -336,7 +336,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-                c.argument('json', options_list=['--json'], help='Output in json format. true/false')
 
         for scope in ['show', 'set']:
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
@@ -388,6 +387,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} flexible-server db delete'.format(command_group)) as c:
             c.argument('database_name', arg_type=database_name_getter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+            c.argument('force', options_list=['--force'], action='store_true', help='Delete the database without prompt')
 
         with self.argument_context('{} flexible-server show-connection-string'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the server.')

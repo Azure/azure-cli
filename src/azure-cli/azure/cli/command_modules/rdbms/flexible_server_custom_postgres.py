@@ -274,9 +274,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 
 
-def flexible_list_skus(cmd, client, location, json=None):
-    if not json or json.lower() == 'false':
-        set_output_format(cmd.cli_ctx, 'table')
+def flexible_list_skus(cmd, client, location):
     result = client.execute(location)
     logger.warning('For prices please refer to https://aka.ms/postgres-pricing')
     return result
