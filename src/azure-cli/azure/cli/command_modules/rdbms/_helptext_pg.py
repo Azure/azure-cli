@@ -101,7 +101,7 @@ examples:
 helps['postgres flexible-server parameter'] = """
 type: group
 short-summary: Commands for managing server parameter values for flexible server.
-examples:
+example:
   - name: List the parameter values for a flexible server.
     text: az postgres flexible-server parameter list
     crafted: true
@@ -112,7 +112,7 @@ type: command
 short-summary: List the parameter values for a flexible server.
 examples:
   - name: List the parameter values for a flexible server.
-    text: az postgres flexible-server parameter list
+    text: az postgres flexible-server parameter list --resource-group testGroup --server-name servername
     crafted: true
 """
 
@@ -149,12 +149,12 @@ type: command
 short-summary: Restore a flexible server from backup.
 examples:
   - name: Restore 'testServer' to a specific point-in-time as a new server 'testServerNew'.
-    text: az postgres flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --restore-point-in-time "2017-06-15T13:10:00Z"
+    text: az postgres flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --time "2017-06-15T13:10:00Z"
   - name: Restore 'testServer2' to 'testServerNew', where 'testServerNew' is in a different resource group from 'testServer2'.
     text: |
         az postgres flexible-server restore --resource-group testGroup --name testServerNew \\
             --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testServer2" \\
-            --restore-point-in-time "2017-06-15T13:10:00Z"
+            --time "2017-06-15T13:10:00Z"
 """
 
 helps['postgres flexible-server show'] = """
