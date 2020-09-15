@@ -66,7 +66,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
 
 # Cluster Region
-    with self.command_group('eventhubs cluster', eh_clusters_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=cluster_mgmt_client_factory) as g:
+    with self.command_group('eventhubs cluster', eh_clusters_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=cluster_mgmt_client_factory, min_api='2018-01-01-preview') as g:
         g.custom_command('create', 'cli_cluster_create')
         g.show_command('show', 'get')
         g.command('list', 'list_by_resource_group')
