@@ -970,7 +970,7 @@ def _get_functionapp_runtime_versions():
     runtime_to_version_strings = []
     for runtime, runtime_versions in runtime_to_version.items():
         # dotnet and custom version is not configurable, so leave out of help menu
-        if runtime == 'dotnet' or runtime == 'custom':
+        if runtime in ('dotnet', 'custom'):
             continue
         ordered_runtime_versions = list(runtime_versions.keys())
         ordered_runtime_versions.sort(key=float)
