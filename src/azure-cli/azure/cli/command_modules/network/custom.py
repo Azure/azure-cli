@@ -6333,7 +6333,33 @@ def create_virtual_router(cmd,
     return vhub_client.get(resource_group_name, virtual_hub_name)
 
 
+def virtual_router_update_getter(cmd, resource_group_name, virtual_router_name):
+    from azure.mgmt.network.models import ErrorException
+    try:
+        vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
+        return vrouter_client.get(resource_group_name, virtual_router_name)
+    except ErrorException:  # 404
+        pass
+
+    virtual_hub_name = virtual_router_name
+    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
+    return vhub_client.get(resource_group_name, virtual_hub_name)
+
+
+def virtual_router_update_setter(cmd, resource_group_name, virtual_router_name, parameters):
+    if parameters.type == 'Microsoft.Network/virtualHubs':
+        client = network_client_factory(cmd.cli_ctx).virtual_hubs
+    else:
+        client = network_client_factory(cmd.cli_ctx).virtual_routers
+
+    # If the client is virtual_hubs,
+    # the virtual_router_name represents virtual_hub_name and
+    # the parameters represents VirtualHub
+    return client.create_or_update(resource_group_name, virtual_router_name, parameters)
+
+
 def update_virtual_router(cmd, instance, tags=None):
+    # both VirtualHub and VirtualRouter own those properties
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
     return instance

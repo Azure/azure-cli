@@ -3190,16 +3190,17 @@ class NetworkVirtualRouter(ScenarioTest):
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
-    @record_only()
+    # @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='eastus2euap')
     def test_vrouter_with_virtual_hub_support(self, resource_group, resource_group_location):
         self.kwargs.update({
             'rg': 'test_vrouter_with_virtual_hub_support',    # the subscription needs to be a specified one given by service team
             'location': resource_group_location,
-            'vnet': 'vnet3',
+            'vnet': 'vnet2',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
-            'vrouter': 'vrouter3',
+            'vrouter': 'vrouter2',
+            'peer': 'peer1'
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} '
@@ -3229,14 +3230,17 @@ class NetworkVirtualRouter(ScenarioTest):
             self.check('length(virtualRouterIps)', 2),
         ])
 
-        self.cmd('network vrouter peering create -g {rg} --vrouter-name {vrouter} -n peer-1 '
+        self.cmd('network vrouter peering create -g {rg} --vrouter-name {vrouter} -n {peer} '
                  '--peer-asn 11000 --peer-ip 10.0.0.120')
 
         self.cmd('network vrouter peering list -g {rg} --vrouter-name {vrouter}')
 
-        self.cmd('network vrouter peering show -g {rg} --vrouter-name {vrouter} -n peer-1')
+        self.cmd('network vrouter peering show -g {rg} --vrouter-name {vrouter} -n {peer}')
 
-        # self.cmd('network vrouter peering update -g {rg} --vrouter-name {vrouter} -n peer-1')    # unable to update
+        # unable to update unless the ASN's range is required
+        # self.cmd('network vrouter peering update -g {rg} --vrouter-name {vrouter} -n {peer} --peer-ip 10.0.0.0')
+
+        self.cmd('network vrouter peering delete -g {rg} --vrouter-name {vrouter} -n {peer}')
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 

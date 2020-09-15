@@ -348,6 +348,12 @@ def load_command_table(self, _):
         min_api='2019-08-01'
     )
 
+    network_vrouter_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_router,
+        min_api='2019-08-01'
+    )
+
     network_vrouter_peering_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualRouterPeeringsOperations.{}',
         client_factory=cf_virtual_router_peering,
@@ -1230,7 +1236,12 @@ def load_command_table(self, _):
     # region VirtualRouter
     with self.command_group('network vrouter', network_vrouter_sdk) as g:
         g.custom_command('create', 'create_virtual_router')
-        g.generic_update_command('update', custom_func_name='update_virtual_router')
+        g.generic_update_command('update',
+                                 getter_name='virtual_router_update_getter',
+                                 getter_type=network_vrouter_update_sdk,
+                                 setter_name='virtual_router_update_setter',
+                                 setter_type=network_vrouter_update_sdk,
+                                 custom_func_name='update_virtual_router')
         g.custom_command('delete', 'delete_virtual_router')
         g.custom_show_command('show', 'show_virtual_router')
         g.custom_command('list', 'list_virtual_router')
