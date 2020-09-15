@@ -613,7 +613,6 @@ def load_arguments(self, _):
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
-        c.argument('hostname', help="Configure and attach an app service custom domain")
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -907,27 +906,6 @@ def load_arguments(self, _):
 
     with self.argument_context('appservice domain show-terms') as c:
         c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
-
-    with self.argument_context('appservice domain update') as c:
-        c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
-        c.argument('contact_info', options_list=['--contact-info', '-c'], help='The file path to a JSON object with your contact info for domain registration. '
-                                                                                'Please see the following link for the format of the JSON file expected: '
-                                                                                'https://github.com/AzureAppServiceCLI/appservice_domains_templates/blob/master/contact_info.json')
-        c.argument('privacy', options_list=['--privacy', '-p'], help='Enable privacy protection')
-        c.argument('auto_renew', options_list=['--auto-renew', '-a'], help='Enable auto-renew on the domain')
-        c.argument('remove_locks', options_list=['--remove-locks'], help='Remove read-only protecting the domain resoure, then update domain')
-        c.argument('tags', arg_type=tags_type)
-
-    with self.argument_context('appservice domain show') as c:
-        c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
-
-    with self.argument_context('appservice domain delete') as c:
-        c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
-        c.argument('remove_locks', options_list=['--remove-locks'], help='Remove read-only and delete locks protecting the domain resoure, then delete domain')
-
-    with self.argument_context('appservice domain renew') as c:
-        c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
-        c.argument('remove_locks', options_list=['--remove-locks'], help='Remove read-only locks protecting the domain resoure, then renew domain')
 
     with self.argument_context('staticwebapp') as c:
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
