@@ -46,11 +46,9 @@ type: command
 short-summary: Create a new firewall rule for a flexible server.
 examples:
   - name: Create a firewall rule allowing connections from a specific IP address.
-    text: az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testServer \\
-                --firewall-rule-name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
+    text: az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testServer --name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
   - name: Create a firewall rule allowing connections from an IP address range.
-    text: az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testServer \\
-            --firewall-rule-name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
+    text: az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testServer --name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
 """
 
 helps['postgres flexible-server firewall-rule delete'] = """
@@ -58,14 +56,14 @@ type: command
 short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
-    text: az postgres flexible-server firewall-rule delete --firewall-rule-name testRule --resource-group testGroup --server-name testServer
+    text: az postgres flexible-server firewall-rule delete --name testRule --resource-group testGroup --server-name testServer
     crafted: true
 """
 
 helps['postgres flexible-server firewall-rule list'] = """
 type: command
 short-summary: List all firewall rules for a flexible server.
-examples:
+example:
   - name: List all firewall rules for a server.
     text: az postgres server firewall-rule list --resource-group testGroup --server-name testServer
     crafted: true
@@ -76,7 +74,7 @@ type: command
 short-summary: Get the details of a firewall rule.
 examples:
   - name: Get the details of a firewall rule.
-    text: az postgres flexible-server firewall-rule show --firewall-rule-name testRule --resource-group testGroup --server-name testServer
+    text: az postgres flexible-server firewall-rule show --name testRule --resource-group testGroup --server-name testServer
     crafted: true
 """
 
@@ -85,11 +83,9 @@ type: command
 short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule's start IP address.
-    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testServer //
-            --firewall-rule-name allowiprange --start-ip-address 107.46.14.1
+    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testServer --name allowiprange --start-ip-address 107.46.14.1
   - name: Update a firewall rule's start and end IP address.
-    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testServer //
-            --firewall-rule-name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
+    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testServer --name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
 """
 
 helps['postgres flexible-server list'] = """
@@ -125,9 +121,9 @@ type: command
 short-summary: Update the parameter of a flexible server.
 examples:
   - name: Set a new parameter value.
-    text: az postgres flexible-server parameter set --configuration-name parameterName -value parameterValue
+    text: az postgres flexible-server parameter set --name parameterName --value parameterValue
   - name: Set a parameter value to its default.
-    text: az postgres flexible-server parameter set --configuration-name parameterName
+    text: az postgres flexible-server parameter set --name parameterName
 """
 
 helps['postgres flexible-server parameter show'] = """
@@ -135,7 +131,7 @@ type: command
 short-summary: Get the parameter for a flexible server."
 examples:
   - name: Get the parameter for a server.W
-    text: az postgres flexible-server parameter show --configuration-name parameterName
+    text: az postgres flexible-server parameter show --name parameterName
     crafted: true
 """
 
@@ -204,15 +200,15 @@ examples:
 helps['postgres flexible-server list-skus'] = """
 type: command
 short-summary: Lists available sku's in the given region.
-examples:
+example:
   - name: Lists available sku's in the given region.
-    text: az mysql flexible-server list-skus -l
+    text: az mysql flexible-server list-skus -l eastus
 """
 
 helps['postgres flexible-server wait'] = """
 type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
-examples:
+example:
   - name: Wait for the flexible server to satisfy certain conditions.
     text: az postgres server wait --exists --resource-group testGroup --name testServer
     crafted: true
