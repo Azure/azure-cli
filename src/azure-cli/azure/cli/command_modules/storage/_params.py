@@ -412,11 +412,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
-        c.argument('enable_container_delete_retention', arg_type=get_three_state_flag(),
+        c.argument('enable_container_delete_retention',
+                   arg_type=get_three_state_flag(),
+                   options_list=['--enable-container-delete-retention', '-c'],
                    arg_group='Container Delete Retention Policy', min_api='2019-06-01',
                    help='Enable container delete retention policy for container soft delete when set to true. '
                         'Disable container delete retention policy when set to false.')
-        c.argument('container_delete_retention_days', type=int, arg_group='Container Delete Retention Policy',
+        c.argument('container_delete_retention_days',
+                   options_list=['--container-delete-retention-days', '--container-days'],
+                   type=int, arg_group='Container Delete Retention Policy',
                    min_api='2019-06-01', validator=validate_container_delete_retention_days,
                    help='Indicate the number of days that the deleted container should be retained. The minimum '
                         'specified value can be 1 and the maximum value can be 365.')
@@ -444,7 +448,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
                    min_api='2019-06-01', help='Enable file service properties for share soft delete.')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
-                   validator=validate_delete_retention_days, min_api='2019-06-01',
+                   validator=validate_file_delete_retention_days, min_api='2019-06-01',
                    help=' Indicate the number of days that the deleted item should be retained. The minimum specified '
                    'value can be 1 and the maximum value can be 365.')
 
