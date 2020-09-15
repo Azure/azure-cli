@@ -296,7 +296,7 @@ def register_ids_argument(cli_ctx):
                 if not isinstance(json_vals, list):
                     json_vals = [json_vals]
                 for json_val in json_vals:
-                    if 'id' in json_val:
+                    if isinstance(json_val, dict) and 'id' in json_val:
                         full_id_list += [json_val['id']]
             except ValueError:
                 # supports piping of --ids to the command when using TSV. Requires use of --query
