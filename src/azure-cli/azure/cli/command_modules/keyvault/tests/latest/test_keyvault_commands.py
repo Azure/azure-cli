@@ -367,13 +367,17 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
             'key_backup': os.path.join(self.kwargs['sdtest_dir'], 'key.bak')
         })
 
+        for i in range(1, 4):
+            self.kwargs['cer{}_path'.format(i)] = os.path.join(self.kwargs['pem_dir'], 'sd{}.cer'.format(i))
+            self.kwargs['key{}_path'.format(i)] = os.path.join(self.kwargs['pem_dir'], 'sd{}.key'.format(i))
+
         # create a new key and backup it
         self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
         self.cmd('az keyvault key backup --hsm-name {hsm_name} -n {key_name} -f "{key_backup}"')
 
         # download SD
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
-                 '--sd-quorum 2 --sd-wrapping-keys "{pem_dir}/sd1.cer" "{pem_dir}/sd2.cer" "{pem_dir}/sd3.cer"')
+                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"')
 
         # delete the HSM
         self.cmd('az group lock delete -g {rg} -n {rg_lock}')
@@ -394,7 +398,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         # upload the blob
         self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
                  '--sd-exchange-key "{exchange_key}" '
-                 '--sd-wrapping-keys "{pem_dir}/sd1.key" "{pem_dir}/sd2.key"')
+                 '--sd-wrapping-keys "{key1_path}" "{key2_path}"')
 
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
