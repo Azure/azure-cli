@@ -366,6 +366,10 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
             'key_backup': os.path.join(self.kwargs['sdtest_dir'], 'key.bak')
         })
 
+        onlyfiles = [f for f in os.listdir(KEYS_DIR) if os.path.isfile(os.path.join(KEYS_DIR, f))]
+        if onlyfiles:
+            raise CLIError(onlyfiles)
+
         for i in range(1, 4):
             self.kwargs['cer{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.cer'.format(i))
             self.kwargs['key{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.key'.format(i))
