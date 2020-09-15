@@ -141,12 +141,7 @@ class CommandRecommender():
         The recommended command will be the best matched one from
         both the help files and the aladdin recommendations.
         """
-        import os
-        from azure.cli.core.cloud import CLOUDS_FORBIDDING_ALADDIN_REQUEST
-
-        if self.cli_ctx and self.cli_ctx.cloud \
-           and self.cli_ctx.cloud.name not in CLOUDS_FORBIDDING_ALADDIN_REQUEST \
-           and not os.getenv('DISABLE_ALADDIN_REQUEST'):
+        if not self._disable_aladdin_service():
             self._set_aladdin_recommendations()
 
         # all the recommended commands from help examples and aladdin
@@ -176,6 +171,28 @@ class CommandRecommender():
             recommend_command = self.aladdin_recommendations[0]
 
         return recommend_command
+
+    def _disable_aladdin_service(self):
+        """Decide whether to disable aladdin request when a command fails.
+        The possible cases to disable it are:
+            1. In air-gapped clouds
+            2. In testing environments
+        """
+        from azure.cli.core.cloud import CLOUDS_FORBIDDING_ALADDIN_REQUEST
+
+        # CLI is not started well
+        if not self.cli_ctx or not self.cli_ctx.cloud:
+            return True
+
+        # for air-gapped clouds
+        if self.cli_ctx.cloud.name in CLOUDS_FORBIDDING_ALADDIN_REQUEST:
+            return True
+
+        # for testing environments
+        if self.cli_ctx.__class__.__name__ == 'DummyCli':
+            return True
+
+        return False
 
     def _get_parameter_list(self, raw_command):  # pylint: disable=no-self-use
         """Get the paramter list from a raw command string
