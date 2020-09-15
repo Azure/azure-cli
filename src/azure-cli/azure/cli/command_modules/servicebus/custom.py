@@ -446,16 +446,24 @@ def return_valid_duration(instance_value, update_value):
 def return_valid_duration_create(update_value):
     from datetime import timedelta
     from isodate import parse_duration
+    from knack.util import CLIError
     from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         if iso8601pattern.match(update_value):
             if parse_duration(update_value) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return update_value
+            else:
+                raise CLIError(
+                    'duration value should be less than (days:min:secs) 10675199:10085:477581')
 
         if timedeltapattern.match(update_value):
             day, minute, seconds = update_value.split(":")
             if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
+            else:
+                raise CLIError(
+                    'duration value should be less than timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)')
+
 
     return None
 
