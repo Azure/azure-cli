@@ -1070,8 +1070,7 @@ def iot_central_app_get(client, app_name, resource_group_name=None):
     return client.apps.get(resource_group_name, app_name)
 
 
-
-def iot_central_app_delete(cmd, client, app_name, resource_group_name, no_wait=False):
+def iot_central_app_delete(client, app_name, resource_group_name, no_wait=False):
     return sdk_no_wait(no_wait, client.apps.delete, resource_group_name, app_name)
 
 
