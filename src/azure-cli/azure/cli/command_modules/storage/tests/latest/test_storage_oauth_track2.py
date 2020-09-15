@@ -150,11 +150,36 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
 
         self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
+                                JMESPathCheck('deleted', False),
+                                JMESPathCheck('encryptionScope', None),
+                                JMESPathCheck('properties.appendBlobCommittedBlockCount', None),
+                                JMESPathCheck('properties.blobTier', None),
+                                JMESPathCheck('properties.blobTierChangeTime', None),
+                                JMESPathCheck('properties.blobTierInferred', None),
                                 JMESPathCheck('properties.blobType', 'BlockBlob'),
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.contentSettings.cacheControl', None),
+                                JMESPathCheck('properties.contentSettings.contentDisposition', None),
+                                JMESPathCheck('properties.contentSettings.contentEncooding', None),
+                                JMESPathCheck('properties.contentSettings.contentLanguage', None),
+                                JMESPathCheckExists('properties.contentSettings.contentMd5'),
+                                JMESPathCheck('properties.copy.completionTime', None),
+                                JMESPathCheck('properties.copy.id', None),
+                                JMESPathCheck('properties.copy.progress', None),
+                                JMESPathCheck('properties.copy.source', None),
+                                JMESPathCheck('properties.copy.status', None),
+                                JMESPathCheck('properties.copy.statusDescription', None),
                                 JMESPathCheck('properties.pageRanges', None),
                                 JMESPathCheckExists('properties.etag'),
+                                JMESPathCheckExists('properties.creationTime'),
+                                JMESPathCheck('properties.deletedTime', None),
+                                JMESPathCheckExists('properties.etag'),
+                                JMESPathCheckExists('properties.lastModified'),
+                                JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'available'),
+                                JMESPathCheck('properties.lease.status', 'unlocked'),
+                                JMESPathCheck('snapshot', None),
                                 JMESPathCheck('objectReplicationDestinationPolicy', None),
                                 JMESPathCheck('objectReplicationSourceProperties', []),
                                 JMESPathCheck('rehydratePriority', None),
@@ -172,6 +197,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.blobType', 'PageBlob'),
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.pageBlobSequenceNumber', 0),
                                 JMESPathCheckExists('properties.pageRanges'))
 
         # test snapshot
@@ -215,3 +241,66 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
                                 JMESPathCheck('properties.pageRanges', None))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
+    def test_storage_blob_list_oauth(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'account': storage_account,
+            'container': self.create_container(account_info=account_info),
+            'local_file': self.create_temp_file(128),
+            'blob_name1': "/".join(["dir", self.create_random_name(prefix='blob', length=24)]),
+            'blob_name2': "/".join(["dir", self.create_random_name(prefix='blob', length=24)])
+        })
+
+        # Prepare blob 1
+        self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob_name1} --account-name {account} ')
+
+        # Test with include snapshot
+        result = self.oauth_cmd('storage blob snapshot -c {container} -n {blob_name1} --account-name {account} ')\
+            .get_output_in_json()
+        self.assertIsNotNone(result['snapshot'])
+        snapshot = result['snapshot']
+
+        self.oauth_cmd('storage blob list -c {container} --include s --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('[0].snapshot', snapshot))
+
+        # Test with metadata
+        self.oauth_cmd('storage blob metadata update -c {container} -n {blob_name1} --metadata test=1 --account-name {account} ')
+        self.oauth_cmd('storage blob metadata show -c {container} -n {blob_name1} --account-name {account} ')\
+            .assert_with_checks(JMESPathCheck('test', '1'))
+
+        self.oauth_cmd('storage blob list -c {container} --include m --account-name {account}  ') \
+            .assert_with_checks(JMESPathCheck('[0].metadata.test', '1'))
+
+        # Prepare blob 2
+        self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob_name2} --account-name {account} ')
+
+        self.oauth_cmd('storage blob list -c {container} --account-name {account} ').assert_with_checks(
+            JMESPathCheck('length(@)', 2))
+
+        # Test num_results and next marker
+        self.oauth_cmd('storage blob list -c {container} --num-results 1 --account-name {account} ').assert_with_checks(
+            JMESPathCheck('length(@)', 1))
+
+        result = self.oauth_cmd(
+            'storage blob list -c {container} --num-results 1 --show-next-marker --account-name {account} ')\
+            .get_output_in_json()
+        self.assertIsNotNone(result[1]['nextMarker'])
+        self.kwargs['next_marker'] = result[1]['nextMarker']
+
+        # Test with marker
+        self.oauth_cmd('storage blob list -c {container} --marker {next_marker} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Test with prefix
+        self.oauth_cmd('storage blob list -c {container} --prefix dir/ --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 2))
+
+        # Test with delimiter
+        self.oauth_cmd('storage blob list -c {container} --delimiter "/" --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1),
+                                JMESPathCheck('[0].name', 'dir/'))

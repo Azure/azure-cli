@@ -54,16 +54,25 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
         if_unmodified_since=if_unmodified_since, timeout=timeout)
 
 
-def list_blobs(client, container_name, prefix=None, num_results=None, include=None, delimiter=None, marker=None,
-               timeout=None):
+def list_blobs(client, delimiter=None, include=None, marker=None, num_results=None, prefix=None,
+               show_next_marker=None, **kwargs):
+    from ..track2_util import list_generator
 
-    generator = client.list_blobs(container_name=container_name, prefix=prefix, num_results=num_results,
-                                  include=include, delimiter=delimiter, marker=marker, timeout=timeout)
-    result = list(generator)
+    if delimiter:
+        generator = client.walk_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
+    else:
+        generator = client.list_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
 
-    if getattr(generator, 'next_marker', None):
-        logger.warning('Next Marker:')
-        logger.warning(generator.next_marker)
+    pages = generator.by_page(continuation_token=marker)  # BlobPropertiesPaged
+    result = list_generator(pages=pages, num_results=num_results)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
 
     return result
 
@@ -647,3 +656,40 @@ def acquire_blob_lease(client, lease_duration=-1, **kwargs):
 def renew_blob_lease(client, **kwargs):
     client.renew(**kwargs)
     return client.id
+
+
+def add_progress_callback_v2(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def query_blob(client, query_expression, input_config=None, output_config=None, result_file=None, **kwargs):
+
+    reader = client.query_blob(query_expression=query_expression, blob_format=input_config, output_format=output_config,
+                               **kwargs)
+
+    if result_file is not None:
+        with open(result_file, 'wb') as stream:
+            reader.readinto(stream)
+        stream.close()
+        return None
+
+    return reader.readall().decode("utf-8")

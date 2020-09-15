@@ -16,7 +16,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file_system, cf_adls_directory,
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
-                                                               cf_or_policy)
+                                                               cf_or_policy, cf_container_client)
+
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import show_exception_handler
@@ -238,11 +239,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
                             custom_command_type=storage_account_custom_type,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01', is_preview=True) as g:
-        g.show_command('show', 'get_service_properties')
+        from ._transformers import transform_restore_policy_output
+        g.show_command('show', 'get_service_properties', transform=transform_restore_policy_output)
         g.generic_update_command('update',
                                  getter_name='get_service_properties',
                                  setter_name='set_service_properties',
-                                 custom_func_name='update_blob_service_properties')
+                                 custom_func_name='update_blob_service_properties',
+                                 transform=transform_restore_policy_output)
 
     with self.command_group('storage account file-service-properties', file_service_mgmt_sdk,
                             custom_command_type=get_custom_sdk('account', client_factory=cf_mgmt_file_services,
@@ -281,12 +284,17 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             min_api='2019-02-02',
                             custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
-        from ._transformers import transform_blob_json_output
+        from ._transformers import transform_blob_list_output, transform_blob_json_output
         from ._format import transform_blob_output
         g.storage_custom_command_oauth('show', 'show_blob_v2', transform=transform_blob_json_output,
                                        table_transformer=transform_blob_output,
                                        exception_handler=show_exception_handler)
         g.storage_custom_command_oauth('set-tier', 'set_blob_tier_v2')
+        g.storage_custom_command_oauth('list', 'list_blobs', client_factory=cf_container_client,
+                                       transform=transform_blob_list_output,
+                                       table_transformer=transform_blob_output)
+        g.storage_custom_command_oauth('query', 'query_blob',
+                                       is_preview=True, min_api='2019-12-12')
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
@@ -311,8 +319,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                     create_boolean_result_output_transformer)
         from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters,
                                   process_blob_upload_batch_parameters)
-
-        g.storage_custom_command_oauth('list', 'list_blobs', table_transformer=transform_blob_output)
         g.storage_command_oauth(
             'download', 'get_blob_to_path', table_transformer=transform_blob_output)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
@@ -479,6 +485,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.generic_update_command('update', setter_name='update', setter_arg_name='file_share',
                                  custom_func_name='update_share_rm')
+        g.custom_command('stats', 'get_stats', transform=lambda x: getattr(x, 'share_usage_bytes'))
 
     with self.command_group('storage share', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:

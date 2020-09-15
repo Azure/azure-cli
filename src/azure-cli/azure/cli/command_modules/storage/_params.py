@@ -11,7 +11,8 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
-                          validate_included_datasets, validate_custom_domain, validate_container_public_access,
+                          validate_included_datasets_validator, validate_custom_domain,
+                          validate_container_public_access,
                           validate_table_payload_format, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
@@ -71,10 +72,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     action='store_true', validator=add_progress_callback)
     socket_timeout_type = CLIArgumentType(help='The socket timeout(secs), used by the service to regulate data flow.',
                                           type=int)
-    num_results_type = CLIArgumentType(
-        default=5000, help='Specifies the maximum number of results to return. Provide "*" to return all.',
-        validator=validate_storage_data_plane_list)
-
     large_file_share_type = CLIArgumentType(
         action='store_true', min_api='2019-04-01',
         help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
@@ -152,6 +149,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'the response body if the listing operation did not return all containers remaining to be listed '
              'with the current page. If specified, this generator will begin returning results from the point '
              'where the previous generator stopped.')
+
+    marker_type = CLIArgumentType(
+        help='A string value that identifies the portion of the list of containers to be '
+             'returned with the next listing operation. The operation returns the NextMarker value within '
+             'the response body if the listing operation did not return all containers remaining to be listed '
+             'with the current page. If specified, this generator will begin returning results from the point '
+             'where the previous generator stopped.')
+
+    num_results_type = CLIArgumentType(
+        default=5000, validator=validate_storage_data_plane_list,
+        help='Specify the maximum number to return. If the request does not specify '
+        'num_results, or specifies a value greater than 5000, the server will return up to 5000 items. Note that '
+        'if the listing operation crosses a partition boundary, then the service will return a continuation token '
+        'for retrieving the remaining of the results. Provide "*" to return all.'
+    )
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -528,16 +540,24 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination_path', help='The destination path that will be appended to the blob name.')
 
     with self.argument_context('storage blob list') as c:
-        c.argument('include', validator=validate_included_datasets)
-        c.argument('num_results', arg_type=num_results_type)
+        from ._validators import get_include_help_string
+        t_blob_include = self.get_sdk('_generated.models._azure_blob_storage_enums#ListBlobsIncludeItem',
+                                      resource_type=ResourceType.DATA_STORAGE_BLOB)
+        c.register_container_arguments()
         c.argument('delimiter',
                    help='When the request includes this parameter, the operation returns a BlobPrefix element in the '
                    'result list that acts as a placeholder for all blobs whose names begin with the same substring '
                    'up to the appearance of the delimiter character. The delimiter may be a single character or a '
                    'string.')
+        c.argument('include', help="Specify one or more additional datasets to include in the response. "
+                   "Options include: {}. Can be combined.".format(get_include_help_string(t_blob_include)),
+                   validator=validate_included_datasets_validator(include_class=t_blob_include))
         c.argument('marker', arg_type=marker_type)
+        c.argument('num_results', arg_type=num_results_type)
         c.argument('prefix',
                    help='Filter the results to return only blobs whose name begins with the specified prefix.')
+        c.argument('show_next_marker', action='store_true',
+                   help='Show nextMarker in result when specified.')
 
     with self.argument_context('storage blob generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -818,6 +838,67 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
                    help='Name of the destination blob. If the exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
+
+    with self.argument_context('storage blob query') as c:
+        from ._validators import validate_text_configuration
+        c.register_blob_arguments()
+        c.register_precondition_options()
+        line_separator = CLIArgumentType(help="The string used to separate records.", default='\n')
+        column_separator = CLIArgumentType(help="The string used to separate columns.", default=',')
+        quote_char = CLIArgumentType(help="The string used to quote a specific field.", default='"')
+        record_separator = CLIArgumentType(help="The string used to separate records.", default='\n')
+        escape_char = CLIArgumentType(help="The string used as an escape character. Default to empty.", default="")
+        has_header = CLIArgumentType(
+            arg_type=get_three_state_flag(),
+            help="Whether the blob data includes headers in the first line. "
+            "The default value is False, meaning that the data will be returned inclusive of the first line. "
+            "If set to True, the data will be returned exclusive of the first line.", default=False)
+        c.extra('lease', options_list='--lease-id',
+                help='Required if the blob has an active lease.')
+        c.argument('query_expression', help='The query expression in SQL. The maximum size of the query expression '
+                   'is 256KiB. For more information about the expression syntax, please see '
+                   'https://docs.microsoft.com/azure/storage/blobs/query-acceleration-sql-reference')
+        c.extra('input_format', arg_type=get_enum_type(['csv', 'json']), validator=validate_text_configuration,
+                help='Serialization type of the data currently stored in the blob. '
+                'The default is to treat the blob data as CSV data formatted in the default dialect.'
+                'The blob data will be reformatted according to that profile when blob format is specified. '
+                'If you choose `json`, please specify `Output Json Text Configuration Arguments` accordingly; '
+                'If you choose `csv`, please specify `Output Delimited Text Configuration Arguments`.')
+        c.extra('output_format', arg_type=get_enum_type(['csv', 'json']),
+                help='Output serialization type for the data stream. '
+                'By default the data will be returned as it is represented in the blob. '
+                'By providing an output format, the blob data will be reformatted according to that profile. '
+                'If you choose `json`, please specify `Output Json Text Configuration Arguments` accordingly; '
+                'If you choose `csv`, please specify `Output Delimited Text Configuration Arguments`.')
+        c.extra('in_line_separator',
+                arg_group='Input Json Text Configuration',
+                arg_type=line_separator)
+        c.extra('in_column_separator', arg_group='Input Delimited Text Configuration',
+                arg_type=column_separator)
+        c.extra('in_quote_char', arg_group='Input Delimited Text Configuration',
+                arg_type=quote_char)
+        c.extra('in_record_separator', arg_group='Input Delimited Text Configuration',
+                arg_type=record_separator)
+        c.extra('in_escape_char', arg_group='Input Delimited Text Configuration',
+                arg_type=escape_char)
+        c.extra('in_has_header', arg_group='Input Delimited Text Configuration',
+                arg_type=has_header)
+        c.extra('out_line_separator',
+                arg_group='Output Json Text Configuration',
+                arg_type=line_separator)
+        c.extra('out_column_separator', arg_group='Output Delimited Text Configuration',
+                arg_type=column_separator)
+        c.extra('out_quote_char', arg_group='Output Delimited Text Configuration',
+                arg_type=quote_char)
+        c.extra('out_record_separator', arg_group='Output Delimited Text Configuration',
+                arg_type=record_separator)
+        c.extra('out_escape_char', arg_group='Output Delimited Text Configuration',
+                arg_type=escape_char)
+        c.extra('out_has_header', arg_group='Output Delimited Text Configuration',
+                arg_type=has_header)
+        c.extra('result_file', help='Specify the file path to save result.')
+        c.ignore('input_config')
+        c.ignore('output_config')
 
     with self.argument_context('storage blob sync') as c:
         c.extra('destination_container', options_list=['--container', '-c'], required=True,

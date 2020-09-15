@@ -21,7 +21,7 @@ pytest_base_cmd = 'PYTHONPATH={}/lib/{}/site-packages python -m pytest -x -v --b
 pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
 
 for mod_name in mod_list:
-    if mod_name in ['botservice', 'network', 'configure']:
+    if mod_name in ['botservice', 'network', 'configure', 'monitor', 'cloud']:
         exit_code = subprocess.call(['{} --junit-xml ./azure_cli_test_result/{}.xml --pyargs azure.cli.command_modules.{}'.format(pytest_base_cmd, mod_name, mod_name)], shell=True)
     else:
         exit_code = subprocess.call(['{} --junit-xml ./azure_cli_test_result/{}.xml --pyargs azure.cli.command_modules.{}'.format(pytest_parallel_cmd, mod_name, mod_name)], shell=True)

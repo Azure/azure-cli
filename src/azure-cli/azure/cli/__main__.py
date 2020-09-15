@@ -17,7 +17,7 @@ from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2.11.0"
+__version__ = "2.11.1"
 
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
@@ -77,7 +77,7 @@ finally:
     try:
         # check for new version auto-upgrade
         if az_cli.config.getboolean('auto-upgrade', 'enable', False) and \
-                sys.argv[1] != 'upgrade' and (sys.argv[1] != 'extension' and sys.argv[2] != 'update'):
+                sys.argv[1] != 'upgrade' and (sys.argv[1] != 'extension' or sys.argv[2] != 'update'):
             from azure.cli.core._session import VERSIONS  # pylint: disable=ungrouped-imports
             from azure.cli.core.util import get_cached_latest_versions, _VERSION_UPDATE_TIME  # pylint: disable=ungrouped-imports
             if VERSIONS[_VERSION_UPDATE_TIME]:
