@@ -1831,6 +1831,9 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
     """ Create a new role assignment for a user, group, or service principal. """
     from azure.cli.command_modules.role.custom import _resolve_object_id
 
+    if not assignee_object_id and not assignee:
+        raise CLIError('Please specify --assignee or --assignee-object-id.')
+
     if assignee_object_id is None:
         if _is_guid(assignee):
             assignee_object_id = assignee
