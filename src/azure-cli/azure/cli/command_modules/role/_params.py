@@ -186,6 +186,9 @@ def load_arguments(self, _):
                    "use the object id and not the app id.")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('include_classic_administrators', arg_type=get_three_state_flag(), help='list default role assignments for subscription classic administrators, aka co-admins')
+        c.argument('description', min_api='2020-04-01-preview', help='Description of role assignment.')
+        c.argument('condition', min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
+        c.argument('condition_version', min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
 
     time_help = ('The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}')
     with self.argument_context('role assignment list-changelogs') as c:
@@ -197,6 +200,11 @@ def load_arguments(self, _):
         if PrincipalType:
             c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
                        help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
+
+    with self.argument_context('role assignment update') as c:
+        c.argument('role_assignment',
+                   help='Description of an existing role assignment as JSON, or a path to a file containing a '
+                        'JSON description.')
 
     with self.argument_context('role assignment delete') as c:
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Continue to delete all assignments under the subscription')

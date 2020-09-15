@@ -62,7 +62,8 @@ from ._util import (
     get_sql_subscription_usages_operations,
     get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
-    get_sql_instance_failover_groups_operations
+    get_sql_instance_failover_groups_operations,
+    get_sql_import_export_operations
 )
 
 from ._validators import (
@@ -102,6 +103,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
 
+    import_export_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ImportExportOperations.{}',
+        client_factory=get_sql_import_export_operations)
+
     database_lro_transform = LongRunningOperationResultTransform(
         self.cli_ctx, db_transform)
 
@@ -138,8 +143,14 @@ def load_command_table(self, _):
                                  supports_no_wait=True,
                                  transform=database_lro_transform,
                                  table_transformer=db_table_format)
-        g.custom_command('import', 'db_import')
+
         g.custom_command('export', 'db_export')
+
+    with self.command_group('sql db',
+                            import_export_operations,
+                            client_factory=get_sql_import_export_operations) as g:
+
+        g.custom_command('import', 'db_import')
 
     capabilities_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#CapabilitiesOperations.{}',

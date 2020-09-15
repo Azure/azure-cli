@@ -32,6 +32,10 @@ def get_sql_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).databases
 
 
+def get_sql_import_export_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).import_export
+
+
 def get_sql_database_operations_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_operations
 

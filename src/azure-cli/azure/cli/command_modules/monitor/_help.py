@@ -667,7 +667,8 @@ parameters:
   - name: --condition
     short-summary: The condition which triggers the scaling action.
     long-summary: >
-        Usage:  --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD
+        Usage:  --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD
+                            {avg,min,max,total,count} PERIOD
                             [where DIMENSION {==,!=} VALUE [or VALUE ...]
                             [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]
 

@@ -156,35 +156,6 @@ def get_installed_cli_distributions():
     ]
 
 
-def _update_latest_from_pypi(versions):
-    from subprocess import check_output, STDOUT, CalledProcessError
-
-    success = False
-
-    if not check_connectivity(max_retries=0):
-        return versions, success
-
-    try:
-        cmd = [sys.executable] + \
-            '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
-        logger.debug('Running: %s', cmd)
-        log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
-        success = True
-        for line in log_output.splitlines():
-            if not line.startswith(CLI_PACKAGE_NAME):
-                continue
-            comps = line.split()
-            mod = comps[0].replace(COMPONENT_PREFIX, '') or CLI_PACKAGE_NAME
-            version = comps[1].replace('(', '').replace(')', '')
-            try:
-                versions[mod]['pypi'] = version
-            except KeyError:
-                pass
-    except CalledProcessError:
-        pass
-    return versions, success
-
-
 def get_latest_from_github(package_path='azure-cli'):
     try:
         import requests
@@ -262,8 +233,8 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
     versions = _get_local_versions()
 
     # get the versions from pypi
-    versions, success = get_cached_latest_versions(versions) if use_cache else _update_latest_from_pypi(versions)
-    updates_available = 0
+    versions, success = get_cached_latest_versions(versions) if use_cache else _update_latest_from_github(versions)
+    updates_available_components = []
 
     def _print(val=''):
         print(val, file=output)
@@ -278,13 +249,13 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
 
     ver_string = _get_version_string(CLI_PACKAGE_NAME, versions.pop(CLI_PACKAGE_NAME))
     if '*' in ver_string:
-        updates_available += 1
+        updates_available_components.append(CLI_PACKAGE_NAME)
     _print(ver_string)
     _print()
     for name in sorted(versions.keys()):
         ver_string = _get_version_string(name, versions.pop(name))
         if '*' in ver_string:
-            updates_available += 1
+            updates_available_components.append(name)
         _print(ver_string)
     _print()
     extensions = get_extensions()
@@ -315,8 +286,8 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
     # if unable to query PyPI, use sentinel value to flag that
     # we couldn't check for updates
     if not success:
-        updates_available = -1
-    return version_string, updates_available
+        updates_available_components = None
+    return version_string, updates_available_components
 
 
 def get_az_version_json():
@@ -341,25 +312,27 @@ def show_updates_available(new_line_before=False, new_line_after=False):
         if datetime.datetime.now() < version_check_time + datetime.timedelta(days=7):
             return
 
-    _, updates_available = get_az_version_string(use_cache=True)
-    if updates_available > 0:
+    _, updates_available_components = get_az_version_string(use_cache=True)
+    if updates_available_components:
         if new_line_before:
             logger.warning("")
-        show_updates(updates_available)
+        show_updates(updates_available_components)
         if new_line_after:
             logger.warning("")
     VERSIONS[_VERSION_CHECK_TIME] = str(datetime.datetime.now())
 
 
-def show_updates(updates_available):
-    if updates_available == -1:
+def show_updates(updates_available_components):
+    if updates_available_components is None:
         logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
-    elif updates_available:  # pylint: disable=too-many-nested-blocks
+    elif updates_available_components:  # pylint: disable=too-many-nested-blocks
         if in_cloud_console():
             warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
         else:
-            warning_msg = "You have %i updates available. Consider updating your CLI installation with 'az upgrade'"
-        logger.warning(warning_msg, updates_available)
+            warning_msg = "You have %i updates available."
+            if CLI_PACKAGE_NAME in updates_available_components:
+                warning_msg = "{} Consider updating your CLI installation with 'az upgrade'".format(warning_msg)
+        logger.warning(warning_msg, len(updates_available_components))
     else:
         print('Your CLI is up-to-date.')
 
@@ -1054,7 +1027,7 @@ def is_guid(guid):
 
 
 def handle_version_update():
-    """Clean up information in local file that may be invalidated
+    """Clean up information in local files that may be invalidated
     because of a version update of Azure CLI
     """
     try:
@@ -1064,7 +1037,11 @@ def handle_version_update():
         if not VERSIONS['versions']:
             get_cached_latest_versions()
         elif LooseVersion(VERSIONS['versions']['core']['local']) != LooseVersion(__version__):
+            logger.debug("Azure CLI has been updated.")
+            logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
             VERSIONS['versions'] = {}
             VERSIONS['update_time'] = ''
+            from azure.cli.core.cloud import refresh_known_clouds
+            refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)

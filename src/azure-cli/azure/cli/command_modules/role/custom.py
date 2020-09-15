@@ -63,8 +63,9 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         role_definition = shell_safe_json_parse(role_definition)
 
     if not isinstance(role_definition, dict):
-        raise CLIError('Invalid role defintion. A valid dictionary JSON representation is expected.')
+        raise CLIError('Invalid role definition. A valid dictionary JSON representation is expected.')
     # to workaround service defects, ensure property names are camel case
+    # e.g. AssignableScopes -> assignableScopes
     names = [p for p in role_definition if p[:1].isupper()]
     for n in names:
         new_name = n[:1].lower() + n[1:]
@@ -129,17 +130,28 @@ def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_r
 
 
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
-                           scope=None, assignee_principal_type=None):
+                           scope=None, assignee_principal_type=None, description=None,
+                           condition=None, condition_version=None):
+    """Check parameters are provided correctly, then call _create_role_assignment."""
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
 
     if assignee_principal_type and not assignee_object_id:
         raise CLIError('usage error: --assignee-object-id GUID [--assignee-principal-type]')
 
+    # If condition is set and condition-version is empty, condition-version defaults to "2.0".
+    if condition and not condition_version:
+        condition_version = "2.0"
+
+    # If condition-version is set, condition must be set as well.
+    if condition_version and not condition:
+        raise CLIError('usage error: When --condition-version is set, --condition must be set as well.')
+
     try:
         return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
                                        resolve_assignee=(not assignee_object_id),
-                                       assignee_principal_type=assignee_principal_type)
+                                       assignee_principal_type=assignee_principal_type, description=description,
+                                       condition=condition, condition_version=condition_version)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
             return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
@@ -147,7 +159,9 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
-                            resolve_assignee=True, assignee_principal_type=None):
+                            resolve_assignee=True, assignee_principal_type=None, description=None,
+                            condition=None, condition_version=None):
+    """Prepare scope, role ID and resolve object ID from Graph API."""
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -158,7 +172,8 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     worker = MultiAPIAdaptor(cli_ctx)
     return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope,
-                                         assignee_principal_type)
+                                         assignee_principal_type, description=description,
+                                         condition=condition, condition_version=condition_version)
 
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
@@ -229,6 +244,37 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
         if not r.get('additionalProperties'):  # remove the useless "additionalProperties"
             r.pop('additionalProperties', None)
     return results
+
+
+def update_role_assignment(cmd, role_assignment):
+    # Try role_assignment as a file.
+    if os.path.exists(role_assignment):
+        role_assignment = get_file_json(role_assignment)
+    else:
+        role_assignment = shell_safe_json_parse(role_assignment)
+
+    # Updating role assignment is only supported after 2020-04-01-preview, so we don't need to use MultiAPIAdaptor.
+    from azure.cli.core.profiles import get_sdk
+
+    RoleAssignment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'RoleAssignment', mod='models',
+                             operation_group='role_assignments')
+    assignment = RoleAssignment.from_dict(role_assignment)
+    scope = assignment.scope
+    name = assignment.name
+
+    auth_client = _auth_client_factory(cmd.cli_ctx, scope)
+    assignments_client = auth_client.role_assignments
+
+    # Get the existing assignment to do some checks.
+    original_assignment = assignments_client.get(scope, name)
+
+    # Forbid condition version downgrading.
+    # This should be implemented on the service-side in the future.
+    if (assignment.condition_version and original_assignment.condition_version and
+            original_assignment.condition_version.startswith('2.') and assignment.condition_version.startswith('1.')):
+        raise CLIError("Condition version cannot be downgraded to '1.X'.")
+
+    return assignments_client.create(scope, name, parameters=assignment)
 
 
 def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
@@ -1750,7 +1796,7 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
         setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
 
 
-# for injecting test seems to produce predicatable role assignment id for playback
+# for injecting test seems to produce predictable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
 

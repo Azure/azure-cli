@@ -5531,33 +5531,35 @@ helps['network watcher connection-monitor endpoint add'] = """
 type: command
 short-summary: Add an endpoint to a connection monitor
 examples:
-  - name: Add an endpoint as destination
+  - name: Add an external address as a destination endpoint
     text: >
       az network watcher connection-monitor endpoint add
       --connection-monitor MyConnectionMonitor
       --location westus
-      --name MyEndpoint
+      --name MyExternalEndpoint
       --address "bing.com"
       --dest-test-groups DefaultTestGroup
-  - name: Add an endpoint as source
+      --type ExternalAddress
+  - name: Add an Azure VM as a source endpoint
     text: >
       az network watcher connection-monitor endpoint add
       --connection-monitor MyConnectionMonitor
       --location westus
-      --name MyEndpoint
+      --name MyVMEndpoint
       --resource-id MyVMResourceID
       --source-test-groups DefaultTestGroup
-  - name: Add an endpoint with filter
+      --type AzureVM
+  - name: Add a Subnet as a source endpoint with addresses excluded
     text: >
       az network watcher connection-monitor endpoint add
       --connection-monitor MyConnectionMonitor
       --location westus
-      --name MyEndpoint
-      --resource-id MyLogAnalysisWorkSpaceID
+      --name MySubnetEndpoint
+      --resource-id MySubnetID
       --source-test-groups DefaultTestGroup
-      --filter-type Include
-      --filter-item type=AgentAddress address=npmuser
-      --filter-item type=AgentAddress address=pypiuser
+      --type AzureSubnet
+      --address-exclude 10.0.0.25 10.0.0.30
+      --coverage-level BelowAverage
 """
 
 helps['network watcher connection-monitor endpoint remove'] = """

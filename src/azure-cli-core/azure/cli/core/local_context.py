@@ -57,7 +57,7 @@ class AzCLILocalContext:  # pylint: disable=too-many-instance-attributes
             self.current_dir = os.getcwd()
         except FileNotFoundError:
             if self.is_on:
-                logger.warning('The working directory has been deleted or recreated. Local context is ignored.')
+                logger.warning('The working directory has been deleted or recreated. Parameter persistence is ignored.')
 
         if self.is_on:
             self._local_context_file = self._get_local_context_file()
@@ -133,17 +133,17 @@ class AzCLILocalContext:  # pylint: disable=too-many-instance-attributes
                 parent_dir = os.path.dirname(local_context_file.config_path)
                 if not os.listdir(parent_dir):
                     shutil.rmtree(parent_dir)
-                logger.warning('Local context persistence file in working directory %s is deleted.',
+                logger.warning('Parameter persistence file in working directory %s is deleted.',
                                os.path.dirname(local_context_file.config_dir))
             except Exception:  # pylint: disable=broad-except
-                logger.warning('Fail to delete local context persistence file in working directory %s',
+                logger.warning('Fail to delete parameter persistence file in working directory %s',
                                os.path.dirname(local_context_file.config_dir))
 
     def clear(self, recursive=False):
         local_context_files = self._load_local_context_files(recursive=recursive)
         for local_context_file in local_context_files:
             local_context_file.clear()
-            logger.warning('Local context information in working directory %s is cleared.',
+            logger.warning('Parameter persistence information in working directory %s is cleared.',
                            os.path.dirname(local_context_file.config_dir))
 
     def delete(self, names=None):
@@ -152,8 +152,8 @@ class AzCLILocalContext:  # pylint: disable=too-many-instance-attributes
             for scope in local_context_file.sections():
                 for name in names:
                     local_context_file.remove_option(scope, name)
-        logger.warning('Local context value is deleted. You can run `az local-context show` to show all available '
-                       'values.')
+        logger.warning('Parameter persistence value is deleted. You can run `az config param-persist show` to show all '
+                       'available values.')
 
     def get_value(self, names=None):
         result = {}
