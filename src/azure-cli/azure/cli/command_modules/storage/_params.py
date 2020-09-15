@@ -18,7 +18,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
-                          validator_delete_retention_days, validate_delete_retention_days,
+                          validate_delete_retention_days, validate_container_delete_retention_days,
+                          validate_file_delete_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy)
 
 
@@ -413,15 +414,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
         c.argument('enable_container_delete_retention', arg_type=get_three_state_flag(),
                    arg_group='Container Delete Retention Policy', min_api='2019-06-01',
-                   help='Enable delete retention policy for container soft delete.')
+                   help='Enable container delete retention policy for container soft delete when set to true. '
+                        'Disable container delete retention policy when set to false.')
         c.argument('container_delete_retention_days', type=int, arg_group='Container Delete Retention Policy',
-                   min_api='2019-06-01',
+                   min_api='2019-06-01', validator=validate_container_delete_retention_days,
                    help='Indicate the number of days that the deleted container should be retained. The minimum '
-                        'specified value can be 1 and thaze maximum value can be 365.')
+                        'specified value can be 1 and the maximum value can be 365.')
         c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
                    min_api='2018-07-01')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
-                   validator=validator_delete_retention_days, min_api='2018-07-01')
+                   validator=validate_delete_retention_days, min_api='2018-07-01')
         c.argument('enable_restore_policy', arg_type=get_three_state_flag(), arg_group='Restore Policy',
                    min_api='2019-06-01', help="Enable blob restore policy when it set to true.")
         c.argument('restore_days', type=int, arg_group='Restore Policy',
