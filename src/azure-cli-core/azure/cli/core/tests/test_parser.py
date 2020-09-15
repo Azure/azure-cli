@@ -245,7 +245,6 @@ class TestParser(unittest.TestCase):
 
         # assert the right choices are matched as "close".
         # If these don't hold, matching algorithm should be deemed flawed.
-        choice_lists = [choice_lists[index] for index in range(len(choice_lists)) if not index % 2]
         for choices in choice_lists[:2]:
             self.assertEqual(len(choices), 1)
         self.assertEqual(len(choice_lists[2]), 0)
