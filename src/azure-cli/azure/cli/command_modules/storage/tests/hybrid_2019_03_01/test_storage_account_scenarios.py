@@ -258,8 +258,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertEqual(self.cmd('storage account show -g {rg} -n {sa}').exit_code, 0)
 
-        with self.assertRaises(SystemExit) as ex:	
-            self.cmd('storage account show text_causing_parsing_error')	
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('storage account show text_causing_parsing_error')
         self.assertEqual(ex.exception.code, 2)
 
         with self.assertRaises(SystemExit) as ex:
