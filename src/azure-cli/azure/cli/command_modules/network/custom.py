@@ -6277,19 +6277,21 @@ def create_virtual_router(cmd,
                           location=None,
                           tags=None):
     vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-
     vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
 
-    existing_vrouters = vrouter_client.list_by_resource_group(resource_group_name)
-    existing_vhubs = vhub_client.list_by_resource_group(resource_group_name)
+    from azure.mgmt.network.models import ErrorException
+    try:
+        vrouter_client.get(resource_group_name, virtual_router_name)
+    except ErrorException:
+        pass
 
-    for vhub in existing_vhubs:
-        if vhub.name == virtual_router_name:
-            raise CLIError('VirtualRouter name "{}" is duplicated'.format(virtual_router_name))
-
-    for vrouter in existing_vrouters:
-        if vrouter.name == virtual_router_name:
-            raise CLIError('VirtualRouter name "{}" is duplicated'.format(virtual_router_name))
+    virtual_hub_name = virtual_router_name
+    try:
+        vhub_client.get(resource_group_name, virtual_hub_name)
+        raise CLIError('The VirtualRouter "{}" under resource group "{}" exists'.format(virtual_hub_name,
+                                                                                        resource_group_name))
+    except CloudError :
+        pass
 
     SubResource = cmd.get_models('SubResource')
 
@@ -6305,8 +6307,6 @@ def create_virtual_router(cmd,
         return vrouter_client.create_or_update(resource_group_name, virtual_router_name, virtual_router)
 
     # for VirtualHub
-    virtual_hub_name = virtual_router_name
-
     VirtualHub, HubIpConfiguration = cmd.get_models('VirtualHub', 'HubIpConfiguration')
 
     hub = VirtualHub(tags=tags, location=location, virtual_wan=None, sku='Standard')
@@ -6341,7 +6341,6 @@ def update_virtual_router(cmd, instance, tags=None):
 
 def list_virtual_router(cmd, resource_group_name=None):
     vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-
     vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
 
     if resource_group_name is not None:
@@ -6356,12 +6355,12 @@ def list_virtual_router(cmd, resource_group_name=None):
 
 def show_virtual_router(cmd, resource_group_name, virtual_router_name):
     vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-
     vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
 
+    from azure.mgmt.network.models import ErrorException
     try:
         item = vrouter_client.get(resource_group_name, virtual_router_name)
-    except:  # pylint: disable=bare-except
+    except ErrorException:
         virtual_hub_name = virtual_router_name
         item = vhub_client.get(resource_group_name, virtual_hub_name)
 
@@ -6370,14 +6369,14 @@ def show_virtual_router(cmd, resource_group_name, virtual_router_name):
 
 def delete_virtual_router(cmd, resource_group_name, virtual_router_name):
     vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-
     vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
 
+    from azure.mgmt.network.models import ErrorException
     try:
         vrouter_client.get(resource_group_name, virtual_router_name)
         item = vrouter_client.delete(resource_group_name, virtual_router_name)
-    except:  # pylint: disable=bare-except
+    except ErrorException:
         from azure.cli.core.commands import LongRunningOperation
 
         virtual_hub_name = virtual_router_name
@@ -6392,10 +6391,11 @@ def delete_virtual_router(cmd, resource_group_name, virtual_router_name):
 def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name, peer_asn, peer_ip):
 
     # try VirtualRouter first
+    from azure.mgmt.network.models import ErrorException
     try:
         vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
         vrouter_client.get(resource_group_name, virtual_router_name)
-    except:  # pylint: disable=bare-except
+    except ErrorException:
         pass
     else:
         vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
@@ -6413,12 +6413,10 @@ def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
     try:
         vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
         vhub_client.get(resource_group_name, virtual_hub_name)
-    except CloudError as e:
-        if e.status_code == 404:
-            msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                          resource_group_name)
-            raise CLIError(msg)
-        raise e
+    except CloudError:
+        msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
+                                                                                      resource_group_name)
+        raise CLIError(msg)
 
     BgpConnection = cmd.get_models('BgpConnection')
     vhub_bgp_conn = BgpConnection(name=peering_name, peer_asn=peer_asn, peer_ip=peer_ip)
@@ -6446,12 +6444,10 @@ def list_virtual_router_peering(cmd, resource_group_name, virtual_router_name):
     try:
         vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
         vhub_client.get(resource_group_name, virtual_hub_name)
-    except CloudError as e:
-        if e.status_code == 404:
-            msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                          resource_group_name)
-            raise CLIError(msg)
-        raise e
+    except CloudError:
+        msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
+                                                                                      resource_group_name)
+        raise CLIError(msg)
 
     try:
         vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
@@ -6483,12 +6479,10 @@ def show_virtual_router_peering(cmd, resource_group_name, virtual_router_name, p
     try:
         vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
         vhub_client.get(resource_group_name, virtual_hub_name)
-    except CloudError as e:
-        if e.status_code == 404:
-            msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                          resource_group_name)
-            raise CLIError(msg)
-        raise e
+    except CloudError:
+        msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
+                                                                                      resource_group_name)
+        raise CLIError(msg)
 
     vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
     return vhub_bgp_conn_client.get(resource_group_name, virtual_hub_name, bgp_conn_name)
@@ -6511,12 +6505,10 @@ def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
     try:
         vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
         vhub_client.get(resource_group_name, virtual_hub_name)
-    except CloudError as e:
-        if e.status_code == 404:
-            msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                          resource_group_name)
-            raise CLIError(msg)
-        raise e
+    except CloudError:
+        msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
+                                                                                      resource_group_name)
+        raise CLIError(msg)
 
     vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
     return vhub_bgp_conn_client.delete(resource_group_name, virtual_hub_name, bgp_conn_name)
