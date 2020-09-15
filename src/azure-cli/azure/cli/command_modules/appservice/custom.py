@@ -568,10 +568,14 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             client.web_apps.sync_function_triggers_slot(resource_group_name, name, slot)
         else:
             client.web_apps.sync_function_triggers(resource_group_name, name)
-    except CloudError as ce:
+    except CloudError as ex:
         # This SDK function throws an error if Status Code is 200
-        if ce.status_code != 200:
-            raise ce
+        if ex.status_code != 200:
+            raise ex
+    except DefaultErrorResponseException as ex:
+        if ex.response.status_code != 200:
+            raise ex 
+
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
