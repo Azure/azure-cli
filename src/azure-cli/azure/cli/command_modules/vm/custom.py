@@ -8,6 +8,9 @@ from __future__ import print_function
 import json
 import os
 
+import requests
+from msrestazure.azure_exceptions import CloudError
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -1455,11 +1458,22 @@ def get_boot_log(cmd, resource_group_name, vm_name):
 
     virtual_machine = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
     # pylint: disable=no-member
-    if (not virtual_machine.instance_view.boot_diagnostics or
-            not virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri):
-        raise CLIError('Please enable boot diagnostics.')
 
-    blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri
+    blob_uri = None
+    if virtual_machine.instance_view and virtual_machine.instance_view.boot_diagnostics:
+        blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri
+
+    # Managed storage
+    if blob_uri is None:
+        try:
+            poller = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
+            uris = LongRunningOperation(cmd.cli_ctx)(poller)
+            blob_uri = uris.serial_console_log_blob_uri
+        except CloudError:
+            pass
+        if blob_uri is None:
+            raise CLIError('Please enable boot diagnostics.')
+        return requests.get(blob_uri).content
 
     # Find storage account for diagnostics
     storage_mgmt_client = _get_storage_management_client(cmd.cli_ctx)
@@ -1468,10 +1482,10 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     try:
         storage_accounts = storage_mgmt_client.storage_accounts.list()
         matching_storage_account = (a for a in list(storage_accounts)
-                                    if blob_uri.startswith(a.primary_endpoints.blob))
+                                    if a.primary_endpoints.blob and blob_uri.startswith(a.primary_endpoints.blob))
         storage_account = next(matching_storage_account)
     except StopIteration:
-        raise CLIError('Failed to find storage accont for console log file')
+        raise CLIError('Failed to find storage account for console log file')
 
     regex = r'/subscriptions/[^/]+/resourceGroups/(?P<rg>[^/]+)/.+'
     match = re.search(regex, storage_account.id, re.I)
@@ -1493,7 +1507,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     storage_client.get_blob_to_stream(container, blob, BootLogStreamWriter(sys.stdout), max_connections=1)
 
 
-def get_sas(cmd, resource_group_name, vm_name, expire=None):
+def get_boot_log_uri(cmd, resource_group_name, vm_name, expire=None):
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machines.retrieve_boot_diagnostics_data(
         resource_group_name, vm_name, sas_uri_expiration_time_in_minutes=expire)

@@ -1557,7 +1557,7 @@ class VMBootDiagnostics(ScenarioTest):
             self.check('diagnosticsProfile.bootDiagnostics.enabled', True),
             self.check('diagnosticsProfile.bootDiagnostics.storageUri', None)
         ])
-        self.cmd('vm boot-diagnostics get-sas -g {rg} -n {vm} --expire 100', checks=[
+        self.cmd('vm boot-diagnostics get-boot-log-uri -g {rg} -n {vm} --expire 100', checks=[
             self.exists('consoleScreenshotBlobUri'),
             self.exists('serialConsoleLogBlobUri')
         ])
