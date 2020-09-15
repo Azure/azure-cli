@@ -69,7 +69,7 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs cluster create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part=None, help='Location of the Cluster, for locations of available pre-provision clusters, please check az evetnhubs ')
-        c.argument('capacity', type=int, help='Capacity for Sku')
+        c.argument('capacity', type=int, help='Capacity for Sku, allowed value : 1')
 
     for scope in ['eventhubs cluster create', 'eventhubs cluster update']:
         with self.argument_context(scope) as c:

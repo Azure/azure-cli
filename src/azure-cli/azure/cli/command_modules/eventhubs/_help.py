@@ -435,15 +435,15 @@ helps['eventhubs cluster create'] = """
 type: command
 short-summary: Create EventHubs Cluster
 examples:
-  - name: Update a new namespace.
+  - name: Create a new cluster.
     text: az eventhubs cluster create --resource-group myresourcegroup --name mycluster --location mylocation --capacity 1 --tags tag=value
 """
 
 helps['eventhubs cluster update'] = """
 type: command
-short-summary: Updates tags of EventHubs Cluster
+short-summary: Update tags of EventHubs Cluster
 examples:
-  - name: Update a new namespace.
+  - name: Update tags of a existing cluster.
     text: az eventhubs cluster update --resource-group myresourcegroup --name mycluster --tags tag=value
 """
 
@@ -457,17 +457,17 @@ examples:
 
 helps['eventhubs cluster show'] = """
 type: command
-short-summary: Gets the resource description of the specified Event Hubs Cluster.
+short-summary: Get the resource description of the specified Event Hubs Cluster.
 examples:
-  - name: Gets the resource description of the specified Event Hubs Cluster.
+  - name: Get the resource description of the specified Event Hubs Cluster.
     text: az eventhubs cluster show --resource-group myresourcegroup --name mycluster
 """
 
 helps['eventhubs cluster delete'] = """
 type: command
-short-summary: Deletes an existing Event Hubs Cluster.
+short-summary: Delete an existing Event Hubs Cluster.
 examples:
-  - name: Deletes an existing Event Hubs Cluster.
+  - name: Delete an existing Event Hubs Cluster.
     text: az eventhubs cluster delete --resource-group myresourcegroup --name mycluster
 """
 
