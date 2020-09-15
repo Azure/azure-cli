@@ -911,7 +911,7 @@ def delete_permission(cmd, identifier, api, api_permissions=None):
     if not rra:
         # Silently pass if the api is not required.
         logger.warning("App %s doesn't require access to API %s.", identifier, api)
-        return
+        return None
 
     if api_permissions:
         # Check if the user tries to delete any ResourceAccess that is not required.
@@ -922,7 +922,7 @@ def delete_permission(cmd, identifier, api, api_permissions=None):
                            identifier, api, ', '.join(non_existing_ra_ids))
             if len(non_existing_ra_ids) == len(api_permissions):
                 # Skip the REST call if nothing to remove
-                return
+                return None
 
         # Remove specified ResourceAccess under RequiredResourceAccess.resource_access
         rra.resource_access = [a for a in rra.resource_access if a.id not in api_permissions]
