@@ -889,7 +889,7 @@ examples:
     crafted: true
 """
 
-helps['vm boot-diagnostics get-sas'] = """
+helps['vm boot-diagnostics get-boot-log-uris'] = """
 type: command
 short-summary: Get SAS URIs for a virtual machine's boot diagnostic logs.
 parameters:
@@ -898,7 +898,7 @@ parameters:
 examples:
   - name: Get SAS URIs for a virtual machine's boot diagnostic logs.
     text: >
-        az vm boot-diagnostics get-sas -g MyResourceGroup -n MyVirtualMachine
+        az vm boot-diagnostics get-boot-log-uris -g MyResourceGroup -n MyVirtualMachine
 """
 
 helps['vm capture'] = """

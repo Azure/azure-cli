@@ -9,7 +9,6 @@ import json
 import os
 
 import requests
-from msrestazure.azure_exceptions import CloudError
 
 try:
     from urllib.parse import urlparse
@@ -1452,6 +1451,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     import re
     import sys
     from azure.cli.core.profiles import get_sdk
+    from msrestazure.azure_exceptions import CloudError
     BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory(cmd.cli_ctx)
@@ -1507,7 +1507,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     storage_client.get_blob_to_stream(container, blob, BootLogStreamWriter(sys.stdout), max_connections=1)
 
 
-def get_boot_log_uri(cmd, resource_group_name, vm_name, expire=None):
+def get_boot_log_uris(cmd, resource_group_name, vm_name, expire=None):
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machines.retrieve_boot_diagnostics_data(
         resource_group_name, vm_name, sas_uri_expiration_time_in_minutes=expire)

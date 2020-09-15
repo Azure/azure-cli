@@ -304,7 +304,7 @@ def load_command_table(self, _):
         g.custom_command('disable', 'disable_boot_diagnostics')
         g.custom_command('enable', 'enable_boot_diagnostics')
         g.custom_command('get-boot-log', 'get_boot_log')
-        g.custom_command('get-boot-log-uri', 'get_boot_log_uri', min_api='2020-06-01')
+        g.custom_command('get-boot-log-uris', 'get_boot_log_uris', min_api='2020-06-01')
 
     with self.command_group('vm diagnostics', compute_vm_sdk) as g:
         g.custom_command('set', 'set_diagnostics_extension')
