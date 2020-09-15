@@ -452,7 +452,7 @@ type: command
 short-summary: List the quantity of available pre-provisioned Event Hubs Clusters, indexed by Azure region.
 examples:
   - name: List of available pre-provisioned Event Hubs Clusters, indexed by Azure region.
-    text: az eventhubs cluster update --resource-group myresourcegroup --name mycluster --tags tag=value
+    text: az eventhubs cluster available-region
 """
 
 helps['eventhubs cluster show'] = """
