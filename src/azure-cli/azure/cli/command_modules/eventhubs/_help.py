@@ -447,7 +447,7 @@ examples:
     text: az eventhubs cluster update --resource-group myresourcegroup --name mycluster --tags tag=value
 """
 
-helps['eventhubs cluster available_cluster_region'] = """
+helps['eventhubs cluster available-region'] = """
 type: command
 short-summary: List the quantity of available pre-provisioned Event Hubs Clusters, indexed by Azure region.
 examples:

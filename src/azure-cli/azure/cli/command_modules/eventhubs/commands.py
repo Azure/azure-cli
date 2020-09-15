@@ -72,7 +72,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_resource_group')
         g.command('namespace list', 'list_namespaces')
         g.command('delete', 'delete')
-        g.command('available_cluster_region', 'list_available_cluster_region')
+        g.command('available-region', 'list_available_cluster_region')
         g.generic_update_command('update', getter_name='get', setter_name='update', custom_func_name='cli_cluster_update', custom_func_type=eventhubs_custom)
 
 # EventHub Region
