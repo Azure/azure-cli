@@ -174,7 +174,6 @@ def flexible_server_update_custom_func(instance,
                                        tags=None,
                                        auto_grow=None,
                                        assign_identity=False,
-                                       public_network_access=None,
                                        ha_enabled=None,
                                        replication_role=None,
                                        maintenance_window=None):
@@ -233,7 +232,6 @@ def flexible_server_update_custom_func(instance,
                              tags=tags,
                              ha_enabled=ha_enabled,
                              replication_role=replication_role,
-                             public_network_access=public_network_access,
                              maintenance_window=instance.maintenance_window)
 
     if assign_identity:

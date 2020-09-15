@@ -195,7 +195,7 @@ type: command
 short-summary: List all read replicas for a given server.
 examples:
   - name: List all read replicas for master server 'testServer'.
-    text: az mysql flexible-server replica list -g testGroup
+    text: az mysql flexible-server replica list -g testGroup -s primaryservername
 """
 
 helps['mysql flexible-server replica stop-replication'] = """
@@ -203,7 +203,7 @@ type: command
 short-summary: Stop replication to a read replica and make it a read/write server.
 examples:
   - name: Stop replication to 'testReplicaServer' and make it a read/write server.
-    text: az mysql flexible-server replica stop-replication -g testGroup -n testReplicaServer
+    text: az mysql flexible-server replica stop-replication -g testGroup -s testReplicaServer
 """
 
 helps['mysql flexible-server restart'] = """
