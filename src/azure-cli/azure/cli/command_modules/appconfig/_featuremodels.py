@@ -7,7 +7,7 @@ from enum import Enum
 import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
-from ._azconfig.models import KeyValue
+from ._models import KeyValue
 from ._constants import FeatureFlagConstants
 
 # pylint: disable=too-few-public-methods
@@ -86,8 +86,8 @@ class FeatureFlag:
         Description of Feature Flag
     :ivar bool locked:
         Represents whether the feature flag is locked.
-    :ivar datetime last_modified:
-        A datetime object representing the last time the feature flag was modified.
+    :ivar str last_modified:
+        A str representation of the datetime object representing the last time the feature flag was modified.
     :ivar str etag:
         The ETag contains a value that you can use to perform operations.
     :ivar dict {string, FeatureFilter[]} conditions:

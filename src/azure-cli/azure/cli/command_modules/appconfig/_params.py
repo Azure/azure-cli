@@ -76,9 +76,13 @@ def load_arguments(self, _):
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('assign_identity', arg_type=identities_arg_type, is_preview=True)
+        c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
+                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
+        c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
+                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
 
     with self.argument_context('appconfig update', arg_group='Customer Managed Key', is_preview=True) as c:
         c.argument('encryption_key_name', help='The name of the KeyVault key.')
@@ -175,7 +179,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
-        c.argument('label', help="If no label specified, restore all key-value pairs with all labels. Support star sign as filters, for instance abc* means labels with abc as prefix.")
+        c.argument('label', help="If no label specified, restore all key-value pairs with all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
 
     with self.argument_context('appconfig kv lock') as c:
         c.argument('key', help='Key to be locked.')

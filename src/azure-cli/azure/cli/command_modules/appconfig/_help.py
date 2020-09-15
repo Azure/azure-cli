@@ -22,6 +22,8 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
   - name: Create an App Configuration with name, location, sku and resource group with user assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
+  - name: Create an App Configuration with name, location and resource group and enable public network access.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network
 """
 
 helps['appconfig identity'] = """
@@ -268,6 +270,8 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
   - name: Remove customer encryption key
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
+  - name: Update an App Configuration to enable public network access.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true
 """
 
 helps['appconfig feature'] = """

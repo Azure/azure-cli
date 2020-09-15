@@ -144,10 +144,14 @@ If you get errors on installation on **OS X**, upgrade pip by typing:
     pip install --upgrade --force-reinstall pip
 ```
 
-If you get errors on installation on **Fedora** such as `No module named '_cffi_backend'`,
+If you get errors on installation on **Fedora or CentOS** such as `No module named '_cffi_backend'`,
 install `python3-cffi` by typing:
 ```shell
     sudo yum install -y python3-cffi
+```
+If your system does not provide the `python3-cffi` RPM package, you can install the `cffi` package with `pip`:
+```shell
+    sudo pip3 install cffi --target /usr/lib64/az/lib/python3.6/site-packages/
 ```
 
 If you get errors on installation on **Debian or Ubuntu** such as the examples below,

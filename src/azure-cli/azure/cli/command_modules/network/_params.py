@@ -61,7 +61,7 @@ def load_arguments(self, _):
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
      ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
-     PreferredIPVersion, HTTPConfigurationMethod, OutputType) = self.get_models(
+     PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction',
@@ -72,7 +72,7 @@ def load_arguments(self, _):
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
          'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
-         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType')
+         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType')
 
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
@@ -147,7 +147,11 @@ def load_arguments(self, _):
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
 
     with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
-        c.argument('enable_private_link', action='store_true', help='Enable Private Link feature for this application gateway', default=False)
+        c.argument('enable_private_link',
+                   action='store_true',
+                   help='Enable Private Link feature for this application gateway. '
+                        'If both public IP and private IP are enbaled, taking effect only in public frontend IP',
+                   default=False)
         c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
         c.argument('private_link_subnet', help='The name of the subnet within the same vnet of an application gateway')
@@ -941,7 +945,7 @@ def load_arguments(self, _):
         c.argument('private_ip_address', help='Static private IP address to associate with the configuration.')
 
     with self.argument_context('network lb frontend-ip update') as c:
-        c.argument('private_ip_address', help='Static private IP address to associate with the configuration. Use "" to remove the static address and use a dynamic address instead.')
+        c.argument('private_ip_address', help='Static private IP address to associate with the configuration. Use ""(\'""\' in PowerShell) to remove the static address and use a dynamic address instead.')
 
     with self.argument_context('network lb probe') as c:
         c.argument('interval', help='Probing time interval in seconds.')
@@ -1001,7 +1005,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network nic update') as c:
         c.argument('network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses. Use "" to revert to default Azure servers.', nargs='+', arg_group='DNS')
+        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses. Use ""(\'""\' in PowerShell) to revert to default Azure servers.', nargs='+', arg_group='DNS')
 
     for item in ['create', 'ip-config update', 'ip-config create']:
         with self.argument_context('network nic {}'.format(item)) as c:
@@ -1025,7 +1029,7 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
         c.argument('public_ip_address', help='Name or ID of the public IP to use.', validator=get_public_ip_validator())
         c.argument('make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
-        c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or "" to use a dynamic address.')
+        c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or ""(\'""\' in PowerShell) to use a dynamic address.')
 
     with self.argument_context('network nic ip-config address-pool') as c:
         c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
@@ -1145,20 +1149,32 @@ def load_arguments(self, _):
                                arg_group='V2 Endpoint',
                                min_api='2019-11-01') as c:
         c.argument('endpoint_dest_name',
-                   help='The name of the source of connection monitor endpoint. '
-                        'If you are creating a V2 Connection Monitor, it\'s required')
-        c.argument('endpoint_dest_resource_id',
-                   help='Resource ID of the source of connection monitor endpoint')
-        c.argument('endpoint_dest_address',
-                   help='Address of the source of connection monitor endpoint (IP or domain name)')
-        c.argument('endpoint_source_name',
                    help='The name of the destination of connection monitor endpoint. '
                         'If you are creating a V2 Connection Monitor, it\'s required')
+        c.argument('endpoint_dest_resource_id',
+                   help='Resource ID of the destination of connection monitor endpoint')
+        c.argument('endpoint_dest_address',
+                   help='Address of the destination of connection monitor endpoint (IP or domain name)')
+        c.argument('endpoint_dest_type',
+                   arg_type=get_enum_type(EndpointType),
+                   help='The endpoint type')
+        c.argument('endpoint_dest_coverage_level',
+                   arg_type=get_enum_type(CoverageLevel),
+                   help='Test coverage for the endpoint')
+        c.argument('endpoint_source_name',
+                   help='The name of the source of connection monitor endpoint. '
+                        'If you are creating a V2 Connection Monitor, it\'s required')
         c.argument('endpoint_source_resource_id',
-                   help='Resource ID of the destination of connection monitor endpoint. '
+                   help='Resource ID of the source of connection monitor endpoint. '
                         'If endpoint is intended to used as source, this option is required.')
         c.argument('endpoint_source_address',
-                   help='Address of the destination of connection monitor endpoint (IP or domain name)')
+                   help='Address of the source of connection monitor endpoint (IP or domain name)')
+        c.argument('endpoint_source_type',
+                   arg_type=get_enum_type(EndpointType),
+                   help='The endpoint type')
+        c.argument('endpoint_source_coverage_level',
+                   arg_type=get_enum_type(CoverageLevel),
+                   help='Test coverage for the endpoint')
 
     # Argument Group for test configuration to create a V2 connection monitor
     with self.argument_context('network watcher connection-monitor',
@@ -1194,6 +1210,10 @@ def load_arguments(self, _):
                    options_list='--tcp-port',
                    help='The port to connect to',
                    type=int)
+        c.argument('test_config_tcp_port_behavior',
+                   options_list='--tcp-port-behavior',
+                   help='Destination port behavior',
+                   arg_type=get_enum_type(DestinationPortBehavior))
         c.argument('test_config_tcp_disable_trace_route',
                    options_list='--tcp-disable-trace-route',
                    help='Value indicating whether path evaluation with trace route should be disabled. '
@@ -1263,12 +1283,27 @@ def load_arguments(self, _):
                    help='Resource ID of the connection monitor endpoint')
         c.argument('address',
                    help='Address of the connection monitor endpoint (IP or domain name)')
+        c.argument('address_include',
+                   nargs='+',
+                   help='List of address of the endpoint item which needs to be included to the endpoint scope')
+        c.argument('address_exclude',
+                   nargs='+',
+                   help='List of address of the endpoint item which needs to be included to the endpoint scope')
+        c.argument('endpoint_type',
+                   options_list=['--type'],
+                   help='The endpoint type',
+                   arg_type=get_enum_type(EndpointType))
+        c.argument('coverage_level',
+                   arg_type=get_enum_type(CoverageLevel),
+                   help='Test coverage for the endpoint')
         c.argument('filter_type',
                    arg_type=get_enum_type(ConnectionMonitorEndpointFilterType),
+                   deprecate_info=c.deprecate(hide=False),
                    help="The behavior of the endpoint filter. Currently only 'Include' is supported.")
         c.argument('filter_items',
                    options_list=['--filter-item'],
                    action=NWConnectionMonitorEndpointFilterItemAction,
+                   deprecate_info=c.deprecate(hide=False),
                    nargs='+',
                    help="List of property=value pairs to define filter items. "
                         "Property currently include: type, address. "
@@ -1327,6 +1362,9 @@ def load_arguments(self, _):
                        help='Value indicating whether path evaluation with trace route should be disabled. '
                             'false is default.',
                        arg_type=get_three_state_flag())
+            c.argument('tcp_port_behavior',
+                       help='Destination port behavior',
+                       arg_type=get_enum_type(DestinationPortBehavior))
         # ICMP protocol configuration
         with self.argument_context('network watcher connection-monitor test-configuration',
                                    min_api='2019-11-01',
@@ -1600,7 +1638,7 @@ def load_arguments(self, _):
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
 
     with self.argument_context('network traffic-manager profile', arg_group='Monitor Configuration') as c:
-        c.argument('monitor_path', help='Path to monitor. Use "" for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
+        c.argument('monitor_path', help='Path to monitor. Use ""(\'""\' in PowerShell) for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
         c.argument('monitor_port', help='Port to monitor.', type=int, options_list=['--port', c.deprecate(target='--monitor-port', redirect='--port', hide=True)])
         c.argument('monitor_protocol', monitor_protocol_type, options_list=['--protocol', c.deprecate(target='--monitor-protocol', redirect='--protocol', hide=True)])
         c.argument('timeout', help='The time in seconds allowed for endpoints to respond to a health check.', type=int)
@@ -1698,8 +1736,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
 
     with self.argument_context('network vnet subnet update') as c:
-        c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string "" to detach it.')
-        c.argument('route_table', help='Name or ID of a route table to associate with the subnet. Use empty string "" to detach it. You can also append "--remove routeTable" in "az network vnet subnet update" to detach it.')
+        c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string ""(\'""\' in PowerShell) to detach it.')
+        c.argument('route_table', help='Name or ID of a route table to associate with the subnet. Use empty string ""(\'""\' in PowerShell) to detach it. You can also append "--remove routeTable" in "az network vnet subnet update" to detach it.')
 
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:

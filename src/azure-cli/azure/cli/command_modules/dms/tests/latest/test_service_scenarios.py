@@ -6,26 +6,27 @@
 
 import json
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck, JMESPathCheckGreaterThan
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, VirtualNetworkPreparer, JMESPathCheck, JMESPathCheckGreaterThan
 
 
 class DmsServiceTests(ScenarioTest):
     service_random_name_prefix = 'dmsclitest'
     location_name = 'centralus'
-    sku_name = 'Basic_2vCores'
+    sku_name = 'Standard_2vCores'
     vsubnet_id = '/subscriptions/{}/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/AzureDMS-CORP-USC-VNET-5044/subnets/Subnet-1'
     name_exists_checks = [JMESPathCheck('nameAvailable', False),
                           JMESPathCheck('reason', 'AlreadyExists')]
     name_available_checks = [JMESPathCheck('nameAvailable', True)]
 
     @ResourceGroupPreparer(name_prefix='dms_cli_test', location=location_name)
+    @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_service_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
-
+        subnet = self.cmd('az network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()
         self.kwargs.update({
             'lname': self.location_name,
             'skuname': self.sku_name,
-            'vnetid': self.vsubnet_id.format(self.get_subscription_id()),
+            'vnetid': subnet['id'],
             'sname': service_name
         })
 
@@ -71,15 +72,17 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms check-name -l {lname} -n {sname}', checks=self.name_available_checks)
 
     @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
+    @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_project_commands(self, resource_group):
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
         project_name1 = self.create_random_name('project1', 15)
         project_name2 = self.create_random_name('project2', 15)
+        subnet = self.cmd('az network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()
 
         self.kwargs.update({
             'lname': self.location_name,
             'skuname': self.sku_name,
-            'vnetid': self.vsubnet_id.format(self.get_subscription_id()),
+            'vnetid': subnet['id'],
             'sname': service_name,
             'pname1': project_name1,
             'pname2': project_name2
@@ -120,7 +123,9 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms delete -g {rg} -n {sname} --delete-running-tasks true -y')
 
     @ResourceGroupPreparer(name_prefix='dms_cli_test_', location=location_name)
+    @VirtualNetworkPreparer(name_prefix='dms.clitest.vn')
     def test_task_commands(self, resource_group):
+        from azure.cli.testsdk.checkers import JMESPathPatternCheck
         service_name = self.create_random_name(self.service_random_name_prefix, 15)
         project_name = self.create_random_name('project', 15)
         task_name1 = self.create_random_name('task1', 15)
@@ -129,11 +134,12 @@ class DmsServiceTests(ScenarioTest):
         database_options2 = "[ { 'name': 'SourceDatabase2', 'target_database_name': 'TargetDatabase2', 'make_source_db_read_only': False, 'table_map': { 'dbo.TestTableSource1': 'dbo.TestTableTarget1', 'dbo.TestTableSource2': 'dbo.TestTableTarget2' } } ]"
         source_connection_info = "{ 'userName': 'testuser', 'password': 'testpassword', 'dataSource': 'notarealsourceserver', 'authentication': 'SqlAuthentication', 'encryptConnection': True, 'trustServerCertificate': True }"
         target_connection_info = "{ 'userName': 'testuser', 'password': 'testpassword', 'dataSource': 'notarealtargetserver', 'authentication': 'SqlAuthentication', 'encryptConnection': True, 'trustServerCertificate': True }"
+        subnet = self.cmd('az network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()
 
         self.kwargs.update({
             'lname': self.location_name,
             'skuname': self.sku_name,
-            'vnetid': self.vsubnet_id.format(self.get_subscription_id()),
+            'vnetid': subnet['id'],
             'sname': service_name,
             'pname': project_name,
             'tname1': task_name1,
@@ -165,7 +171,7 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=create_checks)
 
         cancel_checks = [JMESPathCheck('name', task_name1),
-                         JMESPathCheck('properties.state', 'Canceled')]
+                         JMESPathPatternCheck('properties.state', 'Cancel(?:ed|ing)')]
         self.cmd('az dms project task cancel -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=cancel_checks)
 
         self.cmd('az dms project task create --database-options-json "{dboptions2}" -n {tname2} --project-name {pname} -g {rg} --service-name {sname} --source-connection-json "{sconn}" --target-connection-json "{tconn}"')

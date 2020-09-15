@@ -466,6 +466,32 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_network_appgw_creation_with_public_and_private_ip')
+    def test_network_appgw_creation_with_public_and_private_ip(self, resource_group):
+        self.kwargs.update({
+            "appgw": "applicationGateway",
+            "ip": "publicIP",
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+
+        self.cmd("network application-gateway create -g {rg} -n {appgw} "
+                 "--sku Standard_v2 "
+                 "--enable-private-link "
+                 "--private-ip-address 10.0.0.17 "
+                 "--public-ip-address {ip}")
+        show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
+
+        self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
+        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
+
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
+
+        self.cmd("network application-gateway delete -g {rg} -n {appgw}")
+
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
@@ -3233,6 +3259,45 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql/managedInstances',
                  checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
 
+    @ResourceGroupPreparer(name_prefix='test_subnet_with_private_endpoint_option')
+    def test_subnet_with_private_endpoint_and_private_Link_options(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'MyVnet',
+            'subnet1': 'MySubnet1',
+            'subnet2': 'MySubnet2',
+            'subnet3': 'MySubnet3',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.1.0/24 '
+                 '--name {subnet1} '
+                 '--disable-private-endpoint-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.1.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Disabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Enabled')
+                 ])
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.2.0/24 '
+                 '--name {subnet2} '
+                 '--disable-private-link-service-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.2.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Enabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Disabled')
+                 ])
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.3.0/24 '
+                 '--name {subnet3} '
+                 '--disable-private-endpoint-network-policies true '
+                 '--disable-private-link-service-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.3.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Disabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Disabled')
+                 ])
+
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
@@ -3621,7 +3686,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction inbound --local {private-ip}:22 --protocol tcp --remote 100.1.2.3:*')
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local {private-ip}:* --protocol tcp --remote 100.1.2.3:80')
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
-        self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
+        self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 10.0.0.9 --dest-ip 10.0.0.6')
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westus', kind='StorageV2')

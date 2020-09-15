@@ -151,8 +151,10 @@ class ResourceScenarioTest(ScenarioTest):
                  checks=self.check("length([?location == '{loc}']) == length(@)", True))
         self.cmd('resource list --resource-type {rt}',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-        self.cmd('resource list --name {vnet}',
-                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --name {vnet}', checks=[
+            self.check("length([?name=='{vnet}'])", vnet_count),
+            self.check('[0].provisioningState', 'Succeeded')
+        ])
         self.cmd('resource list --tag cli-test',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
         self.cmd('resource list --tag cli-test=test',
@@ -307,7 +309,7 @@ class TagScenarioTest(ScenarioTest):
         tag_values = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
         for tag_value in tag_values:
             self.cmd('tag remove-value --value {} -n {{tag}}'.format(tag_value))
-        self.cmd('tag delete -n {tag}')
+        self.cmd('tag delete -n {tag} -y')
 
         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
         self.cmd('tag create -n {tag}', checks=[
@@ -325,7 +327,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
-        self.cmd('tag delete -n {tag}')
+        self.cmd('tag delete -n {tag} -y')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
@@ -462,6 +464,156 @@ class TagScenarioTest(ScenarioTest):
 
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
 
+    def test_tag_create_or_update_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_create_or_update_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_create_or_update_resourcegroup', location='westus')
+    def test_tag_create_or_update_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_create_or_update_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_create_or_update_resource', location='westus')
+    def test_tag_create_or_update_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_create_or_update_scope(resource_id=resource['id'])
+
+    # Utility method to test CreateOrUpdate for Tags within subscription, resource group, and tracked resources.
+    def utility_tag_create_or_update_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'expected_tags1': 'cliName1=cliValue1 cliName2=cliValue2',
+            'expected_tags2': 'cliName1=cliValue1 cliName2='
+        })
+
+        # 1. pass in an empty tag set, should throw error
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('tag create --resource-id {resource_id} --tags', checks=self.check('tags', {}))
+
+        # 2. pass in a complete tag string
+        tag_dict1 = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2'}
+        self.cmd('tag create --resource-id {resource_id} --tags {expected_tags1}', checks=[
+            self.check('properties.tags', tag_dict1)
+        ])
+
+        # 3. pass in one incomplete tag string
+        tag_dict2 = {'cliName1': 'cliValue1', 'cliName2': ''}
+        self.cmd('tag create --resource-id {resource_id} --tags {expected_tags2}', checks=[
+            self.check('properties.tags', tag_dict2)
+        ])
+
+        # 4. clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id} -y', checks=self.is_empty())
+
+    def test_tag_update_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_update_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_update_resourcegroup', location='westus')
+    def test_tag_update_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_update_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_update_resource', location='westus')
+    def test_tag_update_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_update_scope(resource_id=resource['id'])
+
+    # Utility method to test updating tags on subscription, resource group and tracked resource, including Merge, Replace, and Delete Operation.
+    def utility_tag_update_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'original_tags': 'cliName1=cliValue1 cliName2=cliValue2',
+            'merge_tags': 'cliName1=cliValue1 cliName3=cliValue3',
+            'replace_tags': 'cliName1=cliValue1 cliName4=cliValue4',
+            'delete_tags': 'cliName4=cliValue4',
+            'merge_operation': 'merge',
+            'replace_operation': 'replace',
+            'delete_operation': 'delete'
+        })
+
+        # setup original
+        self.cmd('tag create --resource-id {resource_id} --tags {original_tags}')
+
+        # 1. test merge operation
+        after_merge_tags_dict = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2', 'cliName3': 'cliValue3'}
+        self.cmd('tag update --resource-id {resource_id} --operation {merge_operation} --tags {merge_tags}', checks=[
+            self.check('properties.tags', after_merge_tags_dict)
+        ])
+
+        # 2. test replace operation
+        after_replace_tags_dict = {'cliName1': 'cliValue1', 'cliName4': 'cliValue4'}
+        self.cmd('tag update --resource-id {resource_id} --operation {replace_operation} --tags {replace_tags}',
+                 checks=[
+                     self.check('properties.tags', after_replace_tags_dict)
+                 ])
+
+        # 3. test delete operation
+        after_delete_tags_dict = {'cliName1': 'cliValue1'}
+        self.cmd('tag update --resource-id {resource_id} --operation {delete_operation} --tags {delete_tags}', checks=[
+            self.check('properties.tags', after_delete_tags_dict)
+        ])
+
+        # 4. clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id} -y', checks=self.is_empty())
+
+    def test_tag_get_subscription(self):
+        subscription_id = '/subscriptions/' + self.get_subscription_id()
+        self.utility_tag_get_scope(resource_id=subscription_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_get_resourcegroup', location='westus')
+    def test_tag_get_resourcegroup(self, resource_group):
+        resource_group_id = '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        self.utility_tag_get_scope(resource_id=resource_group_id)
+
+    @ResourceGroupPreparer(name_prefix='test_tag_get_resource', location='westus')
+    def test_tag_get_resource(self, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30)
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.utility_tag_get_scope(resource_id=resource['id'])
+
+    # Utility method to test Get for Tags within subscription, resource group and tracked resource.
+    def utility_tag_get_scope(self, resource_id):
+        self.kwargs.update({
+            'resource_id': resource_id,
+            'original_tags': 'cliName1=cliValue1 cliName2=cliValue2'
+        })
+
+        # setup original
+        self.cmd('tag create --resource-id {resource_id} --tags {original_tags}')
+
+        # test get operation
+        expected_tags_dict = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2'}
+        self.cmd('tag list --resource-id {resource_id}', checks=[
+            self.check('properties.tags', expected_tags_dict)
+        ])
+
+        # clean up: delete the existing tags
+        self.cmd('tag delete --resource-id {resource_id} -y', checks=self.is_empty())
+
 
 class ProviderRegistrationTest(ScenarioTest):
 
@@ -517,10 +669,11 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
-            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60)
+            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
-        self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file "{tf}" --parameters @"{params}" --parameters storageAccountName="{storage-account-name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -528,7 +681,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment sub create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
+        self.cmd('deployment sub create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}" --parameters storageAccountName="{storage-account-name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -551,7 +704,8 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
-        self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" --no-wait')
+        self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" '
+                 '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment sub cancel -n {dn2}')
 
@@ -568,10 +722,11 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
-            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60)
+            'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
-        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters @"{params}" --parameters storageAccountName="{storage-account-name}" ', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -579,7 +734,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
+        self.cmd('deployment create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}" --parameters storageAccountName="{storage-account-name}" ', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -600,7 +755,8 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
-        self.cmd('deployment create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" --no-wait')
+        self.cmd('deployment create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" '
+                 '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment cancel -n {dn2}')
 
@@ -1117,6 +1273,53 @@ class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
         ])
 
 
+class DeploymentWhatIfAtManagementGroupTest(ScenarioTest):
+    def test_management_group_level_what_if(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
+            'mg': self.create_random_name('azure-cli-management', 30),
+            'sub-rg': self.create_random_name('azure-cli-sub-resource-group', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg what-if --management-group-id {mg} --location WestUS --template-file "{tf}" --no-pretty-print '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
+                 '--parameters storageAccountName="{storage-account-name}"',
+                 checks=[
+                     self.check('status', 'Succeeded'),
+                     self.check("length(changes)", 4),
+                     self.check("changes[0].changeType", "Create"),
+                     self.check("changes[1].changeType", "Create"),
+                     self.check("changes[2].changeType", "Create"),
+                     self.check("changes[3].changeType", "Create"),
+                 ])
+
+
+class DeploymentWhatIfAtTenantScopeTest(ScenarioTest):
+    def test_tenant_level_what_if(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60),
+            'mg': self.create_random_name('azure-cli-management-group', 40),
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment tenant what-if --location WestUS --template-file "{tf}" --parameters targetMG="{mg}" --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+            self.check("length(changes)", 3),
+            self.check("changes[0].changeType", "Create"),
+            self.check("changes[1].changeType", "Create"),
+            self.check("changes[2].changeType", "Create"),
+        ])
+
+
 class DeploymentScriptsTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
     def test_list_all_deployment_scripts(self, resource_group):
@@ -1238,7 +1441,9 @@ class FeatureScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     def test_feature_unregister(self):
-        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=self.check('properties.state', 'Unregistered'))
+        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=[
+            self.check_pattern('properties.state', 'Unregistering|Unregistered')
+        ])
 
 
 class PolicyScenarioTest(ScenarioTest):
@@ -1676,7 +1881,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.resource_policy_operations(resource_group, management_group_name)
 
             # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(IncorrectUsageError):
+            with self.assertRaises(SystemExit):
                 self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)

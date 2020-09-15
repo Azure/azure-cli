@@ -19,7 +19,6 @@ from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants,
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
@@ -104,6 +103,76 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_public_network_access(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='PubNetworkTrue', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'enable_public_network': 'true'
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', 'Enabled')])
+
+        config_store_name = self.create_random_name(prefix='PubNetworkFalse', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'enable_public_network': 'false'
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', 'Disabled')])
+
+        config_store_name = self.create_random_name(prefix='PubNetworkNull', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_name
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', None)])
+
+        # Enable public network access with update command
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', 'Enabled')])
+
+        # Disable public network access with update command
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network {enable_public_network}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('publicNetworkAccess', 'Disabled')])
 
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
@@ -802,7 +871,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
         # Add duplicate features with different labels in src config store
         entry_feature = 'Beta'
-        internal_feature_key = FEATURE_FLAG_PREFIX + entry_feature
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         self.kwargs.update({
             'feature': entry_feature,
             'label': entry_label
@@ -1456,7 +1525,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         assert len(response_dict) == 4
 
         # List all features with null labels
-        null_label_pattern = ""
+        null_label_pattern = "\\0"
         self.kwargs.update({
             'label': null_label_pattern
         })
@@ -1573,13 +1642,22 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
-        # Invalid Pattern - contains multiple **
-        invalid_pattern = '**ta'
+        # Invalid Pattern - starts with *
+        invalid_pattern = '*Beta'
         self.kwargs.update({
             'feature': invalid_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Regular expression error in parsing"):
+        with self.assertRaisesRegexp(CLIError, "Bad Request"):
+            self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
+
+        # Invalid Pattern - contains multiple **
+        invalid_pattern = 'Beta**'
+        self.kwargs.update({
+            'feature': invalid_pattern
+        })
+
+        with self.assertRaisesRegexp(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Delete Beta (label v2) feature flag using connection-string

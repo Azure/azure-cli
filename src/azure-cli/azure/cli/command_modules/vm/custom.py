@@ -272,7 +272,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         encryption_type=None, disk_encryption_set=None, max_shares=None,
                         disk_iops_read_only=None, disk_mbps_read_only=None,
                         image_reference=None, image_reference_lun=None,
-                        gallery_image_reference=None, gallery_image_reference_lun=None):
+                        gallery_image_reference=None, gallery_image_reference_lun=None,
+                        network_access_policy=None, disk_access=None, logical_sector_size=None, tier=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -330,7 +331,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  image_reference=image_reference, gallery_image_reference=gallery_image_reference,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id,
-                                 upload_size_bytes=upload_size_bytes)
+                                 upload_size_bytes=upload_size_bytes,
+                                 logical_sector_size=logical_sector_size)
 
     if size_gb is None and upload_size_bytes is None and (option == DiskCreateOption.empty or for_upload):
         raise CLIError('usage error: --size-gb or --upload-size-bytes required to create an empty disk')
@@ -339,6 +341,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk_encryption_set = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+
+    if disk_access is not None and not is_valid_resource_id(disk_access):
+        disk_access = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
 
     encryption = None
     if disk_encryption_set:
@@ -362,6 +369,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.disk_iops_read_only = disk_iops_read_only
     if disk_mbps_read_only is not None:
         disk.disk_mbps_read_only = disk_mbps_read_only
+    if network_access_policy is not None:
+        disk.network_access_policy = network_access_policy
+    if disk_access is not None:
+        disk.disk_access_id = disk_access
+    if tier is not None:
+        disk.tier = tier
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
@@ -380,7 +393,9 @@ def list_managed_disks(cmd, resource_group_name=None):
 
 
 def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
-                        disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None):
+                        disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
+                        network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
+                        disk_mbps_read_only=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -392,6 +407,12 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.disk_iops_read_write = disk_iops_read_write
     if disk_mbps_read_write is not None:
         instance.disk_mbps_read_write = disk_mbps_read_write
+    if disk_iops_read_only is not None:
+        instance.disk_iops_read_only = disk_iops_read_only
+    if disk_mbps_read_only is not None:
+        instance.disk_mbps_read_only = disk_mbps_read_only
+    if max_shares is not None:
+        instance.max_shares = max_shares
     if disk_encryption_set is not None:
         if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
                 encryption_type != 'EncryptionAtRestWithCustomerKey':
@@ -403,6 +424,13 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.encryption.disk_encryption_set_id = disk_encryption_set
     if encryption_type is not None:
         instance.encryption.type = encryption_type
+    if network_access_policy is not None:
+        instance.network_access_policy = network_access_policy
+    if disk_access is not None and not is_valid_resource_id(disk_access):
+        disk_access = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+        instance.disk_access_id = disk_access
     return instance
 # endregion
 
@@ -481,7 +509,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
-                    encryption_type=None):
+                    encryption_type=None, network_access_policy=None, disk_access=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -511,6 +539,11 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
 
+    if disk_access is not None and not is_valid_resource_id(disk_access):
+        disk_access = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+
     if disk_encryption_set is not None and encryption_type is None:
         raise CLIError('usage error: Please specify --encryption-type.')
     if encryption_type is not None:
@@ -523,6 +556,10 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                         encryption=encryption)
     if hyper_v_generation:
         snapshot.hyper_vgeneration = hyper_v_generation
+    if network_access_policy is not None:
+        snapshot.network_access_policy = network_access_policy
+    if disk_access is not None:
+        snapshot.disk_access_id = disk_access
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.snapshots.create_or_update, resource_group_name, snapshot_name, snapshot)
@@ -540,7 +577,8 @@ def list_snapshots(cmd, resource_group_name=None):
     return client.snapshots.list()
 
 
-def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None, encryption_type=None):
+def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
+                    encryption_type=None, network_access_policy=None, disk_access=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -557,6 +595,13 @@ def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryptio
         instance.encryption.disk_encryption_set_id = disk_encryption_set
     if encryption_type is not None:
         instance.encryption.type = encryption_type
+    if network_access_policy is not None:
+        instance.network_access_policy = network_access_policy
+    if disk_access is not None and not is_valid_resource_id(disk_access):
+        disk_access = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+        instance.disk_access_id = disk_access
     return instance
 # endregion
 
@@ -651,7 +696,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
-              encryption_at_host=None):
+              encryption_at_host=None, enable_auto_update=None, patch_mode=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -822,7 +867,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         dedicated_host=dedicated_host, priority=priority, max_price=max_price, eviction_policy=eviction_policy,
         enable_agent=enable_agent, vmss=vmss, os_disk_encryption_set=os_disk_encryption_set,
         data_disk_encryption_sets=data_disk_encryption_sets, specialized=specialized,
-        encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group)
+        encryption_at_host=encryption_at_host, dedicated_host_group=dedicated_host_group,
+        enable_auto_update=enable_auto_update, patch_mode=patch_mode)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -2507,13 +2553,17 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             'tags': tags,
             'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
             'properties': {
-                'singlePlacementGroup': True,
+                'singlePlacementGroup': single_placement_group,
                 'provisioningState': 0,
                 'platformFaultDomainCount': platform_fault_domain_count
             }
         }
         if zones is not None:
             vmss_resource['zones'] = zones
+        if proximity_placement_group is not None:
+            vmss_resource['properties']['proximityPlacementGroup'] = {
+                'id': proximity_placement_group
+            }
     else:
         raise CLIError('usage error: --orchestration-mode (ScaleSet | VM)')
 

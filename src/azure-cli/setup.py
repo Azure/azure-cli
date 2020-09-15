@@ -11,18 +11,18 @@ from setuptools import setup, find_packages
 import sys
 
 try:
-    from azure_bdist_wheel import cmdclass
+    from azure_cli_bdist_wheel import cmdclass
 except ImportError:
     from distutils import log as logger
 
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.9.1"
+VERSION = "2.11.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
-    with open('azure/cli/__init__.py', 'r', encoding='utf-8') as f:
+    with open('azure/cli/__main__.py', 'r', encoding='utf-8') as f:
         content = f.read()
 except OSError:
     pass
@@ -31,7 +31,7 @@ else:
 
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
-        print('Could not find __version__ in azure/cli/__init__.py')
+        print('Could not find __version__ in azure/cli/__main__.py')
         sys.exit(1)
     if m.group(1) != VERSION:
         print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
@@ -51,20 +51,20 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
+    'azure-appconfiguration~=1.1.0',
     'azure-batch~=9.0',
-    'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}.*'.format(VERSION),
-    'azure-cli-nspkg~=3.0,>=3.0.3',
     'azure-cosmos~=3.0,>=3.0.2',
-    'azure-datalake-store~=0.0.48',
+    'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
-    'azure-keyvault~=1.1',
+    'azure-keyvault~=1.1.0',
+    'azure-keyvault-administration~=4.0.0b1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
-    'azure-mgmt-apimanagement~=0.1.0',
+    'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-applicationinsights~=0.1.1',
-    'azure-mgmt-appconfiguration~=0.5.0',
-    'azure-mgmt-authorization~=0.52.0',
+    'azure-mgmt-appconfiguration~=0.6.0',
+    'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batch~=9.0.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing~=0.2',
@@ -75,7 +75,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc14',
-    'azure-mgmt-containerservice~=9.0.1',
+    'azure-mgmt-containerservice~=9.4.0',
     'azure-mgmt-cosmosdb~=0.15.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -85,12 +85,12 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid==3.0.0rc7',
     'azure-mgmt-eventhub~=4.0.0',
-    'azure-mgmt-hdinsight~=1.6.0',
+    'azure-mgmt-hdinsight~=1.7.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.12.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-keyvault~=2.2.0',
+    'azure-mgmt-keyvault~=7.0.0b3',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.7.0',
     'azure-mgmt-managedservices~=1.0',
@@ -100,8 +100,8 @@ DEPENDENCIES = [
     'azure-mgmt-media~=2.1,>=2.1.0',
     'azure-mgmt-monitor~=0.11.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=0.11.0',
-    'azure-mgmt-network~=11.0.0',
+    'azure-mgmt-netapp~=0.12.0',
+    'azure-mgmt-network~=12.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=2.2.0',
@@ -115,16 +115,19 @@ DEPENDENCIES = [
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.4.1',
     'azure-mgmt-servicebus~=0.6.0',
-    'azure-mgmt-servicefabric~=0.4.0',
+    'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-signalr~=0.4.0',
-    'azure-mgmt-sql~=0.19.0',
+    'azure-mgmt-sql~=0.21.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
-    'azure-mgmt-storage~=11.1.0',
+    'azure-mgmt-storage~=11.2.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.47.0',
-    'azure-multiapi-storage~=0.3.2',
+    'azure-mgmt-synapse~=0.3.0',
+    'azure-multiapi-storage~=0.4.1',
     'azure-loganalytics~=0.1.0',
     'azure-storage-common~=1.4',
+    'azure-synapse-accesscontrol~=0.2.0',
+    'azure-synapse-spark~=0.2.0',
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'jsmin~=2.2.2',
@@ -164,10 +167,9 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     package_data={
-        'azure.cli.core': ['auth_landing_pages/*.html'],
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
