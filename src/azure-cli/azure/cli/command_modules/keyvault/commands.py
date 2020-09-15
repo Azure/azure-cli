@@ -68,7 +68,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vault_or_hsm')
         g.custom_show_command('show', 'get_vault_or_hsm',
                               doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('get'))
-        g.custom_command('delete', 'delete_vault_or_hsm',
+        g.custom_command('delete', 'delete_vault_or_hsm', supports_no_wait=True,
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('delete'))
         g.custom_command('purge', 'purge_vault_or_hsm', supports_no_wait=True,
                          doc_string_source=mgmt_vaults_entity.operations_docs_tmpl.format('begin_purge_deleted'))

@@ -202,14 +202,14 @@ def _scaffold_certificate_profile(cmd):
     return template
 
 
-def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, hsm_name=None):
+def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, hsm_name=None, no_wait=False):
     if is_azure_stack_profile(cmd) or vault_name:
         return client.delete(resource_group_name=resource_group_name, vault_name=vault_name)
 
     assert hsm_name
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
     return sdk_no_wait(
-        False, hsm_client.begin_delete,
+        no_wait, hsm_client.begin_delete,
         resource_group_name=resource_group_name,
         name=hsm_name
     )
@@ -565,7 +565,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
             if 'Parameter \'name\' must conform to the following pattern' in error_msg:
                 error_msg = 'Managed HSM name must be between 3-24 alphanumeric characters. ' \
                             'The name must begin with a letter, end with a letter or digit, ' \
-                            'and not contain consecutive hyphens.'
+                            'and not contain hyphens.'
             raise CLIError(error_msg)
 
 
