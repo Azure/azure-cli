@@ -411,6 +411,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
+        c.argument('enable_container_delete_retention', arg_type=get_three_state_flag(),
+                   arg_group='Container Delete Retention Policy', min_api='2019-06-01',
+                   help='Enable delete retention policy for container soft delete.')
+        c.argument('container_delete_retention_days', type=int, arg_group='Container Delete Retention Policy',
+                   min_api='2019-06-01',
+                   help='Indicate the number of days that the deleted container should be retained. The minimum '
+                        'specified value can be 1 and thaze maximum value can be 365.')
         c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
                    min_api='2018-07-01')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
