@@ -3,20 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import uuid
+# pylint: disable=unused-argument, line-too-long
+
 import random
 from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation, _is_poller
-from azure.cli.core.profiles import ResourceType
-from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory, network_client_factory
-from msrestazure.tools import is_valid_resource_id, parse_resource_id# pylint: disable=import-error
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
+from azure.mgmt.resource.resources.models import ResourceGroup
+from ._client_factory import resource_client_factory
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'eastus2euap' #'eastus2euap'
+DEFAULT_LOCATION = 'eastus2euap'  # 'eastus2euap'
 
 
 def resolve_poller(result, cli_ctx, name):
@@ -54,46 +52,56 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name)
     # This is for the case when user does not pass a location but the resource group exists in the local context.
     #  In that case, the location needs to be set to the location of the rg, not the default one.
 
-    ## TODO: Fix this because it changes the default location even when I pass in a location param
+    # TODO: Fix this because it changes the default location even when I pass in a location param
     # location = _update_location(cmd, resource_group_name)
 
     return location, resource_group_name, server_name
 
 
 def generate_password(administrator_login_password):
-    import string,secrets
+    import secrets
     if administrator_login_password is None:
         passwordLength = 16
         special_character = random.choice('!@#,?;:$&*')
         administrator_login_password = secrets.token_urlsafe(passwordLength)
-        random_position = random.randint(1, len(administrator_login_password)-1)
-        administrator_login_password = administrator_login_password[:random_position] + special_character + administrator_login_password[random_position + 1:]
+        random_position = random.randint(1, len(administrator_login_password) - 1)
+        administrator_login_password = administrator_login_password[
+            :random_position] + special_character + administrator_login_password[
+                random_position + 1:]
     return administrator_login_password
 
 
 def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
     from datetime import datetime
     # allow access to azure ip addresses
-    cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name
+    cf_firewall, logging_name = db_context.cf_firewall, db_context.logging_name  # NOQA pylint: disable=unused-variable
     now = datetime.now()
-    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
+    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
+                                                                 now.second)
     if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
         logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
-                   'Azure resources...')
-        firewall_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
+                       'Azure resources...')
+        firewall_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
+                                                                                                   now.day, now.hour,
+                                                                                                   now.minute,
+                                                                                                   now.second)
     elif start_ip == end_ip:
         logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip)
     else:
         if start_ip == '0.0.0.0' and end_ip == '255.255.255.255':
-            firewall_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip, end_ip)
+            firewall_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
+                                                                now.second)
+        logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip,
+                       end_ip)
     firewall_client = cf_firewall(cmd.cli_ctx, None)
-    '''
-    return resolve_poller(
-        firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
-        cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
-    '''
-    firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip, end_ip).result()
+
+    # Commenting out until firewall_id is properly returned from RP
+    # return resolve_poller(
+    #    firewall_client.create_or_update(resource_group_name, server_name, firewall_name , start_ip, end_ip),
+    #    cmd.cli_ctx, '{} Firewall Rule Create/Update'.format(logging_name))
+
+    firewall = firewall_client.create_or_update(resource_group_name, server_name, firewall_name, start_ip,
+                                                end_ip).result()
     return firewall.name
 
 
@@ -132,6 +140,7 @@ def update_kwargs(kwargs, key, value):
 
 def parse_maintenance_window(maintenance_window_string):
     parsed_input = maintenance_window_string.split(':')
+    # pylint: disable=no-else-return
     if len(parsed_input) == 1:
         return _map_maintenance_window(parsed_input[0]), None, None
     elif len(parsed_input) == 2:
@@ -160,18 +169,18 @@ def _create_resource_group(cmd, location, resource_group_name):
 
 def _check_resource_group_existence(cmd, resource_group_name):
     resource_client = resource_client_factory(cmd.cli_ctx)
-    return  resource_client.resource_groups.check_existence(resource_group_name)
+    return resource_client.resource_groups.check_existence(resource_group_name)
 
 
 # Map day_of_week string to integer to day of week
 # Possible values can be 0 - 6
 def _map_maintenance_window(day_of_week):
-    options = {"Mon":1,
-               "Tue":2,
-               "Wed":3,
-               "Thu":4,
-               "Fri":5,
-               "Sat":6,
-               "Sun":0,
+    options = {"Mon": 1,
+               "Tue": 2,
+               "Wed": 3,
+               "Thu": 4,
+               "Fri": 5,
+               "Sat": 6,
+               "Sun": 0,
                }
     return options[day_of_week]

@@ -183,6 +183,10 @@ setup(
             'resources/WindowsFunctionsStacks.json',
             'resources/LinuxFunctionsStacks.json',
             'resources/WebappRuntimeStacks.json'
+        ],
+        'azure.cli.command_modules.rdbms': [
+            'randomname/adjectives.txt',
+            'randomname/nouns.txt'
         ]
     },
     cmdclass=cmdclass

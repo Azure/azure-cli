@@ -9,6 +9,7 @@ import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
 import azure.cli.command_modules.rdbms._helptext_pg  # pylint: disable=unused-import
 import azure.cli.command_modules.rdbms._helptext_mysql  # pylint: disable=unused-import
 
+
 class RdbmsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):

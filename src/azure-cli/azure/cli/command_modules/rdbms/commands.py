@@ -42,13 +42,9 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_server_keys_operations,
     cf_postgres_server_ad_administrators_operations)
 
-from ._transformers import table_transform_output
-# from .transformers import table_transform_connection_string
-# from .validators import db_up_namespace_processor
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_command_table(self, _):
-
     rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
 
     mariadb_servers_sdk = CliCommandType(
@@ -458,4 +454,3 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.wait_command('wait')
-

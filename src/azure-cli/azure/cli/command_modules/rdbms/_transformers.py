@@ -25,7 +25,7 @@ def table_transform_output_list_servers(result):
         new_entry['Resource Group'] = key['resourceGroup']
         new_entry['Location'] = key['location']
         new_entry['Version'] = key['version']
-        new_entry['Storage Size(GiB)'] = int(key['storageProfile']['storageMb'])/1024.0
+        new_entry['Storage Size(GiB)'] = int(key['storageProfile']['storageMb']) / 1024.0
         new_entry['State'] = key['state']
         new_entry['Tier'] = key['sku']['tier']
         new_entry['SKU'] = key['sku']['name']

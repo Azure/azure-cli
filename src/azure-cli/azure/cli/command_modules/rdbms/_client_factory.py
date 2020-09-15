@@ -32,7 +32,7 @@ def get_mariadb_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication    # pylint: disable=import-error
+            from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
 
         return MariaDBManagementClient(
@@ -60,7 +60,7 @@ def get_mysql_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication    # pylint: disable=import-error
+            from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
 
         return MySQLManagementClient(
@@ -69,6 +69,7 @@ def get_mysql_management_client(cli_ctx, **_):
             credentials=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
+
 
 def get_mysql_flexible_management_client(cli_ctx, **_):
     from os import getenv
@@ -87,7 +88,7 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication    # pylint: disable=import-error
+            from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
 
         return MySQLManagementClient(
@@ -115,7 +116,7 @@ def get_postgresql_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication    # pylint: disable=import-error
+            from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
 
         return PostgreSQLManagementClient(
@@ -124,6 +125,7 @@ def get_postgresql_management_client(cli_ctx, **_):
             credentials=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
+
 
 def get_postgresql_flexible_management_client(cli_ctx, **_):
     from os import getenv
@@ -141,7 +143,7 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication    # pylint: disable=import-error
+            from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
 
         return PostgreSQLManagementClient(
@@ -152,27 +154,33 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
 
-
 def cf_mariadb_servers(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).servers
+
 
 def cf_mysql_servers(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).servers
 
+
 def cf_postgres_servers(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).servers
+
 
 def cf_mariadb_firewall_rules(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).firewall_rules
 
+
 def cf_mysql_firewall_rules(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).firewall_rules
+
 
 def cf_postgres_firewall_rules(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).firewall_rules
 
+
 def cf_mariadb_config(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).configurations
+
 
 def cf_mysql_config(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).configurations
@@ -269,39 +277,51 @@ def cf_mysql_server_ad_administrators_operations(cli_ctx, _):
 def cf_postgres_server_ad_administrators_operations(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).server_administrators
 
+
 # Meru operations for flexible servers
 def cf_mysql_flexible_servers(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).servers
 
+
 def cf_mysql_flexible_firewall_rules(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).firewall_rules
+
 
 def cf_mysql_flexible_config(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).configurations
 
+
 def cf_mysql_flexible_db(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).databases
+
 
 def cf_mysql_flexible_replica(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).replicas
 
+
 def cf_mysql_flexible_location_capabilities(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).location_based_capabilities
+
 
 def cf_postgres_flexible_servers(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).servers
 
+
 def cf_postgres_flexible_firewall_rules(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).firewall_rules
+
 
 def cf_postgres_flexible_config(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).configurations
 
+
 def cf_postgres_flexible_location_capabilities(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
 
+
 def resource_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
 
 def network_client_factory(cli_ctx):
     from azure.mgmt.network import NetworkManagementClient

@@ -11,9 +11,10 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
-from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db
+from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
+    cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
-    parse_public_access_input, update_kwargs, generate_password, parse_maintenance_window
+    parse_public_access_input, generate_password, parse_maintenance_window
 from .flexible_server_custom_common import user_confirmation, server_list_custom_func
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
 
@@ -23,6 +24,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 
 
 # region create without args
+# pylint: disable=too-many-locals
 def flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                                 location=None, storage_mb=None, administrator_login=None,
                                 administrator_login_password=None, version=None,
@@ -32,7 +34,8 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     from azure.mgmt.rdbms import mysql_flexibleservers
     try:
         db_context = DbContext(
-            azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db, logging_name='MySQL', command_group='mysql', server_client=client)
+            azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
+            logging_name='MySQL', command_group='mysql', server_client=client)
 
         # Raise error when user passes values for both parameters
         if subnet_arm_resource_id is not None and public_access is not None:
@@ -40,27 +43,32 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                            "and --public_access is invalid. Use either one of them.")
 
         # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
+        # pylint: disable=too-many-boolean-expressions
         if (vnet_address_prefix is not None) or (subnet_address_prefix is not None):
-            if ((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and ((vnet_resource_id is None) or (subnet_arm_resource_id is None))):
-               raise CLIError("Incorrect usage : "
-                              "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
+            if (((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or
+                    ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or
+                    ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and
+                     ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
+                raise CLIError("Incorrect usage : "
+                               "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
 
         server_result = firewall_id = subnet_id = None
 
         # Populate desired parameters
-        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
+        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                                 server_name)
 
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
             subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
                                     location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
             delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
-                    subnet_arm_resource_id=subnet_id)
+                subnet_arm_resource_id=subnet_id)
         elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
             subnet_id = create_vnet(cmd, server_name, location, resource_group_name,
                                     DELEGATION_SERVICE_NAME)
             delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
-                    subnet_arm_resource_id=subnet_id)
+                subnet_arm_resource_id=subnet_id)
         else:
             delegated_subnet_arguments = None
 
@@ -81,8 +89,10 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         if server_result is None:
             # Create mysql server
             # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
-            server_result = _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention,
-                                           sku_name, tier, storage_mb, administrator_login, administrator_login_password,
+            server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
+                                           backup_retention,
+                                           sku_name, tier, storage_mb, administrator_login,
+                                           administrator_login_password,
                                            version, tags, delegated_subnet_arguments, assign_identity, public_access,
                                            high_availability, zone)
 
@@ -100,19 +110,19 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
             _create_database(db_context, cmd, resource_group_name, server_name, database_name)
 
         user = server_result.administrator_login
-        id = server_result.id
+        server_id = server_result.id
         loc = server_result.location
         version = server_result.version
         sku = server_result.sku.name
         host = server_result.fully_qualified_domain_name
 
-        logger.warning('Make a note of your password. If you forget, you would have to' \
-                       ' reset your password with \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
+        logger.warning('Make a note of your password. If you forget, you would have to reset your password with \
+             \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
                        server_name, resource_group_name)
 
         _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
-        return _form_response(user, sku, loc, id, host, version,
+        return _form_response(user, sku, loc, server_id, host, version,
                               administrator_login_password if administrator_login_password is not None else '*****',
                               _create_mysql_connection_string(host, database_name, user, administrator_login_password),
                               database_name, firewall_id, subnet_id)
@@ -170,7 +180,7 @@ def flexible_server_update_custom_func(instance,
                                maintenance_window=None):
     from importlib import import_module
     server_module_path = instance.__module__
-    module = import_module(server_module_path) # replacement not needed for update in flex servers
+    module = import_module(server_module_path)  # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
 
     if sku_name:
@@ -216,15 +226,15 @@ def flexible_server_update_custom_func(instance,
             instance.maintenance_window.custom_window = custom_window
 
     params = ServerForUpdate(sku=instance.sku,
-                                storage_profile=instance.storage_profile,
-                                administrator_login_password=administrator_login_password,
-                                ssl_enforcement=ssl_enforcement,
-                                delegated_subnet_arguments=instance.delegated_subnet_arguments,
-                                tags=tags,
-                                ha_enabled=ha_enabled,
-                                replication_role=replication_role,
-                                public_network_access=public_network_access,
-                                maintenance_window=instance.maintenance_window)
+                             storage_profile=instance.storage_profile,
+                             administrator_login_password=administrator_login_password,
+                             ssl_enforcement=ssl_enforcement,
+                             delegated_subnet_arguments=instance.delegated_subnet_arguments,
+                             tags=tags,
+                             ha_enabled=ha_enabled,
+                             replication_role=replication_role,
+                             public_network_access=public_network_access,
+                             maintenance_window=instance.maintenance_window)
 
     if assign_identity:
         if server_module_path.find('mysql'):
@@ -236,34 +246,33 @@ def flexible_server_update_custom_func(instance,
 
     return params
 
-def _flexible_server_update_password(instance, server_name, administrator_login, administrator_login_password):
-    return flexible_server_update_custom_func(instance,
-                                               server_name=server_name,
-                                               administrator_login=administrator_login,
-                                               administrator_login_password=administrator_login_password)
 
 def server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
     confirm = force
+    result = None  # default return value
     if not force:
-        confirm = user_confirmation("Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=force)
-    if (confirm):
+        confirm = user_confirmation(
+            "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
+                                                                                              resource_group_name),
+            yes=force)
+    if confirm:
         try:
             result = client.delete(resource_group_name, server_name)
             if cmd.cli_ctx.local_context.is_on:
-                local_context_file = cmd.cli_ctx.local_context._get_local_context_file()
+                local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
                 local_context_file.remove_option('mysql flexible-server', 'server_name')
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
-        return result
+    return result
 
 
-## Parameter update command
+# Parameter update command
 def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
         # update the command with system default
         try:
             parameter = client.get(resource_group_name, server_name, configuration_name)
-            value = parameter.default_value # reset value to default
+            value = parameter.default_value  # reset value to default
             source = "system-default"
         except CloudError as e:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
@@ -272,8 +281,8 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 
-## Replica commands
 
+# Replica commands
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
 def flexible_replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
     provider = 'Microsoft.DBforMySQL'
@@ -306,7 +315,7 @@ def flexible_replica_create(cmd, client, resource_group_name, server_name, sourc
     from azure.mgmt.rdbms import mysql_flexibleservers
 
     parameters = mysql_flexibleservers.models.Server(
-        sku=mysql_flexibleservers.models.Sku(name=sku_name,tier=tier),
+        sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         source_server_id=source_server,
         location=location,
         create_mode="Replica")
@@ -342,10 +351,10 @@ def flexible_list_skus(client, location):
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
-                   storage_mb, administrator_login, administrator_login_password, version, tags, delegated_subnet_arguments,
+                   storage_mb, administrator_login, administrator_login_password, version, tags,
+                   delegated_subnet_arguments,
                    assign_identity, public_network_access, ha_enabled, availability_zone):
-
-    logging_name, azure_sdk, server_client = db_context.logging_name, db_context.azure_sdk, db_context.server_client
+    logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
     logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
@@ -372,7 +381,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         tags=tags)
 
     if assign_identity:
-        parameters.identity = mysql_flexibleservers.Identity(
+        parameters.identity = mysql_flexibleservers.models.Identity(
             type=mysql_flexibleservers.models.ResourceIdentityType.system_assigned.value)
 
     return resolve_poller(
@@ -381,13 +390,14 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
 
 def flexible_server_connection_string(
-            server_name='{server}', database_name='{database}', administrator_login='{login}',
-            administrator_login_password='{password}'):
+        server_name='{server}', database_name='{database}', administrator_login='{login}',
+        administrator_login_password='{password}'):
     host = '{}.mysql.database.azure.com'.format(server_name)
     if database_name is None:
         database_name = 'mysql'
     return {
-        'connectionStrings': _create_mysql_connection_strings(host, administrator_login, administrator_login_password, database_name)
+        'connectionStrings': _create_mysql_connection_strings(host, administrator_login, administrator_login_password,
+                                                              database_name)
     }
 
 
@@ -420,14 +430,15 @@ def _create_mysql_connection_strings(host, user, password, database):
     return result
 
 
-def _form_response(username, sku, location, id, host, version, password, connection_string, database_name, firewall_id=None, subnet_id=None):
+def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name,
+                   firewall_id=None, subnet_id=None):
     output = {
         'host': host,
         'username': username,
         'password': password,
         'skuname': sku,
         'location': location,
-        'id': id,
+        'id': server_id,
         'version': version,
         'databaseName': database_name,
         'connectionString': connection_string
@@ -442,9 +453,9 @@ def _form_response(username, sku, location, id, host, version, password, connect
 def _update_local_contexts(cmd, server_name, resource_group_name, location, user):
     if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'server_name',
-                                    server_name)  # Setting the server name in the local context
+                                      server_name)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
-                                    location)  # Setting the location in the local context
+                                      location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
         cmd.cli_ctx.local_context.set(['mysql flexible-server'], 'administrator_login',
                                       user)  # Setting the server name in the local context
