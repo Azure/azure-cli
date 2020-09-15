@@ -239,9 +239,10 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result, str(512 * 1024))
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
-    @ResourceGroupPreparer(name_prefix="cli_sf", location="eastus")
-    @StorageAccountPreparer(name_prefix="clitest", location="eastus")
+    @ResourceGroupPreparer(name_prefix="cli_sf", location="francecentral")
+    @StorageAccountPreparer(name_prefix="clitest", location="francecentral")
     def test_storage_share_rm_soft_delete(self):
+        import time
         self.cmd('storage account file-service-properties update -n {sa} -g {rg} --delete-retention-days 7 --enable-delete-retention',
                  checks={
                      JMESPathCheck('shareDeleteRetentionPolicy.days', 7),
@@ -263,11 +264,14 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 0)
         })
         self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted', checks={
-            JMESPathCheck('length(@)', 1)
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deleted', True)
         })
 
+        time.sleep(30)
         self.kwargs['version'] = \
-            self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --query [0].version -o tsv').output.strip('\n')
+            self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --query [0].version -o tsv'
+                     ).output.strip('\n')
         self.cmd('storage share-rm restore --storage-account {sa} -g {rg} -n {share} --deleted-version {version}',
                  checks={
                      JMESPathCheck('name', self.kwargs['share'])})
