@@ -1830,7 +1830,11 @@ def load_arguments(self, _):
 
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
-        c.argument('hosted_gateway', help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.', validator=validate_virtul_network_gateway)
+        c.argument('hosted_gateway',
+                   deprecate_info=c.deprecate(redirect='--hosted_subnet', hide=False),
+                   help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.',
+                   validator=validate_virtul_network_gateway)
+        c.argument('hosted_subnet', help='The ID of a subnet where VirtualRouter would be deployed')
 
     with self.argument_context('network vrouter peering') as c:
         c.argument('virtual_router_name', options_list=['--vrouter-name'], help='The name of the Virtual Router.')
