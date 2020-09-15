@@ -20,7 +20,8 @@ def build_dns_zone(domain_name, dependencies=None):
 
 def build_domain(domain_name, local_ip_address, current_time, address1, address2, city,
                  country, postal_code, state, email, fax, job_title, name_first,
-                 name_last, name_middle, organization, phone, dns_zone_id, privacy, auto_renew, tags, dependencies=None):
+                 name_last, name_middle, organization, phone, dns_zone_id, privacy,
+                 auto_renew, tags, dependencies=None):
     dependencies = dependencies or []
 
     contact_info = {
