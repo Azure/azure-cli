@@ -6290,7 +6290,7 @@ def create_virtual_router(cmd,
         vhub_client.get(resource_group_name, virtual_hub_name)
         raise CLIError('The VirtualRouter "{}" under resource group "{}" exists'.format(virtual_hub_name,
                                                                                         resource_group_name))
-    except CloudError :
+    except CloudError:
         pass
 
     SubResource = cmd.get_models('SubResource')
