@@ -19,7 +19,6 @@ from azure.mgmt.sql.models import (
     CapabilityGroup,
     CapabilityStatus,
     CreateMode,
-    DatabaseEdition,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
@@ -1252,7 +1251,7 @@ def db_update(
     Applies requested parameters to a db resource instance for a DB update.
     '''
     # Verify edition
-    if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
+    if instance.sku.tier.lower() == "datawarehouse":  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
 
@@ -1929,7 +1928,7 @@ def dw_create(
     '''
 
     # Set edition
-    kwargs['sku'].tier = DatabaseEdition.data_warehouse.value
+    kwargs['sku'].tier = "DataWarehouse"
 
     # Create
     return _db_dw_create(
@@ -1954,7 +1953,7 @@ def dw_list(
         server_name=server_name)
 
     # Include only DW's
-    return [db for db in dbs if db.sku.tier == DatabaseEdition.data_warehouse.value]
+    return [db for db in dbs if db.sku.tier == "DataWarehouse"]
 
 
 def dw_update(
@@ -3316,6 +3315,43 @@ def restore_long_term_retention_mi_backup(
         database_name=target_managed_database_name,
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+
+def managed_db_log_replay_start(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        auto_complete,
+        last_backup_name,
+        storage_container_uri,
+        storage_container_sas_token,
+        **kwargs):
+
+    # Determine managed instance location
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.restore_external_backup.value
+
+    if auto_complete and not last_backup_name:
+        raise CLIError('Please specify a last backup name when using auto complete flag.')
+    else:
+        kwargs['auto_complete'] = auto_complete
+        kwargs['last_backup_name'] = last_backup_name
+
+    kwargs['storageContainerUri'] = storage_container_uri
+    kwargs['storageContainerSasToken'] = storage_container_sas_token
+
+    # Create
+    return client.create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
         parameters=kwargs)
 
 ###############################################

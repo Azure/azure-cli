@@ -4699,3 +4699,185 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
+
+
+class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
+
+    def test_sql_midb_logreplay_mgmt(self):
+
+        managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+
+        loc = 'westeurope'
+        resource_group = "cliLogReplay"
+
+        self.kwargs.update({
+            'loc': loc,
+            'resource_group': resource_group,
+            'vnet_name': 'vcCliTestLogReplayVnet',
+            'subnet_name': 'vcCliTestLogReplaySubnet',
+            'route_table_name': 'vcCliTestLogReplayRouteTable',
+            'route_name_default': 'default',
+            'nsg': 'test-vnet-nsg',
+            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'managed_instance_name': managed_instance_name,
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
+        })
+        
+        self.cmd('group create --location {loc} --name {resource_group}')
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
+        self.cmd('network route-table show -g {resource_group} -n {route_table_name}')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {resource_group} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        # Create network security group
+        self.cmd('network nsg create --resource-group {resource_group} --name {nsg}')
+        # Create subnet and set properties needed
+        self.cmd('network vnet subnet create -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name} --delegations Microsoft.Sql/managedInstances --network-security-group {nsg}',
+                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
+
+        subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+        
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi create -g {resource_group} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} --capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family}',
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('vCores', 4),
+                     JMESPathCheck('storageSizeInGb', 128),
+                     JMESPathCheck('licenseType', self.kwargs.get('license_type')),
+                     JMESPathCheck('sku.tier', self.kwargs.get('edition')),
+                     JMESPathCheck('sku.family', self.kwargs.get('family')),
+                     JMESPathCheck('sku.capacity', self.kwargs.get('v_cores')),
+                     JMESPathCheck('identity', None)]).get_output_in_json()
+
+        managed_database_name = 'logReplayTestDb'
+        self.kwargs.update({
+            'managed_database_name': managed_database_name,
+            'storage_sas': 'sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2FgjocUpioABFvm5N0BwhKFrukGw41s%3D',
+            'storage_uri': 'https://mijetest.blob.core.windows.net/pcc-remote-replicas-test',
+            'last_backup_name': 'log1.bak'
+        })
+
+        # Start Log Replay Service
+        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} -ss {storage_sas} -su {storage_uri} --no-wait', 
+                 checks=NoneCheck())
+
+        if self.in_recording or self.is_live:
+            sleep(10)
+
+        # Complete log replay service
+        self.cmd('sql midb log-replay complete -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --last-bn {last_backup_name}',
+                 checks=NoneCheck())
+
+        if self.in_recording or self.is_live:
+            sleep(60)
+
+        # Verify status is Online
+        self.cmd('sql midb show -g {resource_group} --mi {managed_instance_name} -n {managed_database_name}', 
+                 checks=[
+                     JMESPathCheck('status', 'Online')])
+
+
+
+class SqlManagedDatabaseLogReplayCancelScenarionTest(ScenarioTest):
+
+    def test_sql_midb_logreplay_cancel_mgmt(self):
+
+        managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+
+        loc = 'westeurope'
+        resource_group = "cliLogReplayCancel"
+
+        self.kwargs.update({
+            'loc': loc,
+            'resource_group': resource_group,
+            'vnet_name': 'vcCliTestLogReplayVnet',
+            'subnet_name': 'vcCliTestLogReplaySubnet',
+            'route_table_name': 'vcCliTestLogReplayRouteTable',
+            'route_name_default': 'default',
+            'nsg': 'test-vnet-nsg',
+            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'managed_instance_name': managed_instance_name,
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
+        })
+        
+        #self.cmd('group create --location {loc} --name {resource_group}')
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
+        self.cmd('network route-table show -g {resource_group} -n {route_table_name}')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {resource_group} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        # Create network security group
+        self.cmd('network nsg create --resource-group {resource_group} --name {nsg}')
+        # Create subnet and set properties needed
+        self.cmd('network vnet subnet create -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name} --delegations Microsoft.Sql/managedInstances --network-security-group {nsg}',
+                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
+
+        subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+        
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi create -g {resource_group} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} --capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family}',
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('vCores', 4),
+                     JMESPathCheck('storageSizeInGb', 128),
+                     JMESPathCheck('licenseType', self.kwargs.get('license_type')),
+                     JMESPathCheck('sku.tier', self.kwargs.get('edition')),
+                     JMESPathCheck('sku.family', self.kwargs.get('family')),
+                     JMESPathCheck('sku.capacity', self.kwargs.get('v_cores')),
+                     JMESPathCheck('identity', None)]).get_output_in_json()
+
+        managed_database_name = 'logReplayTestDb'
+        self.kwargs.update({
+            'managed_database_name': managed_database_name,
+            'storage_sas': 'sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2FgjocUpioABFvm5N0BwhKFrukGw41s%3D',
+            'storage_uri': 'https://mijetest.blob.core.windows.net/pcc-remote-replicas-test',
+            'last_backup_name': 'log1.bak'
+        })
+
+        # Start Log Replay Service
+        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} -ss {storage_sas} -su {storage_uri} --no-wait', 
+                 checks=NoneCheck())
+
+        # Wait a minute to start restoring
+        if self.in_recording or self.is_live:
+            sleep(60)
+
+        # Cancel log replay service
+        self.cmd('sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --yes',
+                 checks=NoneCheck())
+
+
