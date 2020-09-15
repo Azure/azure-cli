@@ -358,7 +358,6 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
             'key_name': self.create_random_name('key', 10),
             'rg': 'bim-rg',
             'rg_lock': 'bim-lock',
-            'pem_dir': os.path.join(KEYS_DIR, 'security_domain_pem'),
             'sdtest_dir': sdtest_dir
         })
         self.kwargs.update({
@@ -368,8 +367,8 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         })
 
         for i in range(1, 4):
-            self.kwargs['cer{}_path'.format(i)] = os.path.join(self.kwargs['pem_dir'], 'sd{}.cer'.format(i))
-            self.kwargs['key{}_path'.format(i)] = os.path.join(self.kwargs['pem_dir'], 'sd{}.key'.format(i))
+            self.kwargs['cer{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.cer'.format(i))
+            self.kwargs['key{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.key'.format(i))
 
         # create a new key and backup it
         self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
