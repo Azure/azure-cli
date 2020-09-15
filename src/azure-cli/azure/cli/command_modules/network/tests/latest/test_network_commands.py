@@ -3195,10 +3195,10 @@ class NetworkVirtualRouter(ScenarioTest):
         self.kwargs.update({
             'rg': 'test_vrouter_with_virtual_hub_support',    # the subscription needs to be a specified one given by service team
             'location': resource_group_location,
-            'vnet': 'vnet1',
+            'vnet': 'vnet3',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
-            'vrouter': 'vrouter1',
+            'vrouter': 'vrouter3',
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} '
@@ -3216,19 +3216,26 @@ class NetworkVirtualRouter(ScenarioTest):
         })
 
         self.cmd('network vrouter create -g {rg} -l {location} -n {vrouter} --hosted-subnet {subnet1_id}', checks=[
-            # self.check('type', 'Microsoft.Network/virtualHubs'),
-            # self.check('ipConfigurations', None),
-            # self.check('provisioningState', 'Succeeded')
+            self.check('type', 'Microsoft.Network/virtualHubs'),
+            self.check('ipConfigurations', None),
+            self.check('provisioningState', 'Succeeded')
         ])
 
-        self.cmd('network vrouter list -g {rg}', checks=[
-            # self.check('length(@)', 1)
-        ])
+        self.cmd('network vrouter list -g {rg}')
 
         self.cmd('network vrouter show -g {rg} -n {vrouter}', checks=[
-            # self.check('virtualRouterAsn', 65515),
-            # self.check('length(virtualRouterIps)', 2),
+            self.check('virtualRouterAsn', 65515),
+            self.check('length(virtualRouterIps)', 2),
         ])
+
+        self.cmd('network vrouter peering create -g {rg} --vrouter-name {vrouter} -n peer-1 '
+                 '--peer-asn 11000 --peer-ip 10.0.0.120')
+
+        self.cmd('network vrouter peering list -g {rg} --vrouter-name {vrouter}')
+
+        self.cmd('network vrouter peering show -g {rg} --vrouter-name {vrouter} -n peer-1')
+
+        # self.cmd('network vrouter peering update -g {rg} --vrouter-name {vrouter} -n peer-1')    # unable to update
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 

@@ -5366,7 +5366,7 @@ examples:
 
 helps['network vrouter'] = """
 type: group
-short-summary: Manage the virtual router.
+short-summary: Manage the virtual router. This feature supports both VirtualHub and VirtualRouter. Considering VirtualRouter is depcated, we recommand to create VirtualRouter instead
 """
 
 helps['network vrouter create'] = """

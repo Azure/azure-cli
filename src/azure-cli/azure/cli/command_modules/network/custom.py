@@ -6425,6 +6425,35 @@ def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
     return vhub_bgp_conn_client.create_or_update(resource_group_name, virtual_hub_name, bgp_conn_name, vhub_bgp_conn)
 
 
+def virtual_router_peering_update_getter(cmd, resource_group_name, virtual_router_name, peering_name):
+    vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
+
+    from azure.mgmt.network.models import ErrorException
+    try:
+        vrouter_peering_client.get(resource_group_name, virtual_router_name, peering_name)
+    except ErrorException:  # 404
+        pass
+
+    virtual_hub_name = virtual_router_name
+    bgp_conn_name = peering_name
+
+    vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
+    return vhub_bgp_conn_client.get(resource_group_name, virtual_hub_name, bgp_conn_name)
+
+
+def virtual_router_peering_update_setter(cmd, resource_group_name, virtual_router_name, peering_name, parameters):
+    if parameters.type == 'Microsoft.Network/virtualHubs/bgpConnections':
+        client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
+    else:
+        client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
+
+    # if the client is virtual_hub_bgp_connection,
+    # the virtual_router_name represents virtual_hub_name and
+    # the peering_name represents bgp_connection_name and
+    # the parameters represents BgpConnection
+    return client.create_or_update(resource_group_name, virtual_router_name, peering_name, parameters)
+
+
 def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
     with cmd.update_context(instance) as c:
         c.set_param('peer_asn', peer_asn)
