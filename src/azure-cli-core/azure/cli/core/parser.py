@@ -458,12 +458,12 @@ class AzCliCommandParser(CLICommandParser):
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
                 az_error = AzCLIError(AzCLIErrorType.ArgumentParseError, error_msg, command=self.prog)
 
-            _, params, extension = self._get_failure_recovery_arguments(action)
+            command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
             # recommand a command for user
-            recommender = CommandRecommender(command_name_inferred[3:].strip(), params, extension, error_msg, cli_ctx)
+            recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
             recommender.set_help_examples(self.get_examples(command_name_inferred))
             recommended_command = recommender.recommend_a_command()
             if recommended_command:

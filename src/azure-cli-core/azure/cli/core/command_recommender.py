@@ -42,7 +42,7 @@ class CommandRecommender():
 
     def __init__(self, command, parameters, extension, error_msg, cli_ctx):
         """
-        :param command: The command name in user's input, which should be corrected if misspelled.
+        :param command: The command name in user's input.
         :type command: str
         :param parameters: The parameter arguments in users input.
         :type parameters: list
@@ -144,29 +144,33 @@ class CommandRecommender():
         if not self._disable_aladdin_service():
             self._set_aladdin_recommendations()
 
-        # all the recommended commands from help examples and aladdin
-        all_commands = self.help_examples + self.aladdin_recommendations
-        all_commands.sort(key=len)
-
-        filtered_commands = []
-        filtered_choices = []
-        target = ''.join(self.parameters)
-
-        for command in all_commands:
-            # filter out the commands which begins with a different command group
-            if command.startswith('az {}'.format(self.command)):
-                parameters = self._get_parameter_list(command)
-                normalized_parameters = self._normalize_parameters(parameters)
-                filtered_choices.append(''.join(normalized_parameters))
-                filtered_commands.append(command)
-
-        # sort the commands by argument matches
-        candidates = difflib.get_close_matches(target, filtered_choices, cutoff=0)
-
         recommend_command = ''
-        if candidates:
-            index = filtered_choices.index(candidates[0])
-            recommend_command = filtered_commands[index]
+        if self.help_examples and self.aladdin_recommendations:
+            # all the recommended commands from help examples and aladdin
+            all_commands = self.help_examples + self.aladdin_recommendations
+            all_commands.sort(key=len)
+
+            filtered_commands = []
+            filtered_choices = []
+            target = ''.join(self.parameters)
+            example_command_name = self.help_examples[0].split(' -')[0]
+
+            for command in all_commands:
+                # keep only the commands which begin with a same command name with examples
+                if command.startswith(example_command_name):
+                    parameters = self._get_parameter_list(command)
+                    normalized_parameters = self._normalize_parameters(parameters)
+                    filtered_choices.append(''.join(normalized_parameters))
+                    filtered_commands.append(command)
+
+            # sort the commands by argument matches
+            candidates = difflib.get_close_matches(target, filtered_choices, cutoff=0)
+
+            if candidates:
+                index = filtered_choices.index(candidates[0])
+                recommend_command = filtered_commands[index]
+
+        # fallback to use the first recommended command from Aladdin
         elif self.aladdin_recommendations:
             recommend_command = self.aladdin_recommendations[0]
 
