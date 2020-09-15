@@ -3137,7 +3137,7 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
 class NetworkVirtualRouter(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
-    # @unittest.skip('Skip as service has bug')
+    @unittest.skip('Skip as service has bug for deleting peering')
     def test_network_virtual_router_scenario(self, resource_group, resource_group_location):
 
         self.kwargs.update({
