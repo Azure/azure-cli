@@ -24,3 +24,8 @@ def cmd_with_retry(self, *args, sleep_duration=ROLE_COMMAND_SLEEP_DURATION, max_
             else:
                 raise
     return result
+
+
+def escape_apply_kwargs(val):
+    """Replace {} as {{}} so that val is preserved after _apply_kwargs."""
+    return val.replace('{', "{{").replace('}', "}}")

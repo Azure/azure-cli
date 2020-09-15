@@ -58,7 +58,8 @@ DEPENDENCIES = [
     'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
-    'azure-keyvault~=1.1',
+    'azure-keyvault~=1.1.0',
+    'azure-keyvault-administration~=4.0.0b1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-applicationinsights~=0.1.1',
@@ -89,7 +90,7 @@ DEPENDENCIES = [
     'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.12.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-keyvault~=7.0.0b2',
+    'azure-mgmt-keyvault~=7.0.0b3',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.7.0',
     'azure-mgmt-managedservices~=1.0',
@@ -140,6 +141,10 @@ DEPENDENCIES = [
     'javaproperties==0.5.1',
     'jsondiff==1.2.0'
 ]
+
+# dependencies for specific OSes
+if not sys.platform.startswith('cygwin'):
+    DEPENDENCIES.append('psutil~=5.7')
 
 TESTS_REQUIRE = [
     'mock~=4.0'
