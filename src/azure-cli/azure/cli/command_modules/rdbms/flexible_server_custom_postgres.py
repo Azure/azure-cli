@@ -10,12 +10,14 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
+from azure.cli.core._output import set_output_format
 from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from .flexible_server_custom_common import user_confirmation, server_list_custom_func
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
+
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
@@ -24,15 +26,15 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 # region create without args
 # pylint: disable=too-many-locals
 def flexible_server_create(cmd, client,
-                            resource_group_name=None, server_name=None,
-                            location=None, backup_retention=None,
-                            sku_name=None, tier=None,
-                            storage_mb=None, administrator_login=None,
-                            administrator_login_password=None, version=None,
-                            tags=None, public_access=None,
-                            assign_identity=False, subnet_arm_resource_id=None,
-                            high_availability=None, zone=None, vnet_resource_id=None,
-                            vnet_address_prefix=None, subnet_address_prefix=None):
+                           resource_group_name=None, server_name=None,
+                           location=None, backup_retention=None,
+                           sku_name=None, tier=None,
+                           storage_mb=None, administrator_login=None,
+                           administrator_login_password=None, version=None,
+                           tags=None, public_access=None,
+                           assign_identity=False, subnet_arm_resource_id=None,
+                           high_availability=None, zone=None, vnet_resource_id=None,
+                           vnet_address_prefix=None, subnet_address_prefix=None):
     from azure.mgmt.rdbms import postgresql_flexibleservers
     try:
         db_context = DbContext(
@@ -127,9 +129,9 @@ def flexible_server_create(cmd, client,
 
 
 def flexible_server_restore(cmd, client,
-                             resource_group_name, server_name,
-                             source_server, restore_point_in_time,
-                             location=None, no_wait=False):
+                            resource_group_name, server_name,
+                            source_server, restore_point_in_time,
+                            location=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -161,15 +163,15 @@ def flexible_server_restore(cmd, client,
 
 # Update Flexible server command
 def flexible_server_update_custom_func(instance,
-                                sku_name=None,
-                                tier=None,
-                                storage_mb=None,
-                                backup_retention=None,
-                                administrator_login_password=None,
-                                ha_enabled=None,
-                                maintenance_window=None,
-                                assign_identity=False,
-                                tags=None):
+                                       sku_name=None,
+                                       tier=None,
+                                       storage_mb=None,
+                                       backup_retention=None,
+                                       administrator_login_password=None,
+                                       ha_enabled=None,
+                                       maintenance_window=None,
+                                       assign_identity=False,
+                                       tags=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path)
@@ -272,8 +274,12 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     return client.update(resource_group_name, server_name, configuration_name, value, source)
 
 
-def flexible_list_skus(client, location):
-    return client.execute(location)
+def flexible_list_skus(cmd, client, location, json=None):
+    if not json or json.lower() == 'false':
+        set_output_format(cmd.cli_ctx, 'table')
+    result = client.execute(location)
+    logger.warning('For prices please refer to https://aka.ms/postgres-pricing')
+    return result
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
@@ -406,8 +412,8 @@ def _update_local_contexts(cmd, server_name, resource_group_name, location, user
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
 
 
-# pylint: disable=too-many-instance-attributes,too-few-public-methods
-class DbContext:
+# pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
+class DbContext(object):
     def __init__(self, azure_sdk=None, logging_name=None, cf_firewall=None,
                  command_group=None, server_client=None):
         self.azure_sdk = azure_sdk

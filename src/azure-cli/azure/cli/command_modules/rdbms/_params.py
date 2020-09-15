@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+# pylint: disable=too-many-statements
 
 from knack.arguments import CLIArgumentType
 
@@ -11,15 +12,15 @@ from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list,
     tags_type, get_location_type,
     get_enum_type,
+    resource_group_name_type,
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     retention_validator, tls_validator, public_access_validator, pg_storage_validator, mysql_storage_validator, tier_validator, \
     pg_sku_name_validator, mysql_sku_name_validator, pg_version_validator, mysql_version_validator, maintenance_window_validator, ip_address_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from .randomname.generate import generate_username
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
-from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
-                                                get_resource_name_completion_list)
+
+from .randomname.generate import generate_username
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
@@ -32,23 +33,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     def _complex_params(command_group):
 
-        server_name_setter_arg_type = CLIArgumentType(
-            metavar='NAME',
-            help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-            local_context_attribute=LocalContextAttribute(name='server_name',
-                                                          actions=[LocalContextAction.SET], scopes=['{} server'.format(command_group)]))
+        server_name_setter_arg_type = CLIArgumentType(metavar='NAME',
+                                                      help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                                      local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET], scopes=['{} server'.format(command_group)]))
 
-        server_name_getter_arg_type = CLIArgumentType(
-            metavar='NAME',
-            help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-            local_context_attribute=LocalContextAttribute(name='server_name',
-                                                          actions=[LocalContextAction.GET], scopes=['{} server'.format(command_group)]))
+        server_name_getter_arg_type = CLIArgumentType(metavar='NAME',
+                                                      help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                                      local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.GET], scopes=['{} server'.format(command_group)]))
 
-        server_name_arg_type = CLIArgumentType(
-            metavar='NAME',
-            help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-            local_context_attribute=LocalContextAttribute(name='server_name',
-                                                          actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} server'.format(command_group)]))
+        server_name_arg_type = CLIArgumentType(metavar='NAME',
+                                               help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                               local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} server'.format(command_group)]))
 
         overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
 
@@ -195,48 +190,32 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     # Flexible-server
     def _flexible_server_params(command_group):
 
-        server_name_setter_arg_type = CLIArgumentType(
-            metavar='NAME',
-            help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-            local_context_attribute=LocalContextAttribute(name='server_name',
-                                                          actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        server_name_setter_arg_type = CLIArgumentType(metavar='NAME',
+                                                      help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                                      local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
 
-        server_name_getter_arg_type = CLIArgumentType(
-            metavar='NAME',
-            help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-            local_context_attribute=LocalContextAttribute(name='server_name',
-                                                          actions=[LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+        server_name_getter_arg_type = CLIArgumentType(metavar='NAME',
+                                                      help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                                      local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
-        server_name_arg_type = CLIArgumentType(
-            metavar='NAME',
-            help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-            local_context_attribute=LocalContextAttribute(name='server_name',
-                                                          actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+        server_name_arg_type = CLIArgumentType(metavar='NAME',
+                                               help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
+                                               local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
-        administrator_login_setter_arg_type = CLIArgumentType(
-            metavar='NAME',
-            local_context_attribute=LocalContextAttribute(name='administrator_login',
-                                                          actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        administrator_login_setter_arg_type = CLIArgumentType(metavar='NAME',
+                                                              local_context_attribute=LocalContextAttribute(name='administrator_login', actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
 
-        administrator_login_arg_type = CLIArgumentType(
-            metavar='NAME',
-            local_context_attribute=LocalContextAttribute(name='administrator_login',
-                                                          actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        administrator_login_arg_type = CLIArgumentType(metavar='NAME',
+                                                       local_context_attribute=LocalContextAttribute(name='administrator_login', actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
 
-        database_name_setter_arg_type = CLIArgumentType(
-            metavar='NAME',
-            local_context_attribute=LocalContextAttribute(name='database_name',
-                                                          actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        database_name_setter_arg_type = CLIArgumentType(metavar='NAME',
+                                                        local_context_attribute=LocalContextAttribute(name='database_name', actions=[LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
 
-        database_name_getter_arg_type = CLIArgumentType(
-            metavar='NAME',
-            local_context_attribute=LocalContextAttribute(name='database_name',
-                                                          actions=[LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
+        database_name_getter_arg_type = CLIArgumentType(metavar='NAME',
+                                                        local_context_attribute=LocalContextAttribute(name='database_name', actions=[LocalContextAction.GET], scopes=['{} flexible-server'.format(command_group)]))
 
-        database_name_arg_type = CLIArgumentType(
-            metavar='NAME',
-            local_context_attribute=LocalContextAttribute(name='database_name',
-                                                          actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
+        database_name_arg_type = CLIArgumentType(metavar='NAME',
+                                                 local_context_attribute=LocalContextAttribute(name='database_name', actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=['{} flexible-server'.format(command_group)]))
 
         overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
 
@@ -276,7 +255,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('subnet_arm_resource_id', options_list=['--subnet'],
                        help='Name or ID of the subnet that allows access to an Azure Flexible Server. ')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
-            c.argument('location', arg_type=get_location_type(self.cli_ctx))  # , validator=get_default_location_from_resource_group)
+            c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'], arg_group='Authentication', arg_type=administrator_login_setter_arg_type,
                        help='Administrator username for the server. Once set, it cannot be changed. ')
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
@@ -359,7 +338,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             argument_context_string = '{} flexible-server parameter {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'], required=True,
-                           help='The name of the server configuration')  # N/A
+                           help='The name of the server configuration')
 
         with self.argument_context('{} flexible-server parameter set'.format(command_group)) as c:
             c.argument('value', options_list=['--value', '-v'],

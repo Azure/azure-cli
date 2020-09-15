@@ -25,6 +25,7 @@ def server_list_custom_func(client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
     return client.list()
 
+
 def firewall_rule_delete_func(client, resource_group_name=None, server_name=None, firewall_rule_name=None, prompt=None):
     confirm = True
     result = None

@@ -14,7 +14,7 @@ from ._client_factory import resource_client_factory
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'eastus2euap'  # 'eastus2euap'
+DEFAULT_LOCATION = 'eastus'  # For testing: 'eastus2euap'
 
 
 def resolve_poller(result, cli_ctx, name):
