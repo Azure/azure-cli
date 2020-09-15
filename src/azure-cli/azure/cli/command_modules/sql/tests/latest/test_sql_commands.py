@@ -4707,8 +4707,8 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
 
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
 
-        loc = 'westeurope'
-        resource_group = "cliLogReplay"
+        loc = 'westcentralus'
+        resource_group = "cliLogReplayTest"
 
         self.kwargs.update({
             'loc': loc,
@@ -4723,14 +4723,14 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             'admin_login': 'admin123',
             'admin_password': 'SecretPassword123',
             'license_type': 'LicenseIncluded',
-            'v_cores': 4,
+            'v_cores': 8,
             'storage_size_in_gb': '128',
             'edition': 'GeneralPurpose',
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy"
         })
-        
+
         self.cmd('group create --location {loc} --name {resource_group}')
 
         # Create and prepare VNet and subnet for new virtual cluster
@@ -4747,7 +4747,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
                  checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
 
         subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-        
+
         self.kwargs.update({
             'subnet_id': subnet['id']
         })
@@ -4758,7 +4758,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', managed_instance_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('vCores', 4),
+                     JMESPathCheck('vCores', 8),
                      JMESPathCheck('storageSizeInGb', 128),
                      JMESPathCheck('licenseType', self.kwargs.get('license_type')),
                      JMESPathCheck('sku.tier', self.kwargs.get('edition')),
@@ -4775,7 +4775,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         })
 
         # Start Log Replay Service
-        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} -ss {storage_sas} -su {storage_uri} --no-wait', 
+        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} -ss {storage_sas} -su {storage_uri} --no-wait',
                  checks=NoneCheck())
 
         if self.in_recording or self.is_live:
@@ -4789,10 +4789,9 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             sleep(60)
 
         # Verify status is Online
-        self.cmd('sql midb show -g {resource_group} --mi {managed_instance_name} -n {managed_database_name}', 
+        self.cmd('sql midb show -g {resource_group} --mi {managed_instance_name} -n {managed_database_name}',
                  checks=[
                      JMESPathCheck('status', 'Online')])
-
 
 
 class SqlManagedDatabaseLogReplayCancelScenarionTest(ScenarioTest):
@@ -4824,8 +4823,8 @@ class SqlManagedDatabaseLogReplayCancelScenarionTest(ScenarioTest):
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy"
         })
-        
-        #self.cmd('group create --location {loc} --name {resource_group}')
+
+        self.cmd('group create --location {loc} --name {resource_group}')
 
         # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
@@ -4841,7 +4840,7 @@ class SqlManagedDatabaseLogReplayCancelScenarionTest(ScenarioTest):
                  checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
 
         subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
-        
+
         self.kwargs.update({
             'subnet_id': subnet['id']
         })
@@ -4869,7 +4868,7 @@ class SqlManagedDatabaseLogReplayCancelScenarionTest(ScenarioTest):
         })
 
         # Start Log Replay Service
-        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} -ss {storage_sas} -su {storage_uri} --no-wait', 
+        self.cmd('sql midb log-replay start -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} -ss {storage_sas} -su {storage_uri} --no-wait',
                  checks=NoneCheck())
 
         # Wait a minute to start restoring
@@ -4879,5 +4878,3 @@ class SqlManagedDatabaseLogReplayCancelScenarionTest(ScenarioTest):
         # Cancel log replay service
         self.cmd('sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name} --yes',
                  checks=NoneCheck())
-
-

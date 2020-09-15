@@ -3340,9 +3340,9 @@ def managed_db_log_replay_start(
 
     if auto_complete and not last_backup_name:
         raise CLIError('Please specify a last backup name when using auto complete flag.')
-    else:
-        kwargs['auto_complete'] = auto_complete
-        kwargs['last_backup_name'] = last_backup_name
+
+    kwargs['auto_complete'] = auto_complete
+    kwargs['last_backup_name'] = last_backup_name
 
     kwargs['storageContainerUri'] = storage_container_uri
     kwargs['storageContainerSasToken'] = storage_container_sas_token
