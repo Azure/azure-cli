@@ -83,7 +83,7 @@ class WebappBasicE2ETest(ScenarioTest):
         ])
         # turn on diagnostics
         test_cmd = ('webapp log config -g {} -n {} --level verbose'.format(resource_group, webapp_name) + ' '
-                    '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
+                    '--application-logging filesystem --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
         self.cmd(test_cmd)
         self.cmd('webapp log show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorMessages.enabled', True),
@@ -145,9 +145,10 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].value', '10.14'),
         ])
 
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_runtime(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
+        webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|10.15"'.format(
@@ -157,6 +158,9 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheck('[0].value', '10.15'),
         ])
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "DOTNETCORE|3.1"'.format(
+            resource_group, webapp_name_2, plan)).get_output_in_json()
+        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_cd(self, resource_group):
@@ -243,6 +247,40 @@ class WebappQuickCreateTest(ScenarioTest):
             resource_group, plan)).get_output_in_json()['id']
         self.cmd('webapp create -g {} -n webInOtherRG --plan {}'.format(resource_group2, plan_id), checks=[
             JMESPathCheck('name', 'webInOtherRG')
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name="resource_group_one", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(parameter_name="resource_group_two", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_create_names_are_substrings(self, resource_group_one, resource_group_two):
+        webapp_name_one = "test-webapp-name-on"
+        webapp_name_two = "test-webapp-name-one"
+        webapp_name_three = "test-webapp-nam"
+        plan_name_one = "webapp-plan-one"
+        plan_name_two = "webapp-plan-two"
+        plan_id_one = self.cmd('appservice plan create -g {} -n {}'.format(
+            resource_group_one, plan_name_one)).get_output_in_json()['id']
+        plan_id_two = self.cmd('appservice plan create -g {} -n {}'.format(
+            resource_group_two, plan_name_two)).get_output_in_json()['id']
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_one, webapp_name_one, plan_id_one), checks=[
+            JMESPathCheck('name', webapp_name_one)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_two, webapp_name_two, plan_id_two), checks=[
+            JMESPathCheck('name', webapp_name_two)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_one, webapp_name_three, plan_id_one), checks=[
+            JMESPathCheck('name', webapp_name_three)
+        ])
+
+        # Re running webapp create to make sure there are no mix ups with existing apps that have names that are substrings of each other.
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_one, webapp_name_one, plan_id_one), checks=[
+            JMESPathCheck('name', webapp_name_one)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_two, webapp_name_two, plan_id_two), checks=[
+            JMESPathCheck('name', webapp_name_two)
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group_one, webapp_name_three, plan_id_one), checks=[
+            JMESPathCheck('name', webapp_name_three)
         ])
 
 
@@ -1341,7 +1379,6 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
-            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
@@ -1376,7 +1413,6 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_id, cert_name), checks=[
-            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
@@ -2064,6 +2100,468 @@ class FunctionAppSlotTests(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
+class FunctionAppKeysTests(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_keys_set(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+        key_type = "functionKeys"
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
+                 .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+
+        key_value = "keyvalue1_changed"
+        self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
+                 .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_keys_list(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+        key_type = "functionKeys"
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
+                 .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+
+        self.cmd('functionapp keys list -g {} -n {}'
+                 .format(resource_group, functionapp_name)).assert_with_checks([
+                     JMESPathCheck('functionKeys.{}'.format(key_name), key_value)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_keys_delete(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+        key_type = "functionKeys"
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
+                 .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+
+        self.cmd('functionapp keys delete -g {} -n {} --key-name {} --key-type {}'
+                 .format(resource_group, functionapp_name, key_name, key_type))
+
+        self.cmd('functionapp keys list -g {} -n {}'
+                 .format(resource_group, functionapp_name)).assert_with_checks([
+                     JMESPathCheck('functionKeys.{}'.format(key_name), None)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_keys_set_slot(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        slot_name = self.create_random_name(prefix='slotname', length=24)
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+        key_type = "functionKeys"
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'
+                 .format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('name', slot_name),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/slots')])
+
+        self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
+                 .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+
+        key_value = "keyvalue1_changed"
+        self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
+                 .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_keys_list_slot(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        slot_name = self.create_random_name(prefix='slotname', length=24)
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+        key_type = "functionKeys"
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'
+                 .format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('name', slot_name),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/slots')])
+
+        self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
+                 .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+
+        self.cmd('functionapp keys list -g {} -n {} -s {}'
+                 .format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('functionKeys.{}'.format(key_name), key_value)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_keys_delete_slot(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        slot_name = self.create_random_name(prefix='slotname', length=24)
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+        key_type = "functionKeys"
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'
+                 .format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('name', slot_name),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/slots')])
+
+        self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
+                 .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
+
+        self.cmd('functionapp keys delete -g {} -n {} -s {} --key-name {} --key-type {}'
+                 .format(resource_group, functionapp_name, slot_name, key_name, key_type))
+
+        self.cmd('functionapp keys list -g {} -n {} -s {}'
+                 .format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('functionKeys.{}'.format(key_name), None)])
+
+
+# LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
+class FunctionAppFunctionKeysTests(LiveScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_function_keys_set(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        function_name = "HttpTrigger"
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        # ping function so you know it's ready
+        requests.get('http://{}.azurewebsites.net/api/{}'.format(functionapp_name, function_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
+                 .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value)])
+
+        key_value = "keyvalue1_changed"
+        self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
+                 .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_function_keys_list(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        function_name = "HttpTrigger"
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        # ping function so you know it's ready
+        requests.get('http://{}.azurewebsites.net/api/{}'.format(functionapp_name, function_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
+                 .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value)])
+
+        self.cmd('functionapp function keys list -g {} -n {} --function-name {}'
+                 .format(resource_group, functionapp_name, function_name)).assert_with_checks([
+                     JMESPathCheck('{}'.format(key_name), key_value)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_function_keys_delete(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        function_name = "HttpTrigger"
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        # ping function so you know it's ready
+        requests.get('http://{}.azurewebsites.net/api/{}'.format(functionapp_name, function_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
+                 .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value)])
+
+        self.cmd('functionapp function keys delete -g {} -n {} --function-name {} --key-name {}'
+                 .format(resource_group, functionapp_name, function_name, key_name))
+
+        self.cmd('functionapp function keys list -g {} -n {} --function-name {}'
+                 .format(resource_group, functionapp_name, function_name)).assert_with_checks([
+                     JMESPathCheck('{}'.format(key_name), None)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_function_keys_set_slot(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        slot_name = self.create_random_name(prefix='slotname', length=24)
+        function_name = "HttpTrigger"
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'
+                 .format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('name', slot_name),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/slots')])
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} -s {} --src "{}"'.format(resource_group, functionapp_name, slot_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        # ping function so you know it's ready
+        requests.get('http://{}.azurewebsites.net/api/{}'.format(functionapp_name, function_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp function keys set -g {} -n {} --function-name {} -s {} --key-name {} --key-value {}'
+                 .format(resource_group, functionapp_name, function_name, slot_name, key_name, key_value)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value)])
+
+        key_value = "keyvalue1_changed"
+        self.cmd('functionapp function keys set -g {} -n {} --function-name {} -s {} --key-name {} --key-value {}'
+                 .format(resource_group, functionapp_name, function_name, slot_name, key_name, key_value)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_function_keys_list_slot(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        slot_name = self.create_random_name(prefix='slotname', length=24)
+        function_name = "HttpTrigger"
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'
+                 .format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('name', slot_name),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/slots')])
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} -s {} --src "{}"'.format(resource_group, functionapp_name, slot_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        # ping function so you know it's ready
+        requests.get('http://{}.azurewebsites.net/api/{}'.format(functionapp_name, function_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp function keys set -g {} -n {} --function-name {} -s {} --key-name {} --key-value {}'
+                 .format(resource_group, functionapp_name, function_name, slot_name, key_name, key_value)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value)])
+
+        self.cmd('functionapp function keys list -g {} -n {} --function-name {} -s {}'
+                 .format(resource_group, functionapp_name, function_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('{}'.format(key_name), key_value)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_function_keys_delete_slot(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        slot_name = self.create_random_name(prefix='slotname', length=24)
+        function_name = "HttpTrigger"
+        key_name = "keyname1"
+        key_value = "keyvalue1"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'
+                 .format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('name', slot_name),
+                     JMESPathCheck('type', 'Microsoft.Web/sites/slots')])
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} -s {} --src "{}"'.format(resource_group, functionapp_name, slot_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        # ping function so you know it's ready
+        requests.get('http://{}.azurewebsites.net/api/{}'.format(functionapp_name, function_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp function keys set -g {} -n {} --function-name {} -s {} --key-name {} --key-value {}'
+                 .format(resource_group, functionapp_name, function_name, slot_name, key_name, key_value)).assert_with_checks([
+                     JMESPathCheck('name', key_name),
+                     JMESPathCheck('value', key_value)])
+
+        self.cmd('functionapp function keys delete -g {} -n {} --function-name {} -s {} --key-name {}'
+                 .format(resource_group, functionapp_name, function_name, slot_name, key_name))
+
+        self.cmd('functionapp function keys list -g {} -n {} --function-name {} -s {}'
+                 .format(resource_group, functionapp_name, function_name, slot_name)).assert_with_checks([
+                     JMESPathCheck('{}'.format(key_name), None)])
+
+
+# LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
+class FunctionAppFunctionTests(LiveScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_function_show(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        function_name = "HttpTrigger"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name)).assert_with_checks([
+            JMESPathCheck('name', '{}/{}'.format(functionapp_name, function_name)),
+            JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('scriptHref', 'https://{}.azurewebsites.net/admin/vfs/site/wwwroot/{}/run.csx'.format(functionapp_name, function_name))])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_function_delete(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        function_name = "HttpTrigger"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        self.cmd('functionapp function delete -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
+
+        self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name)).assert_with_checks([
+            JMESPathCheck('config', {})])
+
+
 class WebappAuthenticationTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_authentication', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_authentication(self, resource_group):
@@ -2084,6 +2582,7 @@ class WebappAuthenticationTest(ScenarioTest):
             JMESPathCheck('runtimeVersion', None),
             JMESPathCheck('clientId', None),
             JMESPathCheck('clientSecret', None),
+            JMESPathCheck('clientSecretCertificateThumbprint', None),
             JMESPathCheck('allowedAudiences', None),
             JMESPathCheck('issuer', None),
             JMESPathCheck('facebookAppId', None),
@@ -2094,7 +2593,7 @@ class WebappAuthenticationTest(ScenarioTest):
         # update and verify
         result = self.cmd('webapp auth update -g {} -n {} --enabled true --action LoginWithFacebook '
                           '--token-store false --token-refresh-extension-hours 7.2 --runtime-version 1.2.8 '
-                          '--aad-client-id aad_client_id --aad-client-secret aad_secret '
+                          '--aad-client-id aad_client_id --aad-client-secret aad_secret --aad-client-secret-certificate-thumbprint aad_thumbprint '
                           '--aad-allowed-token-audiences https://audience1 --aad-token-issuer-url https://issuer_url '
                           '--facebook-app-id facebook_id --facebook-app-secret facebook_secret '
                           '--facebook-oauth-scopes public_profile email'
@@ -2108,6 +2607,7 @@ class WebappAuthenticationTest(ScenarioTest):
                               JMESPathCheck('runtimeVersion', '1.2.8'),
                               JMESPathCheck('clientId', 'aad_client_id'),
                               JMESPathCheck('clientSecret', 'aad_secret'),
+                              JMESPathCheck('clientSecretCertificateThumbprint', 'aad_thumbprint'),
                               JMESPathCheck('issuer', 'https://issuer_url'),
                               JMESPathCheck('facebookAppId', 'facebook_id'),
                               JMESPathCheck('facebookAppSecret', 'facebook_secret')]).get_output_in_json()
@@ -2163,7 +2663,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
 
 # Disabled due to issue https://github.com/Azure/azure-cli/issues/10705
 # class FunctionappRemoteBuildScenarioTest(ScenarioTest):
-#    @ResourceGroupPreparer()
+#    @ResourceGroupPreparer(random_name_length=24)
 #    @StorageAccountPreparer()
 #    def test_functionapp_remote_build(self, resource_group, storage_account):
 #        functionapp_name = self.create_random_name(prefix='faremotebuildapp', length=24)
@@ -2211,7 +2711,7 @@ class WebappImplictIdentityTest(ScenarioTest):
                                                            webapp_name), checks=self.is_empty())
 
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     def test_webapp_assign_user_identity(self, resource_group):
         plan_name = self.create_random_name('web-msi-plan', 20)
         webapp_name = self.create_random_name('web-msi', 20)
@@ -2240,7 +2740,7 @@ class WebappImplictIdentityTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     def test_webapp_remove_identity(self, resource_group):
         plan_name = self.create_random_name('web-msi-plan', 20)
         webapp_name = self.create_random_name('web-msi', 20)
@@ -2290,7 +2790,7 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
 
 class WebappTriggeredWebJobListTest(ScenarioTest):
     @record_only()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     def test_webapp_triggeredWebjob_list(self, resource_group):
         # testing this using a webjob already created
         # given there is no create command inorder to re-record please create a webjob before
@@ -2309,7 +2809,7 @@ class WebappTriggeredWebJobListTest(ScenarioTest):
 
 
 class WebappContinuousWebJobE2ETest(ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=24)
     @record_only()
     def test_webapp_continuousWebjob_e2e(self, resource_group):
         # testing this using a webjob already created

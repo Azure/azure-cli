@@ -20,6 +20,7 @@ import ssl
 import sys
 import uuid
 from functools import reduce
+from http import HTTPStatus
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
@@ -35,6 +36,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
+from azure.mgmt.web.models import KeyInfo, DefaultErrorResponseException
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
@@ -58,7 +60,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_VERSION_DEFAULT, RUNTIME_STACKS)
+                         NODE_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
 
 logger = get_logger(__name__)
 
@@ -847,6 +849,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
                          client_id=None, token_store_enabled=None, runtime_version=None,  # pylint: disable=unused-argument
                          token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
+                         client_secret_certificate_thumbprint=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
                          facebook_app_secret=None, facebook_oauth_scopes=None,  # pylint: disable=unused-argument
                          twitter_consumer_key=None, twitter_consumer_secret=None,  # pylint: disable=unused-argument
@@ -1742,8 +1745,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
                            frequency=None, keep_at_least_one_backup=None,
                            retention_period_in_days=None, db_name=None,
                            db_connection_string=None, db_type=None, backup_name=None, slot=None):
-    DefaultErrorResponseException, BackupSchedule, BackupRequest = cmd.get_models(
-        'DefaultErrorResponseException', 'BackupSchedule', 'BackupRequest')
+    BackupSchedule, BackupRequest = cmd.get_models('BackupSchedule', 'BackupRequest')
     configuration = None
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
@@ -2026,7 +2028,8 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
                        docker_container_logging=None, detailed_error_messages=None,
                        failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       AzureBlobStorageApplicationLogsConfig, SiteLogsConfig,
+                                       HttpLogsConfig, FileSystemHttpLogsConfig,
                                        EnabledConfig)
     client = web_client_factory(cmd.cli_ctx)
     # TODO: ensure we call get_site only once
@@ -2036,13 +2039,18 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     location = site.location
 
     application_logs = None
-    if application_logging is not None:
-        if not application_logging:
-            level = 'Off'
-        elif level is None:
-            level = 'Error'
-        fs_log = FileSystemApplicationLogsConfig(level=level)
-        application_logs = ApplicationLogsConfig(file_system=fs_log)
+    if application_logging:
+        fs_log = None
+        blob_log = None
+        level = application_logging != 'off'
+        if application_logging in ['filesystem', 'off']:
+            fs_log = FileSystemApplicationLogsConfig(level=level)
+        level = application_logging != 'off'
+        if application_logging in ['azureblobstorage', 'off']:
+            blob_log = AzureBlobStorageApplicationLogsConfig(level=level, retention_in_days=3,
+                                                             sas_url=None)
+        application_logs = ApplicationLogsConfig(file_system=fs_log,
+                                                 azure_blob_storage=blob_log)
 
     http_logs = None
     server_logging_option = web_server_logging or docker_container_logging
@@ -2419,7 +2427,6 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
     from azure.graphrbac.models import GraphErrorException
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -2427,8 +2434,8 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
     # Cannot check if key vault is in another subscription
     if subscription != key_vault_subscription:
         return False
-    kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
-    vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
+    kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
+    vault = kv_client.vaults.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
     # Check for Microsoft.Azure.WebSites app registration
     AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
     AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'
@@ -2691,7 +2698,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
-                    deployment_container_image_name=None, tags=None):
+                    deployment_container_image_name=None, tags=None, assign_identities=None,
+                    role='Contributor', scope=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 2. In the future, specifying a version will "
@@ -2734,6 +2742,10 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         is_linux = plan_info.reserved
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
+
+    if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
+        raise CLIError("2.x functions are not supported in this region. To create a 3.x function, "
+                       "pass in the flag '--functions-version 3'")
 
     if is_linux and not runtime and (consumption_plan_location or not deployment_container_image_name):
         raise CLIError(
@@ -2874,6 +2886,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
                                               deployment_container_image_name, docker_registry_server_user,
                                               docker_registry_server_password)
+
+    if assign_identities is not None:
+        identity = assign_identity(cmd, resource_group_name, name, assign_identities,
+                                   role, None, scope)
+        functionapp.identity = identity
 
     return functionapp
 
@@ -3887,3 +3904,113 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
             verified_hostname_found = True
 
     return verified_hostname_found
+
+
+def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_value=None, slot=None):
+    # pylint: disable=protected-access
+    KeyInfo._attribute_map = {
+        'name': {'key': 'properties.name', 'type': 'str'},
+        'value': {'key': 'properties.value', 'type': 'str'},
+    }
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.create_or_update_host_secret_slot(resource_group_name,
+                                                                 name,
+                                                                 key_type,
+                                                                 key_name,
+                                                                 slot,
+                                                                 name1=key_name,
+                                                                 value=key_value)
+    return client.web_apps.create_or_update_host_secret(resource_group_name,
+                                                        name,
+                                                        key_type,
+                                                        key_name,
+                                                        name1=key_name,
+                                                        value=key_value)
+
+
+def list_host_keys(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_host_keys_slot(resource_group_name, name, slot)
+    return client.web_apps.list_host_keys(resource_group_name, name)
+
+
+def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        result = client.web_apps.delete_host_secret_slot(resource_group_name, name, key_type, key_name, slot, raw=True)
+    result = client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name, raw=True)
+
+    if result.response.status_code == HTTPStatus.NO_CONTENT:
+        return "Successfully deleted key '{}' of type '{}' from function app '{}'".format(key_name, key_type, name)
+    if result.response.status_code == HTTPStatus.NOT_FOUND:
+        return "Key '{}' of type '{}' does not exist in function app '{}'".format(key_name, key_type, name)
+    return result
+
+
+def show_function(cmd, resource_group_name, name, function_name):
+    client = web_client_factory(cmd.cli_ctx)
+    result = client.web_apps.get_function(resource_group_name, name, function_name)
+    if result is None:
+        return "Function '{}' does not exist in app '{}'".format(function_name, name)
+    return result
+
+
+def delete_function(cmd, resource_group_name, name, function_name):
+    client = web_client_factory(cmd.cli_ctx)
+    result = client.web_apps.delete_function(resource_group_name, name, function_name, raw=True)
+
+    if result.response.status_code == HTTPStatus.NO_CONTENT:
+        return "Successfully deleted function '{}' from app '{}'".format(function_name, name)
+    if result.response.status_code == HTTPStatus.NOT_FOUND:
+        return "Function '{}' does not exist in app '{}'".format(function_name, name)
+    return result
+
+
+def update_function_key(cmd, resource_group_name, name, function_name, key_name, key_value=None, slot=None):
+    # pylint: disable=protected-access
+    KeyInfo._attribute_map = {
+        'name': {'key': 'properties.name', 'type': 'str'},
+        'value': {'key': 'properties.value', 'type': 'str'},
+    }
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.create_or_update_function_secret_slot(resource_group_name,
+                                                                     name,
+                                                                     function_name,
+                                                                     key_name,
+                                                                     slot,
+                                                                     name1=key_name,
+                                                                     value=key_value)
+    return client.web_apps.create_or_update_function_secret(resource_group_name,
+                                                            name,
+                                                            function_name,
+                                                            key_name,
+                                                            name1=key_name,
+                                                            value=key_value)
+
+
+def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
+    return client.web_apps.list_function_keys(resource_group_name, name, function_name)
+
+
+def delete_function_key(cmd, resource_group_name, name, key_name, function_name=None, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        result = client.web_apps.delete_function_secret_slot(resource_group_name,
+                                                             name,
+                                                             function_name,
+                                                             key_name,
+                                                             slot,
+                                                             raw=True)
+    result = client.web_apps.delete_function_secret(resource_group_name, name, function_name, key_name, raw=True)
+
+    if result.response.status_code == HTTPStatus.NO_CONTENT:
+        return "Successfully deleted key '{}' from function '{}'".format(key_name, function_name)
+    if result.response.status_code == HTTPStatus.NOT_FOUND:
+        return "Key '{}' does not exist in function '{}'".format(key_name, function_name)
+    return result

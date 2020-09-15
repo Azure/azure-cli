@@ -86,3 +86,41 @@ def config_unset(cmd, key=None, local=False):
 
         with ScopedConfig(cmd.cli_ctx.config, local):
             cmd.cli_ctx.config.remove_option(section, name)
+
+
+def turn_param_persist_on(cmd):
+    if not cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.turn_on()
+        logger.warning('Parameter persistence is turned on, you can run `az config param-persist off` to turn it off.')
+    else:
+        raise CLIError('Parameter persistence is on already.')
+
+
+def turn_param_persist_off(cmd):
+    if cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.turn_off()
+        logger.warning('Parameter persistence is turned off, you can run `az config param-persist on` to turn it on.')
+    else:
+        raise CLIError('Parameter persistence is off already.')
+
+
+def show_param_persist(cmd, name=None):
+    if not name:
+        name = None
+    return cmd.cli_ctx.local_context.get_value(name)
+
+
+def delete_param_persist(cmd, name=None, all=False, yes=False, purge=False, recursive=False):  # pylint: disable=redefined-builtin
+    if name:
+        cmd.cli_ctx.local_context.delete(name)
+
+    if all:
+        from azure.cli.core.util import user_confirmation
+        if purge:
+            user_confirmation('You are going to delete parameter persistence file. '
+                              'Are you sure you want to continue this operation ?', yes)
+            cmd.cli_ctx.local_context.delete_file(recursive)
+        else:
+            user_confirmation('You are going to clear all parameter persistence values. '
+                              'Are you sure you want to continue this operation ?', yes)
+            cmd.cli_ctx.local_context.clear(recursive)

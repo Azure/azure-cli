@@ -9,7 +9,7 @@ import time
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
 RG_LOCATION = "westus2"
-ANF_LOCATION = "westus2stage"
+ANF_LOCATION = "eastus2"
 DP_RG_LOCATION = "southcentralus"
 DP_ANF_LOCATION = "southcentralusstage"
 GIB_SCALE = 1024 * 1024 * 1024
