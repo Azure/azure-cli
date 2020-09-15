@@ -11,7 +11,9 @@ from azure.cli.core.profiles import ResourceType
 
 # , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
-def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None):
+def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
+                         is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None,
+                         default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None, trusted_service_access_enabled=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -35,17 +37,19 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
             namespace_name=namespace_name,
             parameters=ehparam).result()
 
-    if default_action:
+    if default_action or trusted_service_access_enabled:
         netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
         netwrokruleset.default_action = default_action
+        netwrokruleset.trusted_service_access_enabled=trusted_service_access_enabled
         client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
 
     return client.get(resource_group_name, namespace_name)
 
 
 def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
                          maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
-                         identity=None, key_source=None, key_name=None, key_vault_uri=None, key_version=None):
+                         identity=None, key_source=None, key_name=None, key_vault_uri=None, key_version=None, trusted_service_access_enabled=None):
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
     KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -86,6 +90,7 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
             resourcegroup = instance.id.split('/')[4]
             netwrokruleset = client.get_network_rule_set(resourcegroup, instance.name)
             netwrokruleset.default_action = default_action
+            netwrokruleset.trusted_service_access_enabled = trusted_service_access_enabled
             client.create_or_update_network_rule_set(resourcegroup, instance.name, netwrokruleset)
 
     return instance
@@ -97,6 +102,33 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
             return client.list_by_resource_group(resource_group_name=resource_group_name)
 
     return client.list()
+
+
+# Cluster region
+def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=None, tags=None, capacity=None):
+    Cluster = cmd.get_models('Cluster', resource_type=ResourceType.MGMT_EVENTHUB)
+    ClusterSku = cmd.get_models('ClusterSku', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
+        ehparam = Cluster()
+        ehparam.sku = ClusterSku()
+        ehparam.location = location
+        if not capacity:
+            ehparam.sku.capacity = 1
+        ehparam.tags = tags
+        cluster_result = client.create_or_update(
+            resource_group_name=resource_group_name,
+            cluster_name = cluster_name,
+            parameters=ehparam).result()
+
+    return cluster_result
+
+
+def cli_cluster_update(cmd, client, instance, tags=None):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
+        if tags:
+            instance.tags = tags
+    return instance
 
 
 # Namespace Authorization rule:

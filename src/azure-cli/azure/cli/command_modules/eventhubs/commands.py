@@ -14,11 +14,17 @@ def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs._client_factory import (namespaces_mgmt_client_factory,
                                                                      event_hub_mgmt_client_factory,
                                                                      consumer_groups_mgmt_client_factory,
-                                                                     disaster_recovery_mgmt_client_factory)
+                                                                     disaster_recovery_mgmt_client_factory,
+                                                                     cluster_mgmt_client_factory)
 
     eh_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory,
+        resource_type=ResourceType.MGMT_EVENTHUB)
+
+    eh_clusters_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventhub.operations#ClustersOperations.{}',
+        client_factory=cluster_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
     eh_event_hub_util = CliCommandType(
@@ -58,6 +64,16 @@ def load_command_table(self, _):
         g.command('keys renew', 'regenerate_keys')
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
+
+# Cluster Region
+    with self.command_group('eventhubs cluster', eh_clusters_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=cluster_mgmt_client_factory) as g:
+        g.custom_command('create', 'cli_cluster_create')
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_resource_group')
+        g.command('namespace list', 'list_namespaces')
+        g.command('delete', 'delete')
+        g.command('available_cluster_region', 'list_available_cluster_region')
+        g.generic_update_command('update', getter_name='get', setter_name='update', custom_func_name='cli_cluster_update', custom_func_type=eventhubs_custom)
 
 # EventHub Region
     with self.command_group('eventhubs eventhub', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:

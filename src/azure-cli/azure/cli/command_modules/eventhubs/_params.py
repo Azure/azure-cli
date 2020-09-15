@@ -44,6 +44,8 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
         c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
                    help='Default Action for Network Rule Set.')
+        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access'], arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
         c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
         c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
@@ -59,6 +61,19 @@ def load_arguments_eh(self, _):
         c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
         c.argument('key_version', is_preview=True,
                    help='The version of the KeyVault key to use.')
+
+# Cluster region
+    for scope in ['eventhubs cluster', 'eventhubs cluster namespace list']:
+        with self.argument_context(scope) as c:
+            c.argument('cluster_name', arg_type=name_type, id_part=None, help='Name of Cluster')
+
+    with self.argument_context('eventhubs cluster create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part=None,  help='Location of the Cluster, for locations of available pre-provision clusters, please check az evetnhubs ')
+        c.argument('capacity', type=int, help='Capacity for Sku')
+
+    for scope in ['eventhubs cluster create', 'eventhubs cluster update']:
+        with self.argument_context(scope) as c:
+            c.argument('tags', arg_type=tags_type)
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:
