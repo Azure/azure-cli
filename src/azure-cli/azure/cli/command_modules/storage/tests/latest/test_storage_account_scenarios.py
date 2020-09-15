@@ -360,7 +360,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
     def test_show_usage_no_location(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(SystemExit):
             self.cmd('storage account show-usage')
 
     @ResourceGroupPreparer()
@@ -585,6 +585,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs = {'rg': resource_group, 'sa': storage_account}
 
         self.assertEqual(self.cmd('storage account show -g {rg} -n {sa}').exit_code, 0)
+
+        with self.assertRaises(SystemExit) as ex:	
+            self.cmd('storage account show text_causing_parsing_error')	
+        self.assertEqual(ex.exception.code, 2)
 
         with self.assertRaises(SystemExit) as ex:
             self.cmd('storage account show -g fake_group -n {sa}')
@@ -910,22 +914,22 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             'cmd': 'storage account blob-service-properties update'
         })
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(SystemExit):
             self.cmd('{cmd} --enable-delete-retention true -n {sa} -g {rg}')
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(SystemExit):
             self.cmd('{cmd} --enable-delete-retention false --delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(SystemExit):
             self.cmd('{cmd} --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(SystemExit):
             self.cmd('{cmd} --enable-delete-retention true --delete-retention-days -1 -n {sa} -g {rg}')
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(SystemExit):
             self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 0 -n {sa} -g {rg}')
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(SystemExit):
             self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 366 -n {sa} -g {rg}')
 
         result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()

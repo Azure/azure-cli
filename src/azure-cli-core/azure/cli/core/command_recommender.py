@@ -141,10 +141,12 @@ class CommandRecommender():
         The recommended command will be the best matched one from
         both the help files and the aladdin recommendations.
         """
+        import os
         from azure.cli.core.cloud import CLOUDS_FORBIDDING_ALADDIN_REQUEST
 
         if self.cli_ctx and self.cli_ctx.cloud \
-           and self.cli_ctx.cloud.name not in CLOUDS_FORBIDDING_ALADDIN_REQUEST:
+           and self.cli_ctx.cloud.name not in CLOUDS_FORBIDDING_ALADDIN_REQUEST \
+           and not os.getenv('DISABLE_ALADDIN_REQUEST'):
             self._set_aladdin_recommendations()
 
         # all the recommended commands from help examples and aladdin

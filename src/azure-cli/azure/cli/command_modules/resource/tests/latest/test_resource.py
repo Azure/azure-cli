@@ -2582,7 +2582,7 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
             self.check('name', self.kwargs['group1']),
             self.check('location', self.kwargs['location'])
         ])
-        with self.assertRaisesRegexp(Exception, '2'):
+        with self.assertRaisesRegexp(SystemExit, '2'):
             self.cmd('group delete')
         self.cmd('group delete -n {group1} -y')
         self.cmd('group create -n {group2}', checks=[

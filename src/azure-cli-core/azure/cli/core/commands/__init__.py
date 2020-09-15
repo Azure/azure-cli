@@ -857,7 +857,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 from msrest.exceptions import ValidationError
                 if isinstance(ex, ValidationError):
                     logger.debug('Validation error in %s.', str(validator))
-                raise AzCLIError(AzCLIErrorType.ValidationError, getattr(ex, 'message', str(ex)))
+                raise
         try:
             delattr(ns, '_argument_validators')
         except AttributeError:
