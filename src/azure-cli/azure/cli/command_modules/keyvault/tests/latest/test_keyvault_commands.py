@@ -1818,7 +1818,8 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
         # recover and purge
         self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault recover -n {kv}', checks=self.check('name', '{kv}'))
+        self.cmd('keyvault recover -n {kv} --no-wait')
+        self.cmd('keyvault wait --updated -n {kv}')
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault purge -n {kv}')
 
