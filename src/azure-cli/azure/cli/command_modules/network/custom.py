@@ -6430,7 +6430,7 @@ def virtual_router_peering_update_getter(cmd, resource_group_name, virtual_route
 
     from azure.mgmt.network.models import ErrorException
     try:
-        vrouter_peering_client.get(resource_group_name, virtual_router_name, peering_name)
+        return vrouter_peering_client.get(resource_group_name, virtual_router_name, peering_name)
     except ErrorException:  # 404
         pass
 
@@ -6455,6 +6455,7 @@ def virtual_router_peering_update_setter(cmd, resource_group_name, virtual_route
 
 
 def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
+    # both VirtualHub and VirtualRouter own those properties
     with cmd.update_context(instance) as c:
         c.set_param('peer_asn', peer_asn)
         c.set_param('peer_ip', peer_ip)
@@ -6462,40 +6463,43 @@ def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
 
 
 def list_virtual_router_peering(cmd, resource_group_name, virtual_router_name):
+    virtual_hub_name = virtual_router_name
+
+    from azure.mgmt.network.models import ErrorException
     try:
         vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
         vrouter_client.get(resource_group_name, virtual_router_name)
-    except:  # pylint: disable=bare-except
-        pass
-
-    virtual_hub_name = virtual_router_name
-
-    try:
-        vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-        vhub_client.get(resource_group_name, virtual_hub_name)
-    except CloudError:
-        msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                      resource_group_name)
-        raise CLIError(msg)
+    except ErrorException:
+        try:
+            vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
+            vhub_client.get(resource_group_name, virtual_hub_name)
+        except CloudError:
+            msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
+                                                                                          resource_group_name)
+            raise CLIError(msg)
 
     try:
         vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
         vrouter_peerings = list(vrouter_peering_client.list(resource_group_name, virtual_router_name))
-    except:  # pylint: disable=bare-except
+    except ErrorException:
         vrouter_peerings = []
 
     virtual_hub_name = virtual_router_name
-    vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connections
-    vhub_bgp_connections = list(vhub_bgp_conn_client.list(resource_group_name, virtual_hub_name))
+    try:
+        vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connections
+        vhub_bgp_connections = list(vhub_bgp_conn_client.list(resource_group_name, virtual_hub_name))
+    except CloudError:
+        vhub_bgp_connections = []
 
     return list(vrouter_peerings) + list(vhub_bgp_connections)
 
 
 def show_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name):
+    from azure.mgmt.network.models import ErrorException
     try:
         vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
         vrouter_client.get(resource_group_name, virtual_router_name)
-    except:  # pylint: disable=bare-except
+    except ErrorException:
         pass
     else:
         vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
