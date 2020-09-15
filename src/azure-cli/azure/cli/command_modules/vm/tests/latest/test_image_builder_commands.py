@@ -5,7 +5,7 @@
 import time
 import unittest
 import mock
-from knack.testsdk import record_only
+from azure.cli.testsdk import record_only
 from knack.util import CLIError
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)

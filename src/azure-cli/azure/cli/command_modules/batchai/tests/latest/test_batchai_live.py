@@ -6,7 +6,7 @@ import os
 import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
-from knack.testsdk import JMESPathCheck
+from azure.cli.testsdk import JMESPathCheck
 
 LOCATION_FOR_LIVE_TESTS = 'northeurope'
 
