@@ -50,7 +50,7 @@ DISALLOWED_USER_NAMES = [
 ]
 
 
-def handle_exception(ex):  # pylint: disable=too-many-return-statements
+def handle_exception(ex):  # pylint: disable=too-many-return-statements, too-many-statements
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathTypeError
     from msrestazure.azure_exceptions import CloudError
