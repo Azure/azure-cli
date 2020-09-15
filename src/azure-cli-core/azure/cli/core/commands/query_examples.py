@@ -6,6 +6,7 @@
 from knack.log import get_logger
 from knack.util import todict
 from knack import events
+from knack.util import CLIError
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 
 logger = get_logger(__name__)
@@ -18,6 +19,8 @@ def register_global_query_examples_argument(cli_ctx):
         args = kwargs['args']
         # `query_examples` has been registered and `--query-examples` appers in the command args
         if hasattr(args, '_query_examples') and args._query_examples is not None:  # pylint: disable=protected-access
+            if cli_ctx.invocation.data['query_active']:
+                raise CLIError('You should not use --query and --query-examples together.')
             # change the default output format to table
             if cli_ctx.invocation.data['output'] == 'json':
                 cli_ctx.invocation.data['output'] = 'table'
