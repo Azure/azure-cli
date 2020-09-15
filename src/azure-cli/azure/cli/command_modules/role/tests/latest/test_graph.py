@@ -749,6 +749,24 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
             ad_api = get_required_resource_access(permissions, self.kwargs['ad_graph_resource'])
             self.assertIsNone(ad_api)
+
+            # Test delete non-existing api
+            self.cmd('ad app permission delete --id {app_id} --api 11111111-0000-0000-c000-000000000000')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            self.assertEqual(permissions, [])
+
+            # Test delete api permission from non-existing api
+            self.cmd('ad app permission delete --id {app_id} --api 11111111-0000-0000-c000-000000000000 --api-permissions {ms_target_api} {ms_target_api2}')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            self.assertEqual(permissions, [])
+
+            # Test delete non existing api permission from existing api
+            self.cmd('ad app permission add --id {app_id} --api {ms_graph_resource} '
+                     '--api-permissions {ms_target_api}=Scope {ms_target_api2}=Scope')
+            self.cmd('ad app permission delete --id {app_id} --api {ms_graph_resource} --api-permissions 22222222-0000-0000-c000-000000000000')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            ms_api = get_required_resource_access(permissions, self.kwargs['ms_graph_resource'])
+            self.assertEqual(ms_api['resourceAccess'], [ms_target_api_object, ms_target_api2_object])
         finally:
             if app_id:
                 try:
