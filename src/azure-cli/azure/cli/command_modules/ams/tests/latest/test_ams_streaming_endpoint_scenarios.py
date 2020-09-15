@@ -8,7 +8,7 @@ import sys
 
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from azure.cli.command_modules.ams._test_utils import _get_test_data_file
+from ._test_util import _get_test_data_file
 
 
 class AmsStreamingEndpointsTests(ScenarioTest):
