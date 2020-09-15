@@ -250,12 +250,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Server major version.')
                 c.argument('zone', options_list=['--zone, -z'],
                            help='Availability zone into which to provision the resource.')
-                c.argument('public_network_access', options_list=['--public-network-access'],
-                           help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
 
             c.argument('vnet_resource_id', options_list=['--vnet'], help='The virtual network name.')
-            c.argument('vnet_address_prefix', options_list=['--vnet-address-prefix'], help='The virtual network address prefix.')
-            c.argument('subnet_address_prefix', options_list=['--subnet-address-prefix'], help='The subnet address prefix.')
+            c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The virtual network address prefix.')
+            c.argument('subnet_address_prefix', options_list=['--subnet-prefixes'], help='The subnet address prefix.')
             c.argument('subnet_arm_resource_id', options_list=['--subnet'],
                        help='Name or ID of the subnet that allows access to an Azure Flexible Server. ')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
@@ -287,7 +285,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The name of the new server that is created by the restore command.')
             c.argument('source_server', options_list=['--source-server'],
                        help='The name or resource ID of the source server to restore from.')
-            c.argument('restore_point_in_time', options_list=['--restore-point-in-time'],
+            c.argument('restore_point_in_time', options_list=['--time'],
                        help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
@@ -309,9 +307,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            validator=mysql_storage_validator,
                            help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
-                c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']),
-                           options_list=['--public-network-access'],
-                           help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
                 c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'],
                            help='Enable or disable autogrow of the storage. Default value is Enabled.')
                 c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']),
