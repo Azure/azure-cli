@@ -15,8 +15,8 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window
-from .flexible_server_custom_common import user_confirmation, _server_list_custom_func
-from .flexible_server_virtual_network import create_vnet, prepareVnet
+from .flexible_server_custom_common import user_confirmation, server_list_custom_func
+from .flexible_server_virtual_network import create_vnet, prepare_vnet
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -25,12 +25,12 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 
 # region create without args
 # pylint: disable=too-many-locals
-def _flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
-                            location=None, storage_mb=None, administrator_login=None,
-                            administrator_login_password=None, version=None,
-                            backup_retention=None, tags=None, public_access=None, database_name=None,
-                            subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
-                            vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None):
+def flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
+                                location=None, storage_mb=None, administrator_login=None,
+                                administrator_login_password=None, version=None,
+                                backup_retention=None, tags=None, public_access=None, database_name=None,
+                                subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
+                                vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None):
     from azure.mgmt.rdbms import mysql_flexibleservers
     try:
         db_context = DbContext(
@@ -60,7 +60,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
 
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
-            subnet_id = prepareVnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
+            subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
                                     location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
             delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
                 subnet_arm_resource_id=subnet_id)
@@ -73,7 +73,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
             delegated_subnet_arguments = None
 
         # Get list of servers in the current sub
-        server_list = _server_list_custom_func(client)
+        server_list = server_list_custom_func(client)
 
         # Ensure that the server name is not in the rg and in the subscription
         for key in server_list:
@@ -131,8 +131,7 @@ def _flexible_server_create(cmd, client, resource_group_name=None, server_name=N
         logger.error(ex)
 
 
-def _flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time,
-                             location=None, no_wait=False):
+def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
 
     if not is_valid_resource_id(source_server):
@@ -164,21 +163,21 @@ def _flexible_server_restore(cmd, client, resource_group_name, server_name, sour
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
-def _flexible_server_update_custom_func(instance,
-                                        sku_name=None,
-                                        tier=None,
-                                        storage_mb=None,
-                                        backup_retention=None,
-                                        administrator_login_password=None,
-                                        ssl_enforcement=None,
-                                        subnet_arm_resource_id=None,
-                                        tags=None,
-                                        auto_grow=None,
-                                        assign_identity=False,
-                                        public_network_access=None,
-                                        ha_enabled=None,
-                                        replication_role=None,
-                                        maintenance_window=None):
+def flexible_server_update_custom_func(instance,
+                               sku_name=None,
+                               tier=None,
+                               storage_mb=None,
+                               backup_retention=None,
+                               administrator_login_password=None,
+                               ssl_enforcement=None,
+                               subnet_arm_resource_id=None,
+                               tags=None,
+                               auto_grow=None,
+                               assign_identity=False,
+                               public_network_access=None,
+                               ha_enabled=None,
+                               replication_role=None,
+                               maintenance_window=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path)  # replacement not needed for update in flex servers
@@ -248,7 +247,7 @@ def _flexible_server_update_custom_func(instance,
     return params
 
 
-def _server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
+def server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
     confirm = force
     result = None  # default return value
     if not force:
@@ -268,7 +267,7 @@ def _server_delete_func(cmd, client, resource_group_name=None, server_name=None,
 
 
 # Parameter update command
-def _flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
+def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
         # update the command with system default
         try:
@@ -285,8 +284,7 @@ def _flexible_parameter_update(client, server_name, configuration_name, resource
 
 # Replica commands
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
-def _flexible_replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None,
-                             sku_name=None, tier=None, **kwargs):
+def flexible_replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
     provider = 'Microsoft.DBforMySQL'
 
     # set source server id
@@ -324,7 +322,7 @@ def _flexible_replica_create(cmd, client, resource_group_name, server_name, sour
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
-def _flexible_replica_stop(client, resource_group_name, server_name):
+def flexible_replica_stop(client, resource_group_name, server_name):
     try:
         server_object = client.get(resource_group_name, server_name)
     except Exception as e:
@@ -343,12 +341,12 @@ def _flexible_replica_stop(client, resource_group_name, server_name):
     return client.update(resource_group_name, server_name, params)
 
 
-def _flexible_server_mysql_get(cmd, resource_group_name, server_name):
+def flexible_server_mysql_get(cmd, resource_group_name, server_name):
     client = get_mysql_flexible_management_client(cmd.cli_ctx)
     return client.servers.get(resource_group_name, server_name)
 
 
-def _flexible_list_skus(client, location):
+def flexible_list_skus(client, location):
     return client.list(location)
 
 
@@ -395,6 +393,8 @@ def flexible_server_connection_string(
         server_name='{server}', database_name='{database}', administrator_login='{login}',
         administrator_login_password='{password}'):
     host = '{}.mysql.database.azure.com'.format(server_name)
+    if database_name is None:
+        database_name = 'mysql'
     return {
         'connectionStrings': _create_mysql_connection_strings(host, administrator_login, administrator_login_password,
                                                               database_name)

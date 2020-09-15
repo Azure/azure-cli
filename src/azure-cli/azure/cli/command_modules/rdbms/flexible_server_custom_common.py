@@ -12,22 +12,20 @@ logger = get_logger(__name__)
 
 
 # Common functions used by other providers
-def _flexible_server_update_get(client, resource_group_name, server_name):
+def flexible_server_update_get(client, resource_group_name, server_name):
     return client.get(resource_group_name, server_name)
 
 
-def _flexible_server_update_set(client, resource_group_name, server_name, parameters):
+def flexible_server_update_set(client, resource_group_name, server_name, parameters):
     return client.update(resource_group_name, server_name, parameters)
 
 
-def _server_list_custom_func(client, resource_group_name=None):
+def server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
 
-
-def _firewall_rule_delete_func(client, resource_group_name=None, server_name=None, firewall_rule_name=None,
-                               prompt=None):
+def firewall_rule_delete_func(client, resource_group_name=None, server_name=None, firewall_rule_name=None, prompt=None):
     confirm = True
     result = None
     if not prompt or prompt == ' yes':
@@ -42,7 +40,12 @@ def _firewall_rule_delete_func(client, resource_group_name=None, server_name=Non
     return result
 
 
-def _database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, force=None):
+def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, force=None):
+    if resource_group_name is None or server_name is None or database_name is None:
+        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
+                       "If your local context is turned ON, make sure these three parameters exist in local context "
+                       "using \'az local-context show\' If your local context is turned ON, but they are missing or "
+                       "If your local context is turned OFF, consider passing them explicitly.")
     if not force:
         confirm = user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
@@ -56,11 +59,11 @@ def _database_delete_func(client, resource_group_name=None, server_name=None, da
     return result
 
 
-def _flexible_firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
+def flexible_firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
-def _flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
+def flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
     return client.create_or_update(
         resource_group_name,
         server_name,
@@ -69,7 +72,7 @@ def _flexible_firewall_rule_custom_setter(client, resource_group_name, server_na
         parameters.end_ip_address)
 
 
-def _flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
+def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
     if start_ip_address is not None:
         instance.start_ip_address = start_ip_address
     if end_ip_address is not None:

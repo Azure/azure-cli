@@ -17,10 +17,8 @@ logger = get_logger(__name__)
 DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
 DEFAULT_SUBNET_PREFIX = '10.0.0.0/24'
 
-
 # pylint: disable=too-many-locals, too-many-statements
-def prepareVnet(cmd, server_name, vnet, subnet, resource_group_name, loc, delegation_service_name, vnet_address_pref,
-                subnet_address_pref):
+def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, delegation_service_name, vnet_address_pref, subnet_address_pref):
     Delegation, Subnet, VirtualNetwork, AddressSpace = cmd.get_models('Delegation', 'Subnet', 'VirtualNetwork',
                                                                       'AddressSpace',
                                                                       resource_type=ResourceType.MGMT_NETWORK)

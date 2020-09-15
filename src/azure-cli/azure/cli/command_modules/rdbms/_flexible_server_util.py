@@ -105,17 +105,18 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     return firewall.name
 
 
+# pylint: disable=inconsistent-return-statements
 def parse_public_access_input(public_access):
     # pylint: disable=no-else-return
     if public_access is not None:
         parsed_input = public_access.split('-')
         if len(parsed_input) == 1:
             return parsed_input[0], parsed_input[0]
-        else:
+        elif len(parsed_input) == 2:
             return parsed_input[0], parsed_input[1]
-    else:
-        raise CLIError('incorrect usage: --public-access. Acceptable values are \'all\', \'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' '
-                       'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
+        else:
+            raise CLIError('incorrect usage: --public-access. Acceptable values are \'all\', \'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' '
+                           'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
 
 
 def server_list_custom_func(client, resource_group_name=None):
