@@ -184,10 +184,12 @@ def load_arguments(self, _):
 
         # Private Link Network Settings
         c.argument('public_network_access_type', arg_group='Private Link Network Settings',
-                   arg_type=get_enum_type(PublicNetworkAccess), help='The public network access type.')
+                   arg_type=get_enum_type(PublicNetworkAccess), help='The public network access type.',
+                   deprecate_info=c.deprecate(expiration='2.12.2'))
         c.argument('outbound_public_network_access_type', arg_group='Private Link Network Settings',
                    arg_type=get_enum_type(OutboundOnlyPublicNetworkAccessType),
-                   help='The outbound only public network access type.')
+                   help='The outbound only public network access type.',
+                   deprecate_info=c.deprecate(expiration='2.12.2'))
 
         # Encryption In Transit
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),
