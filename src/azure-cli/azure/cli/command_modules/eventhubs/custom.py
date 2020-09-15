@@ -40,9 +40,8 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     if default_action or trusted_service_access_enabled:
         netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
         netwrokruleset.default_action = default_action
-        netwrokruleset.trusted_service_access_enabled=trusted_service_access_enabled
+        netwrokruleset.trusted_service_access_enabled = trusted_service_access_enabled
         client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
-
 
     return client.get(resource_group_name, namespace_name)
 
@@ -118,13 +117,13 @@ def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=
         ehparam.tags = tags
         cluster_result = client.create_or_update(
             resource_group_name=resource_group_name,
-            cluster_name = cluster_name,
+            cluster_name=cluster_name,
             parameters=ehparam).result()
 
     return cluster_result
 
 
-def cli_cluster_update(cmd, client, instance, tags=None):
+def cli_cluster_update(cmd, instance, tags=None):
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
         if tags:
             instance.tags = tags
