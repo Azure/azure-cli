@@ -24,6 +24,7 @@ from ._validators import (
 def load_command_table(self, _):
     mgmt_api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_KEYVAULT))
     mgmt_api_version = mgmt_api_version.replace('-', '_')
+
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT))
     data_api_version = data_api_version.replace('.', '_')
     data_api_version = data_api_version.replace('-', '_')
@@ -61,28 +62,37 @@ def load_command_table(self, _):
 
     # Management Plane Commands
     with self.command_group('keyvault', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
-        g.custom_command('create', 'create_keyvault',
+        g.custom_command('create', 'create_keyvault', supports_no_wait=True,
                          doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
-        g.custom_command('recover', 'recover_keyvault')
+        g.custom_command('recover', 'recover_keyvault', supports_no_wait=True)
         g.custom_command('list', 'list_keyvault')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.command('purge', 'purge_deleted')
-        g.custom_command('set-policy', 'set_policy')
-        g.custom_command('delete-policy', 'delete_policy')
+        g.command('delete', 'delete', deprecate_info=g.deprecate(
+            tag_func=lambda x: '',
+            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, you will '
+                                   'not be able to reuse this key vault name until the key vault has been purged from '
+                                   'the soft deleted state. Please see the following documentation for additional '
+                                   'guidance.\n'
+                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
+        g.command('purge', 'begin_purge_deleted', supports_no_wait=True)
+        g.custom_command('set-policy', 'set_policy', supports_no_wait=True)
+        g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
         g.command('list-deleted', 'list_deleted')
         g.generic_update_command(
             'update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
             custom_func_name='update_keyvault',
-            doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
+            doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties',
+            supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('keyvault network-rule',
                             kv_vaults_sdk,
                             min_api='2018-02-14',
                             client_factory=keyvault_client_vaults_factory) as g:
-        g.custom_command('add', 'add_network_rule')
-        g.custom_command('remove', 'remove_network_rule')
+        g.custom_command('add', 'add_network_rule', supports_no_wait=True)
+        g.custom_command('remove', 'remove_network_rule', supports_no_wait=True)
         g.custom_command('list', 'list_network_rules')
+        g.wait_command('wait')
 
     with self.command_group('keyvault private-endpoint-connection',
                             kv_private_endpoint_connections_sdk,
@@ -93,7 +103,7 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+        g.command('delete', 'begin_delete', validator=validate_private_endpoint_connection_id, supports_no_wait=True)
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
         g.wait_command('wait', validator=validate_private_endpoint_connection_id)
 
@@ -116,7 +126,14 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
         g.keyvault_command('show-deleted', 'get_deleted_key')
-        g.keyvault_command('delete', 'delete_key')
+        g.keyvault_command('delete', 'delete_key', deprecate_info=g.deprecate(
+            tag_func=lambda x: '',
+            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this key '
+                                   'will be moved to the soft deleted state. You will not be able to create a key with '
+                                   'the same name within this key vault until the key has been purged from the '
+                                   'soft-deleted state. Please see the following documentation for additional '
+                                   'guidance.\n'
+                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key', doc_string_source=data_doc_string.format('backup_key'))
@@ -136,7 +153,13 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_secret', transform=extract_subresource_name())
         g.keyvault_command('show', 'get_secret', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_secret', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name())
+        g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name(), deprecate_info=g.deprecate(
+            tag_func=lambda x: '',
+            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this secret '
+                                   'will be moved to the soft deleted state. You will not be able to create a secret '
+                                   'with the same name within this key vault until the secret has been purged from the '
+                                   'soft-deleted state. Please see the following documentation for additional guidance.'
+                                   '\nhttps://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_secret')
@@ -154,7 +177,15 @@ def load_command_table(self, _):
         g.keyvault_command('list-deleted', 'get_deleted_certificates', transform=extract_subresource_name())
         g.keyvault_command('show', 'get_certificate', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_certificate', transform=extract_subresource_name())
-        g.keyvault_command('delete', 'delete_certificate', transform=extract_subresource_name())
+        g.keyvault_command('delete', 'delete_certificate', deprecate_info=g.deprecate(
+            tag_func=lambda x: '',
+            message_func=lambda x: 'Warning! If you have soft-delete protection enabled on this key vault, this '
+                                   'certificate will be moved to the soft deleted state. You will not be able to '
+                                   'create a certificate with the same name within this key vault until the '
+                                   'certificate has been purged from the soft-deleted state. Please see the following '
+                                   'documentation for additional guidance.\n'
+                                   'https://docs.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview'),
+                           transform=extract_subresource_name())
         g.keyvault_command('purge', 'purge_deleted_certificate')
         g.keyvault_command('recover', 'recover_deleted_certificate', transform=extract_subresource_name())
         g.keyvault_command('set-attributes', 'update_certificate', transform=extract_subresource_name())

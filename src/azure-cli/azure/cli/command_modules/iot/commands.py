@@ -8,7 +8,7 @@ from ._client_factory import iot_hub_service_factory
 from ._client_factory import iot_service_provisioning_factory
 from ._client_factory import iot_central_service_factory
 
-JOB_DEPRECATION_INFO = 'IoT Extension (azure-cli-iot-ext) Job commands'
+CS_DEPRECATION_INFO = 'IoT Extension (azure-iot) connection-string command (az iot hub connection-string show)'
 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -99,7 +99,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot hub', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_hub_create')
         g.custom_command('list', 'iot_hub_list')
-        g.custom_command('show-connection-string', 'iot_hub_show_connection_string')
+        g.custom_command('show-connection-string', 'iot_hub_show_connection_string',
+                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO))
         g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
                                  command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
@@ -113,13 +114,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot hub consumer-group', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_hub_consumer_group_create')
         g.custom_command('list', 'iot_hub_consumer_group_list')
-        g.custom_command('show', 'iot_hub_consumer_group_get')
+        g.custom_show_command('show', 'iot_hub_consumer_group_get')
         g.custom_command('delete', 'iot_hub_consumer_group_delete')
 
     # iot hub policy commands
     with self.command_group('iot hub policy', client_factory=iot_hub_service_factory) as g:
         g.custom_command('list', 'iot_hub_policy_list')
-        g.custom_command('show', 'iot_hub_policy_get')
+        g.custom_show_command('show', 'iot_hub_policy_get')
         g.custom_command('create', 'iot_hub_policy_create', transform=PolicyUpdateResultTransform(self.cli_ctx))
         g.custom_command('delete', 'iot_hub_policy_delete', transform=PolicyUpdateResultTransform(self.cli_ctx))
         g.custom_command('renew-key', 'iot_hub_policy_key_renew', supports_no_wait=True)
@@ -128,7 +129,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_hub_routing_endpoint_create',
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
-        g.custom_command('show', 'iot_hub_routing_endpoint_show')
+        g.custom_show_command('show', 'iot_hub_routing_endpoint_show')
         g.custom_command('list', 'iot_hub_routing_endpoint_list')
         g.custom_command('delete', 'iot_hub_routing_endpoint_delete',
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
@@ -144,7 +145,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # iot hub route commands
     with self.command_group('iot hub route', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_hub_route_create', transform=RouteUpdateResultTransform(self.cli_ctx))
-        g.custom_command('show', 'iot_hub_route_show')
+        g.custom_show_command('show', 'iot_hub_route_show')
         g.custom_command('list', 'iot_hub_route_list')
         g.custom_command('delete', 'iot_hub_route_delete', transform=RouteUpdateResultTransform(self.cli_ctx))
         g.custom_command('update', 'iot_hub_route_update', transform=RouteUpdateResultTransform(self.cli_ctx))
@@ -153,7 +154,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # iot hub device stream commands
     with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory,
                             min_api="2019-07-01-preview") as g:
-        g.custom_command('show', 'iot_hub_devicestream_show')
+        g.custom_show_command('show', 'iot_hub_devicestream_show')
 
     with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory,
                             is_preview=True) as g:

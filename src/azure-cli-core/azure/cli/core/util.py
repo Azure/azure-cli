@@ -28,7 +28,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#work-behind-a-proxy. '
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy.\n\n'
                      'Error detail: {}')
 
 _PROXYID_RE = re.compile(
@@ -36,16 +36,6 @@ _PROXYID_RE = re.compile(
     '(/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*))?')
 
 _CHILDREN_RE = re.compile('(?i)/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
-
-_PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliYum"),
-                                 "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliZypper"),
-                                 "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://aka.ms/doc/UpdateAzureCliApt"),
-                                 "HOMEBREW": ("brew update && brew upgrade azure-cli", "https://aka.ms/doc/UpdateAzureCliHomebrew"),
-                                 "PIP": ("curl -L https://aka.ms/InstallAzureCli | bash", "https://aka.ms/doc/UpdateAzureCliLinux"),
-                                 "MSI": ("https://aka.ms/installazurecliwindows", "https://aka.ms/doc/UpdateAzureCliMsi"),
-                                 "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://aka.ms/doc/UpdateAzureCliDocker")}
-
-_GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/InstallAzureCli'
 
 _VERSION_CHECK_TIME = 'check_time'
 _VERSION_UPDATE_TIME = 'update_time'
@@ -68,6 +58,12 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
+    from requests.exceptions import SSLError
+    import traceback
+
+    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
+    # Print the traceback and exception message
+    logger.debug(traceback.format_exc())
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
@@ -88,12 +84,13 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
         if isinstance(ex, ValidationError):
             logger.error('validation error: %s', ex)
             return 1
-        if isinstance(ex, ClientRequestError):
+        if isinstance(ex, (ClientRequestError, SSLError)):
             msg = str(ex)
             if 'SSLError' in msg:
-                logger.error("request failed: %s", SSLERROR_TEMPLATE.format(msg))
+                # SSL verification failed
+                logger.error("Request failed: %s", SSLERROR_TEMPLATE.format(msg))
             else:
-                logger.error("request failed: %s", ex)
+                logger.error("Request failed: %s", ex)
             return 1
         if isinstance(ex, KeyboardInterrupt):
             return 1
@@ -138,8 +135,25 @@ def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
 
 
 def get_installed_cli_distributions():
-    from pkg_resources import working_set
-    return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
+    # Stop importing pkg_resources, because importing it is slow (~200ms).
+    # from pkg_resources import working_set
+    # return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
+
+    # Use the hard-coded version instead of querying all modules under site-packages.
+    from azure.cli.core import __version__ as azure_cli_core_version
+    from azure.cli.telemetry import __version__ as azure_cli_telemetry_version
+
+    class VersionItem:  # pylint: disable=too-few-public-methods
+        """A mock of pkg_resources.EggInfoDistribution to maintain backward compatibility."""
+        def __init__(self, key, version):
+            self.key = key
+            self.version = version
+
+    return [
+        VersionItem('azure-cli', azure_cli_core_version),
+        VersionItem('azure-cli-core', azure_cli_core_version),
+        VersionItem('azure-cli-telemetry', azure_cli_telemetry_version)
+    ]
 
 
 def _update_latest_from_pypi(versions):
@@ -171,17 +185,51 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
+def get_latest_from_github(package_path='azure-cli'):
+    try:
+        import requests
+        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/master/src/{}/setup.py".format(package_path)
+        response = requests.get(git_url, timeout=10)
+        if response.status_code != 200:
+            logger.info("Failed to fetch the latest version from '%s' with status code '%s' and reason '%s'",
+                        git_url, response.status_code, response.reason)
+            return None
+        for line in response.iter_lines():
+            txt = line.decode('utf-8', errors='ignore')
+            if txt.startswith('VERSION'):
+                match = re.search(r'VERSION = \"(.*)\"$', txt)
+                if match:
+                    return match.group(1)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info("Failed to get the latest version from '%s'. %s", git_url, str(ex))
+        return None
+
+
+def _update_latest_from_github(versions):
+    if not check_connectivity(max_retries=0):
+        return versions, False
+    success = True
+    for pkg in ['azure-cli-core', 'azure-cli-telemetry']:
+        version = get_latest_from_github(pkg)
+        if not version:
+            success = False
+        else:
+            versions[pkg.replace(COMPONENT_PREFIX, '')]['pypi'] = version
+    try:
+        versions[CLI_PACKAGE_NAME]['pypi'] = versions['core']['pypi']
+    except KeyError:
+        pass
+    return versions, success
+
+
 def get_cached_latest_versions(versions=None):
     """ Get the latest versions from a cached file"""
-    import os
     import datetime
-    from azure.cli.core._environment import get_config_dir
     from azure.cli.core._session import VERSIONS
 
     if not versions:
         versions = _get_local_versions()
 
-    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
     if VERSIONS[_VERSION_UPDATE_TIME]:
         version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
         if datetime.datetime.now() < version_update_time + datetime.timedelta(days=1):
@@ -189,10 +237,9 @@ def get_cached_latest_versions(versions=None):
             if cache_versions and cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
                 return cache_versions.copy(), True
 
-    versions, success = _update_latest_from_pypi(versions)
-    if success:
-        VERSIONS['versions'] = versions
-        VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
+    versions, success = _update_latest_from_github(versions)
+    VERSIONS['versions'] = versions
+    VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
     return versions.copy(), success
 
 
@@ -286,12 +333,9 @@ def get_az_version_json():
 
 
 def show_updates_available(new_line_before=False, new_line_after=False):
-    import os
     from azure.cli.core._session import VERSIONS
     import datetime
-    from azure.cli.core._environment import get_config_dir
 
-    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
     if VERSIONS[_VERSION_CHECK_TIME]:
         version_check_time = datetime.datetime.strptime(VERSIONS[_VERSION_CHECK_TIME], '%Y-%m-%d %H:%M:%S.%f')
         if datetime.datetime.now() < version_check_time + datetime.timedelta(days=7):
@@ -314,34 +358,7 @@ def show_updates(updates_available):
         if in_cloud_console():
             warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
         else:
-            warning_msg = 'You have %i updates available. Consider updating your CLI installation'
-            from azure.cli.core._environment import _ENV_AZ_INSTALLER
-            import os
-            installer = os.getenv(_ENV_AZ_INSTALLER)
-            instruction_msg = ''
-            if installer in _PACKAGE_UPGRADE_INSTRUCTIONS:
-                if installer == 'RPM':
-                    distname, _ = get_linux_distro()
-                    if not distname:
-                        instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
-                    else:
-                        distname = distname.lower().strip()
-                        if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
-                            installer = 'YUM'
-                        elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
-                            installer = 'ZYPPER'
-                        else:
-                            instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
-                elif installer == 'PIP':
-                    system = platform.system()
-                    alternative_command = " or '{}' if you used our script for installation. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1]) if system != 'Windows' else ''
-                    instruction_msg = " with 'pip install --upgrade azure-cli'{}".format(alternative_command)
-                if instruction_msg:
-                    warning_msg += instruction_msg
-                else:
-                    warning_msg += " with '{}'. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1])
-            else:
-                warning_msg += '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+            warning_msg = "You have %i updates available. Consider updating your CLI installation with 'az upgrade'"
         logger.warning(warning_msg, updates_available)
     else:
         print('Your CLI is up-to-date.')
@@ -792,19 +809,17 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         else:
             logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
                            "If access token is required, use --resource to specify the resource")
-    try:
-        # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
-        s = Session()
-        req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
-        prepped = s.prepare_request(req)
 
-        # Merge environment settings into session
-        settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
-        _log_request(prepped)
-        r = s.send(prepped, **settings)
-        _log_response(r)
-    except Exception as ex:  # pylint: disable=broad-except
-        raise CLIError(ex)
+    # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
+    s = Session()
+    req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
+    prepped = s.prepare_request(req)
+
+    # Merge environment settings into session
+    settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
+    _log_request(prepped)
+    r = s.send(prepped, **settings)
+    _log_response(r)
 
     if not r.ok:
         reason = r.reason
@@ -1016,6 +1031,19 @@ def get_linux_distro():
     return release_info.get('name', None), release_info.get('version_id', None)
 
 
+def roughly_parse_command(args):
+    # Roughly parse the command part: <az vm create> --name vm1
+    # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but we don't need to bother with
+    # positional args
+    nouns = []
+    for arg in args:
+        if arg and arg[0] != '-':
+            nouns.append(arg)
+        else:
+            break
+    return ' '.join(nouns).lower()
+
+
 def is_guid(guid):
     import uuid
     try:
@@ -1023,3 +1051,24 @@ def is_guid(guid):
         return True
     except ValueError:
         return False
+
+
+def handle_version_update():
+    """Clean up information in local files that may be invalidated
+    because of a version update of Azure CLI
+    """
+    try:
+        from azure.cli.core._session import VERSIONS
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from azure.cli.core import __version__
+        if not VERSIONS['versions']:
+            get_cached_latest_versions()
+        elif LooseVersion(VERSIONS['versions']['core']['local']) != LooseVersion(__version__):
+            logger.debug("Azure CLI has been updated.")
+            logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
+            VERSIONS['versions'] = {}
+            VERSIONS['update_time'] = ''
+            from azure.cli.core.cloud import refresh_known_clouds
+            refresh_known_clouds()
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning(ex)

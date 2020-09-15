@@ -26,6 +26,7 @@ from ._util import (
     get_sql_capabilities_operations,
     get_sql_databases_operations,
     get_sql_database_blob_auditing_policies_operations,
+    get_sql_server_blob_auditing_policies_operations,
     get_sql_database_long_term_retention_backups_operations,
     get_sql_database_long_term_retention_policies_operations,
     get_sql_database_sensitivity_labels_operations,
@@ -60,7 +61,8 @@ from ._util import (
     get_sql_subscription_usages_operations,
     get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
-    get_sql_instance_failover_groups_operations
+    get_sql_instance_failover_groups_operations,
+    get_sql_import_export_operations
 )
 
 from ._validators import (
@@ -100,6 +102,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
 
+    import_export_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ImportExportOperations.{}',
+        client_factory=get_sql_import_export_operations)
+
     database_lro_transform = LongRunningOperationResultTransform(
         self.cli_ctx, db_transform)
 
@@ -136,8 +142,14 @@ def load_command_table(self, _):
                                  supports_no_wait=True,
                                  transform=database_lro_transform,
                                  table_transformer=db_table_format)
-        g.custom_command('import', 'db_import')
+
         g.custom_command('export', 'db_export')
+
+    with self.command_group('sql db',
+                            import_export_operations,
+                            client_factory=get_sql_import_export_operations) as g:
+
+        g.custom_command('import', 'db_import')
 
     capabilities_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#CapabilitiesOperations.{}',
@@ -251,6 +263,18 @@ def load_command_table(self, _):
         g.generic_update_command('update',
                                  custom_func_name='db_audit_policy_update')
 
+    server_blob_auditing_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ServerBlobAuditingPoliciesOperations.{}',
+        client_factory=get_sql_server_blob_auditing_policies_operations)
+
+    with self.command_group('sql server audit-policy',
+                            server_blob_auditing_policies_operations,
+                            client_factory=get_sql_server_blob_auditing_policies_operations) as g:
+
+        g.show_command('show', 'get')
+        g.generic_update_command('update',
+                                 custom_func_name='server_audit_policy_update')
+
     database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#BackupLongTermRetentionPoliciesOperations.{}',
         client_factory=get_sql_database_long_term_retention_policies_operations)
@@ -295,7 +319,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_database_sensitivity_labels_operations) as g:
 
         g.command('list', 'list_current_by_database')
-        g.custom_command('show', 'db_sensitivity_label_show')
+        g.custom_show_command('show', 'db_sensitivity_label_show')
         g.command('delete', 'delete')
         g.custom_command('update', 'db_sensitivity_label_update')
 
@@ -392,7 +416,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#FailoverGroupsOperations.{}',
         client_factory=get_sql_failover_groups_operations)
     with self.command_group('sql failover-group', failover_groups_operations, client_factory=get_sql_failover_groups_operations) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list_by_server')
         g.custom_command('create', 'failover_group_create')
         g.generic_update_command('update', custom_func_name='failover_group_update')
@@ -557,7 +581,7 @@ def load_command_table(self, _):
     with self.command_group('sql mi op', managed_instance_operations_operations) as g:
 
         g.command('list', 'list_by_managed_instance')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('cancel', 'cancel')
 
     managed_instances_operations = CliCommandType(
@@ -643,7 +667,7 @@ def load_command_table(self, _):
             'update_short_term_retention_mi',
             supports_no_wait=True,
             is_preview=True)
-        g.custom_command('show', 'get_short_term_retention_mi', is_preview=True)
+        g.custom_show_command('show', 'get_short_term_retention_mi', is_preview=True)
 
     managed_database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceLongTermRetentionPoliciesOperations.{}',
@@ -663,7 +687,7 @@ def load_command_table(self, _):
     with self.command_group('sql midb ltr-backup',
                             managed_database_long_term_retention_backups_operations,
                             client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
-        g.custom_command('show', 'get_long_term_retention_mi_backup', is_preview=True)
+        g.custom_show_command('show', 'get_long_term_retention_mi_backup', is_preview=True)
         g.custom_command(
             'list',
             'list_long_term_retention_mi_backups', is_preview=True)
@@ -703,7 +727,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#InstanceFailoverGroupsOperations.{}',
         client_factory=get_sql_instance_failover_groups_operations)
     with self.command_group('sql instance-failover-group', instance_failover_groups_operations, client_factory=get_sql_instance_failover_groups_operations) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('create', 'instance_failover_group_create')
         g.generic_update_command('update', custom_func_name='instance_failover_group_update')
         g.command('delete', 'delete')

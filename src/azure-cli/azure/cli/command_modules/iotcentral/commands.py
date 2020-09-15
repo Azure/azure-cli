@@ -25,7 +25,7 @@ def load_command_table(self, _):
     with self.command_group('iotcentral app', iotcentral_sdk, client_factory=iotcentral_service_factory) as g:
         g.custom_command('create', 'iotcentral_app_create')
         g.custom_command('list', 'iotcentral_app_list')
-        g.custom_command('show', 'iotcentral_app_get')
+        g.custom_show_command('show', 'iotcentral_app_get')
         g.generic_update_command('update', getter_name='iotcentral_app_get',
                                  setter_name='iotcentral_app_update', command_type=update_custom_util)
         g.custom_command('delete', 'iotcentral_app_delete')

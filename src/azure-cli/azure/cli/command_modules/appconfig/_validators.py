@@ -10,7 +10,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from ._utils import is_valid_connection_string, resolve_resource_group, get_store_name_from_connection_string
-from ._azconfig.models import QueryFields
+from ._models import QueryFields
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)

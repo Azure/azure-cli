@@ -85,8 +85,8 @@ def _validate_whl_extension(ext_file):
     check_version_compatibility(azext_metadata)
 
 
-def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
-    cmd.cli_ctx.get_progress_controller().add(message='Analyzing')
+def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
+    cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
@@ -108,7 +108,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
         logger.debug('Downloading %s to %s', source, ext_file)
         import requests
         try:
-            cmd.cli_ctx.get_progress_controller().add(message='Downloading')
+            cli_ctx.get_progress_controller().add(message='Downloading')
             _whl_download_from_url(url_parse_result, ext_file)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
             raise CLIError('Please ensure you have network connection. Error detail: {}'.format(str(err)))
@@ -130,7 +130,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
             raise CLIError("The checksum of the extension does not match the expected value. "
                            "Use --debug for more information.")
     try:
-        cmd.cli_ctx.get_progress_controller().add(message='Validating')
+        cli_ctx.get_progress_controller().add(message='Validating')
         _validate_whl_extension(ext_file)
     except AssertionError:
         logger.debug(traceback.format_exc())
@@ -140,7 +140,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
     logger.debug('Validation successful on %s', ext_file)
     # Check for distro consistency
     check_distro_consistency()
-    cmd.cli_ctx.get_progress_controller().add(message='Installing')
+    cli_ctx.get_progress_controller().add(message='Installing')
     # Install with pip
     extension_path = build_extension_path(extension_name, system)
     pip_args = ['install', '--target', extension_path, ext_file]
@@ -206,15 +206,15 @@ def check_version_compatibility(azext_metadata):
         raise CLIError(min_max_msg_fmt)
 
 
-def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
-                  version=None):
+                  version=None, cli_ctx=None, upgrade=None):
     ext_sha256 = None
 
     version = None if version == 'latest' else version
-
+    cmd_cli_ctx = cli_ctx or cmd.cli_ctx
     if extension_name:
-        cmd.cli_ctx.get_progress_controller().add(message='Searching')
+        cmd_cli_ctx.get_progress_controller().add(message='Searching')
         ext = None
         try:
             ext = get_extension(extension_name)
@@ -222,7 +222,14 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
             pass
         if ext:
             if isinstance(ext, WheelExtension):
-                logger.warning("Extension '%s' is already installed.", extension_name)
+                if not upgrade:
+                    logger.warning("Extension '%s' is already installed.", extension_name)
+                    return
+                logger.warning("Extension '%s' %s is already installed.", extension_name, ext.get_version())
+                if version and version == ext.get_version():
+                    return
+                logger.warning("It will be overriden with version {}.".format(version) if version else "It will be updated if available.")
+                update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=version)
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
@@ -236,7 +243,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                 err = "No matching extensions for '{}'. Use --debug for more information.".format(extension_name)
             raise CLIError(err)
 
-    extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
+    extension_name = _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
         ext = get_extension(extension_name)
@@ -289,15 +296,18 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None, version=None):
     try:
+        cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
-            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-            raise CLIError("No updates available for '{}'. Use --debug for more information.".format(extension_name))
+            msg = "Extension {} with version {} not found.".format(extension_name, version) if version else "No updates available for '{}'. Use --debug for more information.".format(extension_name)
+            logger.warning(msg)
+            return
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.
         backup_dir = os.path.join(tempfile.mkdtemp(), extension_name)
         extension_path = ext.path
@@ -307,7 +317,7 @@ def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=N
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(cmd=cmd, source=download_url, ext_sha256=ext_sha256,
+            _add_whl_ext(cli_ctx=cmd_cli_ctx, source=download_url, ext_sha256=ext_sha256,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)
@@ -352,6 +362,45 @@ def list_available_extensions(index_url=None, show_details=False):
             'experimental': latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
             'installed': installed
         })
+    return results
+
+
+def list_versions(extension_name, index_url=None):
+    index_data = get_index_extensions(index_url=index_url)
+
+    try:
+        exts = index_data[extension_name]
+    except Exception:
+        raise CLIError('Extension {} not found.'.format(extension_name))
+
+    try:
+        installed_ext = get_extension(extension_name, ext_type=WheelExtension)
+    except ExtensionNotInstalledException:
+        installed_ext = None
+
+    results = []
+    latest_compatible_version = None
+
+    for ext in sorted(exts, key=lambda c: parse_version(c['metadata']['version']), reverse=True):
+        compatible = ext_compat_with_cli(ext['metadata'])[0]
+        ext_version = ext['metadata']['version']
+        if latest_compatible_version is None and compatible:
+            latest_compatible_version = ext_version
+        installed = ext_version == installed_ext.version if installed_ext else False
+        if installed and parse_version(latest_compatible_version) > parse_version(installed_ext.version):
+            installed = str(True) + ' (upgrade available)'
+        version = ext['metadata']['version']
+        if latest_compatible_version == ext_version:
+            version = version + ' (max compatible version)'
+        results.append({
+            'name': extension_name,
+            'version': version,
+            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False),
+            'experimental': ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'installed': installed,
+            'compatible': compatible
+        })
+    results.reverse()
     return results
 
 

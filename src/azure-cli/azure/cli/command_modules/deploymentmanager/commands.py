@@ -40,7 +40,7 @@ def load_command_table(self, _):
     with self.command_group('deploymentmanager artifact-source', artifact_sources) as g:
         g.custom_command('create', 'cli_artifact_source_create')
         g.command('delete', 'delete', confirmation="There might be rollouts referencing the artifact source. Do you want to delete?")
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command(
             'update',
@@ -51,7 +51,7 @@ def load_command_table(self, _):
     with self.command_group('deploymentmanager service-topology', service_topologies) as g:
         g.custom_command('create', 'cli_service_topology_create')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command(
             'update',
@@ -62,7 +62,7 @@ def load_command_table(self, _):
     with self.command_group('deploymentmanager service', services) as g:
         g.custom_command('create', 'cli_service_create')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command(
             'update',
@@ -73,7 +73,7 @@ def load_command_table(self, _):
     with self.command_group('deploymentmanager service-unit', service_units) as g:
         g.custom_command('create', 'cli_service_unit_create')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command(
             'update',
@@ -84,7 +84,7 @@ def load_command_table(self, _):
     with self.command_group('deploymentmanager step', steps) as g:
         g.custom_command('create', 'cli_step_create')
         g.command('delete', 'delete')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command(
             'update',
@@ -93,7 +93,7 @@ def load_command_table(self, _):
             custom_func_type=deployment_manager_custom)
 
     with self.command_group('deploymentmanager rollout', rollouts) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('stop', 'cancel', confirmation="Do you want to cancel the rollout?")
         g.custom_command(
