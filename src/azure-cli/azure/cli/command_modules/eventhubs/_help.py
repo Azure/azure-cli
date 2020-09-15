@@ -479,6 +479,11 @@ examples:
     text: az eventhubs cluster list --resource-group myresourcegroup
 """
 
+helps['eventhubs cluster namespace'] = """
+type: group
+short-summary: Manage Azure EventHubs Cluster for namespace
+"""
+
 helps['eventhubs cluster namespace list'] = """
 type: command
 short-summary: List of Namespaces within given Cluster.
