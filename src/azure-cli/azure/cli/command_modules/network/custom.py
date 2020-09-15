@@ -6312,16 +6312,25 @@ def create_virtual_router(cmd,
     hub = VirtualHub(tags=tags, location=location, virtual_wan=None, sku='Standard')
     ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
 
-    hub = vhub_client.create_or_update(resource_group_name, virtual_hub_name, hub)
+    from azure.cli.core.commands import LongRunningOperation
+
+    vhub_poller = vhub_client.create_or_update(resource_group_name, virtual_hub_name, hub)
+    LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
-        vhub_ip_config_client.create_or_update(resource_group_name, virtual_hub_name, 'Default', ip_config)
+        vhub_ip_poller = vhub_ip_config_client.create_or_update(resource_group_name,
+                                                                virtual_hub_name,
+                                                                'Default',
+                                                                ip_config)
+        LongRunningOperation(cmd.cli_ctx)(vhub_ip_poller)
     except Exception as ex:
+        logger.error(ex)
+        vhub_ip_config_client.delete(resource_group_name, virtual_hub_name, 'Default')
         vhub_client.delete(resource_group_name, virtual_hub_name)
         raise ex
 
-    return hub
+    return vhub_client.get(resource_group_name, virtual_hub_name)
 
 
 def update_virtual_router(cmd, instance, tags=None):

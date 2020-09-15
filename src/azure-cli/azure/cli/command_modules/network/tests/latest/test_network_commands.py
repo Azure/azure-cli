@@ -3205,6 +3205,10 @@ class NetworkVirtualRouter(ScenarioTest):
                  '--location {location} '
                  '--subnet-name {subnet1} '
                  '--address-prefix 10.0.0.0/24')
+
+        # a cleanup program runs in short peoridically to assign subnets a NSG within that subscription
+        # which will block subnet is assigned to the virtual router
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
         vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
 
         self.kwargs.update({
@@ -3212,12 +3216,20 @@ class NetworkVirtualRouter(ScenarioTest):
         })
 
         self.cmd('network vrouter create -g {rg} -l {location} -n {vrouter} --hosted-subnet {subnet1_id}', checks=[
-            self.check('type', 'Microsoft.Network/virtualHubs')
+            self.check('type', 'Microsoft.Network/virtualHubs'),
+            self.check('ipConfigurations', None),
+            self.check('provisioningState', 'Succeeded')
         ])
 
-        self.cmd('network vrouter list -g {rg}')
+        self.cmd('network vrouter list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
 
-        self.cmd('network vrouter show -g {rg} -n {vrouter}')
+        self.cmd('network vrouter show -g {rg} -n {vrouter}', checks=[
+            self.check('virtualRouterAsn', 65515),
+            self.check('length(virtualRouterIps)', 2),
+            self.check('routingState', 'Provisioned')
+        ])
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
