@@ -45,8 +45,15 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_management_detail = None
         self.raw_command = None
         self.mode = 'default'
+        # The AzCLIErrorType
+        self.error_type = 'None'
+        # The class name of the raw exception
+        self.exception_name = 'None'
+        # The stacktrace of the raw exception
+        self.stack_trace = 'None'
         self.init_time_elapsed = None
         self.invoke_time_elapsed = None
+        self.debug_info = []
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
@@ -55,6 +62,13 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.suppress_new_event = False
 
     def add_exception(self, exception, fault_type, description=None, message=''):
+        # Move the exception info into userTask record, in order to make one Telemetry record for one command
+        self.exception_name = exception.__class__.__name__
+        self.result_summary = _remove_cmd_chars(message or str(exception))
+        self.stack_trace = _remove_cmd_chars(_get_stack_trace())
+
+        # Backward compatible, so there are duplicated info recorded
+        # The logic below should be removed along with self.exceptions after confirmation
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
@@ -179,6 +193,10 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Mode', self.mode)
         from azure.cli.core._environment import _ENV_AZ_INSTALLER
         set_custom_properties(result, 'Installer', os.getenv(_ENV_AZ_INSTALLER))
+        set_custom_properties(result, 'error_type', self.error_type)
+        set_custom_properties(result, 'exception_name', self.exception_name)
+        set_custom_properties(result, 'stack_trace', self.stack_trace)
+        set_custom_properties(result, 'debug_info', ','.join(self.debug_info))
 
         return result
 
@@ -287,6 +305,13 @@ def set_exception(exception, fault_type, summary=None):
 
 
 @decorators.suppress_all_exceptions()
+def set_error_type(error_type):
+    if _session.result != 'None':
+        return
+    _session.error_type = error_type
+
+
+@decorators.suppress_all_exceptions()
 def set_failure(summary=None):
     if _session.result != 'None':
         return
@@ -314,6 +339,12 @@ def set_user_fault(summary=None):
     _session.result = 'UserFault'
     if summary:
         _session.result_summary = _remove_cmd_chars(summary)
+
+
+@decorators.suppress_all_exceptions()
+def set_debug_info(key, info):
+    debug_info = '{}: {}'.format(key, info)
+    _session.debug_info.append(debug_info)
 
 
 @decorators.suppress_all_exceptions()
