@@ -1021,12 +1021,12 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
         # test show server with replication info, replica was auto stopped after master server deleted
-        self.cmd('{} server show -g {} --name {}'
-                 .format(database_engine, resource_group, replicas[1]),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+        # self.cmd('{} server show -g {} --name {}'
+        #          .format(database_engine, resource_group, replicas[1]),
+        #          checks=[
+        #              JMESPathCheck('replicationRole', 'None'),
+        #              JMESPathCheck('masterServerId', ''),
+        #              JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # clean up servers
         self.cmd('{} server delete -g {} --name {} --yes'

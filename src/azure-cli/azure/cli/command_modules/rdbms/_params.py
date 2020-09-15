@@ -149,6 +149,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server vnet-rule create'.format(command_group)) as c:
             c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name', validator=validate_subnet)
 
+        with self.argument_context('{} server vnet-rule update'.format(command_group)) as c:
+            c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name',
+                    validator=validate_subnet)
+
         with self.argument_context('{} server configuration'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
@@ -175,7 +179,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         if command_group != 'mariadb':
             with self.argument_context('{} server key'.format(command_group)) as c:
-                c.argument('server_name', options_list=['--server-name', '-s'])
+                c.argument('server_name', options_list=['--name', '-s'])
                 c.argument('kid', options_list=['--kid', '-k'], help='The Azure Key Vault key identifier of the server key. An example key identifier is "https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
 
             with self.argument_context('{} server ad-admin'.format(command_group)) as c:
