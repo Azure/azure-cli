@@ -388,6 +388,7 @@ def load_command_table(self, _):
 
     with self.command_group('appservice domain', custom_command_type=appservice_domains, is_preview=True) as g:
         g.custom_command('create', 'create_domain')
+        g.custom_command('show-terms', 'show_domain_purchase_terms')
         g.custom_command('update', 'update_domain')
         g.custom_command('show', 'show_domain')
         g.custom_command('list', 'list_domains')
