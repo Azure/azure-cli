@@ -899,10 +899,10 @@ def delete_permission(cmd, identifier, api, api_permissions=None):
     required_resource_access = application.required_resource_access
     # required_resource_access (list of RequiredResourceAccess)
     #   RequiredResourceAccess
-    #     resource_app_id
-    #     resource_access (list of ResourceAccess)
+    #     resource_app_id   <- api
+    #     resource_access   (list of ResourceAccess)
     #       ResourceAccess
-    #         id
+    #         id            <- api_permissions
     #         type
 
     # Get the RequiredResourceAccess object whose resource_app_id == api
