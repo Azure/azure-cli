@@ -12,6 +12,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
                                                 get_three_state_flag, get_enum_type, tags_type)
 from azure.cli.core.util import get_file_json
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
+from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
@@ -44,9 +45,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3',
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'PC2', 'PC3',
              'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -125,7 +126,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
@@ -141,6 +142,10 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
+
+    with self.argument_context('webapp list-instances') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
 
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps')
@@ -204,6 +209,10 @@ def load_arguments(self, _):
             c.argument('deployment_source_branch', options_list=['--deployment-source-branch', '-b'],
                        help='the branch to deploy')
             c.argument('tags', arg_type=tags_type)
+            c.argument('assign_identities', nargs='*', options_list=['--assign-identity'],
+                       help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
+            c.argument('scope', options_list=['--scope'], help="Scope that the system assigned identity can access")
+            c.argument('role', options_list=['--role'], help="Role name or id the system assigned identity will have")
 
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
@@ -270,6 +279,10 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' identity') as c:
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")
+        with self.argument_context(scope + ' identity assign') as c:
+            c.argument('assign_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
+        with self.argument_context(scope + ' identity remove') as c:
+            c.argument('remove_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
@@ -364,6 +377,8 @@ def load_arguments(self, _):
                    configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
+    with self.argument_context('webapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -380,8 +395,8 @@ def load_arguments(self, _):
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
     with self.argument_context('webapp log config') as c:
-        c.argument('application_logging', help='configure application logging to file system',
-                   arg_type=get_three_state_flag(return_label=True))
+        c.argument('application_logging', help='configure application logging',
+                   arg_type=get_enum_type(['filesystem', 'azureblobstorage', 'off']))
         c.argument('detailed_error_messages', help='configure detailed error messages',
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('failed_request_tracing', help='configure failed request tracing',
@@ -526,6 +541,8 @@ def load_arguments(self, _):
                    help='Application ID to integrate AAD organization account Sign-in into your web app')
         c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory',
                    help='AAD application secret')
+        c.argument('client_secret_certificate_thumbprint', options_list=['--aad-client-secret-certificate-thumbprint', '--thumbprint'], arg_group='Azure Active Directory',
+                   help='Alternative to AAD Client Secret, thumbprint of a certificate used for signing purposes')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'],
                    arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
@@ -581,7 +598,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name of the appserviceplan associated with the webapp",
@@ -601,11 +618,13 @@ def load_arguments(self, _):
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp create-remote-connection') as c:
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -738,6 +757,8 @@ def load_arguments(self, _):
         c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)",
                    required=False)
 
+    with self.argument_context('functionapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('functionapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         # This is set to webapp to simply reuse webapp functions, without rewriting same functions for function apps.
@@ -755,6 +776,36 @@ def load_arguments(self, _):
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
+
+    with self.argument_context('functionapp keys', id_part=None) as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type,)
+        c.argument('name', arg_type=functionapp_name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                   help='Name of the function app')
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="The name of the slot. Defaults to the productions slot if not specified")
+    with self.argument_context('functionapp keys set', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+    with self.argument_context('functionapp keys delete', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+
+    with self.argument_context('functionapp function', id_part=None) as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type,)
+        c.argument('name', arg_type=functionapp_name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                   help='Name of the function app')
+        c.argument('function_name', help="Name of the Function")
+    with self.argument_context('functionapp function keys', id_part=None) as c:
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="The name of the slot. Defaults to the productions slot if not specified")
+    with self.argument_context('functionapp function keys set', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
+    with self.argument_context('functionapp function keys delete', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
 
     # Access Restriction Commands
     for scope in ['webapp', 'functionapp']:

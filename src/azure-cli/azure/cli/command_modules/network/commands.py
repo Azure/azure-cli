@@ -348,8 +348,20 @@ def load_command_table(self, _):
         min_api='2019-08-01'
     )
 
+    network_vrouter_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_router,
+        min_api='2019-08-01'
+    )
+
     network_vrouter_peering_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualRouterPeeringsOperations.{}',
+        client_factory=cf_virtual_router_peering,
+        min_api='2019-08-01'
+    )
+
+    network_vrouter_peering_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
     )
@@ -462,7 +474,7 @@ def load_command_table(self, _):
 
     with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_rewrite_rule', supports_no_wait=True)
-        g.custom_command('show', 'show_ag_rewrite_rule')
+        g.custom_show_command('show', 'show_ag_rewrite_rule')
         g.custom_command('list', 'list_ag_rewrite_rules')
         g.custom_command('delete', 'delete_ag_rewrite_rule', supports_no_wait=True)
         g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
@@ -473,7 +485,7 @@ def load_command_table(self, _):
 
     with self.command_group('network application-gateway rewrite-rule condition', network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_rewrite_rule_condition', supports_no_wait=True)
-        g.custom_command('show', 'show_ag_rewrite_rule_condition')
+        g.custom_show_command('show', 'show_ag_rewrite_rule_condition')
         g.custom_command('list', 'list_ag_rewrite_rule_conditions')
         g.custom_command('delete', 'delete_ag_rewrite_rule_condition', supports_no_wait=True)
         g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
@@ -1198,7 +1210,7 @@ def load_command_table(self, _):
 
     with self.command_group('network vnet-gateway aad', network_vgw_sdk, min_api='2019-04-01') as g:
         g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
-        g.custom_command('show', 'show_vnet_gateway_aad')
+        g.custom_show_command('show', 'show_vnet_gateway_aad')
         g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
     # endregion
 
@@ -1224,17 +1236,27 @@ def load_command_table(self, _):
     # region VirtualRouter
     with self.command_group('network vrouter', network_vrouter_sdk) as g:
         g.custom_command('create', 'create_virtual_router')
-        g.generic_update_command('update', custom_func_name='update_virtual_router')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
+        g.generic_update_command('update',
+                                 getter_name='virtual_router_update_getter',
+                                 getter_type=network_vrouter_update_sdk,
+                                 setter_name='virtual_router_update_setter',
+                                 setter_type=network_vrouter_update_sdk,
+                                 custom_func_name='update_virtual_router')
+        g.custom_command('delete', 'delete_virtual_router')
+        g.custom_show_command('show', 'show_virtual_router')
         g.custom_command('list', 'list_virtual_router')
 
     with self.command_group('network vrouter peering', network_vrouter_peering_sdk) as g:
         g.custom_command('create', 'create_virtual_router_peering')
-        g.generic_update_command('update', custom_func_name='update_virtual_router_peering')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+        g.generic_update_command('update',
+                                 getter_name='virtual_router_peering_update_getter',
+                                 getter_type=network_vrouter_peering_update_sdk,
+                                 setter_name='virtual_router_peering_update_setter',
+                                 setter_type=network_vrouter_peering_update_sdk,
+                                 custom_func_name='update_virtual_router_peering')
+        g.custom_command('delete', 'delete_virtual_router_peering')
+        g.custom_show_command('show', 'show_virtual_router_peering')
+        g.custom_command('list', 'list_virtual_router_peering')
     # endregion
 
     # region Bastion

@@ -19,7 +19,7 @@ from azure.cli.core.profiles import ResourceType
 
 
 def create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
-                    enabled_protocols=None, root_squash=None):
+                    enabled_protocols=None, root_squash=None, access_tier=None):
 
     FileShare = cmd.get_models('FileShare', resource_type=ResourceType.MGMT_STORAGE)
 
@@ -32,12 +32,19 @@ def create_share_rm(cmd, client, resource_group_name, account_name, share_name, 
         file_share.root_squash = root_squash
     if metadata is not None:
         file_share.metadata = metadata
+    if access_tier is not None:
+        file_share.access_tier = access_tier
 
     return client.create(resource_group_name=resource_group_name, account_name=account_name, share_name=share_name,
                          file_share=file_share)
 
 
-def update_share_rm(cmd, instance, metadata=None, share_quota=None, root_squash=None):
+def get_stats(client, resource_group_name, account_name, share_name):
+    return client.get(resource_group_name=resource_group_name, account_name=account_name, share_name=share_name,
+                      expand='stats')
+
+
+def update_share_rm(cmd, instance, metadata=None, share_quota=None, root_squash=None, access_tier=None):
 
     FileShare = cmd.get_models('FileShare', resource_type=ResourceType.MGMT_STORAGE)
 
@@ -46,6 +53,7 @@ def update_share_rm(cmd, instance, metadata=None, share_quota=None, root_squash=
         root_squash=root_squash if root_squash is not None else instance.root_squash,
         metadata=metadata if metadata is not None else instance.metadata,
         enabled_protocols=instance.enabled_protocols,
+        access_tier=access_tier if access_tier is not None else instance.access_tier
     )
 
     return params

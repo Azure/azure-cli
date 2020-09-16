@@ -166,7 +166,15 @@ def validate_asp_sku(cmd, namespace):
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
 
 
-def validate_ip_address(namespace):
+def validate_ip_address(cmd, namespace):
+    if namespace.ip_address is not None:
+        _validate_ip_address_format(namespace)
+        # For prevention of adding the duplicate IPs.
+        if 'add' in cmd.name:
+            _validate_ip_address_existance(cmd, namespace)
+
+
+def _validate_ip_address_format(namespace):
     if namespace.ip_address is not None:
         # IPv6
         if ':' in namespace.ip_address:
@@ -184,3 +192,16 @@ def validate_ip_address(namespace):
                 return
 
         raise CLIError('Invalid IP address')
+
+
+def _validate_ip_address_existance(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    from ._appservice_utils import _generic_site_operation
+    configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    access_rules = configs.ip_security_restrictions
+    is_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
+    if True in is_exists:
+        raise CLIError('IP address ' + namespace.ip_address + ' already exists.'
+                       'Cannot add duplicate IP address values.')

@@ -57,6 +57,9 @@ examples:
   - name: Create a disk and specify maximum number of VMs that can attach to the disk at the same time.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --size-gb 256 --max-shares 2 -l centraluseuap
+  - name: Create a disk and associate it with a disk access resource.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --network-access-policy AllowPrivate --disk-access MyDiskAccessID
 """
 
 helps['disk delete'] = """
@@ -106,6 +109,9 @@ examples:
     text: |
         az disk update --name MyManagedDisk --resource-group MyResourceGroup --size-gb 20
     crafted: true
+  - name: Update a managed disk and associate it with a disk access resource.
+    text: |
+        az disk update --name MyManagedDisk --resource-group MyResourceGroup --network-access-policy AllowPrivate --disk-access MyDiskAccessID
 """
 
 helps['disk wait'] = """
@@ -116,6 +122,65 @@ examples:
     text: |
         az disk wait --created --name MyManagedDisk --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['disk-access'] = """
+type: group
+short-summary: Manage disk access resources.
+"""
+
+helps['disk-access create'] = """
+type: command
+short-summary: Create a disk access resource.
+examples:
+  - name: Create a disk access resource.
+    text: >
+        az disk-access create -g MyResourceGroup -l centraluseuap -n MyDiskAccess
+"""
+
+helps['disk-access update'] = """
+type: command
+short-summary: Update a disk access resource.
+examples:
+  - name: Update a disk access resource.
+    text: >
+        az disk-access update -g MyResourceGroup -n MyDiskAccess --tags tag1=val1 tag2=val2
+"""
+
+helps['disk-access list'] = """
+type: command
+short-summary: List disk access resources.
+examples:
+  - name: List all disk access reosurces in a resource group.
+    text: |
+        az disk-access list -g MyResourceGroup
+"""
+
+helps['disk-access show'] = """
+type: command
+short-summary: Get information of a disk access resource.
+examples:
+  - name: Get information of a disk access reosurce.
+    text: |
+        az disk-access show -g MyResourceGroup -n MyDiskAccess
+"""
+
+helps['disk-access delete'] = """
+type: command
+short-summary: Delete a disk access resource.
+examples:
+  - name: Delete a disk access reosurce.
+    text: |
+        az disk-access delete -g MyResourceGroup -n MyDiskAccess
+"""
+
+helps['disk-access wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a disk access is met.
+examples:
+  - name: Place the CLI in a waiting state until the disk access is created with 'provisioningState' at 'Succeeded'.
+    text: |
+        az disk-access wait --created -g MyResourceGroup -n MyDiskAccess
 """
 
 helps['disk-encryption-set'] = """
@@ -622,6 +687,8 @@ examples:
     text: az snapshot create -g MyResourceGroup -n MySnapshot2 --source MyDisk
   - name: Create a snapshot from an existing disk in another resource group.
     text: az snapshot create -g MyResourceGroup -n MySnapshot2 --source "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.Compute/disks/MyDisk"
+  - name: Create a snapshot and associate it with a disk access resource.
+    text: az snapshot create -g MyResourceGroup -n MySnapshot --size-gb 10 --network-access-policy AllowPrivate --disk-access MyDiskAccessID
 """
 
 helps['snapshot grant-access'] = """
@@ -657,6 +724,9 @@ examples:
     text: |
         az snapshot update --name MySnapshot --resource-group MyResourceGroup --subscription MySubscription
     crafted: true
+  - name: Update a snapshot and associate it with a disk access resource.
+    text: |
+        az snapshot update --name MySnapshot --resource-group MyResourceGroup --network-access-policy AllowPrivate --disk-access MyDiskAccessID
 """
 
 helps['snapshot wait'] = """
@@ -676,6 +746,14 @@ examples:
 helps['vm'] = """
 type: group
 short-summary: Manage Linux or Windows virtual machines.
+"""
+
+helps['vm assess-patches'] = """
+type: command
+short-summary: Assess patches on a VM.
+examples:
+  - name: Assess patches on a VM.
+    text: az vm assess-patches -g MyResourceGroup -n MyVm
 """
 
 helps['vm auto-shutdown'] = """
@@ -785,7 +863,7 @@ type: command
 short-summary: Enable the boot diagnostics on a VM.
 parameters:
   - name: --storage
-    short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/)
+    short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/). If it's not specified, managed storage will be used.
 examples:
   - name: Enable boot diagnostics on all VMs in a resource group.
     text: >
@@ -809,6 +887,18 @@ examples:
     text: |
         az vm boot-diagnostics get-boot-log --name MyVirtualMachine --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['vm boot-diagnostics get-boot-log-uris'] = """
+type: command
+short-summary: Get SAS URIs for a virtual machine's boot diagnostic logs.
+parameters:
+  - name: --expire
+    short-summary: Expiration duration in minutes for the SAS URIs with a value between 1 to 1440 minutes. If not specified, SAS URIs will be generated with a default expiration duration of 120 minutes.
+examples:
+  - name: Get SAS URIs for a virtual machine's boot diagnostic logs.
+    text: >
+        az vm boot-diagnostics get-boot-log-uris -g MyResourceGroup -n MyVirtualMachine
 """
 
 helps['vm capture'] = """
@@ -1382,6 +1472,15 @@ examples:
     text: |
         az vm host group show --name MyDedicatedHostGroup --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['vm host group get-instance-view'] = """
+type: command
+short-summary: Get instance view of a dedicated host group.
+examples:
+  - name: Get instance view of a dedicated host group
+    text: |
+        az vm host group get-instance-view --name MyDedicatedHostGroup --resource-group MyResourceGroup
 """
 
 helps['vm host group update'] = """

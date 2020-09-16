@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=protected-access
-
+import os
 import argparse
 
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
@@ -168,15 +169,21 @@ def validate_client_parameters(cmd, namespace):
     if n.sas_token:
         n.sas_token = n.sas_token.lstrip('?')
 
+    # account name with secondary
+    if n.account_name and n.account_name.endswith('-secondary'):
+        n.location_mode = 'secondary'
+        n.account_name = n.account_name[:-10]
+
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('There is no credential provided in your command and environment, we will query account key '
-                       'for your storage account. \nPlease provide --connection-string, --account-key or --sas-token '
-                       'as credential, or use `--auth-mode login` if you have required RBAC roles in your command. '
-                       'For more information about RBAC roles in storage, you can see '
+        logger.warning('There are no credentials provided in your command and environment, we will query for the '
+                       'account key inside your storage account. \nPlease provide --connection-string, '
+                       '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
+                       'have required RBAC roles in your command. For more information about RBAC roles '
+                       'in storage, visit '
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
-                       'Setting corresponding environment variable can avoid inputting credential in your command. '
-                       'Please use --help to get more information.')
+                       'Setting the corresponding environment variables can avoid inputting credentials in '
+                       'your command. Please use --help to get more information.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
@@ -346,7 +353,6 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     if not source_sas:
         # generate a sas token even in the same account when the source and destination are not the same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
-            import os
             dir_name, file_name = os.path.split(path) if path else (None, '')
             source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                      dir_name, file_name)
@@ -551,7 +557,6 @@ def get_file_path_validator(default_file_param=None):
     Allows another path-type parameter to be named which can supply a default filename. """
 
     def validator(namespace):
-        import os
         if not hasattr(namespace, 'path'):
             return
 
@@ -577,6 +582,43 @@ def validate_included_datasets(cmd, namespace):
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         t_blob_include = cmd.get_models('blob#Include')
         namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
+
+
+def get_include_help_string(include_list):
+    item = []
+    for include in include_list:
+        if include.value == 'uncommittedblobs':
+            continue
+        item.append('(' + include.value[0] + ')' + include[1:])
+    return ', '.join(item)
+
+
+def validate_included_datasets_validator(include_class):
+    allowed_values = [x.lower() for x in dir(include_class) if not x.startswith('__')]
+    allowed_string = ''.join(x[0] for x in allowed_values)
+
+    def validator(namespace):
+        if namespace.include:
+            if set(namespace.include) - set(allowed_string):
+                help_string = get_include_help_string(include_class)
+                raise ValueError(
+                    'valid values are {} or a combination thereof.'.format(help_string))
+            include = []
+            if 's' in namespace.include:
+                include.append(include_class.snapshots)
+            if 'm' in namespace.include:
+                include.append(include_class.metadata)
+            if 'c' in namespace.include:
+                include.append(include_class.copy)
+            if 'd' in namespace.include:
+                include.append(include_class.deleted)
+            if 'v' in namespace.include:
+                include.append(include_class.versions)
+            if 't' in namespace.include:
+                include.append(include_class.tags)
+            namespace.include = include
+
+    return validator
 
 
 def validate_key_name(namespace):
@@ -784,8 +826,6 @@ def process_container_delete_parameters(cmd, namespace):
 
 def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
@@ -799,8 +839,6 @@ def process_blob_download_batch_parameters(cmd, namespace):
 
 def process_blob_upload_batch_parameters(cmd, namespace):
     """Process the source and destination of storage blob upload command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.source) or not os.path.isdir(namespace.source):
         raise ValueError('incorrect usage: source must be an existing directory')
@@ -873,8 +911,6 @@ def _process_blob_batch_container_parameters(cmd, namespace, source=True):
 
 def process_file_upload_batch_parameters(cmd, namespace):
     """Process the parameters of storage file batch upload command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.source):
         raise ValueError('incorrect usage: source {} does not exist'.format(namespace.source))
@@ -899,8 +935,6 @@ def process_file_upload_batch_parameters(cmd, namespace):
 
 def process_file_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage file batch download command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
@@ -923,8 +957,6 @@ def process_file_batch_source_parameters(cmd, namespace):
 
 
 def process_file_download_namespace(namespace):
-    import os
-
     get_file_path_validator()(namespace)
 
     dest = namespace.file_path
@@ -997,7 +1029,7 @@ def ipv4_range_type(string):
     ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
         if not re.match("^{ip_format}-{ip_format}$".format(ip_format=ip_format), string):
-            raise ValueError
+            raise CLIError("Please use the following format to specify ip range: '{ip1}-{ip2}'.")
     return string
 
 
@@ -1138,7 +1170,6 @@ def validate_azcopy_remove_arguments(cmd, namespace):
         namespace.target = url
 
     if valid_file:
-        import os
         client = file_data_service_factory(cmd.cli_ctx, {
             'account_name': namespace.account_name,
             'account_key': namespace.account_key})
@@ -1302,3 +1333,77 @@ def validate_match_condition(namespace):
     if namespace.if_none_match:
         namespace = _if_none_match(if_none_match=namespace.if_none_match, **namespace)
         del namespace.if_none_match
+
+
+def validate_or_policy(namespace):
+    error_elements = []
+    if namespace.properties is None:
+        error_msg = "Please provide --policy in JSON format or the following arguments: "
+        if namespace.source_account is None:
+            error_elements.append("--source-account")
+
+        # Apply account name when there is no destination account provided
+        if namespace.destination_account is None:
+            namespace.destination_account = namespace.account_name
+
+        if error_elements:
+            error_msg += ", ".join(error_elements)
+            error_msg += " to initialize Object Replication Policy for storage account."
+            raise ValueError(error_msg)
+    else:
+        if os.path.exists(namespace.properties):
+            or_policy = get_file_json(namespace.properties)
+        else:
+            or_policy = shell_safe_json_parse(namespace.properties)
+
+        try:
+            namespace.source_account = or_policy["sourceAccount"]
+        except KeyError:
+            namespace.source_account = or_policy["source_account"]
+        if namespace.source_account is None:
+            error_elements.append("source_account")
+
+        try:
+            namespace.destination_account = or_policy["destinationAccount"]
+        except KeyError:
+            namespace.destination_account = or_policy["destination_account"]
+
+        if "rules" not in or_policy.keys() or not or_policy["rules"]:
+            error_elements.append("rules")
+        error_msg = "Missing input parameters: "
+        if error_elements:
+            error_msg += ", ".join(error_elements)
+            error_msg += " in properties to initialize Object Replication Policy for storage account."
+            raise ValueError(error_msg)
+        namespace.properties = or_policy
+
+        if "policyId" in or_policy.keys() and or_policy["policyId"]:
+            namespace.policy_id = or_policy['policyId']
+
+
+def validate_text_configuration(cmd, ns):
+    DelimitedTextDialect = cmd.get_models('_models#DelimitedTextDialect', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    DelimitedJSON = cmd.get_models('_models#DelimitedJSON', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if ns.input_format == 'csv':
+        ns.input_config = DelimitedTextDialect(
+            delimiter=ns.in_column_separator,
+            quotechar=ns.in_quote_char,
+            lineterminator=ns.in_record_separator,
+            escapechar=ns.in_escape_char,
+            has_header=ns.in_has_header)
+    if ns.input_format == 'json':
+        ns.input_config = DelimitedJSON(delimiter=ns.in_line_separator)
+
+    if ns.output_format == 'csv':
+        ns.output_config = DelimitedTextDialect(
+            delimiter=ns.out_column_separator,
+            quotechar=ns.out_quote_char,
+            lineterminator=ns.out_record_separator,
+            escapechar=ns.out_escape_char,
+            has_header=ns.out_has_header)
+    if ns.output_format == 'json':
+        ns.output_config = DelimitedJSON(delimiter=ns.out_line_separator)
+    del ns.input_format, ns.in_line_separator, ns.in_column_separator, ns.in_quote_char, ns.in_record_separator, \
+        ns.in_escape_char, ns.in_has_header
+    del ns.output_format, ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, \
+        ns.out_escape_char, ns.out_has_header

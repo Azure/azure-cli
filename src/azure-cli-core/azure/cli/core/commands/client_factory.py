@@ -15,6 +15,10 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
+def _is_vendored_sdk_path(path_comps):
+    return len(path_comps) >= 5 and path_comps[4] == 'vendored_sdks'
+
+
 def resolve_client_arg_name(operation, kwargs):
     if not isinstance(operation, str):
         raise CLIError("operation should be type 'str'. Got '{}'".format(type(operation)))
@@ -22,12 +26,16 @@ def resolve_client_arg_name(operation, kwargs):
         logger.info("Keyword 'client_arg_name' is deprecated and should be removed.")
         return kwargs['client_arg_name']
     path, op_path = operation.split('#', 1)
+
     path_comps = path.split('.')
     if path_comps[0] == 'azure':
-        # for CLI command modules
-        # SDK method: azure.mgmt.foo... or azure.foo...
-        # custom method: azure.cli.command_modules.foo...
-        client_arg_name = 'client' if path_comps[1] == 'cli' else 'self'
+        if path_comps[1] != 'cli' or _is_vendored_sdk_path(path_comps):
+            # Public SDK: azure.mgmt.resource... (mgmt-plane) or azure.storage.blob... (data-plane)
+            # Vendored SDK: azure.cli.command_modules.keyvault.vendored_sdks...
+            client_arg_name = 'self'
+        else:
+            # CLI custom method: azure.cli.command_modules.resource...
+            client_arg_name = 'client'
     elif path_comps[0].startswith(EXTENSIONS_MOD_PREFIX):
         # for CLI extensions
         # SDK method: the operation takes the form '<class name>.<method_name>'
@@ -174,7 +182,8 @@ def _get_mgmt_service_client(cli_ctx,
 
 
 def get_data_service_client(cli_ctx, service_type, account_name, account_key, connection_string=None,
-                            sas_token=None, socket_timeout=None, token_credential=None, endpoint_suffix=None):
+                            sas_token=None, socket_timeout=None, token_credential=None, endpoint_suffix=None,
+                            location_mode=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
         client_kwargs = {'account_name': account_name,
@@ -188,6 +197,8 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
+        if location_mode:
+            client.location_mode = location_mode
     except ValueError as exc:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')

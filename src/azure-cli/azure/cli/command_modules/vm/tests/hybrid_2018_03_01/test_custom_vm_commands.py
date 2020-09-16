@@ -103,18 +103,6 @@ class TestVmCustom(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
-    def test_enable_boot_diagnostics_skip_when_enabled_already(self, mock_vm_set, mock_vm_get):
-        vm_fake = mock.MagicMock()
-        cmd = _get_test_cmd()
-        mock_vm_get.return_value = vm_fake
-        vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
-        vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'https://storage_uri1'
-        enable_boot_diagnostics(cmd, 'g1', 'vm1', 'https://storage_uri1')
-        self.assertTrue(mock_vm_get.called)
-        self.assertFalse(mock_vm_set.called)
-
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_disable_boot_diagnostics_on_vm(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
         cmd = _get_test_cmd()

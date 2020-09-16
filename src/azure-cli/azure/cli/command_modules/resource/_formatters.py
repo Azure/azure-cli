@@ -9,7 +9,7 @@ from azure.mgmt.resource.resources.models import ChangeType, PropertyChangeType
 
 from ._symbol import Symbol
 from ._color import Color, ColoredStringBuilder
-from ._utils import parse_resource_id
+from ._utils import split_resource_id
 
 _change_type_to_color = {
     ChangeType.create: Color.GREEN,
@@ -48,8 +48,8 @@ _change_type_to_weight = {
     ChangeType.create: 1,
     ChangeType.deploy: 2,
     ChangeType.modify: 3,
-    ChangeType.ignore: 4,
-    ChangeType.no_change: 5,
+    ChangeType.no_change: 4,
+    ChangeType.ignore: 5,
 }
 
 _property_change_type_to_weight = {
@@ -357,12 +357,12 @@ def _get_api_version(resource_change):
 
 
 def _get_scope(resource_change):
-    scope, _ = parse_resource_id(resource_change.resource_id)
+    scope, _ = split_resource_id(resource_change.resource_id)
     return scope
 
 
 def _get_relative_resource_id(resource_change):
-    _, relative_resource_id = parse_resource_id(resource_change.resource_id)
+    _, relative_resource_id = split_resource_id(resource_change.resource_id)
     return relative_resource_id
 
 
