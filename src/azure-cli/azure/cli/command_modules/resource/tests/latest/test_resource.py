@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-import os, shutil
+import os
+import shutil
 import time
 import mock
 import unittest
@@ -719,7 +720,7 @@ class TemplateSpecsTest(ScenarioTest):
 
         path = os.path.join(curr_dir, 'artifacts')
         if not os.path.exists(path):
-            files = ['createKeyVault.json','createKeyVaultWithSecret.json','createResourceGroup.json']
+            files = ['createKeyVault.json', 'createKeyVaultWithSecret.json', 'createResourceGroup.json']
             os.makedirs(path)
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
@@ -771,7 +772,7 @@ class TemplateSpecsTest(ScenarioTest):
 
         path = os.path.join(curr_dir, 'artifacts')
         if not os.path.exists(path):
-            files = ['createKeyVault.json','createKeyVaultWithSecret.json','createResourceGroup.json']
+            files = ['createKeyVault.json', 'createKeyVaultWithSecret.json', 'createResourceGroup.json']
             os.makedirs(path)
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
@@ -812,6 +813,36 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
+    def test_delete_template_spec(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
+        self.kwargs.update({
+            'resource_group_location': resource_group_location,
+            'template_spec_name': template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+        })
+
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
+                          checks=self.check('name', '1.0')).get_output_in_json()
+
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+
+        self.cmd('ts show --template-spec {template_spec_version_id}')
+        self.cmd('ts show --template-spec {template_spec_id}')
+
+        self.cmd('ts delete --template-spec {template_spec_version_id} --yes')
+        self.cmd('ts list -g {rg}',
+                 checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
+        self.cmd('ts list -g {rg}',
+                 checks=self.check("length([?id=='{template_spec_id}'])", 0))
+
+
+class TemplateSpecsExportTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_export_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         dir_name = self.create_random_name('TemplateSpecExport', 30)
@@ -826,7 +857,7 @@ class TemplateSpecsTest(ScenarioTest):
         })
         path = os.path.join(curr_dir, 'artifacts')
         if not os.path.exists(path):
-            files = ['createKeyVault.json','createKeyVaultWithSecret.json','createResourceGroup.json']
+            files = ['createKeyVault.json', 'createKeyVaultWithSecret.json', 'createResourceGroup.json']
             os.makedirs(path)
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
@@ -862,33 +893,6 @@ class TemplateSpecsTest(ScenarioTest):
         self.assertTrue(os.path.isfile(_artifactFile1))
         self.assertTrue(os.path.isfile(_artifactFile2))\
 
-
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    def test_delete_template_spec(self, resource_group, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
-        self.kwargs.update({
-            'resource_group_location': resource_group_location,
-            'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
-        })
-
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
-                          checks=self.check('name', '1.0')).get_output_in_json()
-
-        self.kwargs['template_spec_version_id'] = result['id']
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
-
-        self.cmd('ts show --template-spec {template_spec_version_id}')
-        self.cmd('ts show --template-spec {template_spec_id}')
-
-        self.cmd('ts delete --template-spec {template_spec_version_id} --yes')
-        self.cmd('ts list -g {rg}',
-                 checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
-
-        self.cmd('ts delete --template-spec {template_spec_id} --yes')
-        self.cmd('ts list -g {rg}',
-                 checks=self.check("length([?id=='{template_spec_id}'])", 0))
 
 
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
