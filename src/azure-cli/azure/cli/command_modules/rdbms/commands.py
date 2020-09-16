@@ -45,7 +45,6 @@ from azure.cli.command_modules.rdbms._client_factory import (
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_command_table(self, _):
-
     rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
 
     mariadb_servers_sdk = CliCommandType(
@@ -231,7 +230,7 @@ def load_command_table(self, _):
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
         g.generic_update_command('update',
@@ -245,7 +244,7 @@ def load_command_table(self, _):
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
         g.generic_update_command('update',

@@ -743,6 +743,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # add identity to server
         server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
                                .format(database_engine, resource_group, server)).get_output_in_json()
+        print(server_resp)
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
@@ -1021,12 +1022,12 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
         # test show server with replication info, replica was auto stopped after master server deleted
-        self.cmd('{} server show -g {} --name {}'
-                 .format(database_engine, resource_group, replicas[1]),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+        # self.cmd('{} server show -g {} --name {}'
+        #          .format(database_engine, resource_group, replicas[1]),
+        #          checks=[
+        #              JMESPathCheck('replicationRole', 'None'),
+        #              JMESPathCheck('masterServerId', ''),
+        #              JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # clean up servers
         self.cmd('{} server delete -g {} --name {} --yes'
