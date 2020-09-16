@@ -32,8 +32,8 @@ Release History
 * Add support for Premium V3 pricing tier (#15055)
 * Fix #12653: az webapp log config --application-logging false doesn't turn it off (#14929)
 * Fix #14684: access-restriction remove by ip address does not work; #13837-az webapp create - Example for different RSgroups for Plan and WebApp (#14818)
-* functionapp: Added support for custom handlers. Deprecated Powershell 6.2. (#15170)
-* functionapp: Fixed issue where app setting was being incorrectly set for linux custom images (#15153)
+* functionapp: Add support for custom handlers. Deprecated Powershell 6.2. (#15170)
+* functionapp: Fix issue where app setting was being incorrectly set for linux custom images (#15153)
 
 **ARM**
 
@@ -58,9 +58,14 @@ Release History
 
 * Support for Migration APIs for Throughput resource for Autoscale feature in CosmosDB (#14887)
 
+**Eventhub**
+
+Added Cluster commands and trusted_service_access_enabled parameter for Networkruleset
+
 **Extension**
 
-* `az extension add`: Add --upgrade option to update the extension if already installed (#15083)
+* `az extension add`: Add `--upgrade` option to update the extension if already installed (#15083)
+* Turn on dynamic install by default (#15081)
 
 **IoT**
 
@@ -68,7 +73,7 @@ Release History
 
 **IoT Central**
 
-* CLI: App delete operation should be long running operation (#15161)
+* App delete operation is now long running operation (#15161)
 
 **Iot Hub**
 

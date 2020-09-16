@@ -5,7 +5,7 @@ Release History
 
 2.12.0
 ++++++
-* Add a new global parameter query-examples (#14765)
+* Add a new global parameter `--query-examples` (#14765)
 * Fix #15025: MSIAuthenticationWrapper not working with azure.core (#15118)
 * Error message improvement (#14855)
 
