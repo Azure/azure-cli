@@ -414,7 +414,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
         c.argument('enable_container_delete_retention',
                    arg_type=get_three_state_flag(),
-                   options_list=['--enable-container-delete-retention', '-c'],
+                   options_list=['--enable-container-delete-retention', '--container-retention'],
                    arg_group='Container Delete Retention Policy', min_api='2019-06-01',
                    help='Enable container delete retention policy for container soft delete when set to true. '
                         'Disable container delete retention policy when set to false.')
