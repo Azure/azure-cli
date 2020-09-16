@@ -899,9 +899,10 @@ def load_arguments(self, _):
                                                                                'https://github.com/AzureAppServiceCLI/appservice_domains_templates/blob/master/contact_info.json')
         c.argument('privacy', options_list=['--privacy', '-p'], help='Enable privacy protection')
         c.argument('auto_renew', options_list=['--auto-renew', '-a'], help='Enable auto-renew on the domain')
-        c.argument('accept_hostname_purchase_terms', options_list=['--accept-hostname-purchase-terms'], help='By using this flag, you are accepting '
-                                                                                                             'the conditions shown using the --show-hostname-purchase-terms flag. ')
+        c.argument('accept_terms', options_list=['--accept-terms'], help='By using this flag, you are accepting '
+                                                                         'the conditions shown using the --show-hostname-purchase-terms flag. ')
         c.argument('tags', arg_type=tags_type)
+        c.argument('dryrun', help='Show summary of the purchase and create operation instead of executing it')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources')
 
     with self.argument_context('appservice domain show-terms') as c:

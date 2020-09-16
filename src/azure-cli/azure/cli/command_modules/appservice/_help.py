@@ -2173,9 +2173,9 @@ helps['appservice domain create'] = """
     short-summary: Create and purchase a custom domain.
     examples:
     - name: Accept the legal terms for purchasing and creating MyCustomDomain.com, then purchase and create domain.
-      text: az appservice domain create -g MyResourceGroup --hostname "MyCustomDomain.com" --contact-info=@'C:/path_to_contact_info.json' --accept-hostname-purchase-terms
+      text: az appservice domain create -g MyResourceGroup --hostname MyCustomDomain.com --contact-info=@'C:/path_to_contact_info.json' --accept-terms
     - name: View the details of the domain that will be purchased and created, without actually running the operation
-      text: az appservice domain create -g MyResourceGroup --hostname "MyCustomDomain.com" --contact-info=@'C:/path_to_contact_info.json' --dryrun
+      text: az appservice domain create -g MyResourceGroup --hostname MyCustomDomain.com --contact-info=@'C:/path_to_contact_info.json' --dryrun
 """
 
 helps['appservice domain show-terms'] = """
@@ -2183,7 +2183,7 @@ helps['appservice domain show-terms'] = """
     short-summary: Show the legal terms for purchasing and creating a custom domain.
     examples:
     - name: Show the legal terms for purchasing and creating MyCustomDomain.com
-      text: az appservice domain show-terms -g MyResourceGroup --hostname "MyCustomDomain.com"
+      text: az appservice domain show-terms --hostname MyCustomDomain.com
 """
 
 helps['staticwebapp'] = """

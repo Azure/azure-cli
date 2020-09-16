@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True, auto_renew=True,  # pylint: disable=too-many-locals
-                  accept_hostname_purchase_terms=False, tags=None, dryrun=False):
+                  accept_terms=False, tags=None, dryrun=False):
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.appservice._template_builder import (build_dns_zone, build_domain)
     from datetime import datetime
@@ -25,10 +25,10 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
 
     tags = tags or {}
 
-    if not accept_hostname_purchase_terms and not dryrun:
+    if not accept_terms and not dryrun:
         raise CLIError("To purchase and create your custom domain '{}', you must view the terms and conditions "
                        "using the command `az appservice domain show-terms`, and accept these terms and "
-                       "conditions using the --accept-hostname-purchase-terms flag".format(hostname))
+                       "conditions using the --accept-terms flag".format(hostname))
 
     contact_info = json.loads(contact_info)
     contact_info = verify_contact_info_and_format(contact_info)
@@ -52,7 +52,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
             "resource_group_name": resource_group_name,
             "privacy": bool(privacy),
             "auto_renew": bool(auto_renew),
-            "accept_hostname_purchase_terms": bool(accept_hostname_purchase_terms),
+            "accept_terms": bool(accept_terms),
             "hostname_available": bool(hostname_availability.available),
             "price": "$11.99 USD" if hostname_availability.available else "N/A"
         })
@@ -77,7 +77,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
                         },
                     "privacy": "%(privacy)s",
                     "auto_renew": "%(auto_renew)s",
-                    "accepted_hostname_purchase_terms": "%(accept_hostname_purchase_terms)s",
+                    "accepted_hostname_purchase_terms": "%(accept_terms)s",
                     "hostname_available": "%(hostname_available)s",
                     "price": "%(price)s"
                     }
@@ -149,7 +149,7 @@ def show_domain_purchase_terms(cmd, hostname):
 
     legal_terms_string = (
         "By purchasing and creating an appservice domain using the `az appservice domain create` command with "
-        "the --accept-hostname-purchase-terms flag, I (a) acknowledge that domain registration is provided by "
+        "the --accept-terms flag, I (a) acknowledge that domain registration is provided by "
         "GoDaddy.com, LLC ('Go Daddy'), who is my registrar of record,(b) agree to the legal terms provided "
         "below, (c) agree to share my contact information and IP address with Go Daddy, (d) authorize Microsoft"
         "Microsoft to charge or bill my current payment method for the price of the domain ($11.99) including "
