@@ -69,3 +69,4 @@ find * -prune -type d | while IFS= read -r d; do
         az run-tests --path ${WORKDIR}/fulltests/lib/python3.7/site-packages --module $d
     fi
 done
+az run-tests --path ${WORKDIR}/fulltests/lib/python3.7/site-packages --module core
