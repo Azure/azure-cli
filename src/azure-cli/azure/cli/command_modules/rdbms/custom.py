@@ -368,6 +368,20 @@ def _server_update_set(client, resource_group_name, server_name, parameters):
     return client.update(resource_group_name, server_name, parameters)
 
 
+def _server_delete(cmd, client, resource_group_name, server_name):
+    database_engine = 'postgres'
+    if isinstance(client, MySqlServersOperations):
+        database_engine = 'mysql'
+
+    result = client.delete(resource_group_name, server_name)
+
+    if cmd.cli_ctx.local_context.is_on:
+        local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
+        local_context_file.remove_option('{} server'.format(database_engine), 'server_name')
+
+    return result
+
+
 def _get_sku_name(tier, family, capacity):
     return '{}_{}_{}'.format(SKU_TIER_MAP[tier], family, str(capacity))
 
