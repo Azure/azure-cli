@@ -172,6 +172,32 @@ class TestQueryExamplesQueryTreeBuilder(unittest.TestCase):
         self.assertIn('[].friends[].Name', examples)
         self.assertIn("[].friends[?Name=='Bob']", examples)
 
+        input_json = '''
+        {
+            "name": {
+                "firstName": "Ann"
+            },
+            "age": "20",
+            "friends": [
+                {
+                    "Name": "Bob"
+                }
+            ]
+        }
+        '''
+        json_obj = json.loads(input_json)
+        builder = QueryTreeBuilder(mock_config)
+        builder.build(json_obj)
+        examples_list = builder.generate_examples(keyword_list, output_format)
+        examples = self.examples_to_dict(examples_list)
+        self.assertIn('name', examples)
+        self.assertIn('name.firstName', examples)
+        self.assertIn('age', examples)
+        self.assertIn('friends[]', examples)
+        self.assertIn('friends[].Name', examples)
+        self.assertIn("friends[?Name=='Bob']", examples)
+        self.assertIn("friends[?contains(@.Name, 'something')==\\`true\\`].Name", examples)
+
     def test_dict_recommend_with_keywords(self):
         mock_config = MockConfig()
         keyword_list = ['name']

@@ -145,7 +145,10 @@ class QueryTreeNode:
         """
         if self._is_array:
             if self._parent:
-                outer_trace = '{}.{}'.format(self._parent.get_trace_to_root(), self._name)
+                if self._parent.is_dummy and not self._parent._is_array:  # pylint: disable=protected-access
+                    outer_trace = self._name
+                else:
+                    outer_trace = '{}.{}'.format(self._parent.get_trace_to_root(), self._name)
             else:
                 outer_trace = self._name
             return outer_trace, inner_trace
