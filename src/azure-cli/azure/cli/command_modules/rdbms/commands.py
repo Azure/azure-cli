@@ -225,6 +225,8 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mariadb_get')
         g.command('restart', 'restart')
+        g.command('start', 'start')
+        g.command('stop', 'stop')
 
     with self.command_group('mysql server', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
         g.custom_command('create', '_server_create')
@@ -239,6 +241,8 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mysql_get')
         g.command('restart', 'restart')
+        g.command('start', 'start')
+        g.command('stop', 'stop')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_server_create')
