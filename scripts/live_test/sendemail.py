@@ -153,8 +153,8 @@ def write_db(container, testdata):
     target = USER_TARGET
     live = 1 if USER_LIVE == '--live' else 0
     user = REQUESTED_FOR_EMAIL
-    pass0 = testdata.total[2]
-    fail = testdata.total[1]
+    pass0 = testdata.total[1]
+    fail = testdata.total[2]
     rate = testdata.total[3]
     detail = str(testdata.modules)
     container = 'https://clitestresultstac.blob.core.windows.net/' + container
