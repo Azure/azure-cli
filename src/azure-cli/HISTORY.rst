@@ -42,7 +42,10 @@ Release History
 **Compute**
 
 * Add new license_type in vm create/update: RHEL_BYOS, SLES_BYOS (#14934)
-* Upgrade disk API version to 2020-06-30 and some new features (#15031)
+* Upgrade disk API version to 2020-06-30 (#15031)
+* disk create: add --logical-sector-size, --tier (#15031)
+* disk update: Support --disk-iops-read-only, --disk-mbps-read-only, --max-shares (#15031)
+* New command disk-encryption-set list-associated-resources (#15031)
 * vm boot-diagnostics enable: --storage becomes optional (#15145)
 * New command: vm boot-diagnostics get-boot-log-uris (#15145)
 * vm boot-diagnostics get-boot-log: support managed storage (#15145)
