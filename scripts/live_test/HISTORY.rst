@@ -7,6 +7,7 @@ Release History
 ++++++
 
 * Support upgrading API version in pipeline.
+* Fix a tiny DB bug.
 
 0.2.0
 ++++++
