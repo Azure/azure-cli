@@ -104,7 +104,7 @@ DEPENDENCIES = [
     'azure-mgmt-network~=12.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=2.2.0',
+    'azure-mgmt-rdbms~=3.0.0rc1',
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-recoveryservicesbackup~=0.6.0',
     'azure-mgmt-redhatopenshift==0.1.0',
@@ -189,6 +189,10 @@ setup(
             'resources/WindowsFunctionsStacks.json',
             'resources/LinuxFunctionsStacks.json',
             'resources/WebappRuntimeStacks.json'
+        ],
+        'azure.cli.command_modules.rdbms': [
+            'randomname/adjectives.txt',
+            'randomname/nouns.txt'
         ]
     },
     cmdclass=cmdclass
