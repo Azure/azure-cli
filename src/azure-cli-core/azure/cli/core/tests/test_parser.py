@@ -257,7 +257,8 @@ class TestParser(unittest.TestCase):
         with mock.patch('logging.Logger.error', mock_log_error), \
                 mock.patch('azure.cli.core.extension.operations.add_extension', mock_add_extension), \
                 mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_command_tree', mock_ext_cmd_tree_load), \
-                mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_use_dynamic_install_config', return_value='yes_without_prompt'):
+                mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_use_dynamic_install_config', return_value='yes_without_prompt'), \
+                mock.patch('azure.cli.core.parser.AzCliCommandParser._get_extension_run_after_dynamic_install_config', return_value=False):
             with self.assertRaises(SystemExit):
                 parser.parse_args('test new-ext create --opt enum_2'.split())
             self.assertIn("Extension new-ext-name installed. Please rerun your command.", logger_msgs[5])
