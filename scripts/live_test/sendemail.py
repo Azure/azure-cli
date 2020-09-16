@@ -205,6 +205,7 @@ def send_email(container, testdata):
         data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
     if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
+    print(data)
 
     sendgrid_key = sys.argv[1]
     sg = SendGridAPIClient(sendgrid_key)
