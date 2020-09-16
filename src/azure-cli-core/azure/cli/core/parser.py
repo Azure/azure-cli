@@ -321,7 +321,7 @@ class AzCliCommandParser(CLICommandParser):
                 response = requests.get(
                     'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json',
                     verify=(not should_disable_connection_verify()),
-                    timeout=300)
+                    timeout=10)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.info("Request failed for extension command tree: %s", str(ex))
                 return None
