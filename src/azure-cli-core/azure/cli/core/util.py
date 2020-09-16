@@ -55,7 +55,7 @@ DISALLOWED_USER_NAMES = [
 ]
 
 
-def handle_exception(ex):  # pylint: disable=too-many-statements
+def handle_exception(ex):  # pylint: disable=too-many-return-statements, too-many-statements
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathTypeError
     from msrestazure.azure_exceptions import CloudError
@@ -110,8 +110,11 @@ def handle_exception(ex):  # pylint: disable=too-many-statements
         # TODO: Fine-grained analysis
         elif isinstance(ex, HttpOperationError):
             try:
-                response_dict = json.loads(ex.response.text)
-                error = response_dict['error']
+                response = json.loads(ex.response.text)
+                if isinstance(response, str):
+                    error = response
+                else:
+                    error = response['error']
 
                 # ARM should use ODATA v4. So should try this first.
                 # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091

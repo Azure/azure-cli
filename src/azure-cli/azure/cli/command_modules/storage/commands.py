@@ -102,7 +102,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('remove', 'storage_remove', is_preview=True)
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
-        g.custom_command('copy', 'storage_copy', is_preview=True)
+        from ._validators import validate_azcopy_credential
+        g.storage_custom_command('copy', 'storage_copy', is_preview=True, validator=validate_azcopy_credential)
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
@@ -481,11 +482,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_share_rm')
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('exists', '_file_share_exists', transform=create_boolean_result_output_transformer('exists'))
-        g.command('list', 'list')
+        g.custom_command('list', 'list_share_rm')
         g.show_command('show', 'get')
         g.generic_update_command('update', setter_name='update', setter_arg_name='file_share',
                                  custom_func_name='update_share_rm')
         g.custom_command('stats', 'get_stats', transform=lambda x: getattr(x, 'share_usage_bytes'))
+        g.custom_command('restore', 'restore_share_rm')
 
     with self.command_group('storage share', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:

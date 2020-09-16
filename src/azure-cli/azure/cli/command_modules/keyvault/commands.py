@@ -12,7 +12,7 @@ from ._client_factory import get_client, get_client_factory, Clients, is_azure_s
 
 from ._transformers import (
     extract_subresource_name, filter_out_managed_resources,
-    multi_transformers, transform_key_decryption_output)
+    multi_transformers, transform_key_decryption_output, keep_max_results)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -144,11 +144,17 @@ def load_command_table(self, _):
     with self.command_group('keyvault key', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_keys',
                            transform=multi_transformers(
-                               filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
+                               filter_out_managed_resources,
+                               keep_max_results,
+                               extract_subresource_name(id_parameter='kid')))
         g.keyvault_command('list-versions', 'get_key_versions',
-                           transform=extract_subresource_name(id_parameter='kid'))
+                           transform=multi_transformers(
+                               keep_max_results,
+                               extract_subresource_name(id_parameter='kid')))
         g.keyvault_command('list-deleted', 'get_deleted_keys',
-                           transform=extract_subresource_name(id_parameter='kid'))
+                           transform=multi_transformers(
+                               keep_max_results,
+                               extract_subresource_name(id_parameter='kid')))
         g.keyvault_custom('create', 'create_key',
                           doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key')
@@ -169,9 +175,18 @@ def load_command_table(self, _):
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_secrets',
-                           transform=multi_transformers(filter_out_managed_resources, extract_subresource_name()))
-        g.keyvault_command('list-versions', 'get_secret_versions', transform=extract_subresource_name())
-        g.keyvault_command('list-deleted', 'get_deleted_secrets', transform=extract_subresource_name())
+                           transform=multi_transformers(
+                               filter_out_managed_resources,
+                               keep_max_results,
+                               extract_subresource_name()))
+        g.keyvault_command('list-versions', 'get_secret_versions',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               extract_subresource_name()))
+        g.keyvault_command('list-deleted', 'get_deleted_secrets',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               extract_subresource_name()))
         g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace,
                            transform=extract_subresource_name())
         g.keyvault_command('set-attributes', 'update_secret', transform=extract_subresource_name())
@@ -198,9 +213,18 @@ def load_command_table(self, _):
                           'create_certificate',
                           doc_string_source=data_entity.operations_docs_tmpl.format('create_certificate'),
                           transform=extract_subresource_name())
-        g.keyvault_command('list', 'get_certificates', transform=extract_subresource_name())
-        g.keyvault_command('list-versions', 'get_certificate_versions', transform=extract_subresource_name())
-        g.keyvault_command('list-deleted', 'get_deleted_certificates', transform=extract_subresource_name())
+        g.keyvault_command('list', 'get_certificates',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               extract_subresource_name()))
+        g.keyvault_command('list-versions', 'get_certificate_versions',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               extract_subresource_name()))
+        g.keyvault_command('list-deleted', 'get_deleted_certificates',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               extract_subresource_name()))
         g.keyvault_command('show', 'get_certificate', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_certificate', transform=extract_subresource_name())
         g.keyvault_command('delete', 'delete_certificate', deprecate_info=g.deprecate(
@@ -226,19 +250,19 @@ def load_command_table(self, _):
                            transform=extract_subresource_name())
 
     with self.command_group('keyvault certificate contact', data_entity.command_type) as g:
-        g.keyvault_command('list', 'get_certificate_contacts')
+        g.keyvault_command('list', 'get_certificate_contacts', transform=keep_max_results)
         g.keyvault_custom('add', 'add_certificate_contact')
         g.keyvault_custom('delete', 'delete_certificate_contact')
 
     with self.command_group('keyvault certificate issuer', data_entity.command_type) as g:
         g.keyvault_custom('update', 'update_certificate_issuer')
-        g.keyvault_command('list', 'get_certificate_issuers')
+        g.keyvault_command('list', 'get_certificate_issuers', transform=keep_max_results)
         g.keyvault_custom('create', 'create_certificate_issuer')
         g.keyvault_command('show', 'get_certificate_issuer')
         g.keyvault_command('delete', 'delete_certificate_issuer')
 
     with self.command_group('keyvault certificate issuer admin', data_entity.command_type) as g:
-        g.keyvault_custom('list', 'list_certificate_issuer_admins')
+        g.keyvault_custom('list', 'list_certificate_issuer_admins', transform=keep_max_results)
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
@@ -268,12 +292,12 @@ def load_command_table(self, _):
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault storage', data_entity.command_type) as g:
             g.keyvault_command('add', 'set_storage_account')
-            g.keyvault_command('list', 'get_storage_accounts')
+            g.keyvault_command('list', 'get_storage_accounts', transform=keep_max_results)
             g.keyvault_command('show', 'get_storage_account')
             g.keyvault_command('update', 'update_storage_account')
             g.keyvault_command('remove', 'delete_storage_account')
             g.keyvault_command('regenerate-key', 'regenerate_storage_account_key')
-            g.keyvault_command('list-deleted', 'get_deleted_storage_accounts')
+            g.keyvault_command('list-deleted', 'get_deleted_storage_accounts', transform=keep_max_results)
             g.keyvault_command('show-deleted', 'get_deleted_storage_account')
             g.keyvault_command('purge', 'purge_deleted_storage_account')
             g.keyvault_command('recover', 'recover_deleted_storage_account')
@@ -286,11 +310,11 @@ def load_command_table(self, _):
         with self.command_group('keyvault storage sas-definition', data_entity.command_type) as g:
             g.keyvault_command('create', 'set_sas_definition',
                                doc_string_source=data_entity.operations_docs_tmpl.format('set_sas_definition'))
-            g.keyvault_command('list', 'get_sas_definitions')
+            g.keyvault_command('list', 'get_sas_definitions', transform=keep_max_results)
             g.keyvault_command('show', 'get_sas_definition')
             g.keyvault_command('update', 'update_sas_definition',
                                doc_string_source=data_entity.operations_docs_tmpl.format('update_sas_definition'))
             g.keyvault_command('delete', 'delete_sas_definition')
-            g.keyvault_command('list-deleted', 'get_deleted_sas_definitions')
+            g.keyvault_command('list-deleted', 'get_deleted_sas_definitions', transform=keep_max_results)
             g.keyvault_command('show-deleted', 'get_deleted_sas_definition')
             g.keyvault_command('recover', 'recover_deleted_sas_definition')

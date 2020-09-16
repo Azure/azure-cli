@@ -64,7 +64,7 @@ def load_arguments(self, _):
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
-    functionapp_runtime_to_version, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
+    functionapp_runtime_strings, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -665,7 +665,7 @@ def load_arguments(self, _):
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
         c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.',
-                   arg_type=get_enum_type(functionapp_runtime_to_version.keys()))
+                   arg_type=get_enum_type(functionapp_runtime_strings))
         c.argument('runtime_version',
                    help='The version of the functions runtime stack. '
                         'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
@@ -959,6 +959,7 @@ def _get_functionapp_runtime_versions():
                 runtime_version = runtime_version_json[KEYS.DISPLAY_VERSION]
                 runtime_version_properties = {
                     KEYS.IS_HIDDEN: runtime_version_json[KEYS.IS_HIDDEN],
+                    KEYS.IS_DEPRECATED: runtime_version_json[KEYS.IS_DEPRECATED],
                     KEYS.IS_PREVIEW: runtime_version_json[KEYS.IS_PREVIEW],
                 }
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
@@ -968,14 +969,14 @@ def _get_functionapp_runtime_versions():
     # taking their properties into account (i.e. isHidden, isPreview)
     runtime_to_version_strings = []
     for runtime, runtime_versions in runtime_to_version.items():
-        # dotnet version is not configurable, so leave out of help menu
-        if runtime == 'dotnet':
+        # dotnet and custom version is not configurable, so leave out of help menu
+        if runtime in ('dotnet', 'custom'):
             continue
         ordered_runtime_versions = list(runtime_versions.keys())
         ordered_runtime_versions.sort(key=float)
         ordered_runtime_versions_strings = []
         for version in ordered_runtime_versions:
-            if runtime_versions[version][KEYS.IS_HIDDEN]:
+            if runtime_versions[version][KEYS.IS_HIDDEN] or runtime_versions[version][KEYS.IS_DEPRECATED]:
                 continue
             if runtime_versions[version][KEYS.IS_PREVIEW]:
                 ordered_runtime_versions_strings.append(version + ' (preview)')
@@ -983,4 +984,4 @@ def _get_functionapp_runtime_versions():
                 ordered_runtime_versions_strings.append(version)
         runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(ordered_runtime_versions_strings) + ']')
 
-    return runtime_to_version, runtime_to_version_strings
+    return runtime_to_version.keys(), runtime_to_version_strings
