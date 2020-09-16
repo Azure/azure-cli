@@ -24,3 +24,7 @@ def consumer_groups_mgmt_client_factory(cli_ctx, _):
 
 def disaster_recovery_mgmt_client_factory(cli_ctx, _):
     return cf_eventhub(cli_ctx).disaster_recovery_configs
+
+
+def cluster_mgmt_client_factory(cli_ctx, _):
+    return cf_eventhub(cli_ctx).clusters
