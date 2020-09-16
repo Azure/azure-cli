@@ -1055,6 +1055,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
+        c.argument('include_deleted', action='store_true',
+                   help='Include soft deleted file shares when specified.')
+
+    with self.argument_context('storage share-rm restore', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('deleted_version',
+                   help='Identify the version of the deleted share that will be restored.')
+        c.argument('share_name',
+                   help='The file share name. Identify the name of the deleted share that will be restored.')
+        c.argument('restored_name',
+                   help='A new file share name to be restored. If not specified, deleted share name will be used.')
 
     with self.argument_context('storage share url') as c:
         c.argument('unc', action='store_true', help='Output UNC network path.')
