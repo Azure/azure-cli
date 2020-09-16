@@ -574,8 +574,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             raise ex
     except DefaultErrorResponseException as ex:
         if ex.response.status_code != 200:
-            raise ex 
-
+            raise ex
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
