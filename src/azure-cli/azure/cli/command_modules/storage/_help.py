@@ -2040,6 +2040,18 @@ examples:
     text: az storage share-rm list -g MyResourceGroup --storage-account mystorageaccount
   - name: List the Azure file shares under the storage account 'mystorageaccount' (account id).
     text: az storage share-rm list --storage-account mystorageaccount
+  - name: List all file shares include deleted under the storage account 'mystorageaccount' .
+    text: az storage share-rm list --storage-account mystorageaccount --include-deleted
+"""
+
+helps['storage share-rm restore'] = """
+type: command
+short-summary: Restore a file share within a valid retention days if share soft delete is enabled.
+examples:
+  - name: Restore a file share within a valid retention days if share soft delete is enabled.
+    text: az storage share-rm restore -n deletedshare --deleted-version 01D64EB9886F00C4 -g MyResourceGroup --storage-account mystorageaccount
+  - name: Restore a file share within a valid retention days if share soft delete is enabled to a new name.
+    text: az storage share-rm restore -n deletedshare --deleted-version 01D64EB9886F00C4 --restored-name newname -g MyResourceGroup --storage-account mystorageaccount
 """
 
 helps['storage share-rm show'] = """
