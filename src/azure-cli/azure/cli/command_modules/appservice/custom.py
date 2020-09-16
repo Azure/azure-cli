@@ -2795,6 +2795,12 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                        '--functions-version. Dotnet version will be %s for this function app.',
                        runtime_version_json[KEYS.DISPLAY_VERSION])
 
+    if runtime_version_json[KEYS.IS_DEPRECATED]:
+        logger.warning('%s version %s has been deprecated. In the future, this version will be unavailable. '
+                       'Please update your command to use a more recent version. For a list of supported '
+                       '--runtime-versions, run \"az functionapp create -h\"',
+                       runtime_json[KEYS.PROPERTIES][KEYS.DISPLAY], runtime_version_json[KEYS.DISPLAY_VERSION])
+
     site_config_json = runtime_version_json[KEYS.SITE_CONFIG_DICT]
     app_settings_json = runtime_version_json[KEYS.APP_SETTINGS_DICT]
 
@@ -2969,7 +2975,10 @@ def _get_runtime_version_functionapp(version_string, is_linux):
     if linux_match:
         return float(linux_match.group(1))
 
-    return float(version_string)
+    try:
+        return float(version_string)
+    except ValueError:
+        return 0
 
 
 def try_create_application_insights(cmd, functionapp):
