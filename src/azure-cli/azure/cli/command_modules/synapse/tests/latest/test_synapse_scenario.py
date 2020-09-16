@@ -1068,3 +1068,87 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
+
+    def test_integration_runtime(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
+            'name': 'integrationruntime',
+            'type': 'Managed',
+            'selfhosted-integration-runtime': 'SelfHostedIntegrationRuntime',
+            'node': 'T-WAYANG'})
+
+        # create integration runtime
+        self.cmd(
+            'az synapse integration-runtime create --resource-group {rg} --workspace-name {workspace} --name {name} --type {type}',
+
+        # get integration runtime
+        self.cmd(
+            'az synapse integration-runtime show --resource-group {rg} --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list integration runtime
+        self.cmd(
+            'az synapse integration-runtime list --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/integrationruntimes')
+            ])
+
+        # delete integration runtime
+        self.cmd(
+            'az synapse integration-runtime delete --resource-group {rg} --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse integration-runtime show --resource-group {rg} --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+        # upgrade self-hosted integration runtime
+        self.cmd(
+            'az synapse integration-runtime upgrade --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+
+        # get keys for a self-hosted integration runtime
+        self.cmd(
+            'az synapse integration-runtime-key show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}',
+            checks=[
+                self.check('length([])', 2)
+            ])
+
+        # regenerate self-hosted integration runtime key
+        self.cmd(
+            'az synapse integration-runtime-key regenerate --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            '--key-name authKey1',
+            checks=[
+                self.check('authKey2', None)
+            ])
+
+        # get metric data for a self-hosted integration runtime
+        self.cmd(
+            'az synapse integration-runtime-metric show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}',
+            checks=[
+                self.check('name', self.kwargs['selfhosted-integration-runtime'])
+            ])
+
+        # get self-hosted integration runtime node information
+        self.cmd(
+            'az synapse integration-runtime-node show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            '--node-name {node}',
+            checks=[
+                self.check('nodeName', self.kwargs['node'])
+            ])
+
+        # update self-hosted integration runtime node
+        self.cmd(
+            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            '--node-name {node}',
+            checks=[
+                self.check('nodeName', self.kwargs['node'])
+            ])
+
+        # get self-hosted integration runtime node ip
+        self.cmd(
+            'az synapse integration-runtime-node show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            '--node-name {node}')
+
+        # sync credentials among integration runtime nodes
+        self.cmd(
+            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
