@@ -374,7 +374,7 @@ class AzCliCommandParser(CLICommandParser):
 
     def _get_extension_run_after_dynamic_install_config(self):
         cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
-        default_value = False
+        default_value = True
         run_after_extension_installed = cli_ctx.config.getboolean('extension',
                                                                   'run_after_dynamic_install',
                                                                   default_value) if cli_ctx else default_value
