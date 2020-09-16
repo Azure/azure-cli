@@ -109,7 +109,7 @@ def upload_files(container):
                 cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac'
                 cmd = cmd.format(fullpath, container, name)
                 print('Running: ' + cmd)
-                os.popen(cmd)
+                os.system(cmd)
 
     print('Exit upload_files()')
 
