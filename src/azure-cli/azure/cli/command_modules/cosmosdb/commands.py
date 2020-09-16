@@ -203,39 +203,48 @@ def load_command_table(self, _):
     # Offer throughput
     with self.command_group('cosmosdb sql database throughput', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.show_command('show', 'get_sql_database_throughput')
+        g.custom_command('migrate', 'cli_cosmosdb_sql_database_throughput_migrate')
         g.custom_command('update', 'cli_cosmosdb_sql_database_throughput_update')
 
     with self.command_group('cosmosdb sql container throughput', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.show_command('show', 'get_sql_container_throughput')
         g.custom_command('update', 'cli_cosmosdb_sql_container_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_sql_container_throughput_migrate')
 
     with self.command_group('cosmosdb mongodb database throughput', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.show_command('show', 'get_mongo_db_database_throughput')
         g.custom_command('update', 'cli_cosmosdb_mongodb_database_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_mongodb_database_throughput_migrate')
 
     with self.command_group('cosmosdb mongodb collection throughput', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.show_command('show', 'get_mongo_db_collection_throughput')
         g.custom_command('update', 'cli_cosmosdb_mongodb_collection_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_mongodb_collection_throughput_migrate')
 
     with self.command_group('cosmosdb cassandra keyspace throughput', cosmosdb_cassandra_sdk, client_factory=cf_cassandra_resources) as g:
         g.show_command('show', 'get_cassandra_keyspace_throughput')
         g.custom_command('update', 'cli_cosmosdb_cassandra_keyspace_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_cassandra_keyspace_throughput_migrate')
 
     with self.command_group('cosmosdb cassandra table throughput', cosmosdb_cassandra_sdk, client_factory=cf_cassandra_resources) as g:
         g.show_command('show', 'get_cassandra_table_throughput')
         g.custom_command('update', 'cli_cosmosdb_cassandra_table_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_cassandra_table_throughput_migrate')
 
     with self.command_group('cosmosdb gremlin database throughput', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
         g.show_command('show', 'get_gremlin_database_throughput')
         g.custom_command('update', 'cli_cosmosdb_gremlin_database_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_gremlin_database_throughput_migrate')
 
     with self.command_group('cosmosdb gremlin graph throughput', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
         g.show_command('show', 'get_gremlin_graph_throughput')
         g.custom_command('update', 'cli_cosmosdb_gremlin_graph_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_gremlin_graph_throughput_migrate')
 
     with self.command_group('cosmosdb table throughput', cosmosdb_table_sdk, client_factory=cf_table_resources) as g:
         g.show_command('show', 'get_table_throughput')
         g.custom_command('update', 'cli_cosmosdb_table_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_table_throughput_migrate')
 
     # virtual network rules
     with self.command_group('cosmosdb network-rule', None, client_factory=cf_db_accounts) as g:
