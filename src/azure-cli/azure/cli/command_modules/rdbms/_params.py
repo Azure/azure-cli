@@ -59,7 +59,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
             c.argument('minimal_tls_version', arg_type=get_enum_type(['TLS1_0', 'TLS1_1', 'TLS1_2', 'TLSEnforcementDisabled']), options_list=['--minimal-tls-version'], help='Set the minimal TLS version for connections to server when SSL is enabled. Default is TLSEnforcementDisabled.', validator=tls_validator)
-            c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--public-network-access'], help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
+            c.argument('public_network_access', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--public-network-access', '--public'], help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Default is Enabled.')
             c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('capacity', options_list=['--vcore'], type=int, help='Number of vcore.')
             c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), help='Hardware generation.')
@@ -99,7 +99,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], arg_type=overriding_none_arg_type)
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the source server to restore from.')
-            c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+            c.argument('restore_point_in_time', options_list=['--restore-point-in-time', '--pitr-time'], help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
         with self.argument_context('{} server georestore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
