@@ -1486,3 +1486,30 @@ def validate_azcopy_credential(cmd, namespace):
             cmd, namespace, url=namespace.source,
             container=namespace.source_container, blob=namespace.source_blob,
             share=namespace.source_share, file_path=namespace.source_file_path)
+
+def validate_text_configuration(cmd, ns):
+    DelimitedTextDialect = cmd.get_models('_models#DelimitedTextDialect', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    DelimitedJSON = cmd.get_models('_models#DelimitedJSON', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if ns.input_format == 'csv':
+        ns.input_config = DelimitedTextDialect(
+            delimiter=ns.in_column_separator,
+            quotechar=ns.in_quote_char,
+            lineterminator=ns.in_record_separator,
+            escapechar=ns.in_escape_char,
+            has_header=ns.in_has_header)
+    if ns.input_format == 'json':
+        ns.input_config = DelimitedJSON(delimiter=ns.in_line_separator)
+
+    if ns.output_format == 'csv':
+        ns.output_config = DelimitedTextDialect(
+            delimiter=ns.out_column_separator,
+            quotechar=ns.out_quote_char,
+            lineterminator=ns.out_record_separator,
+            escapechar=ns.out_escape_char,
+            has_header=ns.out_has_header)
+    if ns.output_format == 'json':
+        ns.output_config = DelimitedJSON(delimiter=ns.out_line_separator)
+    del ns.input_format, ns.in_line_separator, ns.in_column_separator, ns.in_quote_char, ns.in_record_separator, \
+        ns.in_escape_char, ns.in_has_header
+    del ns.output_format, ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, \
+        ns.out_escape_char, ns.out_has_header

@@ -2028,7 +2028,8 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
                        docker_container_logging=None, detailed_error_messages=None,
                        failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       AzureBlobStorageApplicationLogsConfig, SiteLogsConfig,
+                                       HttpLogsConfig, FileSystemHttpLogsConfig,
                                        EnabledConfig)
     client = web_client_factory(cmd.cli_ctx)
     # TODO: ensure we call get_site only once
@@ -2038,13 +2039,18 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     location = site.location
 
     application_logs = None
-    if application_logging is not None:
-        if not application_logging:
-            level = 'Off'
-        elif level is None:
-            level = 'Error'
-        fs_log = FileSystemApplicationLogsConfig(level=level)
-        application_logs = ApplicationLogsConfig(file_system=fs_log)
+    if application_logging:
+        fs_log = None
+        blob_log = None
+        level = application_logging != 'off'
+        if application_logging in ['filesystem', 'off']:
+            fs_log = FileSystemApplicationLogsConfig(level=level)
+        level = application_logging != 'off'
+        if application_logging in ['azureblobstorage', 'off']:
+            blob_log = AzureBlobStorageApplicationLogsConfig(level=level, retention_in_days=3,
+                                                             sas_url=None)
+        application_logs = ApplicationLogsConfig(file_system=fs_log,
+                                                 azure_blob_storage=blob_log)
 
     http_logs = None
     server_logging_option = web_server_logging or docker_container_logging
@@ -2421,7 +2427,6 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
     from azure.graphrbac.models import GraphErrorException
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -2429,8 +2434,8 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
     # Cannot check if key vault is in another subscription
     if subscription != key_vault_subscription:
         return False
-    kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
-    vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
+    kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
+    vault = kv_client.vaults.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
     # Check for Microsoft.Azure.WebSites app registration
     AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
     AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'

@@ -83,7 +83,7 @@ class WebappBasicE2ETest(ScenarioTest):
         ])
         # turn on diagnostics
         test_cmd = ('webapp log config -g {} -n {} --level verbose'.format(resource_group, webapp_name) + ' '
-                    '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
+                    '--application-logging filesystem --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
         self.cmd(test_cmd)
         self.cmd('webapp log show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorMessages.enabled', True),
@@ -1379,7 +1379,6 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
-            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
@@ -1414,7 +1413,6 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_id, cert_name), checks=[
-            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 

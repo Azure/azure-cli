@@ -811,6 +811,16 @@ type: group
 short-summary: Manage blob metadata.
 """
 
+helps['storage blob query'] = """
+type: command
+short-summary: Enable users to select/project on blob or blob snapshot data by providing simple query expressions.
+examples:
+  - name: Enable users to select/project on blob by providing simple query expressions.
+    text: az storage blob query -c mycontainer -n myblob --query-expression "SELECT _2 from BlobStorage"
+  - name: Enable users to select/project on blob by providing simple query expressions and save in target file.
+    text: az storage blob query -c mycontainer -n myblob --query-expression "SELECT _2 from BlobStorage" --result-file result.csv
+"""
+
 helps['storage blob restore'] = """
 type: command
 short-summary: Restore blobs in the specified blob ranges.
@@ -2030,6 +2040,18 @@ examples:
     text: az storage share-rm list -g MyResourceGroup --storage-account mystorageaccount
   - name: List the Azure file shares under the storage account 'mystorageaccount' (account id).
     text: az storage share-rm list --storage-account mystorageaccount
+  - name: List all file shares include deleted under the storage account 'mystorageaccount' .
+    text: az storage share-rm list --storage-account mystorageaccount --include-deleted
+"""
+
+helps['storage share-rm restore'] = """
+type: command
+short-summary: Restore a file share within a valid retention days if share soft delete is enabled.
+examples:
+  - name: Restore a file share within a valid retention days if share soft delete is enabled.
+    text: az storage share-rm restore -n deletedshare --deleted-version 01D64EB9886F00C4 -g MyResourceGroup --storage-account mystorageaccount
+  - name: Restore a file share within a valid retention days if share soft delete is enabled to a new name.
+    text: az storage share-rm restore -n deletedshare --deleted-version 01D64EB9886F00C4 --restored-name newname -g MyResourceGroup --storage-account mystorageaccount
 """
 
 helps['storage share-rm show'] = """
