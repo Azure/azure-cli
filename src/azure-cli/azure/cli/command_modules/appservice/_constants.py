@@ -53,6 +53,8 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.LINUX_FX_VERSION = 'linuxFxVersion'
         self.APPLICATION_INSIGHTS = 'applicationInsights'
         self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
+        self.USE_32_BIT_WORKER_PROC = 'use32BitWorkerProcess'
+        self.FUNCTIONS_WORKER_RUNTIME = 'FUNCTIONS_WORKER_RUNTIME'
 
 
 RUNTIME_STACKS = os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WebappRuntimeStacks.json'))
