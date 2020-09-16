@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-import os
+import os, shutil
 import time
 import mock
 import unittest
@@ -654,7 +654,55 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
-class TemplateSpecsTest(LiveScenarioTest):
+class TemplateSpecsTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', location='westus')
+    def test_list_template_spec(self, resource_group, resource_group_one, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
+        self.kwargs.update({
+            'template_spec_name': template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'rg': resource_group,
+            'rg1': resource_group_one,
+            'resource_group_location': resource_group_location,
+        })
+
+        template_spec_in_rg = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+        template_spec_in_rg1_2 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 2.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+        template_spec_in_rg1_3 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 3.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+
+        self.kwargs['template_spec_id_rg'] = template_spec_in_rg['id'].replace('/versions/1.0', '')
+
+        self.kwargs['template_spec_version_id_rg1_2'] = template_spec_in_rg1_2['id']
+        self.kwargs['template_spec_version_id_rg1_3'] = template_spec_in_rg1_3['id']
+        self.kwargs['template_spec_id_rg1'] = template_spec_in_rg1_2['id'].replace('/versions/2.0', '')
+
+        self.cmd('ts list -g {rg1}', checks=[
+                 self.check("length([?id=='{template_spec_id_rg}'])", 0),
+                 self.check("length([?id=='{template_spec_id_rg1}'])", 1),
+                 ])
+
+        self.cmd('ts list -g {rg}', checks=[
+                 self.check("length([?id=='{template_spec_id_rg}'])", 1),
+                 self.check("length([?id=='{template_spec_id_rg1}'])", 0)
+                 ])
+
+        self.cmd('ts list -g {rg1} -n {template_spec_name}', checks=[
+                 self.check('length([])', 2),
+                 self.check("length([?id=='{template_spec_version_id_rg1_2}'])", 1),
+                 self.check("length([?id=='{template_spec_version_id_rg1_3}'])", 1)
+                 ])
+
+        self.cmd('ts list', checks=[
+                 self.check("length([?id=='{template_spec_id_rg}'])", 1),
+                 self.check("length([?id=='{template_spec_id_rg1}'])", 1),
+                 ])
+
+        # clean up
+        self.cmd('ts delete --template-spec {template_spec_id_rg} --yes')
+        self.cmd('ts delete --template-spec {template_spec_id_rg1} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_create_template_specs(self, resource_group, resource_group_location):
@@ -668,6 +716,13 @@ class TemplateSpecsTest(LiveScenarioTest):
             'description': '"AzCLI test root template spec"',
             'version_description': '"AzCLI test version of root template spec"',
         })
+
+        path = os.path.join(curr_dir, 'artifacts')
+        if not os.path.exists(path):
+            files = ['createKeyVault.json','createKeyVaultWithSecret.json','createResourceGroup.json']
+            os.makedirs(path)
+            for f in files:
+                shutil.copy(os.path.join(curr_dir, f), path)
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
             self.check('artifacts.length([])', 3),
@@ -714,6 +769,13 @@ class TemplateSpecsTest(LiveScenarioTest):
                  self.check('artifacts', None)
                  ])
 
+        path = os.path.join(curr_dir, 'artifacts')
+        if not os.path.exists(path):
+            files = ['createKeyVault.json','createKeyVaultWithSecret.json','createResourceGroup.json']
+            os.makedirs(path)
+            for f in files:
+                shutil.copy(os.path.join(curr_dir, f), path)
+
         self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
                  self.check('artifacts.length([])', 3),
@@ -725,61 +787,13 @@ class TemplateSpecsTest(LiveScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', location='westus')
-    def test_list_template_spec(self, resource_group, resource_group_one, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
-        self.kwargs.update({
-            'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
-            'rg': resource_group,
-            'rg1': resource_group_one,
-            'resource_group_location': resource_group_location,
-        })
-
-        template_spec_in_rg = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
-        template_spec_in_rg1_2 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 2.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
-        template_spec_in_rg1_3 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 3.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
-
-        self.kwargs['template_spec_id_rg'] = template_spec_in_rg['id'].replace('/versions/1.0', '')
-
-        self.kwargs['template_spec_version_id_rg1_2'] = template_spec_in_rg1_2['id']
-        self.kwargs['template_spec_version_id_rg1_3'] = template_spec_in_rg1_3['id']
-        self.kwargs['template_spec_id_rg1'] = template_spec_in_rg1_2['id'].replace('/versions/2.0', '')
-
-        self.cmd('ts list', checks=[
-                 self.check("length([?id=='{template_spec_id_rg}'])", 1),
-                 self.check("length([?id=='{template_spec_id_rg1}'])", 1),
-                 ])
-
-        self.cmd('ts list -g {rg1}', checks=[
-                 self.check("length([?id=='{template_spec_id_rg}'])", 0),
-                 self.check("length([?id=='{template_spec_id_rg1}'])", 1),
-                 ])
-
-        self.cmd('ts list -g {rg}', checks=[
-                 self.check("length([?id=='{template_spec_id_rg}'])", 1),
-                 self.check("length([?id=='{template_spec_id_rg1}'])", 0)
-                 ])
-
-        self.cmd('ts list -g {rg1} -n {template_spec_name}', checks=[
-                 self.check('length([])', 2),
-                 self.check("length([?id=='{template_spec_version_id_rg1_2}'])", 1),
-                 self.check("length([?id=='{template_spec_version_id_rg1_3}'])", 1)
-                 ])
-
-        # clean up
-        self.cmd('ts delete --template-spec {template_spec_id_rg} --yes')
-        self.cmd('ts delete --template-spec {template_spec_id_rg1} --yes')
-
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_show_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-get-template-spec', 60)
         self.kwargs.update({
             'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
             'resource_group_location': resource_group_location,
         })
 
@@ -810,6 +824,12 @@ class TemplateSpecsTest(LiveScenarioTest):
             'output_folder': os.path.join(curr_dir, dir_name).replace('\\', '\\\\'),
             'output_folder2': os.path.join(curr_dir, dir_name2).replace('\\', '\\\\'),
         })
+        path = os.path.join(curr_dir, 'artifacts')
+        if not os.path.exists(path):
+            files = ['createKeyVault.json','createKeyVaultWithSecret.json','createResourceGroup.json']
+            os.makedirs(path)
+            for f in files:
+                shutil.copy(os.path.join(curr_dir, f), path)
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
                           checks=self.check('name', '1.0')).get_output_in_json()
@@ -850,7 +870,7 @@ class TemplateSpecsTest(LiveScenarioTest):
         self.kwargs.update({
             'resource_group_location': resource_group_location,
             'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'template_spec_with_artifacts.json').replace('\\', '\\\\'),
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
         })
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
