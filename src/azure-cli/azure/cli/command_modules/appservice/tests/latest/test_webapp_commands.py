@@ -991,7 +991,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck(
-                "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+                "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", None),
             JMESPathCheck(
                 "[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", username)
         ])
@@ -1008,7 +1008,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         self.assertNotIn('DOCKER_REGISTRY_SERVER_USERNAME', all_settings)
         self.assertNotIn('DOCKER_REGISTRY_SERVER_URL', all_settings)
         self.assertNotIn('DOCKER_REGISTRY_SERVER_PASSWORD', all_settings)
-        self.assertIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
+        self.assertNotIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
 
 
 class FunctionappACRDeploymentScenarioTest(ScenarioTest):
