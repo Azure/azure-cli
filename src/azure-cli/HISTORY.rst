@@ -31,7 +31,7 @@ Release History
 
 * Add support for Premium V3 pricing tier (#15055)
 * Fix #12653: az webapp log config --application-logging false doesn't turn it off (#14929)
-* Fix #14684- access-restriction remove by ip address does not work; #13837-az webapp create - Example for different RSgroups for Plan and WebApp (#14818)
+* Fix #14684: access-restriction remove by ip address does not work; #13837-az webapp create - Example for different RSgroups for Plan and WebApp (#14818)
 * functionapp: Added support for custom handlers. Deprecated Powershell 6.2. (#15170)
 * functionapp: Fixed issue where app setting was being incorrectly set for linux custom images (#15153)
 
