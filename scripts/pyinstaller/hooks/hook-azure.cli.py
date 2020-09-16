@@ -11,6 +11,7 @@ from PyInstaller.utils.hooks import collect_submodules
 _hiddenimports = collect_submodules('humanfriendly')
 _hiddenimports.extend(collect_submodules('pytest'))
 _hiddenimports.extend(collect_submodules('unittest'))
+_hiddenimports.extend(collect_submodules('fileinput'))
 # _hiddenimports.extend(collect_submodules('xdist'))
 _hiddenimports.extend(collect_submodules('azure.mgmt.keyvault'))
 _hiddenimports.extend(collect_submodules('azure.mgmt.authorization'))
