@@ -166,8 +166,19 @@ jobs:
         pwd
         ls
         # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
-        git clone -b $(USER_BRANCH) $(USER_REPO)
-        #git clone https://github.com/Azure/azure-cli-extensions.git
+        git config --global user.email "AzurePipelines"
+        git config --global user.name "AzurePipelines"
+        # Commit changes
+        if [[ "$(USER_USERNAME)" != "" || "$(USER_TOKEN)" != "" ]]; then
+          REPO="$(USER_REPO)"
+          # Pass username and token so that we can commit changes
+          git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+          #git clone https://github.com/Azure/azure-cli-extensions.git
+        else
+          git clone -b $(USER_BRANCH) $(USER_REPO)
+          #git clone https://github.com/Azure/azure-cli-extensions.git
+        fi
+
         python -m venv env
         source env/bin/activate
         # pip install azdev
@@ -176,16 +187,35 @@ jobs:
         pip install pytest-json-report
         pip install pytest-html
         pip install pytest-rerunfailures
+
         azdev setup -c azure-cli
+
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-        # Sequential
-        azdev test $(Target) $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 -s"
-        # Parallel
-        azdev test $(Target) $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
+
+        # Commit changes
+        if [[ "$(USER_USERNAME)" != "" || "$(USER_TOKEN)" != "" ]]; then
+          azdev test $(Target) --no-exitfirst -a "-n $(USER_PARALLELISM)"
+          azdev test $(Target) --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
+        else
+          # Sequential
+          azdev test $(Target) $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 -s"
+          # Parallel
+          azdev test $(Target) $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
+        fi
+
         pwd
         ls
+        # Commit changes
+        if [[ "$(USER_USERNAME)" != "" || "$(USER_TOKEN)" != "" ]]; then
+          cd azure-cli
+          git status
+          git add .
+          git commit -m "Upload recording files"
+          git push origin $(USER_BRANCH)
+        fi
+
       condition: eq(variables.Match, '1')
     - task: PublishTestResults@2
       condition: eq(variables.Match, '1')

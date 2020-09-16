@@ -845,9 +845,13 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
+        from azure.cli.core.azclierror import AzCLIErrorType
+        from azure.cli.core.azclierror import AzCLIError
         for validator in getattr(ns, '_argument_validators', []):
             try:
                 validator(**self._build_kwargs(validator, ns))
+            except AzCLIError:
+                raise
             except Exception as ex:
                 # Delay the import and mimic an exception handler
                 from msrest.exceptions import ValidationError
