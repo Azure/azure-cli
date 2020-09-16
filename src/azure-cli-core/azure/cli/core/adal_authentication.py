@@ -13,6 +13,9 @@ from azure.core.credentials import AccessToken
 from azure.cli.core.util import in_cloud_console
 
 from knack.util import CLIError
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods
@@ -21,12 +24,15 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
 
-    def _get_token(self):
+    def _get_token(self, sdk_resource=None):
+        """
+        :param sdk_resource: `resource` converted from Track 2 SDK's `scopes`
+        """
         external_tenant_tokens = None
         try:
-            scheme, token, full_token = self._token_retriever()
+            scheme, token, full_token = self._token_retriever(sdk_resource)
             if self._external_tenant_token_retriever:
-                external_tenant_tokens = self._external_tenant_token_retriever()
+                external_tenant_tokens = self._external_tenant_token_retriever(sdk_resource)
         except CLIError as err:
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
@@ -60,7 +66,9 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
     # This method is exposed for Azure Core.
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
-        _, token, full_token, _ = self._get_token()
+        logger.debug("AdalAuthentication.get_token invoked by Track 2 SDK with scopes=%s", scopes)
+        from azure.cli.core.util import scopes_to_resource
+        _, token, full_token, _ = self._get_token(scopes_to_resource(scopes))
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))
         except KeyError:  # needed to deal with differing unserialized MSI token payload
@@ -68,6 +76,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
     # This method is exposed for msrest.
     def signed_session(self, session=None):  # pylint: disable=arguments-differ
+        logger.debug("AdalAuthentication.signed_session invoked by Track 1 SDK")
         session = session or super(AdalAuthentication, self).signed_session()
 
         scheme, token, _, external_tenant_tokens = self._get_token()
@@ -82,8 +91,6 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
     @staticmethod
     def _log_hostname():
         import socket
-        from knack.log import get_logger
-        logger = get_logger(__name__)
         logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
                        "below, please mention the hostname '%s'", socket.gethostname())
 

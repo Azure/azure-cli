@@ -377,6 +377,15 @@ class TestUtils(unittest.TestCase):
             request = send_mock.call_args.args[1]
             self.assertEqual(request.headers['User-Agent'], get_az_user_agent() + ' env-ua ARG-UA')
 
+    def test_scopes_to_resource(self):
+        from azure.cli.core.util import scopes_to_resource
+        # scopes as a list
+        self.assertEqual(scopes_to_resource(['https://management.core.windows.net/.default']),
+                         'https://management.core.windows.net/')
+        # scopes as a tuple
+        self.assertEqual(scopes_to_resource(('https://storage.azure.com/.default',)),
+                         'https://storage.azure.com/')
+
 
 class TestBase64ToHex(unittest.TestCase):
 

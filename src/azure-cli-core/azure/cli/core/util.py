@@ -1072,3 +1072,17 @@ def handle_version_update():
             refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
+
+
+def scopes_to_resource(scopes):
+    """Convert MSAL scopes to ADAL resource by stripping the /.default suffix and return a str.
+    For example: ['https://management.core.windows.net/.default'] -> 'https://management.core.windows.net'
+
+    :param scopes: The MSAL scopes. It can be a list or tuple of string
+    :return: The ADAL resource
+    :rtype: str
+    """
+    scope = scopes[0]
+    if scope.endswith(".default"):
+        scope = scope[:-len(".default")]
+    return scope
