@@ -321,7 +321,7 @@ class AzCliCommandParser(CLICommandParser):
                 response = requests.get(
                     'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json',
                     verify=(not should_disable_connection_verify()),
-                    timeout=300)
+                    timeout=10)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.info("Request failed for extension command tree: %s", str(ex))
                 return None
@@ -352,6 +352,8 @@ class AzCliCommandParser(CLICommandParser):
         """
 
         cmd_chain = self._get_extension_command_tree()
+        if not cmd_chain:
+            return None
         for part in command_str.split():
             try:
                 if isinstance(cmd_chain[part], str):
@@ -363,11 +365,20 @@ class AzCliCommandParser(CLICommandParser):
 
     def _get_extension_use_dynamic_install_config(self):
         cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        default_value = 'yes_prompt'
         use_dynamic_install = cli_ctx.config.get(
-            'extension', 'use_dynamic_install', 'no').lower() if cli_ctx else 'no'
+            'extension', 'use_dynamic_install', default_value).lower() if cli_ctx else default_value
         if use_dynamic_install not in ['no', 'yes_prompt', 'yes_without_prompt']:
-            use_dynamic_install = 'no'
+            use_dynamic_install = default_value
         return use_dynamic_install
+
+    def _get_extension_run_after_dynamic_install_config(self):
+        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        default_value = True
+        run_after_extension_installed = cli_ctx.config.getboolean('extension',
+                                                                  'run_after_dynamic_install',
+                                                                  default_value) if cli_ctx else default_value
+        return run_after_extension_installed
 
     def _check_value(self, action, value):  # pylint: disable=too-many-statements, too-many-locals
         # Override to customize the error message when a argument is not among the available choices
@@ -400,9 +411,7 @@ class AzCliCommandParser(CLICommandParser):
                         telemetry.set_command_details(command_str,
                                                       parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
                                                       extension_name=ext_name)
-                        run_after_extension_installed = cli_ctx.config.getboolean('extension',
-                                                                                  'run_after_dynamic_install',
-                                                                                  False) if cli_ctx else False
+                        run_after_extension_installed = self._get_extension_run_after_dynamic_install_config()
                         if use_dynamic_install == 'yes_without_prompt':
                             logger.warning('The command requires the extension %s. '
                                            'It will be installed first.', ext_name)
