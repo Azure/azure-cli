@@ -20,8 +20,11 @@ logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
-# Add names of clouds that don't allow telemetry data collection here such as JEDI.
-CLOUDS_FORBIDDING_TELEMETRY = []
+# Add names of clouds that don't allow telemetry data collection here such as some air-gapped clouds.
+CLOUDS_FORBIDDING_TELEMETRY = ['USSec', 'USNat']
+
+# Add names of clouds that don't allow Aladdin requests for command recommendations here
+CLOUDS_FORBIDDING_ALADDIN_REQUEST = ['USSec', 'USNat']
 
 
 class CloudNotRegisteredException(Exception):
@@ -122,6 +125,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
                  storage_endpoint=None,
                  storage_sync_endpoint=None,
                  keyvault_dns=None,
+                 mhsm_dns=None,
                  sql_server_hostname=None,
                  azure_datalake_store_file_system_endpoint=None,
                  azure_datalake_analytics_catalog_and_job_endpoint=None,
@@ -136,6 +140,7 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
         self.storage_endpoint = storage_endpoint
         self.storage_sync_endpoint = storage_sync_endpoint
         self.keyvault_dns = keyvault_dns
+        self.mhsm_dns = mhsm_dns
         self.sql_server_hostname = sql_server_hostname
         self.mysql_server_endpoint = mysql_server_endpoint
         self.postgresql_server_endpoint = postgresql_server_endpoint
@@ -375,6 +380,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         storage_endpoint='core.windows.net',
         storage_sync_endpoint='afs.azure.net',
         keyvault_dns='.vault.azure.net',
+        mhsm_dns='.managedhsm.azure.net',
         sql_server_hostname='.database.windows.net',
         mysql_server_endpoint='.mysql.database.azure.com',
         postgresql_server_endpoint='.postgres.database.azure.com',
@@ -407,6 +413,7 @@ AZURE_CHINA_CLOUD = Cloud(
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
+        mhsm_dns='.managedhsm.azure.cn',
         sql_server_hostname='.database.chinacloudapi.cn',
         mysql_server_endpoint='.mysql.database.chinacloudapi.cn',
         postgresql_server_endpoint='.postgres.database.chinacloudapi.cn',
@@ -436,6 +443,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         storage_endpoint='core.usgovcloudapi.net',
         storage_sync_endpoint='afs.azure.us',
         keyvault_dns='.vault.usgovcloudapi.net',
+        mhsm_dns='.managedhsm.usgovcloudapi.net',
         sql_server_hostname='.database.usgovcloudapi.net',
         mysql_server_endpoint='.mysql.database.usgovcloudapi.net',
         postgresql_server_endpoint='.postgres.database.usgovcloudapi.net',
@@ -460,6 +468,7 @@ AZURE_GERMAN_CLOUD = Cloud(
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
+        mhsm_dns='.managedhsm.microsoftazure.de',
         sql_server_hostname='.database.cloudapi.de',
         mysql_server_endpoint='.mysql.database.cloudapi.de',
         postgresql_server_endpoint='.postgres.database.cloudapi.de',

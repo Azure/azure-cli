@@ -9,6 +9,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import sdk_no_wait
 
 from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
@@ -387,7 +388,8 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_storage_container_name=None,
                    fileupload_sas_ttl=1,
                    fileupload_storage_authentication_type=None,
-                   fileupload_storage_container_uri=None):
+                   fileupload_storage_container_uri=None,
+                   min_tls_version=None):
     from datetime import timedelta
     cli_ctx = cmd.cli_ctx
     if enable_fileupload_notifications:
@@ -428,7 +430,8 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
                                   messaging_endpoints=msg_endpoint_dic,
                                   storage_endpoints=storage_endpoint_dic,
-                                  cloud_to_device=cloud_to_device_properties)
+                                  cloud_to_device=cloud_to_device_properties,
+                                  min_tls_version=min_tls_version)
     properties.enable_file_upload_notifications = enable_fileupload_notifications
 
     hub_description = IotHubDescription(location=location,
@@ -1047,7 +1050,7 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
 
 def iot_central_app_create(
         cmd, client, app_name, resource_group_name, subdomain, sku="ST2",
-        location=None, template=None, display_name=None
+        location=None, template=None, display_name=None, no_wait=False
 ):
     cli_ctx = cmd.cli_ctx
     location = _ensure_location(cli_ctx, resource_group_name, location)
@@ -1060,9 +1063,7 @@ def iot_central_app_create(
               sku=appSku,
               template=template)
 
-    createResult = client.apps.create_or_update(
-        resource_group_name, app_name, app)
-    return createResult
+    return sdk_no_wait(no_wait, client.apps.create_or_update, resource_group_name, app_name, app)
 
 
 def iot_central_app_get(client, app_name, resource_group_name=None):
@@ -1071,8 +1072,8 @@ def iot_central_app_get(client, app_name, resource_group_name=None):
     return client.apps.get(resource_group_name, app_name)
 
 
-def iot_central_app_delete(client, app_name, resource_group_name):
-    return client.apps.delete(resource_group_name, app_name)
+def iot_central_app_delete(client, app_name, resource_group_name, no_wait=False):
+    return sdk_no_wait(no_wait, client.apps.delete, resource_group_name, app_name)
 
 
 def iot_central_app_list(client, resource_group_name=None):

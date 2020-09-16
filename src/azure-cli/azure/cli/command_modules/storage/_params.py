@@ -230,7 +230,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
         c.argument('enable_hierarchical_namespace', arg_type=get_three_state_flag(),
-                   options_list=['--enable-hierarchical-namespace', '--hns'],
+                   options_list=['--enable-hierarchical-namespace', '--hns',
+                                 c.deprecate(target='--hierarchical-namespace', redirect='--hns', hide=True)],
                    help=" Allow the blob service to exhibit filesystem semantics. This property can be enabled only "
                    "when storage account kind is StorageV2.",
                    min_api='2018-02-01')

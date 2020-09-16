@@ -380,6 +380,79 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
+    def test_role_assignment_create_update(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'rg': resource_group,
+                'description': "Role assignment foo to check on bar",
+                'condition': "@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:Name] stringEquals 'foo'",
+                'condition_version': "2.0"
+            })
+
+            result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+            self.kwargs['object_id'] = result['objectId']
+            try:
+                # Test create role assignment with description, condition and condition_version
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                         # Include double quotes to tell shlex to treat arguments as a whole
+                         '--description "{description}" '
+                         '--condition "{condition}" --condition-version {condition_version}',
+                         checks=[
+                             self.check("description", "{description}"),
+                             self.check("condition", "{condition}"),
+                             self.check("conditionVersion", "{condition_version}")
+                         ])
+                self.cmd('role assignment delete -g {rg}')
+
+                # Test create role assignment with description, condition. condition_version defaults to 2.0
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                         '--description "{description}" '
+                         '--condition "{condition}"',
+                         checks=[
+                             self.check("description", "{description}"),
+                             self.check("condition", "{condition}"),
+                             self.check("conditionVersion", "2.0")
+                         ])
+                self.cmd('role assignment delete -g {rg}')
+
+                # Test error is raised if condition-version is set but condition is not
+                with self.assertRaisesRegex(CLIError, "--condition must be set"):
+                    self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                             '--condition-version {condition_version}')
+
+                # Update
+                output = self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                                  '--description "{description}" '
+                                  '--condition "{condition}" --condition-version {condition_version}').get_output_in_json()
+
+                updated_description = "Some updated description."
+                output['description'] = updated_description
+                import shlex
+                from ..util import escape_apply_kwargs
+                # The json contains both single (in description) and double quotes, use shlex to quote and escape it,
+                # then escape it again before being passed to self.cmd
+                output_json = escape_apply_kwargs(shlex.quote(json.dumps(output)))
+
+                self.cmd("role assignment update --role-assignment {}".format(output_json),
+                         checks=[self.check("description", updated_description)])
+
+                with self.assertRaisesRegex(CLIError, "cannot be downgraded"):
+                    output['conditionVersion'] = '1.0'
+                    output_json = escape_apply_kwargs(shlex.quote(json.dumps(output)))
+                    self.cmd("role assignment update --role-assignment {}".format(output_json))
+
+                self.cmd('role assignment delete -g {rg}')
+
+            finally:
+                self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
     def test_role_assignment_handle_conflicted_assignments(self, resource_group):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
