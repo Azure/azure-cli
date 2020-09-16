@@ -33,7 +33,7 @@ GROUP_NAME_MAX_LENGTH = 20
 
 
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
-    location = 'eastus2' # 'eastus2euap'
+    location = 'eastus2'
 
     def _remove_resource_group(self, resource_group_name):
         self.cmd('group delete -n {} --yes'.format(resource_group_name))
@@ -121,7 +121,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    location = 'eastus2' # 'eastus2euap'
+    location = 'eastus2'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=location)
