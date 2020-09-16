@@ -429,9 +429,9 @@ def return_valid_duration(instance_value, update_value):
         value_toreturn = str(instance_value)
 
     if iso8601pattern.match(value_toreturn):
-        if parse_duration(value_toreturn) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
-            return value_toreturn
-        return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
+        if parse_duration(value_toreturn) > timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
+            return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
+        return value_toreturn
 
     if timedeltapattern.match(value_toreturn):
         day, minute, seconds = value_toreturn.split(":")
@@ -450,22 +450,19 @@ def return_valid_duration_create(update_value):
     from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         if iso8601pattern.match(update_value):
-            if parse_duration(update_value) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
-                return update_value
-            else:
+            if parse_duration(update_value) > timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 raise CLIError(
                     'duration value should be less than (days:min:secs) 10675199:10085:477581')
 
         if timedeltapattern.match(update_value):
             day, minute, seconds = update_value.split(":")
             if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
-                return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
+                update_value = timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
             else:
                 raise CLIError(
                     'duration value should be less than timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)')
 
-
-    return None
+    return update_value
 
 
 # NetwrokRuleSet Region
