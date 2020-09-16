@@ -491,3 +491,8 @@ examples:
   - name: List of Namespaces within given Cluster.
     text: az eventhubs cluster namespace list --resource-group myresourcegroup --name mycluster
 """
+
+helps['eventhubs cluster wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the Cluster operation is completed.
+"""
