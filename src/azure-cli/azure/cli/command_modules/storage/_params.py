@@ -167,11 +167,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     )
 
     if_modified_since_type = CLIArgumentType(
-       help='Commence only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
-       type=get_datetime_type(False))
+        help='Commence only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+        type=get_datetime_type(False))
     if_unmodified_since_type = CLIArgumentType(
-       help='Commence only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
-       type=get_datetime_type(False))
+        help='Commence only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+        type=get_datetime_type(False))
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
