@@ -31,13 +31,13 @@ from azure.graphrbac.models import GraphErrorException
 
 from msrestazure.azure_exceptions import CloudError
 
-from ._client_factory import get_client_factory, Clients, is_azure_stack_profile
-from ._validators import _construct_vnet, secret_text_encoding_values
-from .security_domain.jwe import JWE
-from .security_domain.security_domain import Datum, SecurityDomainRestoreData
-from .security_domain.shared_secret import SharedSecret
-from .security_domain.sp800_108 import KDF
-from .security_domain.utils import Utils
+from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
+from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
+from azure.cli.command_modules.keyvault.security_domain.jwe import JWE
+from azure.cli.command_modules.keyvault.security_domain.security_domain import Datum, SecurityDomainRestoreData
+from azure.cli.command_modules.keyvault.security_domain.shared_secret import SharedSecret
+from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
+from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 
 logger = get_logger(__name__)
 
