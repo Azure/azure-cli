@@ -36,7 +36,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         target_container = self.create_container(target_account_info)
         self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
                          'src --source-account-name {} --source-account-key {} --source-snapshot '
-                         '{} --destination-container {} --destination-blob backup',
+                         '{} --destination-container {} --destination-blob backup '
+                         '--destination-if-modified-since "2020-06-29T06:32Z" ',
                          target_account_info, source_container, source_account,
                          source_account_info[1], snapshot, target_container)
 

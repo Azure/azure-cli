@@ -862,8 +862,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
 
         c.register_source_uri_arguments(validator=process_blob_source_uri, blob_only=True)
-        c.argument('destination_if_modified_since', arg_group='Pre-condition')
-        c.argument('destination_if_unmodified_since', arg_group='Pre-condition')
+        c.argument('destination_if_modified_since', arg_group='Pre-condition', type=get_datetime_type(False))
+        c.argument('destination_if_unmodified_since', arg_group='Pre-condition', type=get_datetime_type(False))
         c.argument('destination_if_match', arg_group='Pre-condition')
         c.argument('destination_if_none_match', arg_group='Pre-condition')
         c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
