@@ -832,8 +832,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
-            c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition')
-            c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition', type=get_datetime_type(False))
+            c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition', type=get_datetime_type(False))
             c.argument('{}_if_match'.format(item), arg_group='Pre-condition')
             c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
         c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
