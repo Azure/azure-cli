@@ -91,7 +91,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 
     if not string:
         raise CLIError(
-            'For HMAC authorization, please specify config store name or connection string(suggested).')
+            'If you are using HMAC auth mode, please specify config store name or connection string(suggested).')
     return string
 
 

@@ -242,7 +242,9 @@ def export_config(cmd,
                                         label=label if label else SearchFilterOptions.EMPTY_LABEL,
                                         name=name,
                                         connection_string=connection_string,
-                                        all_=True)
+                                        all_=True,
+                                        auth_mode=auth_mode,
+                                        endpoint=endpoint)
 
     # if customer needs preview & confirmation
     if not yes:
@@ -260,7 +262,9 @@ def export_config(cmd,
                                              label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
                                              name=dest_name,
                                              connection_string=dest_connection_string,
-                                             all_=True)
+                                             all_=True,
+                                             auth_mode=dest_auth_mode,
+                                             endpoint=dest_endpoint)
 
         elif destination == 'appservice':
             dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)

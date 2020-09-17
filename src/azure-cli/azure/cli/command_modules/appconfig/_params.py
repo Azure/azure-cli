@@ -131,7 +131,8 @@ def load_arguments(self, _):
                    help='Auth mode for connecting to source App Configuration. For details, refer to "--auth-mode" argument.')
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
-        c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+        c.argument('appservice_account', validator=validate_appservice_name_or_id,
+                   help='If you are using AAD auth mode, provide ARM ID for AppService. If you are using HMAC auth mode, you can provide either ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
 
     with self.argument_context('appconfig kv export') as c:
         c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default. Only when export destination is appconfig, we support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix. Label filters are not supported when exporting to file or appservice.")
@@ -161,7 +162,8 @@ def load_arguments(self, _):
                    help='Auth mode for connecting to destination App Configuration. For details, refer to "--auth-mode" argument.')
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
-        c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+        c.argument('appservice_account', validator=validate_appservice_name_or_id,
+                   help='If you are using AAD auth mode, provide ARM ID for AppService. If you are using HMAC auth mode, you can provide either ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
 
     with self.argument_context('appconfig kv set') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")

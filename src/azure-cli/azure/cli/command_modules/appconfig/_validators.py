@@ -93,9 +93,16 @@ def validate_appservice_name_or_id(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     if namespace.appservice_account:
         if not is_valid_resource_id(namespace.appservice_account):
-            config_store_name = namespace.name
-            if not config_store_name:
+            config_store_name = ""
+            if namespace.name:
+                config_store_name = namespace.name
+            elif namespace.connection_string:
                 config_store_name = get_store_name_from_connection_string(namespace.connection_string)
+            else:
+                if namespace.auth_mode == 'aad':
+                    raise CLIError("Since you are using AAD auth mode, please provide a valid ARM resource ID for --appservice-account.")
+                raise CLIError("Please provide App Configuration name or connection string.")
+
             resource_group, _ = resolve_resource_group(cmd, config_store_name)
             namespace.appservice_account = {
                 "subscription": get_subscription_id(cmd.cli_ctx),
@@ -103,8 +110,7 @@ def validate_appservice_name_or_id(cmd, namespace):
                 "name": namespace.appservice_account
             }
         else:
-            namespace.appservice_account = parse_resource_id(
-                namespace.appservice_account)
+            namespace.appservice_account = parse_resource_id(namespace.appservice_account)
 
 
 def validate_query_fields(namespace):
