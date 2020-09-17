@@ -911,6 +911,11 @@ short-summary: Get the details of an SSL certificate.
 examples:
   - name: Get the details of an SSL certificate.
     text: az network application-gateway ssl-cert show -g MyResourceGroup --gateway-name MyAppGateway -n MySslCert
+  - name: Display the expiry date of SSL certificate. The certificate is returned in PKCS7 format from which the expiration date needs to be retrieved.
+    text: |
+        publiccert=`az network application-gateway ssl-cert show -g MyResourceGroup --gateway-name MyAppGateway --name mywebsite.com --query publicCertData -o tsv`
+        echo "-----BEGIN CERTIFICATE-----" >> public.cert; echo "${publiccert}" >> public.cert; echo "-----END CERTIFICATE-----" >> public.cert
+        cat public.cert | fold -w 64 | openssl pkcs7 -print_certs | openssl x509 -noout -enddate
 """
 
 helps['network application-gateway ssl-cert update'] = """
