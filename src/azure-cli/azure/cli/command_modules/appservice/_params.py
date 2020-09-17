@@ -903,6 +903,7 @@ def load_arguments(self, _):
                                                                          'the conditions shown using the --show-hostname-purchase-terms flag. ')
         c.argument('tags', arg_type=tags_type)
         c.argument('dryrun', help='Show summary of the purchase and create operation instead of executing it')
+        c.argument('no_wait', help='Do not wait for the create to complete, and return immediately after queuing the create.')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources')
 
     with self.argument_context('appservice domain show-terms') as c:

@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True, auto_renew=True,  # pylint: disable=too-many-locals
-                  accept_terms=False, tags=None, dryrun=False):
+                  accept_terms=False, tags=None, dryrun=False, no_wait=False):
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.appservice._template_builder import (build_dns_zone, build_domain)
     from datetime import datetime
@@ -30,7 +30,13 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
                        "using the command `az appservice domain show-terms`, and accept these terms and "
                        "conditions using the --accept-terms flag".format(hostname))
 
-    contact_info = json.loads(contact_info)
+    try:
+        contact_info = json.loads(contact_info)
+    except Exception:
+        raise CLIError('Unable to load contact info. Please verify the path to your contact info file, '
+                       'and that the format matches the sample found at the following link: '
+                       'https://github.com/AzureAppServiceCLI/appservice_domains_templates'
+                       '/blob/master/contact_info.json')
     contact_info = verify_contact_info_and_format(contact_info)
 
     current_time = str(datetime.utcnow()).replace('+00:00', 'Z')
@@ -88,6 +94,10 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
         raise CLIError("Custom domain name '{}' is not available. Please try again "
                        "with a new hostname.".format(hostname))
 
+    tld = '.'.join(hostname.split('.')[1:])
+    agreements = web_client.top_level_domains.list_agreements(name=tld, include_privacy=privacy)
+    agreement_keys = [agreement.agreement_key for agreement in agreements]
+
     dns_zone_id = "[resourceId('Microsoft.Network/dnszones', '{}')]".format(hostname)
 
     master_template = ArmTemplateBuilder()
@@ -112,6 +122,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
                                    dns_zone_id=dns_zone_id,
                                    privacy=privacy,
                                    auto_renew=auto_renew,
+                                   agreement_keys=agreement_keys,
                                    tags=tags,
                                    dependencies=[dns_zone_id])
 
@@ -131,10 +142,10 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
         deployment = Deployment(properties=properties)
 
         deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-            sdk_no_wait(False, client.create_or_update, resource_group_name, deployment_name, deployment))
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment))
     else:
         deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-            sdk_no_wait(False, client.create_or_update, resource_group_name, deployment_name, properties))
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
 
     return deployment_result
 
@@ -147,50 +158,24 @@ def show_domain_purchase_terms(cmd, hostname):
     except Exception:  # pylint: disable=broad-except
         raise CLIError("Invalid hostname: '{}'. Please enter a valid hostname".format(hostname))
 
-    legal_terms_string = (
-        "By purchasing and creating an appservice domain using the `az appservice domain create` command with "
-        "the --accept-terms flag, I (a) acknowledge that domain registration is provided by "
-        "GoDaddy.com, LLC ('Go Daddy'), who is my registrar of record,(b) agree to the legal terms provided "
-        "below, (c) agree to share my contact information and IP address with Go Daddy, (d) authorize Microsoft"
-        "Microsoft to charge or bill my current payment method for the price of the domain ($11.99) including "
-        "applicable taxes on a one-time basis or, if auto-renewal is selected, an annual basis until I "
-        "discontinue auto-renewal, and (e) agree that Microsoft may share my contact information and these "
-        "transaction details with GoDaddy. Microsoft does not provide rights for non-Microsoft products or services."
-    )
-
-    additional_terms_string = ("No domain name registration will be deemed effective unless and until the "
-                               "relevant registry accepts your application and activates your domain name "
-                               "registration. If you have selected automatic renewal, Go Daddy will "
-                               "automatically renew your domain name registration(s) on an annual basis. "
-                               "You may cancel automatic renewal at any time. If you have not selected automatic "
-                               "renewal, you may renew an expired domain name registration at Microsoft’s "
-                               "then-current rate for domain names up to 18 days after the expiration date. "
-                               "After such 18-day period, and until the 42nd day after the expiration date "
-                               "(the “Redemption Period”), renewal will be subject to an additional 80.00 USD "
-                               "fee. If you fail to renew your domain name registration prior to expiration of "
-                               "the Redemption Period, the domain name may be reassigned by Go Daddy to auction "
-                               "or backorder holders, or dropped to the registry. If your domain name is dropped "
-                               "to the registry, it may still remain in redeemable status for 30 days, during "
-                               "which time you may request renewal of your domain name. You may cancel your "
-                               "domain name registration within 5 days after the registration date for a full "
-                               "refund. No cancellations will be accepted and no refunds will be granted more "
-                               "than 5 days after the registration date.")
+    tld = '.'.join(hostname.split('.')[1:])
+    agreements = web_client.top_level_domains.list_agreements(name=tld, include_privacy=True)
 
     terms = {
         "hostname": hostname,
         "hostname_available": hostname_availability.available,
-        "hostname_purchase_price": "$11.99 USD" if hostname_availability.available else "N/A",
-        "legal_terms": legal_terms_string,
+        "hostname_purchase_price": "$11.99 USD" if hostname_availability.available else None,
+        "legal_terms":
+            "https://storedomainslegalterms.blob.core.windows.net/domain-purchase-legal-terms/legal_terms.txt",
         "GoDaddy_domain_registration_and_customer_service_agreement":
             "https://www.godaddy.com/legal/agreements/domain-name-registration-agreement",
         "ICANN_rights_and_responsibilities_policy":
-            "https://www.icann.org/resources/pages/responsibilities-2014-03-14-en",
-        "legal_terms_additional": additional_terms_string,
-        "domain_registration_agreement":
-            "https://www.secureserver.net/legal-agreement?id=reg_sa&pageid=reg_sa&pl_id=510456j",
-        "domains_by_proxy_agreement":
-            "https://www.secureserver.net/legal-agreement?id=domain_nameproxy&pageid=domain_nameproxy&pl_id=510456"
+            "https://www.icann.org/resources/pages/responsibilities-2014-03-14-en"
     }
+
+    for agreement in agreements:
+        terms['_'.join(agreement.title.lower().split(' '))] = agreement.url
+
     return terms
 
 
