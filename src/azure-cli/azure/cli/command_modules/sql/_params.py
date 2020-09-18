@@ -106,17 +106,11 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
 def get_internal_backup_storage_redundancy(self):
     return {
-        'Local': 'LRS',
-        'Zone': 'ZRS',
-        'Geo': 'GRS',
-    }.get(self, 'Invalid')
+        'local': 'LRS',
+        'zone': 'ZRS',
+        'geo': 'GRS',
+    }.get(self.lower(), 'Invalid')
 
-def get_internal_backup_storage_redundancy(self):
-    return {
-        'Local': 'LRS',
-        'Zone': 'ZRS',
-        'Geo': 'GRS',
-    }.get(self, 'Invalid')
 
 #####
 #        Reusable param type definitions
