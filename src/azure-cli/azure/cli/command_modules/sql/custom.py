@@ -45,6 +45,7 @@ from azure.mgmt.sql.models import (
 )
 
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 from ._util import (
     get_sql_capabilities_operations,
@@ -455,6 +456,10 @@ class SqlManagedInstanceMinimalTlsVersionType(Enum):
     tls_1_1 = "1.1"
     tls_1_2 = "1.2"
 
+class SqlManagedInstanceBackupStorageRedundancyType(Enum):
+    grs = "GRS"
+    lrs = "LRS"
+    zrs = "ZRS"
 
 class ComputeModelType(str, Enum):
 
@@ -2674,6 +2679,17 @@ def managed_instance_create(
     kwargs['location'] = location
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
+
+    if kwargs['location'] in ['southeastasia','brazilsouth','eastasia']:
+        if kwargs['storage_account_type'] == 'GRS':
+            confirmation = prompt_y_n("Selected value for backup storage redundancy is geo-redundant storage. Note that database backups will be geo-replicated to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/micreate-ragrs-regions. Do you want to proceed?")
+            if not confirmation:
+                return
+
+        if not kwargs['storage_account_type']:
+            confirmation = prompt_y_n("You have not specified the value for backup storage redundancy which will default to geo-redundant storage. Note that database backups will be geo-replicated to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/micreate-ragrs-regions. Do you want to proceed?")
+            if not confirmation:
+                return
 
     # Create
     return client.create_or_update(

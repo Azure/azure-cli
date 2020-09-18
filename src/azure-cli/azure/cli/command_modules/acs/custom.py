@@ -1214,7 +1214,7 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_
 def _handle_merge(existing, addition, key, replace):
     if not addition.get(key, False):
         return
-    if existing[key] is None:
+    if not existing.get(key):
         existing[key] = addition[key]
         return
 
