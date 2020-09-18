@@ -389,9 +389,9 @@ def set_key(cmd,
                 logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError(str(exception))
+                raise CLIError("Failed to set the key-value due to an exception: " + str(exception))
         except Exception as exception:
-            raise CLIError(str(exception))
+            raise CLIError("Failed to set the key-value due to an exception: " + str(exception))
     raise CLIError("Failed to set the key '{}' due to a conflicting operation.".format(key))
 
 
@@ -464,9 +464,9 @@ def set_keyvault(cmd,
                 logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError(str(exception))
+                raise CLIError("Failed to set the keyvault reference due to an exception: " + str(exception))
         except Exception as exception:
-            raise CLIError(str(exception))
+            raise CLIError("Failed to set the keyvault reference due to an exception: " + str(exception))
     raise CLIError("Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
 
 
@@ -553,9 +553,9 @@ def lock_key(cmd,
                 logger.debug('Retrying lock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError(str(exception))
+                raise CLIError("Failed to lock the key-value due to an exception: " + str(exception))
         except Exception as exception:
-            raise CLIError(str(exception))
+            raise CLIError("Failed to lock the key-value due to an exception: " + str(exception))
     raise CLIError("Failed to lock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
 
 
@@ -577,7 +577,7 @@ def unlock_key(cmd,
         except ResourceNotFoundError:
             raise CLIError("Key '{}' with label '{}' does not exist.".format(key, label))
         except HttpResponseError as exception:
-            raise CLIError(str(exception))
+            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
 
         confirmation_message = "Are you sure you want to unlock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
@@ -590,9 +590,9 @@ def unlock_key(cmd,
                 logger.debug('Retrying unlock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError(str(exception))
+                raise CLIError("Failed to unlock the key-value due to an exception: " + str(exception))
         except Exception as exception:
-            raise CLIError(str(exception))
+            raise CLIError("Failed to unlock the key-value due to an exception: " + str(exception))
     raise CLIError("Failed to unlock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
 
 
@@ -613,7 +613,7 @@ def show_key(cmd,
     except ResourceNotFoundError:
         raise CLIError("Key '{}' with label '{}' does not exist.".format(key, label))
     except HttpResponseError as exception:
-        raise CLIError(str(exception))
+        raise CLIError('Failed to retrieve key-values from config store. ' + str(exception))
 
     raise CLIError("Failed to get the key '{}' with label '{}'.".format(key, label))
 
@@ -658,16 +658,13 @@ def restore_key(cmd,
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     exception_messages = []
-    try:
-        restore_keyvalues = __read_kv_from_config_store(azconfig_client,
-                                                        key=key if key else SearchFilterOptions.ANY_KEY,
-                                                        label=label if label else SearchFilterOptions.ANY_LABEL,
-                                                        datetime=datetime)
-        current_keyvalues = __read_kv_from_config_store(azconfig_client,
-                                                        key=key if key else SearchFilterOptions.ANY_KEY,
-                                                        label=label if label else SearchFilterOptions.ANY_LABEL)
-    except HttpResponseError as exception:
-        raise CLIError('Failed to read key-value(s) that match the specified key and label.' + str(exception))
+    restore_keyvalues = __read_kv_from_config_store(azconfig_client,
+                                                    key=key if key else SearchFilterOptions.ANY_KEY,
+                                                    label=label if label else SearchFilterOptions.ANY_LABEL,
+                                                    datetime=datetime)
+    current_keyvalues = __read_kv_from_config_store(azconfig_client,
+                                                    key=key if key else SearchFilterOptions.ANY_KEY,
+                                                    label=label if label else SearchFilterOptions.ANY_LABEL)
 
     try:
         kvs_to_restore, kvs_to_modify, kvs_to_delete = __compare_kvs_for_restore(restore_keyvalues, current_keyvalues)
