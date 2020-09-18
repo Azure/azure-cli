@@ -58,8 +58,7 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
-    SqlManagedInstanceMinimalTlsVersionType,
-    AuthenticationType
+    SqlManagedInstanceMinimalTlsVersionType
 )
 
 from ._validators import (
@@ -1854,7 +1853,7 @@ def load_arguments(self, _):
 
         c.argument('last_backup_name',
                    required=False,
-                   options_list=['--last-bn'],
+                   options_list=['--last-backup-name', '--last-bn'],
                    help='The name of the last backup to restore.')
 
         c.argument('storage_container_uri',
@@ -1875,7 +1874,7 @@ def load_arguments(self, _):
 
         c.argument('last_backup_name',
                    required=False,
-                   options_list=['--last-bn'],
+                   options_list=['--last-backup-name', '--last-bn'],
                    help='The name of the last backup to restore.')
 
     ###############################################
