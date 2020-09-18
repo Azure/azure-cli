@@ -1955,7 +1955,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         assert expected_export == actual_export
 
 
-class AppConfigAadAuthScenarioTest(ScenarioTest):
+class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
