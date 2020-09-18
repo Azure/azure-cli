@@ -18,6 +18,7 @@ from azure.cli.testsdk import (
     JMESPathCheckGreaterThan,
     NoneCheck,
     ResourceGroupPreparer,
+    VirtualNetworkPreparer,
     ScenarioTest,
     StorageAccountPreparer,
     LiveScenarioTest,
@@ -41,7 +42,7 @@ managed_instance_name_max_length = 20
 
 
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
+    def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus2',
                  admin_user='admin123', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True):
         super(SqlServerPreparer, self).__init__(name_prefix, server_name_max_length)
@@ -819,7 +820,9 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
-    def test_sql_mi_operation_mgmt(self):
+    @ResourceGroupPreparer(name_prefix='clitestsql', location='westeurope', key='resource_group')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnet1', key='vnet_name')
+    def test_sql_mi_operation_mgmt(self, resource_group):
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
@@ -830,14 +833,11 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group = "toki"
         user = admin_login
 
         self.kwargs.update({
             'loc': loc,
-            'resource_group': resource_group,
-            'vnet_name': 'vcCliTestVnet1',
-            'subnet_name': 'vcCliTestSubnet1',
+            'subnet_name': 'default',
             'route_table_name': 'vcCliTestRouteTable1',
             'route_name_default': 'default',
             'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
@@ -851,7 +851,8 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
-            'delegations': "Microsoft.Sql/managedInstances"
+            'delegations': "Microsoft.Sql/managedInstances",
+            'nsg': 'mynsg'
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
@@ -860,8 +861,9 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
         self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
         self.cmd('network vnet update -g {resource_group} -n {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network nsg create -g {resource_group} -n {nsg}')
         self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} ')
+        self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} --network-security-group {nsg}')
         subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         print('Creating subnet...\n')
@@ -1208,7 +1210,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     @SqlServerPreparer(location='westeurope')
-    @StorageAccountPreparer(location='westus')
+    @StorageAccountPreparer(location='southcentralus')
     @StorageAccountPreparer(parameter_name='storage_account_2',
                             resource_group_parameter_name='resource_group_2')
     def test_sql_db_security_mgmt(self, resource_group, resource_group_2,
@@ -1345,7 +1347,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     @SqlServerPreparer(location='westeurope')
-    @StorageAccountPreparer(location='westus')
+    @StorageAccountPreparer(location='southcentralus')
     @StorageAccountPreparer(parameter_name='storage_account_2',
                             resource_group_parameter_name='resource_group_2')
     def test_sql_server_security_mgmt(self, resource_group, resource_group_2,
@@ -2403,12 +2405,12 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
 
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westcentralus')
-    @SqlServerPreparer(location='westcentralus')
-    @StorageAccountPreparer(location='westcentralus')
+    @ResourceGroupPreparer(location='southcentralus')
+    @SqlServerPreparer(location='southcentralus')
+    @StorageAccountPreparer(location='southcentralus')
     @AllowLargeResponse()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'westcentralus'
+        location_long_name = 'southcentralus'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -2862,8 +2864,8 @@ class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
 
 
 class SqlZoneResilienceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='centralus')
-    @SqlServerPreparer(location='centralus')
+    @ResourceGroupPreparer(location='southcentralus')
+    @SqlServerPreparer(location='southcentralus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_database(self, resource_group, resource_group_location, server):
         database_name = "createUnzonedUpdateToZonedDb"
@@ -2963,8 +2965,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='centralus')
-    @SqlServerPreparer(location='centralus')
+    @ResourceGroupPreparer(location='southcentralus')
+    @SqlServerPreparer(location='southcentralus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_pool(self, resource_group, resource_group_location, server):
         pool_name = "createUnzonedUpdateToZonedPool"
@@ -3074,20 +3076,21 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    def test_sql_managed_instance_mgmt(self):
+    @ResourceGroupPreparer(name_prefix='clitestsql', location='westeurope', parameter_name='resource_group_1')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnet1', key='vnet_name')
+    def test_sql_managed_instance_mgmt(self, resource_group_1):
         managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         families = ['Gen5']
 
-        subnet = '/subscriptions/8fb1ad69-28b1-4046-b50f-43999c131722/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1'
+        subnet = self.cmd('az network vnet subnet show -g {rg} -n default --vnet-name {vnet_name}').get_output_in_json()['id']
 
         license_type = 'LicenseIncluded'
         loc = 'westeurope'
         v_cores = 8
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
-        resource_group_1 = "toki"
         collation = "Serbian_Cyrillic_100_CS_AS"
         proxy_override = "Proxy"
         # proxy_override_update = "Redirect"
@@ -3102,6 +3105,12 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         user = admin_login
 
+        self.kwargs.update({
+            'delegations': "Microsoft.Sql/managedInstances",
+            'nsg': 'mynsg'
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n default --delegations {delegations} --network-security-group {nsg}')
         # test create sql managed_instance
         managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
                                       '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --minimal-tls-version {} --tags {} {} --backup-storage-redundancy {}'
@@ -3229,26 +3238,32 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
     @AllowLargeResponse()
-    def test_sql_managed_instance_create_identity_mgmt(self):
+    @ResourceGroupPreparer(name_prefix='clitestsql', location='westeurope', parameter_name='resource_group_1')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnet1', key='vnet_name')
+    def test_sql_managed_instance_create_identity_mgmt(self, resource_group_1):
 
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         families = ['Gen5']
 
-        subnet = '/subscriptions/8fb1ad69-28b1-4046-b50f-43999c131722/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1'
+        subnet = self.cmd('az network vnet subnet show -g {rg} -n default --vnet-name {vnet_name}').get_output_in_json()['id']
 
         license_type = 'LicenseIncluded'
         loc = 'westeurope'
         v_cores = 8
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
-        resource_group_1 = "toki"
         collation = "Serbian_Cyrillic_100_CS_AS"
         proxy_override = "Proxy"
 
         user = admin_login
 
+        self.kwargs.update({
+            'nsg': 'mynsg'
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n default --network-security-group {nsg}')
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
                  '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
@@ -3400,15 +3415,15 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
     # Remove when issue #9393 is fixed.
     @live_only()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnet', key='vnet_name')
     def test_sql_mi_tdebyok(self, resource_group, resource_group_location):
 
         resource_prefix = 'sqltdebyok'
 
         self.kwargs.update({
             'loc': resource_group_location,
-            'vnet_name': 'vcCliTestVnet',
-            'subnet_name': 'vcCliTestSubnet',
+            'subnet_name': 'default',
             'route_table_name': 'vcCliTestRouteTable',
             'route_name_default': 'default',
             'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
@@ -3423,7 +3438,9 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
             'edition': 'GeneralPurpose',
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
-            'proxy_override': "Proxy"
+            'proxy_override': "Proxy",
+            'delegations': "Microsoft.Sql/managedInstances",
+            'nsg': 'mynsg'
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
@@ -3431,7 +3448,9 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
         self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} --network-security-group {nsg}')
         subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
@@ -3539,15 +3558,15 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitestsql', location='westeurope')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnet1', key='vnet_name')
     def test_sql_managed_db_short_retention(self, resource_group, resource_group_location):
 
         resource_prefix = 'MIDBShortTermRetention'
 
         self.kwargs.update({
             'loc': "westeurope",
-            'vnet_name': 'MIVirtualNetwork',
-            'subnet_name': 'ManagedInsanceSubnet',
+            'subnet_name': 'default',
             'route_table_name': 'vcCliTestRouteTable',
             'route_name_internet': 'vcCliTestRouteInternet',
             'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
@@ -3565,11 +3584,13 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
             'proxy_override': "Proxy",
             'retention_days_inc': 14,
             'retention_days_dec': 7,
-            'rg': 'v-urmila'
+            'delegations': "Microsoft.Sql/managedInstances",
+            'nsg': 'mynsg'
         })
-
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} --network-security-group {nsg}')
         self.kwargs.update({
-            'subnet_id': '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/v-urmila/providers/Microsoft.Network/virtualNetworks/MIVirtualNetwork/subnets/ManagedInsanceSubnet'
+            'subnet_id': self.cmd('az network vnet subnet show -g {rg} -n default --vnet-name {vnet_name}').get_output_in_json()['id']
         })
 
         # create sql managed_instance
@@ -3756,16 +3777,15 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitestsql', location='westeurope')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnetRestoreDel', key='vnet_name')
     def test_sql_managed_deleted_db_restore(self, resource_group, resource_group_location):
 
         resource_prefix = 'MIRestoreDeletedDB'
 
         self.kwargs.update({
             'loc': 'westeurope',
-            'rg': 'DejanDuVnetRG',
-            'vnet_name': 'vcCliTestVnetRestoreDel',
-            'subnet_name': 'vcCliTestSubnetRestoreDel',
+            'subnet_name': 'default',
             'route_table_name': 'vcCliTestRouteTableRestoreDel',
             'route_name_internet': 'vcCliTestRouteInternet',
             'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
@@ -3783,7 +3803,9 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
             'retention_days_inc': 14,
-            'retention_days_dec': 7
+            'retention_days_dec': 7,
+            'delegations': "Microsoft.Sql/managedInstances",
+            'nsg': 'mynsg'
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
@@ -3791,7 +3813,9 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
         self.cmd('network vnet update -g {rg} -n {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} --network-security-group {nsg}')
         subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
@@ -3852,7 +3876,9 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
-    def test_sql_managed_db_mgmt(self):
+    @ResourceGroupPreparer(name_prefix='clitestsql', location='westeurope', parameter_name='resource_group_1')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnet1', key='vnet_name')
+    def test_sql_managed_db_mgmt(self, resource_group_1):
         database_name = "cliautomationdb01"
         database_name_restored = "restoredcliautomationdb01"
 
@@ -3860,7 +3886,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        subnet = '/subscriptions/8fb1ad69-28b1-4046-b50f-43999c131722/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1'
+        subnet = self.cmd('az network vnet subnet show -g {rg} -n default --vnet-name {vnet_name}').get_output_in_json()['id']
 
         license_type = 'LicenseIncluded'
         loc = 'westeurope'
@@ -3868,9 +3894,15 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group_1 = "toki"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
+
+        self.kwargs.update({
+            'delegations': "Microsoft.Sql/managedInstances",
+            'nsg': 'mynsg'
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n default --delegations {delegations} --network-security-group {nsg}')
 
         # Prepare managed instance for test
         managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
@@ -3951,14 +3983,16 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
 
     # Remove when issue #9393 is fixed.
     @live_only()
+    @ResourceGroupPreparer(name_prefix='clitestsql', location='westeurope')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnetAad', key='vnet_name')
     def test_sql_mi_aad_admin(self):
 
         print('Test is started...\n')
 
         self.kwargs.update({
             'loc': 'westeurope',
-            'vnet_name': 'vcCliTestVnetAad',
-            'subnet_name': 'vcCliTestSubnetAad',
+            # 'vnet_name': 'vcCliTestVnetAad',
+            'subnet_name': 'default',
             'route_table_name': 'vcCliTestRouteTableAad',
             'route_name_internet': 'vcCliTestRouteInternet',
             'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
@@ -3972,7 +4006,8 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
-            'rg': 'DejanDuVnetRG'
+            'delegations': "Microsoft.Sql/managedInstances",
+            'nsg': 'mynsg'
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
@@ -3980,7 +4015,9 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
         self.cmd('network vnet update -g {rg} -n {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network nsg create -g {resource_group} -n {nsg}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} --network-security-group {nsg}')
         subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         print('Vnet is created...\n')
@@ -4267,13 +4304,13 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='clitestsql', location='westeurope')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestVnet7', key='vnet_name')
     def test_sql_virtual_cluster_mgmt(self):
 
         self.kwargs.update({
-            'rg': 'DejanDuVnetRG',
             'loc': 'westeurope',
-            'vnet_name': 'vcCliTestVnet7',
-            'subnet_name': 'vcCliTestSubnet7',
+            'subnet_name': 'default',
             'route_table_name': 'vcCliTestRouteTable7',
             'route_name_internet': 'vcCliTestRouteInternet',
             'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
@@ -4287,7 +4324,8 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
             'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
-            'delegations': "Microsoft.Sql/managedInstances"
+            'delegations': "Microsoft.Sql/managedInstances",
+            'nsg': 'mynsg'
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
@@ -4295,8 +4333,9 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
         self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
         self.cmd('network vnet update -g {rg} -n {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network nsg create -g {resource_group} -n {nsg}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} ')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --delegations {delegations} --network-security-group {nsg}')
         subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
@@ -4596,7 +4635,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         information_type = 'Name'
         label_name = 'Confidential - GDPR'
         information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
-        label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
+        label_id = 'c3b8afe5-f8c4-4b7a-a227-d0f31c35f6c2'
 
         self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
@@ -4639,12 +4678,12 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
 
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        resource_group_location = "eastus2euap"
+        resource_group_location = "eastus"
         tls1_2 = "1.2"
         tls1_1 = "1.1"
 
@@ -4669,7 +4708,9 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
-    def test_sql_mi_failover_mgmt(self):
+    @ResourceGroupPreparer(name_prefix='clitestsql', location='westeurope', key='resource_group', parameter_name='resource_group')
+    @VirtualNetworkPreparer(name_prefix='vcCliTestFailoverVnet3', key='vnet_name')
+    def test_sql_mi_failover_mgmt(self, resource_group):
 
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
@@ -4681,14 +4722,11 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group = "DejanDuVnetRG"
         user = admin_login
 
         self.kwargs.update({
             'loc': loc,
-            'resource_group': resource_group,
-            'vnet_name': 'vcCliTestFailoverVnet3',
-            'subnet_name': 'vcCliTestFailoverSubnet3',
+            'subnet_name': 'default',
             'route_table_name': 'vcCliTestFailoverRouteTable3',
             'route_name_default': 'default',
             'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
@@ -4700,7 +4738,8 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
             'storage_size_in_gb': '128',
             'edition': 'GeneralPurpose',
             'collation': "Serbian_Cyrillic_100_CS_AS",
-            'proxy_override': "Proxy"
+            'proxy_override': "Proxy",
+            'nsg': 'mynsg'
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
@@ -4709,6 +4748,8 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
         self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
         self.cmd('network vnet update -g {resource_group} -n {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network nsg create -g {resource_group} -n {nsg}')
+        self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --network-security-group {nsg}')
         self.cmd('network vnet subnet update -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name} --delegations Microsoft.Sql/managedInstances',
                  checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
 
