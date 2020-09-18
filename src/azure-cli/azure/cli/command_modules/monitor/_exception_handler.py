@@ -13,6 +13,7 @@ def monitor_exception_handler(ex):
     from azure.mgmt.monitor.v2018_01_01.models import ErrorResponseException as ErrorResponseException_v2018_01_01
     from azure.mgmt.monitor.v2018_03_01.models import ErrorResponseException as ErrorResponseException_v2018_03_01
     from azure.mgmt.monitor.v2019_06_01.models import ErrorResponseException as ErrorResponseException_v2019_06_01
+    from msrestazure.azure_exceptions import CloudError
 
     from knack.util import CLIError
 
@@ -22,7 +23,8 @@ def monitor_exception_handler(ex):
                        ErrorResponseException_v2017_05_01,
                        ErrorResponseException_v2018_01_01,
                        ErrorResponseException_v2018_03_01,
-                       ErrorResponseException_v2019_06_01
+                       ErrorResponseException_v2019_06_01,
+                       CloudError
                        )):
         # work around for issue: https://github.com/Azure/azure-sdk-for-python/issues/1556
         try:

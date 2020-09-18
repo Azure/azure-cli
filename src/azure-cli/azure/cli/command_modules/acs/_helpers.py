@@ -5,7 +5,7 @@
 
 from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 # pylint: disable=no-name-in-module,import-error
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAPIServerAccessProfile
+from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAPIServerAccessProfile
 from knack.util import CLIError
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
 

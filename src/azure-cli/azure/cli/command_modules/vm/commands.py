@@ -210,6 +210,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_encryption_sets')
+        g.command('list-associated-resources', 'list_associated_resources')
 
     with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
@@ -303,6 +304,7 @@ def load_command_table(self, _):
         g.custom_command('disable', 'disable_boot_diagnostics')
         g.custom_command('enable', 'enable_boot_diagnostics')
         g.custom_command('get-boot-log', 'get_boot_log')
+        g.custom_command('get-boot-log-uris', 'get_boot_log_uris', min_api='2020-06-01')
 
     with self.command_group('vm diagnostics', compute_vm_sdk) as g:
         g.custom_command('set', 'set_diagnostics_extension')
