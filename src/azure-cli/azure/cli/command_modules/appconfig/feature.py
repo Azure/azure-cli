@@ -43,7 +43,7 @@ def set_feature(cmd,
                 description=None,
                 yes=False,
                 connection_string=None,
-                auth_mode="hmac",
+                auth_mode="key",
                 endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
 
@@ -144,7 +144,7 @@ def delete_feature(cmd,
                    label=None,
                    yes=False,
                    connection_string=None,
-                   auth_mode="hmac",
+                   auth_mode="key",
                    endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -198,7 +198,7 @@ def show_feature(cmd,
                  label=None,
                  fields=None,
                  connection_string=None,
-                 auth_mode="hmac",
+                 auth_mode="key",
                  endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -239,7 +239,7 @@ def list_feature(cmd,
                  connection_string=None,
                  top=None,
                  all_=False,
-                 auth_mode="hmac",
+                 auth_mode="key",
                  endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     try:
@@ -286,7 +286,7 @@ def lock_feature(cmd,
                  label=None,
                  connection_string=None,
                  yes=False,
-                 auth_mode="hmac",
+                 auth_mode="key",
                  endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -328,7 +328,7 @@ def unlock_feature(cmd,
                    label=None,
                    connection_string=None,
                    yes=False,
-                   auth_mode="hmac",
+                   auth_mode="key",
                    endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -370,7 +370,7 @@ def enable_feature(cmd,
                    label=None,
                    connection_string=None,
                    yes=False,
-                   auth_mode="hmac",
+                   auth_mode="key",
                    endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -423,7 +423,7 @@ def disable_feature(cmd,
                     label=None,
                     connection_string=None,
                     yes=False,
-                    auth_mode="hmac",
+                    auth_mode="key",
                     endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -482,7 +482,7 @@ def add_filter(cmd,
                yes=False,
                index=None,
                connection_string=None,
-               auth_mode="hmac",
+               auth_mode="key",
                endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -560,7 +560,7 @@ def delete_filter(cmd,
                   yes=False,
                   connection_string=None,
                   all_=False,
-                  auth_mode="hmac",
+                  auth_mode="key",
                   endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -669,7 +669,7 @@ def show_filter(cmd,
                 name=None,
                 label=None,
                 connection_string=None,
-                auth_mode="hmac",
+                auth_mode="key",
                 endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
@@ -726,7 +726,7 @@ def list_filter(cmd,
                 connection_string=None,
                 top=None,
                 all_=False,
-                auth_mode="hmac",
+                auth_mode="key",
                 endpoint=None):
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)

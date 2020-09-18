@@ -1972,7 +1972,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
-        # Get connection string and add a key-value and feature flag using HMAC auth mode
+        # Get connection string and add a key-value and feature flag using the default "key" auth mode
         credential_list = self.cmd(
             'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
@@ -2019,18 +2019,18 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
 
         # Before assigning data reader role, read operation should fail with AAD auth
         with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
-            self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode aad --key {key}')
+            self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
 
         # Assign data reader role to current user
         self.cmd('role assignment create --assignee {user_id} --role "App Configuration Data Reader" --scope {appconfig_id}')
         time.sleep(900)  # It takes around 15 mins for RBAC permissions to propagate
 
         # After asssigning data reader role, read operation should succeed
-        self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode aad --key {key}',
+        self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value)])
 
-        self.cmd('appconfig feature show --endpoint {endpoint} --auth-mode aad --feature {feature}',
+        self.cmd('appconfig feature show --endpoint {endpoint} --auth-mode login --feature {feature}',
                  checks=[self.check('locked', default_locked),
                          self.check('key', entry_feature),
                          self.check('description', default_description),
@@ -2043,7 +2043,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
             'value': updated_value
         })
         with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
-            self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode aad --key {key} --value {value} -y')
+            self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y')
 
         # Export from appconfig to file should succeed
         exported_file_path = os.path.join(TEST_DIR, 'export_aad_1.json')
@@ -2055,7 +2055,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
             'exported_file_path': exported_file_path
         })
         self.cmd(
-            'appconfig kv export --endpoint {endpoint} --auth-mode aad -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
         with open(expected_exported_file_path) as json_file:
             expected_exported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -2067,7 +2067,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
         time.sleep(900)  # It takes around 15 mins for RBAC permissions to propagate
 
         # After assigning data owner role, write operation should succeed
-        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode aad --key {key} --value {value} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', updated_value)])
 
@@ -2079,7 +2079,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
             'key': keyvault_key,
             'secret_identifier': keyvault_id
         })
-        self.cmd('appconfig kv set-keyvault --endpoint {endpoint} --auth-mode aad --key {key} --secret-identifier {secret_identifier} -y',
+        self.cmd('appconfig kv set-keyvault --endpoint {endpoint} --auth-mode login --key {key} --secret-identifier {secret_identifier} -y',
                  checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('value', appconfig_keyvault_value)])
@@ -2093,11 +2093,11 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
             'exported_file_path': exported_file_path
         })
         self.cmd(
-            'appconfig kv import --endpoint {endpoint} --auth-mode aad -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
 
         # Export from appconfig to file should succeed
         self.cmd(
-            'appconfig kv export --endpoint {endpoint} --auth-mode aad -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
         with open(expected_exported_file_path) as json_file:
             expected_exported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:

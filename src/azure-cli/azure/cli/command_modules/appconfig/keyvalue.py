@@ -45,7 +45,7 @@ def import_config(cmd,
                   yes=False,
                   skip_features=False,
                   content_type=None,
-                  auth_mode="hmac",
+                  auth_mode="key",
                   endpoint=None,
                   # from-file parameters
                   path=None,
@@ -58,7 +58,7 @@ def import_config(cmd,
                   src_key=None,
                   src_label=None,
                   preserve_labels=False,
-                  src_auth_mode="hmac",
+                  src_auth_mode="key",
                   src_endpoint=None,
                   # from-appservice parameters
                   appservice_account=None):
@@ -180,7 +180,7 @@ def export_config(cmd,
                   yes=False,
                   skip_features=False,
                   skip_keyvault=False,
-                  auth_mode="hmac",
+                  auth_mode="key",
                   endpoint=None,
                   # to-file parameters
                   path=None,
@@ -193,7 +193,7 @@ def export_config(cmd,
                   dest_connection_string=None,
                   dest_label=None,
                   preserve_labels=False,
-                  dest_auth_mode="hmac",
+                  dest_auth_mode="key",
                   dest_endpoint=None,
                   # to-app-service parameters
                   appservice_account=None):
@@ -306,7 +306,7 @@ def set_key(cmd,
             value=None,
             yes=False,
             connection_string=None,
-            auth_mode="hmac",
+            auth_mode="key",
             endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -403,7 +403,7 @@ def set_keyvault(cmd,
                  tags=None,
                  yes=False,
                  connection_string=None,
-                 auth_mode="hmac",
+                 auth_mode="key",
                  endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -476,7 +476,7 @@ def delete_key(cmd,
                label=None,
                yes=False,
                connection_string=None,
-               auth_mode="hmac",
+               auth_mode="key",
                endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -528,7 +528,7 @@ def lock_key(cmd,
              name=None,
              connection_string=None,
              yes=False,
-             auth_mode="hmac",
+             auth_mode="key",
              endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -565,7 +565,7 @@ def unlock_key(cmd,
                name=None,
                connection_string=None,
                yes=False,
-               auth_mode="hmac",
+               auth_mode="key",
                endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -602,7 +602,7 @@ def show_key(cmd,
              label=None,
              datetime=None,
              connection_string=None,
-             auth_mode="hmac",
+             auth_mode="key",
              endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     try:
@@ -628,7 +628,7 @@ def list_key(cmd,
              top=None,
              all_=False,
              resolve_keyvault=False,
-             auth_mode="hmac",
+             auth_mode="key",
              endpoint=None):
     if fields and resolve_keyvault:
         raise CLIError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
@@ -653,7 +653,7 @@ def restore_key(cmd,
                 label=None,
                 connection_string=None,
                 yes=False,
-                auth_mode="hmac",
+                auth_mode="key",
                 endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -725,7 +725,7 @@ def list_revision(cmd,
                   connection_string=None,
                   top=None,
                   all_=False,
-                  auth_mode="hmac",
+                  auth_mode="key",
                   endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 

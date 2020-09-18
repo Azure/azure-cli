@@ -91,7 +91,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 
     if not string:
         raise CLIError(
-            'If you are using HMAC auth mode, please specify config store name or connection string(suggested).')
+            'If you are using "key" auth mode, please specify config store name or connection string(suggested).')
     return string
 
 
@@ -127,13 +127,13 @@ def prep_null_label_for_url_encoding(label=None):
 
 def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
     azconfig_client = None
-    if auth_mode == "hmac":
+    if auth_mode == "key":
         connection_string = resolve_connection_string(cmd, name, connection_string)
         azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
                                                                              user_agent=HttpHeaders.USER_AGENT)
-    if auth_mode == "aad":
+    if auth_mode == "login":
         if not endpoint:
-            raise CLIError("App Configuration endpoint should be provided if auth mode is 'aad'.")
+            raise CLIError("App Configuration endpoint should be provided if auth mode is 'login'.")
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
         # Due to this bug in get_login_credentials: https://github.com/Azure/azure-cli/issues/15179,
