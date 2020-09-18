@@ -9,7 +9,6 @@ from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.web.models import SkuDescription
-from colorama import Fore, Style
 
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, DOTNET_RUNTIME_NAME,
@@ -61,7 +60,8 @@ def zip_contents_from_dir(dirPath, lang):
                     zf.write(absname, arcname)
     except IOError as e:
         if e.errno == 13:
-            raise CLIError('Insufficient permissions to create a zip in current directory. Please re-run the command with administrator privileges')
+            raise CLIError('Insufficient permissions to create a zip in current directory. '
+                           'Please re-run the command with administrator privileges')
         raise CLIError(e)
 
     return zip_file_path
@@ -174,9 +174,7 @@ def get_lang_from_content(src_path, html=False):
     else:  # TODO: Update the doc when the detection logic gets updated
         raise CLIError("Could not auto-detect the runtime stack of your app.\n"
                        "HINT: Are you in the right folder?\n"
-                        "For more information, see "
-                        + Fore.BLUE + Style.BRIGHT + "'https://go.microsoft.com/fwlink/?linkid=2109470'"
-                        + Style.RESET_ALL)
+                       "For more information, see 'https://go.microsoft.com/fwlink/?linkid=2109470'")
     return runtime_details_dict
 
 
