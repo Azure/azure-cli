@@ -11,6 +11,9 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
+from ._flexible_server_util import get_mysql_versions, get_mysql_skus, get_mysql_storage_size, get_mysql_backup_retention, get_mysql_tiers, \
+                                   get_postgres_versions, get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers
+
 
 logger = get_logger(__name__)
 
@@ -117,83 +120,79 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
-def pg_storage_validator(ns):
+def mysql_retention_validator(cmd, ns):
+    if ns.backup_retention:
+        backup_retention = get_mysql_backup_retention(cmd, ns)
+        if not backup_retention[0] <= int(ns.backup_retention) <= backup_retention[1]:
+            raise CLIError('incorrect usage: --backup_retention. Range is {} to {} days.'
+                           .format(backup_retention[0], backup_retention[1]))
+
+
+def mysql_storage_validator(cmd, ns):
     if ns.storage_mb:
-        if str(ns.storage_mb) in ['32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384']:
+        storage_sizes = get_mysql_storage_size(cmd, ns)
+        if storage_sizes[0] <= int(ns.storage_mb) <= storage_sizes[1]:
             ns.storage_mb = int(ns.storage_mb) * 1024
         else:
-            raise CLIError('Incorrect value for --storage-size : Allowed values(in GB) : \
-                            {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384}')
+            raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
+                           .format(storage_sizes[0], storage_sizes[1]))
 
-
-def mysql_storage_validator(ns):
-    if ns.storage_mb:
-        if 10 <= int(ns.storage_mb) <= 16384:
-            ns.storage_mb = int(ns.storage_mb) * 1024
-        else:
-            raise CLIError('Incorrect value for --storage-size  : Allowed values(in GB) : Integers ranging 10-16384')
-
-
-def tier_validator(ns):
+def mysql_tier_validator(cmd, ns):
     if ns.tier:
-        if str(ns.tier) not in ['Burstable', 'GeneralPurpose', 'MemoryOptimized']:
-            raise CLIError('Incorrect value for --tier. Allowed values : Burstable, GeneralPurpose, MemoryOptimized')
-
-        if re.match(r"^Standard_B\d", ns.sku_name) and ns.tier != 'Burstable':
-            raise CLIError('SKU and tier are not matching. SKU "{}" is in "Burstable" tier. '
-                           'Specify "--tier Burstable" argument to deploy with the SKU'.format(ns.sku_name))
-        if re.match(r"^Standard_D\d+s_v3$", ns.sku_name) and ns.tier != 'GeneralPurpose':
-            raise CLIError('SKU and tier are not matching. SKU "{}" is in "General Purpose" tier. '
-                           'Specify "--tier GeneralPurpose" argument to deploy with the SKU'.format(ns.sku_name))
-        if re.match(r"^Standard_E\d+s_v3$", ns.sku_name) and ns.tier != 'MemoryOptimized':
-            raise CLIError('SKU and tier are not matching. SKU "{}" is in "Memory Optimized" tier. '
-                           'Specify "--tier MemoryOptimized" argument to deploy with the SKU'.format(ns.sku_name))
+        tiers = get_mysql_tiers(cmd, ns)
+        if ns.tier not in tiers:
+            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
-def pg_sku_name_validator(ns):
+def mysql_sku_name_validator(cmd, ns):
     if ns.sku_name:
-        if len(ns.sku_name.split('_')) != 3:
-            raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. '
-                           'Examples: Standard_D4s_v3')
-        server_type, cpu, server_v3 = ns.sku_name.split('_')
-        if server_type != 'Standard' or server_v3 != 'v3':
-            raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. '
-                           'Examples: Standard_D4s_v3')
-        if not re.match(r"^(D|E)\d+s$", cpu) or \
-           (re.match(r"^(D|E)\d+s$", cpu) and int(cpu[1:-1]) not in [2, 4, 8, 16, 32, 48, 64]):
-            raise CLIError('Incorrect value for --sku-name.  Follow the convention Standard_{VM name}. '
-                           'Examples: Standard_D4s_v3. \nAllowed number of vCores: 2, 4, 8, 16, 32, 48, 64')
+        skus = get_mysql_skus(cmd, ns)
+        if ns.sku_name not in skus:
+            error_msg = 'Incorrect value for --sku-name. '
+            if ns.tier:
+                error_msg += 'The SKU name does not match {} tier. '.format(ns.tier)
+            raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 
-def mysql_sku_name_validator(ns):
+def mysql_version_validator(cmd, ns):
+    if ns.version:
+        versions = get_mysql_versions(cmd, ns)
+        if ns.version not in versions:
+            raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
+
+
+def pg_storage_validator(cmd, ns):
+    if ns.storage_mb:
+        storage_sizes = get_postgres_storage_sizes(cmd, ns)
+        if ns.storage_mb in storage_sizes:
+            ns.storage_mb = int(ns.storage_mb) * 1024
+        else:
+            raise CLIError('Incorrect value for --storage-size : Allowed values(in GB) : {}'
+                           .format(storage_sizes))
+
+
+def pg_tier_validator(cmd, ns):
+    if ns.tier:
+        tiers = get_postgres_tiers(cmd, ns)
+        if ns.tier not in tiers:
+            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+
+
+def pg_sku_name_validator(cmd, ns):
     if ns.sku_name:
-        if len(ns.sku_name.split('_')) == 2:
-            server_type, cpu = ns.sku_name.split('_')
-            if server_type != 'Standard' or cpu not in ['B1ms', 'B2s', 'B1s']:
-                raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. '
-                               'Examples: Standard_D4s_v3 Standard_E8s_v3 Standard_B1ms')
-        elif len(ns.sku_name.split('_')) == 3:
-            server_type, cpu, server_v3 = ns.sku_name.split('_')
-            if server_type != 'Standard' or server_v3 != 'v4':
-                raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. '
-                               'Examples: Standard_D4s_v3 Standard_B1ms')
-            if not re.match(r"^(D|E)\d+ds$", cpu) or \
-               (re.match(r"^(D|E)\d+ds$", cpu) and int(cpu[1:-1]) not in [2, 4, 8, 16, 32, 48, 64]):
-                raise CLIError('Incorrect value for --sku-name.  Follow the convention Standard_{VM name}. '
-                               'Examples: Standard_D4s_v3 Standard_E8s_v3 Standard_B1ms. '
-                               '\nAllowed number of vCores: 2, 4, 8, 16, 32, 48, 64')
+        skus = get_postgres_skus(cmd, ns)
+        if ns.sku_name not in skus:
+            error_msg = 'Incorrect value for --sku-name. '
+            if ns.tier:
+                error_msg += 'The SKU name does not match {} tier. '.format(ns.tier)
+            raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 
-def pg_version_validator(ns):
+def pg_version_validator(cmd, ns):
     if ns.version:
-        if ns.version not in ['11', '12']:
-            raise CLIError('Incorrect value for --version. Allowed values : {11, 12}')
-
-
-def mysql_version_validator(ns):
-    if ns.version:
-        if ns.version not in ['5.6', '5.7', '8.0']:
-            raise CLIError('Incorrect value for --version. Allowed values : {5.6, 5.7, 8.0}')
+        versions = get_postgres_versions(cmd, ns)
+        if ns.version not in versions:
+            raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
 
 
 def maintenance_window_validator(ns):

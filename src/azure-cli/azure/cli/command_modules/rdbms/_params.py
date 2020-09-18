@@ -9,14 +9,15 @@
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.parameters import (
-    get_resource_name_completion_list,
-    tags_type, get_location_type,
-    get_enum_type,
-    resource_group_name_type,
-    get_three_state_flag)
+     get_resource_name_completion_list,
+     tags_type, get_location_type,
+     get_enum_type,
+     resource_group_name_type,
+     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
-    retention_validator, tls_validator, public_access_validator, pg_storage_validator, mysql_storage_validator, tier_validator, \
-    pg_sku_name_validator, pg_version_validator, mysql_version_validator, maintenance_window_validator, ip_address_validator
+     tls_validator, public_access_validator, pg_storage_validator, mysql_storage_validator, pg_tier_validator, mysql_tier_validator, \
+     pg_sku_name_validator, mysql_sku_name_validator, pg_version_validator, mysql_version_validator, maintenance_window_validator, ip_address_validator, \
+     mysql_retention_validator, retention_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
@@ -229,23 +230,29 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server create'.format(command_group)) as c:
             # Add create mode as a parameter
             if command_group == 'postgres':
-                c.argument('tier', default='GeneralPurpose', options_list=['--tier'], validator=tier_validator,
+                c.argument('tier', default='GeneralPurpose', options_list=['--tier'], validator=pg_tier_validator,
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', default='Standard_D2s_v3', options_list=['--sku-name'], validator=pg_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3 ')
                 c.argument('storage_mb', default='128', options_list=['--storage-size'], type=int, validator=pg_storage_validator,
                            help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
+                c.argument('backup_retention', default=7, type=int, options_list=['--backup-retention'],
+                       help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
+                       validator=retention_validator)
                 c.argument('version', default='12', options_list=['--version'], validator=pg_version_validator,
                            help='Server major version.')
                 c.argument('zone', options_list=['--zone, -z'],
                            help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
-                c.argument('tier', default='Burstable',
+                c.argument('tier', default='Burstable', validator=mysql_tier_validator,
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', default='Standard_B1ms', options_list=['--sku-name'],
+                c.argument('sku_name', default='Standard_B1ms', options_list=['--sku-name'], validator=mysql_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', default='10', options_list=['--storage-size'], type=int, validator=mysql_storage_validator,
                            help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
+                c.argument('backup_retention', default=7, type=int, options_list=['--backup-retention'],
+                       help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
+                       validator=mysql_retention_validator)
                 c.argument('version', default='5.7', options_list=['--version'], validator=mysql_version_validator,
                            help='Server major version.')
                 c.argument('zone', options_list=['--zone, -z'],
@@ -263,9 +270,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
                        arg_group='Authentication')
-            c.argument('backup_retention', default=7, type=int, options_list=['--backup-retention'],
-                       help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.',
-                       validator=retention_validator)
             c.argument('tags', tags_type)
             c.argument('public_access', options_list=['--public-access'],
                        help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. IP address ranges must be dash-separated and not contain any spaces. Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. Specifying no IP address sets the server in public access mode but does not create a firewall rule. ',
@@ -290,8 +294,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.ignore('assign_identity')
-            c.argument('backup_retention', type=int, options_list=['--backup-retention'],
-                       help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
                        help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',)
             c.argument('ha_enabled', options_list=['--high-availability'], arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -300,13 +302,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
             c.argument('tags', tags_type)
             if command_group == 'mysql':
-                c.argument('tier', options_list=['--tier'],
-                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', options_list=['--sku-name'],
+                c.argument('tier', options_list=['--tier'], validator=mysql_tier_validator,
+                       help='Compute tier of the server.')
+                c.argument('sku_name', options_list=['--sku-name'], validator=mysql_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            validator=mysql_storage_validator,
                            help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
+                c.argument('backup_retention', type=int, options_list=['--backup-retention'],
+                       help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=mysql_retention_validator)
                 c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'],
                            help='Enable or disable autogrow of the storage. Default value is Enabled.')
                 c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -317,13 +321,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
             elif command_group == 'postgres':
-                c.argument('tier', options_list=['--tier'], validator=tier_validator,
-                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('tier', options_list=['--tier'], validator=pg_tier_validator,
+                       help='Compute tier of the server.')
                 c.argument('sku_name', options_list=['--sku-name'], validator=pg_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            validator=pg_storage_validator,
                            help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
+                c.argument('backup_retention', type=int, options_list=['--backup-retention'],
+                       help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
+
 
         with self.argument_context('{} flexible-server list-skus'.format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
@@ -413,14 +420,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('source_server', options_list=['--source-server'],
                        help='The name or resource ID of the source server to restore from.')
             if command_group == 'mysql':
-                c.argument('tier', options_list=['--tier'],
-                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('tier', options_list=['--tier'], validator=mysql_tier_validator,
+                       help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', options_list=['--sku-name'],
+                           validator=mysql_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention'
                                 ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-            if command_group == 'postgres':
-                c.argument('tier', options_list=['--tier'], validator=tier_validator,
-                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+            elif command_group == 'postgres':
+                 c.argument('tier', options_list=['--tier'], validator=pg_tier_validator,
+                       help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-s'], help='Name of the server.')
