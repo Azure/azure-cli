@@ -19,7 +19,6 @@ from azure.mgmt.sql.models import (
     CapabilityGroup,
     CapabilityStatus,
     CreateMode,
-    DatabaseEdition,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
@@ -465,6 +464,30 @@ class ComputeModelType(str, Enum):
 
     provisioned = "Provisioned"
     serverless = "Serverless"
+
+
+class DatabaseEdition(str, Enum):
+
+    web = "Web"
+    business = "Business"
+    basic = "Basic"
+    standard = "Standard"
+    premium = "Premium"
+    premium_rs = "PremiumRS"
+    free = "Free"
+    stretch = "Stretch"
+    data_warehouse = "DataWarehouse"
+    system = "System"
+    system2 = "System2"
+    general_purpose = "GeneralPurpose"
+    business_critical = "BusinessCritical"
+    hyperscale = "Hyperscale"
+
+
+class AuthenticationType(str, Enum):
+
+    sql = "SQL"
+    ad_password = "ADPassword"
 
 
 def _get_server_dns_suffx(cli_ctx):
@@ -1193,7 +1216,7 @@ def db_import(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.create_import_operation(
+    return client.import_method(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -2680,14 +2703,20 @@ def managed_instance_create(
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
 
-    if kwargs['location'] in ['southeastasia','brazilsouth','eastasia']:
+    if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
         if kwargs['storage_account_type'] == 'GRS':
-            confirmation = prompt_y_n("Selected value for backup storage redundancy is geo-redundant storage. Note that database backups will be geo-replicated to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/micreate-ragrs-regions. Do you want to proceed?")
+            confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
+             Note that database backups will be geo-replicated to the paired region.
+             To learn more about Azure Paired Regions visit https://aka.ms/micreate-ragrs-regions.
+             Do you want to proceed?""")
             if not confirmation:
                 return
 
         if not kwargs['storage_account_type']:
-            confirmation = prompt_y_n("You have not specified the value for backup storage redundancy which will default to geo-redundant storage. Note that database backups will be geo-replicated to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/micreate-ragrs-regions. Do you want to proceed?")
+            confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
+            which will default to geo-redundant storage. Note that database backups will be geo-replicated
+            to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/micreate-ragrs-regions.
+            Do you want to proceed?""")
             if not confirmation:
                 return
 

@@ -237,3 +237,45 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('storage share-rm stats -n {} --storage-account {} -g {} '.format(
             share_name, storage_account, resource_group)).output.strip('\n')
         self.assertEqual(result, str(512 * 1024))
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_sf", location="francecentral")
+    @StorageAccountPreparer(name_prefix="clitest", location="francecentral")
+    def test_storage_share_rm_soft_delete(self):
+        import time
+        self.cmd('storage account file-service-properties update -n {sa} -g {rg} --delete-retention-days 7 --enable-delete-retention',
+                 checks={
+                     JMESPathCheck('shareDeleteRetentionPolicy.days', 7),
+                     JMESPathCheck('shareDeleteRetentionPolicy.enabled', True)
+                 })
+
+        self.kwargs.update({
+            'share': self.create_random_name(prefix='share', length=24)
+        })
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share}', checks={
+            JMESPathCheck('name', self.kwargs['share'])
+        })
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('length(@)', 1)
+        })
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('length(@)', 0)
+        })
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted', checks={
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deleted', True)
+        })
+
+        time.sleep(30)
+        self.kwargs['version'] = \
+            self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --query [0].version -o tsv'
+                     ).output.strip('\n')
+        self.cmd('storage share-rm restore --storage-account {sa} -g {rg} -n {share} --deleted-version {version}',
+                 checks={
+                     JMESPathCheck('name', self.kwargs['share'])})
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('length(@)', 1)
+        })

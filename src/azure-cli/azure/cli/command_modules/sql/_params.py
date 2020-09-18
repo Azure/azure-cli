@@ -12,8 +12,8 @@ from azure.mgmt.sql.models import (
     Database,
     ElasticPool,
     ElasticPoolPerDatabaseSettings,
-    ImportExtensionRequest,
-    ExportRequest,
+    ImportExistingDatabaseDefinition,
+    ExportDatabaseDefinition,
     InstancePool,
     ManagedDatabase,
     ManagedInstance,
@@ -21,7 +21,6 @@ from azure.mgmt.sql.models import (
     Server,
     ServerAzureADAdministrator,
     Sku,
-    AuthenticationType,
     BlobAuditingPolicyState,
     CatalogCollationType,
     CreateMode,
@@ -60,7 +59,7 @@ from .custom import (
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
-    SqlManagedInstanceBackupStorageRedundancyType
+    AuthenticationType
 )
 
 from ._validators import (
@@ -104,6 +103,13 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
             self.unit,
             ', '.join(sorted(self.unit_map, key=self.unit_map.__getitem__)))
 
+
+def get_internal_backup_storage_redundancy(self):
+    return {
+        'Local': 'LRS',
+        'Zone': 'ZRS',
+        'Geo': 'GRS',
+    }.get(self, 'Invalid')
 
 def get_internal_backup_storage_redundancy(self):
     return {
@@ -219,7 +225,7 @@ storage_param_type = CLIArgumentType(
     validator=validate_managed_instance_storage_size)
 
 backup_storage_redundancy_param_type = CLIArgumentType(
-    options_list=['--backup-storage-redundancy'],
+    options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
     help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
     validator=validate_managed_instance_backup_storage_redundancy)
@@ -637,9 +643,9 @@ def load_arguments(self, _):
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
     with self.argument_context('sql db export') as c:
-        # Create args that will be used to build up the ExportRequest object
+        # Create args that will be used to build up the ExportDatabaseDefinition object
         create_args_for_complex_type(
-            c, 'parameters', ExportRequest, [
+            c, 'parameters', ExportDatabaseDefinition, [
                 'administrator_login',
                 'administrator_login_password',
                 'authentication_type',
@@ -662,8 +668,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(StorageKeyType))
 
     with self.argument_context('sql db import') as c:
-        # Create args that will be used to build up the ImportExtensionRequest object
-        create_args_for_complex_type(c, 'parameters', ImportExtensionRequest, [
+        # Create args that will be used to build up the ImportExistingDatabaseDefinition object
+        create_args_for_complex_type(c, 'parameters', ImportExistingDatabaseDefinition, [
             'administrator_login',
             'administrator_login_password',
             'authentication_type',
@@ -1518,6 +1524,7 @@ def load_arguments(self, _):
                 'timezone_id',
                 'tags',
                 'storage_account_type',
+                'yes'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1556,8 +1563,12 @@ def load_arguments(self, _):
 
         c.argument('storage_account_type',
                    arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy'],
+                   options_list=['--backup-storage-redundancy', '--bsr'],
                    help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
