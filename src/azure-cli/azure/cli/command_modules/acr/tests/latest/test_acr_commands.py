@@ -452,6 +452,7 @@ class AcrCommandsTests(ScenarioTest):
                           self.check('identity.type', 'SystemAssigned, UserAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower()], result['identity'])
         # add another user identity to existing
+        time.sleep(10)
         result = self.cmd('acr identity assign --name {registry_name} --identities {second_identity_id}',
                           self.check('identity.type', 'SystemAssigned, UserAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower(), self.kwargs['second_identity_id'].lower()], result['identity'])
