@@ -18,7 +18,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
-                          validator_delete_retention_days, validate_delete_retention_days,
+                          validate_delete_retention_days, validate_container_delete_retention_days,
+                          validate_file_delete_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy)
 
 
@@ -230,7 +231,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
         c.argument('enable_hierarchical_namespace', arg_type=get_three_state_flag(),
-                   options_list=['--enable-hierarchical-namespace', '--hns'],
+                   options_list=['--enable-hierarchical-namespace', '--hns',
+                                 c.deprecate(target='--hierarchical-namespace', redirect='--hns', hide=True)],
                    help=" Allow the blob service to exhibit filesystem semantics. This property can be enabled only "
                    "when storage account kind is StorageV2.",
                    min_api='2018-02-01')
@@ -410,10 +412,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
+        c.argument('enable_container_delete_retention',
+                   arg_type=get_three_state_flag(),
+                   options_list=['--enable-container-delete-retention', '--container-retention'],
+                   arg_group='Container Delete Retention Policy', min_api='2019-06-01',
+                   help='Enable container delete retention policy for container soft delete when set to true. '
+                        'Disable container delete retention policy when set to false.')
+        c.argument('container_delete_retention_days',
+                   options_list=['--container-delete-retention-days', '--container-days'],
+                   type=int, arg_group='Container Delete Retention Policy',
+                   min_api='2019-06-01', validator=validate_container_delete_retention_days,
+                   help='Indicate the number of days that the deleted container should be retained. The minimum '
+                        'specified value can be 1 and the maximum value can be 365.')
         c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
                    min_api='2018-07-01')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
-                   validator=validator_delete_retention_days, min_api='2018-07-01')
+                   validator=validate_delete_retention_days, min_api='2018-07-01')
         c.argument('enable_restore_policy', arg_type=get_three_state_flag(), arg_group='Restore Policy',
                    min_api='2019-06-01', help="Enable blob restore policy when it set to true.")
         c.argument('restore_days', type=int, arg_group='Restore Policy',
@@ -434,7 +448,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
                    min_api='2019-06-01', help='Enable file service properties for share soft delete.')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
-                   validator=validate_delete_retention_days, min_api='2019-06-01',
+                   validator=validate_file_delete_retention_days, min_api='2019-06-01',
                    help=' Indicate the number of days that the deleted item should be retained. The minimum specified '
                    'value can be 1 and the maximum value can be 365.')
 
@@ -756,27 +770,45 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
 
     with self.argument_context('storage copy') as c:
-        c.argument('destination', options_list=['--destination', '-d'], help="The path/url of copy destination. "
+        c.argument('destination',
+                   options_list=['--destination', '-d',
+                                 c.deprecate(target='--destination-local-path', redirect='--destination')],
+                   help="The path/url of copy destination. "
                    "It can be a local path, an url to azure storage server. If you provide destination parameter "
                    "here, you do not need to provide arguments in copy destination arguments group and copy "
-                   "destination arguments will be deprecated in future.")
-        c.argument('source', options_list=['--source', '-s'], help="The path/url of copy source. It can be a local"
+                   "destination arguments will be deprecated in future.", required=False)
+        c.argument('source',
+                   options_list=['--source', '-s',
+                                 c.deprecate(target='--source-local-path', redirect='--source')],
+                   help="The path/url of copy source. It can be a local"
                    " path, an url to azure storage server or AWS S3 buckets. If you provide source parameter here,"
                    " you do not need to provide arguments in copy source arguments group and copy source arguments"
-                   " will be deprecated in future.")
+                   " will be deprecated in future.", required=False)
         for item in ['destination', 'source']:
-            c.argument('{}_account_name'.format(item), arg_group='Copy {}'.format(item),
-                       help='Storage account name of copy {}'.format(item))
-            c.argument('{}_container'.format(item), arg_group='Copy {}'.format(item),
-                       help='Container name of copy {} storage account'.format(item))
-            c.argument('{}_blob'.format(item), arg_group='Copy {}'.format(item),
-                       help='Blob name in blob container of copy {} storage account'.format(item))
-            c.argument('{}_share'.format(item), arg_group='Copy {}'.format(item),
-                       help='File share name of copy {} storage account'.format(item))
-            c.argument('{}_file_path'.format(item), arg_group='Copy {}'.format(item),
-                       help='File path in file share of copy {} storage account'.format(item))
-            c.argument('{}_local_path'.format(item), arg_group='Copy {}'.format(item),
-                       help='Local file path')
+            c.extra('{}_container'.format(item), arg_group='Copy {}'.format(item),
+                    help='Container name of copy {} storage account'.format(item))
+            c.extra('{}_blob'.format(item), arg_group='Copy {}'.format(item),
+                    help='Blob name in blob container of copy {} storage account'.format(item))
+            c.extra('{}_share'.format(item), arg_group='Copy {}'.format(item),
+                    help='File share name of copy {} storage account'.format(item))
+            c.extra('{}_file_path'.format(item), arg_group='Copy {}'.format(item),
+                    help='File path in file share of copy {} storage account'.format(item))
+
+        c.argument('account_name', acct_name_type, arg_group='Storage Account', id_part=None,
+                   options_list=['--account-name',
+                                 c.deprecate(target='--destination-account-name', redirect='--account-name')],
+                   help='Storage account name of copy destination')
+        c.extra('source_account_name', arg_group='Copy source',
+                help='Account name of copy source storage account.')
+        c.extra('source_account_key', arg_group='Copy source',
+                help='Account key of copy source storage account. Must be used in conjunction with source storage '
+                     'account name.')
+        c.extra('source_connection_string', arg_group='Copy source',
+                options_list=['--source-connection-string', '--src-conn'],
+                help='Connection string of source storage account.')
+        c.extra('source_sas', arg_group='Copy source',
+                help='Shared Access Signature (SAS) token of copy source. Must be used in conjunction with source '
+                     'storage account name.')
         c.argument('put_md5', arg_group='Additional Flags', action='store_true',
                    help='Create an MD5 hash of each file, and save the hash as the Content-MD5 property of the '
                    'destination blob/file.Only available when uploading.')
@@ -1054,6 +1086,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
+        c.argument('include_deleted', action='store_true',
+                   help='Include soft deleted file shares when specified.')
+
+    with self.argument_context('storage share-rm restore', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('deleted_version',
+                   help='Identify the version of the deleted share that will be restored.')
+        c.argument('share_name',
+                   help='The file share name. Identify the name of the deleted share that will be restored.')
+        c.argument('restored_name',
+                   help='A new file share name to be restored. If not specified, deleted share name will be used.')
 
     with self.argument_context('storage share url') as c:
         c.argument('unc', action='store_true', help='Output UNC network path.')

@@ -992,7 +992,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck(
-                "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+                "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", None),
             JMESPathCheck(
                 "[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", username)
         ])
@@ -1009,7 +1009,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         self.assertNotIn('DOCKER_REGISTRY_SERVER_USERNAME', all_settings)
         self.assertNotIn('DOCKER_REGISTRY_SERVER_URL', all_settings)
         self.assertNotIn('DOCKER_REGISTRY_SERVER_PASSWORD', all_settings)
-        self.assertIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
+        self.assertNotIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
 
 
 class FunctionappACRDeploymentScenarioTest(ScenarioTest):
@@ -1380,7 +1380,6 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
-            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
@@ -1415,7 +1414,6 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_id, cert_name), checks=[
-            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
@@ -1746,6 +1744,22 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
                  JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')])
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_windows_runtime_custom_handler(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 40)
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 3 --os-type Windows --runtime custom'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+                 JMESPathCheck("[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
+                 JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'custom')])
+
 
 class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
@@ -1933,6 +1947,25 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck(
                 "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
         ])
+
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_custom_handler(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            # this weird field means it is a linux
+            JMESPathCheck('reserved', True),
+            JMESPathCheck('sku.name', 'S1')
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime custom'
+                 .format(resource_group, functionapp, plan, storage_account), checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'custom')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

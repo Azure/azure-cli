@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.11.1"
+VERSION = "2.12.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -58,7 +58,8 @@ DEPENDENCIES = [
     'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
-    'azure-keyvault~=1.1',
+    'azure-keyvault~=1.1.0',
+    'azure-keyvault-administration~=4.0.0b1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-applicationinsights~=0.1.1',
@@ -74,8 +75,8 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc14',
+    'azure-mgmt-cosmosdb~=1.0.0',
     'azure-mgmt-containerservice~=9.4.0',
-    'azure-mgmt-cosmosdb~=0.15.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
@@ -83,13 +84,13 @@ DEPENDENCIES = [
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid==3.0.0rc7',
-    'azure-mgmt-eventhub~=4.0.0',
+    'azure-mgmt-eventhub~=4.1.0',
     'azure-mgmt-hdinsight~=1.7.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.12.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-keyvault~=7.0.0b2',
+    'azure-mgmt-keyvault~=7.0.0b3',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.7.0',
     'azure-mgmt-managedservices~=1.0',
@@ -103,7 +104,7 @@ DEPENDENCIES = [
     'azure-mgmt-network~=12.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=2.2.0',
+    'azure-mgmt-rdbms~=3.0.0rc1',
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-recoveryservicesbackup~=0.6.0',
     'azure-mgmt-redhatopenshift==0.1.0',
@@ -140,6 +141,10 @@ DEPENDENCIES = [
     'javaproperties==0.5.1',
     'jsondiff==1.2.0'
 ]
+
+# dependencies for specific OSes
+if not sys.platform.startswith('cygwin'):
+    DEPENDENCIES.append('psutil~=5.7')
 
 TESTS_REQUIRE = [
     'mock~=4.0'
@@ -184,6 +189,10 @@ setup(
             'resources/WindowsFunctionsStacks.json',
             'resources/LinuxFunctionsStacks.json',
             'resources/WebappRuntimeStacks.json'
+        ],
+        'azure.cli.command_modules.rdbms': [
+            'randomname/adjectives.txt',
+            'randomname/nouns.txt'
         ]
     },
     cmdclass=cmdclass

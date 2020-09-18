@@ -911,6 +911,11 @@ short-summary: Get the details of an SSL certificate.
 examples:
   - name: Get the details of an SSL certificate.
     text: az network application-gateway ssl-cert show -g MyResourceGroup --gateway-name MyAppGateway -n MySslCert
+  - name: Display the expiry date of SSL certificate. The certificate is returned in PKCS7 format from which the expiration date needs to be retrieved.
+    text: |
+        publiccert=`az network application-gateway ssl-cert show -g MyResourceGroup --gateway-name MyAppGateway --name mywebsite.com --query publicCertData -o tsv`
+        echo "-----BEGIN CERTIFICATE-----" >> public.cert; echo "${publiccert}" >> public.cert; echo "-----END CERTIFICATE-----" >> public.cert
+        cat public.cert | fold -w 64 | openssl pkcs7 -print_certs | openssl x509 -noout -enddate
 """
 
 helps['network application-gateway ssl-cert update'] = """
@@ -5366,7 +5371,7 @@ examples:
 
 helps['network vrouter'] = """
 type: group
-short-summary: Manage the virtual router.
+short-summary: Manage the virtual router. This feature supports both VirtualHub and VirtualRouter. Considering VirtualRouter is depcated, we recommand to create VirtualRouter instead
 """
 
 helps['network vrouter create'] = """
@@ -5379,9 +5384,19 @@ type: command
 short-summary: Update a virtual router.
 """
 
+helps['network vrouter show'] = """
+type: command
+short-summary: Show a virtual router.
+"""
+
 helps['network vrouter list'] = """
 type: command
 short-summary: List all virtual routers under a subscription or a resource group.
+"""
+
+helps['network vrouter delete'] = """
+type: command
+short-summary: Delete a virtual router under a resource group.
 """
 
 helps['network vrouter peering'] = """
@@ -5397,6 +5412,21 @@ short-summary: Create a virtual router peering.
 helps['network vrouter peering update'] = """
 type: command
 short-summary: Update a virtual router peering.
+"""
+
+helps['network vrouter peering list'] = """
+type: command
+short-summary: List all virtual router peerings under a resource group.
+"""
+
+helps['network vrouter peering show'] = """
+type: command
+short-summary: Show a virtual router peering
+"""
+
+helps['network vrouter peering delete'] = """
+type: command
+short-summary: Delete a virtual router peering.
 """
 
 helps['network watcher'] = """
