@@ -8,12 +8,12 @@
 import random
 from itertools import chain
 from knack.log import get_logger
+from msrest.paging import Paged
+
 from azure.cli.core.commands import LongRunningOperation, _is_poller
-from azure.cli.core.commands import cached_get, cached_put
 from azure.cli.core.util import CLIError
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
-from msrest.paging import Paged
 
 logger = get_logger(__name__)
 
@@ -203,7 +203,7 @@ def _parse_list_skus(cmd, ns, client, database_engine):
 
     if not result:
         raise CLIError("No available SKUs in this location")
-    
+
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
     for tier_info in tiers:
@@ -218,11 +218,11 @@ def _parse_list_skus(cmd, ns, client, database_engine):
                 skus.add(vcores.name)
         tier_dict["skus"] = skus
         tier_dict["versions"] = versions
-        
+
         storage_info = tier_info.supported_storage_editions[0]
         if database_engine == 'mysql':
             tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
-            tier_dict["storage_sizes"] = (int(storage_info.min_storage_size.storage_size_mb) // 1024, 
+            tier_dict["storage_sizes"] = (int(storage_info.min_storage_size.storage_size_mb) // 1024,
                                           int(storage_info.max_storage_size.storage_size_mb) // 1024)
         elif database_engine == 'postgres':
             storage_sizes = set()
@@ -231,17 +231,17 @@ def _parse_list_skus(cmd, ns, client, database_engine):
             tier_dict["storage_sizes"] = storage_sizes
 
         tiers_dict[tier_name] = tier_dict
-        
+
     return tiers_dict
 
 
 def _get_available_values(cmd, ns, database_engine, argument):
-    if database_engine == 'mysql': 
+    if database_engine == 'mysql':
         client = cf_mysql_flexible_location_capabilities
     elif database_engine == 'postgres':
         client = cf_postgres_flexible_location_capabilities
     sku_info = _parse_list_skus(cmd, ns, client, database_engine)
-    result = {key:sku_info[key][argument] for key in sku_info.keys()}
+    result = {key: val[argument] for key, val in sku_info.items()}
     return result[ns.tier] if ns.tier else set(chain.from_iterable(result.values()))
 
 
