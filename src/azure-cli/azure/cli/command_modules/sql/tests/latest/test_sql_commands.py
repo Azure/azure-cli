@@ -3754,9 +3754,7 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
             'collation': "Serbian_Cyrillic_100_CS_AS",
             'proxy_override': "Proxy",
             'retention_days_inc': 14,
-            'retention_days_dec': 7,
-            'delegations': "Microsoft.Sql/managedInstances",
-            'nsg': 'mynsg'
+            'retention_days_dec': 7
         })
 
         subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} -n {subnet}').get_output_in_json()
