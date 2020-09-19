@@ -2,8 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import re
-
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
@@ -11,8 +9,9 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
-from ._flexible_server_util import get_mysql_versions, get_mysql_skus, get_mysql_storage_size, get_mysql_backup_retention, get_mysql_tiers, \
-                                   get_postgres_versions, get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers
+from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
+                                    get_mysql_backup_retention, get_mysql_tiers, get_postgres_versions,
+                                    get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers)
 
 
 logger = get_logger(__name__)
@@ -136,6 +135,7 @@ def mysql_storage_validator(cmd, ns):
         else:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
                            .format(storage_sizes[0], storage_sizes[1]))
+
 
 def mysql_tier_validator(cmd, ns):
     if ns.tier:
