@@ -62,14 +62,14 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def test_create_delete_volumes(self):
+    def test_create_delete_volumes(self, resource_group):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         tags = "Tag1=Value1 Tag2=Value2"
 
         protocol_types = "NFSv3"
-        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', tags=tags, protocols=protocol_types)
+        volume = self.create_volume(account_name, pool_name, volume_name, resource_group, tags=tags, protocols=protocol_types)
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         assert volume['tags']['Tag1'] == 'Value1'
         assert volume['tags']['Tag2'] == 'Value2'
@@ -94,7 +94,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert len(volume_list) == 0
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def test_create_volume_with_subnet_in_different_rg(self):
+    def test_create_volume_with_subnet_in_different_rg(self, resource_group):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
@@ -107,7 +107,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         subs_id = self.current_subscription()
         self.cmd("az group create -n %s --subscription %s -l %s" % (subnet_rg, subs_id, RG_LOCATION)).get_output_in_json()
 
-        rg = '{rg}'
+        rg = resource_group
         self.setup_vnet(subnet_rg, vnet_name, subnet_name, '10.0.0.0', RG_LOCATION)
         self.cmd("az netappfiles account create -g %s -a %s -l %s" % (rg, account_name, ANF_LOCATION)).get_output_in_json()
         self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s" % (rg, account_name, pool_name, ANF_LOCATION, POOL_DEFAULT)).get_output_in_json()
@@ -121,8 +121,8 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.cmd("az group delete --yes -n %s" % (subnet_rg))
 
     @serial_test()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    @ResourceGroupPreparer(name_prefix='cli_netappf_test_volume2_', parameter_name='replication_resourcegroup')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', location=DP_RG_LOCATION)
+    @ResourceGroupPreparer(name_prefix='cli_netappf_test_volume2_', parameter_name='replication_resourcegroup', location=DP_RG_LOCATION)
     def test_perform_replication(self, resource_group, replication_resourcegroup):
         # create source volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -131,9 +131,9 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         pool_name_r = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         volume_name_r = self.create_random_name(prefix='cli-vol-', length=24)
-        rg = '{rg}'
+        rg = resource_group
 
-        src_volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        src_volume = self.create_volume(account_name, pool_name, volume_name, rg)
         assert src_volume['id'] is not None
 
         # create destination volume in other region/rg and with its own vnet
@@ -179,14 +179,14 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         time.sleep(2)
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def test_list_volumes(self):
+    def test_list_volumes(self, resource_group):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name1 = self.create_random_name(prefix='cli-vol-', length=24)
         volume_name2 = self.create_random_name(prefix='cli-vol-', length=24)
         tags = "Tag1=Value1"
 
-        self.create_volume(account_name, pool_name, volume_name1, '{rg}', tags=tags, volume_name2=volume_name2)
+        self.create_volume(account_name, pool_name, volume_name1, resource_group, tags=tags, volume_name2=volume_name2)
 
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 2
@@ -197,14 +197,14 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def test_get_volume_by_name(self):
+    def test_get_volume_by_name(self, resource_group):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         tags = "Tag2=Value1"
 
         protocol_types = "NFSv4.1"
-        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', tags=tags, protocols=protocol_types)
+        volume = self.create_volume(account_name, pool_name, volume_name, resource_group, tags=tags, protocols=protocol_types)
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         # specified protocol type
         assert len(volume['protocolTypes']) == 1
@@ -222,13 +222,13 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume_from_id['name'] == account_name + '/' + pool_name + '/' + volume_name
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def test_update_volume(self):
+    def test_update_volume(self, resource_group):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         tags = "Tag1=Value2"
 
-        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        volume = self.create_volume(account_name, pool_name, volume_name, resource_group)
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         # default protocol type
         assert len(volume['protocolTypes']) == 1
@@ -246,12 +246,12 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['exportPolicy']['rules'][0]['ruleIndex'] == 1
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def test_export_policy(self):
+    def test_export_policy(self, resource_group):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
 
-        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        volume = self.create_volume(account_name, pool_name, volume_name, resource_group)
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
 
         # now add an export policy
@@ -280,7 +280,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert len(vol_with_export_policy['exportPolicy']['rules']) == 2
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def test_export_policy_non_default(self):
+    def test_export_policy_non_default(self, resource_group):
         # tests that adding export policy works with non-default service level/usage threshold
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
@@ -288,7 +288,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         pool_payload = "--service-level 'Standard' --size 8"
         volume_payload = "--service-level 'Standard' --usage-threshold 200"
 
-        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
+        volume = self.create_volume(account_name, pool_name, volume_name, resource_group, pool_payload=pool_payload, volume_payload=volume_payload)
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         # check the specified volume properties
         assert volume['usageThreshold'] == 200 * GIB_SCALE
