@@ -1135,7 +1135,7 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
         instance.rule_type = rule_type
     if rewrite_rule_set is not None:
         instance.rewrite_rule_set = SubResource(id=rewrite_rule_set)
-    with cmd.update_context(instance):
+    with cmd.update_context(instance) as c:
         c.set_param('priority', priority)
     return parent
 
