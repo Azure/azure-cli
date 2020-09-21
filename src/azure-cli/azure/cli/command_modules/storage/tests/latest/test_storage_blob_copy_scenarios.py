@@ -85,8 +85,9 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                                ' --expiry {}', account_info, source_container, start,
                                expiry).output.strip()
 
-        self.storage_cmd('storage blob copy start -b dst -c {} --source-blob src --sas-token {} --source-container {}',
-                         account_info, target_container, sas, source_container)
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-blob src --sas-token {} --source-container {} '
+                         '--source-if-unmodified-since "2020-06-29T06:32Z" --destination-if-modified-since '
+                         '"2020-06-29T06:32Z" ', account_info, target_container, sas, source_container)
 
         from time import sleep, time
         start = time()
