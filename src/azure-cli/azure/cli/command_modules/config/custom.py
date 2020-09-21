@@ -17,25 +17,37 @@ def _normalize_config_value(value):
     return value
 
 
-def config_set(cmd, key_value=None, local=False):
-    if key_value:
-        with ScopedConfig(cmd.cli_ctx.config, local):
-            for kv in key_value:
-                # core.no_color=true
-                parts = kv.split('=', 1)
-                if len(parts) == 1:
-                    raise CLIError('usage error: [section].[name]=[value] ...')
-                key = parts[0]
-                value = parts[1]
+def _parse_key(key):
+    """Parse the key to section and option name. There can be 2 case:
+        1. If no section is provided, like `no_color`, section will default to `core`.
+        2. If section is provided, like `core.no_color`, use the specified section.
+    """
+    if not key:
+        raise ValueError
+    parts = key.split('.', 1)
+    if len(parts) == 1:
+        # Section is not provided, default to `core`
+        return 'core', key
+    # Section is provided, like `core.no_color`, use the specified section.
+    return parts[0], parts[1]
 
-                # core.no_color
-                parts = key.split('.', 1)
-                if len(parts) == 1:
-                    raise CLIError('usage error: [section].[name]=[value] ...')
-                section = parts[0]
-                name = parts[1]
 
-                cmd.cli_ctx.config.set_value(section, name, _normalize_config_value(value))
+def config_set(cmd, key_value_pairs=None, local=False):
+    with ScopedConfig(cmd.cli_ctx.config, local):
+        for kv in key_value_pairs:
+            # core.no_color=true
+            parts = kv.split('=', 1)
+            if len(parts) == 1:
+                raise CLIError('usage error: [section].[name]=[value] ...')
+            key = parts[0]
+            value = parts[1]
+
+            try:
+                section, name = _parse_key(key)
+            except ValueError:
+                raise CLIError('usage error: [section].[name]=[value] ...')
+
+            cmd.cli_ctx.config.set_value(section, name, _normalize_config_value(value))
 
 
 def config_get(cmd, key=None, local=False):
@@ -49,15 +61,7 @@ def config_get(cmd, key=None, local=False):
                 result[section] = items
             return result
 
-    parts = key.split('.', 1)
-    if len(parts) == 1:
-        # Only section is provided
-        section = key
-        name = None
-    else:
-        # section.name
-        section = parts[0]
-        name = parts[1]
+    section, name = _parse_key(key)
 
     with ScopedConfig(cmd.cli_ctx.config, local):
         items = cmd.cli_ctx.config.items(section)
@@ -70,19 +74,16 @@ def config_get(cmd, key=None, local=False):
     try:
         return next(x for x in items if x['name'] == name)
     except StopIteration:
-        raise CLIError("Configuration '{}' is not set.".format(key))
+        raise CLIError("Configuration '{}.{}' is not set.".format(section, name))
 
 
-def config_unset(cmd, key=None, local=False):
-    for k in key:
+def config_unset(cmd, keys=None, local=False):
+    for key in keys:
         # section.name
-        parts = k.split('.', 1)
-
-        if len(parts) == 1:
+        try:
+            section, name = _parse_key(key)
+        except ValueError:
             raise CLIError("usage error: [section].[name]")
-
-        section = parts[0]
-        name = parts[1]
 
         with ScopedConfig(cmd.cli_ctx.config, local):
             cmd.cli_ctx.config.remove_option(section, name)

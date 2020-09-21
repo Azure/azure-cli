@@ -11,20 +11,27 @@ def load_arguments(self, _):
         c.ignore('_subscription')  # ignore the global subscription param
 
     with self.argument_context('config set') as c:
-        c.positional('key_value', nargs='+', help="Space-separated configurations in the form of <section>.<key>=<value>.")
+        c.positional('key_value_pairs', nargs='+',
+                     help="Set options in the form of <section>.<name>=<value>. "
+                          "If `<section>` is omitted, `core` will be used. "
+                          "To set multiple options, separate each key value pair with spaces.")
         c.argument('local', action='store_true', help='Set as a local configuration in the working directory.')
 
     with self.argument_context('config get') as c:
-        c.positional('key', nargs='?', help='The configuration to get. '
-                                            'If not provided, all sections and configurations will be listed. '
-                                            'If `section` is provided, all configurations under the specified section will be listed. '
-                                            'If `<section>.<key>` is provided, only the corresponding configuration is shown.')
+        c.positional('key', nargs='?',
+                     help='The configuration to get. '
+                          'To list all options under all sections, leave it unspecified. '
+                          'To list all options under a section, use `<section>.`. '
+                          'To list one option, use `<section>.<name>`. If `<section>` is omitted, `core` will be used. ')
         c.argument('local', action='store_true',
                    help='Include local configuration. Scan from the working directory up to the root drive, then the global configuration '
                         'and return the first occurrence.')
 
     with self.argument_context('config unset') as c:
-        c.positional('key', nargs='+', help='The configuration to unset, in the form of <section>.<key>.')
+        c.positional('keys', nargs='+',
+                     help='The configuration to unset, in the form of `<section>.<name>`. '
+                          'If `<section>` is omitted, `core` will be used. '
+                          'To unset multiple options, separate each key with spaces.')
         c.argument('local', action='store_true',
                    help='Include local configuration. Scan from the working directory up to the root drive, then the global configuration '
                         'and unset the first occurrence.')
