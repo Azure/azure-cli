@@ -69,6 +69,24 @@ def _create_token_credential(cli_ctx):
     return token_credential
 
 
+def _show_no_credentials_warning(namespace, auth_mode_attr=None):
+    credentials_attrs = [ca for ca in ['--connection-string', '--account-key', '--sas-token'] if hasattr(namespace, ca[2:].replace('-', '_'))]
+    logger.warning('There are no credentials provided in your command and environment, we will query for the '
+                   'account key inside your storage account. ')
+    if len(credentials_attrs) > 0:
+        logger.warning('Please provide {} as credentials{} '
+                       .format(' or '.join(credentials_attrs),
+                               ', or use `--auth-mode login` if you have required RBAC roles in your command. '
+                               'For more information about RBAC roles in storage, visit '
+                               'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.' if auth_mode_attr else '.'))
+    elif auth_mode_attr:
+        logger.warning('Try `--auth-mode login` if you have required RBAC roles in your command. '
+                       'For more information about RBAC roles in storage, visit '
+                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. ')
+    logger.warning('Setting the corresponding environment variables can avoid inputting credentials in '
+                   'your command. Please use --help to get more information.')
+
+
 # region PARAMETER VALIDATORS
 def parse_storage_account(cmd, namespace):
     """Parse storage account which can be either account name or account id"""
@@ -116,8 +134,10 @@ def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
     n = namespace
+    auth_mode_attr = False
 
     if hasattr(n, 'auth_mode'):
+        auth_mode_attr = True
         auth_mode = n.auth_mode or get_config_value(cmd, 'storage', 'auth_mode', None)
         del n.auth_mode
         if not n.account_name:
@@ -176,14 +196,7 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('There are no credentials provided in your command and environment, we will query for the '
-                       'account key inside your storage account. \nPlease provide --connection-string, '
-                       '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
-                       'have required RBAC roles in your command. For more information about RBAC roles '
-                       'in storage, visit '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
-                       'Setting the corresponding environment variables can avoid inputting credentials in '
-                       'your command. Please use --help to get more information.')
+        _show_no_credentials_warning(namespace, auth_mode_attr)
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
