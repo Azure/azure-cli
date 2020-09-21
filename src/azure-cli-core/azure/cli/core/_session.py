@@ -116,3 +116,6 @@ VERSIONS = Session()
 
 # EXT_CMD_TREE provides command to extension name mapping
 EXT_CMD_TREE = Session()
+
+# CLOUD_ENDPOINTS provides endpoints/suffixes of clouds
+CLOUD_ENDPOINTS = Session()

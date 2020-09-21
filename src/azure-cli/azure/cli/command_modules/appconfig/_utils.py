@@ -109,3 +109,12 @@ def get_store_name_from_connection_string(connection_string):
         if endpoint:
             return endpoint.split("//")[1].split('.')[0]
     return None
+
+
+def prep_null_label_for_url_encoding(label=None):
+    if label is not None:
+        import ast
+        # ast library requires quotes around string
+        label = '"{0}"'.format(label)
+        label = ast.literal_eval(label)
+    return label

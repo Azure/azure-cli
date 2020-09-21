@@ -568,10 +568,13 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             client.web_apps.sync_function_triggers_slot(resource_group_name, name, slot)
         else:
             client.web_apps.sync_function_triggers(resource_group_name, name)
-    except CloudError as ce:
+    except CloudError as ex:
         # This SDK function throws an error if Status Code is 200
-        if ce.status_code != 200:
-            raise ce
+        if ex.status_code != 200:
+            raise ex
+    except DefaultErrorResponseException as ex:
+        if ex.response.status_code != 200:
+            raise ex
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
@@ -2028,7 +2031,8 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
                        docker_container_logging=None, detailed_error_messages=None,
                        failed_request_tracing=None, slot=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
-                                       SiteLogsConfig, HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       AzureBlobStorageApplicationLogsConfig, SiteLogsConfig,
+                                       HttpLogsConfig, FileSystemHttpLogsConfig,
                                        EnabledConfig)
     client = web_client_factory(cmd.cli_ctx)
     # TODO: ensure we call get_site only once
@@ -2038,13 +2042,18 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     location = site.location
 
     application_logs = None
-    if application_logging is not None:
-        if not application_logging:
-            level = 'Off'
-        elif level is None:
-            level = 'Error'
-        fs_log = FileSystemApplicationLogsConfig(level=level)
-        application_logs = ApplicationLogsConfig(file_system=fs_log)
+    if application_logging:
+        fs_log = None
+        blob_log = None
+        level = application_logging != 'off'
+        if application_logging in ['filesystem', 'off']:
+            fs_log = FileSystemApplicationLogsConfig(level=level)
+        level = application_logging != 'off'
+        if application_logging in ['azureblobstorage', 'off']:
+            blob_log = AzureBlobStorageApplicationLogsConfig(level=level, retention_in_days=3,
+                                                             sas_url=None)
+        application_logs = ApplicationLogsConfig(file_system=fs_log,
+                                                 azure_blob_storage=blob_log)
 
     http_logs = None
     server_logging_option = web_server_logging or docker_container_logging
@@ -2421,7 +2430,6 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
     from azure.graphrbac.models import GraphErrorException
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -2429,8 +2437,8 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
     # Cannot check if key vault is in another subscription
     if subscription != key_vault_subscription:
         return False
-    kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
-    vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
+    kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
+    vault = kv_client.vaults.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
     # Check for Microsoft.Azure.WebSites app registration
     AZURE_PUBLIC_WEBSITES_APP_ID = 'abfa0a7c-a6b6-4736-8310-5855508787cd'
     AZURE_GOV_WEBSITES_APP_ID = '6a02c803-dafd-4136-b4c3-5a6f318b4714'
@@ -2706,6 +2714,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
     SiteConfig, Site, NameValuePair = cmd.get_models('SiteConfig', 'Site', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
@@ -2790,6 +2799,12 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                        '--functions-version. Dotnet version will be %s for this function app.',
                        runtime_version_json[KEYS.DISPLAY_VERSION])
 
+    if runtime_version_json[KEYS.IS_DEPRECATED]:
+        logger.warning('%s version %s has been deprecated. In the future, this version will be unavailable. '
+                       'Please update your command to use a more recent version. For a list of supported '
+                       '--runtime-versions, run \"az functionapp create -h\"',
+                       runtime_json[KEYS.PROPERTIES][KEYS.DISPLAY], runtime_version_json[KEYS.DISPLAY_VERSION])
+
     site_config_json = runtime_version_json[KEYS.SITE_CONFIG_DICT]
     app_settings_json = runtime_version_json[KEYS.APP_SETTINGS_DICT]
 
@@ -2810,11 +2825,16 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='false'))
                 site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
+
+                # clear all runtime specific configs and settings
+                site_config_json = {KEYS.USE_32_BIT_WORKER_PROC: False}
+                app_settings_json = {}
+
+                # ensure that app insights is created if not disabled
+                runtime_version_json[KEYS.APPLICATION_INSIGHTS] = True
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-        if deployment_container_image_name is None:
-            site_config.linux_fx_version = site_config_json[KEYS.LINUX_FX_VERSION]
     else:
         functionapp_def.kind = 'functionapp'
 
@@ -2823,16 +2843,13 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
 
-    # adding appsetting to site to make it a function
+    # adding app settings
     for app_setting, value in app_settings_json.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
-
-    if disable_app_insights or not runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
-        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
 
     # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and not is_plan_elastic_premium(cmd, plan_info):
@@ -2854,6 +2871,9 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=instrumentation_key))
+    elif disable_app_insights or not runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
+        # set up dashboard if no app insights
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
         create_app_insights = True
 
@@ -2964,7 +2984,10 @@ def _get_runtime_version_functionapp(version_string, is_linux):
     if linux_match:
         return float(linux_match.group(1))
 
-    return float(version_string)
+    try:
+        return float(version_string)
+    except ValueError:
+        return 0
 
 
 def try_create_application_insights(cmd, functionapp):
