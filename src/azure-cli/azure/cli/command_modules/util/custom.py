@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from azure.cli.core.util import run_pip_cmd
 
 logger = get_logger(__name__)
 
@@ -117,10 +118,9 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 logger.debug("Update azure cli with '%s'", " ".join(update_cmd))
                 exit_code = subprocess.call(update_cmd)
         elif installer == 'PIP':
-            pip_args = [sys.executable, '-m', 'pip', 'install', '--upgrade', 'azure-cli', '-vv',
-                        '--disable-pip-version-check', '--no-cache-dir']
-            logger.debug("Update azure cli with '%s'", " ".join(pip_args))
-            exit_code = subprocess.call(pip_args, shell=platform.system() == 'Windows')
+            pip_args = ['install', '--upgrade', 'azure-cli', '-vv', '--disable-pip-version-check', '--no-cache-dir']
+            logger.debug("Update azure cli with '%s'", " ".join(['pip'] + pip_args))
+            exit_code, _ = run_pip_cmd(pip_args)
         elif installer == 'DOCKER':
             logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
                            "or run 'pip install --upgrade azure-cli' in this container")

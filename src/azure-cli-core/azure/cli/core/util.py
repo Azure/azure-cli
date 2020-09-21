@@ -1200,3 +1200,15 @@ def scopes_to_resource(scopes):
         scope = scope[:-len("/.default")]
 
     return scope
+
+
+def run_pip_cmd(args):
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    from pip._internal.cli.main import main as pip_main
+    output = io.StringIO()
+    with redirect_stderr(output):
+        with redirect_stdout(output):
+            exit_code = pip_main(args)
+    return exit_code, output.getvalue()
+
