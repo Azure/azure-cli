@@ -10,7 +10,7 @@ import adal
 from msrest.authentication import Authentication
 from msrestazure.azure_active_directory import MSIAuthentication
 from azure.core.credentials import AccessToken
-from azure.cli.core.util import in_cloud_console
+from azure.cli.core.util import in_cloud_console, scopes_to_resource
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -67,7 +67,6 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
     # This method is exposed for Azure Core.
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         logger.debug("AdalAuthentication.get_token invoked by Track 2 SDK with scopes=%s", scopes)
-        from azure.cli.core.util import scopes_to_resource
         _, token, full_token, _ = self._get_token(scopes_to_resource(scopes))
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))
@@ -98,5 +97,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core. Add *scopes, **kwargs to fit azure.core requirement
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
+        logger.debug("MSIAuthenticationWrapper.get_token invoked by Track 2 SDK with scopes=%s", scopes)
+        self.resource = scopes_to_resource(scopes)
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
