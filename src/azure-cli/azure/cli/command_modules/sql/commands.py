@@ -259,9 +259,10 @@ def load_command_table(self, _):
                             database_blob_auditing_policies_operations,
                             client_factory=get_sql_database_blob_auditing_policies_operations) as g:
 
-        g.show_command('show', 'get')
-        g.generic_update_command('update',
-                                 custom_func_name='db_audit_policy_update')
+        g.custom_command('show', 'db_audit_policy_show')
+        g.custom_command('update', 'db_audit_policy_update')
+        #g.generic_update_command('update',
+        #                       custom_func_name='db_audit_policy_update_old')
 
     server_blob_auditing_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerBlobAuditingPoliciesOperations.{}',
@@ -271,7 +272,7 @@ def load_command_table(self, _):
                             server_blob_auditing_policies_operations,
                             client_factory=get_sql_server_blob_auditing_policies_operations) as g:
 
-        g.show_command('show', 'get')
+        g.custom_command('show', 'server_audit_policy_show')
         g.generic_update_command('update',
                                  custom_func_name='server_audit_policy_update')
 
