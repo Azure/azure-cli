@@ -101,3 +101,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         self.resource = scopes_to_resource(scopes)
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
+
+    def signed_session(self, session=None):
+        logger.debug("MSIAuthenticationWrapper.signed_session invoked by Track 1 SDK")
+        super().signed_session(session)
