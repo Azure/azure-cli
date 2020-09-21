@@ -94,7 +94,7 @@ def run_tests(cmd, path, module):
         module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/azure-cli-core.xml', '--pyargs', 'azure.cli.core.tests']
         exist_code = pytest.main(module_args)
         
-    if module not in ['feedback']:
+    if module not in ['feedback', 'keyvault']:
         if module in ['botservice', 'network', 'configure', 'monitor']:
             module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
             exist_code = pytest.main(module_args)
