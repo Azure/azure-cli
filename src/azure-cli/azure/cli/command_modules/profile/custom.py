@@ -229,9 +229,7 @@ def check_cli(cmd):
         print('CLI self-test completed: OK')
     else:
         raise CLIError(exceptions)
-<<<<<<< HEAD
 
-<<<<<<< HEAD
 
 def _fromtimestamp(t):
     # datetime.datetime can't be patched:
@@ -241,23 +239,3 @@ def _fromtimestamp(t):
     # https://williambert.online/2011/07/how-to-unit-testing-in-django-with-mocking-and-patching/
     from datetime import datetime
     return datetime.fromtimestamp(t)
-=======
-def run_tests():
-    import pytest
-
-    mod_list = ['acr', 'acs', 'advisor', 'ams', 'apim', 'appconfig', 'appservice', 'aro', 'backup', 'batch', 'batchai', 'billing', 'botservice', 'cdn', 'cloud', 'cognitiveservices', 'configure', 'consumption', 'container', 'cosmosdb', 'deploymentmanager', 'dla', 'dls', 'dms', 'eventgrid', 'eventhubs', 'extension', 'feedback', 'find', 'hdinsight', 'interactive', 'iot', 'iotcentral', 'keyvault', 'kusto', 'lab', 'managedservices', 'maps', 'monitor', 'natgateway', 'netappfiles', 'network', 'policyinsights', 'privatedns', 'profile', 'rdbms', 'redis', 'relay', 'reservations', 'resource', 'role', 'search', 'security', 'servicebus', 'servicefabric', 'signalr', 'sql', 'sqlvm', 'storage', 'util', 'vm']
-    pytest_args = ['-x', '-v', '-p', 'no:warnings', '--log-level=WARN']
-    pytest_parallel_args = pytest_args # + ['-n', 'auto']
-
-    for mod_name in mod_list:
-        if mod_name in ['botservice', 'network', 'configure', 'monitor']:
-            module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(mod_name), '--pyargs', 'azure.cli.command_modules.{}'.format(mod_name)]
-            pytest.main(module_args)
-        else:
-            module_args = pytest_parallel_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(mod_name), '--pyargs', 'azure.cli.command_modules.{}'.format(mod_name)]
-            pytest.main(module_args)
-    core_module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/azure-cli-core.xml', '--pyargs', 'azure.cli.command_modules.core']
-    pytest.main(module_args)
->>>>>>> add run tests in self-test
-=======
->>>>>>> rollback self-test
