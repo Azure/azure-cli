@@ -93,16 +93,17 @@ def run_tests(cmd, path, module):
     if module == 'core':
         module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/azure-cli-core.xml', '--pyargs', 'azure.cli.core.tests']
         exist_code = pytest.main(module_args)
-
-    if module in ['botservice', 'network', 'configure', 'monitor']:
-        module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
-        exist_code = pytest.main(module_args)
-    else:
-        module_args = pytest_parallel_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
-        exist_code = pytest.main(module_args)
-    if exist_code == 5:
-        logger.warning('No tests found for {}, skip it.'.format(module))
-        exist_code = 0
+        
+    if module not in ['feedback']:
+        if module in ['botservice', 'network', 'configure', 'monitor']:
+            module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
+            exist_code = pytest.main(module_args)
+        else:
+            module_args = pytest_parallel_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
+            exist_code = pytest.main(module_args)
+        if exist_code == 5:
+            logger.warning('No tests found for {}, skip it.'.format(module))
+            exist_code = 0
     sys.exit(exist_code)
 
 '''
