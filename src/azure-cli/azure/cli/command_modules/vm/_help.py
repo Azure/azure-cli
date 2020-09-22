@@ -2428,6 +2428,11 @@ examples:
     crafted: true
 """
 
+helps['vmss extension upgrade'] = """
+type: command
+short-summary: Upgrade all extensions for all VMSS instances to the latest version.
+"""
+
 helps['vmss get-instance-view'] = """
 type: command
 short-summary: View an instance of a VMSS.
