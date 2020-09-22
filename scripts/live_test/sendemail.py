@@ -7,6 +7,8 @@ import sys
 import os
 import traceback
 import datetime
+import random
+import string
 import test_data
 
 
@@ -69,22 +71,13 @@ def main():
 
 def get_container_name():
     """
-    Generate container name in storage account
+    Generate container name in storage account. It is also an identifier of the pipeline run.
     :return:
     """
     print('Enter get_container_name()')
-
-    date = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    name = date
-    if USER_LIVE == '--live':
-        mode = 'live'
-    elif USER_LIVE == '':
-        mode = 'replay'
-    else:
-        mode = ''
-    name += mode
-    # if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
-    #     name += '_archive'
+    time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    random_id = ''.join(random.choice(string.digits) for _ in range(6))
+    name = time + '_' + random_id
     print('Exit get_container_name()')
     return name
 

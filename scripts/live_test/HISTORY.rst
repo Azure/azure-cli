@@ -8,6 +8,7 @@ Release History
 
 * Update pipeline run title.
 * Generate index.html of HTML files of testing results.
+* Design a unique representation of a pipeline run.
 
 0.3.0
 ++++++
