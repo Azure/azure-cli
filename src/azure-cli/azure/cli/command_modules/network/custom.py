@@ -1086,7 +1086,8 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
 
 def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
                                    address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
+                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None,
+                                   priority=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1100,6 +1101,7 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
     new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
+        priority=priority,
         backend_address_pool=SubResource(id=address_pool) if address_pool else None,
         backend_http_settings=SubResource(id=http_settings) if http_settings else None,
         http_listener=SubResource(id=http_listener),
@@ -1117,7 +1119,7 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
 
 def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_pool=None,
                                    http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
-                                   rule_type=None, rewrite_rule_set=None):
+                                   rule_type=None, rewrite_rule_set=None, priority=None):
     SubResource = cmd.get_models('SubResource')
     if address_pool is not None:
         instance.backend_address_pool = SubResource(id=address_pool)
@@ -1133,6 +1135,8 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
         instance.rule_type = rule_type
     if rewrite_rule_set is not None:
         instance.rewrite_rule_set = SubResource(id=rewrite_rule_set)
+    with cmd.update_context(instance) as c:
+        c.set_param('priority', priority)
     return parent
 
 
