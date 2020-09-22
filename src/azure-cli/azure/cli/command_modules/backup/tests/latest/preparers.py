@@ -34,8 +34,6 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
             execute(self.cli_ctx, cmd)
-            # disable soft delete
-            execute(self.cli_ctx, 'az rest --method PATCH --uri "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{}/providers/Microsoft.RecoveryServices/vaults/{}/backupconfig/vaultconfig?api-version=2019-05-13" --body \'{{"properties":{{"enhancedSecurityState":"Enabled","softDeleteFeatureState":"Disabled"}}}}\' --headers Content-Type=application/json'.format(self.resource_group, name))
 
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
@@ -71,7 +69,12 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                 execute(self.cli_ctx,
                         'az backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
                         .format(resource_group, vault_name, container, item))
-        execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
+        from msrestazure.azure_exceptions import CloudError
+        try:
+            execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
+        except CloudError as ex:
+            if 'Recovery Services vault cannot be deleted as there are backup items in soft deleted state in the vault' not in str(ex):
+                raise ex
 
 
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
