@@ -207,6 +207,7 @@ def load_arguments(self, _):
         c.argument('enable_node_public_ip', action='store_true', is_preview=True)
         c.argument('windows_admin_username', options_list=['--windows-admin-username'])
         c.argument('windows_admin_password', options_list=['--windows-admin-password'])
+        c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('node_osdisk_diskencryptionset_id', type=str, options_list=['--node-osdisk-diskencryptionset-id', '-d'])
 
     with self.argument_context('aks update') as c:
@@ -227,6 +228,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
+        c.argument('enable_ahub', options_list=['--enable-ahub'])
+        c.argument('disable_ahub', options_list=['--disable-ahub'])
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])

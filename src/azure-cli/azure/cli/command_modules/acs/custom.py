@@ -1583,6 +1583,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                admin_username="azureuser",
                windows_admin_username=None,
                windows_admin_password=None,
+               enable_ahub=False,
                kubernetes_version='',
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
@@ -1696,9 +1697,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 raise CLIError(
                     'Please specify both username and password in non-interactive mode.')
 
+        windows_license_type = None
+        if enable_ahub:
+            windows_license_type = 'Windows_Server'
+
         windows_profile = ManagedClusterWindowsProfile(
             admin_username=windows_admin_username,
-            admin_password=windows_admin_password)
+            admin_password=windows_admin_password,
+            license_type=windows_license_type)
 
     # Skip create service principal profile for the cluster if the cluster
     # enables managed identity and customer doesn't explicitly provide a service principal.
@@ -2088,6 +2094,8 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_aad=False,
                aad_tenant_id=None,
                aad_admin_group_object_ids=None,
+               enable_ahub=False,
+               disable_ahub=False,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2104,7 +2112,9 @@ def aks_update(cmd, client, resource_group_name, name,
             not uptime_sla and
             api_server_authorized_ip_ranges is None and
             not enable_aad and
-            not update_aad_profile):
+            not update_aad_profile and
+            not enable_ahub and
+            not disable_ahub):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2119,7 +2129,9 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--api-server-authorized-ip-ranges" or '
                        '"--enable-aad" or '
                        '"--aad-tenant-id" or '
-                       '"--aad-admin-group-object-ids"')
+                       '"--aad-admin-group-object-ids" or '
+                       '"--enable-ahub" or '
+                       '"--disable-ahub"')
 
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
@@ -2228,6 +2240,14 @@ def aks_update(cmd, client, resource_group_name, name,
             instance.aad_profile.tenant_id = aad_tenant_id
         if aad_admin_group_object_ids is not None:
             instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(aad_admin_group_object_ids)
+
+    if enable_ahub and disable_ahub:
+        raise CLIError('Cannot specify "--enable-ahub" and "--disable-ahub" at the same time')
+
+    if enable_ahub:
+        instance.windows_profile.license_type = 'Windows_Server'
+    if disable_ahub:
+        instance.windows_profile.license_type = 'None'
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
