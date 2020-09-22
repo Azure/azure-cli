@@ -268,7 +268,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
 class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest.vn',
                  parameter_name='virtual_network',
-                 resource_group_parameter_name=None,
+                 resource_group_parameter_name='resource_group',
                  resource_group_key=KEY_RESOURCE_GROUP,
                  dev_setting_name='AZURE_CLI_TEST_DEV_VIRTUAL_NETWORK_NAME',
                  random_name_length=24, key=KEY_VIRTUAL_NETWORK):
@@ -303,9 +303,14 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_name:
-            self.live_only_execute(
-                self.cli_ctx,
-                'az network vnet delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
+            from msrestazure.azure_exceptions import CloudError
+            try:
+                self.live_only_execute(
+                    self.cli_ctx,
+                    'az network vnet delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
+            except CloudError:
+                # deletion of vnet may fail as service could create subresources like IPConfig. We could rely on the deletion of resource group to delete the vnet.
+                pass
 
     def _get_resource_group(self, **kwargs):
         try:

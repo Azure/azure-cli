@@ -26,6 +26,12 @@ FUNCTIONS_STACKS_API_JSON_PATHS = {
 }
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
+FUNCTIONS_NO_V2_REGIONS = {
+    "USNat West",
+    "USNat East",
+    "USSec West",
+    "USSec East"
+}
 
 
 class FUNCTIONS_STACKS_API_KEYS():
@@ -33,18 +39,22 @@ class FUNCTIONS_STACKS_API_KEYS():
     def __init__(self):
         self.NAME = 'name'
         self.VALUE = 'value'
+        self.DISPLAY = 'display'
         self.PROPERTIES = 'properties'
         self.MAJOR_VERSIONS = 'majorVersions'
         self.DISPLAY_VERSION = 'displayVersion'
         self.RUNTIME_VERSION = 'runtimeVersion'
         self.IS_HIDDEN = 'isHidden'
         self.IS_PREVIEW = 'isPreview'
+        self.IS_DEPRECATED = 'isDeprecated'
         self.IS_DEFAULT = 'isDefault'
         self.SITE_CONFIG_DICT = 'siteConfigPropertiesDictionary'
         self.APP_SETTINGS_DICT = 'appSettingsDictionary'
         self.LINUX_FX_VERSION = 'linuxFxVersion'
         self.APPLICATION_INSIGHTS = 'applicationInsights'
         self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
+        self.USE_32_BIT_WORKER_PROC = 'use32BitWorkerProcess'
+        self.FUNCTIONS_WORKER_RUNTIME = 'FUNCTIONS_WORKER_RUNTIME'
 
 
 RUNTIME_STACKS = os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WebappRuntimeStacks.json'))

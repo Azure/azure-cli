@@ -14,6 +14,13 @@ def multi_transformers(*transformers):
     return _multi_transformers
 
 
+def keep_max_results(output, **command_args):
+    maxresults = command_args.get('maxresults', None)
+    if maxresults:
+        return [_ for _ in output][:maxresults]
+    return output
+
+
 def filter_out_managed_resources(output, **command_args):  # pylint: disable=unused-argument
     return [_ for _ in output if not getattr(_, 'managed')] if output else output
 

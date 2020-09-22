@@ -22,10 +22,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_definition_create')
         g.custom_command('list', 'cli_definition_list')
         g.custom_command('delete', 'cli_definition_delete')
-        g.custom_command('show', 'cli_definition_get')
+        g.custom_show_command('show', 'cli_definition_get')
 
     with self.command_group('managedservices assignment', msp_registration_assignments, client_factory=cf_registration_assignments) as g:
         g.custom_command('create', 'cli_assignment_create')
-        g.custom_command('show', 'cli_assignment_get')
+        g.custom_show_command('show', 'cli_assignment_get')
         g.custom_command('delete', 'cli_assignment_delete')
         g.custom_command('list', 'cli_assignment_list')

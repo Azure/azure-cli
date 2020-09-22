@@ -466,6 +466,32 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_network_appgw_creation_with_public_and_private_ip')
+    def test_network_appgw_creation_with_public_and_private_ip(self, resource_group):
+        self.kwargs.update({
+            "appgw": "applicationGateway",
+            "ip": "publicIP",
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+
+        self.cmd("network application-gateway create -g {rg} -n {appgw} "
+                 "--sku Standard_v2 "
+                 "--enable-private-link "
+                 "--private-ip-address 10.0.0.17 "
+                 "--public-ip-address {ip}")
+        show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
+
+        self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
+        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
+
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
+
+        self.cmd("network application-gateway delete -g {rg} -n {appgw}")
+
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
@@ -1004,27 +1030,35 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
+        # Make the default rule has priority.
+        # Otherwise, server will raise ApplicationGatewayRequestRoutingRulePartialPriorityDefined
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n rule1 --priority 1')
+
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener2 --no-wait --frontend-port appGatewayFrontendPort --host-name www.test2.com')
 
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener')
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener --priority 12')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}').get_output_in_json()
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener'))
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener2')
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener2 --priority 32')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}').get_output_in_json()
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
 
         self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener')
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener --priority 10')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name2}').get_output_in_json()
         self.kwargs['set_id'] = rule['rewriteRuleSet']['id']
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name2} --rewrite-rule-set {set_id}', checks=[
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name2} --rewrite-rule-set {set_id} --priority 21', checks=[
             self.check('rewriteRuleSet.id', '{set_id}')
         ])
 
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 3))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=[
+            self.check('length(@)', 3)
+        ])
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=[
+            self.check('length(@)', 2)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map')
     def test_network_ag_url_path_map(self, resource_group):
@@ -3111,7 +3145,7 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
 class NetworkVirtualRouter(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
-    @unittest.skip('Skip as service has bug')
+    @unittest.skip('Skip as service has bug for deleting peering')
     def test_network_virtual_router_scenario(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -3161,6 +3195,60 @@ class NetworkVirtualRouter(ScenarioTest):
         ])
 
         self.cmd('network vrouter peering delete -n {vrouter_peering} -g {rg} --vrouter-name {vrouter}')
+
+        self.cmd('network vrouter delete -g {rg} -n {vrouter}')
+
+    # @record_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='eastus2euap')
+    def test_vrouter_with_virtual_hub_support(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'rg': 'test_vrouter_with_virtual_hub_support',    # the subscription needs to be a specified one given by service team
+            'location': resource_group_location,
+            'vnet': 'vnet2',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'vrouter': 'vrouter2',
+            'peer': 'peer1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} '
+                 '--location {location} '
+                 '--subnet-name {subnet1} '
+                 '--address-prefix 10.0.0.0/24')
+
+        # a cleanup program runs in short peoridically to assign subnets a NSG within that subscription
+        # which will block subnet is assigned to the virtual router
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
+        vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet1_id': vnet['subnets'][0]['id']
+        })
+
+        self.cmd('network vrouter create -g {rg} -l {location} -n {vrouter} --hosted-subnet {subnet1_id}', checks=[
+            self.check('type', 'Microsoft.Network/virtualHubs'),
+            self.check('ipConfigurations', None),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('network vrouter list -g {rg}')
+
+        self.cmd('network vrouter show -g {rg} -n {vrouter}', checks=[
+            self.check('virtualRouterAsn', 65515),
+            self.check('length(virtualRouterIps)', 2),
+        ])
+
+        self.cmd('network vrouter peering create -g {rg} --vrouter-name {vrouter} -n {peer} '
+                 '--peer-asn 11000 --peer-ip 10.0.0.120')
+
+        self.cmd('network vrouter peering list -g {rg} --vrouter-name {vrouter}')
+
+        self.cmd('network vrouter peering show -g {rg} --vrouter-name {vrouter} -n {peer}')
+
+        # unable to update unless the ASN's range is required
+        # self.cmd('network vrouter peering update -g {rg} --vrouter-name {vrouter} -n {peer} --peer-ip 10.0.0.0')
+
+        self.cmd('network vrouter peering delete -g {rg} --vrouter-name {vrouter} -n {peer}')
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
@@ -3232,6 +3320,45 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         # verify the update command, and that CLI validation will accept either serviceName or Name
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql/managedInstances',
                  checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
+
+    @ResourceGroupPreparer(name_prefix='test_subnet_with_private_endpoint_option')
+    def test_subnet_with_private_endpoint_and_private_Link_options(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'MyVnet',
+            'subnet1': 'MySubnet1',
+            'subnet2': 'MySubnet2',
+            'subnet3': 'MySubnet3',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.1.0/24 '
+                 '--name {subnet1} '
+                 '--disable-private-endpoint-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.1.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Disabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Enabled')
+                 ])
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.2.0/24 '
+                 '--name {subnet2} '
+                 '--disable-private-link-service-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.2.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Enabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Disabled')
+                 ])
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} '
+                 '--address-prefixes 10.0.3.0/24 '
+                 '--name {subnet3} '
+                 '--disable-private-endpoint-network-policies true '
+                 '--disable-private-link-service-network-policies true', checks=[
+                     self.check('addressPrefix', '10.0.3.0/24'),
+                     self.check('privateEndpointNetworkPolicies', 'Disabled'),
+                     self.check('privateLinkServiceNetworkPolicies', 'Disabled')
+                 ])
 
 
 class NetworkActiveActiveCrossPremiseScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -3621,7 +3748,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction inbound --local {private-ip}:22 --protocol tcp --remote 100.1.2.3:*')
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local {private-ip}:* --protocol tcp --remote 100.1.2.3:80')
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
-        self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
+        self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 10.0.0.9 --dest-ip 10.0.0.6')
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westus', kind='StorageV2')
@@ -3960,7 +4087,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network virtual-appliance sku list', checks=[
-            self.check('length(@)', 3)
+            self.check('length(@)', 4)
         ])
         self.cmd('network virtual-appliance sku show --name "barracudasdwanrelease"', checks=[
             self.check('name', 'barracudasdwanrelease')
