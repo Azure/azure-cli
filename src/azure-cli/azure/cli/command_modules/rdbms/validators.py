@@ -73,10 +73,10 @@ def password_validator(ns):
 
 
 def retention_validator(ns):
-    if ns.backup_retention:
+    if ns.backup_retention is not None:
         val = ns.backup_retention
         if not 7 <= int(val) <= 35:
-            raise CLIError('incorrect usage: --backup_retention. Range is 7 to 35 days.')
+            raise CLIError('incorrect usage: --backup-retention. Range is 7 to 35 days.')
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
@@ -119,79 +119,101 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
-def mysql_retention_validator(cmd, ns):
-    if ns.backup_retention:
-        backup_retention = get_mysql_backup_retention(cmd, ns)
-        if not backup_retention[0] <= int(ns.backup_retention) <= backup_retention[1]:
-            raise CLIError('incorrect usage: --backup_retention. Range is {} to {} days.'
-                           .format(backup_retention[0], backup_retention[1]))
+def mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=None, instance=None):
+    _mysql_tier_validator(tier, sku_info) # need to be validated first
+    if tier is None and instance is not None:
+        tier = instance.sku.tier
+    _mysql_retention_validator(backup_retention, sku_info, tier)
+    _mysql_storage_validator(storage_mb, sku_info, tier, instance)
+    _mysql_sku_name_validator(sku_name, sku_info, tier)
+    _mysql_version_validator(version, sku_info, tier)
 
 
-def mysql_storage_validator(cmd, ns):
-    if ns.storage_mb:
-        storage_sizes = get_mysql_storage_size(cmd, ns)
-        if storage_sizes[0] <= int(ns.storage_mb) <= storage_sizes[1]:
-            ns.storage_mb = int(ns.storage_mb) * 1024
-        else:
+def _mysql_retention_validator(backup_retention, sku_info, tier):
+    if backup_retention is not None:
+        backup_retention_range = get_mysql_backup_retention(sku_info, tier)
+        if not backup_retention_range[0] <= int(backup_retention) <= backup_retention_range[1]:
+            raise CLIError('incorrect usage: --backup-retention. Range is {} to {} days.'
+                           .format(backup_retention_range[0], backup_retention_range[1]))
+
+
+def _mysql_storage_validator(storage_mb, sku_info, tier, instance):
+    if storage_mb is not None:
+        if instance:
+            original_size = int(instance.storage_profile.storage_mb) // 1024
+            if original_size > storage_mb:
+                raise CLIError('Updating storage cannot be smaller than the '
+                               'original storage size {} GiB.'.format(original_size))
+        storage_sizes = get_mysql_storage_size(sku_info, tier)
+        if not storage_sizes[0] <= int(storage_mb) <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
                            .format(storage_sizes[0], storage_sizes[1]))
 
 
-def mysql_tier_validator(cmd, ns):
-    if ns.tier:
-        tiers = get_mysql_tiers(cmd, ns)
-        if ns.tier not in tiers:
+def _mysql_tier_validator(tier, sku_info):
+    if tier:
+        tiers = get_mysql_tiers(sku_info)
+        if tier not in tiers:
             raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
-def mysql_sku_name_validator(cmd, ns):
-    if ns.sku_name:
-        skus = get_mysql_skus(cmd, ns)
-        if ns.sku_name not in skus:
-            error_msg = 'Incorrect value for --sku-name. '
-            if ns.tier:
-                error_msg += 'The SKU name does not match {} tier. '.format(ns.tier)
+def _mysql_sku_name_validator(sku_name, sku_info, tier):
+    if sku_name:
+        skus = get_mysql_skus(sku_info, tier)
+        if sku_name not in skus:
+            error_msg = 'Incorrect value for --sku-name. The SKU name does not match {} tier. Specify --tier if you did not. '.format(tier)
             raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 
-def mysql_version_validator(cmd, ns):
-    if ns.version:
-        versions = get_mysql_versions(cmd, ns)
-        if ns.version not in versions:
+def _mysql_version_validator(version, sku_info, tier):
+    if version:
+        versions = get_mysql_versions(sku_info, tier)
+        if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
 
 
-def pg_storage_validator(cmd, ns):
-    if ns.storage_mb:
-        storage_sizes = get_postgres_storage_sizes(cmd, ns)
-        if ns.storage_mb in storage_sizes:
-            ns.storage_mb = int(ns.storage_mb) * 1024
-        else:
-            raise CLIError('Incorrect value for --storage-size : Allowed values(in GB) : {}'
+def pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=None, instance=None):
+    _pg_tier_validator(tier, sku_info) # need to be validated first
+    if tier is None and instance is not None:
+        tier = instance.sku.tier
+    _pg_storage_validator(storage_mb, sku_info, tier, instance)
+    _pg_sku_name_validator(sku_name, sku_info, tier)
+    _pg_version_validator(version, sku_info, tier)
+
+
+def _pg_storage_validator(storage_mb, sku_info, tier, instance):
+    if storage_mb is not None:
+        if instance is not None:
+            original_size = int(instance.storage_profile.storage_mb) // 1024
+            if original_size > storage_mb:
+                raise CLIError('Updating storage cannot be smaller than '
+                               'the original storage size {} GiB.'.format(original_size))
+        storage_sizes = get_postgres_storage_sizes(sku_info, tier)
+        if storage_mb not in storage_sizes:
+            storage_sizes = sorted([int(size) for size in storage_sizes])
+            raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
                            .format(storage_sizes))
 
 
-def pg_tier_validator(cmd, ns):
-    if ns.tier:
-        tiers = get_postgres_tiers(cmd, ns)
-        if ns.tier not in tiers:
+def _pg_tier_validator(tier, sku_info):
+    if tier:
+        tiers = get_postgres_tiers(sku_info)
+        if tier not in tiers:
             raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
-def pg_sku_name_validator(cmd, ns):
-    if ns.sku_name:
-        skus = get_postgres_skus(cmd, ns)
-        if ns.sku_name not in skus:
-            error_msg = 'Incorrect value for --sku-name. '
-            if ns.tier:
-                error_msg += 'The SKU name does not match {} tier. '.format(ns.tier)
+def _pg_sku_name_validator(sku_name, sku_info, tier):
+    if sku_name:
+        skus = get_postgres_skus(sku_info, tier)
+        if sku_name not in skus:
+            error_msg = 'Incorrect value for --sku-name. The SKU name does not match {} tier.  Specify --tier if you did not. '.format(tier)
             raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 
-def pg_version_validator(cmd, ns):
-    if ns.version:
-        versions = get_postgres_versions(cmd, ns)
-        if ns.version not in versions:
+def _pg_version_validator(version, sku_info, tier):
+    if version:
+        versions = get_postgres_versions(sku_info, tier)
+        if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
 
 

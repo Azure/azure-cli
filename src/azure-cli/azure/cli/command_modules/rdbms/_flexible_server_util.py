@@ -153,54 +153,56 @@ def parse_maintenance_window(maintenance_window_string):
     return None, None, None
 
 
-def get_mysql_versions(cmd, ns):
-    return _get_available_values(cmd, ns, 'mysql', 'versions')
+def get_mysql_versions(sku_info, tier):
+    return _get_available_values(sku_info, 'versions', tier)
 
 
-def get_mysql_skus(cmd, ns):
-    return _get_available_values(cmd, ns, 'mysql', 'skus')
+def get_mysql_skus(sku_info, tier):
+    return _get_available_values(sku_info, 'skus', tier)
 
 
-def get_mysql_storage_size(cmd, ns):
-    return _get_available_values(cmd, ns, 'mysql', 'storage_sizes')
+def get_mysql_storage_size(sku_info, tier):
+    return _get_available_values(sku_info, 'storage_sizes', tier)
 
 
-def get_mysql_backup_retention(cmd, ns):
-    return _get_available_values(cmd, ns, 'mysql', 'backup_retention')
+def get_mysql_backup_retention(sku_info, tier):
+    return _get_available_values(sku_info, 'backup_retention', tier)
 
 
-def get_mysql_tiers(cmd, ns):
-    sku_info = _parse_list_skus(cmd, ns, cf_mysql_flexible_location_capabilities, 'mysql')
+def get_mysql_tiers(sku_info):
     return list(sku_info.keys())
 
 
-def get_postgres_versions(cmd, ns):
-    return _get_available_values(cmd, ns, 'postgres', 'versions')
+def get_postgres_versions(sku_info, tier):
+    return _get_available_values(sku_info, 'versions', tier)
 
 
-def get_postgres_skus(cmd, ns):
-    return _get_available_values(cmd, ns, 'postgres', 'skus')
+def get_postgres_skus(sku_info, tier):
+    return _get_available_values(sku_info, 'skus', tier)
 
 
-def get_postgres_storage_sizes(cmd, ns):
-    return _get_available_values(cmd, ns, 'postgres', 'storage_sizes')
+def get_postgres_storage_sizes(sku_info, tier):
+    return _get_available_values(sku_info, 'storage_sizes', tier)
 
 
-def get_postgres_tiers(cmd, ns):
-    sku_info = _parse_list_skus(cmd, ns, cf_postgres_flexible_location_capabilities, 'postgres')
+def get_postgres_tiers(sku_info):
     return list(sku_info.keys())
 
 
-def _parse_list_skus(cmd, ns, client, database_engine):
-    list_skus_client = client(cmd.cli_ctx, '_')
-    resource_client = resource_client_factory(cmd.cli_ctx)
-    rg = resource_client.resource_groups.get(ns.resource_group_name)
-    if database_engine == 'mysql':
-        result = list_skus_client.list(rg.location)
-    elif database_engine == 'postgres':
-        result = list_skus_client.execute(rg.location)
+def get_postgres_list_skus_info(cmd, location):
+    list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
+    list_skus_result = list_skus_client.execute(location)
+    return _parse_list_skus(list_skus_result, 'postgres')
+
+
+def get_mysql_list_skus_info(cmd, location):
+    list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
+    list_skus_result = list_skus_client.list(location)
+    return _parse_list_skus(list_skus_result, 'mysql')
+
+
+def _parse_list_skus(result, database_engine):
     result = _get_list_from_paged_response(result)
-
     if not result:
         raise CLIError("No available SKUs in this location")
 
@@ -235,14 +237,9 @@ def _parse_list_skus(cmd, ns, client, database_engine):
     return tiers_dict
 
 
-def _get_available_values(cmd, ns, database_engine, argument):
-    if database_engine == 'mysql':
-        client = cf_mysql_flexible_location_capabilities
-    elif database_engine == 'postgres':
-        client = cf_postgres_flexible_location_capabilities
-    sku_info = _parse_list_skus(cmd, ns, client, database_engine)
+def _get_available_values(sku_info, argument, tier=None):
     result = {key: val[argument] for key, val in sku_info.items()}
-    return result[ns.tier] if ns.tier else set(chain.from_iterable(result.values()))
+    return result[tier]
 
 
 def _get_list_from_paged_response(obj_list):

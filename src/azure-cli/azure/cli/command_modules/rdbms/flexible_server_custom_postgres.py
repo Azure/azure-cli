@@ -14,8 +14,9 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from .flexible_server_custom_common import user_confirmation, server_list_custom_func
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window
+    parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
+from .validators import pg_arguments_validator
 
 
 logger = get_logger(__name__)
@@ -34,7 +35,13 @@ def flexible_server_create(cmd, client,
                            assign_identity=False, subnet_arm_resource_id=None,
                            high_availability=None, zone=None, vnet_resource_id=None,
                            vnet_address_prefix=None, subnet_address_prefix=None):
+    # validator
+    sku_info = get_postgres_list_skus_info(cmd, location)
+    pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
+    storage_mb *= 1024
+
     from azure.mgmt.rdbms import postgresql_flexibleservers
+
     try:
         db_context = DbContext(
             azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
@@ -161,7 +168,7 @@ def flexible_server_restore(cmd, client,
 
 
 # Update Flexible server command
-def flexible_server_update_custom_func(instance,
+def flexible_server_update_custom_func(cmd, instance,
                                        sku_name=None,
                                        tier=None,
                                        storage_mb=None,
@@ -171,7 +178,14 @@ def flexible_server_update_custom_func(instance,
                                        maintenance_window=None,
                                        assign_identity=False,
                                        tags=None):
+    
+    # validator
+    location = ''.join(instance.location.lower().split())
+    sku_info = get_postgres_list_skus_info(cmd, location)
+    pg_arguments_validator(tier, sku_name, storage_mb, sku_info, instance=instance)
+
     from importlib import import_module
+
     server_module_path = instance.__module__
     module = import_module(server_module_path)
     ServerForUpdate = getattr(module, 'ServerForUpdate')
@@ -183,7 +197,7 @@ def flexible_server_update_custom_func(instance,
         instance.sku.tier = tier
 
     if storage_mb:
-        instance.storage_profile.storage_mb = storage_mb
+        instance.storage_profile.storage_mb = storage_mb * 1024
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
