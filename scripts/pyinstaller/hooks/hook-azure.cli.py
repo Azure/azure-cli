@@ -10,6 +10,7 @@ from PyInstaller.utils.hooks import collect_submodules
 
 _hiddenimports = collect_submodules('humanfriendly')
 _hiddenimports.extend(collect_submodules('pip'))
+_hiddenimports.extend(collect_submodules('distutils'))
 
 _hiddenimports.extend(collect_submodules('pytest'))
 _hiddenimports.extend(collect_submodules('unittest'))
