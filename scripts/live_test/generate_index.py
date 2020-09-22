@@ -44,7 +44,15 @@ def render(data, container_url):
     <!DOCTYPE html>
     <html>
     <head>
+    <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
     </head>
+    </style>
+    """
+    content += """
     <body>
     <h2>Testing results in {}</h2>
     """.format(container_url)
