@@ -6,7 +6,9 @@
 import pkgutil
 import importlib
 
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+
+_datas = collect_data_files('pip')
 
 _hiddenimports = collect_submodules('humanfriendly')
 _hiddenimports.extend(collect_submodules('pip'))
@@ -26,4 +28,6 @@ mods_ns_pkg = importlib.import_module('azure.cli.command_modules')
 command_modules = [modname for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__)]
 for command_module in command_modules:
     _hiddenimports.extend(collect_submodules('azure.cli.command_modules.{}'.format(command_module), filter=lambda name: 'tests' not in name))
+
 hiddenimports = _hiddenimports
+datas = _datas
