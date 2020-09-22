@@ -8,7 +8,7 @@ import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             Notebook)
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import sdk_no_wait, CLIError
 from .sparkpool import get_spark_pool
 from .workspace import get_resource_group_by_workspace_name
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
@@ -262,23 +262,24 @@ def get_notebook(cmd, workspace_name, notebook_name):
 
 def export_notebook(cmd, workspace_name, output_folder, notebook_name=None):
     def write_to_file(notebook, path):
-        with open(path, 'w') as f:
-            json.dump(notebook.properties.as_dict(), f, indent=4)
+        try:
+            with open(path, 'w') as f:
+                json.dump(notebook.properties.as_dict(), f, indent=4)
+        except IOError:
+            raise CLIError('Unable to export to file: {}'.format(path))
 
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
     if notebook_name is not None:
         notebook = client.get_notebook(notebook_name)
         path = os.path.join(output_folder, notebook.name + '.ipynb')
+        print(notebook.properties.as_dict())
         write_to_file(notebook, path)
-        return os.stat(path)
-
-    notebooks = client.get_notebooks_by_workspace()
-    file_info = []
-    for notebook in notebooks:
-        path = os.path.join(output_folder, notebook.name + '.ipynb')
-        write_to_file(notebook, path)
-        file_info.append(os.stat(path))
-    return file_info
+    else:
+        notebooks = client.get_notebooks_by_workspace()
+        for notebook in notebooks:
+            path = os.path.join(output_folder, notebook.name + '.ipynb')
+            print(notebook.properties.as_dict())
+            write_to_file(notebook, path)
 
 
 def delete_notebook(cmd, workspace_name, notebook_name, no_wait=False):

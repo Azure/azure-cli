@@ -964,16 +964,6 @@ examples:
           --name testnotebook --file @path/notebook.json
 """
 
-helps['synapse notebook update'] = """
-type: command
-short-summary: Update an exist notebook.
-examples:
-  - name: Update an exist notebook.
-    text: |-
-        az synapse notebook update --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.json
-"""
-
 helps['synapse notebook import'] = """
 type: command
 short-summary: Import a notebook.

@@ -394,7 +394,7 @@ def load_arguments(self, _):
         c.argument('data_flow_name', arg_type=name_type, help='The data flow name.')
 
     # synapse artifacts notebook
-    for scope in ['create', 'update', 'import']:
+    for scope in ['create', 'import']:
         with self.argument_context('synapse notebook ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('notebook_name', arg_type=name_type, help='The notebook name.')

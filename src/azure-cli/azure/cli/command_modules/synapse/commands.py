@@ -241,7 +241,6 @@ def load_command_table(self, _):
     with self.command_group('synapse notebook', synapse_notebook_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_notebook', supports_no_wait=True)
-        g.custom_command('update', 'create_or_update_notebook', supports_no_wait=True)
         g.custom_command('import', 'create_or_update_notebook', supports_no_wait=True)
         g.custom_command('list', 'list_notebooks')
         g.custom_show_command('show', 'get_notebook')
