@@ -934,6 +934,11 @@ examples:
     text: az sql midb log-replay stop -g mygroup --mi myinstance -n mymanageddb
 """
 
+helps['sql midb log-replay wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+"""
+
 helps['sql server'] = """
 type: group
 short-summary: Manage SQL servers.
