@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.4.0
+++++++
+
+* Update pipeline run title.
+* Generate index.html of HTML files of testing results.
+
 0.3.0
 ++++++
 
