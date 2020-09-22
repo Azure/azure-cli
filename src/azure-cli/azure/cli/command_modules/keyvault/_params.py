@@ -37,13 +37,15 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
+    (JsonWebKeyOperation, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
      SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes,
      JsonWebKeyEncryptionAlgorithm) = self.get_models(
-         'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
+         'JsonWebKeyOperation', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          'JsonWebKeyEncryptionAlgorithm',
          resource_type=ResourceType.DATA_KEYVAULT)
+
+    KeyAttributes = self.get_models('KeyAttributes', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
 
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
@@ -340,6 +342,14 @@ def load_arguments(self, _):
                            type=datetime_type)
                 c.argument('not_before', default=None, type=datetime_type,
                            help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+                c.argument('exportable', arg_type=get_three_state_flag(),
+                           is_preview=True,
+                           help='Set "exportable" field in KeyAttributes.')
+
+            c.argument('release_policy', options_list=['--policy'],
+                       help='The policy rules under which the key can be exported encoded with JSON. '
+                            'Use @{file} to load from a file(e.g. @my_policy.json).',
+                       type=get_json_object, is_preview=True)
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,

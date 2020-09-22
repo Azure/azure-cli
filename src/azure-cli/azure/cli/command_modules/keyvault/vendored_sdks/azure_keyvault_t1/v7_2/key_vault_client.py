@@ -70,6 +70,335 @@ class KeyVaultClient(SDKClient):
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
+    def create_key(
+            self, vault_base_url, key_name, kty, key_size=None, key_ops=None, key_attributes=None, tags=None, curve=None, release_policy=None, custom_headers=None, raw=False, **operation_config):
+        """Creates a new key, stores it, then returns key parameters and
+        attributes to the client.
+        The create key operation can be used to create any key type in Azure
+        Key Vault. If the named key already exists, Azure Key Vault creates a
+        new version of the key. It requires the keys/create permission.
+        :param vault_base_url: The vault name, for example
+         https://myvault.vault.azure.net.
+        :type vault_base_url: str
+        :param key_name: The name for the new key. The system will generate
+         the version name for the new key.
+        :type key_name: str
+        :param kty: The type of key to create. For valid values, see
+         JsonWebKeyType. Possible values include: 'EC', 'EC-HSM', 'RSA',
+         'RSA-HSM', 'oct'
+        :type kty: str or ~azure.keyvault.v7_0.models.JsonWebKeyType
+        :param key_size: The key size in bits. For example: 2048, 3072, or
+         4096 for RSA.
+        :type key_size: int
+        :param key_ops:
+        :type key_ops: list[str or
+         ~azure.keyvault.v7_0.models.JsonWebKeyOperation]
+        :param key_attributes:
+        :type key_attributes: ~azure.keyvault.v7_0.models.KeyAttributes
+        :param tags: Application specific metadata in the form of key-value
+         pairs.
+        :type tags: dict[str, str]
+        :param curve: Elliptic curve name. For valid values, see
+         JsonWebKeyCurveName. Possible values include: 'P-256', 'P-384',
+         'P-521', 'P-256K'
+        :type curve: str or ~azure.keyvault.v7_0.models.JsonWebKeyCurveName
+        :param release_policy: The policy rules under which the key can be
+         exported.
+        :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
+        :param dict custom_headers: headers that will be added to the request
+        :param bool raw: returns the direct response alongside the
+         deserialized response
+        :param operation_config: :ref:`Operation configuration
+         overrides<msrest:optionsforoperations>`.
+        :return: KeyBundle or ClientRawResponse if raw=true
+        :rtype: ~azure.keyvault.v7_0.models.KeyBundle or
+         ~msrest.pipeline.ClientRawResponse
+        :raises:
+         :class:`KeyVaultErrorException<azure.keyvault.v7_0.models.KeyVaultErrorException>`
+        """
+        parameters = models.KeyCreateParameters(kty=kty, key_size=key_size, key_ops=key_ops, key_attributes=key_attributes, tags=tags, curve=curve, release_policy=release_policy)
+
+        # Construct URL
+        url = self.create_key.metadata['url']
+        path_format_arguments = {
+            'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True),
+            'key-name': self._serialize.url("key_name", key_name, 'str', pattern=r'^[0-9a-zA-Z-]+$')
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
+
+        # Construct body
+        body_content = self._serialize.body(parameters, 'KeyCreateParameters')
+
+        # Construct and send request
+        request = self._client.post(url, query_parameters)
+        response = self._client.send(
+            request, header_parameters, body_content, stream=False, **operation_config)
+
+        if response.status_code not in [200]:
+            raise models.KeyVaultErrorException(self._deserialize, response)
+
+        deserialized = None
+
+        if response.status_code == 200:
+            deserialized = self._deserialize('KeyBundle', response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(deserialized, response)
+            return client_raw_response
+
+        return deserialized
+    create_key.metadata = {'url': '/keys/{key-name}/create'}
+
+    def import_key(
+            self, vault_base_url, key_name, key, hsm=None, key_attributes=None, tags=None, release_policy=None, custom_headers=None, raw=False, **operation_config):
+        """Imports an externally created key, stores it, and returns key
+        parameters and attributes to the client.
+        The import key operation may be used to import any key type into an
+        Azure Key Vault. If the named key already exists, Azure Key Vault
+        creates a new version of the key. This operation requires the
+        keys/import permission.
+        :param vault_base_url: The vault name, for example
+         https://myvault.vault.azure.net.
+        :type vault_base_url: str
+        :param key_name: Name for the imported key.
+        :type key_name: str
+        :param key: The Json web key
+        :type key: ~azure.keyvault.v7_0.models.JsonWebKey
+        :param hsm: Whether to import as a hardware key (HSM) or software key.
+        :type hsm: bool
+        :param key_attributes: The key management attributes.
+        :type key_attributes: ~azure.keyvault.v7_0.models.KeyAttributes
+        :param tags: Application specific metadata in the form of key-value
+         pairs.
+        :type tags: dict[str, str]
+        :param release_policy: The policy rules under which the key can be
+         exported.
+        :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
+        :param dict custom_headers: headers that will be added to the request
+        :param bool raw: returns the direct response alongside the
+         deserialized response
+        :param operation_config: :ref:`Operation configuration
+         overrides<msrest:optionsforoperations>`.
+        :return: KeyBundle or ClientRawResponse if raw=true
+        :rtype: ~azure.keyvault.v7_0.models.KeyBundle or
+         ~msrest.pipeline.ClientRawResponse
+        :raises:
+         :class:`KeyVaultErrorException<azure.keyvault.v7_0.models.KeyVaultErrorException>`
+        """
+        parameters = models.KeyImportParameters(hsm=hsm, key=key, key_attributes=key_attributes, tags=tags, release_policy=release_policy)
+
+        # Construct URL
+        url = self.import_key.metadata['url']
+        path_format_arguments = {
+            'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True),
+            'key-name': self._serialize.url("key_name", key_name, 'str', pattern=r'^[0-9a-zA-Z-]+$')
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
+
+        # Construct body
+        body_content = self._serialize.body(parameters, 'KeyImportParameters')
+
+        # Construct and send request
+        request = self._client.put(url, query_parameters)
+        response = self._client.send(
+            request, header_parameters, body_content, stream=False, **operation_config)
+
+        if response.status_code not in [200]:
+            raise models.KeyVaultErrorException(self._deserialize, response)
+
+        deserialized = None
+
+        if response.status_code == 200:
+            deserialized = self._deserialize('KeyBundle', response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(deserialized, response)
+            return client_raw_response
+
+        return deserialized
+    import_key.metadata = {'url': '/keys/{key-name}'}
+
+    def update_key(
+            self, vault_base_url, key_name, key_version, key_ops=None, key_attributes=None, tags=None, release_policy=None, custom_headers=None, raw=False, **operation_config):
+        """The update key operation changes specified attributes of a stored key
+        and can be applied to any key type and key version stored in Azure Key
+        Vault.
+        In order to perform this operation, the key must already exist in the
+        Key Vault. Note: The cryptographic material of a key itself cannot be
+        changed. This operation requires the keys/update permission.
+        :param vault_base_url: The vault name, for example
+         https://myvault.vault.azure.net.
+        :type vault_base_url: str
+        :param key_name: The name of key to update.
+        :type key_name: str
+        :param key_version: The version of the key to update.
+        :type key_version: str
+        :param key_ops: Json web key operations. For more information on
+         possible key operations, see JsonWebKeyOperation.
+        :type key_ops: list[str or
+         ~azure.keyvault.v7_0.models.JsonWebKeyOperation]
+        :param key_attributes:
+        :type key_attributes: ~azure.keyvault.v7_0.models.KeyAttributes
+        :param tags: Application specific metadata in the form of key-value
+         pairs.
+        :type tags: dict[str, str]
+        :param release_policy: The policy rules under which the key can be
+         exported.
+        :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
+        :param dict custom_headers: headers that will be added to the request
+        :param bool raw: returns the direct response alongside the
+         deserialized response
+        :param operation_config: :ref:`Operation configuration
+         overrides<msrest:optionsforoperations>`.
+        :return: KeyBundle or ClientRawResponse if raw=true
+        :rtype: ~azure.keyvault.v7_0.models.KeyBundle or
+         ~msrest.pipeline.ClientRawResponse
+        :raises:
+         :class:`KeyVaultErrorException<azure.keyvault.v7_0.models.KeyVaultErrorException>`
+        """
+        parameters = models.KeyUpdateParameters(key_ops=key_ops, key_attributes=key_attributes, tags=tags, release_policy=release_policy)
+
+        # Construct URL
+        url = self.update_key.metadata['url']
+        path_format_arguments = {
+            'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True),
+            'key-name': self._serialize.url("key_name", key_name, 'str'),
+            'key-version': self._serialize.url("key_version", key_version, 'str')
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
+
+        # Construct body
+        body_content = self._serialize.body(parameters, 'KeyUpdateParameters')
+
+        # Construct and send request
+        request = self._client.patch(url, query_parameters)
+        response = self._client.send(
+            request, header_parameters, body_content, stream=False, **operation_config)
+
+        if response.status_code not in [200]:
+            raise models.KeyVaultErrorException(self._deserialize, response)
+
+        deserialized = None
+
+        if response.status_code == 200:
+            deserialized = self._deserialize('KeyBundle', response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(deserialized, response)
+            return client_raw_response
+
+        return deserialized
+    update_key.metadata = {'url': '/keys/{key-name}/{key-version}'}
+
+    def get_key(
+            self, vault_base_url, key_name, key_version, custom_headers=None, raw=False, **operation_config):
+        """Gets the public part of a stored key.
+        The get key operation is applicable to all key types. If the requested
+        key is symmetric, then no key material is released in the response.
+        This operation requires the keys/get permission.
+        :param vault_base_url: The vault name, for example
+         https://myvault.vault.azure.net.
+        :type vault_base_url: str
+        :param key_name: The name of the key to get.
+        :type key_name: str
+        :param key_version: Adding the version parameter retrieves a specific
+         version of a key.
+        :type key_version: str
+        :param dict custom_headers: headers that will be added to the request
+        :param bool raw: returns the direct response alongside the
+         deserialized response
+        :param operation_config: :ref:`Operation configuration
+         overrides<msrest:optionsforoperations>`.
+        :return: KeyBundle or ClientRawResponse if raw=true
+        :rtype: ~azure.keyvault.v7_0.models.KeyBundle or
+         ~msrest.pipeline.ClientRawResponse
+        :raises:
+         :class:`KeyVaultErrorException<azure.keyvault.v7_0.models.KeyVaultErrorException>`
+        """
+        # Construct URL
+        url = self.get_key.metadata['url']
+        path_format_arguments = {
+            'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True),
+            'key-name': self._serialize.url("key_name", key_name, 'str'),
+            'key-version': self._serialize.url("key_version", key_version, 'str')
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
+
+        # Construct and send request
+        request = self._client.get(url, query_parameters)
+        response = self._client.send(request, header_parameters, stream=False, **operation_config)
+
+        if response.status_code not in [200]:
+            raise models.KeyVaultErrorException(self._deserialize, response)
+
+        deserialized = None
+
+        if response.status_code == 200:
+            deserialized = self._deserialize('KeyBundle', response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(deserialized, response)
+            return client_raw_response
+
+        return deserialized
+    get_key.metadata = {'url': '/keys/{key-name}/{key-version}'}
+
     def download(self, vault_base_url, certificates, custom_headers=None, raw=False, **operation_config):
         """Retrieves Security domain from HSM enclave.
         :param vault_base_url: The vault name, for example https://myvault.vault.azure.net.
