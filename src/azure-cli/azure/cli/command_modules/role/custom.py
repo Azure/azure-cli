@@ -939,12 +939,47 @@ def add_permission(cmd, identifier, api, api_permissions):
                    'change effective', identifier, api)
 
 
-def delete_permission(cmd, identifier, api):
+def delete_permission(cmd, identifier, api, api_permissions=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
-    existing_accesses = application.required_resource_access
-    existing_accesses = [e for e in existing_accesses if e.resource_app_id != api]
-    update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
+    required_resource_access = application.required_resource_access
+    # required_resource_access (list of RequiredResourceAccess)
+    #   RequiredResourceAccess
+    #     resource_app_id   <- api
+    #     resource_access   (list of ResourceAccess)
+    #       ResourceAccess
+    #         id            <- api_permissions
+    #         type
+
+    # Get the RequiredResourceAccess object whose resource_app_id == api
+    rra = next((a for a in required_resource_access if a.resource_app_id == api), None)
+
+    if not rra:
+        # Silently pass if the api is not required.
+        logger.warning("App %s doesn't require access to API %s.", identifier, api)
+        return None
+
+    if api_permissions:
+        # Check if the user tries to delete any ResourceAccess that is not required.
+        ra_ids = [ra.id for ra in rra.resource_access]
+        non_existing_ra_ids = [p for p in api_permissions if p not in ra_ids]
+        if non_existing_ra_ids:
+            logger.warning("App %s doesn't require access to API %s's permission %s.",
+                           identifier, api, ', '.join(non_existing_ra_ids))
+            if len(non_existing_ra_ids) == len(api_permissions):
+                # Skip the REST call if nothing to remove
+                return None
+
+        # Remove specified ResourceAccess under RequiredResourceAccess.resource_access
+        rra.resource_access = [a for a in rra.resource_access if a.id not in api_permissions]
+        # Remove the RequiredResourceAccess if its resource_access is empty
+        if not rra.resource_access:
+            required_resource_access.remove(rra)
+    else:
+        # Remove the whole RequiredResourceAccess
+        required_resource_access.remove(rra)
+
+    update_parameter = ApplicationUpdateParameters(required_resource_access=required_resource_access)
     return graph_client.applications.patch(application.object_id, update_parameter)
 
 

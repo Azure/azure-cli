@@ -15,6 +15,7 @@ short-summary: Manage and update CLI extensions.
 helps['extension add'] = """
 type: command
 short-summary: Add an extension.
+long-summary: To learn about installing extensions automatically, visit https://aka.ms/AzExtDynamicInstall.
 parameters:
   - name: --system
     type: string

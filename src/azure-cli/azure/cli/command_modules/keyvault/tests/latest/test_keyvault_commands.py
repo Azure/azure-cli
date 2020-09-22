@@ -402,6 +402,11 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
 
+        files = ['sdfile', 'exchange_key', 'key_backup']
+        for f in files:
+            if os.path.exists(self.kwargs[f]):
+                os.remove(self.kwargs[f])
+
 
 class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
     @pytest.mark.serial()
@@ -628,7 +633,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-key-', 24),
             'loc': 'westus',
-            'key': 'key1'
+            'key': 'key1',
+            'key2': 'key2'
         })
         keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
@@ -641,6 +647,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                        checks=self.check('attributes.enabled', True)).get_output_in_json()
         first_kid = key['key']['kid']
         first_version = first_kid.rsplit('/', 1)[1]
+        self.cmd('keyvault key create --vault-name {kv} -n {key2}')
 
         # encrypt/decrypt
         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
@@ -656,11 +663,11 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         # list keys
         self.cmd('keyvault key list --vault-name {kv}',
                  checks=[
-                     self.check('length(@)', 1),
+                     self.check('length(@)', 2),
                      self.exists('[0].name')
                  ])
-        self.cmd('keyvault key list --vault-name {kv} --maxresults 10',
-                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault key list --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list --vault-name {kv} --maxresults 1', checks=self.check('length(@)', 1))
 
         # create a new key version
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt '
@@ -680,6 +687,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 2))
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
                  checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 1',
+                 checks=self.check('length(@)', 1))
         self.cmd('keyvault key list-versions --id {kid}', checks=self.check('length(@)', 2))
         self.cmd('keyvault key list-versions --id {pkid}', checks=self.check('length(@)', 2))
 
@@ -706,15 +715,15 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         ])
 
         # backup and then delete key
-        key_file = 'backup.key'
-        self.kwargs['key_file'] = key_file
-        self.cmd('keyvault key backup --vault-name {kv} -n {key} --file {key_file}')
+        self.kwargs['key_file'] = os.path.join(tempfile.mkdtemp(), 'backup.key')
+        self.cmd('keyvault key backup --vault-name {kv} -n {key} --file "{key_file}"')
         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
+        self.cmd('keyvault key delete --vault-name {kv} -n {key2}')
         self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
         self.cmd('keyvault key list --vault-name {kv} --maxresults 10', checks=self.is_empty())
 
         # restore key from backup
-        self.cmd('keyvault key restore --vault-name {kv} --file {key_file}')
+        self.cmd('keyvault key restore --vault-name {kv} --file "{key_file}"')
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
                  checks=[
                      self.check('length(@)', 2),
@@ -723,8 +732,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  ])
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
                  checks=self.check('length(@)', 2))
-        if os.path.isfile(key_file):
-            os.remove(key_file)
+        if os.path.isfile(self.kwargs['key_file']):
+            os.remove(self.kwargs['key_file'])
 
         # import PEM from file
         self.kwargs.update({
@@ -865,6 +874,8 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
                      self.check('length(@)', 1),
                      self.check('[0].name', '{key}')
                  ])
+        if os.path.exists(self.kwargs['key_file']):
+            os.remove(self.kwargs['key_file'])
 
         # import PEM
         self.kwargs.update({
@@ -1017,6 +1028,8 @@ class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
                      self.check('length(@)', 1),
                      self.check('[0].name', '{key}')
                  ])
+        if os.path.isfile(self.kwargs['key_file']):
+            os.remove(self.kwargs['key_file'])
 
         # import PEM
         self.kwargs.update({
@@ -1237,7 +1250,8 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-se-', 24),
             'loc': 'westus',
-            'sec': 'secret1'
+            'sec': 'secret1',
+            'sec2': 'secret2'
         })
         _create_keyvault(self, self.kwargs)
 
@@ -1251,14 +1265,16 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
             'sid1': first_sid,
             'ver1': first_version
         })
+        self.cmd('keyvault secret set --vault-name {kv} -n {sec2} --value 123456', checks=self.check('value', '123456'))
 
         # list secrets
         self.cmd('keyvault secret list --vault-name {kv}',
                  checks=[
-                     self.check('length(@)', 1),
+                     self.check('length(@)', 2),
                      self.check('[0].name', first_sname)
                  ])
-        self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 1))
+        self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 2))
+        self.cmd('keyvault secret list --vault-name {kv} --maxresults 1', checks=self.check('length(@)', 1))
 
         # create a new secret version
         secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value DEF456 --tags test=foo --description "test type"', checks=[
@@ -1274,6 +1290,8 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 2))
         self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec} --maxresults 10',
                  checks=self.check('length(@)', 2))
+        self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec} --maxresults 1',
+                 checks=self.check('length(@)', 1))
 
         # show secret (latest)
         self.cmd('keyvault secret show --vault-name {kv} -n {sec}',
@@ -1298,18 +1316,18 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         ])
 
         # backup and then delete secret
-        bak_file = 'backup.secret'
-        self.kwargs['bak_file'] = bak_file
-        self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
+        self.kwargs['bak_file'] = os.path.join(tempfile.mkdtemp(), 'backup.secret')
+        self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file "{bak_file}"')
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}', checks=self.check('name', '{sec}'))
+        self.cmd('keyvault secret delete --vault-name {kv} -n {sec2}', checks=self.check('name', '{sec2}'))
         self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
         # restore secret from backup
-        self.cmd('keyvault secret restore --vault-name {kv} --file {bak_file}', checks=self.check('name', '{sec}'))
+        self.cmd('keyvault secret restore --vault-name {kv} --file "{bak_file}"', checks=self.check('name', '{sec}'))
         self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
                  checks=self.check('length(@)', 2))
-        if os.path.isfile(bak_file):
-            os.remove(bak_file)
+        if os.path.isfile(self.kwargs['bak_file']):
+            os.remove(self.kwargs['bak_file'])
 
         # delete secret
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')

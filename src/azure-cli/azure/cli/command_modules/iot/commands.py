@@ -158,9 +158,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory,
                             is_preview=True) as g:
-        g.custom_command('create', 'iot_central_app_create')
+        g.custom_command('create', 'iot_central_app_create', supports_no_wait=True)
         g.custom_command('list', 'iot_central_app_list')
         g.custom_show_command('show', 'iot_central_app_get')
         g.generic_update_command('update', getter_name='iot_central_app_get',
                                  setter_name='iot_central_app_update', command_type=update_custom_util)
-        g.custom_command('delete', 'iot_central_app_delete', confirmation=True)
+        g.custom_command('delete', 'iot_central_app_delete', confirmation=True, supports_no_wait=True)

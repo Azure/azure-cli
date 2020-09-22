@@ -2711,6 +2711,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
     SiteConfig, Site, NameValuePair = cmd.get_models('SiteConfig', 'Site', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
@@ -2795,6 +2796,12 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                        '--functions-version. Dotnet version will be %s for this function app.',
                        runtime_version_json[KEYS.DISPLAY_VERSION])
 
+    if runtime_version_json[KEYS.IS_DEPRECATED]:
+        logger.warning('%s version %s has been deprecated. In the future, this version will be unavailable. '
+                       'Please update your command to use a more recent version. For a list of supported '
+                       '--runtime-versions, run \"az functionapp create -h\"',
+                       runtime_json[KEYS.PROPERTIES][KEYS.DISPLAY], runtime_version_json[KEYS.DISPLAY_VERSION])
+
     site_config_json = runtime_version_json[KEYS.SITE_CONFIG_DICT]
     app_settings_json = runtime_version_json[KEYS.APP_SETTINGS_DICT]
 
@@ -2815,11 +2822,16 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='false'))
                 site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
+
+                # clear all runtime specific configs and settings
+                site_config_json = {KEYS.USE_32_BIT_WORKER_PROC: False}
+                app_settings_json = {}
+
+                # ensure that app insights is created if not disabled
+                runtime_version_json[KEYS.APPLICATION_INSIGHTS] = True
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-        if deployment_container_image_name is None:
-            site_config.linux_fx_version = site_config_json[KEYS.LINUX_FX_VERSION]
     else:
         functionapp_def.kind = 'functionapp'
 
@@ -2828,16 +2840,13 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
 
-    # adding appsetting to site to make it a function
+    # adding app settings
     for app_setting, value in app_settings_json.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
-
-    if disable_app_insights or not runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
-        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
 
     # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and not is_plan_elastic_premium(cmd, plan_info):
@@ -2859,6 +2868,9 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=instrumentation_key))
+    elif disable_app_insights or not runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
+        # set up dashboard if no app insights
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
         create_app_insights = True
 
@@ -2969,7 +2981,10 @@ def _get_runtime_version_functionapp(version_string, is_linux):
     if linux_match:
         return float(linux_match.group(1))
 
-    return float(version_string)
+    try:
+        return float(version_string)
+    except ValueError:
+        return 0
 
 
 def try_create_application_insights(cmd, functionapp):
