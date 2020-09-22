@@ -2662,7 +2662,7 @@ def server_aad_only_create(
     kwargs['tenant_id'] = _get_tenant_id()
     return client.create_or_update(
         resource_group_name=resource_group_name,
-        server_name=server_name
+        server_name=server_name,
         parameters=kwargs
     )
 
