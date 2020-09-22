@@ -48,9 +48,9 @@ def load_arguments(self, _):
     deployment_create_name_type = CLIArgumentType(options_list=['--name', '-n'], required=False, help='The deployment name. Default to template file base name')
     management_group_id_type = CLIArgumentType(options_list=['--management-group-id', '-m'], required=True, help='The management group id.')
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
-                                                    help="a template file path in the file system")
+                                                    help="a template file path in the file system")                                         
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
-    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
+    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01', help="The template spec resource id.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
@@ -81,6 +81,10 @@ def load_arguments(self, _):
                                                   help='Indicate that the latest api-version will be used regardless of whether it is preview version (like 2020-01-01-preview) or not. '
                                                        'For example, if the supported api-version of resource provider is 2020-01-01-preview and 2019-01-01: '
                                                        'when passing in this parameter it will take the latest version 2020-01-01-preview, otherwise it will take the latest stable version 2019-01-01 without passing in this parameter')
+
+    ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
+    ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
+    ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -526,29 +530,35 @@ def load_arguments(self, _):
         c.argument('parent_id', options_list=['--parent', '-p'])
 
     with self.argument_context('ts') as c:
-        c.argument('name', options_list=['--name', '-n'])
-        c.argument('version', options_list=['--version', '-v'])
+        c.argument('name', options_list=['--name', '-n'], help='The name of the template spec.')
+        c.argument('version', options_list=['--version', '-v'], help='The template spec version.')
 
     with self.argument_context('ts create') as c:
-        c.argument('template_file', options_list=['--template-file', '-f'])
-        c.argument('location', options_list=['--location', '-l'])
-        c.argument('display_name', options_list=['--display-name', '-d'])
-        c.argument('description', options_list=['--description'])
-        c.argument('version_description', options_list=['--version-description'])
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('location', options_list=['--location', '-l'], help='The location to store the template-spec and template-spec version(s). Cannot be changed after creation.')
+        c.argument('display_name', arg_type=ts_display_name_type)
+        c.argument('description', arg_type=ts_description_type)
+        c.argument('version_description', arg_type=ts_version_description_type)
 
     with self.argument_context('ts update') as c:
-        c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
-        c.argument('template_file', options_list=['--template-file', '-f'])
-        c.argument('display_name', options_list=['--display-name', '-d'])
-        c.argument('description', options_list=['--description'])
-        c.argument('version_description', options_list=['--version-description'])
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('display_name', arg_type=ts_display_name_type)
+        c.argument('description', arg_type=ts_description_type)
+        c.argument('version_description', arg_type=ts_version_description_type)
 
     with self.argument_context('ts show') as c:
-        c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
 
     with self.argument_context('ts export') as c:
-        c.argument('output_folder', options_list=['--output-folder'])
-        c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
+        c.argument('output_folder', options_list=['--output-folder'], help='Existing folder to output export(s).')
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
 
     with self.argument_context('ts delete') as c:
-        c.argument('template_spec', options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01')
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template spec or template spec version is stored.')
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
+
+    with self.argument_context('ts list') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type)

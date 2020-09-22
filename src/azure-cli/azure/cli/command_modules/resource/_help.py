@@ -2199,30 +2199,6 @@ short-summary: Manage template specs at subscription or resource group scope.
 helps['ts create'] = """
 type: command
 short-summary: Create a template spec and or template spec version.
-parameters:
-  - name: --resource-group -g
-    type: string
-    short-summary: Name of resource group.
-  - name: --name -n
-    type: string
-    short-summary: Name of the template spec.
-  - name: --version -v
-    type: string
-    short-summary: The template spec version.
-  - name: --template-file -f
-    type: template_spec
-    short-summary: The path to the template file.
-  - name: --location -l
-    short-summary: The location to store the template-spec and template-spec version(s). Cannot be changed after creation.
-  - name: --display-name -d
-    type: string
-    short-summary: The display name of the template spec.
-  - name : --description
-    type: string
-    short-summary: The description of the root template spec.
-  - name : --version-description
-    type: string
-    short-summary: The description of template spec version.
 examples:
   - name: Create a template spec.
     text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec"
@@ -2235,30 +2211,6 @@ examples:
 helps['ts update'] = """
 type: command
 short-summary: Update a template spec version.
-parameters:
-  - name: --resource-group -g
-    type: string
-    short-summary: Name of resource group.
-  - name: --name -n
-    type: string
-    short-summary: Name of the template spec.
-  - name: --version -v
-    type: string
-    short-summary: The template spec version.
-  - name: --template-spec -s
-    short-summary: The template spec resource ID.
-  - name: --template-file -f
-    type: template_spec
-    short-summary: The location to store the template-spec.
-  - name: --display-name -d
-    type: string
-    short-summary: The display name of the template spec.
-  - name : --description
-    type: string
-    short-summary: The description of the parent template spec.
-  - name : --version-description
-    type: string
-    short-summary: The description of template spec version.
 examples:
   - name: Update the template content of a template spec or template spec version based on the resource ID.
     text: az ts update --template-spec resourceID -f updatedFile.json
@@ -2273,18 +2225,6 @@ examples:
 helps['ts show'] = """
 type: command
 short-summary: Get the specified template spec or template spec version.
-parameters:
-  - name: --resource-group -g
-    type: string
-    short-summary: Name of the resource group.
-  - name: --name -n
-    type: string
-    short-summary: Name of the template spec.
-  - name: --version -v
-    type: string
-    short-summary: The template spec version.
-  - name: --template-spec -s
-    short-summary: The template spec resource ID.
 examples:
   - name: Show the specified template spec.
     text: az ts show -g testrg --name TemplateSpecName
@@ -2297,20 +2237,6 @@ examples:
 helps['ts export'] = """
 type: command
 short-summary: Export the specified template spec and artifacts (if any) to the specified output folder.
-parameters:
-  - name: --resource-group -g
-    type: string
-    short-summary: Name of resource group.
-  - name: --name -n
-    type: string
-    short-summary: Name of the template spec.
-  - name: --version -v
-    type: string
-    short-summary: The template spec version.
-  - name: --template-spec -s
-    short-summary: The template spec resource ID.
-  - name: --output-folder
-    short-summary: Existing folder to output export(s).
 examples:
   - name: Export the specified template spec with all versions.
     text: az ts export -g testrg --name TemplateSpecName --output-folder C:/path/
@@ -2320,22 +2246,9 @@ examples:
     text: az ts export -g testrg --name TemplateSpecName --version VersionName --output-folder C:/path/
 """
 
-
 helps['ts delete'] = """
 type: command
-short-summary: Delete a specified template spec or template spec version by name or resource ID.
-parameters:
-  - name: --resource-group -g
-    type: string
-    short-summary: Name of resource group.
-  - name: --name -n
-    type: string
-    short-summary: Name of the template spec.
-  - name: --template-spec -s
-    short-summary: The template spec resource ID.
-  - name: --version -v
-    type: string
-    short-summary: The template spec version.
+short-summary: Delete a specified template spec or template spec version by name or resource ID..
 examples:
   - name: Delete the specified template spec and all versions.
     text: az ts delete -g MyResourceGroup --name TemplateSpecName
@@ -2348,13 +2261,6 @@ examples:
 helps['ts list'] = """
 type: command
 short-summary: List template specs or template spec versions.
-parameters:
-  - name: --resource-group -g
-    type: string
-    short-summary: Name of resource group.
-  - name: --name -n
-    type: string
-    short-summary: Name of the template spec.
 examples:
   - name: List all template specs in current default subscription.
     text: az ts list
