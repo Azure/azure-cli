@@ -840,7 +840,7 @@ def load_arguments(self, _):
 
         c.argument('event_hub_name',
                    arg_group=policy_arg_group,
-                   help='The name of the event hub. If none is specified when providing EventHubAuthorizationRuleResourceId, the default event hub will be selected.')
+                   help='The name of the event hub. If none is specified when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
     with self.argument_context('sql db threat-policy update') as c:
         _configure_security_policy_storage_params(c)
@@ -1379,7 +1379,7 @@ def load_arguments(self, _):
 
         c.argument('event_hub_name',
                    arg_group=policy_arg_group,
-                   help='The name of the event hub. If none is specified when providing EventHubAuthorizationRuleResourceId, the default event hub will be selected.')
+                   help='The name of the event hub. If none is specified when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
     #####
     #           sql server conn-policy
