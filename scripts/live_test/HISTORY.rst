@@ -7,8 +7,9 @@ Release History
 ++++++
 
 * Update pipeline run title.
-* Generate index.html of HTML files of testing results.
+* Generate index.html of testing results.
 * Design a unique representation of a pipeline run.
+* Make storage account container public.
 
 0.3.0
 ++++++
