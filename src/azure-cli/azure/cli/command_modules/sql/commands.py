@@ -636,6 +636,20 @@ def load_command_table(self, _):
         g.custom_command('delete', 'mi_ad_admin_delete')
         g.custom_command('update', 'mi_ad_admin_set')
 
+    #####*****####
+    managed_instance_aadonly_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceAzureADOnlyAuthenticationsOperations.{}',
+        client_factory=get_sql_managed_instance_azure_ad_only_operations)
+
+    with self.command_group ('sql mi aad-only',
+                             maanged_instance_aadonly_operations,
+                             client_factory=get_sql_managed_instance_azure_ad_only_operations) as g:
+        
+        g.custom_command('disable', 'mi_aad_only_delete')
+        g.custom_command('enable', 'mi_aad_only_create')
+        g.command('list', 'list_by_instance')
+    #####*****####
+
     ###############################################
     #                sql managed db               #
     ###############################################

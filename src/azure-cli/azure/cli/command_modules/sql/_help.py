@@ -605,6 +605,13 @@ type: group
 short-summary: Manage SQL managed instances.
 """
 
+#####*****####
+helps['sql mi aad-only'] = """
+type: group
+short-summary: Manage a managed instanec's Azure Active Directly only settings.
+"""
+#####*****####
+
 helps['sql mi ad-admin'] = """
 type: group
 short-summary: Manage a managed instance's Active Directory administrator.

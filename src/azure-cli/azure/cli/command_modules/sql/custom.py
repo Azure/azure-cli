@@ -2916,6 +2916,39 @@ def mi_ad_admin_delete(
         managed_instance_name=managed_instance_name
     )
 
+
+#####
+#           sql managed instance aad-only
+#####
+
+def mi_aad_only_delete(
+    client,
+    resource_group_name,
+    managed_instance_name):
+    '''
+    Disables the managed instance AAD-only setting
+    '''
+    return client.delete(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name
+        )
+
+def mi_aad_only_create(
+    client,
+    resource_group_name,
+    managed_instance_name,
+    **kwargs):
+    '''
+    Enables the AAD-only setting
+    '''
+    kwargs['tenant_id'] = _get_tenant_id()
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        parameters=kwargs
+        )
+
 ###############################################
 #                sql managed db               #
 ###############################################
