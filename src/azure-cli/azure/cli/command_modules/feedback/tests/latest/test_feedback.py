@@ -44,7 +44,14 @@ class TestCommandLogFile(ScenarioTest):
             self.cmd("az extension add -n alias")
             logger.warning("Adding whl ext alias")
 
-        super(TestCommandLogFile, self).setUp()
+        # super(TestCommandLogFile, self).setUp()
+        # set up mock patches
+        if self.in_recording:
+            for patch in self.recording_patches:
+                patch(self)
+        else:
+            for patch in self.replay_patches:
+                patch(self)
         self.temp_command_log_dir = self.create_temp_dir()
 
         # if alias is installed as a wheel extension. Remove it for now and re-install it later.
