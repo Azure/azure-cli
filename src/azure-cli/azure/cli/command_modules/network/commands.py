@@ -524,9 +524,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_ag_url_path_map_rule', supports_no_wait=True, validator=process_ag_url_path_map_rule_create_namespace)
         g.custom_command('delete', 'delete_ag_url_path_map_rule', supports_no_wait=True)
 
-    waf_config_deprecate_info = self.deprecate(redirect='network application-gateway waf-policy', hide=False)
-    with self.command_group('network application-gateway waf-config',
-                            deprecate_info=waf_config_deprecate_info) as g:
+    with self.command_group('network application-gateway waf-config') as g:
         g.custom_command('set', 'set_ag_waf_config_2017_03_01', min_api='2017-03-01', supports_no_wait=True)
         g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_waf_config')
