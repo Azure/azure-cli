@@ -2635,6 +2635,37 @@ def encryption_protector_update(
         server_key_name=key_name
     )
 
+#####
+#           sql server aad-only
+#####
+
+def server_aad_only_delete(
+    client,
+    resource_group_name,
+    server_name):
+    '''
+    Disables a servers aad-only setting
+    '''
+    return client.delete(
+        resource_group_name=resource_group_name,
+        server_name=server_name
+    )
+
+def server_aad_only_create(
+    client,
+    resource_group_name,
+    server_name,
+    **kwargs):
+    '''
+    Enables a servers aad-only setting
+    '''
+    kwargs['tenant_id'] = _get_tenant_id()
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name
+        parameters=kwargs
+    )
+
 ###############################################
 #                sql managed instance         #
 ###############################################
@@ -2931,7 +2962,7 @@ def mi_aad_only_delete(
     return client.delete(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name
-        )
+    )
 
 def mi_aad_only_create(
     client,
@@ -2947,7 +2978,7 @@ def mi_aad_only_create(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         parameters=kwargs
-        )
+    )
 
 ###############################################
 #                sql managed db               #
