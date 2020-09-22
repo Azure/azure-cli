@@ -1538,3 +1538,23 @@ def validate_text_configuration(cmd, ns):
         ns.in_escape_char, ns.in_has_header
     del ns.output_format, ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, \
         ns.out_escape_char, ns.out_has_header
+
+
+def add_acl_progress_hook(namespace):
+    if namespace.progress_hook:
+        return
+
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        print(("In this batch: {} directories and {} files were processed successfully, {} failures were counted. " +
+               "In total, {} directories and {} files were processed successfully, {} failures were counted.")
+              .format(acl_changes.batch_counters.directories_successful, acl_changes.batch_counters.files_successful,
+                      acl_changes.batch_counters.failure_count, acl_changes.aggregate_counters.directories_successful,
+                      acl_changes.aggregate_counters.files_successful, acl_changes.aggregate_counters.failure_count))
+
+        # keep track of failed entries if there are any
+        failed_entries.append(acl_changes.batch_failures)
+
+    namespace.progress_hook = progress_callback

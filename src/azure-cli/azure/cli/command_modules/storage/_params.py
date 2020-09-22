@@ -20,7 +20,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
-                          validate_fs_public_access, validate_logging_version, validate_or_policy)
+                          validate_fs_public_access, validate_logging_version, validate_or_policy,
+                          add_acl_progress_hook)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -1564,7 +1565,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '
                     'be split into multiple requests so that progress can be tracked. Batch size should be between 1 '
                     'and 2000. The default when unspecified is 2000.')
-            c.extra('max_batches', type=int, help='OPtional. Define maximum number of batches that single change '
+            c.extra('max_batches', type=int, help='Optional. Define maximum number of batches that single change '
                     'Access Control operation can execute. If maximum is reached before all sub-paths are processed, '
                     'then continuation token can be used to resume operation. Empty value indicates that maximum '
                     'number of batches in unbound and operation continues till end.')
@@ -1574,3 +1575,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                          'sub-entities of the directory. Continuation token will only be returned when '
                          '--continue-on-failure is True in case of user errors. If not set the default value is False '
                          'for this.')
+            c.extra('progress_hook', validator=add_acl_progress_hook,
+                    help='Callback where the caller can track progress of the operation as well as collect paths that '
+                         'failed to change Access Control.')
