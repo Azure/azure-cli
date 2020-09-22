@@ -270,6 +270,8 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
   - name: Remove customer encryption key
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
+  - name: Update an App Configuration to enable public network access.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true
 """
 
 helps['appconfig feature'] = """
