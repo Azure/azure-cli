@@ -33,8 +33,8 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
-            execute(self.cli_ctx, cmd)
 
+            execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 

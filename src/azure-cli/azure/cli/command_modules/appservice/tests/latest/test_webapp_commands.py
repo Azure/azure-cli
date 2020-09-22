@@ -3061,6 +3061,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_vnetSameName(self, resource_group):
         resource_group_2 = self.create_random_name('swiftwebapp', 24)
