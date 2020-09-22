@@ -362,7 +362,7 @@ def list_network_rules(client, resource_group_name, account_name):
 
 
 def add_network_rule(cmd, client, resource_group_name, account_name, action='Allow', subnet=None,
-                     vnet_name=None, ip_address=None):  # pylint: disable=unused-argument
+                     vnet_name=None, ip_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     if subnet:
@@ -381,6 +381,11 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
             rules.ip_rules = []
         rules.ip_rules = [r for r in rules.ip_rules if r.ip_address_or_range != ip_address]
         rules.ip_rules.append(IpRule(ip_address_or_range=ip_address, action=action))
+    if resource_id:
+        ResourceAccessRule = cmd.get_models('ResourceAccessRule')
+        if not rules.resource_access_rules:
+            rules.resource_access_rules = []
+        rules.resource_access_rules.append(ResourceAccessRule(tenant_id=tenant_id, resource_id=resource_id))
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
