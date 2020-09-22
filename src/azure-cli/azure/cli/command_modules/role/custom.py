@@ -179,11 +179,11 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
                           show_all=False, include_groups=False, include_classic_administrators=False):
-    '''
+    """
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
-    '''
-    graph_client = _graph_client_factory(cmd.cli_ctx)
+    """
+    graph_client = _graph_client_factory(cmd.cli_ctx, scope)
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -677,9 +677,9 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
 
 def create_user(client, user_principal_name, display_name, password,
                 mail_nickname=None, immutable_id=None, force_change_password_next_login=False):
-    '''
+    """
     :param mail_nickname: mail alias. default to user principal name
-    '''
+    """
     mail_nickname = mail_nickname or user_principal_name.split('@')[0]
     param = UserCreateParameters(user_principal_name=user_principal_name, account_enabled=True,
                                  display_name=display_name, mail_nickname=mail_nickname,
@@ -745,9 +745,9 @@ def check_group_membership(cmd, client, group_id, member_object_id):  # pylint: 
 
 
 def list_groups(client, display_name=None, query_filter=None):
-    '''
+    """
     list groups in the directory
-    '''
+    """
     sub_filters = []
     if query_filter:
         sub_filters.append(query_filter)

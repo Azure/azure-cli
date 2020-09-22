@@ -451,6 +451,20 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
+    @AllowLargeResponse()
+    def test_role_assignment_cross_tenant(self):
+        # Use --scope
+        assignments = self.cmd('role assignment list --scope /subscriptions/00977cdb-163f-435f-9c32-39ec8ae61f4d').get_output_in_json()
+        self.assertEqual(assignments[0]['scope'], '/subscriptions/00977cdb-163f-435f-9c32-39ec8ae61f4d')
+        # Verify principalName can be filled
+        self.assertFalse(any(a['principalName'] for a in assignments))
+
+        # Use --subscription
+        assignments = self.cmd('role assignment list --subscription 00977cdb-163f-435f-9c32-39ec8ae61f4d').get_output_in_json()
+        self.assertEqual(assignments[0]['scope'], '/subscriptions/00977cdb-163f-435f-9c32-39ec8ae61f4d')
+        # Verify principalName can be filled
+        self.assertTrue(any(a['principalName'] for a in assignments))
+
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_handle_conflicted_assignments(self, resource_group):
