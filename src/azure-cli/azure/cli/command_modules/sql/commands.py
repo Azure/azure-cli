@@ -710,6 +710,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'managed_db_log_replay_start', supports_no_wait=True)
         g.command('stop', 'delete', confirmation=True, supports_no_wait=True)
         g.command('complete', 'complete_restore')
+        g.wait_command('wait')
 
     managed_database_restore_details_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedDatabaseRestoreDetailsOperations.{}',

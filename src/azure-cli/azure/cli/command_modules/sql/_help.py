@@ -902,7 +902,7 @@ short-summary: SQL Managed Instance database Log Replay service commands.
 
 helps['sql midb log-replay start'] = """
 type: command
-short-summary: Starts Log Replay service on specified database.
+short-summary: Start Log Replay service on specified database.
 examples:
   - name: Log Replay with auto complete option.
     text: az sql midb log-replay start -g mygroup --mi myinstance -n mymanageddb -a --last-bn "backup.bak" --storage-uri "https://test.blob.core.windows.net/testing" --storage-sas "sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2Fgjocqwerqwer41s%3D"
@@ -912,7 +912,7 @@ examples:
 
 helps['sql midb log-replay complete'] = """
 type: command
-short-summary: Completes Log Replay service on specified database.
+short-summary: Complete Log Replay service on specified database.
 examples:
   - name: Completes log replay service.
     text: az sql midb log-replay complete -g mygroup --mi myinstance -n mymanageddb --last-backup-name "backup.bak"
@@ -920,7 +920,7 @@ examples:
 
 helps['sql midb log-replay show'] = """
 type: command
-short-summary: Gets status of Log Replay service.
+short-summary: Get status of Log Replay service.
 examples:
   - name: Gets status of the ongoing log replay service.
     text: az sql midb log-replay show -g mygroup --mi myinstance -n mymanageddb
@@ -928,7 +928,7 @@ examples:
 
 helps['sql midb log-replay stop'] = """
 type: command
-short-summary: Stops Log Replay service.
+short-summary: Stop Log Replay service.
 examples:
   - name: Stops ongoing log replay service by deleting database.
     text: az sql midb log-replay stop -g mygroup --mi myinstance -n mymanageddb
