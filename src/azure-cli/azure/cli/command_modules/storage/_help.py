@@ -1005,6 +1005,16 @@ examples:
     crafted: true
 """
 
+helps['storage container-rm'] = """
+type: group
+short-summary: Manage Azure containers using the Microsoft.Storage resource provider.
+"""
+
+helps['storage container-rm create'] = """
+type: command
+short-summary: Create a new container under the specified storage account.
+"""
+
 helps['storage container'] = """
 type: group
 short-summary: Manage blob storage containers.

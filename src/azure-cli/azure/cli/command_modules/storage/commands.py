@@ -469,6 +469,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command(
             'show', 'get', transform=lambda x: getattr(x, 'legal_hold', x))
 
+    with self.command_group('storage container-rm', command_type=blob_container_mgmt_sdk,
+                            custom_command_type=get_custom_sdk('blob',cf_blob_container_mgmt,resource_type=ResourceType.MGMT_STORAGE),
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
+        g.custom_command('create', 'create_container_rm',
+                         transform=create_boolean_result_output_transformer('created'),
+                         table_transformer=transform_boolean_for_table)
+
     file_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',
         client_factory=file_data_service_factory,
