@@ -815,6 +815,33 @@ def load_arguments(self, _):
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
 
+        c.argument('blob_storage_target_state',
+                   arg_group=policy_arg_group,
+                   help='Indicates whether blob storage is a destination for audit records.',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('log_analytics_target_state',
+                   arg_group=policy_arg_group,
+                   help='Indicates whether log analytics is a destination for audit records.',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('log_analytics_workspace_resource_id',
+                   arg_group=policy_arg_group,
+                   help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace to which you would like to send Audit Logs.')
+
+        c.argument('event_hub_target_state',
+                   arg_group=policy_arg_group,
+                   help='Indicates whether event hub is a destination for audit records.',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('event_hub_authorization_rule_id',
+                   arg_group=policy_arg_group,
+                   help='The resource Id for the event hub authorization rule.')
+
+        c.argument('event_hub_name',
+                   arg_group=policy_arg_group,
+                   help='The name of the event hub. If none is specified when providing EventHubAuthorizationRuleResourceId, the default event hub will be selected.')
+
     with self.argument_context('sql db threat-policy update') as c:
         _configure_security_policy_storage_params(c)
 
@@ -1326,6 +1353,33 @@ def load_arguments(self, _):
         c.argument('retention_days',
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
+
+        c.argument('blob_storage_target_state',
+                   arg_group=policy_arg_group,
+                   help='Indicates whether blob storage is a destination for audit records.',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('log_analytics_target_state',
+                   arg_group=policy_arg_group,
+                   help='Indicates whether log analytics is a destination for audit records.',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('log_analytics_workspace_resource_id',
+                   arg_group=policy_arg_group,
+                   help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace to which you would like to send Audit Logs.')
+
+        c.argument('event_hub_target_state',
+                   arg_group=policy_arg_group,
+                   help='Indicates whether event hub is a destination for audit records.',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
+
+        c.argument('event_hub_authorization_rule_id',
+                   arg_group=policy_arg_group,
+                   help='The resource Id for the event hub authorization rule.')
+
+        c.argument('event_hub_name',
+                   arg_group=policy_arg_group,
+                   help='The name of the event hub. If none is specified when providing EventHubAuthorizationRuleResourceId, the default event hub will be selected.')
 
     #####
     #           sql server conn-policy
