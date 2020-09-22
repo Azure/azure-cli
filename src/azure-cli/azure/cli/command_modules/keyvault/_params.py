@@ -67,6 +67,11 @@ def load_arguments(self, _):
 
     JsonWebKeyType = CLIJsonWebKeyType  # TODO: Remove this patch when new SDK is released
 
+    class ImportKeyTypeForBYOK(str, Enum):
+        ec = 'EC'
+        rsa = 'RSA'
+        oct = 'oct'
+
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
          'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
@@ -348,6 +353,7 @@ def load_arguments(self, _):
         c.argument('pem_password', help='Password of PEM file.')
         c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter(), validator=validate_key_import_source)
         c.argument('byok_string', type=file_type, help='BYOK string containing the key to be imported. Must not be password protected.', validator=validate_key_import_source)
+        c.argument('byok_kty', arg_type=get_enum_type(ImportKeyTypeForBYOK), help='The key type of BYOK file or string.')
 
     with self.argument_context('keyvault key backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
