@@ -179,7 +179,7 @@ def flexible_server_update_custom_func(cmd, instance,
                                        maintenance_window=None,
                                        assign_identity=False,
                                        tags=None):
-    
+
     # validator
     location = ''.join(instance.location.lower().split())
     sku_info = get_postgres_list_skus_info(cmd, location)

@@ -244,9 +244,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable',
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', default='Standard_B1ms', options_list=['--sku-name'], 
+                c.argument('sku_name', default='Standard_B1ms', options_list=['--sku-name'],
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_E16ds_v4 ')
-                c.argument('storage_mb', default='10', options_list=['--storage-size'], type=int, 
+                c.argument('storage_mb', default='10', options_list=['--storage-size'], type=int,
                            help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
                 c.argument('backup_retention', default=7, type=int, options_list=['--backup-retention'],
                            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.')
@@ -299,9 +299,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
             c.argument('tags', tags_type)
             if command_group == 'mysql':
-                c.argument('tier', options_list=['--tier'], 
+                c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
-                c.argument('sku_name', options_list=['--sku-name'], 
+                c.argument('sku_name', options_list=['--sku-name'],
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_E16ds_v4 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
@@ -418,7 +418,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
                 c.argument('sku_name', options_list=['--sku-name'],
                            help='The name of the compute SKU. Follows the convention'
-                                ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+                                ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D2ds_v4 ')
             elif command_group == 'postgres':
                 c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')

@@ -123,8 +123,8 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         sku = server_result.sku.name
         host = server_result.fully_qualified_domain_name
 
-        logger.warning('Make a note of your password. If you forget, you would have to '
-                       'reset your password with \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
+        logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
+                       '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
                        server_name, resource_group_name)
 
         _update_local_contexts(cmd, server_name, resource_group_name, location, user)
@@ -322,6 +322,10 @@ def flexible_replica_create(cmd, client, resource_group_name, server_name, sourc
         sku_name = source_server_object.sku.name
     if tier is None:
         tier = source_server_object.sku.tier
+
+    # validation
+    sku_info = get_mysql_list_skus_info(cmd, location)
+    mysql_arguments_validator(tier, sku_name, None, None, sku_info)
 
     from azure.mgmt.rdbms import mysql_flexibleservers
 
