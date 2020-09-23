@@ -2938,9 +2938,6 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           no_wait=False):
-    instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    instance.orchestrator_version = kubernetes_version
-
     if kubernetes_version != '' and node_image_only:
         raise CLIError('Conflicting flags. Upgrading the Kubernetes version will also upgrade node image version.'
                        'If you only want to upgrade the node version please use the "--node-image-only" option only.')
@@ -2952,6 +2949,9 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       resource_group_name,
                                                       cluster_name,
                                                       nodepool_name)
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    instance.orchestrator_version = kubernetes_version
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
