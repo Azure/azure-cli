@@ -475,6 +475,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_container_rm',
                          transform=create_boolean_result_output_transformer('created'),
                          table_transformer=transform_boolean_for_table)
+        g.command('delete', 'delete')
+        g.generic_update_command('update', setter_name='update', setter_arg_name='blob_container',
+                                 custom_func_name='update_container_rm')
+        g.command('list', 'list')
+        g.custom_command('exists', 'container_rm_exists', transform=create_boolean_result_output_transformer('exists'),
+                         table_transformer=transform_boolean_for_table)
+        g.command('show', 'get', exception_handler=show_exception_handler)
+
 
     file_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',

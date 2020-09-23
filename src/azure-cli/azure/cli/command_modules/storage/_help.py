@@ -1013,6 +1013,49 @@ short-summary: Manage Azure containers using the Microsoft.Storage resource prov
 helps['storage container-rm create'] = """
 type: command
 short-summary: Create a new container under the specified storage account.
+examples:
+  - name: Create a new container under the specified storage account.
+    text: az storage container-rm create --account-name myAccount --name myContainer
+"""
+
+helps['storage container-rm delete'] = """
+type: command
+short-summary: Delete the specified container under its account.
+examples:
+  - name: Delete the specified container under its account.
+    text: az storage container-rm delete --account-name myAccount --name myContainer
+"""
+
+helps['storage container-rm exists'] = """
+type: command
+short-summary: Check for the existence of a container.
+examples:
+  - name: Check for the existence of a container.
+    text: az storage container-rm exists --account-name myAccount --name myContainer
+"""
+
+helps['storage container-rm list'] = """
+type: command
+short-summary: List all containers under the specified storage account.
+examples:
+  - name: List all containers under the specified storage account.
+    text: az storage container-rm list --account-name myAccount
+"""
+
+helps['storage container-rm show'] = """
+type: command
+short-summary: Show the properties for a specified container.
+examples:
+  - name: Show the properties for a specified container.
+    text: az storage container-rm show --account-name myAccount --name myContainer
+"""
+
+helps['storage container-rm update'] = """
+type: command
+short-summary: Update the properties for a container.
+examples:
+  - name: Update the public access level to 'blob' for a specified container.
+    text: az storage container-rm update --account-name myAccount --name myContainer --public-access blob
 """
 
 helps['storage container'] = """

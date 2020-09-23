@@ -1061,7 +1061,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
         from .sdkutil import get_container_access_type_names
         c.argument('container_name', container_name_type, options_list=('--name', '-n'))
-        c.argument('account_name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+        c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.',
+                   completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('public_access', validator=validate_container_public_access,
                    arg_type=get_enum_type(get_container_access_type_names()),
@@ -1069,15 +1070,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
-        c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
         c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
-        c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
-                   arg_group='Encryption Policy',
-                   help='Default the container to use specified encryption scope for all writes.')
-        c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
-                   arg_type=get_three_state_flag(), arg_group='Encryption Policy',
-                   help='Block override of encryption scope from the container default.')
+        c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
 
+    for item in ['create', 'update']:
+        with self.argument_context('storage container-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
+            c.argument('default_encryption_scope',
+                       arg_group='Encryption Policy',
+                       help='Default the container to use specified encryption scope for all writes.')
+            c.argument('deny_encryption_scope_override',
+                       arg_type=get_three_state_flag(), arg_group='Encryption Policy',
+                       help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
