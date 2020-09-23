@@ -75,9 +75,9 @@ def get_container_name():
     :return:
     """
     print('Enter get_container_name()')
-    time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    time = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
     random_id = ''.join(random.choice(string.digits) for _ in range(6))
-    name = time + '_' + random_id
+    name = time + '-' + random_id
     print('Exit get_container_name()')
     return name
 
@@ -143,7 +143,7 @@ def write_db(container, testdata):
                                   host='clisqldbserver.mysql.database.azure.com',
                                   database='clidb')
     cursor = cnx.cursor()
-    sql = 'INSERT INTO t1 (repr, repo, branch, commit, target, live, user, pass, fail, rate, detail, container, date, time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
+    sql = 'INSERT INTO t1 (repr, repo, branch, commit, target, live, user, pass, fail, rate, detail, container, date, time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
     repr = container
     repo = USER_REPO
     branch = USER_BRANCH
