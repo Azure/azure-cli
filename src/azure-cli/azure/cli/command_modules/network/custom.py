@@ -1642,10 +1642,11 @@ def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, 
             updated_rule_set = rule_set
             break
 
-        if rule_group_name is None:
-            updated_rule_set = rule_set
-            break
-        else:
+        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+            if rule_group_name is None:
+                updated_rule_set = rule_set
+                break
+
             rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
             if rg:
                 rg.rules = managed_rule_overrides   # differentiate with add_waf_managed_rule_set()
@@ -1669,13 +1670,11 @@ def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
     delete_rule_set = None
 
     for rule_set in waf_policy.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type != rule_set_type or rule_set.rule_set_version != rule_set_version:
-            continue
+        if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
+            if rule_group_name is None:
+                delete_rule_set = rule_set
+                break
 
-        if rule_group_name is None:
-            delete_rule_set = rule_set
-            break
-        else:
             # Remove one rule from rule group
             rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
             if rg is None:
