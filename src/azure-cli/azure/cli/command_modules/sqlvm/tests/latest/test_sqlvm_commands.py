@@ -41,8 +41,7 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='westus',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='sqlvm',
                  resource_group_parameter_name='resource_group', skip_delete=True):
-        super(SqlVirtualMachinePreparer, self).__init__(
-            name_prefix, sqlvm_max_length)
+        super(SqlVirtualMachinePreparer, self).__init__(name_prefix, sqlvm_max_length)
         self.location = location
         self.parameter_name = parameter_name
         self.vm_user = vm_user
@@ -54,15 +53,13 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
         group = self._get_resource_group(**kwargs)
         template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image MicrosoftSQLServer:SQL2017-WS2016:Enterprise:latest'
                     ' --size Standard_DS2_v2')
-        execute(DummyCli(), template.format(self.location,
-                                            group, name, self.vm_user, self.vm_password))
+        execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
-            execute(
-                DummyCli(), 'az vm delete -g {} -n {} --yes --no-wait'.format(group, name))
+            execute(DummyCli(), 'az vm delete -g {} -n {} --yes --no-wait'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -125,8 +122,7 @@ class SqlVmScenarioTest(ScenarioTest):
     def test_sqlvm_mgmt(self, resource_group, resource_group_location, sqlvm, storage_account):
 
         loc = 'westus'
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(
-            storage_account, resource_group))
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
 
         sa = self.cmd('storage account show -n {} -g {}'
                       .format(storage_account, resource_group)).get_output_in_json()
@@ -150,8 +146,7 @@ class SqlVmScenarioTest(ScenarioTest):
                            ]).get_output_in_json()
 
         # test list sqlvm should be 1
-        self.cmd('sql vm list -g {}'.format(resource_group),
-                 checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('sql vm list -g {}'.format(resource_group), checks=[JMESPathCheck('length(@)', 1)])
 
         # test show of vm
         self.cmd('sql vm show -n {} -g {}'
@@ -200,7 +195,7 @@ class SqlVmScenarioTest(ScenarioTest):
 
         # test expand parameter: comma-separated values - all specificed settings exist
         expand_comma = self.cmd('sql vm show -n {} -g {} --expand {}'
-                                .format(sqlvm, resource_group, 'AutoPatchingSettings,AutoBackupSettings')
+                                .format(sqlvm, resource_group, 'AutoPatchingSettings AutoBackupSettings')
                                 ).get_output_in_json()
         assert 'autoBackupSettings' in expand_comma
         assert 'autoPatchingSettings' in expand_comma
@@ -209,7 +204,7 @@ class SqlVmScenarioTest(ScenarioTest):
 
         # test expand parameter: comma-separated values with * - all settings exist
         expand_comma_all = self.cmd('sql vm show -n {} -g {} --expand {}'
-                                    .format(sqlvm, resource_group, 'AutoPatchingSettings,*,AutoBackupSettings')
+                                    .format(sqlvm, resource_group, 'AutoPatchingSettings * AutoBackupSettings')
                                     ).get_output_in_json()
         assert 'autoBackupSettings' in expand_comma_all
         assert 'autoPatchingSettings' in expand_comma_all
@@ -274,8 +269,7 @@ class SqlVmScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
         # test list sql vm should be empty
-        self.cmd('sql vm list -g {}'.format(resource_group),
-                 checks=[NoneCheck()])
+        self.cmd('sql vm list -g {}'.format(resource_group), checks=[NoneCheck()])
 
     @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_create')
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
@@ -343,8 +337,7 @@ class SqlVmScenarioTest(ScenarioTest):
                  ])
 
         # test create sqlvm1 with auto backup
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(
-            storage_account, resource_group))
+        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
 
         sa = self.cmd('storage account show -n {} -g {}'
                       .format(storage_account, resource_group)).get_output_in_json()
@@ -496,15 +489,12 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                                       domain, operator_acc, key_1[0]['value'], sql_service_acc, sa_1['primaryEndpoints']['blob']),
                               checks=[
                                   JMESPathCheck('name', name),
-                                  JMESPathCheck(
-                                      'location', resource_group_location),
-                                  JMESPathCheck(
-                                      'provisioningState', "Succeeded")
+                                  JMESPathCheck('location', resource_group_location),
+                                  JMESPathCheck('provisioningState', "Succeeded")
                               ]).get_output_in_json()
 
         # test list sqlvm should be 1
-        self.cmd('sql vm group list -g {}'.format(resource_group),
-                 checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('sql vm group list -g {}'.format(resource_group), checks=[JMESPathCheck('length(@)', 1)])
 
         # test show of the group
         self.cmd('sql vm group show -n {} -g {}'
@@ -524,8 +514,7 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('wsfcDomainProfile.storageAccountUrl',
-                                   sa_2['primaryEndpoints']['blob'])
+                     JMESPathCheck('wsfcDomainProfile.storageAccountUrl', sa_2['primaryEndpoints']['blob'])
                  ])
 
         # change the domain
@@ -534,8 +523,7 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck(
-                         'wsfcDomainProfile.domainFqdn', 'my' + domain)
+                     JMESPathCheck('wsfcDomainProfile.domainFqdn', 'my' + domain)
                  ])
 
         # change the operator account
@@ -544,8 +532,7 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', name),
                      JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck(
-                         'wsfcDomainProfile.clusterOperatorAccount', 'my' + operator_acc)
+                     JMESPathCheck('wsfcDomainProfile.clusterOperatorAccount', 'my' + operator_acc)
                  ])
 
         # test delete vm
@@ -554,8 +541,7 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
         # test list sql vm should be empty
-        self.cmd('sql vm group list -g {}'.format(resource_group),
-                 checks=[NoneCheck()])
+        self.cmd('sql vm group list -g {}'.format(resource_group), checks=[NoneCheck()])
 
 
 class SqlVmAndGroupScenarioTest(ScenarioTest):
