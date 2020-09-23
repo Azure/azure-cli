@@ -2233,7 +2233,7 @@ def aks_update(cmd, client, resource_group_name, name,
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-# pylint: disable=unused-argument,inconsistent-return-statements
+# pylint: disable=unused-argument,inconsistent-return-statements,too-many-return-statements
 def aks_upgrade(cmd,
                 client,
                 resource_group_name, name,
