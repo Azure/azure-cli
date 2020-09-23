@@ -120,7 +120,7 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 
 
 def mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=None, instance=None):
-    _mysql_tier_validator(tier, sku_info) # need to be validated first
+    _mysql_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
     _mysql_retention_validator(backup_retention, sku_info, tier)
@@ -161,7 +161,8 @@ def _mysql_sku_name_validator(sku_name, sku_info, tier):
     if sku_name:
         skus = get_mysql_skus(sku_info, tier)
         if sku_name not in skus:
-            error_msg = 'Incorrect value for --sku-name. The SKU name does not match {} tier. Specify --tier if you did not. '.format(tier)
+            error_msg = 'Incorrect value for --sku-name. The SKU name does not match \
+                         {} tier. Specify --tier if you did not. '.format(tier)
             raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 
@@ -173,7 +174,7 @@ def _mysql_version_validator(version, sku_info, tier):
 
 
 def pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=None, instance=None):
-    _pg_tier_validator(tier, sku_info) # need to be validated first
+    _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
         tier = instance.sku.tier
     _pg_storage_validator(storage_mb, sku_info, tier, instance)
@@ -206,7 +207,8 @@ def _pg_sku_name_validator(sku_name, sku_info, tier):
     if sku_name:
         skus = get_postgres_skus(sku_info, tier)
         if sku_name not in skus:
-            error_msg = 'Incorrect value for --sku-name. The SKU name does not match {} tier.  Specify --tier if you did not. '.format(tier)
+            error_msg = 'Incorrect value for --sku-name. The SKU name does not match \
+                         {} tier. Specify --tier if you did not. '.format(tier)
             raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 

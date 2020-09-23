@@ -6,7 +6,6 @@
 # pylint: disable=unused-argument, line-too-long
 
 import random
-from itertools import chain
 from knack.log import get_logger
 from msrest.paging import Paged
 
