@@ -1650,10 +1650,14 @@ def _audit_policy_validate_arguments(
     '''
     Validate input agruments
     '''
+    if not state and not blob_storage_target_state and not storage_account and not storage_endpoint and not storage_account_access_key and\
+       not audit_actions_and_groups and not retention_days and not log_analytics_target_state and not log_analytics_workspace_resource_id and\
+       not event_hub_target_state and not event_hub_authorization_rule_id and not event_hub_name:
+        raise CLIError('Either state or blob storage or log analytics or event hub arguments are missing')
 
     if state != None and state.lower() == BlobAuditingPolicyState.enabled.value.lower() and\
        blob_storage_target_state == None and log_analytics_target_state == None and event_hub_target_state == None:
-        raise CLIError('One of the following arguments must be enabled: blob-storage-target-state, log_analytics_target_state, event_hub_target_state')
+        raise CLIError('One of the following arguments must be enabled: blob-storage-target-state, log-analytics-target-state, event-hub-target-state')
 
     if state != None and state.lower() == BlobAuditingPolicyState.disabled.value.lower() and\
        (blob_storage_target_state != None or storage_account != None or storage_endpoint != None or storage_account_access_key != None or\
@@ -1662,7 +1666,7 @@ def _audit_policy_validate_arguments(
         raise CLIError('No additional arguments should be provided once state is disabled')
 
     if (blob_storage_target_state == None or blob_storage_target_state.lower() == BlobAuditingPolicyState.disabled.value.lower()) and (storage_account != None or storage_endpoint != None or storage_account_access_key != None):
-        raise CLIError('Blob storage account arguments cannot be specified if blob_storage_target_state is not provided or disabled')
+        raise CLIError('Blob storage account arguments cannot be specified if blob-storage-target-state is not provided or disabled')
 
     if blob_storage_target_state != None and blob_storage_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower():
         if storage_account != None and storage_endpoint != None:
@@ -1672,16 +1676,16 @@ def _audit_policy_validate_arguments(
             raise CLIError('Either blob storage account or blob storage endpoint argument must be provided')
 
     if (log_analytics_target_state == None or log_analytics_target_state.lower() == BlobAuditingPolicyState.disabled.value.lower()) and log_analytics_workspace_resource_id != None:
-        raise CLIError('Log analytics workspace resource id cannot be specified if log_analytics_target_state is not provided or disabled')
+        raise CLIError('Log analytics workspace resource id cannot be specified if log-analytics-target-state is not provided or disabled')
     
     if log_analytics_target_state != None and log_analytics_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower() and log_analytics_workspace_resource_id == None:
-        raise CLIError('Log analytics workspace resource id must be specified if log_analytics_target_state is enabled')
+        raise CLIError('Log analytics workspace resource id must be specified if log-analytics-target-state is enabled')
 
     if (event_hub_target_state == None or event_hub_target_state.lower() == BlobAuditingPolicyState.disabled.value.lower()) and (event_hub_authorization_rule_id != None or event_hub_name != None):
-        raise CLIError('Event hub arguments cannot be specified if event_hub_target_state is not provided or disabled')
+        raise CLIError('Event hub arguments cannot be specified if event-hub-target-state is not provided or disabled')
     
     if event_hub_target_state != None and event_hub_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower() and event_hub_authorization_rule_id == None:
-        raise CLIError('event_hub_authorization_rule_id must be specified if event_hub_target_state is enabled')
+        raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
 
 
 def _audit_policy_update_diagnostic_settings(
@@ -1809,6 +1813,8 @@ def _audit_policy_update_diagnostic_settings(
         storage_account = original_audit_diagnostic_settings.storage_account_id,
         workspace = original_audit_diagnostic_settings.workspace_id)
 
+    print("updating diagnostic settings... 1 2 1")
+
     # Create new diagnostic settings with enabled 'SQLSecurityAuditEvents' category
     created_diagnostic_settings = create_diagnostics_settings(
         client = azure_monitor_client.diagnostic_settings,
@@ -1820,6 +1826,8 @@ def _audit_policy_update_diagnostic_settings(
         event_hub_rule = updated_event_hub_authorization_rule_id,
         storage_account = original_audit_diagnostic_settings.storage_account_id,
         workspace = updated_log_analytics_workspace_resource_id)
+
+    print("updating diagnostic settings... 1 2 2")        
     
     # Return roolback data tuples
     return [("delete", created_diagnostic_settings), ("update", original_audit_diagnostic_settings)]
@@ -1845,6 +1853,8 @@ def _audit_policy_update_global_settings(
     '''
 
     print("updating global settings...")
+
+    raise Exception("Test exception")
 
     # Request audit policy
     if database_name == None :
@@ -1922,25 +1932,33 @@ def _audit_policy_update_rollback(
     azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
 
     for rd in roolback_data:
+        rollback_diagnostic_settings = rd[1]
+
         if rd[0] == "update":
             print("rollback update...")
 
-            original_diagnostic_settings = rd[1]
+            input("Press Enter to continue...")
 
             create_diagnostics_settings(
                 client = azure_monitor_client.diagnostic_settings,
-                name = original_diagnostic_settings.name,
+                name = rollback_diagnostic_settings.name,
                 resource_uri = diagnostic_settings_url,
-                logs = original_diagnostic_settings.logs,
-                metrics = original_diagnostic_settings.metrics,
-                event_hub = original_diagnostic_settings.event_hub_name,
-                event_hub_rule = original_diagnostic_settings.event_hub_authorization_rule_id,
-                storage_account = original_diagnostic_settings.storage_account_id,
-                workspace = original_diagnostic_settings.workspace_id)
-        else:
-            print("rollback delete...")            
+                logs = rollback_diagnostic_settings.logs,
+                metrics = rollback_diagnostic_settings.metrics,
+                event_hub = rollback_diagnostic_settings.event_hub_name,
+                event_hub_rule = rollback_diagnostic_settings.event_hub_authorization_rule_id,
+                storage_account = rollback_diagnostic_settings.storage_account_id,
+                workspace = rollback_diagnostic_settings.workspace_id)
 
-            azure_monitor_client.diagnostic_settings.delete()
+            print("rollback update completed")
+        else:
+            print("rollback delete...")
+
+            input("Press Enter to continue...")
+
+            azure_monitor_client.diagnostic_settings.delete(diagnostic_settings_url, rollback_diagnostic_settings.name)
+
+            print("rollback delete completed")
 
 def _audit_policy_update(
         cmd,
@@ -1994,6 +2012,8 @@ def _audit_policy_update(
             event_hub_target_state,
             event_hub_authorization_rule_id,
             event_hub_name)
+    else:
+        rollback_data = None
 
     # Update auditing global settings
     try:
@@ -2014,14 +2034,19 @@ def _audit_policy_update(
             event_hub_target_state)
     except:
         if rollback_data != None:
-            _audit_policy_update_rollback(
-                cmd,
-                client,
-                server_name,
-                resource_group_name,
-                database_name,
-                rollback_data)
+            try:
+                _audit_policy_update_rollback(
+                    cmd,
+                    client,
+                    server_name,
+                    resource_group_name,
+                    database_name,
+                    rollback_data)
+            except:
+                # Do nothing if rollback failed
+                pass
 
+        # Reraise the original exception
         raise            
 
 
