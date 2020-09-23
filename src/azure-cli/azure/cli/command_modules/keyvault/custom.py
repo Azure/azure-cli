@@ -208,7 +208,7 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
         return client.delete(resource_group_name=resource_group_name, vault_name=vault_name)
 
     assert hsm_name
-    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
     return sdk_no_wait(
         no_wait, hsm_client.begin_delete,
         resource_group_name=resource_group_name,
@@ -226,7 +226,7 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
         )
 
     assert hsm_name
-    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
     return hsm_client.purge_deleted(rlocation=location, name=hsm_name)
 
 
@@ -235,7 +235,7 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         deleted_resources = []
         try:
             deleted_resources.extend(client.list_deleted())
@@ -246,7 +246,7 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return deleted_resources
 
     if resource_type == 'hsm':
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         return hsm_client.list_deleted()
 
     if resource_type == 'vault':
@@ -260,7 +260,7 @@ def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None)
         return list_vault(client, resource_group_name)
 
     if resource_type is None:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         resources = []
         try:
             resources.extend(list_vault(client, resource_group_name))
@@ -271,7 +271,7 @@ def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None)
         return resources
 
     if resource_type == 'hsm':
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         return list_hsm(hsm_client, resource_group_name)
 
     if resource_type == 'vault':
@@ -383,7 +383,7 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
                              no_wait=no_wait)
 
     if hsm_name:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         return recover_hsm(cmd=cmd,
                            client=hsm_client,
                            resource_group_name=resource_group_name,
@@ -395,9 +395,9 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
 def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=False):
     from azure.cli.core._profile import Profile
 
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
-    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -497,7 +497,7 @@ def get_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name
     if is_azure_stack_profile(cmd) or vault_name:
         return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
 
-    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
     return hsm_client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
@@ -544,30 +544,20 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             no_wait=no_wait)
 
     if hsm_name:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-
-        from msrest.exceptions import ValidationError
-        try:
-            return create_hsm(cmd=cmd,
-                              client=hsm_client,
-                              resource_group_name=resource_group_name,
-                              hsm_name=hsm_name,
-                              administrators=administrators,
-                              location=location,
-                              sku=sku,
-                              enable_purge_protection=enable_purge_protection,
-                              retention_days=retention_days,
-                              bypass=bypass,
-                              default_action=default_action,
-                              tags=tags,
-                              no_wait=no_wait)
-        except ValidationError as ex:
-            error_msg = str(ex)
-            if 'Parameter \'name\' must conform to the following pattern' in error_msg:
-                error_msg = 'Managed HSM name must be between 3-24 alphanumeric characters. ' \
-                            'The name must begin with a letter, end with a letter or digit, ' \
-                            'and not contain hyphens.'
-            raise CLIError(error_msg)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return create_hsm(cmd=cmd,
+                          client=hsm_client,
+                          resource_group_name=resource_group_name,
+                          hsm_name=hsm_name,
+                          administrators=administrators,
+                          location=location,
+                          sku=sku,
+                          enable_purge_protection=enable_purge_protection,
+                          retention_days=retention_days,
+                          bypass=bypass,
+                          default_action=default_action,
+                          tags=tags,
+                          no_wait=no_wait)
 
 
 def create_hsm(cmd, client,
@@ -589,9 +579,9 @@ def create_hsm(cmd, client,
     if not sku:
         sku = 'Standard_B1'
 
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
@@ -766,7 +756,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
 
 
 def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wait=False):
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        name=name,

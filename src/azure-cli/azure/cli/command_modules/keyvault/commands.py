@@ -40,7 +40,7 @@ def load_command_table(self, _):
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
 
     if not is_azure_stack_profile(self):
-        mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
+        mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)
         private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
@@ -54,7 +54,7 @@ def load_command_table(self, _):
     if not is_azure_stack_profile(self):
         kv_hsms_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
-            client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
+            client_factory=get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)
         )
     else:
         kv_hsms_custom = None

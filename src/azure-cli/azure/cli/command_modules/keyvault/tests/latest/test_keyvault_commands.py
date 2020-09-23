@@ -35,7 +35,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 # for other HSM operations live/playback
-ACTIVE_HSM_NAME = 'clitest0914b'
+ACTIVE_HSM_NAME = 'clitest-0923'
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
 
 # For security domain playback
@@ -206,7 +206,8 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
                      self.check('sku.name', 'Standard_B1'),
                      self.check('length(properties.initialAdminObjectIds)', 1),
                      self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
-                     self.exists('properties.hsmUri')
+                     self.exists('properties.hsmUri'),
+                     self.not_exists('properties.hsmPoolUri')
                  ])
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}',
                  checks=[
@@ -216,7 +217,8 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
                      self.check('sku.name', 'Standard_B1'),
                      self.check('length(properties.initialAdminObjectIds)', 1),
                      self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
-                     self.exists('properties.hsmUri')
+                     self.exists('properties.hsmUri'),
+                     self.not_exists('properties.hsmPoolUri')
                  ])
         self.cmd('keyvault list --resource-type hsm',
                  checks=[
