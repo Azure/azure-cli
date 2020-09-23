@@ -34,29 +34,36 @@ def zip_contents_from_dir(dirPath, lang):
     file_val = os.path.split(path_and_file)[1]
     zip_file_path = relroot + os.path.sep + file_val + ".zip"
     abs_src = os.path.abspath(dirPath)
-    with zipfile.ZipFile("{}".format(zip_file_path), "w", zipfile.ZIP_DEFLATED) as zf:
-        for dirname, subdirs, files in os.walk(dirPath):
-            # skip node_modules folder for Node apps,
-            # since zip_deployment will perform the build operation
-            if lang.lower() == NODE_RUNTIME_NAME:
-                subdirs[:] = [d for d in subdirs if 'node_modules' not in d]
-            elif lang.lower() == NETCORE_RUNTIME_NAME:
-                subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
-            elif lang.lower() == PYTHON_RUNTIME_NAME:
-                subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
+    try:
+        with zipfile.ZipFile("{}".format(zip_file_path), "w", zipfile.ZIP_DEFLATED) as zf:
+            for dirname, subdirs, files in os.walk(dirPath):
+                # skip node_modules folder for Node apps,
+                # since zip_deployment will perform the build operation
+                if lang.lower() == NODE_RUNTIME_NAME:
+                    subdirs[:] = [d for d in subdirs if 'node_modules' not in d]
+                elif lang.lower() == NETCORE_RUNTIME_NAME:
+                    subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
+                elif lang.lower() == PYTHON_RUNTIME_NAME:
+                    subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
 
-                filtered_files = []
+                    filtered_files = []
+                    for filename in files:
+                        if filename == '.env':
+                            logger.info("Skipping file: %s/%s", dirname, filename)
+                        else:
+                            filtered_files.append(filename)
+                    files[:] = filtered_files
+
                 for filename in files:
-                    if filename == '.env':
-                        logger.info("Skipping file: %s/%s", dirname, filename)
-                    else:
-                        filtered_files.append(filename)
-                files[:] = filtered_files
+                    absname = os.path.abspath(os.path.join(dirname, filename))
+                    arcname = absname[len(abs_src) + 1:]
+                    zf.write(absname, arcname)
+    except IOError as e:
+        if e.errno == 13:
+            raise CLIError('Insufficient permissions to create a zip in current directory. '
+                           'Please re-run the command with administrator privileges')
+        raise CLIError(e)
 
-            for filename in files:
-                absname = os.path.abspath(os.path.join(dirname, filename))
-                arcname = absname[len(abs_src) + 1:]
-                zf.write(absname, arcname)
     return zip_file_path
 
 
@@ -165,8 +172,9 @@ def get_lang_from_content(src_path, html=False):
         runtime_details_dict['file_loc'] = package_netcore_file
         runtime_details_dict['default_sku'] = 'F1'
     else:  # TODO: Update the doc when the detection logic gets updated
-        raise CLIError("Could not auto-detect the runtime stack of your app, "
-                       "see 'https://go.microsoft.com/fwlink/?linkid=2109470' for more information")
+        raise CLIError("Could not auto-detect the runtime stack of your app.\n"
+                       "HINT: Are you in the right folder?\n"
+                       "For more information, see 'https://go.microsoft.com/fwlink/?linkid=2109470'")
     return runtime_details_dict
 
 
