@@ -910,6 +910,6 @@ jobs:
        set -ev
        . env/bin/activate
        if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
-         azdev test-coverage cli --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci
+         azdev coverage cli --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci
        fi
     displayName: 'Test Coverage Result'
