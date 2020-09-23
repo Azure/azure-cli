@@ -2234,8 +2234,14 @@ def aks_update(cmd, client, resource_group_name, name,
 
 
 # pylint: disable=unused-argument,inconsistent-return-statements
-def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version='', control_plane_only=False, node_image_only=False,
-                no_wait=False, yes=False):
+def aks_upgrade(cmd,
+                client,
+                resource_group_name, name,
+                kubernetes_version='',
+                control_plane_only=False,
+                node_image_only=False,
+                no_wait=False,
+                yes=False):
     msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
     if not yes and not prompt_y_n(msg, default="n"):
         return None
@@ -2249,18 +2255,21 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version='', c
             break
 
     if kubernetes_version != '' and node_image_only:
-        raise CLIError('Conflicting flags. Upgrading the Kubernetes version will also upgrade node image version. If you only want to upgrade the node version please use the "--node-image-only" option only.')
+        raise CLIError('Conflicting flags. Upgrading the Kubernetes version will also upgrade node image version. '
+                       'If you only want to upgrade the node version please use the "--node-image-only" option only.')
 
     if node_image_only:
-        msg = "This node image upgrade operation will run across every node pool in the cluster and might take a while, do you wish to continue?"
+        msg = "This node image upgrade operation will run across every node pool in the cluster" \
+              "and might take a while, do you wish to continue?"
         if not yes and not prompt_y_n(msg, default="n"):
             return None
 
-        # This only provide convenience for customer at client side so they can run az aks upgrade to upgrade all nodepools
-        #  of a cluster. The SDK only support upgrade single nodepool at a time. So we have to call it multiple times
+        # This only provide convenience for customer at client side so they can run az aks upgrade to upgrade all
+        # nodepools of a cluster. The SDK only support upgrade single nodepool at a time.
         for agent_pool_profile in instance.agent_pool_profiles:
             if vmas_cluster:
-                raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation can only be applied on VirtualMachineScaleSets cluster.')
+                raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation '
+                               'can only be applied on VirtualMachineScaleSets cluster.')
             _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, name, agent_pool_profile.name)
         return None
 
@@ -2933,11 +2942,16 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     instance.orchestrator_version = kubernetes_version
 
     if kubernetes_version != '' and node_image_only:
-        raise CLIError('Conflicting flags. Upgrading the Kubernetes version will also upgrade node image version. If you only want to upgrade the node version please use the "--node-image-only" option only.')
+        raise CLIError('Conflicting flags. Upgrading the Kubernetes version will also upgrade node image version.'
+                       'If you only want to upgrade the node version please use the "--node-image-only" option only.')
 
     if node_image_only:
         managed_cluster_client = cf_managed_clusters(cmd.cli_ctx)
-        return _upgrade_single_nodepool_image_version(no_wait, managed_cluster_client, resource_group_name, cluster_name, nodepool_name)
+        return _upgrade_single_nodepool_image_version(no_wait,
+                                                      managed_cluster_client,
+                                                      resource_group_name,
+                                                      cluster_name,
+                                                      nodepool_name)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
