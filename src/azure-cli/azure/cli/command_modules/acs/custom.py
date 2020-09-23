@@ -1633,6 +1633,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                attach_acr=None,
                enable_aad=False,
                aad_admin_group_object_ids=None,
+               aci_subnet_name=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1789,7 +1790,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         subscription_id,
         resource_group_name,
         {},
-        workspace_resource_id
+        workspace_resource_id,
+        aci_subnet_name,
+        vnet_subnet_id
     )
     monitoring = False
     if 'omsagent' in addon_profiles:
@@ -2433,7 +2436,7 @@ def _get_azext_module(extension_name, module_name):
 
 
 def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
-                        workspace_resource_id=None):
+                        workspace_resource_id=None, aci_subnet_name=None, vnet_subnet_id=None):
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
@@ -2464,6 +2467,15 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     if 'azure-policy' in addons:
         addon_profiles['azurepolicy'] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('azure-policy')
+    if 'virtual-node' in addons:
+        if not aci_subnet_name or not vnet_subnet_id:
+            raise CLIError('"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
+        # TODO: how about aciConnectorwindows, what is its addon name?
+        addon_profiles['aciConnectorLinux'] = ManagedClusterAddonProfile(
+            enabled=True,
+            config={'SubnetName': aci_subnet_name}
+        )
+        addons.remove('virtual-node')
     # error out if any (unrecognized) addons remain
     if addons:
         raise CLIError('"{}" {} not recognized by the --enable-addons argument.'.format(
