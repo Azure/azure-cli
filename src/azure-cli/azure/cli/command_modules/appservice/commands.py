@@ -79,6 +79,8 @@ def load_command_table(self, _):
 
     staticsite_sdk = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.static_sites#{}')
 
+    appservice_domains = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_domains#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
@@ -383,6 +385,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_appserviceenvironment_arm', supports_no_wait=True)
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
+
+    with self.command_group('appservice domain', custom_command_type=appservice_domains, is_preview=True) as g:
+        g.custom_command('create', 'create_domain')
+        g.custom_command('show-terms', 'show_domain_purchase_terms')
 
     with self.command_group('staticwebapp', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsites')
