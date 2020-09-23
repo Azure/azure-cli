@@ -63,7 +63,10 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('name', options_list=['--name', '-n'], id_part='None', help='Name of the App Configuration. You can configure the default name using `az configure --defaults app_configuration_store=<name>`', configured_default='app_configuration_store')
+        c.argument('name', options_list=['--name', '-n'], id_part='None',
+                   help='Name of the App Configuration. If the auth mode is "key", you should have "Contributor" role assigned in order to fetch access keys. ' +
+                   'If the auth mode is "login", you should have "Reader" or "Contributor" role assigned in order to fetch store endpoint. ' +
+                   'You can configure the default name using `az configure --defaults app_configuration_store=<name>`', configured_default='app_configuration_store')
         c.argument('connection_string', validator=validate_connection_string, configured_default='appconfig_connection_string',
                    help="Combination of access key and endpoint of App Configuration. Can be found using 'az appconfig credential list'. Users can preset it using `az configure --defaults appconfig_connection_string=<connection_string>` or environment variable with the name AZURE_APPCONFIG_CONNECTION_STRING.")
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.')
@@ -72,11 +75,11 @@ def load_arguments(self, _):
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
         c.argument('sku', help='The sku of App Configuration', arg_type=get_enum_type(['Free', 'Standard']))
-        c.argument('endpoint', help='Endpoint of the App Configuration in the format "https://storename.azconfig.io". Required if --auth-mode is "login". You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
+        c.argument('endpoint', help='If auth mode is "login", provide endpoint of the App Configuration in the format "https://storename.azconfig.io". You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
         c.argument('auth_mode', arg_type=get_enum_type(['login', 'key']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
                    'If the auth mode is "key", provide connection string or store name and your account access keys will be retrieved for authorization. ' +
-                   'If the auth mode is "login", provide the store endpoint and your "az login" credentials will be used for authorization. ' +
+                   'If the auth mode is "login", provide the store endpoint or store name and your "az login" credentials will be used for authorization. ' +
                    'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
                    'For more information, see https://docs.microsoft.com/en-us/azure/azure-app-configuration/concept-enable-rbac')
 
@@ -122,18 +125,18 @@ def load_arguments(self, _):
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
-        c.argument('src_name', help='The name of the source App Configuration.')
+        c.argument('src_name', help='The name of the source App Configuration. For details, refer to "--name" argument.')
         c.argument('src_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the source store.")
         c.argument('src_key', help='If no key specified, import all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be imported.')
         c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no value specified, import keys with null label by default. Support star sign as filters, for instance * means all labels, abc* means labels with abc as prefix.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --label.")
-        c.argument('src_endpoint', help='Endpoint of the source App Configuration in the format "https://storename.azconfig.io". Required if --src-auth-mode is "login".')
+        c.argument('src_endpoint', help='If --src-auth-mode is "login", provide endpoint of the source App Configuration in the format "https://storename.azconfig.io".')
         c.argument('src_auth_mode', arg_type=get_enum_type(['login', 'key']),
                    help='Auth mode for connecting to source App Configuration. For details, refer to "--auth-mode" argument.')
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id,
-                   help='If you are using "login" auth mode, provide ARM ID for AppService. If you are using "key" auth mode, you can provide either ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+                   help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
 
     with self.argument_context('appconfig kv export') as c:
         c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default. Only when export destination is appconfig, we support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix. Label filters are not supported when exporting to file or appservice.")
@@ -154,17 +157,17 @@ def load_arguments(self, _):
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
-        c.argument('dest_name', help='The name of the destination App Configuration.')
+        c.argument('dest_name', help='The name of the destination App Configuration. For details, refer to "--name" argument.')
         c.argument('dest_connection_string', validator=validate_connection_string, help="Combination of access key and endpoint of the destination store.")
         c.argument('dest_label', help="Exported KVs will be labeled with this destination label. If neither --dest-label nor --preserve-labels is specified, will assign null label.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --dest-label.")
-        c.argument('dest_endpoint', help='Endpoint of the destination App Configuration in the format "https://storename.azconfig.io". Required if --dest-auth-mode is "login".')
+        c.argument('dest_endpoint', help='If --dest-auth-mode is "login", provide endpoint of the destination App Configuration in the format "https://storename.azconfig.io".')
         c.argument('dest_auth_mode', arg_type=get_enum_type(['login', 'key']),
                    help='Auth mode for connecting to destination App Configuration. For details, refer to "--auth-mode" argument.')
 
     with self.argument_context('appconfig kv export', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id,
-                   help='If you are using "login" auth mode, provide ARM ID for AppService. If you are using "key" auth mode, you can provide either ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
+                   help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration. Required for AppService arguments')
 
     with self.argument_context('appconfig kv set') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")

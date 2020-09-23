@@ -35,10 +35,11 @@ Correct format should be Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xx
 
 def validate_auth_mode(namespace):
     auth_mode = namespace.auth_mode
-    if auth_mode == "login" and not namespace.endpoint:
-        raise CLIError("App Configuration endpoint should be provided if auth mode is 'login'.")
-    if auth_mode == "login" and (namespace.connection_string or namespace.name):
-        raise CLIError("Auth mode should be 'key' when connection string or store name is provided.")
+    if auth_mode == "login":
+        if not namespace.name and not namespace.endpoint:
+            raise CLIError("App Configuration name or endpoint should be provided if auth mode is 'login'.")
+        if namespace.connection_string:
+            raise CLIError("Auth mode should be 'key' when connection string is provided.")
 
 
 def validate_import_depth(namespace):
@@ -99,9 +100,7 @@ def validate_appservice_name_or_id(cmd, namespace):
             elif namespace.connection_string:
                 config_store_name = get_store_name_from_connection_string(namespace.connection_string)
             else:
-                if namespace.auth_mode == 'login':
-                    raise CLIError("Since you are using 'login' auth mode, please provide a valid ARM resource ID for --appservice-account.")
-                raise CLIError("Please provide App Configuration name or connection string.")
+                raise CLIError("Please provide App Configuration name or connection string for fetching the AppService account details. Alternatively, you can provide a valid ARM ID for the Appservice account.")
 
             resource_group, _ = resolve_resource_group(cmd, config_store_name)
             namespace.appservice_account = {

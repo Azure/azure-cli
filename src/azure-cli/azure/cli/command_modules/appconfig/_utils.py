@@ -10,6 +10,7 @@ from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient
+from azure.mgmt.appconfiguration.models import ErrorException
 
 from ._client_factory import cf_configstore
 from ._constants import HttpHeaders
@@ -19,33 +20,37 @@ logger = get_logger(__name__)
 
 def construct_connection_string(cmd, config_store_name):
     connection_string_template = 'Endpoint={};Id={};Secret={}'
+    # If the logged in user/Service Principal does not have 'Reader' or 'Contributor' role
+    # assigned for the requested AppConfig, resolve_resource_group will raise CLI error
+    resource_group_name, endpoint = resolve_resource_group(cmd, config_store_name)
 
     try:
-        resource_group_name, endpoint = resolve_resource_group(
-            cmd, config_store_name)
         config_store_client = cf_configstore(cmd.cli_ctx)
         access_keys = config_store_client.list_keys(
             resource_group_name, config_store_name)
         for entry in access_keys:
             if not entry.read_only:
                 return connection_string_template.format(endpoint, entry.id, entry.value)
-    except Exception:
+    except Exception as ex:
         raise CLIError(
-            'Cannot find the App Configuration {}. Check if it exists in the subscription that logged in. '.format(config_store_name))
+            'Failed to get access keys for the App Configuration "{}". Make sure that the account that logged in has "Contributor" role assigned for this App Configuration store.\n{}'.format(config_store_name, str(ex)))
 
     raise CLIError('Cannot find a read write access key for the App Configuration {}'.format(
         config_store_name))
 
 
 def resolve_resource_group(cmd, config_store_name):
-    config_store_client = cf_configstore(cmd.cli_ctx)
-    all_stores = config_store_client.list()
-    for store in all_stores:
-        if store.name.lower() == config_store_name.lower():
-            # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
-            return store.id.split('/')[4], store.endpoint
-    raise CLIError(
-        "App Configuration store: {} does not exist".format(config_store_name))
+    try:
+        config_store_client = cf_configstore(cmd.cli_ctx)
+        all_stores = config_store_client.list()
+        for store in all_stores:
+            if store.name.lower() == config_store_name.lower():
+                # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
+                return store.id.split('/')[4], store.endpoint
+    except ErrorException as ex:
+        raise CLIError("Failed to get the list of App Configuration stores for the current user. Make sure that the account that logged in has 'Reader' or 'Contributor' role assigned for the required App Configuration store.\n{}".format(str(ex)))
+
+    raise CLIError("Failed to find the App Configuration store '{}'. Make sure that the account that logged in has 'Reader' or 'Contributor' role assigned for this App Configuration store.".format(config_store_name))
 
 
 def user_confirmation(message, yes=False):
@@ -133,7 +138,14 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
                                                                              user_agent=HttpHeaders.USER_AGENT)
     if auth_mode == "login":
         if not endpoint:
-            raise CLIError("App Configuration endpoint should be provided if auth mode is 'login'.")
+            try:
+                if name:
+                    _, endpoint = resolve_resource_group(cmd, name)
+                else:
+                    raise CLIError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
+            except Exception as ex:
+                raise CLIError("Failed to retrieve App Configuration endpoint from store name.\n" + str(ex))
+
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
         # Due to this bug in get_login_credentials: https://github.com/Azure/azure-cli/issues/15179,
