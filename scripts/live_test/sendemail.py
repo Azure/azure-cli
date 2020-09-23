@@ -10,6 +10,7 @@ import datetime
 import random
 import string
 import test_data
+import generate_index
 
 
 SENDGRID_KEY = sys.argv[1]
@@ -57,6 +58,13 @@ def main():
     # Send email
     try:
         send_email(container, testdata)
+    except Exception:
+        print(traceback.format_exc())
+
+    # Generate index.html
+    try:
+        container_url = 'https://clitestresultstac.blob.core.windows.net/' + container
+        generate_index.generate(container, container_url)
     except Exception:
         print(traceback.format_exc())
 
@@ -131,7 +139,6 @@ def write_db(container, testdata):
       PRIMARY KEY (`id`),
       UNIQUE KEY `repr` (`repr`)
     );
-
     """
     print('Enter write_db()')
 
@@ -155,7 +162,7 @@ def write_db(container, testdata):
     fail = testdata.total[2]
     rate = testdata.total[3]
     detail = str(testdata.modules)
-    container = 'https://clitestresultstac.blob.core.windows.net/' + container
+    container = 'https://clitestresultstac.blob.core.windows.net/{}/index.html'.format(container)
     d = datetime.datetime.now()
     date = d.strftime('%Y%m%d')
     time = d.strftime('%H%M%S')
