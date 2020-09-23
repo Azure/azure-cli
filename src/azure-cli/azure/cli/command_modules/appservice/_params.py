@@ -227,8 +227,8 @@ def load_arguments(self, _):
             c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
         with self.argument_context(scope + ' config ssl import') as c:
-            c.argument('key_vault', help='The name or resource ID of the Key Vault')
-            c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
+            c.argument('certificate_name', help='The name of the certificate to be imported')
+            c.argument('key_vault', help='the keyvault id')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
         with self.argument_context(scope + ' config hostname') as c:

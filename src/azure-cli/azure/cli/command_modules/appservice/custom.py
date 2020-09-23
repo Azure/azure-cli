@@ -2380,7 +2380,7 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
+def import_ssl_cert(cmd, resource_group_name, name, certificate_name, key_vault=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
@@ -2389,22 +2389,47 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     server_farm_id = webapp.server_farm_id
     location = webapp.location
     kv_id = None
-    if not is_valid_resource_id(key_vault):
-        kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
-        key_vaults = kv_client.vaults.list_by_subscription()
-        for kv in key_vaults:
-            if key_vault == kv.name:
-                kv_id = kv.id
+    kv_secret_name = certificate_name
+
+    # if key_vault is not populated, we are attempting to import an App Service Certificate
+    if not key_vault: 
+        certs = client.app_service_certificate_orders.list()
+        cert = None
+        for c in certs:
+            rg = parse_resource_id(c.id)['resource_group']
+            if c.name == certificate_name:
+                cert = c.certificates[certificate_name]
                 break
+
+        if not cert:
+            no_cert_msg = 'This app service certificate does not exist'
+            logger.warning(no_cert_msg)
+            return
+        
+        kv_id = cert.key_vault_id
+        if kv_id is None: 
+            no_kv_msg = 'this cert is not associated with a KV'
+            logger.warning(no_kv_msg)
+            return
+        kv_secret_name = cert.key_vault_secret_name
+
     else:
-        kv_id = key_vault
+        if not is_valid_resource_id(key_vault):
+            kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
+            key_vaults = kv_client.vaults.list_by_subscription()
+            for kv in key_vaults:
+                if key_vault == kv.name:
+                    kv_id = kv.id
+                    break
+        else:
+            kv_id = key_vault
 
     if kv_id is None:
         kv_msg = 'The Key Vault {0} was not found in the subscription in context. ' \
                  'If your Key Vault is in a different subscription, please specify the full Resource ID: ' \
                  '\naz .. ssl import -n {1} -g {2} --key-vault-certificate-name {3} ' \
                  '--key-vault /subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/' \
-                 'vaults/{0}'.format(key_vault, name, resource_group_name, key_vault_certificate_name)
+                 'vaults/{0}'.format(key_vault, name, resource_group_name, certificate_name)
         logger.warning(kv_msg)
         return
 
@@ -2412,7 +2437,10 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
-    cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+    if not key_vault:
+        cert_name = '{}-{}-{}'.format(certificate_name, resource_group_name, certificate_name)
+    else:
+        cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, certificate_name)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
     if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
@@ -2421,7 +2449,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=key_vault_certificate_name, server_farm_id=server_farm_id)
+                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
