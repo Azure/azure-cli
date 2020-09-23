@@ -1652,6 +1652,8 @@ def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
     """
     waf_policy = client.get(resource_group_name, policy_name)
 
+    delete_rule_set = None
+
     for rule_set in waf_policy.managed_rules.managed_rule_sets:
         if rule_set.rule_set_type != rule_set_type and rule_set.rule_set_version == rule_set_version:
             continue
