@@ -15,7 +15,13 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
+<<<<<<< HEAD
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, retention_validator
+=======
+    tls_validator, public_access_validator, pg_storage_validator, mysql_storage_validator, pg_tier_validator, mysql_tier_validator, \
+    pg_sku_name_validator, mysql_sku_name_validator, pg_version_validator, mysql_version_validator, maintenance_window_validator, ip_address_validator, \
+    mysql_retention_validator, retention_validator
+>>>>>>> f4aff3300945aea05b5d445c1bb2c304d3779927
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
@@ -299,14 +305,24 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
             c.argument('tags', tags_type)
             if command_group == 'mysql':
+<<<<<<< HEAD
                 c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
                 c.argument('sku_name', options_list=['--sku-name'],
+=======
+                c.argument('tier', options_list=['--tier'], validator=mysql_tier_validator,
+                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
+                c.argument('sku_name', options_list=['--sku-name'], validator=mysql_sku_name_validator,
+>>>>>>> f4aff3300945aea05b5d445c1bb2c304d3779927
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_E16ds_v4 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
                 c.argument('backup_retention', type=int, options_list=['--backup-retention'],
+<<<<<<< HEAD
                            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.')
+=======
+                           help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=mysql_retention_validator)
+>>>>>>> f4aff3300945aea05b5d445c1bb2c304d3779927
                 c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--storage-auto-grow'],
                            help='Enable or disable autogrow of the storage. Default value is Enabled.')
                 c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -317,9 +333,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
             elif command_group == 'postgres':
+<<<<<<< HEAD
                 c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
                 c.argument('sku_name', options_list=['--sku-name'],
+=======
+                c.argument('tier', options_list=['--tier'], validator=pg_tier_validator,
+                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
+                c.argument('sku_name', options_list=['--sku-name'], validator=pg_sku_name_validator,
+>>>>>>> f4aff3300945aea05b5d445c1bb2c304d3779927
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            help='The storage capacity of the server. Minimum is 32 GiB and max is 16 TiB.')
@@ -414,6 +436,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('source_server', options_list=['--source-server'],
                        help='The name or resource ID of the source server to restore from.')
             if command_group == 'mysql':
+<<<<<<< HEAD
                 c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
                 c.argument('sku_name', options_list=['--sku-name'],
@@ -422,7 +445,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             elif command_group == 'postgres':
                 c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+=======
+                c.argument('tier', options_list=['--tier'], validator=mysql_tier_validator,
+                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
+>>>>>>> f4aff3300945aea05b5d445c1bb2c304d3779927
                 c.argument('sku_name', options_list=['--sku-name'],
+                           help='The name of the compute SKU. Follows the convention'
+                                ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+            elif command_group == 'postgres':
+                c.argument('tier', options_list=['--tier'], validator=pg_tier_validator,
+                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('sku_name', options_list=['--sku-name'],
+                           validator=pg_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention'
                                 ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
 
