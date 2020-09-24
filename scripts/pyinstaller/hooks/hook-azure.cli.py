@@ -21,6 +21,7 @@ _hiddenimports.append('fileinput')
 # _hiddenimports.extend(collect_submodules('xdist'))
 _hiddenimports.extend(collect_submodules('azure.mgmt.keyvault'))
 _hiddenimports.extend(collect_submodules('azure.mgmt.authorization'))
+_hiddenimports.extend(collect_submodules('azure.mgmt.resource'))
 _hiddenimports.extend(collect_submodules('azure.multiapi'))
 _hiddenimports.extend(collect_submodules('azure.cli.core'))
 

@@ -11,9 +11,7 @@ from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
-from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
-from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
-from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
+from .preparers import _create_keyvault, ServerPreparer
 
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))

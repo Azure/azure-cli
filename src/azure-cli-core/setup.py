@@ -75,6 +75,10 @@ with open('README.rst', 'r', encoding='utf-8') as f:
 with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
+PACKAGE_DATA = {
+    'azure.cli.core': ['auth_landing_pages/*.html']
+}
+
 setup(
     name='azure-cli-core',
     version=VERSION,
@@ -93,5 +97,5 @@ setup(
         "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,
-    package_data={'azure.cli.core': ['auth_landing_pages/*.html']}
+    package_data=PACKAGE_DATA
 )

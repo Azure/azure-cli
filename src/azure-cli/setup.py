@@ -157,6 +157,29 @@ with open('README.rst', 'r', encoding='utf-8') as f:
 with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
+PACKAGE_DATA = {
+    'azure.cli.command_modules.acr': ['*.json'],
+    'azure.cli.command_modules.botservice': ['*.json', '*.config'],
+    'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
+    'azure.cli.command_modules.servicefabric': [
+        'template/windows/template.json',
+        'template/windows/parameter.json',
+        'template/linux/template.json',
+        'template/linux/parameter.json',
+        'template/service/template.json',
+        'template/service/parameter.json'
+    ],
+    'azure.cli.command_modules.appservice': [
+        'resources/WindowsFunctionsStacks.json',
+        'resources/LinuxFunctionsStacks.json',
+        'resources/WebappRuntimeStacks.json'
+    ],
+    'azure.cli.command_modules.rdbms': [
+        'randomname/adjectives.txt',
+        'randomname/nouns.txt'
+    ]
+}
+
 setup(
     name='azure-cli',
     version=VERSION,
@@ -176,27 +199,6 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.6.0',
-    package_data={
-        'azure.cli.command_modules.acr': ['*.json'],
-        'azure.cli.command_modules.botservice': ['*.json', '*.config'],
-        'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
-        'azure.cli.command_modules.servicefabric': [
-            'template/windows/template.json',
-            'template/windows/parameter.json',
-            'template/linux/template.json',
-            'template/linux/parameter.json',
-            'template/service/template.json',
-            'template/service/parameter.json'
-        ],
-        'azure.cli.command_modules.appservice': [
-            'resources/WindowsFunctionsStacks.json',
-            'resources/LinuxFunctionsStacks.json',
-            'resources/WebappRuntimeStacks.json'
-        ],
-        'azure.cli.command_modules.rdbms': [
-            'randomname/adjectives.txt',
-            'randomname/nouns.txt'
-        ]
-    },
+    package_data=PACKAGE_DATA,
     cmdclass=cmdclass
 )
