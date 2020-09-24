@@ -14,7 +14,8 @@ from ._client_factory import resource_client_factory
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'eastus'  # For testing: 'eastus2euap'
+DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
+DEFAULT_LOCATION_MySQL = 'westus2'
 
 
 def resolve_poller(result, cli_ctx, name):
@@ -29,10 +30,13 @@ def create_random_resource_name(prefix='azure', length=15):
     return prefix + ''.join(digits)
 
 
-def generate_missing_parameters(cmd, location, resource_group_name, server_name):
+def generate_missing_parameters(cmd, location, resource_group_name, server_name, db_engine):
     # if location is not passed as a parameter or is missing from local context
     if location is None:
-        location = DEFAULT_LOCATION
+        if db_engine == 'postgres':
+            location = DEFAULT_LOCATION_PG
+        else:
+            location = DEFAULT_LOCATION_MySQL
 
     # If resource group is there in local context, check for its existence.
     resource_group_exists = True
@@ -61,13 +65,8 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name)
 def generate_password(administrator_login_password):
     import secrets
     if administrator_login_password is None:
-        passwordLength = 16
-        special_character = random.choice('!@#,?;:$&*')
-        administrator_login_password = secrets.token_urlsafe(passwordLength)
-        random_position = random.randint(1, len(administrator_login_password) - 1)
-        administrator_login_password = administrator_login_password[
-            :random_position] + special_character + administrator_login_password[
-                random_position + 1:]
+        passwordlength = 16
+        administrator_login_password = secrets.token_urlsafe(passwordlength)
     return administrator_login_password
 
 
