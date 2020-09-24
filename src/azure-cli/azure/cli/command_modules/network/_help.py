@@ -1344,6 +1344,10 @@ type: command
 short-summary: >
   Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
   https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+examples:
+  - name: Disable a attack protection rule
+    text: |
+      az network application-gateway waf-policy managed-rule rule-set add --policy-name MyPolicy -g MyResourceGroup --type OWASP --version 3.1 --group-name REQUEST-921-PROTOCOL-ATTACK --rules 921110
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set update'] = """
@@ -1351,6 +1355,13 @@ type: command
 short-summary: >
   Update(Override) existing rule set of a WAF policy managed rules. For rule set and rules, please visit:
   https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+examples:
+  - name: Override rules under rule group EQUEST-921-PROTOCOL-ATTACK
+    text: |
+      az network application-gateway waf-policy managed-rule rule-set update --policy-name MyPolicy -g MyResourceGroup --type OWASP --version 3.1 --group-name REQUEST-921-PROTOCOL-ATTACK --rules 921130 921160
+  - name: Update the OWASP protocol version from 3.1 to 3.0 which will clear the old rules
+    text: |
+      az network application-gateway waf-policy managed-rule rule-set update --policy-name MyPolicy -g MyResourceGroup --type OWASP --version 3.0
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set remove'] = """
@@ -1360,7 +1371,7 @@ short-summary: >
 examples:
   - name: Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     text: |
-        az network application-gateway waf-policy managed-rule rule-set remove --policy-name MyPolicy --resource-group MyResourceGroup --type Permanent --version IPv4
+        az network application-gateway waf-policy managed-rule rule-set remove --policy-name MyPolicy --resource-group MyResourceGroup --type OWASP --version 3.1
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set list'] = """
