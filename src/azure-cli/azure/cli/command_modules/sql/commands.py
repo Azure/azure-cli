@@ -574,7 +574,7 @@ def load_command_table(self, _):
         c.custom_command('set', 'server_dns_alias_set')
 
     server_aadonly_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#ServerAzureADOnlyAuthentications.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ServerAzureADOnlyAuthenticationsOperations.{}',
         client_factory=get_sql_server_azure_ad_only_operations)
 
     with self.command_group ('sql server ad-only-auth',

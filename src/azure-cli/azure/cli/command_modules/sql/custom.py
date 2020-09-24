@@ -2655,8 +2655,7 @@ def server_aad_only_disable(
 def server_aad_only_enable(
     client,
     resource_group_name,
-    server_name,
-    **kwargs):
+    server_name):
     '''
     Enables a servers aad-only setting
     '''
@@ -2968,18 +2967,15 @@ def mi_aad_only_disable(
 def mi_aad_only_enable(
     client,
     resource_group_name,
-    managed_instance_name,
-    **kwargs):
+    managed_instance_name):
     '''
     Enables the AAD-only setting
     '''
-    #kwargs['tenant_id'] = _get_tenant_id()
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
-        azure_ad_only_authentication=True,
-        parameters=kwargs
+        azure_ad_only_authentication=True
     )
 
 ###############################################

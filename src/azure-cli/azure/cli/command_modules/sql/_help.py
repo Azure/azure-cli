@@ -645,7 +645,7 @@ type: group
 short-summary: Disable Azure Active Directly only Authentication for this Managed Instance.
 """
 
-ps['sql mi ad-only-auth get'] = """
+helps['sql mi ad-only-auth get'] = """
 type: group
 short-summary: Get a specific Azure Active Directly only Authentication property.
 """
