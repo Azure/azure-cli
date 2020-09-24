@@ -30,15 +30,15 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
     if fail_on_exist and container_rm_exists(client, resource_group_name, account_name, container_name):
         from azure.cli.core.azclierror import AzCLIErrorType
         from azure.cli.core.azclierror import AzCLIError
-        raise AzCLIError(AzCLIErrorType.ValidationError, "The specified container already exists.")
+        raise AzCLIError(AzCLIErrorType.ValidationError, 'The specified container already exists.')
+
     BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
     blob_container = BlobContainer(public_access=public_access,
                                    default_encryption_scope=default_encryption_scope,
                                    deny_encryption_scope_override=deny_encryption_scope_override,
                                    metadata=metadata)
-    container = client.create(resource_group_name=resource_group_name, account_name=account_name,
-                              container_name=container_name, blob_container=blob_container)
-    return container is not None
+    return client.create(resource_group_name=resource_group_name, account_name=account_name,
+                         container_name=container_name, blob_container=blob_container)
 
 
 def update_container_rm(cmd, instance, metadata=None, public_access=None,
@@ -53,6 +53,13 @@ def update_container_rm(cmd, instance, metadata=None, public_access=None,
         if deny_encryption_scope_override is not None else instance.deny_encryption_scope_override,
     )
     return params
+
+
+def list_container_rm(cmd, client, resource_group_name, account_name, include_deleted=None):
+    ListContainersInclude = cmd.get_models('ListContainersInclude', resource_type=ResourceType.MGMT_STORAGE)
+    include = ListContainersInclude("deleted") if include_deleted is not None else None
+
+    return client.list(resource_group_name=resource_group_name, account_name=account_name, include=include)
 
 
 def container_rm_exists(client, resource_group_name, account_name, container_name):

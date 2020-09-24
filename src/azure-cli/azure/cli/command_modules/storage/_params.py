@@ -1067,20 +1067,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_access', validator=validate_container_public_access,
                    arg_type=get_enum_type(get_container_access_type_names()),
                    help='Specifies whether data in the container may be accessed publicly.')
+        c.ignore('filter', 'maxpagesize')
 
     with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
 
     for item in ['create', 'update']:
         with self.argument_context('storage container-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
+            c.argument('metadata', nargs='+',
+                       help='Metadata in space-separated key=value pairs that is associated with the container. '
+                            'This overwrites any existing metadata',
+                       validator=validate_metadata)
             c.argument('default_encryption_scope',
                        arg_group='Encryption Policy',
                        help='Default the container to use specified encryption scope for all writes.')
             c.argument('deny_encryption_scope_override',
                        arg_type=get_three_state_flag(), arg_group='Encryption Policy',
                        help='Block override of encryption scope from the container default.')
+
+    with self.argument_context('storage container-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('include_deleted', action='store_true',
+                   help='Include soft deleted containers when specified.')
 
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
