@@ -1102,6 +1102,6 @@ def scopes_to_resource(scopes):
     if scope.endswith(".default"):
         scope = scope[:-len(".default")]
 
-    # Trim extra slashes. https://datalake.azure.net// -> https://datalake.azure.net/
+    # Trim extra ending slashes. https://datalake.azure.net// -> https://datalake.azure.net/
     scope = scope.rstrip('/') + '/'
     return scope
