@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.11.1"
+VERSION = "2.12.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -84,7 +84,7 @@ DEPENDENCIES = [
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid==3.0.0rc7',
-    'azure-mgmt-eventhub~=4.0.0',
+    'azure-mgmt-eventhub~=4.1.0',
     'azure-mgmt-hdinsight~=1.7.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=3.0.0',
@@ -104,7 +104,7 @@ DEPENDENCIES = [
     'azure-mgmt-network~=12.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=2.2.0',
+    'azure-mgmt-rdbms~=3.0.0rc1',
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-recoveryservicesbackup~=0.6.0',
     'azure-mgmt-redhatopenshift==0.1.0',
@@ -189,6 +189,10 @@ setup(
             'resources/WindowsFunctionsStacks.json',
             'resources/LinuxFunctionsStacks.json',
             'resources/WebappRuntimeStacks.json'
+        ],
+        'azure.cli.command_modules.rdbms': [
+            'randomname/adjectives.txt',
+            'randomname/nouns.txt'
         ]
     },
     cmdclass=cmdclass

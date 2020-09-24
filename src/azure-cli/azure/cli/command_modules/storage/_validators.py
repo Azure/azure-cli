@@ -1200,31 +1200,46 @@ def as_user_validator(namespace):
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
 
 
-def validator_delete_retention_days(namespace):
-    if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
-        raise ValueError(
-            "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
-            "is set to true")
+def validator_delete_retention_days(namespace, enable=None, days=None):
+    enable_param = '--' + enable.replace('_', '-')
+    days_param = '--' + enable.replace('_', '-')
+    enable = getattr(namespace, enable)
+    days = getattr(namespace, days)
 
-    if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
+    if enable is True and days is None:
         raise ValueError(
-            "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
+            "incorrect usage: you have to provide value for '{}' when '{}' "
+            "is set to true".format(days_param, enable_param))
 
-    if namespace.enable_delete_retention is None and namespace.delete_retention_days is not None:
+    if enable is False and days is not None:
         raise ValueError(
-            "incorrect usage: please specify '--enable-delete-retention true' if you want to set the value for "
-            "'--delete-retention-days'")
+            "incorrect usage: '{}' is invalid when '{}' is set to false".format(days_param, enable_param))
 
-    if namespace.delete_retention_days or namespace.delete_retention_days == 0:
-        if namespace.delete_retention_days < 1:
+    if enable is None and days is not None:
+        raise ValueError(
+            "incorrect usage: please specify '{} true' if you want to set the value for "
+            "'{}'".format(enable_param, days_param))
+
+    if days or days == 0:
+        if days < 1:
             raise ValueError(
-                "incorrect usage: '--delete-retention-days' must be greater than or equal to 1")
-        if namespace.delete_retention_days > 365:
+                "incorrect usage: '{}' must be greater than or equal to 1".format(days_param))
+        if days > 365:
             raise ValueError(
-                "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
+                "incorrect usage: '{}' must be less than or equal to 365".format(days_param))
+
+
+def validate_container_delete_retention_days(namespace):
+    validator_delete_retention_days(namespace, enable='enable_container_delete_retention',
+                                    days='container_delete_retention_days')
 
 
 def validate_delete_retention_days(namespace):
+    validator_delete_retention_days(namespace, enable='enable_delete_retention',
+                                    days='delete_retention_days')
+
+
+def validate_file_delete_retention_days(namespace):
     if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
         raise ValueError(
             "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
