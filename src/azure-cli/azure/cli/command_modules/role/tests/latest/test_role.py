@@ -486,7 +486,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 os.chdir(base_dir)
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
-    def test_role_assignment_delete_empty_args(self):
+    def test_role_assignment_empty_args(self):
         expected_msg = "{} can't be an empty string"
         with self.assertRaisesRegex(CLIError, expected_msg.format("--assignee")):
             self.cmd('role assignment delete --assignee ""')
