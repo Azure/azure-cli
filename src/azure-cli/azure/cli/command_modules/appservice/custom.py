@@ -2455,13 +2455,13 @@ def get_import_kv_details(cmd, client, certificate_name, key_vault):
                 break
 
         if not cert:
-            no_cert_msg = 'This app service certificate does not exist'
+            no_cert_msg = 'An App Service Certificate with this name does not exist in this subscription.'
             logger.warning(no_cert_msg)
             return
 
         kv_id = cert.key_vault_id
         if kv_id is None:
-            no_kv_msg = 'this cert is not associated with a KV'
+            no_kv_msg = 'This App Service Certificate has not been added to a KeyVault, and cannot be imported.'
             logger.warning(no_kv_msg)
             return
         kv_secret_name = cert.key_vault_secret_name
