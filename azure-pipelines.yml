@@ -657,7 +657,7 @@ jobs:
   displayName: Build Deb Packages
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
@@ -710,10 +710,10 @@ jobs:
 
 - job: TestDebPackages
   displayName: Test Deb Packages
-
+  timeoutInMinutes: 300
   dependsOn:
    - BuildDebPackages
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   strategy:
     matrix:
       Focal:
@@ -880,7 +880,7 @@ jobs:
 
 - job: BuildAndTestPyinstallerDebPackages
   displayName: Build And Test Pyinstaller Deb Packages
-  timeoutInMinutes: 180
+  timeoutInMinutes: 300
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:

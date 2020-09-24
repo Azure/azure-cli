@@ -7,11 +7,13 @@ import os
 import sys
 import subprocess
 
+distro = sys.argv[1] if len(sys.argv) > 1 else None
+
 root_dir = '/opt/az/lib/python3.6/site-packages/azure/cli/command_modules'
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 
 pytest_base_cmd = '/opt/az/bin/python3 -m pytest -x -v --boxed -p no:warnings --log-level=WARN'
-pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
+pytest_parallel_cmd = pytest_base_cmd if distro == 'bionic' else '{} -n auto'.format(pytest_base_cmd) 
 
 for mod_name in mod_list:
     if mod_name in ['botservice', 'network', 'cloud']:
