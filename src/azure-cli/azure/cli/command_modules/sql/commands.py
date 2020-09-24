@@ -65,7 +65,6 @@ from ._util import (
     get_sql_virtual_network_rules_operations,
     get_sql_instance_failover_groups_operations,
     get_sql_import_export_operations
-    
 )
 
 from ._validators import (
@@ -578,8 +577,8 @@ def load_command_table(self, _):
         client_factory=get_sql_server_azure_ad_only_operations)
 
     with self.command_group('sql server ad-only-auth',
-                             server_aadonly_operations,
-                             client_factory=get_sql_server_azure_ad_only_operations) as g:
+                            server_aadonly_operations,
+                            client_factory=get_sql_server_azure_ad_only_operations) as g:
         
         g.custom_command('disable', 'server_aad_only_disable')
         g.custom_command('enable', 'server_aad_only_enable')

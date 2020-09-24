@@ -2970,7 +2970,6 @@ def mi_aad_only_disable(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
         azure_ad_only_authentication=False
-        #parameters=kwargs
     )
 
 
