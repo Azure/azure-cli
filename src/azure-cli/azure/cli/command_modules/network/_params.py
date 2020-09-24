@@ -524,7 +524,7 @@ def load_arguments(self, _):
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
-        c.argument('rules', nargs='+', help='List of rules that will be disabled.')
+        c.argument('rules', nargs='+', help='List of rules that will be disabled. If provided, --rule-group-name must be provided too')
 
     with self.argument_context('network application-gateway waf-policy managed-rule exclusion',
                                min_api='2019-09-01') as c:

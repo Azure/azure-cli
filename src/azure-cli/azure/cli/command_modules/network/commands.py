@@ -59,7 +59,8 @@ from azure.cli.command_modules.network._validators import (
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace, process_route_table_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace)
+    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
+    process_appgw_waf_policy_update)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -604,7 +605,8 @@ def load_command_table(self, _):
         g.generic_update_command('update',
                                  command_type=network_ag_waf_sdk,
                                  client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_managed_rule_set')
+                                 custom_func_name='update_waf_managed_rule_set',
+                                 validator=process_appgw_waf_policy_update)
         g.custom_command('remove', 'remove_waf_managed_rule_set')
         g.custom_command('list', 'list_waf_managed_rule_set')
 

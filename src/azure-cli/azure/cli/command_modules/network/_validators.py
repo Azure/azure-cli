@@ -1923,3 +1923,13 @@ def process_vnet_name_or_id(cmd, namespace):
             namespace='Microsoft.Network',
             type='virtualNetworks',
             name=namespace.vnet)
+
+
+def process_appgw_waf_policy_update(cmd, namespace):
+    rule_group_name = namespace.rule_group_name
+    rules = namespace.rules
+
+    if rules is None and rule_group_name is not None:
+        raise CLIError('--rules and --rule-group-name must be provided at the same time')
+    if rules is not None and rule_group_name is None:
+        raise CLIError('--rules and --rule-group-name must be provided at the same time')
