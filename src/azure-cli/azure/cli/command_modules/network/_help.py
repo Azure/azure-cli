@@ -5371,7 +5371,7 @@ examples:
 
 helps['network vrouter'] = """
 type: group
-short-summary: Manage the virtual router. This feature supports both VirtualHub and VirtualRouter. Considering VirtualRouter is depcated, we recommand to create VirtualHub instead
+short-summary: Manage the virtual router. This feature supports both VirtualHub and VirtualRouter. Considering VirtualRouter is deprecated, we recommend to create VirtualRouter with --hosted-subnet instead
 """
 
 helps['network vrouter create'] = """
