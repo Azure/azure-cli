@@ -579,7 +579,7 @@ def load_command_table(self, _):
     with self.command_group('sql server ad-only-auth',
                             server_aadonly_operations,
                             client_factory=get_sql_server_azure_ad_only_operations) as g:
-        
+
         g.custom_command('disable', 'server_aad_only_disable')
         g.custom_command('enable', 'server_aad_only_enable')
         g.command('get', 'get')
@@ -655,9 +655,9 @@ def load_command_table(self, _):
         client_factory=get_sql_managed_instance_azure_ad_only_operations)
 
     with self.command_group('sql mi ad-only-auth',
-                             managed_instance_aadonly_operations,
-                             client_factory=get_sql_managed_instance_azure_ad_only_operations) as g:
-        
+                            managed_instance_aadonly_operations,
+                            client_factory=get_sql_managed_instance_azure_ad_only_operations) as g:
+
         g.custom_command('disable', 'mi_aad_only_disable')
         g.custom_command('enable', 'mi_aad_only_enable')
         g.command('get', 'get')
