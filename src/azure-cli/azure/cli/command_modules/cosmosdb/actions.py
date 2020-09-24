@@ -31,7 +31,7 @@ class CreateLocation(argparse._AppendAction):
                 kvp = item.split('=', 1)
                 _key = kvp[0].lower()
                 if _key in keys_found:
-                    raise CLIError('usage error: --locations [KEY=VALUE ...]')
+                    raise CLIError('usage error: --locations [KEY=VALUE ...]. KEY {} provided multiple times'.format(_key))
                 keys_found.add(_key)
                 if _key == "regionname":
                     _name = kvp[1]
@@ -40,7 +40,7 @@ class CreateLocation(argparse._AppendAction):
                 elif _key == "iszoneredundant":
                     _is_zr = kvp[1].lower() == "true"
                 else:
-                    raise CLIError('usage error: --locations [KEY=VALUE ...]')
+                    raise CLIError('usage error: --locations [KEY=VALUE ...]. KEY {} not supported. Valid keys are regionName, failoverPriority, and isZoneRedundant'.format(_key))
             namespace.locations.append(
                 Location(location_name=_name,
                          failover_priority=_failover,
