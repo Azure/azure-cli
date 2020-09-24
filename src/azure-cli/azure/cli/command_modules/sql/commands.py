@@ -46,6 +46,7 @@ from ._util import (
     get_sql_managed_database_long_term_retention_policies_operations,
     get_sql_managed_database_long_term_retention_backups_operations,
     get_sql_managed_instance_azure_ad_administrators_operations,
+    get_sql_managed_instance_azure_ad_only_operations,
     get_sql_managed_instance_encryption_protectors_operations,
     get_sql_managed_instance_keys_operations,
     get_sql_managed_instance_operations_operations,
@@ -53,6 +54,7 @@ from ._util import (
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
     get_sql_restorable_dropped_managed_databases_operations,
+    get_sql_server_azure_ad_only_operations,
     get_sql_server_connection_policies_operations,
     get_sql_server_dns_aliases_operations,
     get_sql_server_keys_operations,
@@ -63,6 +65,7 @@ from ._util import (
     get_sql_virtual_network_rules_operations,
     get_sql_instance_failover_groups_operations,
     get_sql_import_export_operations
+    
 )
 
 from ._validators import (
@@ -570,20 +573,17 @@ def load_command_table(self, _):
         c.command('delete', 'delete')
         c.custom_command('set', 'server_dns_alias_set')
 
-    #####*****#####
     server_aadonly_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerAzureADOnlyAuthentications.{}',
         client_factory=get_sql_server_azure_ad_only_operations)
 
-    with self.command_group ('sql server aad-only',
+    with self.command_group ('sql server ad-only-auth',
                              server_aadonly_operations,
                              client_factory=get_sql_server_azure_ad_only_operations) as g:
         
-        g.custom_command('disable', 'server_aad_only_delete')
-        g.custom_command('enable', 'server_aad_only_create')
-        g.command('list', 'list_by_instance')
+        g.custom_command('disable', 'server_aad_only_disable')
+        g.custom_command('enable', 'server_aad_only_enable')
         g.command('get', 'get')
-    #####*****#####
 
     ###############################################
     #                sql managed instance         #
@@ -655,13 +655,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceAzureADOnlyAuthenticationsOperations.{}',
         client_factory=get_sql_managed_instance_azure_ad_only_operations)
 
-    with self.command_group ('sql mi aad-only',
-                             maanged_instance_aadonly_operations,
+    with self.command_group ('sql mi ad-only-auth',
+                             managed_instance_aadonly_operations,
                              client_factory=get_sql_managed_instance_azure_ad_only_operations) as g:
         
-        g.custom_command('disable', 'mi_aad_only_delete')
-        g.custom_command('enable', 'mi_aad_only_create')
-        g.command('list', 'list_by_instance')
+        g.custom_command('disable', 'mi_aad_only_disable')
+        g.custom_command('enable', 'mi_aad_only_enable')
         g.command('get', 'get')
 
     ###############################################

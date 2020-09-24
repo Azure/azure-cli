@@ -2639,19 +2639,20 @@ def encryption_protector_update(
 #           sql server aad-only
 #####
 
-def server_aad_only_delete(
+def server_aad_only_disable(
     client,
     resource_group_name,
     server_name):
     '''
     Disables a servers aad-only setting
     '''
-    return client.delete(
+    return client.create_or_update(
         resource_group_name=resource_group_name,
-        server_name=server_name
+        server_name=server_name,
+        azure_ad_only_authentication=False
     )
 
-def server_aad_only_create(
+def server_aad_only_enable(
     client,
     resource_group_name,
     server_name,
@@ -2659,11 +2660,10 @@ def server_aad_only_create(
     '''
     Enables a servers aad-only setting
     '''
-    kwargs['tenant_id'] = _get_tenant_id()
     return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        parameters=kwargs
+        azure_ad_only_authentication=True
     )
 
 ###############################################
@@ -2952,19 +2952,20 @@ def mi_ad_admin_delete(
 #           sql managed instance aad-only
 #####
 
-def mi_aad_only_delete(
+def mi_aad_only_disable(
     client,
     resource_group_name,
     managed_instance_name):
     '''
     Disables the managed instance AAD-only setting
     '''
-    return client.delete(
+    return client.create_or_update(
         resource_group_name=resource_group_name,
-        managed_instance_name=managed_instance_name
+        managed_instance_name=managed_instance_name,
+        azure_ad_only_authentication=False
+        #parameters=kwargs
     )
-
-def mi_aad_only_create(
+def mi_aad_only_enable(
     client,
     resource_group_name,
     managed_instance_name,
@@ -2972,11 +2973,12 @@ def mi_aad_only_create(
     '''
     Enables the AAD-only setting
     '''
-    kwargs['tenant_id'] = _get_tenant_id()
+    #kwargs['tenant_id'] = _get_tenant_id()
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name,
+        azure_ad_only_authentication=True,
         parameters=kwargs
     )
 

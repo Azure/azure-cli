@@ -605,13 +605,6 @@ type: group
 short-summary: Manage SQL managed instances.
 """
 
-#####*****####
-helps['sql mi aad-only'] = """
-type: group
-short-summary: Manage a managed instanec's Azure Active Directly only settings.
-"""
-#####*****####
-
 helps['sql mi ad-admin'] = """
 type: group
 short-summary: Manage a managed instance's Active Directory administrator.
@@ -635,6 +628,26 @@ short-summary: Returns a list of managed instance Active Directory Administrator
 helps['sql mi ad-admin update'] = """
 type: command
 short-summary: Updates an existing managed instance Active Directory administrator.
+"""
+
+helps['sql mi ad-only-auth'] = """
+type: group
+short-summary: Manage a Managed Instance's Azure Active Directly only settings.
+"""
+
+helps['sql mi ad-only-auth enable'] = """
+type: group
+short-summary: Enable Azure Active Directly only Authentication for this Managed Instance.
+"""
+
+helps['sql mi ad-only-auth disable'] = """
+type: group
+short-summary: Disable Azure Active Directly only Authentication for this Managed Instance.
+"""
+
+ps['sql mi ad-only-auth get'] = """
+type: group
+short-summary: Get a specific Azure Active Directly only Authentication property.
 """
 
 helps['sql mi create'] = """
@@ -920,6 +933,26 @@ short-summary: Create a new server Active Directory administrator.
 helps['sql server ad-admin update'] = """
 type: command
 short-summary: Update an existing server Active Directory administrator.
+"""
+
+helps['sql server ad-only-auth enable'] = """
+type: command
+short-summary: Manage Azure Active Directly only Authentication settings for this Server.
+"""
+
+helps['sql server ad-only-auth enable'] = """
+type: command
+short-summary: Enable Azure Active Directly only Authentication for this Server.
+"""
+
+helps['sql server ad-only-auth disable'] = """
+type: command
+short-summary: Disable Azure Active Directly only Authentication for this Server.
+"""
+
+helps['sql server ad-only-auth get'] = """
+type: command
+short-summary: Get a specific Azure Active Directly only Authentication property.
 """
 
 helps['sql server audit-policy'] = """
