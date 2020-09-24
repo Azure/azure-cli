@@ -68,7 +68,7 @@ def container_rm_exists(client, resource_group_name, account_name, container_nam
         container = client.get(resource_group_name=resource_group_name,
                                account_name=account_name, container_name=container_name)
         return container is not None
-    except CloudError as ce:
+    except CloudError:
         return False
 
 

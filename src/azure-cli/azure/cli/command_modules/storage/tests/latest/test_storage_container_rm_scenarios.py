@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import ScenarioTest, api_version_constraint, ResourceGroupPreparer, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse

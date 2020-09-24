@@ -1079,10 +1079,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Metadata in space-separated key=value pairs that is associated with the container. '
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
-            c.argument('default_encryption_scope',
+            c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
                        arg_group='Encryption Policy',
                        help='Default the container to use specified encryption scope for all writes.')
             c.argument('deny_encryption_scope_override',
+                       options_list=['--deny-encryption-scope-override', '--deny-override'],
                        arg_type=get_three_state_flag(), arg_group='Encryption Policy',
                        help='Block override of encryption scope from the container default.')
 
