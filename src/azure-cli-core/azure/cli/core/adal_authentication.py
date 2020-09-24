@@ -67,6 +67,14 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
     # This method is exposed for Azure Core.
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         logger.debug("AdalAuthentication.get_token invoked by Track 2 SDK with scopes=%s", scopes)
+
+        # Deal with an old Track 2 SDK issue where the default credential_scopes is extended with
+        # custom credential_scopes. Instead, credential_scopes should be replaced by custom credential_scopes.
+        # https://github.com/Azure/azure-sdk-for-python/issues/12947
+        # We simply remove the first one if there are multiple scopes provided.
+        if len(scopes) > 1:
+            scopes = scopes[1:]
+
         _, token, full_token, _ = self._get_token(scopes_to_resource(scopes))
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))

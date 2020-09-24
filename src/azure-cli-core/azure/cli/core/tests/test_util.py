@@ -386,6 +386,20 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(scopes_to_resource(('https://storage.azure.com/.default',)),
                          'https://storage.azure.com/')
 
+        # Double slashes are reduced
+        self.assertEqual(scopes_to_resource(['https://datalake.azure.net//.default']),
+                         'https://datalake.azure.net/')
+
+    def test_resource_to_scopes(self):
+        from azure.cli.core.util import resource_to_scopes
+        # resource converted to a scopes list
+        self.assertEqual(resource_to_scopes('https://management.core.windows.net/'),
+                         ['https://management.core.windows.net/.default'])
+
+        # Use double slashes for certain services
+        self.assertEqual(resource_to_scopes('https://datalake.azure.net/'),
+                         ['https://datalake.azure.net//.default'])
+
 
 class TestBase64ToHex(unittest.TestCase):
 
