@@ -17,7 +17,7 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 from pkg_resources import parse_version
 
 from azure.cli.core import CommandIndex
-from azure.cli.core.util import CLIError, reload_module, run_pip_cmd
+from azure.cli.core.util import CLIError, reload_module, run_pip_cmd, is_bundled
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli,
                                       EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
@@ -46,15 +46,29 @@ LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _run_pip(pip_exec_args, extension_path=None):
-    args = pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
-    logger.debug('Running: %s', ['pip'] + args)
-    exit_code, log_output = run_pip_cmd(args)
-    if exit_code != 0:
-        logger.debug(log_output)
-        if "PermissionError: [WinError 5]" in log_output:
-            logger.warning(
-                "You do not have the permission to add extensions in the target directory%s. You may need to rerun on a shell as administrator.",
-                ': ' + os.path.split(extension_path)[0] if extension_path else '')
+    if is_bundled:
+        args = pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
+        logger.debug('Running: %s', ['pip'] + args)
+        exit_code, log_output = run_pip_cmd(args)
+        if exit_code != 0:
+            logger.debug(log_output)
+            if "PermissionError: [WinError 5]" in log_output:
+                logger.warning(
+                    "You do not have the permission to add extensions in the target directory%s. You may need to rerun on a shell as administrator.",
+                    ': ' + os.path.split(extension_path)[0] if extension_path else '')
+    else:
+        cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
+        logger.debug('Running: %s', cmd)
+        try:
+            log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
+            logger.debug(log_output)
+            exit_code = 0
+        except CalledProcessError as e:
+            logger.debug(e.output)
+            logger.debug(e)
+            if "PermissionError: [WinError 5]" in e.output:
+                logger.warning("You do not have the permission to add extensions in the target directory%s. You may need to rerun on a shell as administrator.", ': ' + os.path.split(extension_path)[0] if extension_path else '')
+            exit_code = e.returncode
     return exit_code
 
 

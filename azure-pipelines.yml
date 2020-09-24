@@ -710,7 +710,7 @@ jobs:
 
 - job: TestDebPackages
   displayName: Test Deb Packages
-  timeoutInMinutes: 300
+  timeoutInMinutes: 600
   dependsOn:
    - BuildDebPackages
   condition: succeeded()
@@ -880,7 +880,7 @@ jobs:
 
 - job: BuildAndTestPyinstallerDebPackages
   displayName: Build And Test Pyinstaller Deb Packages
-  timeoutInMinutes: 300
+  timeoutInMinutes: 600
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:

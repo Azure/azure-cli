@@ -24,6 +24,7 @@ from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
 from .local_context import AzCLILocalContext, LocalContextAction
+from .util import is_bundled
 
 logger = get_logger(__name__)
 
@@ -206,7 +207,7 @@ class MainCommandsLoader(CLICommandsLoader):
             else:
                 # Perform module discovery
                 command_modules = []
-                if getattr(sys, 'frozen', False):
+                if is_bundled():
                     command_modules = 'ALL_COMMAND_MODULES'
                 else:
                     command_modules = []

@@ -1211,3 +1211,7 @@ def run_pip_cmd(args):
         exit_code = pip_main(args)
     return exit_code, output.getvalue()
 
+
+def is_bundled():
+    return getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+
