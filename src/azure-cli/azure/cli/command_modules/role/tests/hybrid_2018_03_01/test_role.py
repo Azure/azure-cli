@@ -56,9 +56,9 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {sp} -g {rg}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {sp} -g {rg}',
+                self.cmd('role assignment delete -y --assignee {sp} -g {rg}',
                          checks=self.is_empty())
-                self.cmd('role assignment delete --assignee {sp}',
+                self.cmd('role assignment delete -y --assignee {sp}',
                          checks=self.is_empty())
         finally:
             self.cmd('ad app delete --id {sp}')
@@ -248,7 +248,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 result = self.cmd('role assignment list --all').get_output_in_json()
                 self.assertTrue(len(result) >= 1)
 
-                self.cmd('role assignment delete --assignee {upn} --role contributor -g {rg}')
+                self.cmd('role assignment delete -y --assignee {upn} --role contributor -g {rg}')
                 self.cmd('role assignment list -g {rg}',
                          checks=self.is_empty())
 
@@ -256,7 +256,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment create --assignee {upn} --role contributor --scope {nsg_id}')
                 self.cmd('role assignment list --assignee {upn} --role contributor --scope {nsg_id}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {upn} --role contributor --scope {nsg_id}')
+                self.cmd('role assignment delete -y --assignee {upn} --role contributor --scope {nsg_id}')
                 self.cmd('role assignment list --scope {nsg_id}',
                          checks=self.is_empty())
 
@@ -266,7 +266,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {upn} --role reader')
+                self.cmd('role assignment delete -y --assignee {upn} --role reader')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
