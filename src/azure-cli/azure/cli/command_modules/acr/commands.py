@@ -279,7 +279,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
         msg += " Use '{}' instead.".format(self.redirect)
         msg += " For more information go to"
-        msg += " https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos"
+        msg += " https://aka.ms/acr/helm"
         return msg
 
     with self.command_group('acr helm', acr_helm_util,
