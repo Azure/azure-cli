@@ -487,9 +487,12 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
         for i in ids:
             assignments_client.delete_by_id(i)
         return
-    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
+    if not yes:
         from knack.prompting import prompt_y_n
-        msg = 'This will delete all role assignments under the subscription. Are you sure?'
+        msg = 'This will delete the matched role assignments. Are you sure to continue?'
+        if not any([ids, assignee, role, resource_group_name, scope, assignee]):
+            msg = 'WARNING: As no parameter is specified, all role assignments under the subscription will be '\
+                  'deleted. Are you sure to continue?'
         if not prompt_y_n(msg, default="n"):
             return
 

@@ -85,9 +85,9 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {sp} -g {rg}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {sp} -g {rg}',
+                self.cmd('role assignment delete -y --assignee {sp} -g {rg}',
                          checks=self.is_empty())
-                self.cmd('role assignment delete --assignee {sp}',
+                self.cmd('role assignment delete -y --assignee {sp}',
                          checks=self.is_empty())
         finally:
             self.cmd('ad app delete --id {sp}')
@@ -322,8 +322,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 result = self.cmd('role assignment list --all').get_output_in_json()
                 self.assertTrue(len(result) >= 1)
 
-                self.cmd('role assignment delete --assignee {group_id} --role contributor -g {rg}')
-                self.cmd('role assignment delete --assignee {upn} --role contributor -g {rg}')
+                self.cmd('role assignment delete -y --assignee {group_id} --role contributor -g {rg}')
+                self.cmd('role assignment delete -y --assignee {upn} --role contributor -g {rg}')
                 self.cmd('role assignment list -g {rg}',
                          checks=self.is_empty())
 
@@ -331,7 +331,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment create --assignee {upn} --role contributor --scope {nsg_id}')
                 self.cmd('role assignment list --assignee {upn} --role contributor --scope {nsg_id}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {upn} --role contributor --scope {nsg_id}')
+                self.cmd('role assignment delete -y --assignee {upn} --role contributor --scope {nsg_id}')
                 self.cmd('role assignment list --scope {nsg_id}',
                          checks=self.is_empty())
 
@@ -341,12 +341,12 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {upn} --role reader')
+                self.cmd('role assignment delete -y --assignee {upn} --role reader')
 
                 # test role assignment on empty scope
                 with self.assertRaisesRegexp(CLIError, 'Invalid scope. Please use --help to view the valid format.'):
                     self.cmd('role assignment create --assignee {upn} --scope "" --role reader')
-                    self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
+                    self.cmd('role assignment delete -y --assignee {upn} --scope "" --role reader')
 
                 # test role assignment on empty scope
                 with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
@@ -373,7 +373,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 # test role assignment on subscription level
                 self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg}')
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
-                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment delete -y -g {rg}')
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
@@ -407,7 +407,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                              self.check("condition", "{condition}"),
                              self.check("conditionVersion", "{condition_version}")
                          ])
-                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment delete -y -g {rg}')
 
                 # Test create role assignment with description, condition. condition_version defaults to 2.0
                 self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
@@ -418,7 +418,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                              self.check("condition", "{condition}"),
                              self.check("conditionVersion", "2.0")
                          ])
-                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment delete -y -g {rg}')
 
                 # Test error is raised if condition-version is set but condition is not
                 with self.assertRaisesRegex(CLIError, "--condition must be set"):
@@ -446,7 +446,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     output_json = escape_apply_kwargs(shlex.quote(json.dumps(output)))
                     self.cmd("role assignment update --role-assignment {}".format(output_json))
 
-                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment delete -y -g {rg}')
 
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
@@ -484,7 +484,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 rg_id = self.cmd('group show -n {rg}').get_output_in_json()['id']
                 self.cmd('role assignment create --assignee {upn} --role reader --scope ' + rg_id)
                 self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 1))
-                self.cmd('role assignment delete --assignee {upn} --role reader --scope ' + rg_id)
+                self.cmd('role assignment delete -y --assignee {upn} --role reader --scope ' + rg_id)
                 self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 0))
             finally:
                 self.cmd('configure --default group="" --scope local')
@@ -525,7 +525,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     self.check('[0].scope', self.kwargs['scope'])
                 ])
 
-                self.cmd('role assignment delete --assignee {upn} --role reader --scope {scope}')
+                self.cmd('role assignment delete -y --assignee {upn} --role reader --scope {scope}')
 
                 self.cmd('role assignment list --assignee {upn} --role reader --scope {scope}',
                          checks=self.check('length([])', 0))
