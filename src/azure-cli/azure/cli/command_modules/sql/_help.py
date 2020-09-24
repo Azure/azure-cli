@@ -636,17 +636,17 @@ short-summary: Manage a Managed Instance's Azure Active Directly only settings.
 """
 
 helps['sql mi ad-only-auth enable'] = """
-type: group
+type: command
 short-summary: Enable Azure Active Directly only Authentication for this Managed Instance.
 """
 
 helps['sql mi ad-only-auth disable'] = """
-type: group
+type: command
 short-summary: Disable Azure Active Directly only Authentication for this Managed Instance.
 """
 
 helps['sql mi ad-only-auth get'] = """
-type: group
+type: command
 short-summary: Get a specific Azure Active Directly only Authentication property.
 """
 
@@ -933,6 +933,11 @@ short-summary: Create a new server Active Directory administrator.
 helps['sql server ad-admin update'] = """
 type: command
 short-summary: Update an existing server Active Directory administrator.
+"""
+
+helps['sql server ad-only-auth'] = """
+type: group
+short-summary: Manage a Server's Azure Active Directly only settings.
 """
 
 helps['sql server ad-only-auth enable'] = """
