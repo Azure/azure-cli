@@ -155,9 +155,9 @@ class TestExtensionCommands(unittest.TestCase):
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
                 mock.patch('azure.cli.core.extension.operations.shutil'), \
-                mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
+                mock.patch('azure.cli.core.extension.operations.run_pip_cmd', return_value=(0, "")) as run_pip_cmd:
             add_extension(cmd=self.cmd, extension_name=extension_name, pip_proxy=proxy_endpoint)
-            args = check_output.call_args
+            args = run_pip_cmd.call_args
             pip_cmd = args[0][0]
             proxy_index = pip_cmd.index(proxy_param)
             assert pip_cmd[proxy_index + 1] == proxy_endpoint
@@ -167,9 +167,9 @@ class TestExtensionCommands(unittest.TestCase):
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
                 mock.patch('azure.cli.core.extension.operations.shutil'), \
-                mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
+                mock.patch('azure.cli.core.extension.operations.run_pip_cmd', return_value=(0, "")) as run_pip_cmd:
             add_extension(cmd=self.cmd, extension_name=extension_name)
-            args = check_output.call_args
+            args = run_pip_cmd.call_args
             pip_cmd = args[0][0]
             if '--proxy' in pip_cmd:
                 raise AssertionError("proxy parameter in check_output args although no proxy specified")
@@ -271,10 +271,10 @@ class TestExtensionCommands(unittest.TestCase):
                 mock.patch('azure.cli.core.extension.operations.shutil'), \
                 mock.patch('azure.cli.core.extension.operations.is_valid_sha256sum', return_value=(True, computed_extension_sha256)), \
                 mock.patch('azure.cli.core.extension.operations.extension_exists', return_value=None), \
-                mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
+                mock.patch('azure.cli.core.extension.operations.run_pip_cmd', return_value=(0, "")) as run_pip_cmd:
 
             update_extension(self.cmd, MY_EXT_NAME, pip_proxy=proxy_endpoint)
-            args = check_output.call_args
+            args = run_pip_cmd.call_args
             pip_cmd = args[0][0]
             proxy_index = pip_cmd.index(proxy_param)
             assert pip_cmd[proxy_index + 1] == proxy_endpoint
@@ -290,10 +290,10 @@ class TestExtensionCommands(unittest.TestCase):
                 mock.patch('azure.cli.core.extension.operations.shutil'), \
                 mock.patch('azure.cli.core.extension.operations.is_valid_sha256sum', return_value=(True, computed_extension_sha256)), \
                 mock.patch('azure.cli.core.extension.operations.extension_exists', return_value=None), \
-                mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
+                mock.patch('azure.cli.core.extension.operations.run_pip_cmd', return_value=(0, "")) as run_pip_cmd:
 
             update_extension(self.cmd, MY_EXT_NAME)
-            args = check_output.call_args
+            args = run_pip_cmd.call_args
             pip_cmd = args[0][0]
             if '--proxy' in pip_cmd:
                 raise AssertionError("proxy parameter in check_output args although no proxy specified")
