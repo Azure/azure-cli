@@ -1345,7 +1345,7 @@ short-summary: >
   Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
   https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 examples:
-  - name: Disable a attack protection rule
+  - name: Disable an attack protection rule
     text: |
       az network application-gateway waf-policy managed-rule rule-set add --policy-name MyPolicy -g MyResourceGroup --type OWASP --version 3.1 --group-name REQUEST-921-PROTOCOL-ATTACK --rules 921110
 """
