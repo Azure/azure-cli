@@ -472,11 +472,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage container-rm', command_type=blob_container_mgmt_sdk,
                             custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
                                                                resource_type=ResourceType.MGMT_STORAGE),
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-02-01') as g:
         g.custom_command('create', 'create_container_rm')
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', setter_name='update', setter_arg_name='blob_container',
-                                 custom_func_name='update_container_rm')
+        g.custom_command('update', 'update_container_rm')
         g.custom_command('list', 'list_container_rm')
         g.custom_command('exists', 'container_rm_exists', transform=create_boolean_result_output_transformer('exists'),
                          table_transformer=transform_boolean_for_table)
