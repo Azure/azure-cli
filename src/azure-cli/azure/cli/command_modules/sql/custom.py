@@ -1276,7 +1276,7 @@ def db_update(
     Applies requested parameters to a db resource instance for a DB update.
     '''
     # Verify edition
-    if instance.sku.tier.lower() == "datawarehouse":  # pylint: disable=no-member
+    if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
 
@@ -1953,7 +1953,7 @@ def dw_create(
     '''
 
     # Set edition
-    kwargs['sku'].tier = "DataWarehouse"
+    kwargs['sku'].tier = DatabaseEdition.data_warehouse.value
 
     # Create
     return _db_dw_create(
@@ -1978,7 +1978,7 @@ def dw_list(
         server_name=server_name)
 
     # Include only DW's
-    return [db for db in dbs if db.sku.tier == "DataWarehouse"]
+    return [db for db in dbs if db.sku.tier == DatabaseEdition.data_warehouse.value]
 
 
 def dw_update(

@@ -58,7 +58,8 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
-    SqlManagedInstanceMinimalTlsVersionType
+    SqlManagedInstanceMinimalTlsVersionType,
+    AuthenticationType
 )
 
 from ._validators import (
@@ -653,7 +654,8 @@ def load_arguments(self, _):
                    options_list=['--admin-password', '-p'])
 
         c.argument('authentication_type',
-                   options_list=['--auth-type', '-a'])
+                   options_list=['--auth-type', '-a'],
+                   arg_type=get_enum_type(AuthenticationType))
 
         c.argument('storage_key_type',
                    arg_type=get_enum_type(StorageKeyType))
@@ -676,7 +678,8 @@ def load_arguments(self, _):
                    options_list=['--admin-password', '-p'])
 
         c.argument('authentication_type',
-                   options_list=['--auth-type', '-a'])
+                   options_list=['--auth-type', '-a'],
+                   arg_type=get_enum_type(AuthenticationType))
 
         c.argument('storage_key_type',
                    arg_type=get_enum_type(StorageKeyType))
