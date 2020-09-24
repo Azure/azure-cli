@@ -39,6 +39,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=location)
     def test_postgres_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('postgres', resource_group)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=location)
+    def test_mysql_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('mysql', resource_group)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -118,17 +123,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('name', restore_server_name),
                          JMESPathCheck('resourceGroup', resource_group)])
 
-        # flexible-server restart
-        self.cmd('{} flexible-server restart -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+        if database_engine == 'postgres':
+            # flexible-server restart
+            self.cmd('{} flexible-server restart -g {} -n {}'
+                    .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
-        # flexible-server stop
-        self.cmd('{} flexible-server stop -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+            # flexible-server stop
+            self.cmd('{} flexible-server stop -g {} -n {}'
+                    .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
-        # flexible-server start
-        self.cmd('{} flexible-server start -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+            # flexible-server start
+            self.cmd('{} flexible-server start -g {} -n {}'
+                    .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         # flexible-server list servers
         self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
