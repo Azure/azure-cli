@@ -8,13 +8,14 @@ from collections import OrderedDict
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
-from ._client_factory import get_client, get_client_factory, Clients, is_azure_stack_profile
+from azure.cli.command_modules.keyvault._client_factory import (
+    get_client, get_client_factory, Clients, is_azure_stack_profile)
 
-from ._transformers import (
+from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results)
 
-from ._validators import (
+from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
     validate_private_endpoint_connection_id)
 
