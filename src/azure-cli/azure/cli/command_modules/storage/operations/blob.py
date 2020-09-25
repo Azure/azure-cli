@@ -40,9 +40,8 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
                                        metadata=metadata)
         return client.create(resource_group_name=resource_group_name, account_name=account_name,
                              container_name=container_name, blob_container=blob_container)
-    else:
-        return client.create(resource_group_name=resource_group_name, account_name=account_name,
-                             container_name=container_name, public_access=public_access, metadata=metadata)
+    return client.create(resource_group_name=resource_group_name, account_name=account_name,
+                         container_name=container_name, public_access=public_access, metadata=metadata)
 
 
 def update_container_rm(cmd, client, container_name, resource_group_name, account_name,
@@ -62,11 +61,10 @@ def update_container_rm(cmd, client, container_name, resource_group_name, accoun
         )
         return client.update(resource_group_name=resource_group_name, account_name=account_name,
                              container_name=container_name, blob_container=blob_container)
-    else:
-        return client.update(resource_group_name=resource_group_name,
-                             account_name=account_name, container_name=container_name,
-                             metadata=metadata if metadata is not None else container.metadata,
-                             public_access=public_access if public_access is not None else container.public_access)
+    return client.update(resource_group_name=resource_group_name,
+                         account_name=account_name, container_name=container_name,
+                         metadata=metadata if metadata is not None else container.metadata,
+                         public_access=public_access if public_access is not None else container.public_access)
 
 
 def list_container_rm(cmd, client, resource_group_name, account_name, include_deleted=None):
