@@ -46,7 +46,7 @@ LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _run_pip(pip_exec_args, extension_path=None):
-    if is_bundled:
+    if is_bundled():
         args = pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
         logger.debug('Running: %s', ['pip'] + args)
         exit_code, log_output = run_pip_cmd(args)
