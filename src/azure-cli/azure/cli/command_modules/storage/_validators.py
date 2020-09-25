@@ -80,7 +80,7 @@ def _show_no_credentials_warning(namespace, auth_mode_attr=None):
             auth_mode_log = ', or use `--auth-mode login` if you have required RBAC roles in your command. '\
                             'For more information about RBAC roles in storage, visit '\
                             'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.'
-        logger.warning('Please provide {} as credentials{} '.format(' or '.join(credentials_attrs), auth_mode_log))
+        logger.warning("Please provide %s as credentials%s " % (' or '.join(credentials_attrs), auth_mode_log))
     elif auth_mode_attr:
         logger.warning('Try `--auth-mode login` if you have required RBAC roles in your command. '
                        'For more information about RBAC roles in storage, visit '
