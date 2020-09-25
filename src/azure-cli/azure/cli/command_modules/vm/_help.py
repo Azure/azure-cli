@@ -2431,6 +2431,9 @@ examples:
 helps['vmss extension upgrade'] = """
 type: command
 short-summary: Upgrade all extensions for all VMSS instances to the latest version.
+examples:
+  - name: Upgrade all extensions to the latest version.
+    text: az vmss extension upgrade -g MyResourceGroup -n MyVmss
 """
 
 helps['vmss get-instance-view'] = """
