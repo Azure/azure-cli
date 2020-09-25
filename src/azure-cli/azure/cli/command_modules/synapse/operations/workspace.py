@@ -31,6 +31,10 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, workspace_info)
 
 
+def delete_workspace(cmd, client, resource_group_name, workspace_name, no_wait=False):
+    return sdk_no_wait(no_wait, client.delete, resource_group_name, workspace_name)
+
+
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
                      tags=None, no_wait=False):
     workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password)

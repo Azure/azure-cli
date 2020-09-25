@@ -94,7 +94,7 @@ def load_command_table(self, _):
         g.custom_command('check-name', 'custom_check_name_availability',
                          command_type=synapse_operations_sdk,
                          client_factory=cf_synapse_client_operations_factory)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('delete', 'delete_workspace', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --SparkPool
@@ -173,7 +173,7 @@ def load_command_table(self, _):
     with self.command_group('synapse linked-service', synapse_linked_service_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_linked_service', supports_no_wait=True)
-        g.custom_command('update', 'create_or_update_linked_service', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_linked_service', supports_no_wait=True)
         g.custom_command('list', 'list_linked_service')
         g.custom_show_command('show', 'get_linked_service')
         g.custom_command('delete', 'delete_linked_service', confirmation=True, supports_no_wait=True)
@@ -182,7 +182,7 @@ def load_command_table(self, _):
     with self.command_group('synapse dataset', synapse_dataset_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_dataset', supports_no_wait=True)
-        g.custom_command('update', 'create_or_update_dataset', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_dataset', supports_no_wait=True)
         g.custom_command('list', 'list_datasets')
         g.custom_show_command('show', 'get_dataset')
         g.custom_command('delete', 'delete_dataset', confirmation=True, supports_no_wait=True)
@@ -191,7 +191,7 @@ def load_command_table(self, _):
     with self.command_group('synapse pipeline', synapse_pipeline_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_pipeline', supports_no_wait=True)
-        g.custom_command('update', 'create_or_update_pipeline', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_pipeline', supports_no_wait=True)
         g.custom_command('list', 'list_pipelines')
         g.custom_show_command('show', 'get_pipeline')
         g.custom_command('delete', 'delete_pipeline', confirmation=True, supports_no_wait=True)
@@ -212,7 +212,7 @@ def load_command_table(self, _):
     with self.command_group('synapse trigger', synapse_trigger_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_trigger', supports_no_wait=True)
-        g.custom_command('update', 'create_or_update_trigger', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_trigger', supports_no_wait=True)
         g.custom_command('list', 'list_triggers')
         g.custom_show_command('show', 'get_trigger')
         g.custom_command('delete', 'delete_trigger', confirmation=True, supports_no_wait=True)
@@ -232,7 +232,7 @@ def load_command_table(self, _):
     with self.command_group('synapse data-flow', synapse_data_flow_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_data_flow', supports_no_wait=True)
-        g.custom_command('update', 'create_or_update_data_flow', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_data_flow', supports_no_wait=True)
         g.custom_command('list', 'list_data_flows')
         g.custom_show_command('show', 'get_data_flow')
         g.custom_command('delete', 'delete_data_flow', confirmation=True, supports_no_wait=True)
@@ -241,6 +241,7 @@ def load_command_table(self, _):
     with self.command_group('synapse notebook', synapse_notebook_sdk,
                             custom_command_type=get_custom_sdk('artifacts', None)) as g:
         g.custom_command('create', 'create_or_update_notebook', supports_no_wait=True)
+        g.custom_command('set', 'create_or_update_notebook', supports_no_wait=True)
         g.custom_command('import', 'create_or_update_notebook', supports_no_wait=True)
         g.custom_command('list', 'list_notebooks')
         g.custom_show_command('show', 'get_notebook')

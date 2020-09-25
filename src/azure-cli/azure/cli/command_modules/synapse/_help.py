@@ -556,13 +556,13 @@ examples:
           --name testlinkedservice --file @path/linkedservice.json
 """
 
-helps['synapse linked-service update'] = """
+helps['synapse linked-service set'] = """
 type: command
-short-summary: Update an exist linked service.
+short-summary: Set an exist linked service.
 examples:
-  - name: Update an exist linked service.
+  - name: Set an exist linked service.
     text: |-
-        az synapse linked-service update --workspace-name testsynapseworkspace \\
+        az synapse linked-service set --workspace-name testsynapseworkspace \\
           --name testlinkedservice --file @path/linkedservice.json
 """
 
@@ -610,13 +610,13 @@ examples:
           --name testdataset --file @path/dataset.json
 """
 
-helps['synapse dataset update'] = """
+helps['synapse dataset set'] = """
 type: command
-short-summary: Update an exist dataset.
+short-summary: Set an exist dataset.
 examples:
-  - name: Update an exist dataset.
+  - name: Set an exist dataset.
     text: |-
-        az synapse dataset update --workspace-name testsynapseworkspace \\
+        az synapse dataset set --workspace-name testsynapseworkspace \\
           --name testdataset --file @path/dataset.json
 """
 
@@ -664,13 +664,13 @@ examples:
           --name testpipeline --file @path/pipeline.json
 """
 
-helps['synapse pipeline update'] = """
+helps['synapse pipeline set'] = """
 type: command
-short-summary: Update an exist pipeline.
+short-summary: Set an exist pipeline.
 examples:
-  - name: Update an exist pipeline.
+  - name: Set an exist pipeline.
     text: |-
-        az synapse pipeline update --workspace-name testsynapseworkspace \\
+        az synapse pipeline set --workspace-name testsynapseworkspace \\
           --name testpipeline --file @path/pipeline.json
 """
 
@@ -780,13 +780,13 @@ examples:
           --name testtrigger --file @path/trigger.json
 """
 
-helps['synapse trigger update'] = """
+helps['synapse trigger set'] = """
 type: command
-short-summary: Update an exist trigger.
+short-summary: Set an exist trigger.
 examples:
-  - name: Update an exist trigger.
+  - name: Set an exist trigger.
     text: |-
-        az synapse trigger update --workspace-name testsynapseworkspace \\
+        az synapse trigger set --workspace-name testsynapseworkspace \\
           --name testtrigger --file @path/trigger.json
 """
 
@@ -910,13 +910,13 @@ examples:
           --name testdataflow --file @path/dataflow.json
 """
 
-helps['synapse data-flow update'] = """
+helps['synapse data-flow set'] = """
 type: command
-short-summary: Update an exist data flow.
+short-summary: Set an exist data flow.
 examples:
-  - name: Update an exist data flow.
+  - name: Set an exist data flow.
     text: |-
-        az synapse data-flow update --workspace-name testsynapseworkspace \\
+        az synapse data-flow set --workspace-name testsynapseworkspace \\
           --name testdataflow --file @path/dataflow.json
 """
 
@@ -961,6 +961,16 @@ examples:
   - name: Create a notebook.
     text: |-
         az synapse notebook create --workspace-name testsynapseworkspace \\
+          --name testnotebook --file @path/notebook.json
+"""
+
+helps['synapse notebook set'] = """
+type: command
+short-summary: Set an exist notebook.
+examples:
+  - name: Set an exist notebook.
+    text: |-
+        az synapse notebook set --workspace-name testsynapseworkspace \\
           --name testnotebook --file @path/notebook.json
 """
 
