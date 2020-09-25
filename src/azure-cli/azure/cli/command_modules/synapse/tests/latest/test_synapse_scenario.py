@@ -754,7 +754,7 @@ class SynapseScenarioTests(ScenarioTest):
             'workspace': 'testsynapseworkspace',
             'name': 'notebook',
             'spark-pool': 'testpool',
-            'output-folder': 'C:/output'})
+            'output-folder': '/output'})
 
         # create notebook
         self.cmd(
@@ -779,12 +779,14 @@ class SynapseScenarioTests(ScenarioTest):
             ])
 
         # export notebook
+        os.makedirs(self.kwargs['output-folder'])
         self.cmd(
             'az synapse notebook export --workspace-name {workspace} --name {name} '
             '--output-folder {output-folder}')
         file_path = os.path.join(self.kwargs['output-folder'], self.kwargs['name'] + '.ipynb')
         self.assertTrue(os.path.isfile(file_path))
         os.remove(file_path)
+        os.removedirs(self.kwargs['output-folder'])
 
         # delete notebook
         self.cmd(
