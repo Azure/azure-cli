@@ -12,6 +12,7 @@ import shutil
 import zipfile
 import traceback
 import hashlib
+from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from pkg_resources import parse_version
