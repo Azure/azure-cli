@@ -387,7 +387,11 @@ def _get_base_url_type(cli_ctx, service):
     if service == 'vault':
         suffix = cli_ctx.cloud.suffixes.keyvault_dns
     elif service == 'hsm':
-        suffix = cli_ctx.cloud.suffixes.mhsm_dns
+        from azure.cli.core.cloud import CloudSuffixNotSetException
+        try:
+            suffix = cli_ctx.cloud.suffixes.mhsm_dns
+        except CloudSuffixNotSetException:  # For Azure Stack and Air-Gaped Cloud
+            suffix = ''
 
     def base_url_type(name):
         return 'https://{}{}'.format(name, suffix)
