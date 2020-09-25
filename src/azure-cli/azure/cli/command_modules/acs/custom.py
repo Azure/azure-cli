@@ -2270,8 +2270,9 @@ def aks_upgrade(cmd,
             if vmas_cluster:
                 raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets cluster.')
-            _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, name, agent_pool_profile.name)
-        return None
+            _upgrade_single_nodepool_image_version(True, client, resource_group_name, name, agent_pool_profile.name)
+        mc = client.get(resource_group_name, name)
+        return _remove_nulls([mc])[0]
 
     if instance.kubernetes_version == kubernetes_version:
         if instance.provisioning_state == "Succeeded":
