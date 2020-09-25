@@ -10,6 +10,7 @@ import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer, record_only
 from azure.mgmt.recoveryservicesbackup.models import StorageType
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
 
@@ -364,7 +365,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm_name.lower(), rp2_json['id'].lower())
 
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     def test_backup_protection(self, resource_group, vault_name, vm_name):
 
@@ -417,6 +418,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
         self.assertTrue(protection_check == '')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location="southeastasia")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
     @VaultPreparer()
