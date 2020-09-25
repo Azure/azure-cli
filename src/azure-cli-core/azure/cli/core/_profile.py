@@ -53,8 +53,6 @@ _SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH = 'useCertSNIssuerAuth'
 _TOKEN_ENTRY_USER_ID = 'userId'
 _TOKEN_ENTRY_TOKEN_TYPE = 'tokenType'
 
-_COMMON_TENANT = 'common'
-
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
@@ -72,14 +70,27 @@ def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     return subscriptions
 
 
-def _get_authority_url(cli_ctx, tenant):
-    authority_url = cli_ctx.cloud.endpoints.active_directory
-    is_adfs = bool(re.match('.+(/adfs|/adfs/)$', authority_url, re.I))
+def _get_authority_and_tenant(authority_url, tenant):
+    """Prepare authority and tenant for Azure Identity with ADFS support."""
+
+    # # Azure Identity doesn't accept the leading https://
+    # authority_url = authority_url[len('https://'):]
+
+    authority_url = authority_url.rstrip('/')
+    is_adfs = authority_url.endswith('adfs')
     if is_adfs:
-        authority_url = authority_url.rstrip('/')  # workaround: ADAL is known to reject auth urls with trailing /
+        # 'https://adfs.redmond.azurestack.corp.microsoft.com/adfs' ->
+        #   ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs')
+        # Remove trailing slash in .../adfs/
+        authority_url = authority_url.rstrip('/')
+        authority_url = authority_url[:-len('/adfs')]
+        # The custom tenant is discarded in ADFS environment
+        tenant = 'adfs'
     else:
-        authority_url = authority_url.rstrip('/') + '/' + (tenant or _COMMON_TENANT)
-    return authority_url, is_adfs
+        # 'https://login.microsoftonline.com' ->
+        #   ('https://login.microsoftonline.com', tenant)
+        authority_url = authority_url.rstrip('/')
+    return authority_url, tenant
 
 
 def get_credential_types(cli_ctx):
@@ -145,8 +156,11 @@ class Profile:
 
         credential = None
         auth_record = None
-        identity = Identity(authority=self._authority, tenant_id=tenant,
-                            scopes=scopes, client_id=client_id,
+        # For ADFS, auth_tenant is 'adfs'
+        # https://github.com/Azure/azure-sdk-for-python/blob/661cd524e88f480c14220ed1f86de06aaff9a977/sdk/identity/azure-identity/CHANGELOG.md#L19
+        authority, auth_tenant = _get_authority_and_tenant(self.cli_ctx.cloud.endpoints.active_directory, tenant)
+        identity = Identity(authority=authority, tenant_id=auth_tenant,
+                            client_id=client_id,
                             allow_unencrypted=self.cli_ctx.config
                             .getboolean('core', 'allow_fallback_to_plaintext', fallback=True),
                             cred_cache=self._adal_cache)
@@ -161,13 +175,13 @@ class Profile:
             if not use_device_code:
                 from azure.identity import CredentialUnavailableError
                 try:
-                    credential, auth_record = identity.login_with_interactive_browser()
+                    credential, auth_record = identity.login_with_interactive_browser(scopes=scopes)
                 except CredentialUnavailableError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
-                credential, auth_record = identity.login_with_device_code()
+                credential, auth_record = identity.login_with_device_code(scopes=scopes)
         else:
             if is_service_principal:
                 if not tenant:

@@ -1964,5 +1964,29 @@ class MSRestAzureAuthStub:
         self._token = value
 
 
+class TestProfileUtils(unittest.TestCase):
+    def test_get_authority_and_tenant(self):
+        from azure.cli.core._profile import _get_authority_and_tenant
+
+        # Public cloud, without tenant
+        expected_authority = "https://login.microsoftonline.com"
+        self.assertEqual(_get_authority_and_tenant("https://login.microsoftonline.com", None),
+                         (expected_authority, None))
+        # Public cloud, with tenant
+        self.assertEqual(_get_authority_and_tenant("https://login.microsoftonline.com", '00000000-0000-0000-0000-000000000001'),
+                         (expected_authority, '00000000-0000-0000-0000-000000000001'))
+
+        # ADFS, without tenant
+        expected_authority = "https://adfs.redmond.azurestack.corp.microsoft.com"
+        self.assertEqual(_get_authority_and_tenant("https://adfs.redmond.azurestack.corp.microsoft.com/adfs", None),
+                         (expected_authority, 'adfs'))
+        # ADFS, without tenant (including a trailing /)
+        self.assertEqual(_get_authority_and_tenant("https://adfs.redmond.azurestack.corp.microsoft.com/adfs/", None),
+                         (expected_authority, 'adfs'))
+        # ADFS, with tenant
+        self.assertEqual(_get_authority_and_tenant("https://adfs.redmond.azurestack.corp.microsoft.com/adfs", '00000000-0000-0000-0000-000000000001'),
+                         (expected_authority, 'adfs'))
+
+
 if __name__ == '__main__':
     unittest.main()

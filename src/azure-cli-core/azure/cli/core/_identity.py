@@ -56,7 +56,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         :param client_id::param kwargs:
         """
         self.authority = authority
-        self.tenant_id = tenant_id or "organizations"
+        self.tenant_id = tenant_id
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         self._cred_cache = kwargs.pop('cred_cache', None)
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
