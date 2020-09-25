@@ -32,5 +32,5 @@ class AdalRefreshTokenBasedClientApplication(ClientApplication):
             kwargs.pop('correlation_id')
         response = client.obtain_token_by_refresh_token(refresh_token, scope=scopes, **kwargs)
         if "error" in response:
-            raise CLIError(response["error"])
+            raise CLIError("Get token failed. {error}: {error_description}".format(**response))
         return response

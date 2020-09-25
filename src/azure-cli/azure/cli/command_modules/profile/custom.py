@@ -76,9 +76,8 @@ def get_access_token(cmd, subscription=None, resource=None, scopes=None, resourc
     # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`
     # Unify to ISO `expiresOn`, like "2020-06-30 06:14:41"
     if 'expires_on' in token_entry:
-        from datetime import datetime
         # https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
-        token_entry['expiresOn'] = datetime.fromtimestamp(int(token_entry['expires_on']))\
+        token_entry['expiresOn'] = _fromtimestamp(int(token_entry['expires_on']))\
             .strftime("%Y-%m-%d %H:%M:%S.%f")
 
     result = {
@@ -239,3 +238,13 @@ def check_cli(cmd):
         print('CLI self-test completed: OK')
     else:
         raise CLIError(exceptions)
+
+
+def _fromtimestamp(t):
+    # datetime.datetime can't be patched:
+    #   TypeError: can't set attributes of built-in/extension type 'datetime.datetime'
+    # So we wrap datetime.datetime.fromtimestamp with this function.
+    # https://docs.python.org/3/library/unittest.mock-examples.html#partial-mocking
+    # https://williambert.online/2011/07/how-to-unit-testing-in-django-with-mocking-and-patching/
+    from datetime import datetime
+    return datetime.fromtimestamp(t)

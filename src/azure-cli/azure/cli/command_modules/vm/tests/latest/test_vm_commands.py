@@ -754,6 +754,11 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('diskMbpsReadOnly', 30)
         ])
 
+        self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-only 250 --disk-mbps-read-only 40', checks=[
+            self.check('diskIopsReadOnly', 250),
+            self.check('diskMbpsReadOnly', 40)
+        ])
+
         self.cmd('disk create -g {rg} -n {disk2} --image-reference {image}', checks=[
             self.check('creationData.imageReference.id', '{image}')
         ])
@@ -776,6 +781,10 @@ class VMManagedDiskScenarioTest(ScenarioTest):
 
         self.cmd('disk create -g {rg} -n {disk6} --size-gb 256 --max-shares 2 -l centraluseuap', checks=[
             self.check('maxShares', 2)
+        ])
+
+        self.cmd('disk update -g {rg} -n {disk6} --max-shares 1', checks=[
+            self.check('maxShares', 1)
         ])
 
 
@@ -1541,7 +1550,17 @@ class VMBootDiagnostics(ScenarioTest):
         self.kwargs['storage_uri'] = 'https://{}.blob.core.windows.net/'.format(self.kwargs['sa'])
 
         self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l westus')
-        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0 --use-unmanaged-disk --nsg-rule NONE')
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0 --nsg-rule NONE')
+
+        self.cmd('vm boot-diagnostics enable -g {rg} -n {vm}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('diagnosticsProfile.bootDiagnostics.enabled', True),
+            self.check('diagnosticsProfile.bootDiagnostics.storageUri', None)
+        ])
+        self.cmd('vm boot-diagnostics get-boot-log-uris -g {rg} -n {vm} --expire 100', checks=[
+            self.exists('consoleScreenshotBlobUri'),
+            self.exists('serialConsoleLogBlobUri')
+        ])
 
         self.cmd('vm boot-diagnostics enable -g {rg} -n {vm} --storage {sa}')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
@@ -3442,7 +3461,7 @@ class VMDiskEncryptionTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption', location='westus')
     def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
-            'vault': self.create_random_name('vault', 10),
+            'vault': self.create_random_name('vault', 20),
             'vmss': 'vmss1'
         })
         self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
@@ -4530,6 +4549,10 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des2_pattern'])
         ])
 
+        self.cmd('disk-encryption-set list-associated-resources -g {rg} -n {des2}', checks=[
+            self.check('length(@)', 1)
+        ])
+
     @unittest.skip('disable temporarily, will fix in another PR')
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_double_encryption_', location='centraluseuap')
     @AllowLargeResponse(size_kb=99999)
@@ -4932,6 +4955,18 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
         ])
         self.cmd('vm assess-patches -g {rg} -n {vm}', checks=[
             self.check('status', 'Succeeded')
+        ])
+
+
+class VMDiskLogicalSectorSize(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_logical_sector_size_')
+    def test_vm_disk_logical_sector_size(self, resource_group):
+        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --logical-sector-size 4096 --sku UltraSSD_LRS', checks=[
+            self.check('creationData.logicalSectorSize', 4096)
+        ])
+        self.cmd('disk create -g {rg} -n d2 --size-gb 10 --tier P4', checks=[
+            self.check('tier', 'P4')
         ])
 
 

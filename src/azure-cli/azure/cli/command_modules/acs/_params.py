@@ -18,15 +18,11 @@ from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
     validate_cluster_autoscaler_profile, validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_nodes_count,
+    validate_list_of_integers, validate_ssh_key, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels)
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-
-aci_connector_os_type = ['Windows', 'Linux', 'Both']
-
-aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-latest.tgz'
 
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
@@ -212,6 +208,7 @@ def load_arguments(self, _):
         c.argument('windows_admin_username', options_list=['--windows-admin-username'])
         c.argument('windows_admin_password', options_list=['--windows-admin-password'])
         c.argument('node_osdisk_diskencryptionset_id', type=str, options_list=['--node-osdisk-diskencryptionset-id', '-d'])
+        c.argument('aci_subnet_name')
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -252,25 +249,6 @@ def load_arguments(self, _):
             c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install kubectl.')
             c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
             c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin.')
-
-    with self.argument_context('aks install-connector') as c:
-        c.argument('aci_resource_group', help='The resource group to create the ACI container groups')
-        c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
-        c.argument('client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
-        c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)
-        c.argument('image_tag', help='The image tag of the virtual kubelet')
-        c.argument('location', help='The location to create the ACI container groups')
-        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
-        c.argument('service_principal',
-                   help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
-
-    with self.argument_context('aks remove-connector') as c:
-        c.argument('connector_name', default='aci-connector',
-                   help='The name for the ACI Connector', validator=validate_connector_name)
-        c.argument('graceful', action='store_true',
-                   help='Mention if you want to drain/uncordon your aci-connector to move your applications')
-        c.argument('os_type', get_enum_type(aci_connector_os_type),
-                   help='The OS type of the connector')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')
@@ -319,16 +297,6 @@ def load_arguments(self, _):
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(nodepool_mode_type))
-
-    with self.argument_context('aks upgrade-connector') as c:
-        c.argument('aci_resource_group')
-        c.argument('chart_url', default=aci_connector_chart_url)
-        c.argument('client_secret')
-        c.argument('connector_name', default='aci-connector', validator=validate_connector_name)
-        c.argument('image_tag')
-        c.argument('location')
-        c.argument('os_type', get_enum_type(aci_connector_os_type))
-        c.argument('service_principal')
 
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('update', options_list=['--update'], action='store_true')

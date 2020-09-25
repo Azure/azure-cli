@@ -366,7 +366,7 @@ class Profile:
             if is_environment:
                 subscription_dict[_USER_ENTITY][_IS_ENVIRONMENT_CREDENTIAL] = True
 
-            # for Subscriptions - List REST API 2019-06-01's subscription account
+            # For subscription account from Subscriptions - List 2019-06-01 and later.
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
                 if hasattr(s, 'home_tenant_id'):
                     subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id

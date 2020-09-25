@@ -64,6 +64,11 @@ do
 done
 set -e
 
+# Remove unused Network SDK API versions
+pushd %{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/azure/mgmt/network/ > /dev/null
+rm -rf v2016_09_01 v2016_12_01 v2017_03_01 v2017_06_01 v2017_08_01 v2017_09_01 v2017_11_01 v2018_02_01 v2018_04_01 v2018_06_01 v2018_08_01 v2018_10_01 v2018_12_01 v2019_04_01 v2019_08_01 v2019_09_01 v2019_11_01 v2019_12_01 v2020_03_01
+popd > /dev/null
+
 # Set up tab completion
 mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d/
 cat %{repo_path}/az.completion > %{buildroot}%{_sysconfdir}/bash_completion.d/azure-cli

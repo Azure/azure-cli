@@ -6,6 +6,8 @@
 from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
+import azure.cli.command_modules.rdbms._helptext_pg  # pylint: disable=unused-import
+import azure.cli.command_modules.rdbms._helptext_mysql  # pylint: disable=unused-import
 
 
 class RdbmsCommandsLoader(AzCommandsLoader):
@@ -31,7 +33,9 @@ class RdbmsCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azure.cli.command_modules.rdbms.commands import load_command_table
+        from azure.cli.command_modules.rdbms.flexible_server_commands import load_flexibleserver_command_table
         load_command_table(self, args)
+        load_flexibleserver_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):

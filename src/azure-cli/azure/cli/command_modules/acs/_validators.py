@@ -16,23 +16,9 @@ from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 import azure.cli.core.keys as keys
 
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterPropertiesAutoScalerProfile
+from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterPropertiesAutoScalerProfile
 
 logger = get_logger(__name__)
-
-
-def validate_connector_name(namespace):
-    """Validates a string as a legal connector name.
-
-    This validation will also occur server-side in the kubernetes, but that may take
-    for a while. So it's more user-friendly to validate in the CLI pre-flight.
-    """
-    # https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md
-    regex = re.compile(r'^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$')
-    found = regex.findall(namespace.connector_name)
-    if not found:
-        raise CLIError('--connector-name must consist of lower case alphanumeric characters or dashes (-), '
-                       'and must start and end with alphanumeric characters.')
 
 
 def validate_ssh_key(namespace):
