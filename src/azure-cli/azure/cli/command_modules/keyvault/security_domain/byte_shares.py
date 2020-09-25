@@ -5,7 +5,7 @@
 
 import array
 
-from .mod_math import ModMath
+from azure.cli.command_modules.keyvault.security_domain.mod_math import ModMath
 
 
 class Share:
