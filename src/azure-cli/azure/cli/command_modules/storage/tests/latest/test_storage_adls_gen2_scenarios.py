@@ -50,6 +50,42 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_adls_access_recursive_scenarios(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = self.create_random_name(prefix="dir", length=12)
+        file = self.create_random_name(prefix="file", length=12)
+        file_path = '/'.join([directory, file])
+
+        # Create file path
+        self.storage_cmd('storage fs file create -p {} -f {}', account_info, file_path, filesystem)
+        # Check the permission of file
+        self.storage_cmd('storage fs file show -p {} -f {}', account_info, file_path, filesystem) \
+            .assert_with_checks(JMESPathCheck('permissions', 'rw-r-----'))
+        # Check the permission of directory
+        self.storage_cmd('storage fs directory show -n {} -f {}', account_info, directory, filesystem) \
+            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true')) \
+            .assert_with_checks(JMESPathCheck('permissions', 'rwxr-x---'))
+
+        # Set acl for root path
+        acl = "user::rwx,group::r--,other::---"
+        self.storage_cmd('storage fs access set -f {} -p / --acl {}', account_info, filesystem, acl)
+
+        self.storage_cmd('storage fs access show -f {} -p / ', account_info, filesystem) \
+            .assert_with_checks(JMESPathCheck('acl', acl)) \
+            .assert_with_checks(JMESPathCheck('group', "$superuser")) \
+            .assert_with_checks(JMESPathCheck('owner', "$superuser")) \
+            .assert_with_checks(JMESPathCheck('permissions', "rwxr-----"))
+
+        # Set permissions for a file
+        permissions = "rwxrwxrwx"
+        self.storage_cmd('storage fs access set -f {} -p {} --permissions {}', account_info, filesystem, file_path,
+                         permissions)
+        self.storage_cmd('storage fs access show -f {} -p {} ', account_info, filesystem, file_path) \
+            .assert_with_checks(JMESPathCheck('permissions', permissions))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_filesystem_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         connection_str = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
