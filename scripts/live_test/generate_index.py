@@ -64,6 +64,8 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
     <h2>Testing results of Azure CLI</h2>
     """
 
+    live = 'True' if USER_LIVE == '--live' else 'False'
+
     content += """
     <p>
     Repository: {}<br>
@@ -71,7 +73,7 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
     Commit: {}<br>
     Live: {}<br>
     </p>
-    """.format(USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
+    """.format(USER_REPO, USER_BRANCH, COMMIT_ID, live)
 
     content += """
     <p>
