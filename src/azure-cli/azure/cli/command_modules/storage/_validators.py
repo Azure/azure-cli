@@ -70,15 +70,18 @@ def _create_token_credential(cli_ctx):
 
 
 def _show_no_credentials_warning(namespace, auth_mode_attr=None):
-    credentials_attrs = [ca for ca in ['--connection-string', '--account-key', '--sas-token'] if hasattr(namespace, ca[2:].replace('-', '_'))]
+    credentials_choices = [ca for ca in ['--connection-string', '--account-key', '--sas-token']
+                         if hasattr(namespace, ca[2:].replace('-', '_'))]
     logger.warning('There are no credentials provided in your command and environment, we will query for the '
                    'account key inside your storage account. ')
-    if len(credentials_attrs) > 0:
-        logger.warning('Please provide {} as credentials{} '
-                       .format(' or '.join(credentials_attrs),
-                               ', or use `--auth-mode login` if you have required RBAC roles in your command. '
-                               'For more information about RBAC roles in storage, visit '
-                               'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.' if auth_mode_attr else '.'))
+    if credentials_choices:
+        credentials_choices_str = ' or '.join(credentials_choices)
+        auth_mode_log = '.'
+        if auth_mode_attr:
+            auth_mode_log = ', or use `--auth-mode login` if you have required RBAC roles in your command. '\
+                            'For more information about RBAC roles in storage, visit '\
+                            'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.'
+        logger.warning("Please provide %s as credentials%s " % (credentials_choices_str, auth_mode_log))
     elif auth_mode_attr:
         logger.warning('Try `--auth-mode login` if you have required RBAC roles in your command. '
                        'For more information about RBAC roles in storage, visit '
