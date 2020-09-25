@@ -94,7 +94,7 @@ def load_command_table(self, _):
         g.custom_command('check-name', 'custom_check_name_availability',
                          command_type=synapse_operations_sdk,
                          client_factory=cf_synapse_client_operations_factory)
-        g.custom_command('delete', 'delete_workspace', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --SparkPool
