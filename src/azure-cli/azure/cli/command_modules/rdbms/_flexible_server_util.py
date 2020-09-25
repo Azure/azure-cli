@@ -63,7 +63,8 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
 
 
 def generate_password(administrator_login_password):
-    import secrets, string
+    import secrets
+    import string
     if administrator_login_password is None:
         passwordlength = 16
         administrator_login_password = secrets.token_urlsafe(passwordlength)
