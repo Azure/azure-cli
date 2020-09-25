@@ -2030,7 +2030,8 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value)])
 
-        self.cmd('appconfig feature show --endpoint {endpoint} --auth-mode login --feature {feature}',
+        # Since the logged in account also has "Contributor" role, providing --name instead of --endpoint should succeed
+        self.cmd('appconfig feature show --name {config_store_name} --auth-mode login --feature {feature}',
                  checks=[self.check('locked', default_locked),
                          self.check('key', entry_feature),
                          self.check('description', default_description),

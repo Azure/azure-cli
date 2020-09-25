@@ -15,7 +15,7 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 EncryptionProperties,
                                                 KeyVaultProperties)
 
-from ._utils import resolve_resource_group, user_confirmation
+from ._utils import resolve_store_metadata, user_confirmation
 
 
 logger = get_logger(__name__)
@@ -50,7 +50,7 @@ def create_configstore(client,
 
 def delete_configstore(cmd, client, name, resource_group_name=None, yes=False):
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
     confirmation_message = "Are you sure you want to delete the App Configuration: {}".format(
         name)
     user_confirmation(confirmation_message, yes)
@@ -65,7 +65,7 @@ def list_configstore(client, resource_group_name=None):
 
 def show_configstore(cmd, client, name, resource_group_name=None):
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
     return client.get(resource_group_name, name)
 
 
@@ -82,7 +82,7 @@ def update_configstore(cmd,
                        enable_public_network=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
 
     public_network_access = None
     if enable_public_network is not None:
@@ -107,7 +107,7 @@ def update_configstore(cmd,
 
 def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
 
     if not identities:
         identities = [SYSTEM_ASSIGNED_IDENTITY]
@@ -142,7 +142,7 @@ def assign_managed_identity(cmd, client, name, resource_group_name=None, identit
 
 def remove_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
     if resource_group_name is None:
-        resource_group_name, _ = resolve_resource_group(cmd, name)
+        resource_group_name, _ = resolve_store_metadata(cmd, name)
 
     current_identities = show_managed_identity(cmd, client, name, resource_group_name)
     if not current_identities or current_identities.type == 'None':
@@ -184,7 +184,7 @@ def show_managed_identity(cmd, client, name, resource_group_name=None):
 
 
 def list_credential(cmd, client, name, resource_group_name=None):
-    resource_group_name, endpoint = resolve_resource_group(cmd, name)
+    resource_group_name, endpoint = resolve_store_metadata(cmd, name)
     credentials = client.list_keys(resource_group_name, name)
     augmented_credentials = []
 
@@ -195,7 +195,7 @@ def list_credential(cmd, client, name, resource_group_name=None):
 
 
 def regenerate_credential(cmd, client, name, id_, resource_group_name=None):
-    resource_group_name, endpoint = resolve_resource_group(cmd, name)
+    resource_group_name, endpoint = resolve_store_metadata(cmd, name)
     credentail = client.regenerate_key(resource_group_name, name, id_)
     return __convert_api_key_to_json(credentail, endpoint)
 

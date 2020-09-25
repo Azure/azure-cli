@@ -9,7 +9,7 @@ import re
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._utils import is_valid_connection_string, resolve_resource_group, get_store_name_from_connection_string
+from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
 from ._featuremodels import FeatureQueryFields
 
@@ -102,7 +102,7 @@ def validate_appservice_name_or_id(cmd, namespace):
             else:
                 raise CLIError("Please provide App Configuration name or connection string for fetching the AppService account details. Alternatively, you can provide a valid ARM ID for the Appservice account.")
 
-            resource_group, _ = resolve_resource_group(cmd, config_store_name)
+            resource_group, _ = resolve_store_metadata(cmd, config_store_name)
             namespace.appservice_account = {
                 "subscription": get_subscription_id(cmd.cli_ctx),
                 "resource_group": resource_group,

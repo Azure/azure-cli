@@ -21,25 +21,22 @@ logger = get_logger(__name__)
 def construct_connection_string(cmd, config_store_name):
     connection_string_template = 'Endpoint={};Id={};Secret={}'
     # If the logged in user/Service Principal does not have 'Reader' or 'Contributor' role
-    # assigned for the requested AppConfig, resolve_resource_group will raise CLI error
-    resource_group_name, endpoint = resolve_resource_group(cmd, config_store_name)
+    # assigned for the requested AppConfig, resolve_store_metadata will raise CLI error
+    resource_group_name, endpoint = resolve_store_metadata(cmd, config_store_name)
 
     try:
         config_store_client = cf_configstore(cmd.cli_ctx)
-        access_keys = config_store_client.list_keys(
-            resource_group_name, config_store_name)
+        access_keys = config_store_client.list_keys(resource_group_name, config_store_name)
         for entry in access_keys:
             if not entry.read_only:
                 return connection_string_template.format(endpoint, entry.id, entry.value)
-    except Exception as ex:
-        raise CLIError(
-            'Failed to get access keys for the App Configuration "{}". Make sure that the account that logged in has "Contributor" role assigned for this App Configuration store.\n{}'.format(config_store_name, str(ex)))
+    except ErrorException as ex:
+        raise CLIError('Failed to get access keys for the App Configuration "{}". Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}'.format(config_store_name, str(ex)))
 
-    raise CLIError('Cannot find a read write access key for the App Configuration {}'.format(
-        config_store_name))
+    raise CLIError('Cannot find a read write access key for the App Configuration {}'.format(config_store_name))
 
 
-def resolve_resource_group(cmd, config_store_name):
+def resolve_store_metadata(cmd, config_store_name):
     try:
         config_store_client = cf_configstore(cmd.cli_ctx)
         all_stores = config_store_client.list()
@@ -48,9 +45,9 @@ def resolve_resource_group(cmd, config_store_name):
                 # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
                 return store.id.split('/')[4], store.endpoint
     except ErrorException as ex:
-        raise CLIError("Failed to get the list of App Configuration stores for the current user. Make sure that the account that logged in has 'Reader' or 'Contributor' role assigned for the required App Configuration store.\n{}".format(str(ex)))
+        raise CLIError("Failed to get the list of App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
 
-    raise CLIError("Failed to find the App Configuration store '{}'. Make sure that the account that logged in has 'Reader' or 'Contributor' role assigned for this App Configuration store.".format(config_store_name))
+    raise CLIError("Failed to find the App Configuration store '{}'.".format(config_store_name))
 
 
 def user_confirmation(message, yes=False):
@@ -96,7 +93,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
 
     if not string:
         raise CLIError(
-            'If you are using "key" auth mode, please specify config store name or connection string(suggested).')
+            'Please specify config store name or connection string(suggested).')
     return string
 
 
@@ -134,28 +131,32 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     azconfig_client = None
     if auth_mode == "key":
         connection_string = resolve_connection_string(cmd, name, connection_string)
-        azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                             user_agent=HttpHeaders.USER_AGENT)
+        try:
+            azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
+                                                                                 user_agent=HttpHeaders.USER_AGENT)
+        except Exception as ex:
+            raise CLIError("An exception occurred while connecting to App Configuration: {}".format(str(ex)))
+
     if auth_mode == "login":
         if not endpoint:
             try:
                 if name:
-                    _, endpoint = resolve_resource_group(cmd, name)
+                    _, endpoint = resolve_store_metadata(cmd, name)
                 else:
                     raise CLIError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
             except Exception as ex:
-                raise CLIError("Failed to retrieve App Configuration endpoint from store name.\n" + str(ex))
+                raise CLIError(str(ex) + "\nYou may be able to resolve this issue by providing App Configuration endpoint instead of name.")
 
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
         # Due to this bug in get_login_credentials: https://github.com/Azure/azure-cli/issues/15179,
         # we need to manage the AAD scope by passing appconfig endpoint as resource
         cred, _, _ = profile.get_login_credentials(resource=endpoint)
-        azconfig_client = AzureAppConfigurationClient(credential=cred,
-                                                      base_url=endpoint,
-                                                      user_agent=HttpHeaders.USER_AGENT)
-
-    if not azconfig_client:
-        raise CLIError("Could not get App Configuration client due to insufficient permissions.")
+        try:
+            azconfig_client = AzureAppConfigurationClient(credential=cred,
+                                                          base_url=endpoint,
+                                                          user_agent=HttpHeaders.USER_AGENT)
+        except Exception as ex:
+            raise CLIError("An exception occurred while connecting to App Configuration: {}".format(str(ex)))
 
     return azconfig_client
