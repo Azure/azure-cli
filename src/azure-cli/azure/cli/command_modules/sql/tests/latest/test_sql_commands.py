@@ -4765,7 +4765,6 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             'proxy_override': "Proxy"
         })
 
-        self.cmd('group create --location {loc} --name {resource_group}')
         rg = self.cmd('group show --name {resource_group}').get_output_in_json()
 
         self.kwargs.update({
