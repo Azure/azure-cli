@@ -75,12 +75,12 @@ def _show_no_credentials_warning(namespace, auth_mode_attr=None):
     logger.warning('There are no credentials provided in your command and environment, we will query for the '
                    'account key inside your storage account. ')
     if credentials_attrs:
-        logger.warning('Please provide {} as credentials{} '
-                       .format(' or '.join(credentials_attrs),
-                               ', or use `--auth-mode login` if you have required RBAC roles in your command. '
-                               'For more information about RBAC roles in storage, visit '
-                               'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.'
-                               if auth_mode_attr else '.'))
+        auth_mode_log = '.'
+        if auth_mode_attr:
+            auth_mode_log = ', or use `--auth-mode login` if you have required RBAC roles in your command. '\
+                            'For more information about RBAC roles in storage, visit '\
+                            'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.'
+        logger.warning('Please provide {} as credentials{} '.format(' or '.join(credentials_attrs), auth_mode_log))
     elif auth_mode_attr:
         logger.warning('Try `--auth-mode login` if you have required RBAC roles in your command. '
                        'For more information about RBAC roles in storage, visit '
