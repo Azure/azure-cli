@@ -78,6 +78,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  app_insights_telemetry_channel_resource_id=None,
                  synapse_analytics_resource_id=None,
                  attestation_resource_id=None,
+                 portal_uri=None,
                  **kwargs):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
@@ -98,6 +99,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
         self.synapse_analytics_resource_id = synapse_analytics_resource_id
         self.attestation_resource_id = attestation_resource_id
+        self.portal_uri = portal_uri
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -305,6 +307,7 @@ def _arm_to_cli_mapper(arm_dict):
             synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=_get_synapse_analytics_resource_id(arm_dict['name'])),
             app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=_get_app_insights_telemetry_channel_resource_id(arm_dict['name'])),
             attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=_get_attestation_resource_id(arm_dict['name']))),
+            portal_uri=arm_dict['portalUri'],
         suffixes=CloudSuffixes(
             storage_endpoint=get_suffix('storage'),
             storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=_get_storage_sync_endpoint(arm_dict['name'])),
@@ -376,6 +379,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.net',
         attestation_resource_id='https://attest.azure.net'),
+        portal_uri='https://portal.azure.com',
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         storage_sync_endpoint='afs.azure.net',
@@ -410,6 +414,7 @@ AZURE_CHINA_CLOUD = Cloud(
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.net'),
+        portal_uri='https://portal.azure.cn',
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -439,6 +444,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         app_insights_resource_id='https://api.applicationinsights.us',
         log_analytics_resource_id='https://api.loganalytics.us',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track'),
+        portal_uri='https://portal.azure.us',
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         storage_sync_endpoint='afs.azure.us',
@@ -465,6 +471,7 @@ AZURE_GERMAN_CLOUD = Cloud(
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.cloudapi.de',
         ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de'),
+        portal_uri='https://portal.microsoftazure.de',
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
