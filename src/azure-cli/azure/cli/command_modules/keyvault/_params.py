@@ -316,7 +316,7 @@ def load_arguments(self, _):
 
     # SDK functions
     for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover',
-                 'set-attributes', 'show', 'show-deleted']:
+                 'set-attributes', 'show', 'show-deleted', 'encrypt', 'decrypt']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             c.ignore('cls')
             if item in ['list', 'list-deleted']:
