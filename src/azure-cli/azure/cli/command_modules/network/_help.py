@@ -1353,8 +1353,9 @@ examples:
 helps['network application-gateway waf-policy managed-rule rule-set update'] = """
 type: command
 short-summary: >
-  Update(Override) existing rule set of a WAF policy managed rules. For rule set and rules, please visit:
-  https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  Manage rules of a WAF policy.
+  If --group-name and --rules are provided, override existing rules. If --group-name is provided, clear all rules under a certain rule group. If neither of them are provided, update rule set and clear all rules under itself.
+  For rule set and rules, please visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 examples:
   - name: Override rules under rule group EQUEST-921-PROTOCOL-ATTACK
     text: |
