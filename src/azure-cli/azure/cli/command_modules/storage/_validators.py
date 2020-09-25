@@ -65,23 +65,24 @@ def _create_token_credential(cli_ctx):
 
     def _cancel_timer_event_handler(_, **__):
         updater.cancel()
+
     cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, _cancel_timer_event_handler)
     return token_credential
 
 
 def _show_no_credentials_warning(namespace, auth_mode_attr=None):
     credentials_choices = [ca for ca in ['--connection-string', '--account-key', '--sas-token']
-                         if hasattr(namespace, ca[2:].replace('-', '_'))]
+                           if hasattr(namespace, ca[2:].replace('-', '_'))]
     logger.warning('There are no credentials provided in your command and environment, we will query for the '
                    'account key inside your storage account. ')
     if credentials_choices:
         credentials_choices_str = ' or '.join(credentials_choices)
         auth_mode_log = '.'
         if auth_mode_attr:
-            auth_mode_log = ', or use `--auth-mode login` if you have required RBAC roles in your command. '\
-                            'For more information about RBAC roles in storage, visit '\
+            auth_mode_log = ', or use `--auth-mode login` if you have required RBAC roles in your command. ' \
+                            'For more information about RBAC roles in storage, visit ' \
                             'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.'
-        logger.warning("Please provide %s as credentials%s " % (credentials_choices_str, auth_mode_log))
+        logger.warning("Please provide %s as credentials%s ", credentials_choices_str, auth_mode_log)
     elif auth_mode_attr:
         logger.warning('Try `--auth-mode login` if you have required RBAC roles in your command. '
                        'For more information about RBAC roles in storage, visit '
@@ -1306,7 +1307,7 @@ def validate_client_auth_parameter(cmd, ns):
             ns.resource_group_name = _query_account_rg(cmd.cli_ctx, account_name=ns.account_name)[0]
         pop_data_client_auth(ns)
     elif (ns.default_encryption_scope and ns.prevent_encryption_scope_override is None) or \
-         (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
+            (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
         raise CLIError("usage error: You need to specify both --default-encryption-scope and "
                        "--prevent-encryption-scope-override to set encryption scope information "
                        "when creating container.")
