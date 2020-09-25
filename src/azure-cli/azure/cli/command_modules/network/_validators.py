@@ -1925,7 +1925,7 @@ def process_vnet_name_or_id(cmd, namespace):
             name=namespace.vnet)
 
 
-def process_appgw_waf_policy_update(cmd, namespace):
+def process_appgw_waf_policy_update(cmd, namespace):    # pylint: disable=unused-argument
     rule_group_name = namespace.rule_group_name
     rules = namespace.rules
 
