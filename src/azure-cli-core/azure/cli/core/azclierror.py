@@ -18,6 +18,8 @@ class AzCLIErrorType(Enum):
     # userfaults
     CommandNotFoundError = 'CommandNotFoundError'
     ArgumentParseError = 'ArgumentParseError'
+    UsageError = 'UsageError'
+    ResourceNotFound = 'ResourceNotFound'
     ValidationError = 'ValidationError'
     ManualInterrupt = 'ManualInterrupt'
     # service side error
