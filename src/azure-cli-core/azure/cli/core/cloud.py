@@ -309,6 +309,7 @@ def _arm_to_cli_mapper(arm_dict):
             storage_endpoint=get_suffix('storage'),
             storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=_get_storage_sync_endpoint(arm_dict['name'])),
             keyvault_dns=get_suffix('keyVaultDns', add_dot=True),
+            mhsm_dns=get_suffix('mhsmDns', add_dot=True),
             sql_server_hostname=sql_server_hostname,
             mysql_server_endpoint=get_suffix('mysqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mysql')),
             postgresql_server_endpoint=get_suffix('postgresqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.postgres')),
