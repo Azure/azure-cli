@@ -414,7 +414,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
             if command_group == 'mysql':
                 c.argument('sku_name', options_list=['--sku-name'],
-                           validator=mysql_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention'
                                 ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
 
