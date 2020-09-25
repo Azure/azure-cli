@@ -6,10 +6,12 @@
 import requests
 
 from azure.cli.core.util import in_cloud_console
-from azure.cli.core._identity import adal_resource_to_msal_scopes
+from azure.cli.core._identity import resource_to_scopes
 from azure.core.exceptions import ClientAuthenticationError
 
 from knack.util import CLIError
+from knack.log import get_logger
+logger = get_logger(__name__)
 
 
 def _convert_token_entry(token):
@@ -32,11 +34,8 @@ class CredentialAdaptor:
 
     def _get_token(self, *scopes):
         external_tenant_tokens = []
-        if not scopes:
-            if self._resource:
-                scopes = adal_resource_to_msal_scopes(self._resource)
-            else:
-                raise CLIError("Unexpected error: Resource or Scope need be specified to get access token")
+        scopes = scopes or resource_to_scopes(self._resource)
+        logger.debug("Retrieving token for scopes %r", scopes)
         try:
             token = self._credential.get_token(*scopes)
             if self._external_credentials:
@@ -74,6 +73,7 @@ class CredentialAdaptor:
         return token, external_tenant_tokens
 
     def signed_session(self, session=None):
+        logger.debug("AdalAuthentication.signed_session invoked by Track 1 SDK")
         session = session or requests.Session()
         token, external_tenant_tokens = self._get_token()
         header = "{} {}".format('Bearer', token.token)
@@ -84,13 +84,20 @@ class CredentialAdaptor:
         return session
 
     def get_token(self, *scopes):
+        logger.debug("CredentialAdaptor.get_token invoked by Track 2 SDK with scopes=%r", scopes)
+
+        # Deal with an old Track 2 SDK issue where the default credential_scopes is extended with
+        # custom credential_scopes. Instead, credential_scopes should be replaced by custom credential_scopes.
+        # https://github.com/Azure/azure-sdk-for-python/issues/12947
+        # We simply remove the first one if there are multiple scopes provided.
+        if len(scopes) > 1:
+            scopes = scopes[1:]
+
         token, _ = self._get_token(*scopes)
         return token
 
     @staticmethod
     def _log_hostname():
         import socket
-        from knack.log import get_logger
-        logger = get_logger(__name__)
         logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
                        "below, please mention the hostname '%s'", socket.gethostname())

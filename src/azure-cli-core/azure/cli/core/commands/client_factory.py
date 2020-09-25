@@ -7,7 +7,7 @@ import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
-from azure.cli.core.util import get_az_user_agent, is_track2, adal_resource_to_msal_scopes
+from azure.cli.core.util import get_az_user_agent, is_track2, resource_to_scopes
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -189,14 +189,11 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
+        client_kwargs.update(configure_common_settings_track2(cli_ctx))
         # Track 2 SDK maintains `scopes` and passes `scopes` to get_token. Specify `scopes` in client's
         # __init__ method.
-        if not credential_scopes:
-            credential_scopes = adal_resource_to_msal_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
-        # TODO: Test with Track 2 SDK after https://github.com/Azure/azure-sdk-for-python/issues/12947 is fixed and
-        #   new fixed SDKs are released
-        client_kwargs['credential_scopes'] = credential_scopes
-        client_kwargs.update(configure_common_settings_track2(cli_ctx))
+        client_kwargs['credential_scopes'] = credential_scopes or \
+            resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)

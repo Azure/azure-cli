@@ -21,7 +21,7 @@ from azure.identity import (
 )
 
 from ._environment import get_config_dir
-from .util import get_file_json, adal_resource_to_msal_scopes
+from .util import get_file_json, resource_to_scopes
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -385,7 +385,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                     # User account
                     username = entry['userId']
                     authority = entry['_authority']
-                    scopes = adal_resource_to_msal_scopes(entry['resource'])
+                    scopes = resource_to_scopes(entry['resource'])
                     refresh_token = entry['refreshToken']
 
                     msal_app = self._build_persistent_msal_app(authority)

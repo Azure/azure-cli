@@ -16,7 +16,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import in_cloud_console, can_launch_browser, adal_resource_to_msal_scopes
+from azure.cli.core.util import in_cloud_console, can_launch_browser, resource_to_scopes
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID
 
@@ -683,11 +683,11 @@ class Profile:
     def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
         # Convert resource to scopes
         if resource and not scopes:
-            scopes = adal_resource_to_msal_scopes(resource)
+            scopes = resource_to_scopes(resource)
 
         # Use ARM as the default scopes
         if not scopes:
-            scopes = adal_resource_to_msal_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
+            scopes = resource_to_scopes(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
@@ -808,7 +808,7 @@ class Profile:
                 scopes = [scopes]
         else:
             # If scope is not provided, use the ARM resource ID
-            scopes = adal_resource_to_msal_scopes(self._ad_resource_uri)
+            scopes = resource_to_scopes(self._ad_resource_uri)
         return scopes
 
 
