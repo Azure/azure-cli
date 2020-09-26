@@ -20,7 +20,6 @@ def create_custom_image(client, resource_group_name, lab_name, name, source_vm_i
             windows_os_info=WindowsOsInfo(windows_os_state=os_state) if os_type.lower() == "windows" else None,
             linux_os_info=LinuxOsInfo(linux_os_state=os_state) if os_type.lower() == "linux" else None)
 
-
     customImage = CustomImage(
         vm=payload,
         author=author,
