@@ -17,8 +17,6 @@ import logging
 
 import six
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from azure.cli.core.azclierror import AzCLIErrorType
-from azure.cli.core.azclierror import AzCLIError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -55,12 +53,13 @@ DISALLOWED_USER_NAMES = [
 ]
 
 
-def handle_exception(ex):  # pylint: disable=too-many-return-statements, too-many-statements
+def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathTypeError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
+    from azure.cli.core.azclierror import AzCLIError
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError
@@ -78,37 +77,53 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements, too-man
             az_error = ex
 
         elif isinstance(ex, JMESPathTypeError):
+            from azure.cli.core.azclierror import InvalidArgumentValueError
             error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
-            az_error = AzCLIError(AzCLIErrorType.ArgumentParseError, error_msg)
+            az_error = InvalidArgumentValueError(error_msg)
             az_error.set_recommendation(QUERY_REFERENCE)
 
-        elif isinstance(ex, ValidationError):
-            az_error = AzCLIError(AzCLIErrorType.ValidationError, error_msg)
+        elif isinstance(ex, SSLError):
+            from azure.cli.core.azclierror import AzureConnectionError
+            az_error = AzureConnectionError(error_msg)
+            az_error.set_recommendation(SSLERROR_TEMPLATE)
 
-        # TODO: Fine-grained analysis to decide whether they are ValidationErrors
-        elif isinstance(ex, (CLIError, CloudError, AzureError)):
+        # TODO: Fine-grained analysis to categorize the errors
+        elif isinstance(ex, (CLIError, ValidationError)):
+            from azure.cli.core.azclierror import ResourceNotFoundError
+            from azure.cli.core.azclierror import ValidationError as AzValidationError
+            if is_resource_not_found_error(error_msg):
+                az_error = ResourceNotFoundError(error_msg)
+            else:
+                az_error = AzValidationError(error_msg)
+
+        # TODO: Fine-grained analysis
+        elif isinstance(ex, (CloudError, AzureError)):
+            from azure.cli.core.azclierror import BadRequestError, AzureInternalError
             try:
                 error_msg = ex.args[0]
                 for detail in ex.args[0].error.details:
                     error_msg += ('\n' + detail)
             except Exception:  # pylint: disable=broad-except
                 pass
-            az_error = AzCLIError(AzCLIErrorType.ValidationError, error_msg)
+
+            if is_bad_request_error(error_msg):
+                az_error = BadRequestError(error_msg)
+            else:
+                az_error = AzureInternalError(error_msg)
             exit_code = ex.args[1] if len(ex.args) >= 2 else 1
 
         # TODO: Fine-grained analysis
-        elif isinstance(ex, AzureException):
-            az_error = AzCLIError(AzCLIErrorType.ServiceError, error_msg)
+        elif isinstance(ex, (AzureException, ClientRequestError)):
+            from azure.cli.core.azclierror import AzureConnectionError, AzureInternalError
+            if is_azure_connection_error(error_msg):
+                az_error = AzureConnectionError(error_msg)
+            else:
+                az_error = AzureInternalError(error_msg)
             exit_code = ex.args[1] if len(ex.args) >= 2 else 1
-
-        # TODO: Fine-grained analysis
-        elif isinstance(ex, (ClientRequestError, SSLError)):
-            az_error = AzCLIError(AzCLIErrorType.ClientError, error_msg)
-            if 'SSLError' in error_msg:
-                az_error.set_recommendation(SSLERROR_TEMPLATE)
 
         # TODO: Fine-grained analysis
         elif isinstance(ex, HttpOperationError):
+            from azure.cli.core.azclierror import AzureInternalError
             try:
                 response = json.loads(ex.response.text)
                 if isinstance(response, str):
@@ -128,22 +143,47 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements, too-man
             except (ValueError, KeyError):
                 pass
 
-            az_error = AzCLIError(AzCLIErrorType.ServiceError, error_msg)
+            az_error = AzureInternalError(error_msg)
 
         elif isinstance(ex, KeyboardInterrupt):
+            from azure.cli.core.azclierror import ManualInterrupt
             error_msg = 'Keyboard interrupt is captured.'
-            az_error = AzCLIError(AzCLIErrorType.ManualInterrupt, error_msg)
+            az_error = ManualInterrupt(error_msg)
 
         else:
+            from azure.cli.core.azclierror import CLIInternalError
             error_msg = "The command failed with an unexpected error. Here is the traceback:"
-            az_error = AzCLIError(AzCLIErrorType.UnexpectedError, error_msg)
-            az_error.set_raw_exception(ex)
+            az_error = CLIInternalError(error_msg)
+            az_error.set_exception_trace(ex)
             az_error.set_recommendation("To open an issue, please run: 'az feedback'")
 
         az_error.print_error()
         az_error.send_telemetry()
 
         return exit_code
+
+
+def is_azure_connection_error(error_msg):
+    error_msg = error_msg.lower()
+    if 'connection error' in error_msg \
+            or 'connection broken' in error_msg \
+            or 'connection aborted' in error_msg:
+        return True
+    return False
+
+
+def is_bad_request_error(error_msg):
+    error_msg = error_msg.lower()
+    if 'bad request' in error_msg:
+        return True
+    return False
+
+
+def is_resource_not_found_error(error_msg):
+    error_msg = error_msg.lower()
+    if 'could not be found' in error_msg:
+        return True
+    return False
 
 
 # pylint: disable=inconsistent-return-statements
