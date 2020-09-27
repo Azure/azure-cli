@@ -65,7 +65,7 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     """
 
     live = 'True' if USER_LIVE == '--live' else 'False'
-    date = container[:6]
+    date = container.split('-')[0]
 
     content += """
     <p>

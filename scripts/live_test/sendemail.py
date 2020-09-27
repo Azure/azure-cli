@@ -162,11 +162,11 @@ def write_db(container, testdata):
     fail = testdata.total[2]
     rate = testdata.total[3]
     detail = str(testdata.modules)
-    container = 'https://clitestresultstac.blob.core.windows.net/{}/index.html'.format(container)
-    d = datetime.datetime.now()
-    date = d.strftime('%Y%m%d')
-    time = d.strftime('%H%M%S')
-    data = (repr, repo, branch, commit, target, live, user, pass0, fail, rate, detail, container, date, time)
+    container_url = 'https://clitestresultstac.blob.core.windows.net/{}/index.html'.format(container)
+    terms = container.split('-')
+    date = terms[0]
+    time = terms[1]
+    data = (repr, repo, branch, commit, target, live, user, pass0, fail, rate, detail, container_url, date, time)
     print(data)
     cursor.execute(sql, data)
 
