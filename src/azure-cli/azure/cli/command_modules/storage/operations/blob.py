@@ -27,7 +27,8 @@ logger = get_logger(__name__)
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
                         metadata=None, public_access=None, fail_on_exist=False,
                         default_encryption_scope=None, deny_encryption_scope_override=None):
-    if fail_on_exist and container_rm_exists(client, resource_group_name, account_name, container_name):
+    if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
+                                             account_name=account_name, container_name=container_name):
         from azure.cli.core.azclierror import AzCLIErrorType
         from azure.cli.core.azclierror import AzCLIError
         raise AzCLIError(AzCLIErrorType.ValidationError, 'The specified container already exists.')
@@ -44,27 +45,18 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
                          container_name=container_name, public_access=public_access, metadata=metadata)
 
 
-def update_container_rm(cmd, client, container_name, resource_group_name, account_name,
-                        metadata=None, public_access=None,
+def update_container_rm(cmd, instance, metadata=None, public_access=None,
                         default_encryption_scope=None, deny_encryption_scope_override=None):
-    container = client.get(resource_group_name=resource_group_name,
-                           account_name=account_name, container_name=container_name)
-    if cmd.supported_api_version(min_api='2019-06-01', resource_type=ResourceType.MGMT_STORAGE):
-        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
-        blob_container = BlobContainer(
-            metadata=metadata if metadata is not None else container.metadata,
-            public_access=public_access if public_access is not None else container.public_access,
-            default_encryption_scope=default_encryption_scope
-            if default_encryption_scope is not None else container.default_encryption_scope,
-            deny_encryption_scope_override=deny_encryption_scope_override
-            if deny_encryption_scope_override is not None else container.deny_encryption_scope_override,
-        )
-        return client.update(resource_group_name=resource_group_name, account_name=account_name,
-                             container_name=container_name, blob_container=blob_container)
-    return client.update(resource_group_name=resource_group_name,
-                         account_name=account_name, container_name=container_name,
-                         metadata=metadata if metadata is not None else container.metadata,
-                         public_access=public_access if public_access is not None else container.public_access)
+    BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+    blob_container = BlobContainer(
+        metadata=metadata if metadata is not None else instance.metadata,
+        public_access=public_access if public_access is not None else instance.public_access,
+        default_encryption_scope=default_encryption_scope
+        if default_encryption_scope is not None else instance.default_encryption_scope,
+        deny_encryption_scope_override=deny_encryption_scope_override
+        if deny_encryption_scope_override is not None else instance.deny_encryption_scope_override,
+    )
+    return blob_container
 
 
 def list_container_rm(cmd, client, resource_group_name, account_name, include_deleted=None):
@@ -80,8 +72,10 @@ def container_rm_exists(client, resource_group_name, account_name, container_nam
         container = client.get(resource_group_name=resource_group_name,
                                account_name=account_name, container_name=container_name)
         return container is not None
-    except CloudError:
-        return False
+    except CloudError as ce:
+        if ce.status_code == 404:
+            return False
+        raise ce
 
 
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,

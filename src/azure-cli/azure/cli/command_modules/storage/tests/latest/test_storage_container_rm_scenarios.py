@@ -11,56 +11,121 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
 class StorageContainerRmScenarios(ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus")
+    @StorageAccountPreparer(name_prefix="containerrm", location="eastus")
     def test_storage_container_using_rm_main_scenario(self):
         # 1. Test create command.
 
-        # Create container with specified public access and metadata.
-        cname = self.create_random_name('container', 24)
+        # Create container with storage account name and resource group.
+        container_name = self.create_random_name('container', 24)
         self.kwargs.update({
-            'cname': cname,
+            'container_name': container_name,
+            'encryption': self.create_random_name(prefix="encryption", length=24),
         })
-        result = self.cmd('storage container-rm create --account-name {sa} -g {rg} '
-                          '-n {cname} --public-access blob --metadata key1=value1').get_output_in_json()
-        self.assertEqual(result['name'], cname)
+        result = self.cmd('storage container-rm create --storage-account {sa} -g {rg} '
+                          '-n {container_name} --public-access blob --metadata key1=value1 '
+                          '-d {encryption} --deny-override false').get_output_in_json()
+        self.assertEqual(result['name'], container_name)
         self.assertEqual(result['publicAccess'], 'Blob')
         self.assertEqual(result['metadata']['key1'], 'value1')
+        self.assertEqual(result['defaultEncryptionScope'], self.kwargs['encryption'])
+        self.assertEqual(result['denyEncryptionScopeOverride'], False)
+
+        container_id = result['id']
+        self.kwargs.update({'container_id': container_id})
 
         # Create container using existing name while setting fail-on-exist true
         from azure.cli.core.azclierror import AzCLIError
         with self.assertRaisesRegexp(AzCLIError, 'The specified container already exists.'):
             self.cmd(
-                'storage container-rm create --account-name {sa} -g {rg} -n {cname} --fail-on-exist').get_output_in_json()
+                'storage container-rm create --storage-account {sa} -g {rg} -n {container_name} --fail-on-exist').get_output_in_json()
+
+        # Create container with storage account id.
+        container_name_2 = self.create_random_name('container', 24)
+        storage_account = self.cmd('storage account show -n {sa}').get_output_in_json()
+        storage_account_id = storage_account['id']
+        self.kwargs.update({
+            'container_name_2': container_name_2,
+            'storage_account_id': storage_account_id
+        })
+        result = self.cmd('storage container-rm create --storage-account {storage_account_id} '
+                          '-n {container_name_2} --public-access off').get_output_in_json()
+        self.assertEqual(result['name'], container_name_2)
+        self.assertEqual(result['publicAccess'], None)
+        self.assertEqual(result['metadata'], None)
+        self.assertEqual(result['defaultEncryptionScope'], None)
+        self.assertEqual(result['denyEncryptionScopeOverride'], None)
 
         # 2. Test exists command (the container exists).
-        result = self.cmd('storage container-rm exists --account-name {sa} -g {rg} -n {cname}').get_output_in_json()
+
+        # Check existence with storage account name and resource group.
+        result = self.cmd('storage container-rm exists --storage-account {sa} -g {rg} -n {container_name}').get_output_in_json()
+        self.assertEqual(result['exists'], True)
+
+        # Check existence with storage account id.
+        result = self.cmd('storage container-rm exists --storage-account {storage_account_id} -n {container_name}').get_output_in_json()
+        self.assertEqual(result['exists'], True)
+
+        # Check existence by container resource id.
+        result = self.cmd('storage container-rm exists --ids {container_id}').get_output_in_json()
         self.assertEqual(result['exists'], True)
 
         # 3. Test show command (the container exists).
-        result = self.cmd('storage container-rm show --account-name {sa} -g {rg} -n {cname}').get_output_in_json()
-        self.assertEqual(result['name'], cname)
-        self.assertEqual(result['publicAccess'], 'Blob')
-        self.assertEqual(result['metadata']['key1'], 'value1')
+
+        # Show properties of a container with storage account name and resource group.
+        result = self.cmd('storage container-rm show --storage-account {sa} -g {rg} -n {container_name}').get_output_in_json()
+        self.assertEqual(result['name'], container_name)
+
+        # Show properties of a container with storage account id.
+        result = self.cmd('storage container-rm show --storage-account {storage_account_id} -n {container_name}').get_output_in_json()
+        self.assertEqual(result['name'], container_name)
+
+        # Show properties of a container by container resource id.
+        result = self.cmd('storage container-rm show --ids {container_id}').get_output_in_json()
+        self.assertEqual(result['name'], container_name)
 
         # 4. Test update command
-        result = self.cmd('storage container-rm update --account-name {sa} -g {rg} -n {cname} '
-                          '--metadata key2=value2 --deny-encryption-scope-override true').get_output_in_json()
-        self.assertEqual(result['denyEncryptionScopeOverride'], True)
+
+        # Update container with storage account name and resource group.
+        result = self.cmd('storage container-rm update --storage-account {sa} -g {rg} '
+                          '-n {container_name} --metadata key2=value2').get_output_in_json()
+        self.assertEqual(result['name'], container_name)
         self.assertEqual(result['metadata']['key2'], 'value2')
         self.assertNotIn('key1', result['metadata'])
 
-        # 5. Test list command
-        self.assertIn(cname,
-                      self.cmd('storage container-rm list --account-name {sa} --query "[].name"').get_output_in_json())
+        # Update container with storage account id.
+        result = self.cmd('storage container-rm update --storage-account {storage_account_id} '
+                          '-n {container_name} --public-access container').get_output_in_json()
+        self.assertEqual(result['name'], container_name)
+        self.assertEqual(result['publicAccess'], 'Container')
 
-        # 6. Test delete command
-        self.cmd('storage container-rm delete --account-name {sa} -g {rg} -n {cname} -y')
+        # Update container by container resource id.
+        result = self.cmd('storage container-rm update --ids {container_id} '
+                          '--deny-encryption-scope-override true').get_output_in_json()
+        self.assertEqual(result['denyEncryptionScopeOverride'], True)
+
+        # 5. Test list command(with storage account name and resource group)
+        result = self.cmd('storage container-rm list --storage-account {sa} --query "[].name"').get_output_in_json()
+        self.assertIn(container_name, result)
+        self.assertEqual(len(result), 2)
+
+        # 6. Test delete command(with storage account name and resource group)
+        self.cmd('storage container-rm delete --storage-account {sa} -g {rg} -n {container_name_2} -y')
+
+        # 7. Test list command(with storage account id)
+        result = self.cmd('storage container-rm list --storage-account {storage_account_id} --query "[].name"').get_output_in_json()
+        self.assertNotIn(container_name_2, result)
+        self.assertIn(container_name, result)
+        self.assertEqual(len(result), 1)
+
+        # 8. Test delete command(with storage account id)
+        self.cmd('storage container-rm delete --ids {container_id} -y')
+        self.assertEqual(self.cmd('storage container-rm list --storage-account {storage_account_id}').get_output_in_json(), [])
 
         # 7. Test show command (the container doesn't exist).
         with self.assertRaisesRegexp(SystemExit, '3'):
-            self.cmd('storage container-rm show --account-name {sa} -g {rg} -n {cname}')
+            self.cmd('storage container-rm show --storage-account {sa} -g {rg} -n {container_name}')
 
         # 8. Test exists command (the container doesn't exist).
-        result = self.cmd('storage container-rm exists --account-name {sa} -g {rg} -n {cname}').get_output_in_json()
+        result = self.cmd('storage container-rm exists --storage-account {sa} -g {rg} -n {container_name}').get_output_in_json()
         self.assertEqual(result['exists'], False)

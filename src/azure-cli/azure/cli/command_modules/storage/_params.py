@@ -1060,26 +1060,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
         from .sdkutil import get_container_access_type_names
-        c.argument('container_name', container_name_type, options_list=('--name', '-n'))
-        c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.',
-                   completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
-        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('container_name', container_name_type, options_list=('--name', '-n'), id_part='child_name_2')
+        c.argument('account_name', storage_account_type)
+        c.argument('resource_group_name', required=False)
         c.argument('public_access', validator=validate_container_public_access,
                    arg_type=get_enum_type(get_container_access_type_names()),
-                   help='Specifies whether data in the container may be accessed publicly.')
+                   help='Specify whether data in the container may be accessed publicly.')
         c.ignore('filter', 'maxpagesize')
 
     with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
 
     for item in ['create', 'update']:
         with self.argument_context('storage container-rm {}'.format(item),
                                    resource_type=ResourceType.MGMT_STORAGE) as c:
-            c.argument('metadata', nargs='+',
-                       help='Metadata in space-separated key=value pairs that is associated with the container. '
-                            'This overwrites any existing metadata',
-                       validator=validate_metadata)
             c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
                        arg_group='Encryption Policy', min_api='2019-06-01',
                        help='Default the container to use specified encryption scope for all writes.')
@@ -1089,6 +1083,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', storage_account_type, id_part=None)
         c.argument('include_deleted', action='store_true',
                    help='Include soft deleted containers when specified.')
 
