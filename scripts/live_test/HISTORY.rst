@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.5.0
+++++++
+* Update index.html design.
+
 0.4.0
 ++++++
 
