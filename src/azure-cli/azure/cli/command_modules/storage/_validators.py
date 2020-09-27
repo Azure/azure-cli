@@ -1549,6 +1549,7 @@ def add_acl_progress_hook(namespace):
     # the progress callback is invoked each time a batch is completed
     def progress_callback(acl_changes):
         # keep track of failed entries if there are any
+        print(acl_changes.batch_failures)
         failed_entries.append(acl_changes.batch_failures)
 
     namespace.progress_hook = progress_callback
