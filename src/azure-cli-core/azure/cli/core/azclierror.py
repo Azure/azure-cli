@@ -56,6 +56,7 @@ class AzCLIError(CLIError):
 
 # region: Second Layer
 # Main categories of the AzureCLI error types, used for Telemetry alalysis
+# DO NOT raise the error classes here directly in your codes.
 class UserFault(AzCLIError):
     """ Users should be responsible for the errors. """
     def send_telemetry(self):
@@ -63,15 +64,15 @@ class UserFault(AzCLIError):
         telemetry.set_user_fault(self.error_msg)
 
 
-class AzureInternalError(AzCLIError):
+class ServiceError(AzCLIError):
     """ Azure Services should be responsible for the errors.  """
     def send_telemetry(self):
         super().send_telemetry()
         telemetry.set_failure(self.error_msg)
 
 
-class CLIInternalError(AzCLIError):
-    """ AzureCLI should be responsible for the errors. """
+class ClientError(AzCLIError):
+    """ Azure CLI should be responsible for the errors. """
     def send_telemetry(self):
         super().send_telemetry()
         telemetry.set_failure(self.error_msg)
@@ -82,11 +83,14 @@ class CLIInternalError(AzCLIError):
 
 # region: Third Layer
 # Sub-categories of the AzureCLI error types, shown to users
+# Raise the error classes here in your codes
+# Command related error types
 class CommandNotFoundError(UserFault):
     """ Command is misspelled or not recognized by AzureCLI. """
     pass
 
 
+# Argument related error types
 class UnrecognizedArgumentError(UserFault):
     """ Argument is misspelled or not recognized by AzureCLI. """
     pass
@@ -109,31 +113,68 @@ class InvalidArgumentValueError(UserFault):
 
 class ArgumentParseError(UserFault):
     """ Fallback of the argument parsing related errors.
-    Use this if the argument parsing related errors can not be classified into the above types. """
+    Use this error only when the argument related errors
+    can not be classified into the above error types. """
     pass
+
+
+# Response related error types
+class BadRequestError(UserFault):
+    """ Bad request from client: 400 error """
+    pass
+
+
+class UnauthorizedError(UserFault):
+    """ Unauthorized request: 401 error """
+
+
+class ForbiddenError(UserFault):
+    """ Service refuse to response: 403 error """
 
 
 class ResourceNotFoundError(UserFault):
-    """ Can not find user specified resource: 404 error """
+    """ Can not find Azure resources: 404 error """
     pass
 
 
+class AzureInternalError(ServiceError):
+    """ Azure service internal error: 5xx error """
+    pass
+
+
+class AzureResponseError(UserFault):
+    """ Fallback of the response related errors.
+    Use this error only when the response related errors
+    can not be classified into the above error types. """
+
+
+# Request related error types
 class AzureConnectionError(UserFault):
-    """ Connection issues like timeout, aborted or broken. """
+    """ Connection issues like connection timeout, aborted or broken. """
     pass
 
 
-class BadRequestError(UserFault):
-    """ Bad request: 400 error """
-    pass
+class ClientRequestError(UserFault):
+    """ Fallback of the request related errors.
+    Error occurs while attempting to make a request to the service. No request is sent.
+    """
 
 
+# Validation related error types
 class ValidationError(UserFault):
-    """ Fallback of the errors found in validators.
-    Use this if the validation related errors can not be classified into the above types. """
+    """ Fallback of the errors in validation functions.
+    Use this error in validation functions only when the error can not be
+    classified into the Argument, Request and Response related error types. """
     pass
 
 
+# CLI internal error type
+class CLIInternalError(ClientError):
+    """ Azure CLI internal error """
+    pass
+
+
+# Keyboard interrupt error type
 class ManualInterrupt(UserFault):
     """ Keyboard interrupt. """
     pass

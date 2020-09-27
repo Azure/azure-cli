@@ -59,10 +59,10 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
-    from azure.cli.core.azclierror import AzCLIError
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError
+    import azure.cli.core.azclierror as azclierror
     import traceback
 
     logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
@@ -73,7 +73,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         error_msg = getattr(ex, 'message', str(ex))
         exit_code = 1
 
-        if isinstance(ex, AzCLIError):
+        if isinstance(ex, azclierror.AzCLIError):
             az_error = ex
 
         elif isinstance(ex, JMESPathTypeError):
@@ -83,79 +83,64 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             az_error.set_recommendation(QUERY_REFERENCE)
 
         elif isinstance(ex, SSLError):
-            from azure.cli.core.azclierror import AzureConnectionError
-            az_error = AzureConnectionError(error_msg)
+            az_error = azclierror.AzureConnectionError(error_msg)
             az_error.set_recommendation(SSLERROR_TEMPLATE)
 
-        # TODO: Fine-grained analysis to categorize the errors
+        elif isinstance(ex, CloudError):
+            if extract_common_error_message(ex):
+                error_msg = extract_common_error_message(ex)
+            status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
+
+        # TODO: CLIError is too general, need to be retired
         elif isinstance(ex, (CLIError, ValidationError)):
-            from azure.cli.core.azclierror import ResourceNotFoundError
-            from azure.cli.core.azclierror import ValidationError as AzValidationError
             if is_resource_not_found_error(error_msg):
-                az_error = ResourceNotFoundError(error_msg)
+                az_error = azclierror.ResourceNotFoundError(error_msg)
             else:
-                az_error = AzValidationError(error_msg)
+                az_error = azclierror.ValidationError(error_msg)
 
-        # TODO: Fine-grained analysis
-        elif isinstance(ex, (CloudError, AzureError)):
-            from azure.cli.core.azclierror import BadRequestError, AzureInternalError
-            try:
-                error_msg = ex.args[0]
-                for detail in ex.args[0].error.details:
-                    error_msg += ('\n' + detail)
-            except Exception:  # pylint: disable=broad-except
-                pass
+        # TODO: AzureError is too general, need confirmation
+        elif isinstance(ex, AzureError):
+            if extract_common_error_message(ex):
+                error_msg = extract_common_error_message(ex)
+            AzCLIErrorType = get_error_type_by_azure_error(ex)
+            az_error = AzCLIErrorType(error_msg)
 
-            if is_bad_request_error(error_msg):
-                az_error = BadRequestError(error_msg)
-            else:
-                az_error = AzureInternalError(error_msg)
-            exit_code = ex.args[1] if len(ex.args) >= 2 else 1
-
-        # TODO: Fine-grained analysis
-        elif isinstance(ex, (AzureException, ClientRequestError)):
-            from azure.cli.core.azclierror import AzureConnectionError, AzureInternalError
+        # TODO: AzureException is too general, need confirmation
+        elif isinstance(ex, AzureException):
             if is_azure_connection_error(error_msg):
-                az_error = AzureConnectionError(error_msg)
+                az_error = azclierror.AzureConnectionError(error_msg)
             else:
-                az_error = AzureInternalError(error_msg)
-            exit_code = ex.args[1] if len(ex.args) >= 2 else 1
+                az_error = azclierror.ClientRequestError(error_msg)
 
-        # TODO: Fine-grained analysis
+        elif isinstance(ex, ClientRequestError):
+            if is_azure_connection_error(error_msg):
+                az_error = azclierror.AzureConnectionError(error_msg)
+            else:
+                az_error = azclierror.ClientRequestError(error_msg)
+
         elif isinstance(ex, HttpOperationError):
-            from azure.cli.core.azclierror import AzureInternalError
-            try:
-                response = json.loads(ex.response.text)
-                if isinstance(response, str):
-                    error = response
-                else:
-                    error = response['error']
-
-                # ARM should use ODATA v4. So should try this first.
-                # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
-                if isinstance(error, dict):
-                    code = "{} - ".format(error.get('code', 'Unknown Code'))
-                    message = error.get('message', ex)
-                    error_msg = "code: {}, {}".format(code, message)
-                else:
-                    error_msg = error
-
-            except (ValueError, KeyError):
-                pass
-
-            az_error = AzureInternalError(error_msg)
+            if extract_http_operation_error_message(ex):
+                error_msg = extract_http_operation_error_message(ex)
+            # by HttpOperationError definition, the message should be with the
+            # format: '({code}) {message}' if there is a status code
+            status_code = ex.__str__().split(')')[0].split('(')[-1]
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
 
         elif isinstance(ex, KeyboardInterrupt):
-            from azure.cli.core.azclierror import ManualInterrupt
             error_msg = 'Keyboard interrupt is captured.'
-            az_error = ManualInterrupt(error_msg)
+            az_error = azclierror.ManualInterrupt(error_msg)
 
         else:
-            from azure.cli.core.azclierror import CLIInternalError
             error_msg = "The command failed with an unexpected error. Here is the traceback:"
-            az_error = CLIInternalError(error_msg)
+            az_error = azclierror.CLIInternalError(error_msg)
             az_error.set_exception_trace(ex)
             az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+
+        if isinstance(az_error, azclierror.ResourceNotFoundError):
+            exit_code = 3
 
         az_error.print_error()
         az_error.send_telemetry()
@@ -163,18 +148,79 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         return exit_code
 
 
+def extract_common_error_message(ex):
+    error_msg = None
+    try:
+        error_msg = ex.args[0]
+        for detail in ex.args[0].error.details:
+            error_msg += ('\n' + detail)
+    except Exception:  # pylint: disable=broad-except
+        pass
+    return error_msg
+
+
+def extract_http_operation_error_message(ex):
+    error_msg = None
+    try:
+        response = json.loads(ex.response.text)
+        if isinstance(response, str):
+            error = response
+        else:
+            error = response['error']
+        # ARM should use ODATA v4. So should try this first.
+        # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+        if isinstance(error, dict):
+            code = "{} - ".format(error.get('code', 'Unknown Code'))
+            message = error.get('message', ex)
+            error_msg = "code: {}, {}".format(code, message)
+        else:
+            error_msg = error
+    except (ValueError, KeyError):
+        pass
+    return error_msg
+
+
+def get_error_type_by_azure_error(ex):
+    import azure.core.exceptions as exceptions
+    import azure.cli.core.azclierror as azclierror
+
+    if isinstance(ex, exceptions.HttpResponseError):
+        status_code = str(ex.status_code)
+        return get_error_type_by_status_code(status_code)
+    if isinstance(ex, exceptions.ResourceNotFoundError):
+        return azclierror.ResourceNotFoundError
+    if isinstance(ex, exceptions.ServiceRequestError):
+        return azclierror.ClientRequestError
+    if isinstance(ex, exceptions.ServiceRequestTimeoutError):
+        return azclierror.AzureConnectionError
+    if isinstance(ex, (exceptions.ServiceResponseError, exceptions.ServiceResponseTimeoutError)):
+        return azclierror.AzureResponseError
+
+    return azclierror.ClientRequestError
+
+
+def get_error_type_by_status_code(status_code):
+    import azure.cli.core.azclierror as azclierror
+
+    if status_code == '400':
+        return azclierror.BadRequestError
+    if status_code == '401':
+        return azclierror.UnauthorizedError
+    if status_code == '403':
+        return azclierror.ForbiddenError
+    if status_code == '404':
+        return azclierror.ResourceNotFoundError
+    if status_code.startswith('5'):
+        return azclierror.AzureInternalError
+
+    return azclierror.AzureResponseError
+
+
 def is_azure_connection_error(error_msg):
     error_msg = error_msg.lower()
     if 'connection error' in error_msg \
             or 'connection broken' in error_msg \
             or 'connection aborted' in error_msg:
-        return True
-    return False
-
-
-def is_bad_request_error(error_msg):
-    error_msg = error_msg.lower()
-    if 'bad request' in error_msg:
         return True
     return False
 
