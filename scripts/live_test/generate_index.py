@@ -38,7 +38,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
                 data.append({'name': name, 'url': url})
         break
     print(data)
-    html = render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
+    html = render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
     with open('index.html', 'w') as f:
         f.write(html)
 
@@ -48,7 +48,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     os.system(cmd)
 
 
-def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
+def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
     content = """
     <!DOCTYPE html>
     <html>
@@ -65,6 +65,7 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
     """
 
     live = 'True' if USER_LIVE == '--live' else 'False'
+    date = container[:6]
 
     content += """
     <p>
@@ -72,15 +73,19 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
     Branch: {}<br>
     Commit: {}<br>
     Live: {}<br>
+    Date: {}
     </p>
-    """.format(USER_REPO, USER_BRANCH, COMMIT_ID, live)
+    """.format(USER_REPO, USER_BRANCH, COMMIT_ID, live, date)
 
     content += """
     <p>
-    <b>User Manual of Live Test Pipeline</b>
+    <b>Pass: {}, Fail: {}, Pass rate: {}</b>
     </p>
+    """.format(testdata.total[1], testdata.total[2], testdata.total[3])
+
+    content += """
     <p>
-    <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd>Word</a> 
+    <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd>User Manual of Live Test Pipeline</a> 
     </p>
     """
 
@@ -89,11 +94,20 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
     <table>
       <tr>
         <th>Module</th>
-        <th>Passed</th>
-        <th>Failed</th>
+        <th>Pass</th>
+        <th>Fail</th>
         <th>Pass rate</th>
       </tr>
     """
+
+    table += """
+      <tr>
+        <td>Total</td>
+        <td>{}</td>
+        <td>{}</td>
+        <td>{}</td>
+      </tr>
+    """.format(testdata.total[1], testdata.total[2], testdata.total[3])
 
     for module, passed, failed, rate in testdata.modules:
         table += """
@@ -106,15 +120,8 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
         """.format(module, passed, failed, rate)
 
     table += """
-      <tr>
-        <td>Total</td>
-        <td>{}</td>
-        <td>{}</td>
-        <td>{}</td>
-      </tr>
     </table>
-    """.format(testdata.total[1], testdata.total[2], testdata.total[3])
-
+    """
     content += table
 
     content += """
