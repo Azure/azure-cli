@@ -51,38 +51,112 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_access_recursive_scenarios(self, resource_group, storage_account):
+        import os
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)
-        directory = self.create_random_name(prefix="dir", length=12)
-        file = self.create_random_name(prefix="file", length=12)
-        file_path = '/'.join([directory, file])
+        dir0 = self.create_random_name(prefix="dir0", length=12)
+        subdir0 = os.path.join(dir0, 'dir0')
+        subdir1 = os.path.join(dir0, 'dir1')
+        subdir2 = os.path.join(dir0, 'dir2')
 
-        # Create file path
-        self.storage_cmd('storage fs file create -p {} -f {}', account_info, file_path, filesystem)
-        # Check the permission of file
-        self.storage_cmd('storage fs file show -p {} -f {}', account_info, file_path, filesystem) \
-            .assert_with_checks(JMESPathCheck('permissions', 'rw-r-----'))
-        # Check the permission of directory
-        self.storage_cmd('storage fs directory show -n {} -f {}', account_info, directory, filesystem) \
-            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true')) \
-            .assert_with_checks(JMESPathCheck('permissions', 'rwxr-x---'))
+        file1 = os.path.join(subdir1, self.create_random_name(prefix="file1", length=12))
+        file2 = os.path.join(subdir1, self.create_random_name(prefix="file2", length=12))
+        file3 = os.path.join(subdir1, self.create_random_name(prefix="file3", length=12))
+        file4 = os.path.join(subdir2, self.create_random_name(prefix="file4", length=12))
+        file5 = os.path.join(subdir2, self.create_random_name(prefix="file5", length=12))
+        file6 = os.path.join(subdir2, self.create_random_name(prefix="file6", length=12))
+
+        local_file = self.create_temp_file(16)
+
+        # Prepare files
+        self.oauth_cmd('storage fs directory create -n {} -f {} --account-name {} ', dir0, filesystem, storage_account)
+        self.oauth_cmd('storage fs directory create -n {} -f {} --account-name {} ', subdir0, filesystem, storage_account)
+        self.oauth_cmd('storage fs directory create -n {} -f {} --account-name {} ', subdir1, filesystem, storage_account)
+        self.oauth_cmd('storage fs directory create -n {} -f {} --account-name {} ', subdir2, filesystem, storage_account)
+
+        self.storage_cmd('storage fs file upload -p {} -f {} -s {} ', account_info, file1, filesystem, local_file)
+        self.oauth_cmd('storage fs file upload -p {} -f {} -s {} --account-name {} ', file2, filesystem, local_file, storage_account)
+        self.oauth_cmd('storage fs file upload -p {} -f {} -s {} --account-name {} ', file3, filesystem, local_file,
+                       storage_account)
+        self.oauth_cmd('storage fs file upload -p {} -f {} -s {} --account-name {} ', file4, filesystem, local_file,
+                       storage_account)
+        self.storage_cmd('storage fs file upload -p {} -f {} -s {} ', account_info, file5, filesystem, local_file,
+                          storage_account)
+        self.oauth_cmd('storage fs file upload -p {} -f {} -s {} --account-name {} ', file6, filesystem, local_file,
+                       storage_account)
+
+        items = self.oauth_cmd('storage fs file list -f {} --account-name {} --query [].name', filesystem, storage_account).get_outpu_in_json()
+        for item in items:
+            self.storage_cmd('storage fs access set -p {} -f {} --permissions rwxr-x--- ', account_info, item, filesystem) \
+                .assert_with_checks(JMESPathCheck('permissions', 'rwxr-x---'))
 
         # Set acl for root path
-        acl = "user::rwx,group::r--,other::---"
-        self.storage_cmd('storage fs access set -f {} -p / --acl {}', account_info, filesystem, acl)
 
-        self.storage_cmd('storage fs access show -f {} -p / ', account_info, filesystem) \
-            .assert_with_checks(JMESPathCheck('acl', acl)) \
-            .assert_with_checks(JMESPathCheck('group', "$superuser")) \
-            .assert_with_checks(JMESPathCheck('owner', "$superuser")) \
-            .assert_with_checks(JMESPathCheck('permissions', "rwxr-----"))
+        acl1 = "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923:rwx"
+        acl2 = "user::r-x"
 
-        # Set permissions for a file
-        permissions = "rwxrwxrwx"
-        self.storage_cmd('storage fs access set -f {} -p {} --permissions {}', account_info, filesystem, file_path,
-                         permissions)
-        self.storage_cmd('storage fs access show -f {} -p {} ', account_info, filesystem, file_path) \
-            .assert_with_checks(JMESPathCheck('permissions', permissions))
+        # ----------- directory ---------
+        # set recursive
+        self.storage_cmd('storage fs access set-recursive -f {} -p {} --acl {}', account_info, filesystem, dir0, acl1)\
+            .assert_with_checks(JMESPathCheck('continuation', None),
+                                JMESPathCheck('counters.directoriesSuccessful', 4),
+                                JMESPathCheck('counters.failureCount', 0),
+                                JMESPathCheck('counters.filesSuccessful', 6))
+        # update recursive
+        self.storage_cmd('storage fs access update-recursive -f {} -p {} --acl {}', account_info, filesystem, subdir2, acl2)\
+            .assert_with_checks(JMESPathCheck('continuation', None),
+                                JMESPathCheck('counters.directoriesSuccessful', 4),
+                                JMESPathCheck('counters.failureCount', 0),
+                                JMESPathCheck('counters.filesSuccessful', 6))
+
+        # remove recursive
+        removal_acl = "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923"
+
+        self.storage_cmd('storage fs access remove-recursive -f {} -p {} --acl {}', account_info, filesystem, dir0, removal_acl)\
+            .assert_with_checks(JMESPathCheck('continuation', None),
+                                JMESPathCheck('counters.directoriesSuccessful', 4),
+                                JMESPathCheck('counters.failureCount', 0),
+                                JMESPathCheck('counters.filesSuccessful', 6))
+
+        # ----------- file ---------
+        # set recursive
+        self.storage_cmd('storage fs access set-recursive -f {} -p {} --acl {}', account_info, filesystem, file5, acl1)\
+            .assert_with_checks(JMESPathCheck('continuation', None),
+                                JMESPathCheck('counters.directoriesSuccessful', 4),
+                                JMESPathCheck('counters.failureCount', 0),
+                                JMESPathCheck('counters.filesSuccessful', 6))
+        # update recursive
+        self.storage_cmd('storage fs access update-recursive -f {} -p {} --acl {}', account_info, filesystem, file5, acl2)\
+            .assert_with_checks(JMESPathCheck('continuation', None),
+                                JMESPathCheck('counters.directoriesSuccessful', 4),
+                                JMESPathCheck('counters.failureCount', 0),
+                                JMESPathCheck('counters.filesSuccessful', 6))
+
+        # remove recursive
+        removal_acl = "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923"
+
+        self.storage_cmd('storage fs access remove-recursive -f {} -p {} --acl {}', account_info, filesystem, file5, removal_acl)\
+            .assert_with_checks(JMESPathCheck('continuation', None),
+                                JMESPathCheck('counters.directoriesSuccessful', 4),
+                                JMESPathCheck('counters.failureCount', 0),
+                                JMESPathCheck('counters.filesSuccessful', 6))
+
+        # Test continue on failure
+        result = self.oauth_cmd('storage fs access set-recursive -f {} -p {} --acl {} --batch-size 2 --max-batches 2 '
+                                '--continue-on-failure --account-name {}', filesystem, dir0, acl1, storage_account)\
+            .get_output_in_json()
+
+        self.assertIsNotNone(result['continuation'])
+        self.assertEqual(result['counters']['directoriesSuccessful'], 4)
+        self.assertEqual(result['counters']['failureCount'], 2)
+        self.assertEqual(result['counters']['filesSuccessful'], 4)
+
+        # fix failed entries and recover from failure
+        self.oauth_cmd('storage fs access set-recursive -f {} -p {} --acl {} --batch-size 2 --max-batches 2 '
+                       '--continue-on-failure --account-name {} --continuation {}', filesystem, dir0, acl1,
+                       storage_account, result['continuation'])
+
+
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
