@@ -175,7 +175,7 @@ def write_db(container, testdata):
 
     # Insert into t2
     sql = 'SELECT id FROM t1 WHERE repr = %s'
-    cursor.execute(sql, repr)
+    cursor.execute(sql, (repr))
     id0 = None
     for value in cursor:
         id0 = value
