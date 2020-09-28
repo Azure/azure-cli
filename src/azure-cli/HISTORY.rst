@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.12.1
+++++++
+
+**RDBMS**
+
+* Hotfix: `az postgres flexible-server create` : Update VnetName to exclude servername and update default region for MySQL
+
 2.12.0
 ++++++
 

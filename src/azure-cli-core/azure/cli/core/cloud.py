@@ -191,8 +191,8 @@ def _get_storage_sync_endpoint(cloud_name):
 
 def _get_synapse_analytics_endpoint(cloud_name):
     synapse_analytics_endpoint_mapper = {
-        'AzureCloud': 'dev.azuresynapse.net',
-        'AzureChinaCloud': 'dev.azuresynapse.azure.cn'
+        'AzureCloud': '.dev.azuresynapse.net',
+        'AzureChinaCloud': '.dev.azuresynapse.azure.cn'
     }
     return synapse_analytics_endpoint_mapper.get(cloud_name, None)
 
@@ -256,6 +256,11 @@ def _get_attestation_endpoint(cloud_name):
     return attestation_endpoint_mapper.get(cloud_name, None)
 
 
+def _get_mhsm_dns_suffix(cloud_name):
+    mhsm_dns_suffix_mapper = {c.name: c.suffixes.mhsm_dns for c in HARD_CODED_CLOUD_LIST}
+    return mhsm_dns_suffix_mapper.get(cloud_name, None)
+
+
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
     for cloud in arm_cloud_metadata_dict:
@@ -309,6 +314,7 @@ def _arm_to_cli_mapper(arm_dict):
             storage_endpoint=get_suffix('storage'),
             storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=_get_storage_sync_endpoint(arm_dict['name'])),
             keyvault_dns=get_suffix('keyVaultDns', add_dot=True),
+            mhsm_dns=get_suffix('mhsmDns', add_dot=True, fallback_value=_get_mhsm_dns_suffix(arm_dict['name'])),
             sql_server_hostname=sql_server_hostname,
             mysql_server_endpoint=get_suffix('mysqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mysql')),
             postgresql_server_endpoint=get_suffix('postgresqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.postgres')),
@@ -474,6 +480,8 @@ AZURE_GERMAN_CLOUD = Cloud(
         postgresql_server_endpoint='.postgres.database.cloudapi.de',
         mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
 
+HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+
 
 def get_known_clouds(refresh=False):
     if 'ARM_CLOUD_METADATA_URL' in os.environ:
@@ -506,7 +514,7 @@ def get_known_clouds(refresh=False):
         if not clouds:
             raise CLIError("No clouds available. Please ensure ARM_CLOUD_METADATA_URL is valid.")
         return clouds
-    return [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+    return HARD_CODED_CLOUD_LIST
 
 
 KNOWN_CLOUDS = get_known_clouds()
