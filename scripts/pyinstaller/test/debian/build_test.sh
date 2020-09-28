@@ -42,6 +42,7 @@ rm -f ${WORKDIR}/src/azure-cli/azure/__init__.py ${WORKDIR}/src/azure-cli/azure/
 pip install --no-deps -e ./src/azure-cli-telemetry
 pip install --no-deps -e ./src/azure-cli-core
 pip install --no-deps -e ./src/azure-cli
+python ./scripts/pyinstaller/test/add_pip_main.py
 python ./scripts/pyinstaller/test/update_spec.py
 python ./scripts/pyinstaller/test/add_run_tests_command.py
 python ./scripts/pyinstaller/test/update_core_init_command_modules.py
