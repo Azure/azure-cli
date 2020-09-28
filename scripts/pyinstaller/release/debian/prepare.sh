@@ -105,6 +105,7 @@ ${TAB}dh \$@ --sourcedirectory $source_dir
 override_dh_install:
 ${TAB}mkdir -p debian/azure-cli/opt/az
 ${TAB}cp -a dist/az/* debian/azure-cli/opt/az
+${TAB}cp -a dist/azpip/* debian/azure-cli/opt/az
 ${TAB}mkdir -p debian/azure-cli/etc/bash_completion.d/
 ${TAB}cat ${completion_script} > debian/azure-cli/etc/bash_completion.d/azure-cli
 

@@ -17,6 +17,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages
 apt-get update
+apt install -y apt-transport-https git gcc
 apt install -y software-properties-common
 add-apt-repository -y ppa:deadsnakes/ppa
 apt-get update
@@ -26,14 +27,22 @@ apt-get install -y python3.7 python3.7-dev python3.7-venv
 cd $WORKDIR
 python3.7 -m venv env
 source ./env/bin/activate
+
+# prepare environment for pyinstaller
 pip install pyinstaller==3.5
 pip install --upgrade "setuptools<45.0.0"
 rm -f ${WORKDIR}/src/azure-cli/azure/__init__.py ${WORKDIR}/src/azure-cli/azure/cli/__init__.py ${WORKDIR}/src/azure-cli-core/azure/__init__.py ${WORKDIR}/src/azure-cli-core/azure/cli/__init__.py ${WORKDIR}/src/azure-cli-telemetry/azure/__init__.py ${WORKDIR}/src/azure-cli-telemetry/azure/cli/__init__.py
 pip install --no-deps -e ./src/azure-cli-telemetry
 pip install --no-deps -e ./src/azure-cli-core
 pip install --no-deps -e ./src/azure-cli
+python ./scripts/pyinstaller/patch/add_pip_main.py
+python ./scripts/pyinstaller/patch/update_spec.py
+python ./scripts/pyinstaller/patch/add_run_tests_command.py
+python ./scripts/pyinstaller/patch/update_core_init_command_modules.py
 pip install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
+
 pyinstaller ${WORKDIR}/az.spec
+deactivate
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian

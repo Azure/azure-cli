@@ -3,11 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import subprocess
+SPEC_PATH = 'az.spec'
 
-BENCHMARK_COMMANDS = [
-    'az version',
-    'az -h',
-    'az vm -h',
-    'az network -h',
-]
+with open(SPEC_PATH, 'r') as fp:
+    content = fp.read()
+with open(SPEC_PATH, 'w') as fp:
+    fp.write(content.replace('./scripts/pyinstaller/hooks/az/release/', './scripts/pyinstaller/hooks/az/test/'))
