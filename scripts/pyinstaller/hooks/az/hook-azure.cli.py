@@ -12,6 +12,7 @@ _datas = collect_data_files('pip')
 
 _hiddenimports = []
 _hiddenimports.extend(collect_submodules('humanfriendly'))
+_hiddenimports.extend(collect_submodules('pip'))
 _hiddenimports.extend(collect_submodules('distutils'))
 _hiddenimports.append('fileinput')
 
