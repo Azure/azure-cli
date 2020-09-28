@@ -22,7 +22,8 @@ from ._actions import (
 from ._constants import (
     SIGNALR_RESOURCE_TYPE,
     SIGNALR_KEY_TYPE,
-    SIGNALR_SERVICE_MODE_TYPE
+    SIGNALR_SERVICE_MODE_TYPE,
+    SIGNALR_DIAGNOSTIC_LOGS_SWITCH
 )
 
 
@@ -44,12 +45,14 @@ def load_arguments(self, _):
         c.argument('sku', help='The sku name of the signalr service. E.g. Standard_S1')
         c.argument('unit_count', help='The number of signalr service unit count', type=int)
         c.argument('service_mode', help='The service mode which signalr service will be working on', choices=SIGNALR_SERVICE_MODE_TYPE)
+        c.argument('enable_messaging_logs', help='The switch for messaging logs which signalr service will generate or not', choices=SIGNALR_DIAGNOSTIC_LOGS_SWITCH)
         c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     with self.argument_context('signalr update') as c:
         c.argument('sku', help='The sku name of the signalr service. E.g. Standard_S1')
         c.argument('unit_count', help='The number of signalr service unit count', type=int)
         c.argument('service_mode', help='The service mode which signalr service will be working on', choices=SIGNALR_SERVICE_MODE_TYPE)
+        c.argument('enable_messaging_logs', help='The switch for messaging logs which signalr service will generate or not', choices=SIGNALR_DIAGNOSTIC_LOGS_SWITCH)
         c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     for scope in ['signalr create', 'signalr update']:
