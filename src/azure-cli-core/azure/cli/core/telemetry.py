@@ -453,7 +453,11 @@ def _get_session_id():
     # of these sub-processes will be very close, usually in several milliseconds. We use 1 second as the threshold here.
     # When the difference of create time between current process and its parent process is larger than the threshold,
     # the parent process will be viewed as the terminal process.
-    import psutil
+    try:
+        # psutil is not available on cygwin
+        import psutil
+    except ImportError:
+        return ""
     time_threshold = 1
     process = psutil.Process()
     while process and process.ppid() and process.pid != process.ppid():
