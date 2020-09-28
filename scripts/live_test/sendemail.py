@@ -167,6 +167,7 @@ def write_db(container, testdata):
     date = terms[0]
     time = terms[1]
     data = (repr, repo, branch, commit, target, live, user, pass0, fail, rate, detail, container_url, date, time)
+    print(sql)
     print(data)
     cursor.execute(sql, data)
 
@@ -182,7 +183,9 @@ def write_db(container, testdata):
     if id0:
         for module, passed, failed, rate in testdata.modules:
             sql = 'INSERT INTO t2 (module, pass, fail, rate, ref_id) VALUES (%s, %s, %s, %s, %s)'
-            data = (module, passed, failed, rate, repr)
+            data = (module, passed, failed, rate, id0)
+            print(sql)
+            print(data)
             cursor.execute(sql, data)
         cnx.commit()
 
