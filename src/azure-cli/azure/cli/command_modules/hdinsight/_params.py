@@ -75,7 +75,7 @@ def load_arguments(self, _):
                         'creating cluster with Enterprise Security Package will not not allowed.')
         c.argument('idbroker', arg_group='Cluster', action='store_true',
                    help='Specify to create ESP cluster with HDInsight ID Broker. If omitted, '
-                        'creating ESP cluster with HDInsight ID broker will not not allowed.')
+                        'creating ESP cluster with HDInsight ID Broker will not not allowed.')
         c.argument('minimal_tls_version', arg_type=get_enum_type(['1.0', '1.1', '1.2']),
                    arg_group='Cluster', help='The minimal supported TLS version.')
 
