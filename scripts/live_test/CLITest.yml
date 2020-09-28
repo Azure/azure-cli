@@ -181,9 +181,10 @@ jobs:
 
         python -m venv env
         source env/bin/activate
-        pip install azdev
+        # pip install azdev
         # git clone https://github.com/Azure/azure-cli-dev-tools.git
-        # pip install -e azure-cli-dev-tools
+        git clone -b fix https://github.com/qwordy/azure-cli-dev-tools.git
+        pip install -e azure-cli-dev-tools
         pip install pytest-json-report
         pip install pytest-html
         pip install pytest-rerunfailures
