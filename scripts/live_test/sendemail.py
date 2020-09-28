@@ -179,7 +179,7 @@ def write_db(container, testdata):
     cursor.execute(sql, (repr,))
     id0 = None
     for value in cursor:
-        id0 = value
+        id0 = value[0]
     if id0:
         for module, passed, failed, rate in testdata.modules:
             sql = 'INSERT INTO t2 (module, pass, fail, rate, ref_id) VALUES (%s, %s, %s, %s, %s)'
