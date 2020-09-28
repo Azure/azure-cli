@@ -10,4 +10,4 @@ pip install -r /mnt/src/azure-cli/requirements.py3.Darwin.txt
 
 pip list
 
-python $root/formula_generate.py -b use_template
+python $root/formula_generate.py

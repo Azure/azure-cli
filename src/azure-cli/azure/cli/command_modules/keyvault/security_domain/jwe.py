@@ -15,8 +15,8 @@ from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padd
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from knack.util import CLIError
 
-from .sp800_108 import KDF
-from .utils import Utils
+from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
+from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 
 
 class JWEHeader:  # pylint: disable=too-many-instance-attributes
