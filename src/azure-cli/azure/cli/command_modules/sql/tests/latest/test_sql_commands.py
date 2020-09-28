@@ -4736,3 +4736,36 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
 
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
+
+
+class SqlDbBackupStorageRedundancyScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='southeastasia')
+    @SqlServerPreparer(location='southeastasia')
+    @AllowLargeResponse()
+    def test_sql_db_backup_storage_redundancy(self, resource_group, resource_group_location, server):
+        database_name = "cliCreateTest"
+
+        # Create database
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --backup-redundancy {}'
+                 .format(resource_group, server, database_name, vcore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition)])
+
+        # Update database
+        self.cmd('sql db update -g {} --server {} --name {} --backup-redundancy'
+                 .format(resource_group, server, database_name, compute_model_serverless),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+
+        # Create database copy
+        database_name = "cliCopyTest"
+
+        # Create database secondary
+        database_name = "cliSecondaryTest"

@@ -65,7 +65,7 @@ from .custom import (
 from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
-    validate_managed_instance_backup_storage_redundancy,
+    validate_backup_storage_redundancy,
     validate_subnet
 )
 
@@ -221,7 +221,7 @@ backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
     help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
-    validator=validate_managed_instance_backup_storage_redundancy)
+    validator=validate_backup_storage_redundancy)
 
 grace_period_param_type = CLIArgumentType(
     help='Interval in hours before automatic failover is initiated '
@@ -325,6 +325,8 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
 
+    arg_ctx.argument('storage_account_type',
+                     arg_type=backup_storage_redundancy_param_type)
 
 def _configure_db_dw_create_params(
         arg_ctx,
