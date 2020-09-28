@@ -43,7 +43,8 @@ def set_access_control_recursive(client, acl, **kwargs):
     # the progress callback is invoked each time a batch is completed
     def progress_callback(acl_changes):
         # keep track of failed entries if there are any
-        failed_entries.append(acl_changes.batch_failures)
+        if acl_changes.batch_failures:
+            failed_entries = acl_changes.batch_failures
 
     result = client.set_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
     result = todict(result)

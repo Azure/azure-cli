@@ -153,32 +153,32 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('counters.filesSuccessful', 1))
 
         # Test continue on failure
-        result = self.oauth_cmd('storage fs access set-recursive -f {} -p "{}" --acl {} --batch-size 2 --max-batches 2 '
-                                '--continue-on-failure --account-name {}', filesystem, dir0, acl1, storage_account)\
-            .get_output_in_json()
-
-        self.assertIsNotNone(result['continuation'])
-        self.assertEqual(result['counters']['directoriesSuccessful'], 4)
-        self.assertEqual(result['counters']['failureCount'], 2)
-        self.assertEqual(result['counters']['filesSuccessful'], 4)
-
-        # fix failed entries and recover from failure
-        for item in result['failedEntries']:
-            self.oauth_cmd('storage fs file upload -p "{}" -f {} -s "{}" --account-name {} ', item, filesystem,
-                            local_file, storage_account)
-            self.oauth_cmd('storage fs access set-recursive -p "{}" -f {} --acl {} --account-name {} ', item,
-                           filesystem, acl1, storage_account)
-
-        self.oauth_cmd('storage fs access set-recursive -f {} -p "{}" --acl {} --batch-size 2 --max-batches 2 '
-                       '--continue-on-failure --account-name {} --continuation {}', filesystem, dir0, acl1,
-                       storage_account, result['continuation'])
-
         def reset_file_to_fail():
             # reset the file to make it failure in set acl resusive
             self.storage_cmd('storage fs file upload -p "{}" -f {} -s "{}" ', account_info, file1, filesystem,
                              local_file)
             self.storage_cmd('storage fs file upload -p "{}" -f {} -s "{}" ', account_info, file5, filesystem,
                              local_file, storage_account)
+        # set recursive
+        result = self.oauth_cmd('storage fs access set-recursive -f {} -p "{}" --acl {} --batch-size 2 --max-batches 2 '
+                                '--continue-on-failure --account-name {}', filesystem, dir0, acl1, storage_account)\
+            .get_output_in_json()
+
+        self.assertIsNotNone(result['continuation'])
+        self.assertEqual(result['counters']['directoriesSuccessful'], 3)
+        self.assertEqual(result['counters']['failureCount'], 1)
+        self.assertEqual(result['counters']['filesSuccessful'], 0)
+
+        # fix failed entries and recover from failure
+        for item in result['failedEntries']:
+            self.oauth_cmd('storage fs file upload -p "{}" -f {} -s "{}" --account-name {} ', item['name'], filesystem,
+                            local_file, storage_account)
+            self.oauth_cmd('storage fs access set-recursive -p "{}" -f {} --acl {} --account-name {} ', item['name'],
+                           filesystem, acl1, storage_account)
+
+        self.oauth_cmd('storage fs access set-recursive -f {} -p "{}" --acl {} --batch-size 2 --max-batches 2 '
+                       '--continue-on-failure --account-name {} --continuation {}', filesystem, dir0, acl1,
+                       storage_account, result['continuation'])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
