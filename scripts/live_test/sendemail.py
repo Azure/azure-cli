@@ -172,6 +172,20 @@ def write_db(container, testdata):
 
     # Make sure data is committed to the database
     cnx.commit()
+
+    # Insert into t2
+    sql = 'SELECT id FROM t1 WHERE repr = %s'
+    cursor.execute(sql, repr)
+    id0 = None
+    for value in cursor:
+        id0 = value
+    if id0:
+        for data in testdata.modules:
+            sql = 'INSERT INTO t2 (module, pass, fail, rate, ref_id) VALUES (%s, %s, %s, %s, %s)'
+            data.append(id0)
+            cursor.execute(sql, data)
+        cnx.commit()
+
     # Close
     cursor.close()
     cnx.close()
