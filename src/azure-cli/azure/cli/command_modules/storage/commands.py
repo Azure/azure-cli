@@ -718,6 +718,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=cf_adls_directory,
         resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
     )
+    custom_adls_directory_sdk = get_custom_sdk(custom_module='fs_directory',
+                                               client_factory=cf_adls_directory,
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
     adls_file_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_file_client#DataLakeFileClient.{}',
         client_factory=cf_adls_file,
@@ -773,11 +776,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata show', 'get_file_properties', exception_handler=show_exception_handler,
                                 transform=transform_metadata)
 
-    with self.command_group('storage fs access', adls_directory_sdk,
+    with self.command_group('storage fs access', adls_directory_sdk, custom_command_type=custom_adls_directory_sdk,
                             resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09') as g:
         from ._transformers import transform_fs_access_output
         g.storage_command_oauth('set', 'set_access_control')
         g.storage_command_oauth('show', 'get_access_control', transform=transform_fs_access_output)
-        g.storage_command_oauth('set-recursive', 'set_access_control_recursive', min_api='2020-02-10')
+        g.storage_custom_command_oauth('set-recursive', 'set_access_control_recursive', min_api='2020-02-10')
         g.storage_command_oauth('update-recursive', 'update_access_control_recursive', min_api='2020-02-10')
         g.storage_command_oauth('remove-recursive', 'remove_access_control_recursive', min_api='2020-02-10')

@@ -1575,6 +1575,3 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                          'sub-entities of the directory. Continuation token will only be returned when '
                          '--continue-on-failure is True in case of user errors. If not set the default value is False '
                          'for this.')
-            c.extra('progress_hook', validator=add_acl_progress_hook,
-                    help='Callback where the caller can track progress of the operation as well as collect paths that '
-                         'failed to change Access Control.')
