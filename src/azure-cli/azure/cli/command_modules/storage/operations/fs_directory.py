@@ -37,6 +37,21 @@ def get_directory_properties(client, timeout=None):
     return result
 
 
+def remove_access_control_recursive(client, acl, **kwargs):
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        # keep track of failed entries if there are any
+        if acl_changes.batch_failures:
+            failed_entries = acl_changes.batch_failures
+
+    result = client.remove_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
+    result = todict(result)
+    result['failedEntries'] = failed_entries
+    return result
+
+
 def set_access_control_recursive(client, acl, **kwargs):
     failed_entries = []
 
@@ -47,6 +62,21 @@ def set_access_control_recursive(client, acl, **kwargs):
             failed_entries = acl_changes.batch_failures
 
     result = client.set_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
+    result = todict(result)
+    result['failedEntries'] = failed_entries
+    return result
+
+
+def update_access_control_recursive(client, acl, **kwargs):
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        # keep track of failed entries if there are any
+        if acl_changes.batch_failures:
+            failed_entries = acl_changes.batch_failures
+
+    result = client.update_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
     result = todict(result)
     result['failedEntries'] = failed_entries
     return result

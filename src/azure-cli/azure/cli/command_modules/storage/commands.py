@@ -782,5 +782,5 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('set', 'set_access_control')
         g.storage_command_oauth('show', 'get_access_control', transform=transform_fs_access_output)
         g.storage_custom_command_oauth('set-recursive', 'set_access_control_recursive', min_api='2020-02-10')
-        g.storage_command_oauth('update-recursive', 'update_access_control_recursive', min_api='2020-02-10')
-        g.storage_command_oauth('remove-recursive', 'remove_access_control_recursive', min_api='2020-02-10')
+        g.storage_custom_command_oauth('update-recursive', 'update_access_control_recursive', min_api='2020-02-10')
+        g.storage_custom_command_oauth('remove-recursive', 'remove_access_control_recursive', min_api='2020-02-10')

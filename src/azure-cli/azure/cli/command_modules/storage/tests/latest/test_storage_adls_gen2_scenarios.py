@@ -171,12 +171,58 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         # fix failed entries and recover from failure
         for item in result['failedEntries']:
-            self.oauth_cmd('storage fs file upload -p "{}" -f {} -s "{}" --account-name {} ', item['name'], filesystem,
-                            local_file, storage_account)
+            self.oauth_cmd('storage fs file upload -p "{}" -f {} -s "{}" --account-name {} ', item['name'],
+                           filesystem, local_file, storage_account)
             self.oauth_cmd('storage fs access set-recursive -p "{}" -f {} --acl {} --account-name {} ', item['name'],
                            filesystem, acl1, storage_account)
 
         self.oauth_cmd('storage fs access set-recursive -f {} -p "{}" --acl {} --batch-size 2 --max-batches 2 '
+                       '--continue-on-failure --account-name {} --continuation {}', filesystem, dir0, acl1,
+                       storage_account, result['continuation'])
+
+        # update recursive
+        reset_file_to_fail()
+
+        result = self.oauth_cmd('storage fs access update-recursive -f {} -p "{}" --acl {} --batch-size 3 '
+                                '--continue-on-failure --account-name {}',
+                                filesystem, dir0, acl1, storage_account).get_output_in_json()
+
+        self.assertIsNotNone(result['continuation'])
+        self.assertEqual(result['counters']['directoriesSuccessful'], 3)
+        self.assertEqual(result['counters']['failureCount'], 1)
+        self.assertEqual(result['counters']['filesSuccessful'], 0)
+
+        # fix failed entries and recover from failure
+        for item in result['failedEntries']:
+            self.oauth_cmd('storage fs file upload -p "{}" -f {} -s "{}" --account-name {} --permissions rwxr-x--- ',
+                           item['name'], filesystem, local_file, storage_account)
+            self.oauth_cmd('storage fs access update-recursive -p "{}" -f {} --acl {} --account-name {} ', item['name'],
+                           filesystem, acl2, storage_account)
+
+        self.oauth_cmd('storage fs access update-recursive -f {} -p "{}" --acl {} --batch-size 3 '
+                       '--continue-on-failure --account-name {} --continuation {}', filesystem, dir0, acl2,
+                       storage_account, result['continuation'])
+
+        # remove recursive
+        reset_file_to_fail()
+
+        result = self.oauth_cmd('storage fs access remove-recursive -f {} -p "{}" --acl {} --batch-size 20 '
+                                '--continue-on-failure --account-name {} ', filesystem, dir0, removal_acl,
+                                storage_account).get_output_in_json()
+
+        self.assertIsNotNone(result['continuation'])
+        self.assertEqual(result['counters']['directoriesSuccessful'], 3)
+        self.assertEqual(result['counters']['failureCount'], 1)
+        self.assertEqual(result['counters']['filesSuccessful'], 0)
+
+        # fix failed entries and recover from failure
+        for item in result['failedEntries']:
+            self.oauth_cmd('storage fs file upload -p "{}" -f {} -s "{}" --account-name {} --permissions rwxr-x--- ',
+                           item['name'], filesystem, local_file, storage_account)
+            self.oauth_cmd('storage fs access remove-recursive -p "{}" -f {} --acl {} --account-name {} ', item['name'],
+                           filesystem, removal_acl, storage_account)
+
+        self.oauth_cmd('storage fs access remove-recursive -f {} -p "{}" --acl {} '
                        '--continue-on-failure --account-name {} --continuation {}', filesystem, dir0, acl1,
                        storage_account, result['continuation'])
 
