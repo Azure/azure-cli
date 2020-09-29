@@ -77,9 +77,8 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             az_error = ex
 
         elif isinstance(ex, JMESPathTypeError):
-            from azure.cli.core.azclierror import InvalidArgumentValueError
             error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
-            az_error = InvalidArgumentValueError(error_msg)
+            az_error = azclierror.InvalidArgumentValueError(error_msg)
             az_error.set_recommendation(QUERY_REFERENCE)
 
         elif isinstance(ex, SSLError):
@@ -93,12 +92,12 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             AzCLIErrorType = get_error_type_by_status_code(status_code)
             az_error = AzCLIErrorType(error_msg)
 
+        elif isinstance(ex, ValidationError):
+            az_error = azclierror.ValidationError(error_msg)
+
         # TODO: CLIError is too general, need to be retired
-        elif isinstance(ex, (CLIError, ValidationError)):
-            if is_resource_not_found_error(error_msg):
-                az_error = azclierror.ResourceNotFoundError(error_msg)
-            else:
-                az_error = azclierror.ValidationError(error_msg)
+        elif isinstance(ex, CLIError):
+            az_error = azclierror.UnknownError(error_msg)
 
         # TODO: AzureError is too general, need confirmation
         elif isinstance(ex, AzureError):
@@ -196,7 +195,7 @@ def get_error_type_by_azure_error(ex):
     if isinstance(ex, (exceptions.ServiceResponseError, exceptions.ServiceResponseTimeoutError)):
         return azclierror.AzureResponseError
 
-    return azclierror.ClientRequestError
+    return azclierror.UnknownError
 
 
 def get_error_type_by_status_code(status_code):
@@ -221,13 +220,6 @@ def is_azure_connection_error(error_msg):
     if 'connection error' in error_msg \
             or 'connection broken' in error_msg \
             or 'connection aborted' in error_msg:
-        return True
-    return False
-
-
-def is_resource_not_found_error(error_msg):
-    error_msg = error_msg.lower()
-    if 'could not be found' in error_msg:
         return True
     return False
 

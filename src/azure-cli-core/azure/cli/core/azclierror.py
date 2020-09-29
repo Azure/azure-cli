@@ -12,6 +12,11 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 # pylint: disable=unnecessary-pass
 
+# Error types in AzureCLI are from different sources, and there are many general error types like CLIError, AzureError.
+# Besides, many error types with different names are actually showing the same kind of error.
+# For example, CloudError, CLIError and ValidtionError all could be a resource-not-found error.
+# Therefore, here we define the new error classes to map and categorize all of the error types from different sources.
+
 
 # region: Base Layer
 # Base class for all the AzureCLI defined error classes.
@@ -19,12 +24,18 @@ logger = get_logger(__name__)
 class AzCLIError(CLIError):
     """ Base class for all the AzureCLI defined error classes. """
 
-    def __init__(self, error_msg):
+    def __init__(self, error_msg, recommendation=None):
         # error message
         self.error_msg = error_msg
+
         # set recommendations to fix the error if the message is not actionable,
         # they will be printed to users after the error message, one recommendation per line
         self.recommendations = []
+        if isinstance(recommendation, str):
+            self.recommendations = [recommendation]
+        elif isinstance(recommendation, list):
+            self.recommendations = recommendation
+
         # exception trace for the error
         self.exception_trace = None
         super().__init__(error_msg)
@@ -55,7 +66,7 @@ class AzCLIError(CLIError):
 
 
 # region: Second Layer
-# Main categories of the AzureCLI error types, used for Telemetry alalysis
+# Main categories of the AzureCLI error types, used for Telemetry analysis
 # DO NOT raise the error classes here directly in your codes.
 class UserFault(AzCLIError):
     """ Users should be responsible for the errors. """
@@ -72,7 +83,7 @@ class ServiceError(AzCLIError):
 
 
 class ClientError(AzCLIError):
-    """ Azure CLI should be responsible for the errors. """
+    """ AzureCLI should be responsible for the errors. """
     def send_telemetry(self):
         super().send_telemetry()
         telemetry.set_failure(self.error_msg)
@@ -84,6 +95,7 @@ class ClientError(AzCLIError):
 # region: Third Layer
 # Sub-categories of the AzureCLI error types, shown to users
 # Raise the error classes here in your codes
+# Avoid using fallback error classes unless you can not find a proper one
 # Command related error types
 class CommandNotFoundError(UserFault):
     """ Command is misspelled or not recognized by AzureCLI. """
@@ -101,7 +113,7 @@ class RequiredArgumentMissingError(UserFault):
     pass
 
 
-class ConflictArgumentError(UserFault):
+class MutuallyExclusiveArgumentError(UserFault):
     """ Arguments can not be specfied together. """
     pass
 
@@ -113,8 +125,8 @@ class InvalidArgumentValueError(UserFault):
 
 class ArgumentParseError(UserFault):
     """ Fallback of the argument parsing related errors.
-    Use this error only when the argument related errors
-    can not be classified into the above error types. """
+    Avoid using this class unless the error can not be classified
+    into the above Argument related error types. """
     pass
 
 
@@ -144,8 +156,8 @@ class AzureInternalError(ServiceError):
 
 class AzureResponseError(UserFault):
     """ Fallback of the response related errors.
-    Use this error only when the response related errors
-    can not be classified into the above error types. """
+    Avoid using this class unless the error can not be classified
+    into the above Response related error types. """
 
 
 # Request related error types
@@ -155,22 +167,23 @@ class AzureConnectionError(UserFault):
 
 
 class ClientRequestError(UserFault):
-    """ Fallback of the request related errors.
-    Error occurs while attempting to make a request to the service. No request is sent.
-    """
+    """ Fallback of the request related errors. Error occurs while attempting
+    to make a request to the service. No request is sent.
+    Avoid using this class unless the error can not be classified
+    into the above Request related errors types. """
 
 
 # Validation related error types
 class ValidationError(UserFault):
     """ Fallback of the errors in validation functions.
-    Use this error in validation functions only when the error can not be
-    classified into the Argument, Request and Response related error types. """
+    Avoid using this class unless the error can not be classified into
+    the Argument, Request and Response related error types above. """
     pass
 
 
 # CLI internal error type
 class CLIInternalError(ClientError):
-    """ Azure CLI internal error """
+    """ AzureCLI internal error """
     pass
 
 
@@ -178,4 +191,21 @@ class CLIInternalError(ClientError):
 class ManualInterrupt(UserFault):
     """ Keyboard interrupt. """
     pass
+
+
+# Unknow error type
+class UnknownError(UserFault):
+    """ Reserved for the errors which can not be categorized into the error types above.
+    Usually for the very general error type like CLIError, AzureError.
+    Error type info will not printed to users for this class. """
+    def print_error(self):
+        from azure.cli.core.azlogging import CommandLoggerContext
+        with CommandLoggerContext(logger):
+            # print only error message (no error type)
+            logger.error(self.error_msg)
+            # print recommendations to action
+            if self.recommendations:
+                for recommendation in self.recommendations:
+                    print(recommendation, file=sys.stderr)
+
 # endregion
