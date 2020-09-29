@@ -816,8 +816,8 @@ def _db_dw_create(
                        database_name=dest_db.database_name,
                        parameters=kwargs)
 
-def _should_show_backup_storage_redundancy_warnings(kwargs):
-    if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
+def _should_show_backup_storage_redundancy_warnings(yes_confirmation, target_db_location):
+    if not yes_confirmation and target_db_location.lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
         return true
 
 def _confirm_backup_storage_redundancy_specify_geo_warning(storage_account_type):
@@ -871,7 +871,8 @@ def db_create(
     '''
 
     # Check backup storage redundancy configurations
-    if _should_show_backup_storage_redundancy_warnings(kwargs):
+    location = _get_server_location(cli_ctx, server_name, resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(kwargs['yes'], location):
         if not _confirm_backup_storage_redundancy_take_geo_warning(kwargs['storage_account_type']):
             return
 
@@ -932,7 +933,8 @@ def db_copy(
         kwargs)
 
     # Check backup storage redundancy configurations
-    if _should_show_backup_storage_redundancy_warnings(kwargs):
+    location = _get_server_location(cli_ctx, dest_server_name, dest_resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(kwargs['yes'], location):
         if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
             return
 
@@ -979,7 +981,8 @@ def db_create_replica(
         kwargs)
 
     # Check backup storage redundancy configurations
-    if _should_show_backup_storage_redundancy_warnings(kwargs):
+    location = _get_server_location(cli_ctx, partner_server_name, partner_resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(kwargs['yes'], location):
         if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
             return
 
@@ -1051,6 +1054,7 @@ def db_restore(
     kwargs['create_mode'] = CreateMode.restore.value if is_deleted else CreateMode.point_in_time_restore.value
 
     # Check backup storage redundancy configurations
+    location = _get_server_location(cli_ctx, server_name, resource_group_name)
     if _should_show_backup_storage_redundancy_warnings(kwargs):
         if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
             return
@@ -1343,8 +1347,9 @@ def db_update(
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
 
-    # Check for backup storage redundancy configuration
-    if _should_show_backup_storage_redundancy_warnings(kwargs):
+    # Check backup storage redundancy configuration
+    location = _get_server_location(cli_ctx, server_name, resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(yes, location):
         if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
             return
 
@@ -1858,7 +1863,7 @@ def restore_long_term_retention_backup(
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
 
     # Check backup storage redundancy configurations
-    if _should_show_backup_storage_redundancy_warnings(kwargs):
+    if _should_show_backup_storage_redundancy_warnings(kwargs['yes'], kwargs['location']):
         if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
             return
 
