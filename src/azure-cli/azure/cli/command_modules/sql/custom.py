@@ -816,6 +816,47 @@ def _db_dw_create(
                        database_name=dest_db.database_name,
                        parameters=kwargs)
 
+def _should_show_backup_storage_redundancy_warnings(kwargs):
+    if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
+        return true
+
+def _confirm_backup_storage_redundancy_specify_geo_warning(storage_account_type):
+    if storage_account_type == 'GRS':
+        confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
+            Note that database backups will be geo-replicated to the paired region.
+            To learn more about Azure Paired Regions visit https://docs.microsoft.com/en-us/azure/best-practices-availability-paired-regions.
+            Do you want to proceed?""")
+        if not confirmation:
+            return false
+    return true
+
+def _confirm_backup_storage_redundancy_take_geo_warning(storage_account_type):
+    if storage_account_type == 'GRS':
+        return _confirm_backup_storage_redundancy_specify_geo_warning(storage_account_type)
+
+    if not kwargs['storage_account_type']:
+        confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
+        which will default to geo-redundant storage. Note that database backups will be geo-replicated
+        to the paired region. To learn more about Azure Paired Regions visit https://docs.microsoft.com/en-us/azure/best-practices-availability-paired-regions.
+        Do you want to proceed?""")
+        if not confirmation:
+            return false
+
+    return true
+
+def _confirm_backup_storage_redundancy_take_source_warning(kwargs):
+    if storage_account_type == 'GRS':
+        return _confirm_backup_storage_redundancy_specify_geo_warning(storage_account_type)
+
+    if not kwargs['storage_account_type']:
+        confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
+        which will default to source's backup storage redundancy. To learn more about Azure Paired Regions visit https://docs.microsoft.com/en-us/azure/best-practices-availability-paired-regions.
+        Do you want to proceed?""")
+        if not confirmation:
+            return false
+
+    return true
+
 
 def db_create(
         cmd,
@@ -828,6 +869,11 @@ def db_create(
     '''
     Creates a DB (with 'Default' create mode.)
     '''
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs):
+        if not _confirm_backup_storage_redundancy_take_geo_warning(kwargs['storage_account_type']):
+            return
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -885,6 +931,11 @@ def db_copy(
         resource_group_name,
         kwargs)
 
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs):
+        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
+            return
+
     return _db_dw_create(
         cmd.cli_ctx,
         client,
@@ -926,6 +977,11 @@ def db_create_replica(
         server_name,
         resource_group_name,
         kwargs)
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs):
+        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
+            return
 
     # Replica must have the same database name as the source db
     return _db_dw_create(
@@ -993,6 +1049,11 @@ def db_restore(
     kwargs['restore_point_in_time'] = restore_point_in_time
     kwargs['source_database_deletion_date'] = source_database_deletion_date
     kwargs['create_mode'] = CreateMode.restore.value if is_deleted else CreateMode.point_in_time_restore.value
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs):
+        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
+            return
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -1271,7 +1332,9 @@ def db_update(
         read_replica_count=None,
         min_capacity=None,
         auto_pause_delay=None,
-        compute_model=None):
+        compute_model=None,
+        storage_account_type=None,
+        yes=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1279,6 +1342,11 @@ def db_update(
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
+
+    # Check for backup storage redundancy configuration
+    if _should_show_backup_storage_redundancy_warnings(kwargs):
+        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
+            return
 
     #####
     # Set sku-related properties
@@ -1788,6 +1856,11 @@ def restore_long_term_retention_backup(
 
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs):
+        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
+            return
 
     return client.create_or_update(
         database_name=target_database_name,

@@ -4744,28 +4744,67 @@ class SqlDbBackupStorageRedundancyScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_backup_storage_redundancy(self, resource_group, resource_group_location, server):
         database_name = "cliCreateTest"
+        backup_storage_redundancy = "Local"
+        backup_storage_redundancy_internal = "LRS"
 
         # Create database
-        self.cmd('sql db create -g {} --server {} --name {} --edition {} --backup-redundancy {}'
-                 .format(resource_group, server, database_name, vcore_edition),
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --backup-storage-redundancy {}'
+                 .format(resource_group, server, database_name, backup_storage_redundancy),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('edition', vcore_edition),
-                     JMESPathCheck('sku.tier', vcore_edition)])
+                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal)]).get_output_in_json()
 
         # Update database
-        self.cmd('sql db update -g {} --server {} --name {} --backup-redundancy'
-                 .format(resource_group, server, database_name, compute_model_serverless),
+        backup_storage_redundancy = "Zone"
+        self.cmd('sql db update -g {} --server {} --name {} --bsr {}'
+                 .format(resource_group, server, database_name, backup_storage_redundancy),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('edition', vcore_edition),
-                     JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+                     JMESPathCheck('name', database_name)]).get_output_in_json()
 
         # Create database copy
         database_name = "cliCopyTest"
+        backup_storage_redundancy = "Local"
+
+        self.cmd('sql db copy -g {} --server {} --name {} --dest-name {} --bsr {}'
+                 .format(resource_group, server, database_name, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal]).get_output_in_json()
 
         # Create database secondary
         database_name = "cliSecondaryTest"
+        backup_storage_redundancy = "Zone"
+        backup_storage_redundancy_internal = "ZRS"
+
+        self.cmd('sql db replica create -g {} --server {} --name {} --dest-name {} --bsr {}'
+                 .format(resource_group, server, database_name, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal]).get_output_in_json()
+
+        # Restore database secondary
+        database_name = "cliRestorePitr"
+        backup_storage_redundancy = "Zone"
+        backup_storage_redundancy_internal = "ZRS"
+
+        # Create database and wait for first backup to exist
+        _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+
+        # Restore to standalone db
+        self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
+                 ' --service-objective {} --edition {}'
+                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                         restore_standalone_database_name, restore_service_objective,
+                         restore_edition),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', restore_standalone_database_name),
+                     JMESPathCheck('requestedServiceObjectiveName',
+                                   restore_service_objective),
+                     JMESPathCheck('status', 'Online')])
+
+        # Restore deleted database

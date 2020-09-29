@@ -416,7 +416,9 @@ def _configure_db_dw_create_params(
             'min_capacity',
             'compute_model',
             'read_scale',
-            'read_replica_count'
+            'read_replica_count',
+            'storage_account_type',
+            'yes'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -540,6 +542,15 @@ def load_arguments(self, _):
     with self.argument_context('sql db create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type,
+                   options_list=['--backup-storage-redundancy', '--bsr'],
+                   help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
+
     with self.argument_context('sql db copy') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.copy)
 
@@ -555,6 +566,15 @@ def load_arguments(self, _):
                    options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type,
+                   options_list=['--backup-storage-redundancy', '--bsr'],
+                   help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -583,6 +603,15 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified. ' +
                    time_format_help)
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type,
+                   options_list=['--backup-storage-redundancy', '--bsr'],
+                   help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -636,6 +665,15 @@ def load_arguments(self, _):
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type,
+                   options_list=['--backup-storage-redundancy', '--bsr'],
+                   help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -755,6 +793,15 @@ def load_arguments(self, _):
                    options_list=['--partner-server'],
                    help='Name of the server to create the new replica in.')
 
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type,
+                   options_list=['--backup-storage-redundancy', '--bsr'],
+                   help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
+
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
                    help='Name of the database to fail over.')
@@ -776,6 +823,15 @@ def load_arguments(self, _):
                    options_list=['--partner-resource-group'],
                    help='Name of the resource group that the other replica is in. If unspecified,'
                    ' defaults to the first database\'s resource group.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type,
+                   options_list=['--backup-storage-redundancy', '--bsr'],
+                   help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     #####
     #           sql db audit-policy & threat-policy
@@ -952,6 +1008,15 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type,
+                   options_list=['--backup-storage-redundancy', '--bsr'],
+                   help='Backup storage redundancy used to store backups')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     ###############################################
     #                sql dw                       #
