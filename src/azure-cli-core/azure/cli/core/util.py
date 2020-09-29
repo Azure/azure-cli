@@ -95,23 +95,22 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         elif isinstance(ex, ValidationError):
             az_error = azclierror.ValidationError(error_msg)
 
-        # TODO: CLIError is too general, need to be retired
         elif isinstance(ex, CLIError):
+            # TODO: Fine-grained analysis here for Unknown error
             az_error = azclierror.UnknownError(error_msg)
 
-        # TODO: AzureError is too general, need confirmation
         elif isinstance(ex, AzureError):
             if extract_common_error_message(ex):
                 error_msg = extract_common_error_message(ex)
             AzCLIErrorType = get_error_type_by_azure_error(ex)
             az_error = AzCLIErrorType(error_msg)
 
-        # TODO: AzureException is too general, need confirmation
         elif isinstance(ex, AzureException):
             if is_azure_connection_error(error_msg):
                 az_error = azclierror.AzureConnectionError(error_msg)
             else:
-                az_error = azclierror.ClientRequestError(error_msg)
+                # TODO: Fine-grained analysis here for Unknown error
+                az_error = azclierror.UnknownError(error_msg)
 
         elif isinstance(ex, ClientRequestError):
             if is_azure_connection_error(error_msg):
@@ -120,11 +119,9 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
                 az_error = azclierror.ClientRequestError(error_msg)
 
         elif isinstance(ex, HttpOperationError):
-            if extract_http_operation_error_message(ex):
-                error_msg = extract_http_operation_error_message(ex)
-            # by HttpOperationError definition, the message should be with the
-            # format: '({code}) {message}' if there is a status code
-            status_code = ex.__str__().split(')')[0].split('(')[-1]
+            message, status_code = extract_http_operation_error(ex)
+            if message:
+                error_msg = message
             AzCLIErrorType = get_error_type_by_status_code(status_code)
             az_error = AzCLIErrorType(error_msg)
 
@@ -158,8 +155,9 @@ def extract_common_error_message(ex):
     return error_msg
 
 
-def extract_http_operation_error_message(ex):
+def extract_http_operation_error(ex):
     error_msg = None
+    status_code = 'Unknown Code'
     try:
         response = json.loads(ex.response.text)
         if isinstance(response, str):
@@ -169,14 +167,15 @@ def extract_http_operation_error_message(ex):
         # ARM should use ODATA v4. So should try this first.
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
-            code = "{} - ".format(error.get('code', 'Unknown Code'))
+            status_code = error.get('code', 'Unknown Code')
+            code_str = "{} - ".format(status_code)
             message = error.get('message', ex)
-            error_msg = "code: {}, {}".format(code, message)
+            error_msg = "code: {}, {}".format(code_str, message)
         else:
             error_msg = error
     except (ValueError, KeyError):
         pass
-    return error_msg
+    return error_msg, status_code
 
 
 def get_error_type_by_azure_error(ex):
