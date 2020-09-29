@@ -17,31 +17,23 @@ BENCHMARK_COMMANDS = [
 ]
 
 
-def parse_real_cost(output):
-    cost = None
-    for line in output.splitlines():
-        if 'real' in line:
-            start_index = line.index('0m') + 2
-            end_index = line.index('s', start_index)
-            cost_str = line[start_index:end_index]
-            cost = float(cost_str)
-            break
-    return cost
-
-
 class CommandCost(object):
     def __init__(self, command):
         self.command = command
-        self.released_command = 'time {}'.format(command).split()
-        self.pyinstaller_command = 'time /opt/paz/{}'.format(command).split()
+        self.released_command = '{}'.format(command).split()
+        self.pyinstaller_command = '/opt/paz/{}'.format(command).split()
         self.costs = []
 
     def run(self):
+        released_start_time = time.time()
         released_output = check_output(self.released_command, shell=platform.system() == 'Windows')
-        released_cost = parse_real_cost(released_output)
+        released_end_time = time.time()
+        released_cost = released_end_time - released_start_time
 
+        pyinstaller_start_time = time.time()
         pyinstaller_output = check_output(self.pyinstaller_command, shell=platform.system() == 'Windows')
-        pyinstaller_cost = parse_real_cost(pyinstaller_output)
+        pyinstaller_end_time = time.time()
+        pyinstaller_cost = pyinstaller_start_time - pyinstaller_end_time
         self.costs.append((released_cost, pyinstaller_cost))
     
     def avg(self):
