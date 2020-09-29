@@ -72,10 +72,10 @@ def container_rm_exists(client, resource_group_name, account_name, container_nam
         container = client.get(resource_group_name=resource_group_name,
                                account_name=account_name, container_name=container_name)
         return container is not None
-    except CloudError as ce:
-        if ce.status_code == 404:
+    except CloudError as err:
+        if err.status_code == 404:
             return False
-        raise ce
+        raise err
 
 
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,

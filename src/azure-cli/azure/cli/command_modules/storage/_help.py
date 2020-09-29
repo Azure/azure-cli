@@ -1015,7 +1015,9 @@ type: command
 short-summary: Create a new container under the specified storage account.
 examples:
   - name: Create a new container under the specified storage account.
-    text: az storage container-rm create --storage-account myAccount --name myContainer
+    text: az storage container-rm create --storage-account myaccount --name mycontainer
+  - name: Create a new container with metadata and public-access as blob under the specified storage account(account id).
+    text: az storage container-rm create --storage-account myaccountid --name mycontainer --public-access blob --metada key1=value1 key2=value2
 """
 
 helps['storage container-rm delete'] = """
@@ -1024,14 +1026,22 @@ short-summary: Delete the specified container under its account.
 examples:
   - name: Delete the specified container under its account.
     text: az storage container-rm delete --storage-account myAccount --name myContainer
+  - name: Delete the specified container under its account(account id).
+    text: az storage container-rm delete --storage-account myaccountid --name mycontainer
+  - name: Delete the specified container by resource id.
+    test: az storage container-rm delete --ids mycontainerid
 """
 
 helps['storage container-rm exists'] = """
 type: command
 short-summary: Check for the existence of a container.
 examples:
-  - name: Check for the existence of a container.
-    text: az storage container-rm exists --storage-account myAccount --name myContainer
+  - name: Check for the existence of a container under the specified storage account.
+    text: az storage container-rm exists --storage-account myaccount --name mycontainer
+  - name: Check for the existence of a container under the specified storage account(account id).
+    text: az storage container-rm exists --storage-account myaccountid --name mycontainer
+  - name: Check for the existence of a container by resource id.
+    text: az storage container-rm exists --ids mycontainerid
 """
 
 helps['storage container-rm list'] = """
@@ -1039,23 +1049,35 @@ type: command
 short-summary: List all containers under the specified storage account.
 examples:
   - name: List all containers under the specified storage account.
-    text: az storage container-rm list --storage-account myAccount
+    text: az storage container-rm list --storage-account myaccount
+  - name: List all containers under the specified storage account(account id).
+    text: az storage container-rm list --storage-account myaccountid
+  - name: List all containers under the specified storage account, including deleted ones.
+    text: az storage container-rm list --storage-account myaccount --include-deleted
 """
 
 helps['storage container-rm show'] = """
 type: command
 short-summary: Show the properties for a specified container.
 examples:
-  - name: Show the properties for a specified container.
-    text: az storage container-rm show --storage-account myAccount --name myContainer
+  - name: Show the properties for a container under the specified storage account.
+    text: az storage container-rm show --storage-account myaccount --name mycontainer
+  - name: Show the properties for a container under the specified storage account(account id).
+    text: az storage container-rm show --storage-account myaccountid --name mycontainer
+  - name: Show the properties for a container by resource id.
+    text: az storage container-rm show --ids mycontainerid
 """
 
 helps['storage container-rm update'] = """
 type: command
 short-summary: Update the properties for a container.
 examples:
-  - name: Update the public access level to 'blob' for a specified container.
-    text: az storage container-rm update --storage-account myAccount --name myContainer --public-access blob
+  - name: Update the public access level to 'blob' for a container under the specified storage account.
+    text: az storage container-rm update --storage-account myaccount --name mycontainer --public-access blob
+  - name: Update the metadata for a container under the specified storage account(account id).
+    text: az storage container-rm update --storage-account myaccountid --name mycontainer --metadata newkey1=newvalue1 newkey2=newvalue2
+  - name: Update the default encryption scope for a container by resource id.
+    text: az storage container-rm update --ids mycontainerid --default-encryption-scope myencryptionscope
 """
 
 helps['storage container'] = """
