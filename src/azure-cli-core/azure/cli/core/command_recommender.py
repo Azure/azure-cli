@@ -118,9 +118,11 @@ class CommandRecommender():
                 },
                 headers=headers,
                 timeout=1)
+            telemetry.set_debug_info('AladdinResponseTime', response.elapsed.total_seconds())
+
         except RequestException as ex:
             logger.debug('Recommendation requests.get() exception: %s', ex)
-            telemetry.set_debug_info('AladdinRecommendationService', ex.__class__.__name__)
+            telemetry.set_debug_info('AladdinException', ex.__class__.__name__)
 
         recommendations = []
         if response and response.status_code == HTTPStatus.OK:
@@ -179,7 +181,6 @@ class CommandRecommender():
 
         return recommend_command
 
-
     def _set_recommended_command_to_telemetry(self, recommend_command):
         """Set the recommended command to Telemetry for analysis. """
 
@@ -187,7 +188,6 @@ class CommandRecommender():
             telemetry.set_debug_info('AladdinRecommendCommand', recommend_command)
         elif recommend_command:
             telemetry.set_debug_info('ExampleRecommendCommand', recommend_command)
-
 
     def _disable_aladdin_service(self):
         """Decide whether to disable aladdin request when a command fails.
