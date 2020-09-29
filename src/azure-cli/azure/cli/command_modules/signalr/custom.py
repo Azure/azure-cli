@@ -13,7 +13,7 @@ from azure.mgmt.signalr.models import (
 
 
 def signalr_create(client, signalr_name, resource_group_name,
-                   sku, unit_count=1, location=None, tags=None, service_mode='Default', enable_message_logs='False', allowed_origins=None, default_action="Allow"):
+                   sku, unit_count=1, location=None, tags=None, service_mode='Default', enable_message_logs=False, allowed_origins=None, default_action="Allow"):
     sku = ResourceSku(name=sku, capacity=unit_count)
     service_mode_feature = SignalRFeature(flag="ServiceMode", value=service_mode)
     enable_message_logs_feature = SignalRFeature(flag="EnableMessagingLogs", value=enable_message_logs)
