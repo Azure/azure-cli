@@ -246,7 +246,7 @@ def _user_agrees_to_telemetry(func):
 def start(mode=None):
     if mode:
         _session.mode = mode
-    _session.start_time = datetime.datetime.utcnow()
+    _session.start_time = datetime.datetime.now(datetime.timezone.utc)
 
 
 @decorators.suppress_all_exceptions()
@@ -266,7 +266,7 @@ def flush():
     from azure.cli.telemetry import save
 
     # flush out current information
-    _session.end_time = datetime.datetime.utcnow()
+    _session.end_time = datetime.datetime.now(datetime.timezone.utc)
     save(get_config_dir(), _session.generate_payload())
 
     # reset session fields, retaining correlation id and application
@@ -279,7 +279,7 @@ def conclude():
     from azure.cli.core._environment import get_config_dir
     from azure.cli.telemetry import save
 
-    _session.end_time = datetime.datetime.utcnow()
+    _session.end_time = datetime.datetime.now(datetime.timezone.utc)
     save(get_config_dir(), _session.generate_payload())
 
 
