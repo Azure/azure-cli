@@ -56,7 +56,7 @@ short-summary: Creates a SignalR Service.
 examples:
   - name: Create a SignalR Service with the Standard SKU and serverless mode and enable messaging logs.
     text: >
-        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless --enable-messaging-logs True
+        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless --enable-message-logs True
 """
 
 helps['signalr delete'] = """
@@ -133,7 +133,7 @@ examples:
         az signalr update -n MySignalR -g MyResourceGroup --service-mode Serverless
   - name: Update for enabling messaging logs in the service.
     text: >
-        az signalr update -n MySignalR -g MyResourceGroup --enable-messaging-logs True
+        az signalr update -n MySignalR -g MyResourceGroup --enable-message-logs True
 """
 
 helps['signalr upstream list'] = """
