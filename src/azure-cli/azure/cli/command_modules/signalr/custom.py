@@ -67,7 +67,7 @@ def signalr_update_custom(instance, sku=None, unit_count=1, tags=None, service_m
 
     if service_mode is not None:
         instance.features += [SignalRFeature(flag="ServiceMode", value=service_mode)]
-    
+
     if enable_messaging_logs is not None:
         instance.features += [SignalRFeature(flag="EnableMessagingLogs", value=enable_messaging_logs)]
 
