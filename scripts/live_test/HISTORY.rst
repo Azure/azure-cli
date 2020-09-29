@@ -6,6 +6,8 @@ Release History
 0.5.0
 ++++++
 * Update index.html design.
+* Add module data table.
+* Add retry for CLI commands.
 
 0.4.0
 ++++++

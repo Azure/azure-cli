@@ -99,8 +99,8 @@ def upload_files(container):
     print('Enter upload_files()')
 
     # Create container
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'
-    os.popen(cmd.format(container, ACCOUNT_KEY))
+    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'.format(container, ACCOUNT_KEY)
+    os.system(cmd)
 
     # Upload files
     for root, dirs, files in os.walk(ARTIFACT_DIR):
@@ -227,7 +227,7 @@ def send_email(container, testdata):
         data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
     if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
-    print(data)
+    # print(data)
 
     sendgrid_key = sys.argv[1]
     sg = SendGridAPIClient(sendgrid_key)

@@ -19,6 +19,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     :param container_url:
     :return:
     """
+    print('Enter generate()')
     data = []
     url = container_url + '?restype=container&comp=list'
     content = requests.get(url).content
@@ -46,9 +47,11 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     cmd = 'az storage blob upload -f index.html -c {} -n index.html --account-name clitestresultstac'.format(container)
     print('Running: ' + cmd)
     os.system(cmd)
+    print('Exit generate()')
 
 
 def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
+    print('Enter render()')
     content = """
     <!DOCTYPE html>
     <html>
@@ -139,6 +142,9 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     </body>
     </html>
     """
+
+    print(content)
+    print('Exit render()')
     return content
 
 
