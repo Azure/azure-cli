@@ -251,7 +251,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @SqlServerPreparer(location='eastus')
     def test_sql_firewall_mgmt(self, resource_group, resource_group_location, server):
         firewall_rule_1 = 'rule1'
         start_ip_address_1 = '0.0.0.0'
@@ -918,7 +918,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @SqlServerPreparer(location='eastus')
     def test_sql_server_connection_policy(self, resource_group, resource_group_location, server):
         # Show
         self.cmd('sql server conn-policy show -g {} -s {}'
@@ -1518,15 +1518,20 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
 
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
-                           parameter_name_for_location="resource_group_location_1")
+                           parameter_name_for_location="resource_group_location_1",
+                           location='eastus')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
-                           parameter_name_for_location="resource_group_location_2")
+                           parameter_name_for_location="resource_group_location_2",
+                           location='eastus')
     @SqlServerPreparer(parameter_name="server_name_1",
-                       resource_group_parameter_name="resource_group_1")
+                       resource_group_parameter_name="resource_group_1",
+                       location='eastus')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_1")
+                       resource_group_parameter_name="resource_group_1",
+                       location='eastus')
     @SqlServerPreparer(parameter_name="server_name_3",
-                       resource_group_parameter_name="resource_group_2")
+                       resource_group_parameter_name="resource_group_2",
+                       location='eastus')
     def test_sql_server_dns_alias_mgmt(self,
                                        resource_group_1, resource_group_location_1,
                                        resource_group_2, resource_group_location_2,
@@ -2403,12 +2408,12 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
 
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westcentralus')
-    @SqlServerPreparer(location='westcentralus')
-    @StorageAccountPreparer(location='westcentralus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
+    @StorageAccountPreparer(location='eastus')
     @AllowLargeResponse()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'westcentralus'
+        location_long_name = 'eastus'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -2626,7 +2631,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                 raise CliTestError("Encryption scan still ongoing: {}.".format(tdeactivity))
 
     @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @SqlServerPreparer(location='eastus')
     def test_sql_tde(self, resource_group, server):
         sn = server
         db_name = self.create_random_name("sqltdedb", 20)
@@ -2666,8 +2671,8 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, sn, db_name),
                  checks=[JMESPathCheck('status', 'Enabled')])
 
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_tdebyok(self, resource_group, server):
         resource_prefix = 'sqltdebyok'
 
@@ -2862,8 +2867,8 @@ class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
 
 
 class SqlZoneResilienceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='centralus')
-    @SqlServerPreparer(location='centralus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_database(self, resource_group, resource_group_location, server):
         database_name = "createUnzonedUpdateToZonedDb"
@@ -2963,8 +2968,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='centralus')
-    @SqlServerPreparer(location='centralus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @AllowLargeResponse()
     def test_sql_zone_resilient_pool(self, resource_group, resource_group_location, server):
         pool_name = "createUnzonedUpdateToZonedPool"
@@ -4639,12 +4644,12 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
 
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        resource_group_location = "eastus2euap"
+        resource_group_location = "eastus"
         tls1_2 = "1.2"
         tls1_1 = "1.1"
 
