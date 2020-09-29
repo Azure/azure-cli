@@ -1029,7 +1029,7 @@ examples:
   - name: Delete the specified container under its account(account id).
     text: az storage container-rm delete --storage-account myaccountid --name mycontainer
   - name: Delete the specified container by resource id.
-    test: az storage container-rm delete --ids mycontainerid
+    text: az storage container-rm delete --ids mycontainerid
 """
 
 helps['storage container-rm exists'] = """
