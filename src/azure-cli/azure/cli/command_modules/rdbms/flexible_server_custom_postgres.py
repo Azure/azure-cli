@@ -70,7 +70,7 @@ def flexible_server_create(cmd, client,
 
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                                 server_name)
+                                                                                 server_name, 'postgres')
 
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):

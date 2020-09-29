@@ -32,10 +32,13 @@ def create_random_resource_name(prefix='azure', length=15):
     return prefix + ''.join(digits)
 
 
-def generate_missing_parameters(cmd, location, resource_group_name, server_name):
+def generate_missing_parameters(cmd, location, resource_group_name, server_name, db_engine):
     # if location is not passed as a parameter or is missing from local context
     if location is None:
-        location = DEFAULT_LOCATION
+        if db_engine == 'postgres':
+            location = DEFAULT_LOCATION_PG
+        else:
+            location = DEFAULT_LOCATION_MySQL
 
     # If resource group is there in local context, check for its existence.
     resource_group_exists = True
