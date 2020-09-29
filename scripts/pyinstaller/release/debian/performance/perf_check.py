@@ -17,7 +17,7 @@ BENCHMARK_COMMANDS = [
 ]
 
 
-def parse_real_cost(self, output):
+def parse_real_cost(output):
     cost = None
     for line in output.splitlines():
         if 'real' in line:
@@ -32,7 +32,7 @@ def parse_real_cost(self, output):
 class CommandCost(object):
     def __init__(self, command):
         self.command = command
-        self.released_command = 'time /opt/az/{}'.format(command).split()
+        self.released_command = 'time {}'.format(command).split()
         self.pyinstaller_command = 'time /opt/paz/{}'.format(command).split()
         self.costs = []
 
