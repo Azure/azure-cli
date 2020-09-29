@@ -5,7 +5,6 @@
 
 # pylint: disable=unused-argument, line-too-long
 
-import json
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 import mysql.connector as mysql_connector
@@ -28,7 +27,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 
 
 # region create without args
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-statements
 def flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                            location=None, storage_mb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
@@ -306,10 +305,10 @@ def flexible_replica_create(cmd, client, resource_group_name, replica_name, serv
     if not is_valid_resource_id(server_name):
         if len(server_name.split('/')) == 1:
             server_name = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
-                                        resource_group=resource_group_name,
-                                        namespace=provider,
-                                        type='flexibleServers',
-                                        name=server_name)
+                                      resource_group=resource_group_name,
+                                      namespace=provider,
+                                      type='flexibleServers',
+                                      name=server_name)
         else:
             raise CLIError('The provided source-server {} is invalid.'.format(server_name))
 
@@ -319,20 +318,9 @@ def flexible_replica_create(cmd, client, resource_group_name, replica_name, serv
     except CloudError as e:
         raise CLIError('Unable to get source server: {}.'.format(str(e)))
 
-    # if location is None:
-    #     location = source_server_object.location
-
-    # if sku_name is None:
-    #     sku_name = source_server_object.sku.name
-    # if tier is None:
-    #     tier = source_server_object.sku.tier
     location = source_server_object.location
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
-
-    # validation
-    # sku_info = get_mysql_list_skus_info(cmd, location)
-    # mysql_arguments_validator(tier, sku_name, None, None, sku_info)
 
     from azure.mgmt.rdbms import mysql_flexibleservers
 
@@ -424,12 +412,14 @@ def flexible_server_connection_string(
                                                               database_name)
     }
 
+
 def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, administrator_login_password, database_name=None, mysql_query=None):
     host = '{}.mysql.database.azure.com'.format(server_name)
     cursor = None
     json_data = None
     if database_name is None:
         database_name = DEFAULT_DB_NAME
+        logger.warning("Connecting to %s database by default.", DEFAULT_DB_NAME)
 
     # Connect to mysql and get cursor to run sql commands
     try:
@@ -443,24 +433,24 @@ def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, admi
     if mysql_query is not None:
         try:
             cursor.execute(mysql_query)
-            logger.warning("Ran Database Query: '{0}'".format(mysql_query))
+            logger.warning("Ran Database Query: '%s'", mysql_query)
             result = cursor.fetchmany(30)  # limit to 30 rows of output for now
-            row_headers=[x[0] for x in cursor.description] # this will extract row headers
+            row_headers = [x[0] for x in cursor.description]  # this will extract row headers
 
-            # format the result for a clean display 
-            json_data=[]
+            # format the result for a clean display
+            json_data = []
             for rv in result:
-                json_data.append(dict(zip(row_headers,rv)))  
+                json_data.append(dict(zip(row_headers, rv)))
         except mysql_connector.errors.Error as e:
             raise CLIError("Unable to execute query '{0}' on MySQL Server: {1}".format(mysql_query, e))
-    
+
     if cursor is not None:
         try:
             cursor.close()
-            logger.warning("Closed the connection to {0}".format(host))
-        except Exception as e:
+            logger.warning("Closed the connection to %s", host)
+        except Exception:  # pylint: disable=broad-except
             logger.warning('Unable to close connection cursor.')
-      
+
     return json_data
 
 

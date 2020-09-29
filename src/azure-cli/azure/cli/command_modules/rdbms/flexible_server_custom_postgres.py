@@ -360,30 +360,30 @@ def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login,
         logger.warning('Successfully Connected to PostgreSQL.')
         cursor = connection.cursor()
     except Exception as e:
-        raise CLIError("Unable to connect to PostgreSQL Server: {0}".format(e))
+        raise CLIError("Unable to connect to PostgreSQL Server: {}".format(e))
 
     # execute query if passed in
     if postgres_query is not None:
         try:
             cursor.execute(postgres_query)
-            logger.warning("Ran Database Query: '{0}'".format(postgres_query))
+            logger.warning("Ran Database Query: '%s'", postgres_query)
             result = cursor.fetchmany(30)  # limit to 30 rows of output for now
-            row_headers=[x[0] for x in cursor.description] # this will extract row headers
+            row_headers = [x[0] for x in cursor.description]  # this will extract row headers
 
-            # format the result for a clean display 
-            json_data=[]
+            # format the result for a clean display
+            json_data = []
             for rv in result:
-                json_data.append(dict(zip(row_headers,rv)))  
+                json_data.append(dict(zip(row_headers, rv)))
         except Exception as e:
             raise CLIError("Unable to execute query '{0}' on PostgreSQL Server: {1}".format(postgres_query, e))
-    
+
     if cursor is not None:
         try:
             cursor.close()
-            logger.warning("Closed the connection to {0}".format(host))
-        except Exception as e:
+            logger.warning("Closed the connection to %s", host)
+        except Exception:  # pylint: disable=broad-except
             logger.warning('Unable to close connection cursor.')
-      
+
     return json_data
 
 

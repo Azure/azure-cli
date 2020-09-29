@@ -134,7 +134,6 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
         g.custom_command('connect', 'connect_to_flexible_server_postgresql')
 
-
     # MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_mysql,
