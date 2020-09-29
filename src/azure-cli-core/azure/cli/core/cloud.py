@@ -307,7 +307,7 @@ def _arm_to_cli_mapper(arm_dict):
             synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=_get_synapse_analytics_resource_id(arm_dict['name'])),
             app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=_get_app_insights_telemetry_channel_resource_id(arm_dict['name'])),
             attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=_get_attestation_resource_id(arm_dict['name'])),
-            portal=arm_dict['portal']),
+            portal=arm_dict['portal'] if 'portal' in arm_dict else None),
         suffixes=CloudSuffixes(
             storage_endpoint=get_suffix('storage'),
             storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=_get_storage_sync_endpoint(arm_dict['name'])),
