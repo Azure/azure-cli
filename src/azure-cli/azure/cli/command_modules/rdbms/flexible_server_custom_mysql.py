@@ -27,6 +27,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 
 # region create without args
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                            location=None, storage_mb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
