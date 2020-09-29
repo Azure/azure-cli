@@ -33,7 +33,7 @@ class CommandCost(object):
         pyinstaller_start_time = time.time()
         pyinstaller_output = check_output(self.pyinstaller_command, shell=platform.system() == 'Windows')
         pyinstaller_end_time = time.time()
-        pyinstaller_cost = pyinstaller_start_time - pyinstaller_end_time
+        pyinstaller_cost = pyinstaller_end_time - pyinstaller_start_time
         self.costs.append((released_cost, pyinstaller_cost))
     
     def avg(self):
