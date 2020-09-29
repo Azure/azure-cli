@@ -278,7 +278,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
             c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_getter_arg_type)
-            c.argument('yes', options_list=['--yes'], action='store_true',
+            c.argument('yes', options_list=['--yes', '-y'], action='store_true',
                        help='Do not prompt for confirmation.')
 
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
@@ -374,7 +374,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
 
         with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:
-            c.argument('yes', options_list=['--yes'], action='store_true', help='Do not prompt for confirmation.')
+            c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
 
         with self.argument_context('{} flexible-server firewall-rule update'.format(command_group)) as c:
             c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
@@ -397,7 +397,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
             with self.argument_context('{} flexible-server db delete'.format(command_group)) as c:
                 c.argument('database_name', arg_type=database_name_getter_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
-                c.argument('yes', options_list=['--yes'], action='store_true', help='Do not prompt for confirmation.')
+                c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
 
         with self.argument_context('{} flexible-server show-connection-string'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the server.')
