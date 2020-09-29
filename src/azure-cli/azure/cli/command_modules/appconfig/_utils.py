@@ -134,8 +134,8 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
         try:
             azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
                                                                                  user_agent=HttpHeaders.USER_AGENT)
-        except Exception as ex:
-            raise CLIError("An exception occurred while connecting to App Configuration: {}".format(str(ex)))
+        except ValueError as ex:
+            raise CLIError("Operation failed to due to an exception: {}".format(str(ex)))
 
     if auth_mode == "login":
         if not endpoint:
@@ -156,7 +156,7 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
             azconfig_client = AzureAppConfigurationClient(credential=cred,
                                                           base_url=endpoint,
                                                           user_agent=HttpHeaders.USER_AGENT)
-        except Exception as ex:
-            raise CLIError("An exception occurred while connecting to App Configuration: {}".format(str(ex)))
+        except (ValueError, TypeError) as ex:
+            raise CLIError("Operation failed to due to an exception: {}".format(str(ex)))
 
     return azconfig_client
