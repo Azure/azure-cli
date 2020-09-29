@@ -362,8 +362,8 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2')
-    @SqlServerPreparer(location='eastus2')
+    @ResourceGroupPreparer(location='southeastasia')
+    @SqlServerPreparer(location='southeastasia')
     def test_sql_db_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         database_name_2 = "cliautomationdb02"
@@ -373,10 +373,12 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         update_storage_bytes = str(10 * 1024 * 1024 * 1024)
         read_scale_disabled = 'Disabled'
         read_scale_enabled = 'Enabled'
+        backup_storage_redundancy_local = 'local'
+        backup_storage_redundancy_zone = 'zone'
 
         # test sql db commands
-        db1 = self.cmd('sql db create -g {} --server {} --name {} --read-scale {}'
-                       .format(resource_group, server, database_name, read_scale_disabled),
+        db1 = self.cmd('sql db create -g {} --server {} --name {} --read-scale {} --backup-storage-redundancy {}'
+                       .format(resource_group, server, database_name, read_scale_disabled, backup_storage_redundancy_local),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group),
                            JMESPathCheck('name', database_name),
@@ -385,7 +387,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
-                           JMESPathCheck('readReplicaCount', '0')]).get_output_in_json()
+                           JMESPathCheck('readReplicaCount', '0'),
+                           JMESPathCheck('backup_storage_redundancy_local', 'Local')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
                  .format(resource_group, server),
@@ -415,10 +418,10 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
         # Update by group/server/name
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {} --read-scale {}'
-                 ' --set tags.key1=value1'
+                 ' --set tags.key1=value1 --backup_storage_redundancy {}'
                  .format(resource_group, server, database_name,
                          update_service_objective, update_storage,
-                         read_scale_enabled),
+                         read_scale_enabled, backup_storage_redundancy_zone),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
@@ -983,6 +986,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         database_name = "cliautomationdb01"
         database_copy_name = "cliautomationdb02"
         service_objective = 'GP_Gen5_8'
+        backup_storage_redundancy = 'local'
 
         # create database
         self.cmd('sql db create -g {} --server {} --name {}'
@@ -1001,6 +1005,17 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('name', database_copy_name)
+                 ])
+
+        # copy database to same server specify backup storage redundancy
+        bsr_database = "bsr_database"
+        self.cmd('sql db copy -g {} --server {} --name {} '
+                 '--dest-name {} --backup-storage-redundancy {}'
+                 .format(resource_group_1, server1, database_name, bsr_database, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('name', database_copy_name),
+                     JMESPathCheck('backupStorageRedundancy', 'Local')
                  ])
 
         # copy database to same server (min parameters, plus service_objective)
@@ -1131,6 +1146,17 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                      JMESPathCheck('name', restore_pool_database_name),
                      JMESPathCheck('status', 'Online'),
                      JMESPathCheck('elasticPoolName', elastic_pool)])
+
+        # restore db with backup storage redundancy parameter
+        bsr_database = 'bsr_database'
+        backup_storage_redundancy = 'geo'
+        self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {} --backup-storage-redundancy {}'
+                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+                         bsr_database, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', restore_standalone_database_name),
+                     JMESPathCheck('backupStorageRedundancy', 'Geo')])
 
 
 class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
@@ -1694,6 +1720,16 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group)])
+
+        # create replica in second server with backup storage redundancy
+        backup_storage_redundancy = "zone"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --backup-storage-redundancy {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('backupStorageRedundancy', 'Zone')])
 
         # check that the replica was created in the correct server
         self.cmd('sql db show -g {} -s {} -n {}'
@@ -4738,73 +4774,89 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
 
 
-class SqlDbBackupStorageRedundancyScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='southeastasia')
-    @SqlServerPreparer(location='southeastasia')
-    @AllowLargeResponse()
-    def test_sql_db_backup_storage_redundancy(self, resource_group, resource_group_location, server):
-        database_name = "cliCreateTest"
-        backup_storage_redundancy = "Local"
-        backup_storage_redundancy_internal = "LRS"
+# class SqlDbBackupStorageRedundancyScenarioTest(ScenarioTest):
+#    @ResourceGroupPreparer(location='southeastasia')
+#    @SqlServerPreparer(location='southeastasia')
+#    @AllowLargeResponse()
+#    def test_sql_db_backup_storage_redundancy_create_update(self, resource_group, resource_group_location, server):
+#        database_name = "cliCreateTest"
+#        backup_storage_redundancy = "Local"
+#        backup_storage_redundancy_internal = "LRS"
 
-        # Create database
-        self.cmd('sql db create -g {} --server {} --name {} --edition {} --backup-storage-redundancy {}'
-                 .format(resource_group, server, database_name, backup_storage_redundancy),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal)]).get_output_in_json()
+#        # Create database
+#        self.cmd('sql db create -g {} --server {} --name {} --edition {} --backup-storage-redundancy {}'
+#                 .format(resource_group, server, database_name, backup_storage_redundancy),
+#                 checks=[
+#                     JMESPathCheck('resourceGroup', resource_group),
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal)]).get_output_in_json()
 
-        # Update database
-        backup_storage_redundancy = "Zone"
-        self.cmd('sql db update -g {} --server {} --name {} --bsr {}'
-                 .format(resource_group, server, database_name, backup_storage_redundancy),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name)]).get_output_in_json()
+#        # Update database
+#        backup_storage_redundancy = "Zone"
+#        self.cmd('sql db update -g {} --server {} --name {} --bsr {}'
+#                 .format(resource_group, server, database_name, backup_storage_redundancy),
+#                 checks=[
+#                     JMESPathCheck('resourceGroup', resource_group),
+#                     JMESPathCheck('name', database_name)]).get_output_in_json()
 
-        # Create database copy
-        database_name = "cliCopyTest"
-        backup_storage_redundancy = "Local"
+#    def test_sql_db_backup_storage_redundancy_copy_replica(self, resource_group, resource_group_location, server):
+#        # Create database copy
+#        database_name = "cliCopyTest"
+#        backup_storage_redundancy = "Zone"
+#        backup_storage_redundancy_internal = "ZRS"
 
-        self.cmd('sql db copy -g {} --server {} --name {} --dest-name {} --bsr {}'
-                 .format(resource_group, server, database_name, backup_storage_redundancy),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal]).get_output_in_json()
+#        self.cmd('sql db copy -g {} --server {} --name {} --dest-name {} --bsr {}'
+#                 .format(resource_group, server, database_name, backup_storage_redundancy),
+#                 checks=[
+#                     JMESPathCheck('resourceGroup', resource_group),
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal]).get_output_in_json()
 
-        # Create database secondary
-        database_name = "cliSecondaryTest"
-        backup_storage_redundancy = "Zone"
-        backup_storage_redundancy_internal = "ZRS"
+#        # Create database secondary
+#        database_name = "cliSecondaryTest"
+#        backup_storage_redundancy = "Local"
+#        backup_storage_redundancy_internal = "LRS"
 
-        self.cmd('sql db replica create -g {} --server {} --name {} --dest-name {} --bsr {}'
-                 .format(resource_group, server, database_name, backup_storage_redundancy),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal]).get_output_in_json()
+#        self.cmd('sql db replica create -g {} --server {} --name {} --dest-name {} --bsr {}'
+#                 .format(resource_group, server, database_name, backup_storage_redundancy),
+#                 checks=[
+#                     JMESPathCheck('resourceGroup', resource_group),
+#                     JMESPathCheck('name', database_name),
+#                     JMESPathCheck('backupStorageRedundancy', backup_storage_redundancy_internal]).get_output_in_json()
 
-        # Restore database secondary
-        database_name = "cliRestorePitr"
-        backup_storage_redundancy = "Zone"
-        backup_storage_redundancy_internal = "ZRS"
+#    def test_sql_db_backup_storage_redundancy_copy_replica(self, resource_group, resource_group_location, server):
+#        # Restore database secondary
+#        database_name = "cliRestorePitr"
+#        backup_storage_redundancy = "Zone"
+#        backup_storage_redundancy_internal = "ZRS"
 
-        # Create database and wait for first backup to exist
-        _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+#        # Create database and wait for first backup to exist
+#        _create_db_wait_for_first_backup(self, resource_group, server, database_name)
 
-        # Restore to standalone db
-        self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
-                 ' --service-objective {} --edition {}'
-                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
-                         restore_standalone_database_name, restore_service_objective,
-                         restore_edition),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', restore_standalone_database_name),
-                     JMESPathCheck('requestedServiceObjectiveName',
-                                   restore_service_objective),
-                     JMESPathCheck('status', 'Online')])
+#        # Restore to standalone db
+#        self.cmd('sql db restore -g {} -s {} -n {} -t {} --dest-name {}'
+#                 ' --service-objective {} --edition {}'
+#                 .format(resource_group, server, database_name, datetime.utcnow().isoformat(),
+#                         restore_standalone_database_name, restore_service_objective,
+#                         restore_edition),
+#                 checks=[
+#                     JMESPathCheck('resourceGroup', resource_group),
+#                     JMESPathCheck('name', restore_standalone_database_name),
+#                     JMESPathCheck('requestedServiceObjectiveName',
+#                                   restore_service_objective),
+#                     JMESPathCheck('status', 'Online')])
 
-        # Restore deleted database
+#        # Restore deleted database
+#        database_name = 'cliautomationdb01'
+
+#        # Standalone db
+#        restore_service_objective = 'S1'
+#        restore_edition = 'Standard'
+#        restore_database_name1 = 'cliautomationdb01restore1'
+#        restore_database_name2 = 'cliautomationdb01restore2'
+
+#        # Create database and wait for first backup to exist
+#        _create_db_wait_for_first_backup(self, resource_group, server, database_name)
+
+#        # Delete database
+#        self.cmd('sql db delete -g {} -s {} -n {} --yes'.format(resource_group, server, database_name))

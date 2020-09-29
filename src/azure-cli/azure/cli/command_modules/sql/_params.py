@@ -106,10 +106,10 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
 def get_internal_backup_storage_redundancy(self):
     return {
-        'Local': 'LRS',
-        'Zone': 'ZRS',
-        'Geo': 'GRS',
-    }.get(self, 'Invalid')
+        'local': 'LRS',
+        'zone': 'ZRS',
+        'geo': 'GRS',
+    }.get(self.lower(), 'Invalid')
 
 #####
 #        Reusable param type definitions
@@ -328,6 +328,7 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('storage_account_type',
                      arg_type=backup_storage_redundancy_param_type)
 
+
 def _configure_db_dw_create_params(
         arg_ctx,
         engine,
@@ -417,8 +418,7 @@ def _configure_db_dw_create_params(
             'compute_model',
             'read_scale',
             'read_replica_count',
-            'storage_account_type',
-            'yes'
+            'storage_account_type'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -572,10 +572,6 @@ def load_arguments(self, _):
                    options_list=['--backup-storage-redundancy', '--bsr'],
                    help='Backup storage redundancy used to store backups')
 
-        c.argument('yes',
-                   options_list=['--yes', '-y'],
-                   help='Do not prompt for confirmation.', action='store_true')
-
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
                    help='The new name that the database will be renamed to.')
@@ -608,10 +604,6 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type,
                    options_list=['--backup-storage-redundancy', '--bsr'],
                    help='Backup storage redundancy used to store backups')
-
-        c.argument('yes',
-                   options_list=['--yes', '-y'],
-                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -670,10 +662,6 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type,
                    options_list=['--backup-storage-redundancy', '--bsr'],
                    help='Backup storage redundancy used to store backups')
-
-        c.argument('yes',
-                   options_list=['--yes', '-y'],
-                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -797,10 +785,6 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type,
                    options_list=['--backup-storage-redundancy', '--bsr'],
                    help='Backup storage redundancy used to store backups')
-
-        c.argument('yes',
-                   options_list=['--yes', '-y'],
-                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
@@ -1013,10 +997,6 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type,
                    options_list=['--backup-storage-redundancy', '--bsr'],
                    help='Backup storage redundancy used to store backups')
-
-        c.argument('yes',
-                   options_list=['--yes', '-y'],
-                   help='Do not prompt for confirmation.', action='store_true')
 
     ###############################################
     #                sql dw                       #

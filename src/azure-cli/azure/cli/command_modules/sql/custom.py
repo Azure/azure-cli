@@ -816,46 +816,35 @@ def _db_dw_create(
                        database_name=dest_db.database_name,
                        parameters=kwargs)
 
-def _should_show_backup_storage_redundancy_warnings(yes_confirmation, target_db_location):
-    if not yes_confirmation and target_db_location.lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
-        return true
 
-def _confirm_backup_storage_redundancy_specify_geo_warning(storage_account_type):
-    if storage_account_type == 'GRS':
-        confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
-            Note that database backups will be geo-replicated to the paired region.
-            To learn more about Azure Paired Regions visit https://docs.microsoft.com/en-us/azure/best-practices-availability-paired-regions.
-            Do you want to proceed?""")
-        if not confirmation:
-            return false
-    return true
+def _should_show_backup_storage_redundancy_warnings(target_db_location):
+    # if not yes_confirmation and target_db_location.lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
+    if target_db_location.lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
+        return True
+    return False
 
-def _confirm_backup_storage_redundancy_take_geo_warning(storage_account_type):
-    if storage_account_type == 'GRS':
-        return _confirm_backup_storage_redundancy_specify_geo_warning(storage_account_type)
 
-    if not kwargs['storage_account_type']:
-        confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
-        which will default to geo-redundant storage. Note that database backups will be geo-replicated
-        to the paired region. To learn more about Azure Paired Regions visit https://docs.microsoft.com/en-us/azure/best-practices-availability-paired-regions.
-        Do you want to proceed?""")
-        if not confirmation:
-            return false
+def _backup_storage_redundancy_specify_geo_warning():
+    print("""Selected value for backup storage redundancy is geo-redundant storage.
+    Note that database backups will be geo-replicated to the paired region.
+    To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
 
-    return true
 
-def _confirm_backup_storage_redundancy_take_source_warning(kwargs):
-    if storage_account_type == 'GRS':
-        return _confirm_backup_storage_redundancy_specify_geo_warning(storage_account_type)
+def _confirm_backup_storage_redundancy_take_geo_warning():
+    # if not storage_account_type:
+    confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
+    which will default to geo-redundant storage. Note that database backups will be geo-replicated
+    to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+    Do you want to proceed?""")
+    if not confirmation:
+        return False
+    return True
 
-    if not kwargs['storage_account_type']:
-        confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
-        which will default to source's backup storage redundancy. To learn more about Azure Paired Regions visit https://docs.microsoft.com/en-us/azure/best-practices-availability-paired-regions.
-        Do you want to proceed?""")
-        if not confirmation:
-            return false
 
-    return true
+def _backup_storage_redundancy_take_source_warning():
+    print("""You have not specified the value for backup storage redundancy
+    which will default to source's backup storage redundancy.
+    To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
 
 
 def db_create(
@@ -873,11 +862,15 @@ def db_create(
     # Check backup storage redundancy configurations
     location = _get_server_location(
         cmd.cli_ctx,
-        server_name=_server_name,
+        server_name=server_name,
         resource_group_name=resource_group_name)
-    if _should_show_backup_storage_redundancy_warnings(kwargs['yes'], location):
-        if not _confirm_backup_storage_redundancy_take_geo_warning(kwargs['storage_account_type']):
-            return
+
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            if not _confirm_backup_storage_redundancy_take_geo_warning():
+                return
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -936,10 +929,14 @@ def db_copy(
         kwargs)
 
     # Check backup storage redundancy configurations
-    location = _get_server_location(cmd.cli_ctx, server_name=dest_server_name, resource_group_name=dest_resource_group_name)
-    if _should_show_backup_storage_redundancy_warnings(kwargs['yes'], location):
-        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
-            return
+    location = _get_server_location(cmd.cli_ctx,
+                                    server_name=dest_server_name,
+                                    resource_group_name=dest_resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -984,10 +981,14 @@ def db_create_replica(
         kwargs)
 
     # Check backup storage redundancy configurations
-    location = _get_server_location(cmd.cli_ctx, server_name=partner_server_name, resource_group_name=partner_resource_group_name)
-    if _should_show_backup_storage_redundancy_warnings(kwargs['yes'], location):
-        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
-            return
+    location = _get_server_location(cmd.cli_ctx,
+                                    server_name=partner_server_name,
+                                    resource_group_name=partner_resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     # Replica must have the same database name as the source db
     return _db_dw_create(
@@ -1058,9 +1059,11 @@ def db_restore(
 
     # Check backup storage redundancy configurations
     location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
-    if _should_show_backup_storage_redundancy_warnings(kwargs):
-        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
-            return
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -1340,8 +1343,7 @@ def db_update(
         min_capacity=None,
         auto_pause_delay=None,
         compute_model=None,
-        storage_account_type=None,
-        yes=None):
+        storage_account_type=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1352,9 +1354,9 @@ def db_update(
 
     # Check backup storage redundancy configuration
     location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
-    if _should_show_backup_storage_redundancy_warnings(yes, location):
-        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
-            return
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if storage_account_type == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     #####
     # Set sku-related properties
@@ -1866,9 +1868,11 @@ def restore_long_term_retention_backup(
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
 
     # Check backup storage redundancy configurations
-    if _should_show_backup_storage_redundancy_warnings(kwargs['yes'], kwargs['location']):
-        if not _confirm_backup_storage_redundancy_take_source_warning(kwargs['storage_account_type']):
-            return
+    if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     return client.create_or_update(
         database_name=target_database_name,
@@ -2784,7 +2788,7 @@ def managed_instance_create(
         if kwargs['storage_account_type'] == 'GRS':
             confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
              Note that database backups will be geo-replicated to the paired region.
-             To learn more about Azure Paired Regions visit https://aka.ms/micreate-ragrs-regions.
+             To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
              Do you want to proceed?""")
             if not confirmation:
                 return
@@ -2792,7 +2796,7 @@ def managed_instance_create(
         if not kwargs['storage_account_type']:
             confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
             which will default to geo-redundant storage. Note that database backups will be geo-replicated
-            to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/micreate-ragrs-regions.
+            to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
             Do you want to proceed?""")
             if not confirmation:
                 return
