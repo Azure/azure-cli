@@ -413,25 +413,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server'],
                        help='The name or resource ID of the source server to restore from.')
-            if command_group == 'mysql':
-                c.argument('tier', options_list=['--tier'],
-                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')
-                c.argument('sku_name', options_list=['--sku-name'],
-                           help='The name of the compute SKU. Follows the convention'
-                                ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D2ds_v4 ')
-            elif command_group == 'postgres':
-                c.argument('tier', options_list=['--tier'],
-                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', options_list=['--sku-name'],
-                           help='The name of the compute SKU. Follows the convention'
-                                ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
-            elif command_group == 'postgres':
-                c.argument('tier', options_list=['--tier'], validator=pg_tier_validator,
-                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', options_list=['--sku-name'],
-                           validator=pg_sku_name_validator,
-                           help='The name of the compute SKU. Follows the convention'
-                                ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+            c.ignore('location')
+            c.ignore('sku_name')
+            c.ignore('tier')
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-s'], help='Name of the server.')

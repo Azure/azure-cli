@@ -6,7 +6,6 @@
 # pylint: disable=unused-argument, line-too-long
 
 import random
-from itertools import chain
 from knack.log import get_logger
 from msrest.paging import Paged
 
@@ -17,7 +16,8 @@ from ._client_factory import resource_client_factory, cf_mysql_flexible_location
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION = 'eastus'  # For testing: 'eastus2euap'
+DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
+DEFAULT_LOCATION_MySQL = 'westus2'
 
 
 def resolve_poller(result, cli_ctx, name):
