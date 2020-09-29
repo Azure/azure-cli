@@ -260,14 +260,14 @@ def flexible_server_update_custom_func(cmd, instance,
     return params
 
 
-def server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
-    confirm = force
+def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
+    confirm = yes
     result = None  # default return value
-    if not force:
+    if not yes:
         confirm = user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
                                                                                               resource_group_name),
-            yes=force)
+            yes=yes)
     if confirm:
         try:
             result = client.delete(resource_group_name, server_name)

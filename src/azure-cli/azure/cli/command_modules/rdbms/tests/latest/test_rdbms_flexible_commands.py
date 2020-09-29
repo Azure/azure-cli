@@ -144,7 +144,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('type(@)', 'array')])
 
         # test delete server
-        self.cmd('{} flexible-server delete -g {} -n {} --force'.format(database_engine, resource_group, server_name), checks=NoneCheck())
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
@@ -220,13 +220,13 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('length(@)', 2)])
 
         # firewall-rule delete
-        self.cmd('{} flexible-server firewall-rule delete --name {} -g {} --server {} --prompt no'
+        self.cmd('{} flexible-server firewall-rule delete --name {} -g {} --server {} --yes'
                  .format(database_engine, firewall_rule_name, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server firewall-rule list -g {} --server {}'
                  .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('length(@)', 1)])
 
-        self.cmd('{} flexible-server firewall-rule delete -g {} -s {} --name {} --prompt no'
+        self.cmd('{} flexible-server firewall-rule delete -g {} -s {} --name {} --yes'
                  .format(database_engine, resource_group, server_name, new_firewall_rule_name))
 
         self.cmd('{} flexible-server firewall-rule list -g {} -s {}'
@@ -349,16 +349,16 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'.format(database_engine, resource_group, server_name, invalid_backup_retention), expect_failure=True)
 
-        self.cmd('{} flexible-server delete -g {} -n {} --force'.format(database_engine, resource_group, server_name), checks=NoneCheck())
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
     mysql_location = 'westus2'
 
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_replica_mgmt(self, resource_group):
-    #     self._test_flexible_server_replica_mgmt('mysql', resource_group)
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_replica_mgmt(self, resource_group):
+        self._test_flexible_server_replica_mgmt('mysql', resource_group)
 
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group):
         location = self.mysql_location
@@ -384,14 +384,6 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('replicationRole', 'Replica'),
                      JMESPathCheck('sourceServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
-
-        # test show server with replication info
-        self.cmd('{} flexible-server show -g {} -n {}'
-                 .format(database_engine, resource_group, master_server),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'Source'),
-                     JMESPathCheck('sourceServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
@@ -427,7 +419,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sourceServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
 
-        self.cmd('{} flexible-server delete -g {} --name {} --force'
+        self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, master_server), checks=NoneCheck())
 
         # test show server with replication info, replica was auto stopped after master server deleted
@@ -439,7 +431,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # clean up servers
-        self.cmd('{} flexible-server delete -g {} --name {} --force'
+        self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
-        self.cmd('{} flexible-server delete -g {} --name {} --force'
+        self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
