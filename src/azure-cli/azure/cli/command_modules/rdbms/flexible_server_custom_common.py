@@ -28,7 +28,7 @@ def server_list_custom_func(client, resource_group_name=None):
 
 
 def firewall_rule_create_func(client, resource_group_name, server_name, firewall_rule_name=None, start_ip_address=None, end_ip_address=None):
-    
+
     if end_ip_address is None and start_ip_address is not None:
         end_ip_address = start_ip_address
         logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip_address)
@@ -37,20 +37,20 @@ def firewall_rule_create_func(client, resource_group_name, server_name, firewall
         from datetime import datetime
         now = datetime.now()
         firewall_rule_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                    now.second)
+                                                                          now.second)
         if start_ip_address == '0.0.0.0' and end_ip_address == '0.0.0.0':
             logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
-                        'Azure resources...')
+                           'Azure resources...')
             firewall_rule_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
-                                                                                                    now.day, now.hour,
-                                                                                                    now.minute,
-                                                                                                    now.second)
+                                                                                                            now.day, now.hour,
+                                                                                                            now.minute,
+                                                                                                            now.second)
         else:
             if start_ip_address == '0.0.0.0' and end_ip_address == '255.255.255.255':
-                firewall_rule_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                    now.second)
+                firewall_rule_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day,
+                                                                         now.hour, now.minute, now.second)
             logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip_address,
-                        end_ip_address)
+                           end_ip_address)
 
     return client.create_or_update(
         resource_group_name,
