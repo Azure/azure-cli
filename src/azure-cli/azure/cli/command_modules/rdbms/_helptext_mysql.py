@@ -187,7 +187,7 @@ type: command
 short-summary: Create a read replica for a server.
 examples:
   - name: Create a read replica 'testReplicaServer' for 'testServer'.
-    text: az mysql flexible-server replica create -n testReplicaServer -g testGroup --source-server testServer
+    text: az mysql flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testServer
 """
 
 helps['mysql flexible-server replica list'] = """
@@ -282,3 +282,17 @@ examples:
     text: az mysql flexible-server wait --exists --resource-group testGroup --name testServer
     crafted: true
 """
+
+helps['mysql flexible-server connect'] = """
+type: command
+short-summary: Connect to a flexible server to run a query on the flexible server.
+examples:
+  - name: Test connection to a flexible server.
+    text: az mysql flexible-server connect --name testServer --admin-user testUser --admin-password testPassword --database testDatabase
+    crafted: true
+  - name: Connect to default database and run a query.
+    text: az mysql flexible-server connect --name testServer --admin-user testUser --admin-password testPassword 
+          --mysql-query "select host,user from mysql.user;" --output table
+    crafted: true
+"""
+

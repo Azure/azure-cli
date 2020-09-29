@@ -7,6 +7,7 @@
 
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
+import psycopg2
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
@@ -342,6 +343,48 @@ def flexible_server_connection_string(
         'connectionStrings': _create_postgresql_connection_strings(host, administrator_login,
                                                                    administrator_login_password, database_name)
     }
+
+
+def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login, administrator_login_password, database_name=None, postgres_query=None):
+    host = '{}.postgres.database.azure.com'.format(server_name)
+    cursor = None
+    json_data = None
+    if database_name is None:
+        logger.warning("Connecting to postgres database by default.")
+        database_name = "postgres"
+
+    # Connect to mysql and get cursor to run sql commands
+    try:
+        connection = psycopg2.connect(user=administrator_login, host=host, password=administrator_login_password, database=database_name)
+        connection.set_session(autocommit=True)
+        logger.warning('Successfully Connected to PostgreSQL.')
+        cursor = connection.cursor()
+    except Exception as e:
+        raise CLIError("Unable to connect to PostgreSQL Server: {0}".format(e))
+
+    # execute query if passed in
+    if postgres_query is not None:
+        try:
+            cursor.execute(postgres_query)
+            logger.warning("Ran Database Query: '{0}'".format(postgres_query))
+            result = cursor.fetchmany(30)  # limit to 30 rows of output for now
+            row_headers=[x[0] for x in cursor.description] # this will extract row headers
+
+            # format the result for a clean display 
+            json_data=[]
+            for rv in result:
+                json_data.append(dict(zip(row_headers,rv)))  
+        except Exception as e:
+            raise CLIError("Unable to execute query '{0}' on PostgreSQL Server: {1}".format(postgres_query, e))
+    
+    if cursor is not None:
+        try:
+            cursor.close()
+            logger.warning("Closed the connection to {0}".format(host))
+        except Exception as e:
+            logger.warning('Unable to close connection cursor.')
+      
+    return json_data
 
 
 def _create_postgresql_connection_strings(host, user, password, database):

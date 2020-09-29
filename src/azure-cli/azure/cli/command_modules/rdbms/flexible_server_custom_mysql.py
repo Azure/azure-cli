@@ -5,8 +5,10 @@
 
 # pylint: disable=unused-argument, line-too-long
 
+import json
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
+import mysql.connector as mysql_connector
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
@@ -297,21 +299,21 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
+def flexible_replica_create(cmd, client, resource_group_name, replica_name, server_name, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
     provider = 'Microsoft.DBforMySQL'
 
     # set source server id
-    if not is_valid_resource_id(source_server):
-        if len(source_server.split('/')) == 1:
-            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+    if not is_valid_resource_id(server_name):
+        if len(server_name.split('/')) == 1:
+            server_name = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                         resource_group=resource_group_name,
                                         namespace=provider,
                                         type='flexibleServers',
-                                        name=source_server)
+                                        name=server_name)
         else:
-            raise CLIError('The provided source-server {} is invalid.'.format(source_server))
+            raise CLIError('The provided source-server {} is invalid.'.format(server_name))
 
-    source_server_id_parts = parse_resource_id(source_server)
+    source_server_id_parts = parse_resource_id(server_name)
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except CloudError as e:
@@ -336,10 +338,10 @@ def flexible_replica_create(cmd, client, resource_group_name, server_name, sourc
 
     parameters = mysql_flexibleservers.models.Server(
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
-        source_server_id=source_server,
+        source_server_id=server_name,
         location=location,
         create_mode="Replica")
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.create, resource_group_name, replica_name, parameters)
 
 
 def flexible_replica_stop(client, resource_group_name, server_name):
@@ -421,6 +423,45 @@ def flexible_server_connection_string(
         'connectionStrings': _create_mysql_connection_strings(host, administrator_login, administrator_login_password,
                                                               database_name)
     }
+
+def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, administrator_login_password, database_name=None, mysql_query=None):
+    host = '{}.mysql.database.azure.com'.format(server_name)
+    cursor = None
+    json_data = None
+    if database_name is None:
+        database_name = DEFAULT_DB_NAME
+
+    # Connect to mysql and get cursor to run sql commands
+    try:
+        connection = mysql_connector.connect(user=administrator_login, host=host, password=administrator_login_password, database=database_name)
+        logger.warning('Successfully Connected to MySQL.')
+        cursor = connection.cursor()
+    except Exception as e:
+        raise CLIError("Unable to connect to MySQL Server: {0}".format(e))
+
+    # execute query if passed in
+    if mysql_query is not None:
+        try:
+            cursor.execute(mysql_query)
+            logger.warning("Ran Database Query: '{0}'".format(mysql_query))
+            result = cursor.fetchmany(30)  # limit to 30 rows of output for now
+            row_headers=[x[0] for x in cursor.description] # this will extract row headers
+
+            # format the result for a clean display 
+            json_data=[]
+            for rv in result:
+                json_data.append(dict(zip(row_headers,rv)))  
+        except mysql_connector.errors.Error as e:
+            raise CLIError("Unable to execute query '{0}' on MySQL Server: {1}".format(mysql_query, e))
+    
+    if cursor is not None:
+        try:
+            cursor.close()
+            logger.warning("Closed the connection to {0}".format(host))
+        except Exception as e:
+            logger.warning('Unable to close connection cursor.')
+      
+    return json_data
 
 
 def _create_mysql_connection_strings(host, user, password, database):
