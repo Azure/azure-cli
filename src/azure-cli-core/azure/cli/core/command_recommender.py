@@ -174,7 +174,20 @@ class CommandRecommender():
         elif self.aladdin_recommendations:
             recommend_command = self.aladdin_recommendations[0]
 
+        # set the recommened command into Telemetry
+        self._set_recommended_command_to_telemetry(recommend_command)
+
         return recommend_command
+
+
+    def _set_recommended_command_to_telemetry(self, recommend_command):
+        """Set the recommended command to Telemetry for analysis. """
+
+        if recommend_command in self.aladdin_recommendations:
+            telemetry.set_debug_info('AladdinRecommendCommand', recommend_command)
+        elif recommend_command:
+            telemetry.set_debug_info('ExampleRecommendCommand', recommend_command)
+
 
     def _disable_aladdin_service(self):
         """Decide whether to disable aladdin request when a command fails.
