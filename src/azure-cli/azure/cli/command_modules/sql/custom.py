@@ -455,10 +455,6 @@ class SqlManagedInstanceMinimalTlsVersionType(Enum):
     tls_1_1 = "1.1"
     tls_1_2 = "1.2"
 
-class SqlManagedInstanceBackupStorageRedundancyType(Enum):
-    grs = "GRS"
-    lrs = "LRS"
-    zrs = "ZRS"
 
 class ComputeModelType(str, Enum):
 

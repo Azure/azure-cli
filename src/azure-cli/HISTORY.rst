@@ -163,10 +163,6 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 **Storage**
 
 * `az storage blob list`: Support OR properties with new api version (#14832)
- 
-**SQL**
-
-* `az sql server audit-policy`: Add sql server auditing support (#14726)
 
 2.11.0
 ++++++
