@@ -66,14 +66,14 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
 
 def generate_password(administrator_login_password):
     import secrets
+    import string
     if administrator_login_password is None:
-        passwordLength = 16
-        special_character = random.choice('!@#,?;:$&*')
-        administrator_login_password = secrets.token_urlsafe(passwordLength)
-        random_position = random.randint(1, len(administrator_login_password) - 1)
-        administrator_login_password = administrator_login_password[
-            :random_position] + special_character + administrator_login_password[
-                random_position + 1:]
+        passwordlength = 16
+        administrator_login_password = secrets.token_urlsafe(passwordlength)
+        index = administrator_login_password.find("-")
+        if index != -1:
+            replaced_char = random.choice(string.ascii_letters)
+            administrator_login_password = administrator_login_password.replace("-", replaced_char)
     return administrator_login_password
 
 

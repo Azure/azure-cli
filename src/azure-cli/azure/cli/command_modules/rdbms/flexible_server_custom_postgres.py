@@ -78,6 +78,7 @@ def flexible_server_create(cmd, client,
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                                  server_name, 'postgres')
+        server_name = server_name.lower()
 
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
@@ -118,15 +119,15 @@ def flexible_server_create(cmd, client,
         sku = server_result.sku.name
         host = server_result.fully_qualified_domain_name
 
-        logger.warning('Make a note of your password. If you forget, you would have to \
-                        reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
+        logger.warning('Make a note of your password. If you forget, you would have to '
+                       'reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
                        server_name, resource_group_name)
 
         _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
         return _form_response(user, sku, loc, server_id, host, version,
                               administrator_login_password if administrator_login_password is not None else '*****',
-                              _create_postgresql_connection_string(host, administrator_login_password), firewall_id,
+                              _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
                               subnet_id)
     except Exception as ex:  # pylint: disable=broad-except
         logger.error(ex)
@@ -341,7 +342,7 @@ def flexible_server_connection_string(
 
 def _create_postgresql_connection_strings(host, user, password, database):
     result = {
-        'psql_cmd': "psql --host={host} --port=5432 --username={user} --dbname=postgres",
+        'psql_cmd': "postgresql://{user}:{password}@{host}/postgres?sslmode=require",
         'ado.net': "Server={host};Database=postgres;Port=5432;User Id={user};Password={password};",
         'jdbc': "jdbc:postgresql://{host}:5432/postgres?user={user}&password={password}",
         'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:5432/postgres  "
@@ -367,12 +368,13 @@ def _create_postgresql_connection_strings(host, user, password, database):
     return result
 
 
-def _create_postgresql_connection_string(host, password):
+def _create_postgresql_connection_string(host, user, password):
     connection_kwargs = {
+        'user': user,
         'host': host,
         'password': password if password is not None else '{password}'
     }
-    return 'postgres://postgres:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
+    return 'postgresql://{user}:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
 
 
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, firewall_id=None,
