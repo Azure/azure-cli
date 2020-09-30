@@ -59,7 +59,7 @@ def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, deleg
                     "The Subnet does not exist with the supplied subnet id. Checking the existence of the Vnet in the supplied Id...")
 
                 subnet_result = _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name,
-                                                               server_name + 'Subnet', location, server_name,
+                                                               'Subnet' + server_name[6:], location, server_name,
                                                                delegation,
                                                                VirtualNetwork, Subnet, AddressSpace,
                                                                DEFAULT_VNET_ADDRESS_PREFIX, DEFAULT_SUBNET_PREFIX)
@@ -77,13 +77,13 @@ def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, deleg
             location = rg.location
             validate_rg_loc_sub(resource_group, subscription, location, resource_group_name,
                                 get_subscription_id(cmd.cli_ctx), loc)
-            subnet_result = _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name, server_name + 'Subnet',
+            subnet_result = _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name, 'Subnet' + server_name[6:],
                                                            location, server_name, delegation, VirtualNetwork, Subnet,
                                                            AddressSpace, DEFAULT_VNET_ADDRESS_PREFIX,
                                                            DEFAULT_SUBNET_PREFIX)
         elif len(vnet.split('\\')) == 1:
             logger.warning("You have supplied a Vnet Name. Verifying its existence...")
-            subnet_result = _create_vnet_subnet_delegation(nw_client, resource_group_name, vnet, server_name + 'Subnet',
+            subnet_result = _create_vnet_subnet_delegation(nw_client, resource_group_name, vnet, 'Subnet' + server_name[6:],
                                                            loc, server_name, delegation, VirtualNetwork, Subnet,
                                                            AddressSpace, DEFAULT_VNET_ADDRESS_PREFIX,
                                                            DEFAULT_SUBNET_PREFIX)
@@ -210,7 +210,7 @@ def create_vnet(cmd, servername, location, resource_group_name, delegation_servi
                                                                       'Delegation',
                                                                       resource_type=ResourceType.MGMT_NETWORK)
     client = network_client_factory(cmd.cli_ctx)
-    vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername)
+    vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername[6:])
 
     logger.warning('Creating new vnet "%s" in resource group "%s"...', vnet_name, resource_group_name)
     client.virtual_networks.create_or_update(resource_group_name, vnet_name,
@@ -227,8 +227,8 @@ def create_vnet(cmd, servername, location, resource_group_name, delegation_servi
 
 
 def _create_vnet_metadata(servername):
-    vnet_name = servername + 'VNET'
-    subnet_name = servername + 'Subnet'
+    vnet_name = 'VNET' + servername
+    subnet_name = 'Subnet' + servername
     vnet_address_prefix = DEFAULT_VNET_ADDRESS_PREFIX
     subnet_prefix = DEFAULT_SUBNET_PREFIX
     return vnet_name, subnet_name, vnet_address_prefix, subnet_prefix
