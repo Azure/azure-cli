@@ -194,9 +194,12 @@ jobs:
         az -v
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        while [ $? -ne 0 ]; do
+        if [ $? -ne 0 ]; then
             az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        done
+        fi
+        if [ $? -ne 0 ]; then
+          az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        fi
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
 
         # Commit changes
@@ -284,9 +287,12 @@ jobs:
         # Send notification
         az -v
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        while [ $? -ne 0 ]; do
-            az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        done
+        if [ $? -ne 0 ]; then
+          az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        fi
+        if [ $? -ne 0 ]; then
+          az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        fi
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
         python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
         # python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
