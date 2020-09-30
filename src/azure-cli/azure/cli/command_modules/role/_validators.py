@@ -96,6 +96,20 @@ def validate_change_password(namespace):
 
 
 def process_assignment_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    # Make sure these arguments are non-empty strings.
+    # When they are accidentally provided as an empty string "", they won't take effect when filtering the role
+    # assignments, causing all matched role assignments to be listed/deleted. For example,
+    #   az role assignment delete --assignee ""
+    # removes all role assignments under the subscription.
+    non_empty_args = ["assignee", "scope", "role", "resource_group_name"]
+    non_empty_msg = "usage error: {} can't be an empty string. Either omit it or provide a non-empty string."
+
+    for arg in non_empty_args:
+        if getattr(namespace, arg) == "":
+            # Get option name, like resource_group_name -> --resource-group
+            option_name = cmd.arguments[arg].type.settings['options_list'][0]
+            raise CLIError(non_empty_msg.format(option_name))
+
     resource_group = namespace.resource_group_name
     if namespace.scope and resource_group and getattr(resource_group, 'is_default', None):
         namespace.resource_group_name = None  # drop configured defaults

@@ -200,8 +200,8 @@ def get_streaming_endpoint(client, resource_group_name, account_name,
     streaming_endpoint = client.get(resource_group_name, account_name, streaming_endpoint_name)
     if not streaming_endpoint:
         show_resource_not_found_message(
-            account_name,
             resource_group_name,
+            account_name,
             'streamingEndpoints',
             streaming_endpoint_name)
 
