@@ -254,7 +254,7 @@ def turn_local_context_on(cmd):
         cmd.cli_ctx.local_context.turn_on()
         logger.warning('Local context is turned on, you can run `az local-context off` to turn it off.')
     else:
-        raise CLIError('Local context is on already.')
+        logger.warning('Local context is on already.')
 
 
 def turn_local_context_off(cmd):
@@ -262,7 +262,7 @@ def turn_local_context_off(cmd):
         cmd.cli_ctx.local_context.turn_off()
         logger.warning('Local context is turned off, you can run `az local-context on` to turn it on.')
     else:
-        raise CLIError('Local context is off already.')
+        logger.warning('Local context is off already.')
 
 
 def show_local_context(cmd, name=None):
