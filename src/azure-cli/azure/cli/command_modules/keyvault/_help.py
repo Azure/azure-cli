@@ -638,3 +638,18 @@ examples:
     text: |
         az keyvault security-domain wait --hsm-name MyHSM
 """
+
+helps['keyvault set-policy'] = """
+type: command
+short-summary: Update security policy settings for a Key Vault.
+examples:
+  - name: Assign key permissions `get`, `list`, `import` and secret permissions `backup`, `restore` to an object id.
+    text: |
+        az keyvault set-policy -n MyVault --key-permissions get list import --secret-permissions backup restore --object-id {GUID}
+  - name: Assign key permissions `get`, `list` to a UPN (User Principal Name).
+    text: |
+        az keyvault set-policy -n MyVault --key-permissions get list --upn {UPN}
+  - name: Assign key permissions `get`, `list` to a SPN (Service Principal Name).
+    text: |
+        az keyvault set-policy -n MyVault --key-permissions get list --spn {SPN}
+"""

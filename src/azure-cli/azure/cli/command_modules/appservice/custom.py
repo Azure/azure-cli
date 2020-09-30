@@ -3588,8 +3588,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         # Raise error if current OS of the app is different from the current one
         if current_os.lower() != os_name.lower():
             raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
-                           "'{}'. "
-                           "Please create a new app to continue this operation.".format(name, current_os, src_dir, os))
+                           "'{}'. Please create a new app"
+                           "to continue this operation.".format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
         # Get site config to check the runtime version
@@ -3673,6 +3673,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         _url = _get_url(cmd, rg_name, name)
         logger.warning("You can launch the app at %s", _url)
         create_json.update({'URL': _url})
+
     if logs:
         _configure_default_logging(cmd, rg_name, name)
         return get_streaming_log(cmd, rg_name, name)

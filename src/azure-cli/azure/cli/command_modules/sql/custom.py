@@ -3363,6 +3363,43 @@ def restore_long_term_retention_mi_backup(
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
 
+
+def managed_db_log_replay_start(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        auto_complete,
+        last_backup_name,
+        storage_container_uri,
+        storage_container_sas_token,
+        **kwargs):
+
+    # Determine managed instance location
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.restore_external_backup.value
+
+    if auto_complete and not last_backup_name:
+        raise CLIError('Please specify a last backup name when using auto complete flag.')
+
+    kwargs['auto_complete'] = auto_complete
+    kwargs['last_backup_name'] = last_backup_name
+
+    kwargs['storageContainerUri'] = storage_container_uri
+    kwargs['storageContainerSasToken'] = storage_container_sas_token
+
+    # Create
+    return client.create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
 ###############################################
 #              sql failover-group             #
 ###############################################

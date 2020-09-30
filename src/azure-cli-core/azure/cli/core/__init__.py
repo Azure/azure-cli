@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.12.0"
+__version__ = "2.12.1"
 
 import os
 import sys

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.decorators import serial_test
 import time
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
@@ -59,6 +60,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         assert replication_status['mirrorState'] == target_state
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
     def test_create_delete_volumes(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -192,6 +194,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_list = self.cmd("netappfiles volume list -g {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 1
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
     def test_get_volume_by_name(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
