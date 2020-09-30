@@ -4171,6 +4171,9 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(databases)', 0)
                  ])
 
+        if self.in_recording:
+            time.sleep(60)
+
         # Update Failover Group
         self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {}'
                  .format(s1.group, s1.name, failover_group_name, database_name),
@@ -4200,6 +4203,9 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', 2)
                  ])
 
+        if self.in_recording:
+            time.sleep(60)
+
         # Update Failover Group failover policy to Manual
         self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
                  .format(s1.group, s1.name, failover_group_name),
@@ -4217,7 +4223,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         # But there is a async part to make old primary a new secondary
         # And we have to wait for this to complete if we are recording the test
         if self.in_recording:
-            time.sleep(30)
+            time.sleep(60)
 
         # Check the roles of failover groups to confirm failover happened
         self.cmd('sql failover-group show -g {} -s {} -n {}'
@@ -4240,7 +4246,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         # But there is a async part to make old primary a new secondary
         # And we have to wait for this to complete if we are recording the test
         if self.in_recording:
-            time.sleep(30)
+            time.sleep(60)
 
         # Check the roles of failover groups to confirm failover happened
         self.cmd('sql failover-group show -g {} -s {} -n {}'
