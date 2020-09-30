@@ -151,8 +151,10 @@ def db_transform(result):
     # Add properties in order to improve backwards compatibility with api-version 2014-04-01
     result.edition = result.sku.tier
     result.elastic_pool_name = _last_segment(result.elastic_pool_id)
-    result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
-    del result.storage_account_type
+
+    if hasattr(result, 'storage_account_type'):
+        result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
+        del result.storage_account_type
 
     return result
 

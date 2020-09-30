@@ -419,8 +419,7 @@ def _configure_db_dw_create_params(
             'compute_model',
             'read_scale',
             'read_replica_count',
-            'storage_account_type',
-            'yes'
+            'storage_account_type'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -800,11 +799,11 @@ def load_arguments(self, _):
                    help='Name of the resource group that the other replica is in. If unspecified,'
                    ' defaults to the first database\'s resource group.')
 
-
     #####
     #           sql db audit-policy & threat-policy
     #####
     def _configure_security_policy_storage_params(arg_ctx):
+
         storage_arg_group = 'Storage'
 
         arg_ctx.argument('storage_account',
@@ -980,7 +979,6 @@ def load_arguments(self, _):
         c.argument('storage_account_type',
                    required=False,
                    arg_type=backup_storage_redundancy_param_type)
-
 
     ###############################################
     #                sql dw                       #
@@ -1821,7 +1819,6 @@ def load_arguments(self, _):
                    help='The resource id of the backups. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id. '
                    'If provided, other arguments are not required. ')
-
 
     with self.argument_context('sql midb ltr-backup list') as c:
         c.argument('database_name',

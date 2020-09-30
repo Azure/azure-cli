@@ -418,7 +418,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
         # Update by group/server/name
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {} --read-scale {}'
-                 ' --set tags.key1=value1 --backup_storage_redundancy {}'
+                 ' --set tags.key1=value1 --backup-storage-redundancy {}'
                  .format(resource_group, server, database_name,
                          update_service_objective, update_storage,
                          read_scale_enabled, backup_storage_redundancy_zone),
@@ -557,7 +557,6 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', vcore_edition_updated),
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
                      JMESPathCheck('sku.family', vcore_family_updated)])
-
 
     @ResourceGroupPreparer(name_prefix='clitest-sql', location='eastus2')
     @SqlServerPreparer(name_prefix='clitest-sql', location='eastus2')
@@ -987,7 +986,6 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         database_name = "cliautomationdb01"
         database_copy_name = "cliautomationdb02"
         service_objective = 'GP_Gen5_8'
-        backup_storage_redundancy = 'local'
 
         # create database
         self.cmd('sql db create -g {} --server {} --name {} --yes'
@@ -1008,17 +1006,6 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_copy_name)
                  ])
 
-        # copy database to same server specify backup storage redundancy
-        bsr_database = "bsr_database"
-        self.cmd('sql db copy -g {} --server {} --name {} '
-                 '--dest-name {} --backup-storage-redundancy {}'
-                 .format(resource_group_1, server1, database_name, bsr_database, backup_storage_redundancy),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('name', bsr_database),
-                     JMESPathCheck('backupStorageRedundancy', 'Local')
-                 ])
-
         # copy database to same server (min parameters, plus service_objective)
         self.cmd('sql db copy -g {} --server {} --name {} '
                  '--dest-name {} --service-objective {}'
@@ -1027,6 +1014,18 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('name', database_copy_name),
                      JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                 ])
+
+        # copy database to same server specify backup storage redundancy
+        bsr_database = "bsr_database"
+        backup_storage_redundancy = 'local'
+        self.cmd('sql db copy -g {} --server {} --name {} '
+                 '--dest-name {} --backup-storage-redundancy {}'
+                 .format(resource_group_1, server1, database_name, bsr_database, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('name', bsr_database),
+                     JMESPathCheck('backupStorageRedundancy', 'Local')
                  ])
 
         # copy database to elastic pool in other server (max parameters, other than
@@ -4899,4 +4898,3 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         # Cancel log replay service
         self.cmd('sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --yes',
                  checks=NoneCheck())
-

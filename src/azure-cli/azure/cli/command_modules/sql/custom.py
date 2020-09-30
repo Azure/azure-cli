@@ -818,7 +818,6 @@ def _db_dw_create(
 
 
 def _should_show_backup_storage_redundancy_warnings(target_db_location):
-    # if not yes_confirmation and target_db_location.lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
     if target_db_location.lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
         return True
     return False
@@ -854,6 +853,7 @@ def db_create(
         server_name,
         resource_group_name,
         no_wait=False,
+        yes=None,
         **kwargs):
     '''
     Creates a DB (with 'Default' create mode.)
@@ -865,7 +865,7 @@ def db_create(
         server_name=server_name,
         resource_group_name=resource_group_name)
 
-    if _should_show_backup_storage_redundancy_warnings(location):
+    if not yes and _should_show_backup_storage_redundancy_warnings(location):
         if not kwargs['storage_account_type']:
             if not _confirm_backup_storage_redundancy_take_geo_warning():
                 return
