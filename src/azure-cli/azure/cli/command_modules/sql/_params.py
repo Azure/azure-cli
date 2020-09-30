@@ -220,7 +220,7 @@ storage_param_type = CLIArgumentType(
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
-    help='Backup storage redundancy used to store backups.',
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
     validator=validate_backup_storage_redundancy)
 
 grace_period_param_type = CLIArgumentType(
