@@ -121,7 +121,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         # flexible-server restore
         restore_server_name = 'restore-' + server_name
         restore_time = (current_time + timedelta(minutes=10)).replace(tzinfo=tzutc()).isoformat()
-        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --time {}'
+        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {}'
                  .format(database_engine, resource_group, restore_server_name, server_name, restore_time),
                  checks=[JMESPathCheck('name', restore_server_name),
                          JMESPathCheck('resourceGroup', resource_group)])
@@ -185,24 +185,24 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
                                 JMESPathCheck('startIpAddress', start_ip_address)]
 
         # firewall-rule create
-        self.cmd('{} flexible-server firewall-rule create -g {} -s {} --name {} '
+        self.cmd('{} flexible-server firewall-rule create -g {} --name {} --rule-name {} '
                  '--start-ip-address {} --end-ip-address {} '
                  .format(database_engine, resource_group, server_name, firewall_rule_name, start_ip_address, end_ip_address),
                  checks=firewall_rule_checks)
 
         # firewall-rule show
-        self.cmd('{} flexible-server firewall-rule show -g {} -s {} --name {} '
+        self.cmd('{} flexible-server firewall-rule show -g {} --name {} --rule-name {} '
                  .format(database_engine, resource_group, server_name, firewall_rule_name),
                  checks=firewall_rule_checks)
 
         # firewall-rule update
         new_start_ip_address = '9.9.9.9'
-        self.cmd('{} flexible-server firewall-rule update -g {} -s {} --name {} --start-ip-address {}'
+        self.cmd('{} flexible-server firewall-rule update -g {} --name {} --rule-name {} --start-ip-address {}'
                  .format(database_engine, resource_group, server_name, firewall_rule_name, new_start_ip_address),
                  checks=[JMESPathCheck('startIpAddress', new_start_ip_address)])
 
         new_end_ip_address = '13.13.13.13'
-        self.cmd('{} flexible-server firewall-rule update -g {} -s {} --name {} --end-ip-address {}'
+        self.cmd('{} flexible-server firewall-rule update -g {} --name {} --rule-name {} --end-ip-address {}'
                  .format(database_engine, resource_group, server_name, firewall_rule_name, new_end_ip_address))
 
         # Add second firewall-rule
@@ -210,26 +210,26 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         firewall_rule_checks = [JMESPathCheck('name', new_firewall_rule_name),
                                 JMESPathCheck('endIpAddress', end_ip_address),
                                 JMESPathCheck('startIpAddress', start_ip_address)]
-        self.cmd('{} flexible-server firewall-rule create -g {} -s {} --name {} '
+        self.cmd('{} flexible-server firewall-rule create -g {} -n {} --rule-name {} '
                  '--start-ip-address {} --end-ip-address {} '
                  .format(database_engine, resource_group, server_name, new_firewall_rule_name, start_ip_address, end_ip_address),
                  checks=firewall_rule_checks)
 
         # firewall-rule list
-        self.cmd('{} flexible-server firewall-rule list -g {} -s {}'
+        self.cmd('{} flexible-server firewall-rule list -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('length(@)', 2)])
 
         # firewall-rule delete
-        self.cmd('{} flexible-server firewall-rule delete --name {} -g {} --server {} --yes'
+        self.cmd('{} flexible-server firewall-rule delete --rule-name {} -g {} --name {} --yes'
                  .format(database_engine, firewall_rule_name, resource_group, server_name), checks=NoneCheck())
 
-        self.cmd('{} flexible-server firewall-rule list -g {} --server {}'
+        self.cmd('{} flexible-server firewall-rule list -g {} --name {}'
                  .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('length(@)', 1)])
 
-        self.cmd('{} flexible-server firewall-rule delete -g {} -s {} --name {} --yes'
+        self.cmd('{} flexible-server firewall-rule delete -g {} -n {} --rule-name {} --yes'
                  .format(database_engine, resource_group, server_name, new_firewall_rule_name))
 
-        self.cmd('{} flexible-server firewall-rule list -g {} -s {}'
+        self.cmd('{} flexible-server firewall-rule list -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
     def _test_parameter_mgmt(self, database_engine, resource_group):
@@ -374,7 +374,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                           checks=[JMESPathCheck('replicationRole', 'None')]).get_output_in_json()
 
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
                  .format(database_engine, resource_group, replicas[0], result['id']),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
@@ -409,7 +409,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # test delete master server
-        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
                  .format(database_engine, resource_group, replicas[1], result['id']),
                  checks=[
                      JMESPathCheck('name', replicas[1]),

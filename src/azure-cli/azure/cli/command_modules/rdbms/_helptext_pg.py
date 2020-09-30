@@ -60,9 +60,9 @@ type: command
 short-summary: Create a new firewall rule for a flexible server.
 examples:
   - name: Create a firewall rule allowing connections from a specific IP address.
-    text: az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testServer --name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
+    text: az postgres flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
   - name: Create a firewall rule allowing connections from an IP address range.
-    text: az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testServer --name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
+    text: az postgres flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
 """
 
 helps['postgres flexible-server firewall-rule delete'] = """
@@ -70,7 +70,7 @@ type: command
 short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
-    text: az postgres flexible-server firewall-rule delete --name testRule --resource-group testGroup --server-name testServer
+    text: az postgres flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -79,7 +79,7 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az postgres server firewall-rule list --resource-group testGroup --server-name testServer
+    text: az postgres server firewall-rule list --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -88,7 +88,7 @@ type: command
 short-summary: Get the details of a firewall rule.
 examples:
   - name: Get the details of a firewall rule.
-    text: az postgres flexible-server firewall-rule show --name testRule --resource-group testGroup --server-name testServer
+    text: az postgres flexible-server firewall-rule show --rule-name testRule --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -97,9 +97,9 @@ type: command
 short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule's start IP address.
-    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testServer --name allowiprange --start-ip-address 107.46.14.1
+    text: az postgres flexible-server firewall-rule update --resource-group testGroup --name testServer --rule-name allowiprange --start-ip-address 107.46.14.1
   - name: Update a firewall rule's start and end IP address.
-    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testServer --name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
+    text: az postgres flexible-server firewall-rule update --resource-group testGroup --name testServer --rule-name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
 """
 
 helps['postgres flexible-server list'] = """
@@ -163,12 +163,12 @@ type: command
 short-summary: Restore a flexible server from backup.
 examples:
   - name: Restore 'testServer' to a specific point-in-time as a new server 'testServerNew'.
-    text: az postgres flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --time "2017-06-15T13:10:00Z"
+    text: az postgres flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --restore-time "2017-06-15T13:10:00Z"
   - name: Restore 'testServer2' to 'testServerNew', where 'testServerNew' is in a different resource group from 'testServer2'.
     text: |
         az postgres flexible-server restore --resource-group testGroup --name testServerNew \\
             --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testServer2" \\
-            --time "2017-06-15T13:10:00Z"
+            --restore-time "2017-06-15T13:10:00Z"
 """
 
 helps['postgres flexible-server show'] = """
@@ -216,7 +216,7 @@ type: command
 short-summary: Lists available sku's in the given region.
 example:
   - name: Lists available sku's in the given region.
-    text: az mysql flexible-server list-skus -l eastus
+    text: az postgres flexible-server list-skus -l eastus
 """
 
 helps['postgres flexible-server wait'] = """
@@ -225,5 +225,18 @@ short-summary: Wait for the flexible server to satisfy certain conditions.
 example:
   - name: Wait for the flexible server to satisfy certain conditions.
     text: az postgres server wait --exists --resource-group testGroup --name testServer
+    crafted: true
+"""
+
+helps['postgres flexible-server connect'] = """
+type: command
+short-summary: Connect to a flexible server to run a query on the flexible server.
+examples:
+  - name: Test connection to a flexible server.
+    text: az postgres flexible-server connect --name testServer --admin-user testUser --admin-password testPassword --database testDatabase
+    crafted: true
+  - name: Connect to default database and run a query.
+    text: az postgres flexible-server connect --name testServer --admin-user testUser --admin-password testPassword
+          --postgres-query "select Usename, Usesuper from pg_user;" --output table
     crafted: true
 """

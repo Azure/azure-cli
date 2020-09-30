@@ -255,11 +255,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('zone', options_list=['--zone, -z'],
                            help='Availability zone into which to provision the resource.')
 
-            c.argument('vnet_resource_id', options_list=['--vnet'], help='The virtual network name.')
-            c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The virtual network address prefix.')
-            c.argument('subnet_address_prefix', options_list=['--subnet-prefixes'], help='The subnet address prefix.')
+            c.argument('vnet_resource_id', options_list=['--vnet'], help='Name of an existing virtual network or name of a new one to create. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
+            c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
+            c.argument('subnet_address_prefix', options_list=['--subnet-prefixes'], help='The subnet IP address prefix to use when creating a new VNet in CIDR format. Default value is 10.0.0.0/24.')
             c.argument('subnet_arm_resource_id', options_list=['--subnet'],
-                       help='Name or ID of the subnet that allows access to an Azure Flexible Server. ')
+                       help='Resource ID of an existing subnet. Please note that the subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers/Microsoft.DBforMySQL/flexibleServers.After delegation, this subnet cannot be used for any other type of Azure resources.')
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), options_list=['--admin-user, -u'], arg_group='Authentication', arg_type=administrator_login_setter_arg_type,
@@ -286,7 +286,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The name of the new server that is created by the restore command.')
             c.argument('source_server', options_list=['--source-server'],
                        help='The name or resource ID of the source server to restore from.')
-            c.argument('restore_point_in_time', options_list=['--time'],
+            c.argument('restore_point_in_time', options_list=['--restore-time'],
                        help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
@@ -357,14 +357,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 if scope == "list":
-                    c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                    c.argument('server_name', id_part=None, options_list=['--name', '-n'], arg_type=server_name_arg_type)
                 else:
-                    c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                    c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type)
 
         for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name', '-n'],
+                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'],
                            help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters. ')
 
         with self.argument_context('{} flexible-server firewall-rule create'.format(command_group)) as c:
@@ -408,17 +408,31 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
 
         with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
-            c.argument('server_name', id_part=None, options_list=['--name', '-s'], help='Name of the server.')
+            c.argument('server_name', id_part=None, options_list=['--name', '-s'], help='Name of the source server.')
 
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
-            c.argument('source_server', options_list=['--source-server'],
+            c.argument('server_name', options_list=['--source-server'],
                        help='The name or resource ID of the source server to restore from.')
+            c.argument('replica_name', options_list=['--replica-name'],
+                       help='The name of the server to restore to.')
             c.ignore('location')
             c.ignore('sku_name')
             c.ignore('tier')
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
-            c.argument('server_name', options_list=['--name', '-s'], help='Name of the server.')
+            c.argument('server_name', options_list=['--name', '-s'], help='Name of the replica server.')
+
+        with self.argument_context('{} flexible-server connect'.format(command_group)) as c:
+            c.argument('server_name', options_list=['--name', '-s'], arg_type=server_name_arg_type, help='Name of the server.')
+            c.argument('administrator_login', arg_type=administrator_login_arg_type, options_list=['--admin-user', '-u'],
+                       help='The login username of the administrator.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+                       help='The login password of the administrator.')
+            c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+            if command_group == "mysql":
+                c.argument('mysql_query', options_list=['--mysql-query'], help='The MySQL query to run on the server.')
+            elif command_group == 'postgres':
+                c.argument('postgres_query', options_list=['--postgres-query'], help='The PostgreSQL query to run on the server.')
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')
