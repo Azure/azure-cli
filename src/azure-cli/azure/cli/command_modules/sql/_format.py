@@ -385,6 +385,7 @@ def mi_transform(result):
 
     return result
 
+
 def _get_external_backup_storage_redundancy(self):
     return {
         'lrs': 'Local',
