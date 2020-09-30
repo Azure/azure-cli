@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     retention_validator, tls_validator, public_access_validator, pg_storage_validator, mysql_storage_validator, tier_validator, \
-    pg_sku_name_validator, mysql_sku_name_validator, pg_version_validator, mysql_version_validator, maintenance_window_validator, ip_address_validator
+    pg_sku_name_validator, pg_version_validator, mysql_version_validator, maintenance_window_validator, ip_address_validator
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
@@ -240,9 +240,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('zone', options_list=['--zone, -z'],
                            help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
-                c.argument('tier', default='Burstable', validator=tier_validator,
+                c.argument('tier', default='Burstable',
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
-                c.argument('sku_name', default='Standard_B1ms', options_list=['--sku-name'], validator=mysql_sku_name_validator,
+                c.argument('sku_name', default='Standard_B1ms', options_list=['--sku-name'],
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', default='10', options_list=['--storage-size'], type=int, validator=mysql_storage_validator,
                            help='The storage capacity of the server. Minimum is 5 GiB and increases in 1 GiB increments. Max is 16 TiB.')
@@ -290,8 +290,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.ignore('assign_identity')
-            c.argument('tier', options_list=['--tier'], validator=tier_validator,
-                       help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
             c.argument('backup_retention', type=int, options_list=['--backup-retention'],
                        help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
@@ -302,7 +300,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
             c.argument('tags', tags_type)
             if command_group == 'mysql':
-                c.argument('sku_name', options_list=['--sku-name'], validator=mysql_sku_name_validator,
+                c.argument('tier', options_list=['--tier'],
+                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
+                c.argument('sku_name', options_list=['--sku-name'],
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
                            validator=mysql_storage_validator,
@@ -317,6 +317,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
             elif command_group == 'postgres':
+                c.argument('tier', options_list=['--tier'], validator=tier_validator,
+                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', options_list=['--sku-name'], validator=pg_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention Standard_{VM name}. Examples: Standard_D4s_v3 ')
                 c.argument('storage_mb', options_list=['--storage-size'], type=int,
@@ -410,13 +412,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server'],
                        help='The name or resource ID of the source server to restore from.')
-            c.argument('tier', options_list=['--tier'], validator=tier_validator,
-                       help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
             if command_group == 'mysql':
+                c.argument('tier', options_list=['--tier'],
+                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
                 c.argument('sku_name', options_list=['--sku-name'],
-                           validator=mysql_sku_name_validator,
                            help='The name of the compute SKU. Follows the convention'
                                 ' Standard_{VM name}. Examples: Standard_B1ms, Standard_D4s_v3 ')
+            if command_group == 'postgres':
+                c.argument('tier', options_list=['--tier'], validator=tier_validator,
+                           help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized ')
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-s'], help='Name of the server.')
