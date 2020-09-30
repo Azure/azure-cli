@@ -388,7 +388,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
                            JMESPathCheck('readReplicaCount', '0'),
-                           JMESPathCheck('backup_storage_redundancy_local', 'Local')]).get_output_in_json()
+                           JMESPathCheck('backupStorageRedundancy', 'Local')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
                  .format(resource_group, server),
@@ -688,7 +688,7 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
         update_service_objective = 'GP_Gen5_8'
 
         # Create db
-        self.cmd('sql db create -g {} -s {} -n {}'
+        self.cmd('sql db create -g {} -s {} -n {} --yes'
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -977,8 +977,8 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
-    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1', location='westeurope')
-    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2', location='westeurope')
+    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1', location='southeastasia')
+    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2', location='southeastasia')
     @AllowLargeResponse()
     def test_sql_db_copy(self, resource_group_1, resource_group_2,
                          resource_group_location,
@@ -989,7 +989,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         backup_storage_redundancy = 'local'
 
         # create database
-        self.cmd('sql db create -g {} --server {} --name {}'
+        self.cmd('sql db create -g {} --server {} --name {} --yes'
                  .format(resource_group_1, server1, database_name),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -1664,19 +1664,19 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='westeurope')
+                           location='southeastasia')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='westeurope')
+                           location='southeastasia')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='southeastasia')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='southeastasia')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='westeurope')
+                       location='southeastasia')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
@@ -1706,7 +1706,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('resourceGroup', s.group)])
 
         # create db in first server
-        self.cmd('sql db create -g {} -s {} -n {}'
+        self.cmd('sql db create -g {} -s {} -n {} --yes'
                  .format(s1.group, s1.name, database_name),
                  checks=[
                      JMESPathCheck('name', database_name),
