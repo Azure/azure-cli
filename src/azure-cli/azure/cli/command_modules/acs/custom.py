@@ -24,9 +24,9 @@ import threading
 import time
 import uuid
 import webbrowser
+from math import isnan
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
-from math import isnan
 
 # pylint: disable=import-error
 import yaml
