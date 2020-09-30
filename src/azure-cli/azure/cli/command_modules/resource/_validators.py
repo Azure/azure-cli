@@ -16,6 +16,52 @@ except ImportError:
 MSI_LOCAL_ID = '[system]'
 
 
+def _validate_template_input(namespace):
+    if namespace.template_file and not os.path.isfile(namespace.template_file):
+        raise CLIError('Please enter a valid file path')
+
+
+def _validate_template_spec(namespace):
+    if namespace.template_spec is None:
+        if (namespace.name is None or namespace.resource_group_name is None):
+            raise CLIError('incorrect usage: Please enter '
+                           'a resource group and resource name or a resource ID for --template-spec')
+    else:
+        from azure.mgmt.core.tools import is_valid_resource_id
+        namespace.template_spec = namespace.template_spec.strip("\"")
+        if not is_valid_resource_id(namespace.template_spec):
+            raise CLIError('--template-spec is not a valid resource ID.')
+
+
+def _validate_template_spec_out(namespace):
+    _validate_template_spec(namespace)
+    if namespace.output_folder and not os.path.isdir(namespace.output_folder):
+        raise CLIError('Please enter a valid output folder')
+
+
+def _validate_deployment_name_with_template_specs(namespace):
+    # If missing,try come out with a name associated with the template name
+    if namespace.deployment_name is None:
+        template_filename = None
+        if namespace.template_file and os.path.isfile(namespace.template_file):
+            template_filename = namespace.template_file
+        if namespace.template_uri and urlparse(namespace.template_uri).scheme:
+            template_filename = urlsplit(namespace.template_uri).path
+        if namespace.template_spec:
+            from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
+            namespace.template_spec = namespace.template_spec.strip("\"")
+            if not is_valid_resource_id(namespace.template_spec):
+                raise CLIError('--template-spec is not a valid resource ID.')
+            if namespace.template_spec.__contains__("versions") is False:
+                raise CLIError('Please enter a valid template spec version ID.')
+            template_filename = parse_resource_id(namespace.template_spec).get('resource_name')
+        if template_filename:
+            template_filename = os.path.basename(template_filename)
+            namespace.deployment_name = os.path.splitext(template_filename)[0]
+        else:
+            namespace.deployment_name = 'deployment1'
+
+
 def _validate_deployment_name(namespace):
     # If missing,try come out with a name associated with the template name
     if namespace.deployment_name is None:
@@ -32,9 +78,19 @@ def _validate_deployment_name(namespace):
 
 
 def process_deployment_create_namespace(namespace):
-    if bool(namespace.template_uri) == bool(namespace.template_file):
-        raise CLIError('incorrect usage: --template-file FILE | --template-uri URI')
-    _validate_deployment_name(namespace)
+    try:
+        if [bool(namespace.template_uri), bool(namespace.template_file),
+                bool(namespace.template_spec)].count(True) != 1:
+            raise CLIError('incorrect usage: Chose only one of'
+                           ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
+    except Exception:  # pylint: disable=broad-except
+        if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) != 1:
+            raise CLIError('incorrect usage: Chose only one of'
+                           ' --template-file FILE | --template-uri URI')
+    if(bool(namespace.template_uri) or bool(namespace.template_file)):
+        _validate_deployment_name(namespace)
+    else:
+        _validate_deployment_name_with_template_specs(namespace)
 
 
 def internal_validate_lock_parameters(namespace, resource_group, resource_provider_namespace,

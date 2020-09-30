@@ -166,6 +166,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         'for retrieving the remaining of the results. Provide "*" to return all.'
     )
 
+    if_modified_since_type = CLIArgumentType(
+        help='Commence only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+        type=get_datetime_type(False))
+    if_unmodified_since_type = CLIArgumentType(
+        help='Commence only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+        type=get_datetime_type(False))
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -179,12 +186,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage', arg_group='Precondition') as c:
-        c.argument('if_modified_since',
-                   help='Commence only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
-                   type=get_datetime_type(False))
-        c.argument('if_unmodified_since',
-                   help='Commence only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
-                   type=get_datetime_type(False))
+        c.argument('if_modified_since', if_modified_since_type)
+        c.argument('if_unmodified_since', if_unmodified_since_type)
         c.argument('if_match')
         c.argument('if_none_match')
 
@@ -832,8 +835,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
-            c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition')
-            c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition', arg_type=if_modified_since_type)
+            c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition',
+                       arg_type=if_unmodified_since_type)
             c.argument('{}_if_match'.format(item), arg_group='Pre-condition')
             c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
         c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
@@ -862,8 +866,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
 
         c.register_source_uri_arguments(validator=process_blob_source_uri, blob_only=True)
-        c.argument('destination_if_modified_since', arg_group='Pre-condition')
-        c.argument('destination_if_unmodified_since', arg_group='Pre-condition')
+        c.argument('destination_if_modified_since', arg_group='Pre-condition', arg_type=if_modified_since_type)
+        c.argument('destination_if_unmodified_since', arg_group='Pre-condition', arg_type=if_unmodified_since_type)
         c.argument('destination_if_match', arg_group='Pre-condition')
         c.argument('destination_if_none_match', arg_group='Pre-condition')
         c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
@@ -1080,7 +1084,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        'only available for premium file shares (file shares in the FileStorage account type).')
             c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
                        min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
-            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), is_preview=True, min_api='2019-06-01',
+            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), min_api='2019-06-01',
                        help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
                        '(default), Hot, and Cool. FileStorage account can choose Premium.')
 
