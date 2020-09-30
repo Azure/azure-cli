@@ -303,6 +303,10 @@ def cf_mysql_flexible_location_capabilities(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).location_based_capabilities
 
 
+def cf_mysql_check_resource_availability(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).check_name_availability
+
+
 def cf_postgres_flexible_servers(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).servers
 
@@ -319,10 +323,13 @@ def cf_postgres_flexible_location_capabilities(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
 
 
+def cf_postgres_check_resource_availability(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).check_name_availability
+
+
 def resource_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def network_client_factory(cli_ctx):
-    from azure.mgmt.network import NetworkManagementClient
-    return get_mgmt_service_client(cli_ctx, NetworkManagementClient, api_version="2018-08-01")
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
