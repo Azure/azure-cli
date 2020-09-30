@@ -1513,12 +1513,11 @@ def _get_diagnostic_settings_url(
 
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    if database_name == None:
-        diagnostic_settings_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}'.format(get_subscription_id(cmd.cli_ctx), resource_group_name, server_name)
-    else:
-        diagnostic_settings_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(get_subscription_id(cmd.cli_ctx), resource_group_name, server_name, database_name)
+    return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(get_subscription_id(cmd.cli_ctx),
+        resource_group_name, 
+        server_name, 
+        database_name if database_name != None else "master")
 
-    return diagnostic_settings_url
 
 def _get_diagnostic_settings(
         cmd,
@@ -1703,8 +1702,6 @@ def _audit_policy_update_diagnostic_settings(
     Update audit policy's diagnostic settings
     '''
 
-    print("updating diagnostic settings...")
-
     # Request diagnostic settings
     diagnostic_settings = _get_diagnostic_settings(cmd, client, resource_group_name, server_name, database_name)
 
@@ -1730,8 +1727,6 @@ def _audit_policy_update_diagnostic_settings(
 
     # If no audit diagnostic settings found then create one
     if num_of_audit_diagnostic_settings == 0:
-        print("updating diagnostic settings... 0")
-
         created_diagnostic_settings = create_diagnostics_settings(
             client = azure_monitor_client.diagnostic_settings,
             name = name,
@@ -1746,9 +1741,7 @@ def _audit_policy_update_diagnostic_settings(
         # Return roolback data tuple
         return [("delete", created_diagnostic_settings)]
 
-    print("updating diagnostic settings... 1")
-
-    # This leaves us with case when num_of_audit_diagnostic_settings is 1
+    # This leaves us with case when num_of_audit_diagnostic_settings is 1    
     other_diagnostic_settings = next((d for d in audit_diagnostic_settings if hasattr(d, 'logs') and next((l for l in d.logs if l.enabled and l.category != 'SQLSecurityAuditEvents'), None) != None), None)
     original_audit_diagnostic_settings = audit_diagnostic_settings[0]
 
@@ -1769,8 +1762,6 @@ def _audit_policy_update_diagnostic_settings(
 
     # If there is no other categories except SQLSecurityAuditEvents update the existing single diagnostic settings
     if not other_diagnostic_settings:
-        print("updating diagnostic settings... 1 1")
-
         # Update existing diagnostic settings
         updated_diagnostic_settings = create_diagnostics_settings(
             client = azure_monitor_client.diagnostic_settings,
@@ -1785,8 +1776,6 @@ def _audit_policy_update_diagnostic_settings(
         
         # Return roolback data tuple
         return [("update", original_audit_diagnostic_settings)]
-
-    print("updating diagnostic settings... 1 2")
 
     # In case there are other categories in the existing single diagnostic settings a "split" must be performed:
     #   1. Disable SQLSecurityAuditEvents category in found diagnostic settings
@@ -1813,7 +1802,8 @@ def _audit_policy_update_diagnostic_settings(
         storage_account = original_audit_diagnostic_settings.storage_account_id,
         workspace = original_audit_diagnostic_settings.workspace_id)
 
-    print("updating diagnostic settings... 1 2 1")
+    # Add 'original_audit_diagnostic_settings' in rollback_data list
+    rollback_data = [("update", original_audit_diagnostic_settings)]
 
     # Create new diagnostic settings with enabled 'SQLSecurityAuditEvents' category
     created_diagnostic_settings = create_diagnostics_settings(
@@ -1827,10 +1817,10 @@ def _audit_policy_update_diagnostic_settings(
         storage_account = original_audit_diagnostic_settings.storage_account_id,
         workspace = updated_log_analytics_workspace_resource_id)
 
-    print("updating diagnostic settings... 1 2 2")        
-    
-    # Return roolback data tuples
-    return [("delete", created_diagnostic_settings), ("update", original_audit_diagnostic_settings)]
+    # Add 'created_diagnostic_settings' in rollback_data list in reverse order
+    rollback_data.insert(0, ("delete", created_diagnostic_settings))
+
+    return rollback_data
 
 
 def _audit_policy_update_global_settings(
@@ -1851,10 +1841,6 @@ def _audit_policy_update_global_settings(
     '''
     Update audit policy's global settings
     '''
-
-    print("updating global settings...")
-
-    raise Exception("Test exception")
 
     # Request audit policy
     if database_name == None :
@@ -1907,8 +1893,11 @@ def _audit_policy_update_global_settings(
             audit_policy.is_azure_monitor_target_enabled = (log_analytics_target_state != None and log_analytics_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower()) or \
                                                            (event_hub_target_state != None and event_hub_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower())
 
-    # Update audit policy    
-    client.create_or_update(resource_group_name, server_name, database_name, audit_policy)
+    # Update audit policy
+    if database_name == None:
+        client.create_or_update(resource_group_name, server_name, audit_policy)
+    else:
+        client.create_or_update(resource_group_name, server_name, database_name, audit_policy)
 
     return audit_policy
 
@@ -1921,7 +1910,9 @@ def _audit_policy_update_rollback(
         database_name,
         roolback_data):
 
-    print("rolling back diagnostic settings...")
+    '''
+    Rollback diagnostic settings change
+    '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.mgmt.monitor import MonitorManagementClient
@@ -1935,10 +1926,6 @@ def _audit_policy_update_rollback(
         rollback_diagnostic_settings = rd[1]
 
         if rd[0] == "update":
-            print("rollback update...")
-
-            input("Press Enter to continue...")
-
             create_diagnostics_settings(
                 client = azure_monitor_client.diagnostic_settings,
                 name = rollback_diagnostic_settings.name,
@@ -1949,16 +1936,9 @@ def _audit_policy_update_rollback(
                 event_hub_rule = rollback_diagnostic_settings.event_hub_authorization_rule_id,
                 storage_account = rollback_diagnostic_settings.storage_account_id,
                 workspace = rollback_diagnostic_settings.workspace_id)
-
-            print("rollback update completed")
         else:
-            print("rollback delete...")
-
-            input("Press Enter to continue...")
-
             azure_monitor_client.diagnostic_settings.delete(diagnostic_settings_url, rollback_diagnostic_settings.name)
 
-            print("rollback delete completed")
 
 def _audit_policy_update(
         cmd,
@@ -2131,101 +2111,6 @@ def db_audit_policy_update(
             event_hub_target_state,
             event_hub_authorization_rule_id,
             event_hub_name)
-
-def db_audit_policy_update_old(
-        cmd,
-        instance,
-        state=None,
-        storage_account=None,
-        storage_endpoint=None,
-        storage_account_access_key=None,
-        audit_actions_and_groups=None,
-        retention_days=None):
-    '''
-    Updates an audit policy. Custom update function to apply parameters to instance.
-    '''
-
-    print ("db_audit_policy_update_old")
-
-    # Apply state
-    if state:
-        instance.state = BlobAuditingPolicyState[state.lower()]
-
-    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
-
-    # Set storage-related properties
-    _db_security_policy_update(
-        cmd.cli_ctx,
-        instance,
-        enabled,
-        storage_account,
-        storage_endpoint,
-        storage_account_access_key,
-        instance.is_storage_secondary_key_in_use)
-
-    # Set other properties
-    if audit_actions_and_groups:
-        instance.audit_actions_and_groups = audit_actions_and_groups
-
-    # If auditing is enabled, make sure that the actions and groups are set to default
-    # value in case they were removed previously (When disabling auditing)
-    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
-        instance.audit_actions_and_groups = [
-            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
-            "FAILED_DATABASE_AUTHENTICATION_GROUP",
-            "BATCH_COMPLETED_GROUP"]
-
-    if retention_days:
-        instance.retention_days = retention_days
-
-    return instance
-
-
-def server_audit_policy_update_old(
-        cmd,
-        instance,
-        state=None,
-        storage_account=None,
-        storage_endpoint=None,
-        storage_account_access_key=None,
-        audit_actions_and_groups=None,
-        retention_days=None):
-    '''
-    Updates an audit policy. Custom update function to apply parameters to instance.
-    '''
-
-    # Apply state
-    if state:
-        instance.state = BlobAuditingPolicyState[state.lower()]
-
-    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
-
-    # Set storage-related properties
-    _db_security_policy_update(
-        cmd.cli_ctx,
-        instance,
-        enabled,
-        storage_account,
-        storage_endpoint,
-        storage_account_access_key,
-        instance.is_storage_secondary_key_in_use)
-
-    # Set other properties
-    if audit_actions_and_groups:
-        instance.audit_actions_and_groups = audit_actions_and_groups
-
-    # If auditing is enabled, make sure that the actions and groups are set to default
-    # value in case they were removed previously (When disabling auditing)
-    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
-        instance.audit_actions_and_groups = [
-            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
-            "FAILED_DATABASE_AUTHENTICATION_GROUP",
-            "BATCH_COMPLETED_GROUP"]
-
-    if retention_days:
-        instance.retention_days = retention_days
-
-    return instance
 
 
 def update_long_term_retention(
