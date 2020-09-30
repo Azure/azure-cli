@@ -284,10 +284,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], arg_type=overriding_none_arg_type,
                        help='The name of the new server that is created by the restore command.')
-            c.argument('source_server', options_list=['--source-server'],
-                       help='The name or resource ID of the source server to restore from.')
             c.argument('restore_point_in_time', options_list=['--restore-time'],
                        help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+            if command_group == 'postgres':
+                c.argument('source_server', options_list=['--source-server'],
+                           help='The name of the source server to restore from.')
+            elif command_group == 'mysql':
+                c.argument('source_server', options_list=['--source-server'],
+                           help='The name or resource ID of the source server to restore from.')
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.ignore('assign_identity')
@@ -408,7 +412,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
 
         with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
-            c.argument('server_name', id_part=None, options_list=['--name', '-s'], help='Name of the source server.')
+            c.argument('server_name', id_part=None, options_list=['--name', '-n'], help='Name of the source server.')
 
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
             c.argument('server_name', options_list=['--source-server'],
@@ -420,7 +424,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('tier')
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
-            c.argument('server_name', options_list=['--name', '-s'], help='Name of the replica server.')
+            c.argument('server_name', options_list=['--name', '-n'], help='Name of the replica server.')
 
     _flexible_server_params('postgres')
     _flexible_server_params('mysql')

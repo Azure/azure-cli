@@ -148,6 +148,8 @@ def flexible_server_restore(cmd, client,
                 name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
+    else:
+        source_server_id = source_server
 
     from azure.mgmt.rdbms import postgresql_flexibleservers
     parameters = postgresql_flexibleservers.models.Server(

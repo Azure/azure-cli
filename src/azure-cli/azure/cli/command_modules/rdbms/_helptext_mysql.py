@@ -19,7 +19,7 @@ examples:
   - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with VNET enabled by default.
     text: |
         az mysql flexible-server create
-  - name: Create a Mysql flexible server with default params (resource group, location, servername, username, password) with all public IPs(0.0.0.0 - 255.255.255.255).
+  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with all public IPs (0.0.0.0 - 255.255.255.255).
     text: |
         az mysql flexible-server create --public-access all
   - name: Create a MySQL flexible server with default params ( resource group, location, servername, username, password ) with public access without any firewall rules.
@@ -204,7 +204,7 @@ type: command
 short-summary: List all read replicas for a given server.
 examples:
   - name: List all read replicas for master server 'testServer'.
-    text: az mysql flexible-server replica list -g testGroup -s primaryservername
+    text: az mysql flexible-server replica list -g testGroup -n primaryservername
 """
 
 helps['mysql flexible-server replica stop-replication'] = """
@@ -212,7 +212,7 @@ type: command
 short-summary: Stop replication to a read replica and make it a read/write server.
 examples:
   - name: Stop replication to 'testReplicaServer' and make it a read/write server.
-    text: az mysql flexible-server replica stop-replication -g testGroup -s testReplicaServer
+    text: az mysql flexible-server replica stop-replication -g testGroup -n testReplicaServer
 """
 
 helps['mysql flexible-server restart'] = """
