@@ -227,16 +227,3 @@ example:
     text: az postgres server wait --exists --resource-group testGroup --name testServer
     crafted: true
 """
-
-helps['postgres flexible-server connect'] = """
-type: command
-short-summary: Connect to a flexible server to run a query on the flexible server.
-examples:
-  - name: Test connection to a flexible server.
-    text: az postgres flexible-server connect --name testServer --admin-user testUser --admin-password testPassword --database testDatabase
-    crafted: true
-  - name: Connect to default database and run a query.
-    text: az postgres flexible-server connect --name testServer --admin-user testUser --admin-password testPassword
-          --postgres-query "select Usename, Usesuper from pg_user;" --output table
-    crafted: true
-"""

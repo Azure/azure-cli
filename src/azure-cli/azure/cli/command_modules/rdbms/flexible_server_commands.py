@@ -132,7 +132,6 @@ def load_flexibleserver_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_sku)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
-        g.custom_command('connect', 'connect_to_flexible_server_postgresql')
 
     # MySQL commands
     with self.command_group('mysql flexible-server', mysql_flexible_servers_sdk,
@@ -190,7 +189,6 @@ def load_flexibleserver_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_sku)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
-        g.custom_command('connect', 'connect_to_flexible_server_mysql')
 
     with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk,
                             is_preview=True) as g:
