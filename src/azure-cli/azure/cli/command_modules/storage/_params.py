@@ -1084,7 +1084,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        'only available for premium file shares (file shares in the FileStorage account type).')
             c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
                        min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
-            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), is_preview=True, min_api='2019-06-01',
+            c.argument('access_tier', arg_type=get_enum_type(t_access_tier), min_api='2019-06-01',
                        help='Access tier for specific share. GpV2 account can choose between TransactionOptimized '
                        '(default), Hot, and Cool. FileStorage account can choose Premium.')
 

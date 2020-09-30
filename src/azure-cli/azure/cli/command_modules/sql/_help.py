@@ -907,6 +907,55 @@ type: command
 short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
 """
 
+helps['sql midb log-replay'] = """
+type: group
+short-summary: SQL Managed Instance database Log Replay service commands.
+"""
+
+helps['sql midb log-replay start'] = """
+type: command
+short-summary: Start Log Replay service on specified database.
+examples:
+  - name: Start Log Replay service with auto complete option.
+    text: az sql midb log-replay start -g mygroup --mi myinstance -n mymanageddb -a --last-bn "backup.bak" --storage-uri "https://test.blob.core.windows.net/testing" --storage-sas "sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2Fgjocqwerqwer41s%3D"
+  - name: Start Log Replay service without auto complete option.
+    text: az sql midb log-replay start -g mygroup --mi myinstance -n mymanageddb --storage-uri "https://test.blob.core.windows.net/testing" --storage-sas "sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2Fgjocqwerqwer41s%3D"
+"""
+
+helps['sql midb log-replay complete'] = """
+type: command
+short-summary: Complete Log Replay service on specified database.
+examples:
+  - name: Complete log replay service.
+    text: az sql midb log-replay complete -g mygroup --mi myinstance -n mymanageddb --last-backup-name "backup.bak"
+"""
+
+helps['sql midb log-replay show'] = """
+type: command
+short-summary: Get status of Log Replay service.
+examples:
+  - name: Get status of the ongoing log replay service.
+    text: az sql midb log-replay show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql midb log-replay stop'] = """
+type: command
+short-summary: Stop Log Replay service.
+examples:
+  - name: Stop ongoing log replay service by deleting database.
+    text: az sql midb log-replay stop -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql midb log-replay wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+examples:
+  - name: Place the CLI in a waiting state until a condition of the managed database is met after starting log replay service.
+    text: az sql midb log-replay wait --exists --resource-group mygroup --managed-instance myinstance --name mymanageddb
+  - name: Place the CLI in a waiting state until a condition of the managed database is met after stopping log replay service.
+    text: az sql midb log-replay wait --deleted --resource-group mygroup --managed-instance myinstance --name mymanageddb
+"""
+
 helps['sql server'] = """
 type: group
 short-summary: Manage SQL servers.
