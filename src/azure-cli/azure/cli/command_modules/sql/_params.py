@@ -799,12 +799,6 @@ def load_arguments(self, _):
                    help='Name of the resource group that the other replica is in. If unspecified,'
                    ' defaults to the first database\'s resource group.')
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
-
-        c.argument('yes',
-                   options_list=['--yes', '-y'],
-                   help='Do not prompt for confirmation.', action='store_true')
 
     #####
     #           sql db audit-policy & threat-policy
@@ -983,7 +977,9 @@ def load_arguments(self, _):
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
 
         c.argument('storage_account_type',
+                   required=False,
                    arg_type=backup_storage_redundancy_param_type)
+
 
     ###############################################
     #                sql dw                       #
@@ -1825,6 +1821,7 @@ def load_arguments(self, _):
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id. '
                    'If provided, other arguments are not required. ')
 
+
     with self.argument_context('sql midb ltr-backup list') as c:
         c.argument('database_name',
                    options_list=['--database', '-d'],
@@ -1870,6 +1867,9 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql midb log-replay start') as c:
         create_args_for_complex_type(

@@ -377,7 +377,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         backup_storage_redundancy_zone = 'zone'
 
         # test sql db commands
-        db1 = self.cmd('sql db create -g {} --server {} --name {} --read-scale {} --backup-storage-redundancy {}'
+        db1 = self.cmd('sql db create -g {} --server {} --name {} --read-scale {} --backup-storage-redundancy {} --yes'
                        .format(resource_group, server, database_name, read_scale_disabled, backup_storage_redundancy_local),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group),
@@ -557,6 +557,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', vcore_edition_updated),
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
                      JMESPathCheck('sku.family', vcore_family_updated)])
+
 
     @ResourceGroupPreparer(name_prefix='clitest-sql', location='eastus2')
     @SqlServerPreparer(name_prefix='clitest-sql', location='eastus2')
@@ -975,8 +976,8 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
-    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='southeastasia')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='southeastasia')
     @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1', location='southeastasia')
     @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2', location='southeastasia')
     @AllowLargeResponse()
@@ -1014,7 +1015,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                  .format(resource_group_1, server1, database_name, bsr_database, backup_storage_redundancy),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('name', database_copy_name),
+                     JMESPathCheck('name', bsr_database),
                      JMESPathCheck('backupStorageRedundancy', 'Local')
                  ])
 
@@ -1155,7 +1156,7 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
                          bsr_database, backup_storage_redundancy),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', restore_standalone_database_name),
+                     JMESPathCheck('name', bsr_database),
                      JMESPathCheck('backupStorageRedundancy', 'Geo')])
 
 
@@ -4637,7 +4638,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         information_type = 'Name'
         label_name = 'Confidential - GDPR'
         information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
-        label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
+        label_id = 'b258e133-6800-46b2-a53d-705fb5202bf3'
 
         self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
@@ -4778,7 +4779,7 @@ class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
         # Failover managed instance primary replica
         self.cmd('sql mi failover -g {resource_group} -n {managed_instance_name}', checks=NoneCheck())
 
-        
+
 class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitest-logreplay', location='westcentralus')
     def test_sql_midb_logreplay_mgmt(self, resource_group, resource_group_location):
@@ -4899,4 +4900,3 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
         self.cmd('sql midb log-replay stop -g {resource_group} --mi {managed_instance_name} -n {managed_database_name1} --yes',
                  checks=NoneCheck())
 
-        

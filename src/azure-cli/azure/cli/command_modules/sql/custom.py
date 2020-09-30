@@ -1846,6 +1846,7 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
+        storage_account_type,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
@@ -1866,6 +1867,7 @@ def restore_long_term_retention_backup(
 
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
+    kwargs['storage_account_type'] = storage_account_type
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
