@@ -3660,11 +3660,6 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
     enable_zip_deploy(cmd, rg_name, name, zip_file_path)
-    # Remove the file after deployment, handling exception if user removed the file manually
-    try:
-        os.remove(zip_file_path)
-    except OSError:
-        pass
 
     if launch_browser:
         logger.warning("Launching app using default browser")
