@@ -12,9 +12,8 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
-     cf_postgres_check_resource_availability
-from .flexible_server_custom_common import user_confirmation, server_list_custom_func
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_check_resource_availability
+from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
     DEFAULT_LOCATION_PG
@@ -351,7 +350,13 @@ def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login,
 
     # Connect to mysql and get cursor to run sql commands
     try:
-        connection = psycopg2.connect(user=administrator_login, host=host, password=administrator_login_password, database=database_name)
+        connection_kwargs = {
+            'host': host,
+            'database': database_name,
+            'user': administrator_login,
+            'password': administrator_login_password if administrator_login_password is not None else '{administrator_login_password}'
+        }
+        connection = psycopg2.connect(**connection_kwargs)
         connection.set_session(autocommit=True)
         logger.warning('Successfully Connected to PostgreSQL.')
         cursor = connection.cursor()

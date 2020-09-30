@@ -16,18 +16,15 @@ helps['mysql flexible-server create'] = """
 type: command
 short-summary: Create a flexible server.
 examples:
-  - name: Create a MySQL flexible server with default params ( resource group, location, servername, username, password ) with VNET enabled by default.
+  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with VNET enabled by default.
     text: |
-        az mysql flexible-server create 
-    
-  - name: Create a MySQL flexible server with default params ( resource group, location, servername, username, password ) with all public IPs(0.0.0.0 - 255.255.255.255).
+        az mysql flexible-server create
+  - name: Create a Mysql flexible server with default params (resource group, location, servername, username, password) with all public IPs(0.0.0.0 - 255.255.255.255).
     text: |
-    az mysql flexible-server create --public-access all
-    
+        az mysql flexible-server create --public-access all
   - name: Create a MySQL flexible server with default params ( resource group, location, servername, username, password ) with public access without any firewall rules.
     text: |
-    az mysql flexible-server create --public-access none
-    
+        az mysql flexible-server create --public-access none
   - name: Create a MySQL flexible server with specified SKU and storage, using defaults from local context.
     text: |
         az mysql flexible-server create --name testServer --admin-password password

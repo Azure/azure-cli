@@ -17,7 +17,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
-from .flexible_server_custom_common import user_confirmation, server_list_custom_func
+from .flexible_server_custom_common import user_confirmation
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
 from .validators import mysql_arguments_validator
 
@@ -418,7 +418,13 @@ def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, admi
 
     # Connect to mysql and get cursor to run sql commands
     try:
-        connection = mysql_connector.connect(user=administrator_login, host=host, password=administrator_login_password, database=database_name)
+        connection_kwargs = {
+            'host': host,
+            'database': database_name,
+            'user': administrator_login,
+            'password': administrator_login_password if administrator_login_password is not None else '{administrator_login_password}'
+        }
+        connection = mysql_connector.connect(**connection_kwargs)
         logger.warning('Successfully Connected to MySQL.')
         cursor = connection.cursor()
     except Exception as e:

@@ -332,5 +332,4 @@ def resource_client_factory(cli_ctx, **_):
 
 
 def network_client_factory(cli_ctx):
-    from azure.mgmt.network import NetworkManagementClient
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)

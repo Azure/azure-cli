@@ -131,6 +131,8 @@ DEPENDENCIES = [
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'jsmin~=2.2.2',
+    'mysql-connector-python~=8.0.13',
+    'psycopg2-binary~=2.8.5',
     'pytz==2019.1',
     'scp~=0.13.2',
     'sshtunnel~=0.1.4',
