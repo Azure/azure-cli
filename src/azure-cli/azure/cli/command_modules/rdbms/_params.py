@@ -286,7 +286,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                        help='The name of the new server that is created by the restore command.')
             c.argument('source_server', options_list=['--source-server'],
                        help='The name or resource ID of the source server to restore from.')
-            c.argument('restore_point_in_time', options_list=['--point-in-time'],
+            c.argument('restore_point_in_time', options_list=['--time'],
                        help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
