@@ -408,7 +408,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
 
         with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
-            c.argument('server_name', id_part=None, options_list=['--name', '-s'], help='Name of the server.')
+            c.argument('server_name', id_part=None, options_list=['--name', '-s'], help='Name of the source server.')
 
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
             c.argument('server_name', options_list=['--source-server'],
@@ -420,7 +420,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('tier')
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
-            c.argument('server_name', options_list=['--name', '-s'], help='Name of the source server.')
+            c.argument('server_name', options_list=['--name', '-s'], help='Name of the replica server.')
 
         with self.argument_context('{} flexible-server connect'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-s'], arg_type=server_name_arg_type, help='Name of the server.')
