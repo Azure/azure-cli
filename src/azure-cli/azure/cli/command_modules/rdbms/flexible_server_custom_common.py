@@ -8,6 +8,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
+
 logger = get_logger(__name__)
 
 
@@ -26,7 +27,40 @@ def server_list_custom_func(client, resource_group_name=None):
     return client.list()
 
 
-def firewall_rule_delete_func(client, resource_group_name=None, server_name=None, firewall_rule_name=None, yes=None):
+def firewall_rule_create_func(client, resource_group_name, server_name, firewall_rule_name=None, start_ip_address=None, end_ip_address=None):
+
+    if end_ip_address is None and start_ip_address is not None:
+        end_ip_address = start_ip_address
+        logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip_address)
+
+    if firewall_rule_name is None:
+        from datetime import datetime
+        now = datetime.now()
+        firewall_rule_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
+                                                                          now.second)
+        if start_ip_address == '0.0.0.0' and end_ip_address == '0.0.0.0':
+            logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
+                           'Azure resources...')
+            firewall_rule_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
+                                                                                                            now.day, now.hour,
+                                                                                                            now.minute,
+                                                                                                            now.second)
+        else:
+            if start_ip_address == '0.0.0.0' and end_ip_address == '255.255.255.255':
+                firewall_rule_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day,
+                                                                         now.hour, now.minute, now.second)
+            logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip_address,
+                           end_ip_address)
+
+    return client.create_or_update(
+        resource_group_name,
+        server_name,
+        firewall_rule_name,
+        start_ip_address,
+        end_ip_address)
+
+
+def firewall_rule_delete_func(client, resource_group_name, server_name, firewall_rule_name, yes=None):
     confirm = yes
     result = None
     if not yes:
@@ -36,27 +70,6 @@ def firewall_rule_delete_func(client, resource_group_name=None, server_name=None
     if confirm:
         try:
             result = client.delete(resource_group_name, server_name, firewall_rule_name)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(ex)
-    return result
-
-
-def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
-    confirm = yes
-    result = None
-    if resource_group_name is None or server_name is None or database_name is None:
-        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
-                       "If your local context is turned ON, make sure these three parameters exist in local context "
-                       "using \'az local-context show\' If your local context is turned ON, but they are missing or "
-                       "If your local context is turned OFF, consider passing them explicitly.")
-    if not yes:
-        confirm = user_confirmation(
-            "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
-                                                                                              resource_group_name),
-            yes=yes)
-    if confirm:
-        try:
-            result = client.delete(resource_group_name, server_name, database_name)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
     return result
@@ -81,6 +94,27 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
     if end_ip_address is not None:
         instance.end_ip_address = end_ip_address
     return instance
+
+
+def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
+    confirm = yes
+    result = None
+    if resource_group_name is None or server_name is None or database_name is None:
+        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name."
+                       "If your local context is turned ON, make sure these three parameters exist in local context "
+                       "using \'az local-context show\' If your local context is turned ON, but they are missing or "
+                       "If your local context is turned OFF, consider passing them explicitly.")
+    if not yes:
+        confirm = user_confirmation(
+            "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
+                                                                                              resource_group_name),
+            yes=yes)
+    if confirm:
+        try:
+            result = client.delete(resource_group_name, server_name, database_name)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error(ex)
+    return result
 
 
 def user_confirmation(message, yes=False):

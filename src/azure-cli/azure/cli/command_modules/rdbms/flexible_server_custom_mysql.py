@@ -13,7 +13,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
-    cf_mysql_flexible_db
+    cf_mysql_flexible_db, cf_mysql_check_resource_availability
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
@@ -64,6 +64,14 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
         server_result = firewall_id = subnet_id = None
 
+        # Check availability for server name if it is supplied by the user
+        if server_name is not None:
+            check_name_client = cf_mysql_check_resource_availability(cmd.cli_ctx, None)
+            server_availability = check_name_client.execute(server_name, DELEGATION_SERVICE_NAME)
+            if not server_availability.name_available:
+                raise CLIError("The server name '{}' already exists.Please re-run command with some "
+                               "other server name.".format(server_name))
+
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                                  server_name, 'mysql')
@@ -81,19 +89,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                 subnet_arm_resource_id=subnet_id)
         else:
             delegated_subnet_arguments = None
-
-        # Get list of servers in the current sub
-        server_list = server_list_custom_func(client)
-
-        # Ensure that the server name is not in the rg and in the subscription
-        for key in server_list:
-            if server_name == key.name and key.id.find(resource_group_name) != -1:
-                logger.warning('Found existing MySQL server \'%s\' in group \'%s\'',
-                               server_name, resource_group_name)
-                server_result = client.get(resource_group_name, server_name)
-            elif server_name == key.name:
-                raise CLIError("The server name '{}' exists in this subscription.Please re-run command with a "
-                               "valid server name.".format(server_name))
 
         administrator_login_password = generate_password(administrator_login_password)
         if server_result is None:
@@ -534,7 +529,7 @@ def _create_mysql_connection_string(host, database_name, user_name, password):
         'username': user_name,
         'password': password if password is not None else '{password}'
     }
-    return 'server={host};database={dbname};uid={username};pwd={password}'.format(**connection_kwargs)
+    return 'mysql {dbname} --host {host} --user {username} --password={password}'.format(**connection_kwargs)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
