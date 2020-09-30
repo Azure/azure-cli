@@ -34,7 +34,7 @@ def zip_contents_from_dir(dirPath, lang):
     relroot = os.path.abspath(tempfile.gettempdir())
     path_and_file = os.path.splitdrive(dirPath)[1]
     file_val = os.path.split(path_and_file)[1]
-    file_val_unique = (file_val + "_" + str(uuid.uuid4()))[:259]
+    file_val_unique = file_val + str(uuid.uuid4())[:259]
     zip_file_path = relroot + os.path.sep + file_val_unique + ".zip"
     abs_src = os.path.abspath(dirPath)
     try:
