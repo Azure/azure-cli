@@ -220,7 +220,7 @@ storage_param_type = CLIArgumentType(
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
-    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
+    help='Backup storage redundancy used to store backups.',
     validator=validate_backup_storage_redundancy)
 
 grace_period_param_type = CLIArgumentType(
@@ -418,7 +418,8 @@ def _configure_db_dw_create_params(
             'compute_model',
             'read_scale',
             'read_replica_count',
-            'storage_account_type'
+            'storage_account_type',
+            'yes'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -543,9 +544,7 @@ def load_arguments(self, _):
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
         c.argument('yes',
                    options_list=['--yes', '-y'],
@@ -568,9 +567,7 @@ def load_arguments(self, _):
                    ' If unspecified, defaults to the origin server.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -601,9 +598,7 @@ def load_arguments(self, _):
                    time_format_help)
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -659,9 +654,7 @@ def load_arguments(self, _):
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -782,9 +775,7 @@ def load_arguments(self, _):
                    help='Name of the server to create the new replica in.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
@@ -809,9 +800,7 @@ def load_arguments(self, _):
                    ' defaults to the first database\'s resource group.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
         c.argument('yes',
                    options_list=['--yes', '-y'],
@@ -994,9 +983,7 @@ def load_arguments(self, _):
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
     ###############################################
     #                sql dw                       #
@@ -1602,9 +1589,7 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
         c.argument('yes',
                    options_list=['--yes', '-y'],

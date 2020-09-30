@@ -159,10 +159,10 @@ def db_transform(result):
 
 def _get_external_backup_storage_redundancy(self):
     return {
-        'LRS': 'Local',
-        'GRS': 'Geo',
-        'ZRS': 'Zone'
-    }.get(self, 'Invalid')
+        'lrs': 'Local',
+        'grs': 'Geo',
+        'zrs': 'Zone'
+    }.get(self.lower(), 'Invalid')
 
 
 #####
