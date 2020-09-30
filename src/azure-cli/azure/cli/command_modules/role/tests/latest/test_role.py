@@ -344,11 +344,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment delete --assignee {upn} --role reader')
 
                 # test role assignment on empty scope
-                with self.assertRaisesRegexp(CLIError, 'Invalid scope. Please use --help to view the valid format.'):
-                    self.cmd('role assignment create --assignee {upn} --scope "" --role reader')
-                    self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
-
-                # test role assignment on empty scope
                 with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
@@ -490,6 +485,17 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('configure --default group="" --scope local')
                 os.chdir(base_dir)
                 self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    def test_role_assignment_empty_string_args(self):
+        expected_msg = "{} can't be an empty string"
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--assignee")):
+            self.cmd('role assignment delete --assignee ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--scope")):
+            self.cmd('role assignment delete --scope ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--role")):
+            self.cmd('role assignment delete --role ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--resource-group")):
+            self.cmd('role assignment delete --resource-group ""')
 
     @unittest.skip("Known service random 403 issue")
     @ResourceGroupPreparer(name_prefix='cli_role_assign')

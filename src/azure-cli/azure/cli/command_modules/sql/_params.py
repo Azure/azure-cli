@@ -111,6 +111,7 @@ def get_internal_backup_storage_redundancy(self):
         'geo': 'GRS',
     }.get(self.lower(), 'Invalid')
 
+
 #####
 #        Reusable param type definitions
 #####
