@@ -40,9 +40,12 @@ def keyvault_exception_handler(cmd, ex):
             raise CLIError(ex)
     elif isinstance(ex, ClientRequestError):
         if 'Failed to establish a new connection' in str(ex.inner_exception):
-            raise CLIError('Max retries exceeded attempting to connect to vault. '
-                           'The vault may not exist or you may need to flush your DNS cache '
-                           'and try again later.')
+            instance_type = 'Vault'
+            if 'managedhsm' in str(ex.inner_exception):
+                instance_type = 'HSM'
+            raise CLIError('Max retries exceeded attempting to connect to {instance_type}. '
+                           'The {instance_type} may not exist or you may need to flush your DNS cache '
+                           'and try again later.'.format(instance_type=instance_type))
         raise CLIError(ex)
     else:
         raise CLIError(ex)
@@ -51,7 +54,7 @@ def keyvault_exception_handler(cmd, ex):
 class KeyVaultCommandGroup(AzCommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
-        from ._client_factory import keyvault_data_plane_factory
+        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
         # all regular and custom commands should use the keyvault data plane client
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
         merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_data_plane_factory
@@ -81,10 +84,10 @@ class KeyVaultCommandGroup(AzCommandGroup):
             return extract_full_summary_from_signature(op)
 
         def keyvault_command_handler(command_args):
-            from azure.cli.core.util import get_arg_list
             from azure.cli.core.commands.client_factory import resolve_client_arg_name
+            from azure.cli.core.profiles import ResourceType
+            from azure.cli.core.util import get_arg_list, poller_classes
             from msrest.paging import Paged
-            from azure.cli.core.util import poller_classes
 
             op = get_op_handler()
             op_args = get_arg_list(op)
@@ -100,6 +103,12 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 command_args.pop('cmd')
 
             try:
+                if command_type.settings.get('resource_type') == ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
+                    abandoned_args = ['identifier', 'vault_base_url']
+                    for arg in abandoned_args:
+                        if arg in command_args:
+                            command_args.pop(arg)
+
                 result = op(**command_args)
                 # apply results transform if specified
                 transform_result = merged_kwargs.get('transform', None)
@@ -151,7 +160,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
 class KeyVaultArgumentContext(AzArgumentContext):
 
     def attributes_argument(self, name, attr_class, create=False, ignore=None):
-        from ._validators import get_attribute_validator, datetime_type
+        from azure.cli.command_modules.keyvault._validators import get_attribute_validator, datetime_type
         from azure.cli.core.commands.parameters import get_three_state_flag
 
         from knack.arguments import ignore_type

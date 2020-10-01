@@ -37,7 +37,7 @@ ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-lines
 
 
 def load_arguments(self, _):
@@ -64,7 +64,7 @@ def load_arguments(self, _):
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
-    functionapp_runtime_to_version, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
+    functionapp_runtime_strings, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -395,8 +395,8 @@ def load_arguments(self, _):
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
     with self.argument_context('webapp log config') as c:
-        c.argument('application_logging', help='configure application logging to file system',
-                   arg_type=get_three_state_flag(return_label=True))
+        c.argument('application_logging', help='configure application logging',
+                   arg_type=get_enum_type(['filesystem', 'azureblobstorage', 'off']))
         c.argument('detailed_error_messages', help='configure detailed error messages',
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('failed_request_tracing', help='configure failed request tracing',
@@ -665,7 +665,7 @@ def load_arguments(self, _):
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
         c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.',
-                   arg_type=get_enum_type(functionapp_runtime_to_version.keys()))
+                   arg_type=get_enum_type(functionapp_runtime_strings))
         c.argument('runtime_version',
                    help='The version of the functions runtime stack. '
                         'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
@@ -891,6 +891,24 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
 
+    # App Service Domain Commands
+    with self.argument_context('appservice domain create') as c:
+        c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
+        c.argument('contact_info', options_list=['--contact-info', '-c'], help='The file path to a JSON object with your contact info for domain registration. '
+                                                                               'Please see the following link for the format of the JSON file expected: '
+                                                                               'https://github.com/AzureAppServiceCLI/appservice_domains_templates/blob/master/contact_info.json')
+        c.argument('privacy', options_list=['--privacy', '-p'], help='Enable privacy protection')
+        c.argument('auto_renew', options_list=['--auto-renew', '-a'], help='Enable auto-renew on the domain')
+        c.argument('accept_terms', options_list=['--accept-terms'], help='By using this flag, you are accepting '
+                                                                         'the conditions shown using the --show-hostname-purchase-terms flag. ')
+        c.argument('tags', arg_type=tags_type)
+        c.argument('dryrun', help='Show summary of the purchase and create operation instead of executing it')
+        c.argument('no_wait', help='Do not wait for the create to complete, and return immediately after queuing the create.')
+        c.argument('validate', help='Generate and validate the ARM template without creating any resources')
+
+    with self.argument_context('appservice domain show-terms') as c:
+        c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
+
     with self.argument_context('staticwebapp') as c:
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
@@ -959,6 +977,7 @@ def _get_functionapp_runtime_versions():
                 runtime_version = runtime_version_json[KEYS.DISPLAY_VERSION]
                 runtime_version_properties = {
                     KEYS.IS_HIDDEN: runtime_version_json[KEYS.IS_HIDDEN],
+                    KEYS.IS_DEPRECATED: runtime_version_json[KEYS.IS_DEPRECATED],
                     KEYS.IS_PREVIEW: runtime_version_json[KEYS.IS_PREVIEW],
                 }
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
@@ -968,14 +987,14 @@ def _get_functionapp_runtime_versions():
     # taking their properties into account (i.e. isHidden, isPreview)
     runtime_to_version_strings = []
     for runtime, runtime_versions in runtime_to_version.items():
-        # dotnet version is not configurable, so leave out of help menu
-        if runtime == 'dotnet':
+        # dotnet and custom version is not configurable, so leave out of help menu
+        if runtime in ('dotnet', 'custom'):
             continue
         ordered_runtime_versions = list(runtime_versions.keys())
         ordered_runtime_versions.sort(key=float)
         ordered_runtime_versions_strings = []
         for version in ordered_runtime_versions:
-            if runtime_versions[version][KEYS.IS_HIDDEN]:
+            if runtime_versions[version][KEYS.IS_HIDDEN] or runtime_versions[version][KEYS.IS_DEPRECATED]:
                 continue
             if runtime_versions[version][KEYS.IS_PREVIEW]:
                 ordered_runtime_versions_strings.append(version + ' (preview)')
@@ -983,4 +1002,4 @@ def _get_functionapp_runtime_versions():
                 ordered_runtime_versions_strings.append(version)
         runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(ordered_runtime_versions_strings) + ']')
 
-    return runtime_to_version, runtime_to_version_strings
+    return runtime_to_version.keys(), runtime_to_version_strings

@@ -10,9 +10,6 @@ from ..storage_test_util import StorageScenarioMixin
 
 
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
-    def oauth_cmd(self, cmd, *args, **kwargs):
-        return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
-
     @api_version_constraint(ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_oauth')
     @StorageAccountPreparer(kind="StorageV2", hns=True)
@@ -150,11 +147,36 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
 
         self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
+                                JMESPathCheck('deleted', False),
+                                JMESPathCheck('encryptionScope', None),
+                                JMESPathCheck('properties.appendBlobCommittedBlockCount', None),
+                                JMESPathCheck('properties.blobTier', None),
+                                JMESPathCheck('properties.blobTierChangeTime', None),
+                                JMESPathCheck('properties.blobTierInferred', None),
                                 JMESPathCheck('properties.blobType', 'BlockBlob'),
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.contentSettings.cacheControl', None),
+                                JMESPathCheck('properties.contentSettings.contentDisposition', None),
+                                JMESPathCheck('properties.contentSettings.contentEncooding', None),
+                                JMESPathCheck('properties.contentSettings.contentLanguage', None),
+                                JMESPathCheckExists('properties.contentSettings.contentMd5'),
+                                JMESPathCheck('properties.copy.completionTime', None),
+                                JMESPathCheck('properties.copy.id', None),
+                                JMESPathCheck('properties.copy.progress', None),
+                                JMESPathCheck('properties.copy.source', None),
+                                JMESPathCheck('properties.copy.status', None),
+                                JMESPathCheck('properties.copy.statusDescription', None),
                                 JMESPathCheck('properties.pageRanges', None),
                                 JMESPathCheckExists('properties.etag'),
+                                JMESPathCheckExists('properties.creationTime'),
+                                JMESPathCheck('properties.deletedTime', None),
+                                JMESPathCheckExists('properties.etag'),
+                                JMESPathCheckExists('properties.lastModified'),
+                                JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'available'),
+                                JMESPathCheck('properties.lease.status', 'unlocked'),
+                                JMESPathCheck('snapshot', None),
                                 JMESPathCheck('objectReplicationDestinationPolicy', None),
                                 JMESPathCheck('objectReplicationSourceProperties', []),
                                 JMESPathCheck('rehydratePriority', None),
@@ -172,6 +194,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.blobType', 'PageBlob'),
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.pageBlobSequenceNumber', 0),
                                 JMESPathCheckExists('properties.pageRanges'))
 
         # test snapshot

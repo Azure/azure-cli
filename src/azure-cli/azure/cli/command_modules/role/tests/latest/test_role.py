@@ -344,11 +344,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment delete --assignee {upn} --role reader')
 
                 # test role assignment on empty scope
-                with self.assertRaisesRegexp(CLIError, 'Invalid scope. Please use --help to view the valid format.'):
-                    self.cmd('role assignment create --assignee {upn} --scope "" --role reader')
-                    self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
-
-                # test role assignment on empty scope
                 with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
@@ -375,6 +370,79 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
                 self.cmd('role assignment delete -g {rg}')
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+            finally:
+                self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
+    def test_role_assignment_create_update(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'rg': resource_group,
+                'description': "Role assignment foo to check on bar",
+                'condition': "@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:Name] stringEquals 'foo'",
+                'condition_version': "2.0"
+            })
+
+            result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+            self.kwargs['object_id'] = result['objectId']
+            try:
+                # Test create role assignment with description, condition and condition_version
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                         # Include double quotes to tell shlex to treat arguments as a whole
+                         '--description "{description}" '
+                         '--condition "{condition}" --condition-version {condition_version}',
+                         checks=[
+                             self.check("description", "{description}"),
+                             self.check("condition", "{condition}"),
+                             self.check("conditionVersion", "{condition_version}")
+                         ])
+                self.cmd('role assignment delete -g {rg}')
+
+                # Test create role assignment with description, condition. condition_version defaults to 2.0
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                         '--description "{description}" '
+                         '--condition "{condition}"',
+                         checks=[
+                             self.check("description", "{description}"),
+                             self.check("condition", "{condition}"),
+                             self.check("conditionVersion", "2.0")
+                         ])
+                self.cmd('role assignment delete -g {rg}')
+
+                # Test error is raised if condition-version is set but condition is not
+                with self.assertRaisesRegex(CLIError, "--condition must be set"):
+                    self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                             '--condition-version {condition_version}')
+
+                # Update
+                output = self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                                  '--description "{description}" '
+                                  '--condition "{condition}" --condition-version {condition_version}').get_output_in_json()
+
+                updated_description = "Some updated description."
+                output['description'] = updated_description
+                import shlex
+                from ..util import escape_apply_kwargs
+                # The json contains both single (in description) and double quotes, use shlex to quote and escape it,
+                # then escape it again before being passed to self.cmd
+                output_json = escape_apply_kwargs(shlex.quote(json.dumps(output)))
+
+                self.cmd("role assignment update --role-assignment {}".format(output_json),
+                         checks=[self.check("description", updated_description)])
+
+                with self.assertRaisesRegex(CLIError, "cannot be downgraded"):
+                    output['conditionVersion'] = '1.0'
+                    output_json = escape_apply_kwargs(shlex.quote(json.dumps(output)))
+                    self.cmd("role assignment update --role-assignment {}".format(output_json))
+
+                self.cmd('role assignment delete -g {rg}')
+
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
@@ -417,6 +485,17 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('configure --default group="" --scope local')
                 os.chdir(base_dir)
                 self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    def test_role_assignment_empty_string_args(self):
+        expected_msg = "{} can't be an empty string"
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--assignee")):
+            self.cmd('role assignment delete --assignee ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--scope")):
+            self.cmd('role assignment delete --scope ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--role")):
+            self.cmd('role assignment delete --role ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--resource-group")):
+            self.cmd('role assignment delete --resource-group ""')
 
     @unittest.skip("Known service random 403 issue")
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
