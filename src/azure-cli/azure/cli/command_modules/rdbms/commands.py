@@ -45,7 +45,6 @@ from azure.cli.command_modules.rdbms._client_factory import (
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_command_table(self, _):
-
     rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
 
     mariadb_servers_sdk = CliCommandType(
@@ -226,12 +225,14 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mariadb_get')
         g.command('restart', 'restart')
+        g.command('start', 'start')
+        g.command('stop', 'stop')
 
     with self.command_group('mysql server', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
         g.generic_update_command('update',
@@ -240,12 +241,14 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mysql_get')
         g.command('restart', 'restart')
+        g.command('start', 'start')
+        g.command('stop', 'stop')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
         g.generic_update_command('update',

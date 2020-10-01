@@ -601,6 +601,7 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
         try:
             result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
+            app_id = result['appId']
             self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {target_api}=Scope')
             self.cmd('ad app permission grant --id {app_id} --api {graph_resource}')
             permissions = self.cmd('ad app permission list --id {app_id}', checks=[
@@ -616,4 +617,159 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             self.cmd('ad app permission list --id {app_id}', checks=self.check('length([*])', 0))
         finally:
             if app_id:
-                self.cmd('ad app delete --id ' + app_id)
+                try:
+                    self.cmd('ad app delete --id ' + app_id)
+                except:
+                    pass
+
+    @AllowLargeResponse()
+    def test_graph_permission(self):
+        if not get_signed_in_user(self):
+            return
+        self.kwargs = {
+            'display_name': self.create_random_name('cli-app-', 15),
+            # AD Graph
+            'ad_graph_resource': '00000002-0000-0000-c000-000000000000',
+            # Delegated Directory.AccessAsUser.All
+            'ad_target_api': 'a42657d6-7f20-40e3-b6f0-cee03008a62a',
+            # Delegated User.Read
+            'ad_target_api2': '311a71cc-e848-46a1-bdf8-97ff7156d8e6',
+            # MS Graph
+            'ms_graph_resource': '00000003-0000-0000-c000-000000000000',
+            # Delegated Directory.AccessAsUser.All
+            'ms_target_api': '0e263e50-5827-48a4-b97c-d940288653c7',
+            # Delegated User.Read
+            'ms_target_api2': 'e1fe6dd8-ba31-4d61-89e7-88639da4683d'
+        }
+        app_id = None
+        try:
+            result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
+            app_id = result['appId']
+
+            # Test add permissions using a list
+            self.cmd('ad app permission add --id {app_id} --api {ad_graph_resource} '
+                     '--api-permissions {ad_target_api}=Scope {ad_target_api2}=Scope')
+            self.cmd('ad app permission add --id {app_id} --api {ms_graph_resource} '
+                     '--api-permissions {ms_target_api}=Scope {ms_target_api2}=Scope')
+            permissions = self.cmd('ad app permission list --id {app_id}', checks=[self.check('length([*])', 2)]).get_output_in_json()
+            # Sample result (required_resource_access):
+            # [
+            #     {
+            #         "additionalProperties": null,
+            #         "expiryTime": "",
+            #         "resourceAccess": [
+            #             {
+            #                 "additionalProperties": null,
+            #                 "id": "a42657d6-7f20-40e3-b6f0-cee03008a62a",
+            #                 "type": "Scope"
+            #             },
+            #             {
+            #                 "additionalProperties": null,
+            #                 "id": "311a71cc-e848-46a1-bdf8-97ff7156d8e6",
+            #                 "type": "Scope"
+            #             }
+            #         ],
+            #         "resourceAppId": "00000002-0000-0000-c000-000000000000"
+            #     },
+            #     {
+            #         "additionalProperties": null,
+            #         "expiryTime": "",
+            #         "resourceAccess": [
+            #             {
+            #                 "additionalProperties": null,
+            #                 "id": "0e263e50-5827-48a4-b97c-d940288653c7",
+            #                 "type": "Scope"
+            #             },
+            #             {
+            #                 "additionalProperties": null,
+            #                 "id": "e1fe6dd8-ba31-4d61-89e7-88639da4683d",
+            #                 "type": "Scope"
+            #             }
+            #         ],
+            #         "resourceAppId": "00000003-0000-0000-c000-000000000000"
+            #     }
+            # ]
+
+            ad_target_api_object = {
+                "additionalProperties": None,
+                "id": self.kwargs['ad_target_api'],
+                "type": "Scope"}
+            ad_target_api2_object = {
+                "additionalProperties": None,
+                "id": self.kwargs['ad_target_api2'],
+                "type": "Scope"}
+            ms_target_api_object = {
+                "additionalProperties": None,
+                "id": self.kwargs['ms_target_api'],
+                "type": "Scope"}
+            ms_target_api2_object = {
+                "additionalProperties": None,
+                "id": self.kwargs['ms_target_api2'],
+                "type": "Scope"}
+
+            def get_required_resource_access(required_resource_access_list, resource_app_id):
+                """Search for the RequiredResourceAccess from required_resource_access(list) by resourceAppId."""
+                return next(
+                    filter(lambda a: a['resourceAppId'] == resource_app_id, required_resource_access_list), None)
+
+            ad_api = get_required_resource_access(permissions, self.kwargs['ad_graph_resource'])
+            ms_api = get_required_resource_access(permissions, self.kwargs['ms_graph_resource'])
+
+            # Check initial `permission add` is correct
+            self.assertEqual(ad_api['resourceAccess'], [ad_target_api_object, ad_target_api2_object])
+            self.assertEqual(ms_api['resourceAccess'], [ms_target_api_object, ms_target_api2_object])
+
+            # Test delete 1 api-permission (ResourceAccess) ms_target_api.
+            self.cmd('ad app permission delete --id {app_id} --api {ms_graph_resource} --api-permissions {ms_target_api}')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            ms_api = get_required_resource_access(permissions, self.kwargs['ms_graph_resource'])
+            # ms_target_api (ResourceAccess) is deleted and ms_target_api2 (ResourceAccess) remains
+            self.assertEqual(ms_api['resourceAccess'], [ms_target_api2_object])
+
+            # Test delete 1 api-permission ms_target_api2 (ResourceAccess)
+            self.cmd('ad app permission delete --id {app_id} --api {ms_graph_resource} --api-permissions {ms_target_api2}')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            ms_api = get_required_resource_access(permissions, self.kwargs['ms_graph_resource'])
+            # ms_graph_resource (RequiredResourceAccess) is removed automatically
+            self.assertIsNone(ms_api)
+
+            # Add ms_target_api and ms_target_api2 back
+            self.cmd('ad app permission add --id {app_id} --api {ms_graph_resource} '
+                     '--api-permissions {ms_target_api}=Scope {ms_target_api2}=Scope')
+            # Delete both ms_target_api and ms_target_api2 at the same time
+            self.cmd('ad app permission delete --id {app_id} --api {ms_graph_resource} --api-permissions {ms_target_api} {ms_target_api2}')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            ms_api = get_required_resource_access(permissions, self.kwargs['ms_graph_resource'])
+            # ms_graph_resource (RequiredResourceAccess) is removed automatically
+            self.assertIsNone(ms_api)
+
+            # Test delete 1 api ad_graph_resource (RequiredResourceAccess)
+            self.cmd('ad app permission delete --id {app_id} --api {ad_graph_resource}')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            ad_api = get_required_resource_access(permissions, self.kwargs['ad_graph_resource'])
+            self.assertIsNone(ad_api)
+
+            # Test delete non-existing api
+            self.cmd('ad app permission delete --id {app_id} --api 11111111-0000-0000-c000-000000000000')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            self.assertEqual(permissions, [])
+
+            # Test delete api permission from non-existing api
+            self.cmd('ad app permission delete --id {app_id} --api 11111111-0000-0000-c000-000000000000 --api-permissions {ms_target_api} {ms_target_api2}')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            self.assertEqual(permissions, [])
+
+            # Test delete non-existing api permission from existing api
+            self.cmd('ad app permission add --id {app_id} --api {ms_graph_resource} '
+                     '--api-permissions {ms_target_api}=Scope {ms_target_api2}=Scope')
+            self.cmd('ad app permission delete --id {app_id} --api {ms_graph_resource} --api-permissions 22222222-0000-0000-c000-000000000000')
+            permissions = self.cmd('ad app permission list --id {app_id}').get_output_in_json()
+            ms_api = get_required_resource_access(permissions, self.kwargs['ms_graph_resource'])
+            self.assertEqual(ms_api['resourceAccess'], [ms_target_api_object, ms_target_api2_object])
+        finally:
+            if app_id:
+                try:
+                    self.cmd('ad app delete --id ' + app_id)
+                except:
+                    pass
