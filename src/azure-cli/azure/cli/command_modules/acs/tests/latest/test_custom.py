@@ -659,7 +659,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'kube-dashboard', enable=False)
-        dashboard_addon_profile = instance.addon_profiles['kubedashboard']
+        dashboard_addon_profile = instance.addon_profiles['kubeDashboard']
         self.assertFalse(dashboard_addon_profile.enabled)
 
         # kube-dashboard enabled, there's existing dashboard addon profile
@@ -668,7 +668,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=False)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'kube-dashboard', enable=True)
-        dashboard_addon_profile = instance.addon_profiles['kubedashboard']
+        dashboard_addon_profile = instance.addon_profiles['kubeDashboard']
         self.assertTrue(dashboard_addon_profile.enabled)
 
         # monitoring enabled and then enabled again should error
