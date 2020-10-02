@@ -339,6 +339,7 @@ def load_arguments(self, _):
         c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
         c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set.')
+        c.argument('priority', type=int, help='Priority of the request routing rule. Range from 1 to 2000')
 
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
@@ -1831,7 +1832,7 @@ def load_arguments(self, _):
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
         c.argument('hosted_gateway',
-                   deprecate_info=c.deprecate(redirect='--hosted_subnet', hide=False),
+                   deprecate_info=c.deprecate(redirect='--hosted-subnet', hide=False),
                    help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.',
                    validator=validate_virtul_network_gateway)
         c.argument('hosted_subnet', help='The ID of a subnet where VirtualRouter would be deployed')

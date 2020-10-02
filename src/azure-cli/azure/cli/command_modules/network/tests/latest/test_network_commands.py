@@ -1030,27 +1030,35 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
+        # Make the default rule has priority.
+        # Otherwise, server will raise ApplicationGatewayRequestRoutingRulePartialPriorityDefined
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n rule1 --priority 1')
+
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener2 --no-wait --frontend-port appGatewayFrontendPort --host-name www.test2.com')
 
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener')
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener --priority 12')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}').get_output_in_json()
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener'))
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener2')
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --http-listener mylistener2 --priority 32')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}').get_output_in_json()
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
 
         self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener')
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener --priority 10')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name2}').get_output_in_json()
         self.kwargs['set_id'] = rule['rewriteRuleSet']['id']
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name2} --rewrite-rule-set {set_id}', checks=[
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name2} --rewrite-rule-set {set_id} --priority 21', checks=[
             self.check('rewriteRuleSet.id', '{set_id}')
         ])
 
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 3))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=[
+            self.check('length(@)', 3)
+        ])
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
-        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=[
+            self.check('length(@)', 2)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map')
     def test_network_ag_url_path_map(self, resource_group):

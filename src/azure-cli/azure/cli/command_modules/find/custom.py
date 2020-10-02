@@ -115,7 +115,7 @@ def call_aladdin_service(query):
     if telemetry_core.is_telemetry_enabled() and subscription_id is not None:
         context['subscriptionId'] = subscription_id
 
-    api_url = 'https://aladdindevwestus-app.azurewebsites.net/api/v1.0/examples'
+    api_url = 'https://app.aladdin.microsoft.com/api/v1.0/examples'
     headers = {
         'Content-Type': 'application/json',
         'X-UserId': hashed_user_id

@@ -13,11 +13,11 @@ from azure.cli.testsdk.base import execute
 # pylint: disable=line-too-long
 
 
-class VaultPreparer(AbstractPreparer, SingleValueReplacer):
+class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=too-many-instance-attributes
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group',
-                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME'):
+                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME', soft_delete=True):
         super(VaultPreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -27,14 +27,17 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
         self.location = None
         self.resource_group_location_parameter_name = resource_group_location_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
+        self.soft_delete = soft_delete
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
-
             execute(self.cli_ctx, cmd)
+            if not self.soft_delete:
+                cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
+                execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
@@ -69,7 +72,12 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                 execute(self.cli_ctx,
                         'az backup protection disable --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
                         .format(resource_group, vault_name, container, item))
-        execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
+        from msrestazure.azure_exceptions import CloudError
+        try:
+            execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
+        except CloudError as ex:
+            if 'Recovery Services vault cannot be deleted as there are backup items in soft deleted state in the vault' not in str(ex):
+                raise ex
 
 
 class VMPreparer(AbstractPreparer, SingleValueReplacer):

@@ -469,6 +469,20 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command(
             'show', 'get', transform=lambda x: getattr(x, 'legal_hold', x))
 
+    with self.command_group('storage container-rm', command_type=blob_container_mgmt_sdk,
+                            custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
+                                                               resource_type=ResourceType.MGMT_STORAGE),
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-02-01', is_preview=True) as g:
+        g.custom_command('create', 'create_container_rm')
+        g.command('delete', 'delete', confirmation=True)
+        g.generic_update_command('update', setter_name='update', max_api='2019-04-01')
+        g.generic_update_command('update', setter_name='update', setter_arg_name='blob_container',
+                                 custom_func_name='update_container_rm', min_api='2019-06-01')
+        g.custom_command('list', 'list_container_rm')
+        g.custom_command('exists', 'container_rm_exists', transform=create_boolean_result_output_transformer('exists'),
+                         table_transformer=transform_boolean_for_table)
+        g.show_command('show', 'get')
+
     file_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',
         client_factory=file_data_service_factory,
@@ -478,7 +492,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('file',
                                                                cf_mgmt_file_shares,
                                                                resource_type=ResourceType.MGMT_STORAGE),
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01', is_preview=True) as g:
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01') as g:
         g.custom_command('create', 'create_share_rm')
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('exists', '_file_share_exists', transform=create_boolean_result_output_transformer('exists'))
