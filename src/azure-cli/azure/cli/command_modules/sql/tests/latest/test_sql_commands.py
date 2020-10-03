@@ -1241,26 +1241,27 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                                   'DATABASE_ROLE_MEMBER_CHANGE_GROUP']
 
         self.cmd('sql db audit-policy update -g {} -s {} -n {}'
-                 ' --state {} --storage-key {} --storage-endpoint={}'
+                 ' --state {} --blob-storage-target-state {} --storage-key {} --storage-endpoint={}'
                  ' --retention-days={} --actions {}'
-                 .format(resource_group, server, database_name, state_enabled, key,
+                 .format(resource_group, server, database_name, state_enabled, state_enabled, key,
                          storage_endpoint, retention_days, audit_actions_input),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', key),
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # update audit policy - specify storage account and resource group. use secondary key
-        storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
-        self.cmd('sql db audit-policy update -g {} -s {} -n {} --storage-account {}'
-                 .format(resource_group, server, database_name, storage_account_2),
+        key2 = self._get_storage_key(storage_account_2, resource_group_2)
+        storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)        
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --blob-storage-target-state {} --storage-account {}'
+                 .format(resource_group, server, database_name, state_enabled, storage_account_2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
+                     JMESPathCheck('storageAccountAccessKey', key2),
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1272,7 +1273,6 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_disabled),
-                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1355,12 +1355,12 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
         # get storage account endpoint and key
         storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
         key = self._get_storage_key(storage_account, resource_group)
-
+        
         # get audit policy
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
                  checks=[JMESPathCheck('resourceGroup', resource_group)])
-
+        
         # update audit policy - enable
         state_enabled = 'Enabled'
         retention_days = 30
@@ -1369,30 +1369,31 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                                   'DATABASE_ROLE_MEMBER_CHANGE_GROUP']
 
         self.cmd('sql server audit-policy update -g {} -n {}'
-                 ' --state {} --storage-key {} --storage-endpoint={}'
+                 ' --state {} --blob-storage-target-state {} --storage-key {} --storage-endpoint={}'
                  ' --retention-days={} --actions {}'
-                 .format(resource_group, server, state_enabled, key,
+                 .format(resource_group, server, state_enabled, state_enabled, key,
                          storage_endpoint, retention_days, audit_actions_input),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service return null
+                     JMESPathCheck('storageAccountAccessKey', key),
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
-
+        
         # update audit policy - specify storage account and resource group. use secondary key
+        key_2 = self._get_storage_key(storage_account_2, resource_group_2)
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
-        self.cmd('sql server audit-policy update -g {} -n {} --storage-account {}'
-                 .format(resource_group, server, storage_account_2),
+        self.cmd('sql server audit-policy update -g {} -n {} --blob-storage-target-state {} --storage-account {}'
+                 .format(resource_group, server, state_enabled, storage_account_2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service return null
+                     JMESPathCheck('storageAccountAccessKey', key_2),
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
-
+        
         # update audit policy - disable
         state_disabled = 'Disabled'
         self.cmd('sql server audit-policy update -g {} -n {} --state {}'
@@ -1400,11 +1401,9 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_disabled),
-                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service return null
-                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
-
+        
 
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
