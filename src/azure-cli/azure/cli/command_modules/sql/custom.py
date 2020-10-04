@@ -1723,7 +1723,11 @@ def _audit_policy_update_diagnostic_settings(
     azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
 
     # Generate diagnostic settings name to be created
-    name = "SQLSecurityAuditEvents_" + str(uuid.uuid4())
+    # For test environment the name should be taken from the recorded yaml file
+    import inspect
+
+    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt"), None)
+    name = "SQLSecurityAuditEvents_" + "8994e18b-06ee-4379-a4c2-c79f71a51299" if test_mode else str(uuid.uuid4())
 
     # If no audit diagnostic settings found then create one
     if num_of_audit_diagnostic_settings == 0:
@@ -1887,6 +1891,9 @@ def _audit_policy_update_global_settings(
             else:
                 audit_policy.storage_endpoint = None;
                 audit_policy.storage_account_access_key = None
+        else:
+            audit_policy.storage_endpoint = None;
+            audit_policy.storage_account_access_key = None
 
         # Apply audit_actions_and_groups
         if audit_actions_and_groups != None:

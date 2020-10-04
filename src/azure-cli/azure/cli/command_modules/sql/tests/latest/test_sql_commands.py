@@ -1214,7 +1214,9 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
     def test_sql_db_security_mgmt(self, resource_group, resource_group_2,
                                   resource_group_location, server,
                                   storage_account, storage_account_2):
-        database_name = "cliautomationdb01"
+        database_name = "cliautomationdb01"        
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
 
         # get storage account endpoint and key
         storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
@@ -1231,10 +1233,14 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         # get audit policy
         self.cmd('sql db audit-policy show -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
-                 checks=[JMESPathCheck('resourceGroup', resource_group)])
+                 checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('blobStorageTargetState', state_disabled),
+                    JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                    JMESPathCheck('eventHubTargetState', state_disabled),
+                    JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
-        # update audit policy - enable
-        state_enabled = 'Enabled'
+        # update audit policy - enable        
         retention_days = 30
         audit_actions_input = 'DATABASE_LOGOUT_GROUP DATABASE_ROLE_MEMBER_CHANGE_GROUP'
         audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
@@ -1253,6 +1259,17 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
+        # get audit policy
+        self.cmd('sql db audit-policy show -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('state', state_enabled),
+                    JMESPathCheck('blobStorageTargetState', state_enabled),
+                    JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                    JMESPathCheck('eventHubTargetState', state_disabled),
+                    JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
         # update audit policy - specify storage account and resource group. use secondary key
         key2 = self._get_storage_key(storage_account_2, resource_group_2)
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)        
@@ -1267,7 +1284,6 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # update audit policy - disable
-        state_disabled = 'Disabled'
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
                  .format(resource_group, server, database_name, state_disabled),
                  checks=[
@@ -1320,7 +1336,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('disabledAlerts', disabled_alerts_expected),
                      JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
-        # update threat policy - disable
+        # update audit policy - disable
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
                  .format(resource_group, server, database_name, state_disabled),
                  checks=[
@@ -1331,6 +1347,28 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
+        # create log analytics workspace
+        log_analytics_workspace_name = "clilaworkspacedb05"
+
+        log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
+                    .format(resource_group, log_analytics_workspace_name),
+                    checks=[
+                        JMESPathCheck('resourceGroup', resource_group),
+                        JMESPathCheck('name', log_analytics_workspace_name),
+                        JMESPathCheck('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+        
+        # update audit policy - enable log analytics
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
+                    ' --log-analytics-target-state {} --log-analytics-workspace-resource-id {}'
+                    .format(resource_group, server, database_name, state_enabled, 
+                            state_enabled, log_analytics_workspace_id),
+                    checks=[
+                        JMESPathCheck('resourceGroup', resource_group),
+                        JMESPathCheck('state', state_enabled),
+                        JMESPathCheck('storageEndpoint', None),
+                        JMESPathCheck('retentionDays', retention_days),
+                        JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+            
 
 class SqlServerSecurityScenarioTest(ScenarioTest):
     def _get_storage_endpoint(self, storage_account, resource_group):
@@ -1352,6 +1390,9 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                                       resource_group_location, server,
                                       storage_account, storage_account_2):
 
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
         # get storage account endpoint and key
         storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
         key = self._get_storage_key(storage_account, resource_group)
@@ -1359,10 +1400,14 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
         # get audit policy
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
-                 checks=[JMESPathCheck('resourceGroup', resource_group)])
+                 checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('blobStorageTargetState', state_disabled),
+                    JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                    JMESPathCheck('eventHubTargetState', state_disabled),
+                    JMESPathCheck('isAzureMonitorTargetEnabled', False)])
         
         # update audit policy - enable
-        state_enabled = 'Enabled'
         retention_days = 30
         audit_actions_input = 'DATABASE_LOGOUT_GROUP DATABASE_ROLE_MEMBER_CHANGE_GROUP'
         audit_actions_expected = ['DATABASE_LOGOUT_GROUP',
@@ -1381,6 +1426,20 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
         
+        # get audit policy
+        import time
+
+        time.sleep(10)
+        self.cmd('sql server audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('state', state_enabled),
+                    JMESPathCheck('blobStorageTargetState', state_enabled),
+                    JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                    JMESPathCheck('eventHubTargetState', state_disabled),
+                    JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
         # update audit policy - specify storage account and resource group. use secondary key
         key_2 = self._get_storage_key(storage_account_2, resource_group_2)
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
@@ -1395,7 +1454,6 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
         
         # update audit policy - disable
-        state_disabled = 'Disabled'
         self.cmd('sql server audit-policy update -g {} -n {} --state {}'
                  .format(resource_group, server, state_disabled),
                  checks=[
@@ -1403,6 +1461,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('state', state_disabled),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        time.sleep(10)
         
 
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
