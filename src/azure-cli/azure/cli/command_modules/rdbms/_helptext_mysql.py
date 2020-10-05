@@ -72,8 +72,6 @@ short-summary: Delete a flexible server.
 examples:
   - name: Delete a flexible server.
     text: az mysql flexible-server delete --resource-group testGroup --name testServer
-  - name: Delete a flexible server without prompt or confirmation.
-    text: az mysql flexible-server delete --resource-group testGroup --name testServer --yes
 """
 
 helps['mysql flexible-server firewall-rule'] = """
