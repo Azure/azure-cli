@@ -89,7 +89,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
 
 class MSIAuthenticationWrapper(MSIAuthentication):
-    # This method is exposed for Azure Core.
-    def get_token(self):
+    # This method is exposed for Azure Core. Add *scopes, **kwargs to fit azure.core requirement
+    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))

@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.3.0
+++++++
+
+* Support upgrading API version in pipeline.
+
 0.2.0
 ++++++
 

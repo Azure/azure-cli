@@ -45,9 +45,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3',
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'PC2', 'PC3',
              'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -64,7 +64,7 @@ def load_arguments(self, _):
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
-    functionapp_runtime_to_version, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
+    functionapp_runtime_strings, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -395,8 +395,8 @@ def load_arguments(self, _):
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
     with self.argument_context('webapp log config') as c:
-        c.argument('application_logging', help='configure application logging to file system',
-                   arg_type=get_three_state_flag(return_label=True))
+        c.argument('application_logging', help='configure application logging',
+                   arg_type=get_enum_type(['filesystem', 'azureblobstorage', 'off']))
         c.argument('detailed_error_messages', help='configure detailed error messages',
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('failed_request_tracing', help='configure failed request tracing',
@@ -665,7 +665,7 @@ def load_arguments(self, _):
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
         c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.',
-                   arg_type=get_enum_type(functionapp_runtime_to_version.keys()))
+                   arg_type=get_enum_type(functionapp_runtime_strings))
         c.argument('runtime_version',
                    help='The version of the functions runtime stack. '
                         'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
@@ -959,6 +959,7 @@ def _get_functionapp_runtime_versions():
                 runtime_version = runtime_version_json[KEYS.DISPLAY_VERSION]
                 runtime_version_properties = {
                     KEYS.IS_HIDDEN: runtime_version_json[KEYS.IS_HIDDEN],
+                    KEYS.IS_DEPRECATED: runtime_version_json[KEYS.IS_DEPRECATED],
                     KEYS.IS_PREVIEW: runtime_version_json[KEYS.IS_PREVIEW],
                 }
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
@@ -968,14 +969,14 @@ def _get_functionapp_runtime_versions():
     # taking their properties into account (i.e. isHidden, isPreview)
     runtime_to_version_strings = []
     for runtime, runtime_versions in runtime_to_version.items():
-        # dotnet version is not configurable, so leave out of help menu
-        if runtime == 'dotnet':
+        # dotnet and custom version is not configurable, so leave out of help menu
+        if runtime in ('dotnet', 'custom'):
             continue
         ordered_runtime_versions = list(runtime_versions.keys())
         ordered_runtime_versions.sort(key=float)
         ordered_runtime_versions_strings = []
         for version in ordered_runtime_versions:
-            if runtime_versions[version][KEYS.IS_HIDDEN]:
+            if runtime_versions[version][KEYS.IS_HIDDEN] or runtime_versions[version][KEYS.IS_DEPRECATED]:
                 continue
             if runtime_versions[version][KEYS.IS_PREVIEW]:
                 ordered_runtime_versions_strings.append(version + ' (preview)')
@@ -983,4 +984,4 @@ def _get_functionapp_runtime_versions():
                 ordered_runtime_versions_strings.append(version)
         runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(ordered_runtime_versions_strings) + ']')
 
-    return runtime_to_version, runtime_to_version_strings
+    return runtime_to_version.keys(), runtime_to_version_strings

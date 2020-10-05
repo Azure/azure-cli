@@ -110,9 +110,8 @@ class MonitorTests(ScenarioTest):
     def test_metric_alert_special_char_scenario(self, resource_group):
         self.kwargs.update({
             'alert': 'alert1',
-            'rg': resource_group
         })
-        self.cmd('network application-gateway create -g {rg} -n ag1')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1')
         gateway_json = self.cmd('network application-gateway show -g {rg} -n ag1').get_output_in_json()
         self.kwargs.update({
             'ag_id': gateway_json['id'],
