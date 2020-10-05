@@ -1726,7 +1726,7 @@ def _audit_policy_update_diagnostic_settings(
     # For test environment the name should be taken from the recorded yaml file
     import inspect
 
-    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt"), None)
+    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt"), None) != None
     name = "SQLSecurityAuditEvents_" + "8994e18b-06ee-4379-a4c2-c79f71a51299" if test_mode else str(uuid.uuid4())
 
     # If no audit diagnostic settings found then create one
