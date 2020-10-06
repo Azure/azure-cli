@@ -1937,6 +1937,9 @@ examples:
   - name: Delete a virtual machine named 'MyVm' by using the latest api-version whether this version is a preview version.
     text: >
         az resource delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
+  - name: Delete all resources tagged 'testing'
+    text: >
+        az resource delete -g MyResourceGroup -t testing
 """
 
 helps['resource invoke-action'] = """
