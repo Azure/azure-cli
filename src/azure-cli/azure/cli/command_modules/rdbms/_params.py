@@ -327,6 +327,19 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} flexible-server list-skus'.format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        
+        with self.argument_context('{} flexible-server connect'.format(command_group)) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the server.')
+            c.argument('administrator_login', arg_type=administrator_login_arg_type, options_list=['--admin-user', '-u'],
+                       help='The login username of the administrator.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+                       help='The login password of the administrator.')
+            c.argument('database_name', arg_type=database_name_arg_type, options_list=['--database-name', '-d'], help='The name of a database.')
+            if command_group == "mysql":
+                c.argument('mysql_query', options_list=['--mysql-query', '-mq'], help='A query to run against the flexible server.')
+            elif command_group == "postgres":
+                c.argument('postgres_query', options_list=['--postgres-query', '-pq'], help='A query to run against the flexible server.')
+
 
         # flexible-server parameter
         for scope in ['list', 'set', 'show']:
