@@ -1847,8 +1847,8 @@ def _audit_policy_update_diagnostic_settings(
             storage_account = original_audit_diagnostic_setting.storage_account_id,
             workspace = updated_log_analytics_workspace_resource_id)
 
-    # Add 'created_diagnostic_settings' in rollback_data list in reverse order
-    rollback_data.insert(0, ("delete", created_diagnostic_settings))
+        # Add 'created_diagnostic_settings' in rollback_data list in reverse order
+        rollback_data.insert(0, ("delete", created_diagnostic_settings))
 
     return rollback_data
 
