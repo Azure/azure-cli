@@ -1918,7 +1918,11 @@ def _audit_policy_update_global_settings(
                 audit_policy.storage_endpoint = None
                 audit_policy.storage_account_access_key = None
         else:
-            if audit_policy.storage_account_access_key == None and audit_policy.storage_endpoint != None:
+            # blob_storage_target_state is not provided in command line - storage_endpoint property of the audit policy should stay as is
+            if not audit_policy.storage_endpoint:
+                audit_policy.storage_endpoint = None
+                audit_policy.storage_account_access_key = None
+            else:
                 storage_account = _get_storage_account_name(audit_policy.storage_endpoint)
                 storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
 
@@ -1926,7 +1930,7 @@ def _audit_policy_update_global_settings(
                             cmd.cli_ctx,
                             storage_account,
                             storage_resource_group,
-                            False)
+                            False)                
 
         # Apply audit_actions_and_groups
         if audit_actions_and_groups != None:

@@ -1336,19 +1336,8 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('disabledAlerts', disabled_alerts_expected),
                      JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
-        # update audit policy - disable
-        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
-                 .format(resource_group, server, database_name, state_disabled),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state_disabled),
-                     JMESPathCheck('storageAccountAccessKey', 'None'),  # service doesn't return it
-                     JMESPathCheck('storageEndpoint', storage_endpoint_2),
-                     JMESPathCheck('retentionDays', retention_days),
-                     JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
-
         # create log analytics workspace        
-        log_analytics_workspace_name = "clilaworkspacedb15"
+        log_analytics_workspace_name = "clilaworkspacedb17"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                     .format(resource_group, log_analytics_workspace_name),
