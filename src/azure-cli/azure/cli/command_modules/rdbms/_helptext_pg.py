@@ -202,7 +202,7 @@ type: command
 short-summary: Lists available sku's in the given region.
 example:
   - name: Lists available sku's in the given region.
-    text: az mysql flexible-server list-skus -l eastus
+    text: az postgres flexible-server list-skus -l eastus
 """
 
 helps['postgres flexible-server wait'] = """
@@ -212,4 +212,14 @@ example:
   - name: Wait for the flexible server to satisfy certain conditions.
     text: az postgres server wait --exists --resource-group testGroup --name testServer
     crafted: true
+"""
+
+helps['postgres flexible-server connect'] = """
+type: command
+short-summary: Connect to a flexible server.
+example:
+  - name: Connect to a flexible server using administrator username and password. Default database is used if not specified.
+    text: az postgres flexible-server connect -u username -p password -d postgres
+  - name: Connect to a flexible server and execute a query with results outputted in a table.
+    text: az postgres flexible-server connect -u username -p password --postgres-query "select * from pg_user;" --output table
 """

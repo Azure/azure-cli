@@ -408,7 +408,7 @@ def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, admi
     cursor = None
     json_data = None
     if database_name is None:
-        database_name=DEFAULT_DB_NAME
+        database_name = DEFAULT_DB_NAME
         logger.warning("Connecting to %s database by default.", DEFAULT_DB_NAME)
     # Connect to mysql and get cursor to run sql commands
     try:
@@ -423,7 +423,7 @@ def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, admi
         cursor = connection.cursor()
     except Exception as e:
         raise CLIError("Unable to connect to MySQL Server: {0}".format(e))
-    
+
     # execute query if passed in
     if mysql_query is not None:
         try:
@@ -437,7 +437,7 @@ def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, admi
                 json_data.append(dict(zip(row_headers, rv)))
         except mysql_connector.errors.Error as e:
             raise CLIError("Unable to execute query '{0}' on MySQL Server: {1}".format(mysql_query, e))
-    
+
     if cursor is not None:
         try:
             cursor.close()
