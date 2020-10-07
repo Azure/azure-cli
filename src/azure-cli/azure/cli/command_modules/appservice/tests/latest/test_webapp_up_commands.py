@@ -205,8 +205,8 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config appsettings list', checks=[
-            JMESPathCheck('[1].name', 'SCM_DO_BUILD_DURING_DEPLOYMENT'),
-            JMESPathCheck('[1].value', 'True')
+            JMESPathCheck('[0].name', 'SCM_DO_BUILD_DURING_DEPLOYMENT'),
+            JMESPathCheck('[0].value', 'True')
         ])
 
         # verify SKU and kind of ASP created

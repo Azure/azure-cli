@@ -603,6 +603,8 @@ def load_arguments(self, _):
                    help="name of the appserviceplan associated with the webapp",
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
+        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Use `az webapp list-runtimes` for available list")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
