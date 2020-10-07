@@ -5,7 +5,9 @@
 
 
 import os
+from enum import Enum
 from knack.prompting import prompt, prompt_pass
+from knack.util import CLIError
 
 from azure.mgmt.datamigration.models import (DataMigrationService,
                                              ServiceSku,
@@ -97,6 +99,18 @@ def create_or_update_project(client,
     generally only helps in a GUI context--to guide the user more easily through creating a task. Since this info is
     necessary at the Task level, there is no need to include it at the Project level where for CLI it is more of a
     useless redundancy."""
+
+    # Set inputs to lowercase
+    source_platform = source_platform.lower()
+    target_platform = target_platform.lower()
+
+    scenario_handled_in_core = core_handles_scenario(source_platform, target_platform)
+
+    # Validation: Test scenario eligibility
+    if not scenario_handled_in_core:
+        raise CLIError("The provided source-platform, target-platform combination is not appropriate. \n\
+Please refer to the help file 'az dms project create -h' for the supported scenarios.")
+
     parameters = Project(location=location,
                          source_platform=source_platform,
                          target_platform=target_platform,
@@ -189,7 +203,6 @@ def list_tasks(client, resource_group_name, service_name, project_name, task_typ
 
 
 # region Helper Methods
-
 def create_sql_connection_info(connection_info_json, prompt_prefix):
     return SqlConnectionInfo(
         user_name=connection_info_json.get('userName', None) or prompt(prompt_prefix + 'Username: '),
@@ -199,5 +212,42 @@ def create_sql_connection_info(connection_info_json, prompt_prefix):
         encrypt_connection=connection_info_json.get('encryptConnection', None),
         trust_server_certificate=connection_info_json.get('trustServerCertificate', None),
         additional_settings=connection_info_json.get('additionalSettings', None))
+
+
+def core_handles_scenario(
+        source_platform,
+        target_platform,
+        task_type=""):
+    # Add scenarios here after migrating them to the core from the extension.
+    CoreScenarioTypes = [
+            ScenarioType.sql_sqldb_offline,
+            ScenarioType.mysql_azuremysql_online,
+            ScenarioType.postgres_azurepostgres_online]
+    return get_scenario_type(source_platform, target_platform, task_type) in CoreScenarioTypes
+
+
+def get_scenario_type(source_platform, target_platform, task_type=""):
+    if source_platform == "sql" and target_platform == "sqldb":
+        scenario_type = ScenarioType.sql_sqldb_offline if not task_type or "offline" in task_type else ScenarioType.unknown
+    elif source_platform == "mysql" and target_platform == "azuredbformysql":
+        scenario_type = ScenarioType.mysql_azuremysql_online if not task_type or "online" in task_type else ScenarioType.unknown
+    elif source_platform == "postgresql" and target_platform == "azuredbforpostgresql":
+        scenario_type = ScenarioType.postgres_azurepostgres_online if not task_type or "online" in task_type else \
+            ScenarioType.unkown
+    else:
+        scenario_type = ScenarioType.unknown
+
+    return scenario_type
+
+
+class ScenarioType(Enum):
+
+        unknown = 0
+        # SQL to SQLDB
+        sql_sqldb_offline = 1
+        # MySQL to Azure for MySQL
+        mysql_azuremysql_online = 21
+        # PostgresSQL to Azure for PostgreSQL
+        postgres_azurepostgres_online = 31
 
 # endregion

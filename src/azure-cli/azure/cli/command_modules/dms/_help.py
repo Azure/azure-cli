@@ -103,17 +103,24 @@ parameters:
 helps['dms project create'] = """
 type: command
 short-summary: Create a migration Project which can contain multiple Tasks.
+long-summary: |
+  The following project configurations are supported:
+    -) source -> target
+    1) SQL -> SQLDB
+    2) MySQL -> AzureDbForMySql
+    3) PostgreSQL -> AzureDbForPostgreSql
+
 parameters:
   - name: --source-platform
     type: string
     short-summary: >
-        The type of server for the source database. The supported types are: SQL.
+        The type of server for the source database. The supported types are: SQL, MySQL, PostgreSql.
   - name: --target-platform
     type: string
     short-summary: >
-        The type of service for the target database. The supported types are: SQLDB.
+        The type of service for the target database. The supported types are: SQLDB, AzureDbForMySql, AzureDbForPostgreSql.
 examples:
-  - name: Create a Project for a DMS instance.
+  - name: Create a SQL to SQLDB Project for a DMS instance.
     text: >
         az dms project create -l westus -n myproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
 """
