@@ -1733,7 +1733,7 @@ def _audit_policy_update_diagnostic_settings(
     name = "SQLSecurityAuditEvents"
 
     import inspect
-    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt"), None) != None
+    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt" or e.function == "test_sql_server_security_mgmt"), None) != None
 
     # For test environment the name should constant, i.e. match the name written in recorded yaml file
     if test_mode:

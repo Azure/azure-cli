@@ -1337,7 +1337,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
         # create log analytics workspace        
-        log_analytics_workspace_name = "clilaworkspacedb17"
+        log_analytics_workspace_name = "clilaworkspacedb18"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                     .format(resource_group, log_analytics_workspace_name),
@@ -1369,11 +1369,8 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                     JMESPathCheck('isAzureMonitorTargetEnabled', True)])
 
         # update audit policy - disable log analytics target
-        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
-                 ' --blob-storage-target-state {} --storage-endpoint={}' 
-                 ' --log-analytics-target-state {}'
-                    .format(resource_group, server, database_name, state_enabled, 
-                            state_enabled, storage_endpoint_2, state_disabled),
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {} --log-analytics-target-state {}'
+                    .format(resource_group, server, database_name, state_enabled, state_disabled),
                     checks=[
                         JMESPathCheck('resourceGroup', resource_group),
                         JMESPathCheck('state', state_enabled),
@@ -1436,11 +1433,8 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                     JMESPathCheck('isAzureMonitorTargetEnabled', True)])
 
         # update audit policy - disable event hub target
-        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}' 
-                 ' --blob-storage-target-state {} --storage-endpoint={}' 
-                 ' --event-hub-target-state {}'
-                    .format(resource_group, server, database_name, state_enabled, 
-                            state_enabled, storage_endpoint_2, state_disabled),
+        self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {} --event-hub-target-state {}'
+                    .format(resource_group, server, database_name, state_enabled, state_disabled),
                     checks=[
                         JMESPathCheck('resourceGroup', resource_group),
                         JMESPathCheck('state', state_enabled),
@@ -1551,9 +1545,131 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        time.sleep(10)
-        
+        # create log analytics workspace        
+        log_analytics_workspace_name = "clilaworkspacesrv04"
 
+        log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
+                    .format(resource_group, log_analytics_workspace_name),
+                    checks=[
+                        JMESPathCheck('resourceGroup', resource_group),
+                        JMESPathCheck('name', log_analytics_workspace_name),
+                        JMESPathCheck('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+        
+        # update audit policy - enable log analytics target
+        self.cmd('sql server audit-policy update -g {} -n {} --state {}'
+                    ' --log-analytics-target-state {} --log-analytics-workspace-resource-id {}'
+                    .format(resource_group, server, state_enabled, 
+                            state_enabled, log_analytics_workspace_id),
+                    checks=[
+                        JMESPathCheck('resourceGroup', resource_group),
+                        JMESPathCheck('state', state_enabled),
+                        JMESPathCheck('retentionDays', retention_days),
+                        JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        time.sleep(10)
+
+        # get audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('sql server audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('state', state_enabled),
+                    JMESPathCheck('blobStorageTargetState', state_enabled),
+                    JMESPathCheck('logAnalyticsTargetState', state_enabled),
+                    JMESPathCheck('eventHubTargetState', state_disabled),
+                    JMESPathCheck('isAzureMonitorTargetEnabled', True)])
+
+        # update audit policy - disable log analytics target
+        self.cmd('sql server audit-policy update -g {} -n {} --state {} --log-analytics-target-state {}'
+                    .format(resource_group, server, state_enabled, state_disabled),
+                    checks=[
+                        JMESPathCheck('resourceGroup', resource_group),
+                        JMESPathCheck('state', state_enabled),
+                        JMESPathCheck('retentionDays', retention_days),
+                        JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        time.sleep(10)
+
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
+        self.cmd('sql server audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('state', state_enabled),
+                    JMESPathCheck('blobStorageTargetState', state_enabled),
+                    JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                    JMESPathCheck('eventHubTargetState', state_disabled),
+                    JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+  
+        # create event hub namespace
+        eventhub_namespace = 'cliehnamespacedb01'        
+        
+        self.cmd('eventhubs namespace create -g {} -n {}'                    
+                    .format(resource_group, eventhub_namespace),
+                    checks=[
+                        JMESPathCheck('provisioningState', 'Succeeded')])
+
+        # create event hub
+        eventhub_name = 'cliehsrv01'
+
+        self.cmd('eventhubs eventhub create -g {} -n {} --namespace-name {}'                    
+                    .format(resource_group, eventhub_name, eventhub_namespace),
+                    checks=[
+                        JMESPathCheck('status', 'Active')])
+
+        # create event hub autorization rule
+        eventhub_auth_rule = 'cliehauthruledb01'
+
+        eventhub_auth_rule_id = self.cmd('eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
+                    .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
+
+        # update audit policy - enable event hub target
+        self.cmd('sql server audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
+                    ' --event-hub-authorization-rule-id {} --event-hub-name {}'
+                    .format(resource_group, server, state_enabled, state_enabled, 
+                            eventhub_auth_rule_id, eventhub_name),
+                    checks=[
+                        JMESPathCheck('resourceGroup', resource_group),
+                        JMESPathCheck('state', state_enabled),
+                        JMESPathCheck('retentionDays', retention_days),
+                        JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        time.sleep(10)
+
+        # get audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('sql server audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('state', state_enabled),
+                    JMESPathCheck('blobStorageTargetState', state_enabled),
+                    JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                    JMESPathCheck('eventHubTargetState', state_enabled),
+                    JMESPathCheck('isAzureMonitorTargetEnabled', True)])
+
+        # update audit policy - disable event hub target
+        self.cmd('sql server audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
+                    .format(resource_group, server, state_enabled, state_disabled),
+                    checks=[
+                        JMESPathCheck('resourceGroup', resource_group),
+                        JMESPathCheck('state', state_enabled),
+                        JMESPathCheck('retentionDays', retention_days),
+                        JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
+
+        time.sleep(10)
+
+        # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('sql server audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('state', state_enabled),
+                    JMESPathCheck('blobStorageTargetState', state_enabled),
+                    JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                    JMESPathCheck('eventHubTargetState', state_disabled),
+                    JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+        
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
     @ResourceGroupPreparer(location='westeurope')
