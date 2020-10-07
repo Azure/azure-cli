@@ -40,7 +40,11 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_private_endpoint_connections_operations,
     cf_postgres_private_link_resources_operations,
     cf_postgres_server_keys_operations,
-    cf_postgres_server_ad_administrators_operations)
+    cf_postgres_server_ad_administrators_operations,
+    cf_mysql_location_based_performance_tier_operations,
+    cf_postgres_location_based_performance_tier_operations)
+
+from ._transformers import table_transform_output_list_sku
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
@@ -209,6 +213,18 @@ def load_command_table(self, _):
     postgres_adadmin_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServerAdministratorsOperations.{}',
         client_factory=cf_postgres_server_ad_administrators_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mysql_location_based_performance_tier_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#LocationBasedPerformanceTierOperations.{}',
+        client_factory=cf_mysql_location_based_performance_tier_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    postgres_location_based_performance_tier_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#LocationBasedPerformanceTierOperations.{}',
+        client_factory=cf_postgres_location_based_performance_tier_operations,
         resource_type=ResourceType.MGMT_RDBMS
     )
 
@@ -458,3 +474,15 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.wait_command('wait')
+
+    with self.command_group('mysql server',
+                            mysql_location_based_performance_tier_sdk,
+                            client_factory=cf_mysql_location_based_performance_tier_operations,
+                            is_preview=True) as g:
+        g.command('list-skus', 'list', table_transformer=table_transform_output_list_sku)
+
+    with self.command_group('postgres server',
+                            postgres_location_based_performance_tier_sdk,
+                            client_factory=cf_postgres_location_based_performance_tier_operations,
+                            is_preview=True) as g:
+        g.command('list-skus', 'list', table_transformer=table_transform_output_list_sku)

@@ -36,7 +36,7 @@ def table_transform_output_list_servers(result):
     return table_result
 
 
-def table_transform_output_list_sku(result):
+def table_transform_output_list_sku_flexible_server(result):
     table_result = []
     if len(result) > 1:
         skus_tiers = result[0]["supportedFlexibleServerEditions"]
@@ -51,6 +51,26 @@ def table_transform_output_list_sku(result):
                     new_entry['vCore'] = key['vCores']
                     new_entry['Memory'] = str(int(key['supportedMemoryPerVcoreMb']) * int(key['vCores']) // 1024) + " GiB"
                     new_entry['Max Disk IOPS'] = key['supportedIOPS']
+                    table_result.append(new_entry)
+            except:
+                raise CLIError("There is no sku available for this location.")
+
+    return table_result
+
+
+def table_transform_output_list_sku(result):
+    table_result = []
+    if len(result) > 1:
+        for tiers in result:
+            tier_name = tiers["id"]
+            try:
+                keys = tiers["serviceLevelObjectives"]
+                for key in keys:
+                    new_entry = OrderedDict()
+                    new_entry['SKU'] = key['id']
+                    new_entry['Tier'] = tier_name
+                    new_entry['vCore'] = key['vCore']
+                    new_entry['Generation'] = key['hardwareGeneration']
                     table_result.append(new_entry)
             except:
                 raise CLIError("There is no sku available for this location.")

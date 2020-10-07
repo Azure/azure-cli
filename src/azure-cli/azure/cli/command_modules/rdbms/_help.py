@@ -1221,3 +1221,19 @@ helps['postgres flexible-server show-connection-string'] = """
     type: command
     short-summary: Show the connection strings for a PostgreSQL flexible-server database.
 """
+
+helps['postgres server list-skus'] = """
+type: command
+short-summary: Lists available sku's in the given region.
+examples:
+  - name: Lists available sku's in the given region.
+    text: az postgres server list-skus -l eastus
+"""
+
+helps['mysql server list-skus'] = """
+type: command
+short-summary: Lists available sku's in the given region.
+examples:
+  - name: Lists available sku's in the given region.
+    text: az mysql server list-skus -l eastus
+"""
