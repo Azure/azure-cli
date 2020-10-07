@@ -1509,8 +1509,6 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
         
-        sleep(10)
-
         # get audit policy
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
@@ -1565,8 +1563,6 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                         JMESPathCheck('retentionDays', retention_days),
                         JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        sleep(10)
-
         # get audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
@@ -1586,8 +1582,6 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                         JMESPathCheck('state', state_enabled),
                         JMESPathCheck('retentionDays', retention_days),
                         JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
-
-        sleep(10)
 
         # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
         self.cmd('sql server audit-policy show -g {} -n {}'
@@ -1633,8 +1627,6 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                         JMESPathCheck('retentionDays', retention_days),
                         JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        sleep(10)
-
         # get audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
@@ -1654,8 +1646,6 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                         JMESPathCheck('state', state_enabled),
                         JMESPathCheck('retentionDays', retention_days),
                         JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
-
-        sleep(10)
 
         # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql server audit-policy show -g {} -n {}'
