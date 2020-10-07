@@ -1509,10 +1509,9 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
         
-        # get audit policy
-        import time
+        sleep(10)
 
-        time.sleep(10)
+        # get audit policy
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
                  checks=[
@@ -1546,7 +1545,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # create log analytics workspace        
-        log_analytics_workspace_name = "clilaworkspacesrv04"
+        log_analytics_workspace_name = "clilaworkspacesrv10"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                     .format(resource_group, log_analytics_workspace_name),
@@ -1566,7 +1565,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                         JMESPathCheck('retentionDays', retention_days),
                         JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        time.sleep(10)
+        sleep(10)
 
         # get audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
         self.cmd('sql server audit-policy show -g {} -n {}'
@@ -1588,7 +1587,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                         JMESPathCheck('retentionDays', retention_days),
                         JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        time.sleep(10)
+        sleep(10)
 
         # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
         self.cmd('sql server audit-policy show -g {} -n {}'
@@ -1634,7 +1633,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                         JMESPathCheck('retentionDays', retention_days),
                         JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        time.sleep(10)
+        sleep(10)
 
         # get audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
         self.cmd('sql server audit-policy show -g {} -n {}'
@@ -1656,7 +1655,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                         JMESPathCheck('retentionDays', retention_days),
                         JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        time.sleep(10)
+        sleep(10)
 
         # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql server audit-policy show -g {} -n {}'
@@ -1669,7 +1668,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                     JMESPathCheck('eventHubTargetState', state_disabled),
                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
-        
+
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
     @ResourceGroupPreparer(location='westeurope')

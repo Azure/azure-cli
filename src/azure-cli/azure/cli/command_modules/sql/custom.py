@@ -1953,7 +1953,8 @@ def _audit_policy_update_global_settings(
 
     # Update audit policy
     if database_name == None:
-        client.create_or_update(resource_group_name, server_name, audit_policy)
+        # For server operation 'client.create_or_update' returns 'LROPoller' object which we should wait on
+        client.create_or_update(resource_group_name, server_name, audit_policy).wait()
     else:
         client.create_or_update(resource_group_name, server_name, database_name, audit_policy)
 
