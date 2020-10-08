@@ -296,7 +296,7 @@ def load_arguments(self, _):
             c.argument('labels', nargs='*', validator=validate_nodepool_labels)
             c.argument('mode', get_enum_type(nodepool_mode_type))
             c.argument('enable_node_public_ip', action='store_true', is_preview=True)
-            c.argument('ppg')
+            c.argument('ppg', type=str, validator=validate_ppg)
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
