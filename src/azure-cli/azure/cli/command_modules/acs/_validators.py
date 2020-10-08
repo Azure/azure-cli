@@ -312,6 +312,7 @@ def validate_vnet_subnet_id(namespace):
         if not is_valid_resource_id(namespace.vnet_subnet_id):
             raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
 
+
 def validate_ppg(namespace):
     if namespace.ppg is not None:
         if namespace.ppg == '':

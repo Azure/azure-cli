@@ -634,7 +634,7 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
-	- name: --ppg
+  - name: --ppg
     type: string
     short-summary: The ID of a PPG.
   - name: --os-type
