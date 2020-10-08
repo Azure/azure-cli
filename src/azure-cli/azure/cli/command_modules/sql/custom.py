@@ -1890,39 +1890,13 @@ def _audit_policy_update_global_settings(
     # Apply additional command line arguments only if policy's state is enabled
     if audit_policy.state == BlobAuditingPolicyState.enabled:
         # Apply blob_storage_target_state and all storage account details
-        if blob_storage_target_state != None:
-            if blob_storage_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower():
-                storage_resource_group = None
-
-                # Resolve storage endpoint in case storage account has been provided.
-                # Error is thrown in case storage endpoint cannot be resolved.
-                if storage_account != None:
-                    storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
-                    storage_endpoint = _get_storage_endpoint(cmd.cli_ctx, storage_account, storage_resource_group)              
-
-                audit_policy.storage_endpoint = storage_endpoint;
-
-                if storage_account_access_key != None:
-                    audit_policy.storage_account_access_key = storage_account_access_key
-                else:
-                    if storage_account == None:
-                        storage_account = _get_storage_account_name(storage_endpoint)
-                        storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
-
-                    audit_policy.storage_account_access_key = _get_storage_key(
-                                cmd.cli_ctx,
-                                storage_account,
-                                storage_resource_group,
-                                False)
-            else:
-                audit_policy.storage_endpoint = None
-                audit_policy.storage_account_access_key = None
-        else:
-            # blob_storage_target_state is not provided in command line - storage_endpoint property of the audit policy should stay as is
+        if blob_storage_target_state == None:
+            # Original audit policy has no storage_endpoint
             if not audit_policy.storage_endpoint:
                 audit_policy.storage_endpoint = None
                 audit_policy.storage_account_access_key = None
             else:
+                # Resolve storage_account_access_key based on original storage_endpoint
                 storage_account = _get_storage_account_name(audit_policy.storage_endpoint)
                 storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
 
@@ -1930,7 +1904,32 @@ def _audit_policy_update_global_settings(
                             cmd.cli_ctx,
                             storage_account,
                             storage_resource_group,
-                            False)                
+                            False)
+        elif blob_storage_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower():
+            # Resolve storage_endpoint using provided storgae_account
+            if storage_account != None:
+                storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
+                storage_endpoint = _get_storage_endpoint(cmd.cli_ctx, storage_account, storage_resource_group)
+                            
+            audit_policy.storage_endpoint = storage_endpoint;
+
+            if storage_account_access_key != None:
+                audit_policy.storage_account_access_key = storage_account_access_key
+            else:
+                # Resolve storage_account if not provided
+                if storage_account == None:
+                    storage_account = _get_storage_account_name(storage_endpoint)
+                    storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
+
+                # Resolve storage_account_access_key based on storage_account
+                audit_policy.storage_account_access_key = _get_storage_key(
+                            cmd.cli_ctx,
+                            storage_account,
+                            storage_resource_group,
+                            False)            
+        else:
+            audit_policy.storage_endpoint = None
+            audit_policy.storage_account_access_key = None
 
         # Apply audit_actions_and_groups
         if audit_actions_and_groups != None:
