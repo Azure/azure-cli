@@ -111,6 +111,17 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, location))
         current_time = datetime.utcnow()
 
+        if database_engine == 'postgres':
+            self.cmd('postgres flexible-server create -g {} -l {} --tier Burstable --sku-name Standard_B1ms'
+                     .format(resource_group, location))
+            self.cmd('postgres flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2s_v3'
+                     .format(resource_group, location))
+        elif database_engine == 'mysql':
+            self.cmd('mysql flexible-server create -g {} -l {} --tier GeneralPurpose --sku-name Standard_D2ds_v4'
+                     .format(resource_group, location))
+            self.cmd('mysql flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2ds_v4'
+                     .format(resource_group, location))
+
         self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=list_checks).get_output_in_json()
 
