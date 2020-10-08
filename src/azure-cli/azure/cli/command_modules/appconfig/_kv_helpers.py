@@ -19,7 +19,7 @@ from azure.appconfiguration import ResourceReadOnlyError
 from azure.core.exceptions import HttpResponseError
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants)
-from ._utils import user_confirmation, prep_null_label_for_url_encoding
+from ._utils import user_confirmation, prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,
@@ -269,7 +269,7 @@ def __read_kv_from_config_store(azconfig_client,
     # In delete, import & export commands, we treat missing --label as null label
     # In list, restore & list_revision commands, we treat missing --label as all labels
 
-    label = prep_null_label_for_url_encoding(label)
+    label = prep_label_filter_for_url_encoding(label)
 
     query_fields = []
     if fields:

@@ -24,12 +24,12 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes)
 from ._models import (convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
-from ._utils import get_appconfig_data_client, user_confirmation, prep_null_label_for_url_encoding
+from ._utils import get_appconfig_data_client, user_confirmation, prep_label_filter_for_url_encoding
 
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
-                          __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
+                          __write_kv_to_app_service, __serialize _kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
 from .feature import list_feature
 
@@ -731,7 +731,7 @@ def list_revision(cmd,
 
     key = key if key else SearchFilterOptions.ANY_KEY
     label = label if label else SearchFilterOptions.ANY_LABEL
-    label = prep_null_label_for_url_encoding(label)
+    label = prep_label_filter_for_url_encoding(label)
 
     try:
         revisions_iterable = azconfig_client.list_revisions(key_filter=key,

@@ -118,7 +118,7 @@ def get_store_name_from_connection_string(connection_string):
     return None
 
 
-def prep_null_label_for_url_encoding(label=None):
+def prep_label_filter_for_url_encoding(label=None):
     if label is not None:
         import ast
         # ast library requires quotes around string

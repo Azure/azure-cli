@@ -25,7 +25,7 @@ from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import (get_appconfig_data_client, user_confirmation,
-                     prep_null_label_for_url_encoding)
+                     prep_label_filter_for_url_encoding)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
                              FeatureFilter)
@@ -890,7 +890,7 @@ def __list_all_keyvalues(azconfig_client,
     # If user has specified fields, we still get all the fields and then
     # filter what we need from the response.
 
-    label = prep_null_label_for_url_encoding(label)
+    label = prep_label_filter_for_url_encoding(label)
 
     try:
         configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key, label_filter=label)
