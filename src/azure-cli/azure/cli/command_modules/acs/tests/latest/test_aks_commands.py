@@ -2027,20 +2027,19 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
-    def test_aks_create_with_ppg(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_create_with_ppg(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
-        node_pool_name = self.create_random_name('cliagentpool', 6)
+        node_pool_name = self.create_random_name('p', 10)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
+            'node_pool_name': node_pool_name,
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
-            'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'ppg': self.generate_ppg_id(resource_group, resource_group_location)
         })
@@ -2053,23 +2052,20 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].ppg', '{ppg}')
+            self.check('agentPoolProfiles[0].proximityPlacementGroupId', '{ppg}')
         ])
 
         # add node pool
         create_ppg_node_pool_cmd = 'aks nodepool add ' \
             '--resource-group={resource_group} ' \
             '--cluster-name={name} ' \
+            '-n {node_pool_name} ' \
             '--ppg={ppg} '
         self.cmd(create_ppg_node_pool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('name', node_pool_name),
-            self.check('ppg', '{ppg}')
+            self.check('proximityPlacementGroupId', '{ppg}')
         ])
-
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @classmethod
     def generate_ssh_keys(cls):
