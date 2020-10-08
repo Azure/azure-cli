@@ -44,7 +44,9 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_location_based_performance_tier_operations,
     cf_postgres_location_based_performance_tier_operations)
 
-from ._transformers import table_transform_output_list_sku
+from ._transformers import (
+    table_transform_output_list_skus_single_server,
+    table_transform_output_list_servers_single_server)
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
@@ -250,7 +252,7 @@ def load_command_table(self, _):
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func')
+        g.custom_command('list', '_server_list_custom_func', table_transformer=table_transform_output_list_servers_single_server)
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
@@ -266,7 +268,7 @@ def load_command_table(self, _):
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func')
+        g.custom_command('list', '_server_list_custom_func', table_transformer=table_transform_output_list_servers_single_server)
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
@@ -479,10 +481,10 @@ def load_command_table(self, _):
                             mysql_location_based_performance_tier_sdk,
                             client_factory=cf_mysql_location_based_performance_tier_operations,
                             is_preview=True) as g:
-        g.command('list-skus', 'list', table_transformer=table_transform_output_list_sku)
+        g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)
 
     with self.command_group('postgres server',
                             postgres_location_based_performance_tier_sdk,
                             client_factory=cf_postgres_location_based_performance_tier_operations,
                             is_preview=True) as g:
-        g.command('list-skus', 'list', table_transformer=table_transform_output_list_sku)
+        g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)

@@ -20,7 +20,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
-    table_transform_output_list_sku_flexible_server)
+    table_transform_output_list_skus)
 
 # from .transformers import table_transform_connection_string
 # from .validators import db_up_namespace_processor
@@ -134,7 +134,7 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_location_capabilities,
                             is_preview=True) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_sku_flexible_server)
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     # MySQL commands
@@ -191,7 +191,7 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_mysql,
                             client_factory=cf_mysql_flexible_location_capabilities,
                             is_preview=True) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_sku_flexible_server)
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('mysql flexible-server replica', mysql_flexible_replica_sdk,

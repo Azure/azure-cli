@@ -36,7 +36,7 @@ def table_transform_output_list_servers(result):
     return table_result
 
 
-def table_transform_output_list_sku_flexible_server(result):
+def table_transform_output_list_skus(result):
     table_result = []
     if len(result) > 1:
         skus_tiers = result[0]["supportedFlexibleServerEditions"]
@@ -58,7 +58,22 @@ def table_transform_output_list_sku_flexible_server(result):
     return table_result
 
 
-def table_transform_output_list_sku(result):
+def table_transform_output_list_servers_single_server(result):
+    table_result = []
+    for key in result:
+        new_entry = OrderedDict()
+        new_entry['Name'] = key['name']
+        new_entry['Resource Group'] = key['resourceGroup']
+        new_entry['Location'] = key['location']
+        new_entry['Version'] = key['version']
+        new_entry['Storage Size(GiB)'] = int(key['storageProfile']['storageMb']) / 1024.0
+        new_entry['Tier'] = key['sku']['tier']
+        new_entry['SKU'] = key['sku']['name']
+        table_result.append(new_entry)
+    return table_result
+
+
+def table_transform_output_list_skus_single_server(result):
     table_result = []
     if len(result) > 1:
         for tiers in result:
