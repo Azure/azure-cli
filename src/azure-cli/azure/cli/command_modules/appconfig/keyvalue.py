@@ -731,8 +731,7 @@ def list_revision(cmd,
 
     key = key if key else SearchFilterOptions.ANY_KEY
     label = label if label else SearchFilterOptions.ANY_LABEL
-    if label == SearchFilterOptions.EMPTY_LABEL:
-        label = prep_null_label_for_url_encoding(label)
+    label = prep_null_label_for_url_encoding(label)
 
     try:
         revisions_iterable = azconfig_client.list_revisions(key_filter=key,

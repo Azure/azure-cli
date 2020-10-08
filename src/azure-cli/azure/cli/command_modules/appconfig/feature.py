@@ -890,8 +890,7 @@ def __list_all_keyvalues(azconfig_client,
     # If user has specified fields, we still get all the fields and then
     # filter what we need from the response.
 
-    if label == SearchFilterOptions.EMPTY_LABEL:
-        label = prep_null_label_for_url_encoding(label)
+    label = prep_null_label_for_url_encoding(label)
 
     try:
         configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key, label_filter=label)
