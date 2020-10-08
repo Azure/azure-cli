@@ -2047,13 +2047,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} --ppg={ppg} '
+            '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+            '--service-principal={service_principal} --client-secret={client_secret} --ppg={ppg} '
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].ppg', '{ppg}'),
+            self.check('agentPoolProfiles[0].ppg', '{ppg}')
         ])
 
         # add node pool
@@ -2064,7 +2064,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(create_ppg_node_pool_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('name', node_pool_name),
-            self.check('ppg', '{ppg}'),
+            self.check('ppg', '{ppg}')
+        ])
 
         # delete
         self.cmd(
@@ -2089,8 +2090,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     def generate_ppg_id(self, resource_group, location):
         ppg_name = self.create_random_name('clippg', 16)
-        ppg = self.cmd('az ppg create -n {} -g {} --location {}
-                               .format(ppg_name, resource_group, location).get_output_in_json()
+        ppg = self.cmd('az ppg create -n {} -g {} --location {}'
+                       .format(ppg_name, resource_group, location)).get_output_in_json()
         return ppg.get("id")
 
     def _get_versions(self, location):
