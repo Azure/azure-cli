@@ -154,6 +154,7 @@ def load_arguments(self, _):
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)
         c.argument('throughput', help='The throughput of SQL container (RU/s). Default value is 400. Omit this parameter if the database has shared throughput unless the container should have dedicated throughput.')
+        c.argument('analytical_storage_ttl', type=int, help='Analytical TTL, when analytical storage is enabled.')
 
 # SQL stored procedure
     with self.argument_context('cosmosdb sql stored-procedure') as c:
