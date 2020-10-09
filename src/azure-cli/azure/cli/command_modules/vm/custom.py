@@ -1720,28 +1720,43 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
 
 def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
-    usage_err = 'usage error: --plan STRING --offer STRING --publish STRING --version STRING | --urn STRING'
+    from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
+                                           InvalidArgumentValueError,
+                                           RequiredArgumentMissingError)
+
     location = location or get_one_of_subscription_locations(cmd.cli_ctx)
+    error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
     if urn:
         if any([publisher, offer, sku, version]):
-            raise CLIError(usage_err)
+            recommendation = 'Try to use --urn publisher:offer:sku:version only'
+            raise MutuallyExclusiveArgumentError(error_msg, recommendation)
+        items = urn.split(":")
+        if len(items) != 4:
+            raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
         publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
             version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
     elif not publisher or not offer or not sku or not version:
-        raise CLIError(usage_err)
+        raise RequiredArgumentMissingError(error_msg)
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machine_images.get(location, publisher, offer, sku, version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+    from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
+                                           InvalidArgumentValueError,
+                                           RequiredArgumentMissingError)
 
-    usage_err = 'usage error: --plan STRING --offer STRING --publish STRING |--urn STRING'
+    error_msg = 'Please specify all of (--plan, --offer, --publish), or --urn'
     if urn:
         if any([publisher, offer, plan]):
-            raise CLIError(usage_err)
-        publisher, offer, _, _ = urn.split(':')
+            recommendation = 'Try to use --urn publisher:offer:sku:version only'
+            raise MutuallyExclusiveArgumentError(error_msg, recommendation)
+        items = urn.split(':')
+        if len(items) != 4:
+            raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
+        publisher, offer, _, _ = items
         image = show_vm_image(cmd, urn)
         if not image.plan:
             logger.warning("Image '%s' has no terms to accept.", urn)
@@ -1749,7 +1764,7 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
         plan = image.plan.name
     else:
         if not publisher or not offer or not plan:
-            raise CLIError(usage_err)
+            raise RequiredArgumentMissingError(error_msg)
 
     market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
 
