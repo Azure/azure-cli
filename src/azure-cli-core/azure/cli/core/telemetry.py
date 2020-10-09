@@ -45,7 +45,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_management_detail = None
         self.raw_command = None
         self.mode = 'default'
-        # The AzCLIErrorType
+        # The AzCLIError sub-class name
         self.error_type = 'None'
         # The class name of the raw exception
         self.exception_name = 'None'
