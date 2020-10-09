@@ -18,6 +18,7 @@ Release History
 * Expect kube-dashboard addon be disabled by default (#15267)
 * `az aks create/update`: Add LicenseType support for Windows (#15257)
 * Support add Spot node pool (#15311)
+* Honor addon names defined in Azure CLI (#15376)
 
 **AMS**
 
