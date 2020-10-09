@@ -45,7 +45,7 @@ Release History
 
 * Fix host group creation FD count limitation (#15316)
 * Add new command to support upgrading extensions for VMSS (#15238)
-* Fix a vmss update, disk attach/detach, extension set/delete issue (#14992)
+* Fix the image reference is missing issue (#14992)
 
 **HDInsight**
 
