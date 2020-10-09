@@ -845,7 +845,6 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
-        from azure.cli.core.azclierror import AzCLIErrorType
         from azure.cli.core.azclierror import AzCLIError
         for validator in getattr(ns, '_argument_validators', []):
             try:
