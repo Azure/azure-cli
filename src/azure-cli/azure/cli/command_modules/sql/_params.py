@@ -800,6 +800,9 @@ def load_arguments(self, _):
         _configure_security_policy_storage_params(c)
 
         policy_arg_group = 'Policy'
+        storage_arg_group = 'Storage'
+        log_analytics_group = 'Log Analytics'
+        event_hub_group = 'Event Hub'
 
         c.argument('state',
                    arg_group=policy_arg_group,
@@ -817,30 +820,30 @@ def load_arguments(self, _):
                    help='The number of days to retain audit logs.')
 
         c.argument('blob_storage_target_state',
-                   arg_group=policy_arg_group,
+                   arg_group=storage_arg_group,
                    help='Indicates whether blob storage is a destination for audit records.',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
         c.argument('log_analytics_target_state',
-                   arg_group=policy_arg_group,
+                   arg_group=log_analytics_group,
                    help='Indicates whether log analytics is a destination for audit records.',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
         c.argument('log_analytics_workspace_resource_id',
-                   arg_group=policy_arg_group,
+                   arg_group=log_analytics_group,
                    help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace to which you would like to send Audit Logs.')
 
         c.argument('event_hub_target_state',
-                   arg_group=policy_arg_group,
+                   arg_group=event_hub_group,
                    help='Indicates whether event hub is a destination for audit records.',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
         c.argument('event_hub_authorization_rule_id',
-                   arg_group=policy_arg_group,
+                   arg_group=event_hub_group,
                    help='The resource Id for the event hub authorization rule.')
 
-        c.argument('event_hub_name',
-                   arg_group=policy_arg_group,
+        c.argument('event_hub',
+                   arg_group=event_hub_group,
                    help='The name of the event hub. If none is specified when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
     with self.argument_context('sql db threat-policy update') as c:
@@ -1322,6 +1325,8 @@ def load_arguments(self, _):
     ######
     with self.argument_context('sql server audit-policy update') as c:
         storage_arg_group = 'Storage'
+        log_analytics_group = 'Log Analytics'
+        event_hub_group = 'Event Hub'
 
         c.argument('storage_account',
                    options_list=['--storage-account'],
@@ -1356,30 +1361,30 @@ def load_arguments(self, _):
                    help='The number of days to retain audit logs.')
 
         c.argument('blob_storage_target_state',
-                   arg_group=policy_arg_group,
+                   arg_group=storage_arg_group,
                    help='Indicates whether blob storage is a destination for audit records.',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
         c.argument('log_analytics_target_state',
-                   arg_group=policy_arg_group,
+                   arg_group=log_analytics_group,
                    help='Indicates whether log analytics is a destination for audit records.',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
         c.argument('log_analytics_workspace_resource_id',
-                   arg_group=policy_arg_group,
+                   arg_group=log_analytics_group,
                    help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace to which you would like to send Audit Logs.')
 
         c.argument('event_hub_target_state',
-                   arg_group=policy_arg_group,
+                   arg_group=event_hub_group,
                    help='Indicates whether event hub is a destination for audit records.',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
         c.argument('event_hub_authorization_rule_id',
-                   arg_group=policy_arg_group,
+                   arg_group=event_hub_group,
                    help='The resource Id for the event hub authorization rule.')
 
-        c.argument('event_hub_name',
-                   arg_group=policy_arg_group,
+        c.argument('event_hub',
+                   arg_group=event_hub_group,
                    help='The name of the event hub. If none is specified when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
     #####

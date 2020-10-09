@@ -2101,7 +2101,7 @@ def server_audit_policy_update(
         log_analytics_workspace_resource_id = None,
         event_hub_target_state = None,
         event_hub_authorization_rule_id = None,
-        event_hub_name = None):
+        event_hub = None):
         '''
         Update server audit policy
         '''
@@ -2123,7 +2123,7 @@ def server_audit_policy_update(
             log_analytics_workspace_resource_id,
             event_hub_target_state,
             event_hub_authorization_rule_id,
-            event_hub_name)
+            event_hub)
 
 
 def db_audit_policy_update(
@@ -2143,7 +2143,7 @@ def db_audit_policy_update(
         log_analytics_workspace_resource_id = None,
         event_hub_target_state = None,
         event_hub_authorization_rule_id = None,
-        event_hub_name = None):
+        event_hub = None):
         '''
         Update database audit policy
         '''
@@ -2165,7 +2165,7 @@ def db_audit_policy_update(
             log_analytics_workspace_resource_id,
             event_hub_target_state,
             event_hub_authorization_rule_id,
-            event_hub_name)
+            event_hub)
 
 
 def update_long_term_retention(

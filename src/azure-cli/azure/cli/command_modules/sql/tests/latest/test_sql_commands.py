@@ -1337,7 +1337,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
         # create log analytics workspace        
-        log_analytics_workspace_name = "clilaworkspacedb18"
+        log_analytics_workspace_name = "clilaworkspacedb19"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                     .format(resource_group, log_analytics_workspace_name),
@@ -1412,7 +1412,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
         # update audit policy - enable event hub target
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {} --event-hub-target-state {}'
-                    ' --event-hub-authorization-rule-id {} --event-hub-name {}'
+                    ' --event-hub-authorization-rule-id {} --event-hub {}'
                     .format(resource_group, server, database_name, state_enabled, state_enabled, 
                             eventhub_auth_rule_id, eventhub_name),
                     checks=[
@@ -1543,7 +1543,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # create log analytics workspace        
-        log_analytics_workspace_name = "clilaworkspacesrv10"
+        log_analytics_workspace_name = "clilaworkspacesrv11"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                     .format(resource_group, log_analytics_workspace_name),
@@ -1618,7 +1618,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
 
         # update audit policy - enable event hub target
         self.cmd('sql server audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
-                    ' --event-hub-authorization-rule-id {} --event-hub-name {}'
+                    ' --event-hub-authorization-rule-id {} --event-hub {}'
                     .format(resource_group, server, state_enabled, state_enabled, 
                             eventhub_auth_rule_id, eventhub_name),
                     checks=[

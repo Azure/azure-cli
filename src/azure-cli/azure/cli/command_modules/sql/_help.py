@@ -48,7 +48,7 @@ examples:
   - name: Disable a blob storage auditing policy.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb \\
-            --blob_storage_target_state Disabled
+            --blob-storage-target-state Disabled
   - name: Enable a log analytics auditing policy.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
@@ -61,18 +61,18 @@ examples:
   - name: Enable an event hub auditing policy.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
-            --event_hub_target_state Enabled \\
-            --event_hub_authorization_rule_id eventhubauthorizationruleid \\
-            --event_hub_name eventhubname
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
   - name: Enable an event hub auditing policy for default event hub.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
-            --event_hub_target_state Enabled \\
-            --event_hub_authorization_rule_id eventhubauthorizationruleid
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
   - name: Disable an event hub auditing policy.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb
-            --event_hub_target_state Disabled
+            --event-hub-target-state Disabled
 """
 
 helps['sql db copy'] = """
@@ -1027,7 +1027,7 @@ examples:
   - name: Disable a blob storage auditing policy.
     text: |
         az sql server audit-policy update -g mygroup -n myserver \\
-            --blob_storage_target_state Disabled
+            --blob-storage-target-state Disabled
   - name: Enable a log analytics auditing policy.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
@@ -1040,18 +1040,18 @@ examples:
   - name: Enable an event hub auditing policy.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
-            --event_hub_target_state Enabled \\
-            --event_hub_authorization_rule_id eventhubauthorizationruleid \\
-            --event_hub_name eventhubname
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
   - name: Enable an event hub auditing policy for default event hub.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
-            --event_hub_target_state Enabled \\
-            --event_hub_authorization_rule_id eventhubauthorizationruleid
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
   - name: Disable an event hub auditing policy.
     text: |
         az sql server audit-policy update -g mygroup -n myserver
-            --event_hub_target_state Disabled
+            --event-hub-target-state Disabled
 """
 
 helps['sql server conn-policy'] = """
