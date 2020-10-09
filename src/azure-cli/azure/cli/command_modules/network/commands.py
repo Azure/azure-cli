@@ -635,7 +635,7 @@ def load_command_table(self, _):
     # endregion
 
     # region DNS
-    with self.command_group('network dns', network_dns_reference_sdk) as g:
+    with self.command_group('network dns', network_dns_reference_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
         g.command('list-references', 'get_by_target_resources')
 
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:
