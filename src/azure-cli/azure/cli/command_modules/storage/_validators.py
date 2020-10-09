@@ -1401,9 +1401,6 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
     # usage check
-    if not any([url, container, blob, share, file_path]):
-        raise CLIError("incorrect usage: please specify one of url, container&blob, share&file_path information.")
-
     if not container and blob:
         raise CLIError('incorrect usage: please specify container information for your blob resource.')
     if not share and file_path:
@@ -1459,8 +1456,14 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
     if namespace.sas_token:
         sas_token = namespace.sas_token.lstrip('?')
     else:
-        sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
-    return '{}?{}'.format(url, sas_token)
+        try:
+            sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.debug("Cannot generate sas token. %s", ex)
+            sas_token = None
+    if sas_token:
+        return '{}?{}'.format(url, sas_token)
+    return url
 
 
 def _is_valid_uri(uri):
