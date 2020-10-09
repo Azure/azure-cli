@@ -110,7 +110,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server create -g {} -n {} -l {}'
                  .format(database_engine, resource_group, server_name, location))
         current_time = datetime.utcnow()
-
+        
         if database_engine == 'postgres':
             self.cmd('postgres flexible-server create -g {} -l {} --tier Burstable --sku-name Standard_B1ms'
                      .format(resource_group, location))
@@ -196,6 +196,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
+
     @ServerPreparer(engine_type='postgres', location=postgres_location)
     def test_postgres_flexible_server_proxy_resource(self, resource_group, server):
         self._test_firewall_rule_mgmt('postgres', resource_group, server)
@@ -261,7 +262,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
     def _test_parameter_mgmt(self, database_engine, resource_group, server):
-
+    
         self.cmd('{} flexible-server parameter list -g {} -s {}'.format(database_engine, resource_group, server), checks=[JMESPathCheck('type(@)', 'array')])
 
         if database_engine == 'mysql':
