@@ -36,7 +36,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
 
-            err = (getattr(err, 'error_response', None) or {}).get('error_description') or ''
+            err = (getattr(err, 'error_response', None) or {}).get('error_description') or str(err)
             if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
                 raise CLIError("Credentials have expired due to inactivity. {}".format(
                     "Please run 'az login'" if not in_cloud_console() else ''))
