@@ -659,7 +659,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'kube-dashboard', enable=False)
-        dashboard_addon_profile = instance.addon_profiles['kubedashboard']
+        dashboard_addon_profile = instance.addon_profiles['kubeDashboard']
         self.assertFalse(dashboard_addon_profile.enabled)
 
         # kube-dashboard enabled, there's existing dashboard addon profile
@@ -668,7 +668,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=False)
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'kube-dashboard', enable=True)
-        dashboard_addon_profile = instance.addon_profiles['kubedashboard']
+        dashboard_addon_profile = instance.addon_profiles['kubeDashboard']
         self.assertTrue(dashboard_addon_profile.enabled)
 
         # monitoring enabled and then enabled again should error
@@ -704,6 +704,15 @@ class AcsCustomCommandTest(unittest.TestCase):
         wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"
         addon.config = {
             'logAnalyticsWorkspaceResourceID': wsID
+        }
+        self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
+        args, kwargs = invoke_def.call_args
+        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
+        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
+
+        # when addon config key is lower cased
+        addon.config = {
+            'loganalyticsworkspaceresourceid': wsID
         }
         self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
         args, kwargs = invoke_def.call_args

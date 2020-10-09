@@ -762,10 +762,9 @@ def show_exception_handler(ex):
     if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
         import sys
         from azure.cli.core.azlogging import CommandLoggerContext
-        from azure.cli.core.azclierror import AzCLIErrorType
-        from azure.cli.core.azclierror import AzCLIError
+        from azure.cli.core.azclierror import ResourceNotFoundError
         with CommandLoggerContext(logger):
-            az_error = AzCLIError(AzCLIErrorType.ValidationError, getattr(ex, 'message', ex))
+            az_error = ResourceNotFoundError(getattr(ex, 'message', ex))
             az_error.print_error()
             az_error.send_telemetry()
             sys.exit(3)
