@@ -868,7 +868,7 @@ def db_create(
     if not yes and _should_show_backup_storage_redundancy_warnings(location):
         if not kwargs['storage_account_type']:
             if not _confirm_backup_storage_redundancy_take_geo_warning():
-                return
+                return None
         if kwargs['storage_account_type'] == 'GRS':
             _backup_storage_redundancy_specify_geo_warning()
 
