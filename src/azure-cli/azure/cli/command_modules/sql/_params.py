@@ -855,7 +855,8 @@ def load_arguments(self, _):
 
         c.argument('log_analytics_workspace_resource_id',
                    arg_group=log_analytics_group,
-                   help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace to which you would like to send Audit Logs.')
+                   help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace '
+                   'to which you would like to send Audit Logs.')
 
         c.argument('event_hub_target_state',
                    arg_group=event_hub_group,
@@ -868,7 +869,8 @@ def load_arguments(self, _):
 
         c.argument('event_hub',
                    arg_group=event_hub_group,
-                   help='The name of the event hub. If none is specified when providing event_hub_authorization_rule_id, the default event hub will be selected.')
+                   help='The name of the event hub. If none is specified '
+                   'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
     with self.argument_context('sql db threat-policy update') as c:
         _configure_security_policy_storage_params(c)
@@ -1400,7 +1402,8 @@ def load_arguments(self, _):
 
         c.argument('log_analytics_workspace_resource_id',
                    arg_group=log_analytics_group,
-                   help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace to which you would like to send Audit Logs.')
+                   help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace '
+                   'to which you would like to send Audit Logs.')
 
         c.argument('event_hub_target_state',
                    arg_group=event_hub_group,
@@ -1413,7 +1416,8 @@ def load_arguments(self, _):
 
         c.argument('event_hub',
                    arg_group=event_hub_group,
-                   help='The name of the event hub. If none is specified when providing event_hub_authorization_rule_id, the default event hub will be selected.')
+                   help='The name of the event hub. If none is specified '
+                   'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
     #####
     #           sql server conn-policy
