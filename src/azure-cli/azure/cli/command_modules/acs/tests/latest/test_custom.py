@@ -710,6 +710,15 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
         self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
 
+        # when addon config key is lower cased
+        addon.config = {
+            'loganalyticsworkspaceresourceid': wsID
+        }
+        self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
+        args, kwargs = invoke_def.call_args
+        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
+        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
+
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):
