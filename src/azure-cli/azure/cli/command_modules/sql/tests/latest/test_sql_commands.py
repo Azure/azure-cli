@@ -1639,8 +1639,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
         eventhub_auth_rule = 'cliehauthruledb01'
 
         eventhub_auth_rule_id = self.cmd('eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
-                                         .format(resource_group, eventhub_auth_rule, eventhub_namespace))
-                                    .get_output_in_json()['id']
+                                         .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
 
         # update audit policy - enable event hub target
         self.cmd('sql server audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
