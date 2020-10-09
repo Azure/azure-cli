@@ -1363,7 +1363,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
         # create log analytics workspace        
-        log_analytics_workspace_name = "clilaworkspacedb19"
+        log_analytics_workspace_name = "clilaworkspacedb20"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                     .format(resource_group, log_analytics_workspace_name),
