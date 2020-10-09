@@ -174,11 +174,11 @@ def mysql_sku_name_validator(ns):
                                'Examples: Standard_D4s_v3 Standard_E8s_v3 Standard_B1ms')
         elif len(ns.sku_name.split('_')) == 3:
             server_type, cpu, server_v3 = ns.sku_name.split('_')
-            if server_type != 'Standard' or server_v3 != 'v3':
+            if server_type != 'Standard' or server_v3 != 'v4':
                 raise CLIError('Incorrect value for --sku-name. Follow the convention Standard_{VM name}. '
                                'Examples: Standard_D4s_v3 Standard_B1ms')
-            if not re.match(r"^(D|E)\d+s$", cpu) or \
-               (re.match(r"^(D|E)\d+s$", cpu) and int(cpu[1:-1]) not in [2, 4, 8, 16, 32, 48, 64]):
+            if not re.match(r"^(D|E)\d+ds$", cpu) or \
+               (re.match(r"^(D|E)\d+ds$", cpu) and int(cpu[1:-1]) not in [2, 4, 8, 16, 32, 48, 64]):
                 raise CLIError('Incorrect value for --sku-name.  Follow the convention Standard_{VM name}. '
                                'Examples: Standard_D4s_v3 Standard_E8s_v3 Standard_B1ms. '
                                '\nAllowed number of vCores: 2, 4, 8, 16, 32, 48, 64')

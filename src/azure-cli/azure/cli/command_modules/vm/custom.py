@@ -1719,43 +1719,43 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
 
 
 def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
-    from azure.cli.core.azclierror import AzCLIErrorType, AzCLIError
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
+    from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
+                                           InvalidArgumentValueError,
+                                           RequiredArgumentMissingError)
 
     location = location or get_one_of_subscription_locations(cmd.cli_ctx)
+    error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
     if urn:
         if any([publisher, offer, sku, version]):
-            error_msg = 'If using --urn, do not specify any of --publisher, --offer, --sku, --version'
-            az_error = AzCLIError(AzCLIErrorType.UsageError, error_msg)
-            az_error.set_recommendation("Try to use --urn publisher:offer:sku:version only")
-            raise az_error
+            recommendation = 'Try to use --urn publisher:offer:sku:version only'
+            raise MutuallyExclusiveArgumentError(error_msg, recommendation)
         items = urn.split(":")
         if len(items) != 4:
-            error_msg = '--urn should be in the format of publisher:offer:sku:version'
-            raise AzCLIError(AzCLIErrorType.UsageError, error_msg)
+            raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
         publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
             version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
     elif not publisher or not offer or not sku or not version:
-        error_msg = 'If not using --urn, all of --publisher, --offer, --sku, --version should be specified'
-        raise AzCLIError(AzCLIErrorType.UsageError, error_msg)
+        raise RequiredArgumentMissingError(error_msg)
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machine_images.get(location, publisher, offer, sku, version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
-    from azure.cli.core.azclierror import AzCLIErrorType, AzCLIError
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+    from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
+                                           InvalidArgumentValueError,
+                                           RequiredArgumentMissingError)
 
+    error_msg = 'Please specify all of (--plan, --offer, --publish), or --urn'
     if urn:
         if any([publisher, offer, plan]):
-            error_msg = 'If using --urn, do not specify any of --plan, --offer, --publish'
-            az_error = AzCLIError(AzCLIErrorType.UsageError, error_msg)
-            raise az_error
+            recommendation = 'Try to use --urn publisher:offer:sku:version only'
+            raise MutuallyExclusiveArgumentError(error_msg, recommendation)
         items = urn.split(':')
         if len(items) != 4:
-            error_msg = '--urn should be in the format of publisher:offer:sku:version'
-            raise AzCLIError(AzCLIErrorType.UsageError, error_msg)
+            raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
         publisher, offer, _, _ = items
         image = show_vm_image(cmd, urn)
         if not image.plan:
@@ -1764,8 +1764,7 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
         plan = image.plan.name
     else:
         if not publisher or not offer or not plan:
-            error_msg = 'If not using --urn, all of --plan, --offer, --publish should be specified'
-            raise AzCLIError(AzCLIErrorType.UsageError, error_msg)
+            raise RequiredArgumentMissingError(error_msg)
 
     market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
 
@@ -3094,6 +3093,11 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.set_orchestration_service_state,
                        resource_group_name, vm_scale_set_name, action)
 
+
+def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_set_rolling_upgrades.start_extension_upgrade,
+                       resource_group_name, vm_scale_set_name)
 # endregion
 
 

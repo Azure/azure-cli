@@ -431,7 +431,8 @@ class AppConfigKVScenarioTest(ScenarioTest):
                  checks=[self.check('[0].key', secret_name),
                          self.check('[0].value', secret_value)])
 
-        exported_file_path = 'export_keyvault.json'
+        exported_file_path = os.path.join(TEST_DIR, 'export_keyvault.json')
+
         self.kwargs.update({
             'import_source': 'file',
             'exported_file_path': exported_file_path,

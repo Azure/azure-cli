@@ -54,7 +54,7 @@ def keyvault_exception_handler(cmd, ex):
 class KeyVaultCommandGroup(AzCommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
-        from ._client_factory import keyvault_data_plane_factory
+        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
         # all regular and custom commands should use the keyvault data plane client
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
         merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_data_plane_factory
@@ -160,7 +160,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
 class KeyVaultArgumentContext(AzArgumentContext):
 
     def attributes_argument(self, name, attr_class, create=False, ignore=None):
-        from ._validators import get_attribute_validator, datetime_type
+        from azure.cli.command_modules.keyvault._validators import get_attribute_validator, datetime_type
         from azure.cli.core.commands.parameters import get_three_state_flag
 
         from knack.arguments import ignore_type

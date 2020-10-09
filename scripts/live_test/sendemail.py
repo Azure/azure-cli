@@ -7,7 +7,10 @@ import sys
 import os
 import traceback
 import datetime
+import random
+import string
 import test_data
+import generate_index
 
 
 SENDGRID_KEY = sys.argv[1]
@@ -58,6 +61,13 @@ def main():
     except Exception:
         print(traceback.format_exc())
 
+    # Generate index.html
+    try:
+        container_url = 'https://clitestresultstac.blob.core.windows.net/' + container
+        generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
+    except Exception:
+        print(traceback.format_exc())
+
     # Write database
     try:
         write_db(container, testdata)
@@ -69,22 +79,13 @@ def main():
 
 def get_container_name():
     """
-    Generate container name in storage account
+    Generate container name in storage account. It is also an identifier of the pipeline run.
     :return:
     """
     print('Enter get_container_name()')
-
-    date = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    name = date
-    if USER_LIVE == '--live':
-        mode = 'live'
-    elif USER_LIVE == '':
-        mode = 'replay'
-    else:
-        mode = ''
-    name += mode
-    # if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live':
-    #     name += '_archive'
+    time = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    random_id = ''.join(random.choice(string.digits) for _ in range(6))
+    name = time + '-' + random_id
     print('Exit get_container_name()')
     return name
 
@@ -98,7 +99,7 @@ def upload_files(container):
     print('Enter upload_files()')
 
     # Create container
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {}'
+    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'
     os.popen(cmd.format(container, ACCOUNT_KEY))
 
     # Upload files
@@ -109,7 +110,7 @@ def upload_files(container):
                 cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac'
                 cmd = cmd.format(fullpath, container, name)
                 print('Running: ' + cmd)
-                os.popen(cmd)
+                os.system(cmd)
 
     print('Exit upload_files()')
 
@@ -119,22 +120,25 @@ def write_db(container, testdata):
     Insert data to database.
     Sql statements to create table:
     USE clidb;
-    CREATE TABLE t1 (
-       repo       VARCHAR(200) COMMENT 'Repo URL',
-       branch     VARCHAR(200) COMMENT 'Branch name',
-       commit     VARCHAR(50) COMMENT 'Commit ID',
-       target     VARCHAR(2000) COMMENT 'Target modules to test. Splited by space, Empty string represents all modules',
-       live       TINYINT(1) COMMENT 'Live run or not',
-       user       VARCHAR(50) COMMENT 'User (email address) who triggers the run',
-       pass       INT COMMENT 'Number of passed tests',
-       fail       INT COMMENT 'Number of failed tests',
-       rate       VARCHAR(50) COMMENT 'Pass rate',
-       detail     VARCHAR(10000) COMMENT 'Detail',
-       container  VARCHAR(200) COMMENT 'Container URL',
-       date       VARCHAR(10) COMMENT 'Date. E.g. 20200801',
-       time       VARCHAR(10) COMMENT 'Time. E.g. 183000'
+    CREATE TABLE `t1` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `repr` varchar(30) DEFAULT NULL COMMENT 'date_time_random6digits',
+      `repo` varchar(200) DEFAULT NULL COMMENT 'Repo URL',
+      `branch` varchar(200) DEFAULT NULL COMMENT 'Branch name',
+      `commit` varchar(50) DEFAULT NULL COMMENT 'Commit ID',
+      `target` varchar(2000) DEFAULT NULL COMMENT 'Target modules to test. Splited by space, Empty string represents all modules',
+      `live` tinyint(1) DEFAULT NULL COMMENT 'Live run or not',
+      `user` varchar(50) DEFAULT NULL COMMENT 'User (email address) who triggers the run',
+      `pass` int(11) DEFAULT NULL COMMENT 'Number of passed tests',
+      `fail` int(11) DEFAULT NULL COMMENT 'Number of failed tests',
+      `rate` varchar(50) DEFAULT NULL COMMENT 'Pass rate',
+      `detail` varchar(10000) DEFAULT NULL COMMENT 'Detail',
+      `container` varchar(200) DEFAULT NULL COMMENT 'Container URL',
+      `date` varchar(10) DEFAULT NULL COMMENT 'Date. E.g. 20200801',
+      `time` varchar(10) DEFAULT NULL COMMENT 'Time. E.g. 183000',
+      PRIMARY KEY (`id`),
+      UNIQUE KEY `repr` (`repr`)
     );
-
     """
     print('Enter write_db()')
 
@@ -146,22 +150,23 @@ def write_db(container, testdata):
                                   host='clisqldbserver.mysql.database.azure.com',
                                   database='clidb')
     cursor = cnx.cursor()
-    sql = 'INSERT INTO t1 (repo, branch, commit, target, live, user, pass, fail, rate, detail, container, date, time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
+    sql = 'INSERT INTO t1 (repr, repo, branch, commit, target, live, user, pass, fail, rate, detail, container, date, time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
+    repr = container
     repo = USER_REPO
     branch = USER_BRANCH
     commit = COMMIT_ID
     target = USER_TARGET
     live = 1 if USER_LIVE == '--live' else 0
     user = REQUESTED_FOR_EMAIL
-    pass0 = testdata.total[2]
-    fail = testdata.total[1]
+    pass0 = testdata.total[1]
+    fail = testdata.total[2]
     rate = testdata.total[3]
     detail = str(testdata.modules)
-    container = 'https://clitestresultstac.blob.core.windows.net/' + container
+    container = 'https://clitestresultstac.blob.core.windows.net/{}/index.html'.format(container)
     d = datetime.datetime.now()
     date = d.strftime('%Y%m%d')
     time = d.strftime('%H%M%S')
-    data = (repo, branch, commit, target, live, user, pass0, fail, rate, detail, container, date, time)
+    data = (repr, repo, branch, commit, target, live, user, pass0, fail, rate, detail, container, date, time)
     print(data)
     cursor.execute(sql, data)
 
@@ -205,6 +210,7 @@ def send_email(container, testdata):
         data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
     if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
+    print(data)
 
     sendgrid_key = sys.argv[1]
     sg = SendGridAPIClient(sendgrid_key)

@@ -106,10 +106,11 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
 def get_internal_backup_storage_redundancy(self):
     return {
-        'Local': 'LRS',
-        'Zone': 'ZRS',
-        'Geo': 'GRS',
-    }.get(self, 'Invalid')
+        'local': 'LRS',
+        'zone': 'ZRS',
+        'geo': 'GRS',
+    }.get(self.lower(), 'Invalid')
+
 
 #####
 #        Reusable param type definitions
@@ -1838,6 +1839,47 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
+
+    with self.argument_context('sql midb log-replay start') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'auto_complete',
+                'last_backup_name',
+                'storage_container_uri',
+                'storage_container_sas_token'
+            ])
+
+        c.argument('auto_complete',
+                   required=False,
+                   options_list=['--auto-complete', '-a'],
+                   action='store_true',
+                   help='The flag that in usage with last_backup_name automatically completes log replay servise.')
+
+        c.argument('last_backup_name',
+                   required=False,
+                   options_list=['--last-backup-name', '--last-bn'],
+                   help='The name of the last backup to restore.')
+
+        c.argument('storage_container_uri',
+                   required=True,
+                   options_list=['--storage-uri', '--su'],
+                   help='The URI of the storage container where backups are.')
+
+        c.argument('storage_container_sas_token',
+                   required=True,
+                   options_list=['--storage-sas', '--ss'],
+                   help='The authorization Sas token to access storage container where backups are.')
+
+    with self.argument_context('sql midb log-replay complete') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'last_backup_name'
+            ])
+
+        c.argument('last_backup_name',
+                   required=False,
+                   options_list=['--last-backup-name', '--last-bn'],
+                   help='The name of the last backup to restore.')
 
     ###############################################
     #                sql virtual cluster          #
