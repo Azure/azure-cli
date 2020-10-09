@@ -1459,8 +1459,11 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
     if namespace.sas_token:
         sas_token = namespace.sas_token.lstrip('?')
     else:
-        sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
-    return '{}?{}'.format(url, sas_token)
+        if service:
+            sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
+    if sas_token:
+        return '{}?{}'.format(url, sas_token)
+    return url
 
 
 def _is_valid_uri(uri):
