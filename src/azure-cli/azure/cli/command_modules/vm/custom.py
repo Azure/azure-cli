@@ -2692,6 +2692,16 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None):
     return client.virtual_machine_scale_sets.get(resource_group_name, name)
 
 
+def get_vmss_modified(cmd, resource_group_name, name, instance_id=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if instance_id is not None:
+        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
+    # To avoid unnecessary permission check of image
+    vmss.virtual_machine_profile.storage_profile.image_reference = None
+    return vmss
+
+
 def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
@@ -2829,8 +2839,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
             vmss.virtual_machine_profile.storage_profile and \
             vmss.virtual_machine_profile.storage_profile.image_reference and \
-            vmss.virtual_machine_profile.storage_profile.image_reference.id:
-        aux_subscriptions = _parse_aux_subscriptions(vmss.virtual_machine_profile.storage_profile.image_reference.id)
+            'id' in vmss.virtual_machine_profile.storage_profile.image_reference:
+        aux_subscriptions = _parse_aux_subscriptions(vmss.virtual_machine_profile.storage_profile.image_reference['id'])
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
     VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
@@ -2974,11 +2984,15 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is None:
         vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        # Avoid unnecessary permission error
+        vmss.virtual_machine_profile.storage_profile.image_reference = None
         # pylint: disable=no-member
         _init_data_disk(vmss.virtual_machine_profile.storage_profile, lun)
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
 
     vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+    # Avoid unnecessary permission error
+    vmss_vm.storage_profile.image_reference = None
     _init_data_disk(vmss_vm.storage_profile, lun, disk)
     return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
 
@@ -2987,10 +3001,14 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is None:
         vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        # Avoid unnecessary permission error
+        vmss.virtual_machine_profile.storage_profile.image_reference = None
         # pylint: disable=no-member
         data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
     else:
         vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+        # Avoid unnecessary permission error
+        vmss_vm.storage_profile.image_reference = None
         data_disks = vmss_vm.storage_profile.data_disks
 
     if not data_disks:
@@ -3012,6 +3030,8 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    # Avoid unnecessary permission error
+    vmss.virtual_machine_profile.storage_profile.image_reference = None
     # pylint: disable=no-member
     if not vmss.virtual_machine_profile.extension_profile:
         raise CLIError('Scale set has no extensions to delete')
@@ -3054,6 +3074,8 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
 
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    # Avoid unnecessary permission error
+    vmss.virtual_machine_profile.storage_profile.image_reference = None
     VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
         'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
 
