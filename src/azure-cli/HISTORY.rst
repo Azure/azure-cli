@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* NON-BREAKING: az acr helm - deprecation url upate (#15293)
+* `az acr helm`: Update deprecation url (#15293)
 * Add logtemplate and systemtask changes for ACR Tasks (#15254)
 
 **AKS**
