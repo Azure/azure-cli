@@ -1459,8 +1459,11 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
     if namespace.sas_token:
         sas_token = namespace.sas_token.lstrip('?')
     else:
-        if service:
+        try:
             sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.debug("Cannot generate sas token. %s", ex)
+            sas_token = None
     if sas_token:
         return '{}?{}'.format(url, sas_token)
     return url
