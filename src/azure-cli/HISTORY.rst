@@ -13,7 +13,7 @@ Release History
 
 **AKS**
 
-* support virtual-node with aks create: `az aks create --enable-addons virtual-node` (#15129)
+* Support virtual-node with aks create: `az aks create --enable-addons virtual-node` (#15129)
 * Add node image only option for CLI (#15250)
 * Expect kube-dashboard addon be disabled by default (#15267)
 * `az aks create/update`: Add LicenseType support for Windows (#15257)
@@ -22,10 +22,6 @@ Release History
 **AMS**
 
 * Fix #14687: Mixed resource group and account name in command "az ams streaming-endpoint show" #14687 (#15251)
-
-**APIM**
-
-* api import: Update short summary (#15207)
 
 **App Config**
 
@@ -42,7 +38,8 @@ Release History
 
 **ARM**
 
-* `az ts`: Add new commands for template specs ; [ARM] az deployment : Add support for --template-spec -s (#14448)
+* `az ts`: Add new commands for template specs
+* `az deployment` : Add support for --template-spec -s (#14448)
 
 **Compute**
 
@@ -52,7 +49,7 @@ Release History
 
 **HDInsight**
 
-* : az hdinsight create: add deprecate information for argument --public-networrk-access-type and --outbound-public-network-access-type (#15181)
+* `az hdinsight create`: add deprecate information for argument --public-networrk-access-type and --outbound-public-network-access-type (#15181)
 * `az hdinsight create`: add deprecate information for argument `--public-networrk-access-type` and `--outbound-public-network-access-type` (#15309)
 * `az hdinsight create`:  add parameter `--idbroker` to support customer to create ESP cluster with HDInsight Id Broker (#15309)
 
@@ -66,7 +63,7 @@ Release History
 
 **Lab**
 
-* Fix #14127: __init__() takes 1 positional argument but 2 were given (#14827)
+* Fix #14127: `__init__()` takes 1 positional argument but 2 were given (#14827)
 
 **Network**
 
@@ -82,7 +79,7 @@ Release History
 
 **Role**
 
-* Fix #15278: az role assignment list/delete: Forbid empty string arguments (#15282)
+* Fix #15278: `az role assignment list/delete`: Forbid empty string arguments (#15282)
 
 **SQL**
 
