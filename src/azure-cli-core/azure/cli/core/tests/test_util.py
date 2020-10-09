@@ -436,7 +436,7 @@ class TestHandleException(unittest.TestCase):
         # test behavior
         self.assertTrue(mock_logger_error.called)
         self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args.args[0])
-        self.assertEqual(ex_result, mock_cloud_error.args[1])
+        self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_typical_response_error(self, mock_logger_error):
