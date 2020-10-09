@@ -3078,6 +3078,11 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.set_orchestration_service_state,
                        resource_group_name, vm_scale_set_name, action)
 
+
+def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_set_rolling_upgrades.start_extension_upgrade,
+                       resource_group_name, vm_scale_set_name)
 # endregion
 
 

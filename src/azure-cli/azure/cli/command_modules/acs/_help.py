@@ -652,6 +652,15 @@ parameters:
   - name: --mode
     type: string
     short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
+  - name: --priority
+    type: string
+    short-summary: The priority of the node pool.
+  - name: --eviction-policy
+    type: string
+    short-summary: The eviction policy of the Spot node pool. It can only be set when --priority is Spot.
+  - name: --spot-max-price
+    type: float
+    short-summary: It can only be set when --priority is Spot. Specify the maximum price you are willing to pay in US Dollars. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand. It can only include up to 5 decimal places.
 """
 
 helps['aks nodepool delete'] = """

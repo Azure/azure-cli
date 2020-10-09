@@ -78,6 +78,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  app_insights_telemetry_channel_resource_id=None,
                  synapse_analytics_resource_id=None,
                  attestation_resource_id=None,
+                 portal=None,
                  **kwargs):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
@@ -98,6 +99,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
         self.synapse_analytics_resource_id = synapse_analytics_resource_id
         self.attestation_resource_id = attestation_resource_id
+        self.portal = portal
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -191,8 +193,8 @@ def _get_storage_sync_endpoint(cloud_name):
 
 def _get_synapse_analytics_endpoint(cloud_name):
     synapse_analytics_endpoint_mapper = {
-        'AzureCloud': 'dev.azuresynapse.net',
-        'AzureChinaCloud': 'dev.azuresynapse.azure.cn'
+        'AzureCloud': '.dev.azuresynapse.net',
+        'AzureChinaCloud': '.dev.azuresynapse.azure.cn'
     }
     return synapse_analytics_endpoint_mapper.get(cloud_name, None)
 
@@ -256,6 +258,11 @@ def _get_attestation_endpoint(cloud_name):
     return attestation_endpoint_mapper.get(cloud_name, None)
 
 
+def _get_mhsm_dns_suffix(cloud_name):
+    mhsm_dns_suffix_mapper = {c.name: c.suffixes.mhsm_dns for c in HARD_CODED_CLOUD_LIST}
+    return mhsm_dns_suffix_mapper.get(cloud_name, None)
+
+
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
     for cloud in arm_cloud_metadata_dict:
@@ -304,12 +311,13 @@ def _arm_to_cli_mapper(arm_dict):
             log_analytics_resource_id=get_endpoint('logAnalyticsResourceId', fallback_value=_get_log_analytics_resource_id(arm_dict['name'])),
             synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=_get_synapse_analytics_resource_id(arm_dict['name'])),
             app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=_get_app_insights_telemetry_channel_resource_id(arm_dict['name'])),
-            attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=_get_attestation_resource_id(arm_dict['name']))),
+            attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=_get_attestation_resource_id(arm_dict['name'])),
+            portal=arm_dict['portal'] if 'portal' in arm_dict else None),
         suffixes=CloudSuffixes(
             storage_endpoint=get_suffix('storage'),
             storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=_get_storage_sync_endpoint(arm_dict['name'])),
             keyvault_dns=get_suffix('keyVaultDns', add_dot=True),
-            mhsm_dns=get_suffix('mhsmDns', add_dot=True),
+            mhsm_dns=get_suffix('mhsmDns', add_dot=True, fallback_value=_get_mhsm_dns_suffix(arm_dict['name'])),
             sql_server_hostname=sql_server_hostname,
             mysql_server_endpoint=get_suffix('mysqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mysql')),
             postgresql_server_endpoint=get_suffix('postgresqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.postgres')),
@@ -376,7 +384,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         log_analytics_resource_id='https://api.loganalytics.io',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.net',
-        attestation_resource_id='https://attest.azure.net'),
+        attestation_resource_id='https://attest.azure.net',
+        portal='https://portal.azure.com'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         storage_sync_endpoint='afs.azure.net',
@@ -410,7 +419,8 @@ AZURE_CHINA_CLOUD = Cloud(
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
-        synapse_analytics_resource_id='https://dev.azuresynapse.net'),
+        synapse_analytics_resource_id='https://dev.azuresynapse.net',
+        portal='https://portal.azure.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -439,7 +449,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net',
         app_insights_resource_id='https://api.applicationinsights.us',
         log_analytics_resource_id='https://api.loganalytics.us',
-        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track'),
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track',
+        portal='https://portal.azure.us'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         storage_sync_endpoint='afs.azure.us',
@@ -465,7 +476,8 @@ AZURE_GERMAN_CLOUD = Cloud(
         microsoft_graph_resource_id='https://graph.microsoft.de',
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.cloudapi.de',
-        ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de'),
+        ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de',
+        portal='https://portal.microsoftazure.de'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
@@ -474,6 +486,8 @@ AZURE_GERMAN_CLOUD = Cloud(
         mysql_server_endpoint='.mysql.database.cloudapi.de',
         postgresql_server_endpoint='.postgres.database.cloudapi.de',
         mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
+
+HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
 
 def get_known_clouds(refresh=False):
@@ -507,7 +521,7 @@ def get_known_clouds(refresh=False):
         if not clouds:
             raise CLIError("No clouds available. Please ensure ARM_CLOUD_METADATA_URL is valid.")
         return clouds
-    return [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+    return HARD_CODED_CLOUD_LIST
 
 
 KNOWN_CLOUDS = get_known_clouds()
