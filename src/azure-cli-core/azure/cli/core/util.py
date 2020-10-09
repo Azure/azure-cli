@@ -626,7 +626,7 @@ def open_page_in_browser(url):
         try:
             # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
-            return subprocess.call(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
+            return start_powershell_process('"{}"'.format(url))
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
@@ -1149,3 +1149,8 @@ def handle_version_update():
             refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
+
+
+def start_powershell_process(ps_process_cmd):
+    import subprocess
+    return subprocess.call(['powershell.exe', '-Command', 'Start-Process {}'.format(ps_process_cmd)])
