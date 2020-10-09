@@ -1014,7 +1014,7 @@ short-summary: Update a server's auditing policy.
 long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
 examples:
   - name: Enable by storage account name.
-    text: | 
+    text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
             --blob-storage-target-state Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
