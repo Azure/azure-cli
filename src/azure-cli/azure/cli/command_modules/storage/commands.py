@@ -16,7 +16,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file_system, cf_adls_directory,
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
-                                                               cf_or_policy, cf_container_client)
+                                                               cf_or_policy, cf_container_client,
+                                                               cf_queue_service, cf_queue_client)
 
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
@@ -609,8 +610,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._format import transform_boolean_for_table
         from ._transformers import create_boolean_result_output_transformer
 
-        g.storage_command_oauth('list', 'list_queues',
-                                transform=transform_storage_list_output)
         g.storage_command_oauth('create', 'create_queue', transform=create_boolean_result_output_transformer('created'),
                                 table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('delete', 'delete_queue', transform=create_boolean_result_output_transformer('deleted'),
@@ -649,6 +648,21 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('clear', 'clear_messages')
         g.storage_command_oauth('update', 'update_message')
+
+    queue_service_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.queue._queue_service_client#QueueServiceClient.{}',
+        client_factory=cf_queue_service, resource_type=ResourceType.DATA_STORAGE_QUEUE)
+
+    queue_client_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.queue._queue_client#QueueClient.{}',
+        client_factory=cf_queue_client, resource_type=ResourceType.DATA_STORAGE_QUEUE)
+
+    with self.command_group('storage queue', queue_service_sdk,
+                            resource_type=ResourceType.DATA_STORAGE_QUEUE, min_api='2018-03-28',
+                            custom_command_type=get_custom_sdk('queue', client_factory=cf_queue_service,
+                                                               resource_type=ResourceType.DATA_STORAGE_QUEUE)) as g:
+        g.storage_custom_command_oauth('list', 'list_queues', transform=transform_storage_list_output)
+
 
     if cosmosdb_table_exists(self.cli_ctx):
         table_sdk = CliCommandType(operations_tmpl='azure.multiapi.cosmosdb.table.tableservice#TableService.{}',
