@@ -1071,6 +1071,7 @@ class SynapseScenarioTests(ScenarioTest):
 
     def test_integration_runtime(self):
         self.kwargs.update({
+            'rg': 'zzy-test-rg',
             'workspace': 'testsynapseworkspace',
             'name': 'integrationruntime',
             'type': 'Managed',
@@ -1107,19 +1108,17 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse integration-runtime upgrade --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
 
         # get keys for a self-hosted integration runtime
-        self.cmd(
-            'az synapse integration-runtime-key show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}',
-            checks=[
-                self.check('length([])', 2)
-            ])
+        key = self.cmd(
+            'az synapse integration-runtime-key show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}').get_output_in_json()
+        assert key['authKey1'] is not None
+        assert key['authKey2'] is not None
 
         # regenerate self-hosted integration runtime key
-        self.cmd(
+        key = self.cmd(
             'az synapse integration-runtime-key regenerate --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
-            '--key-name authKey1',
-            checks=[
-                self.check('authKey2', None)
-            ])
+            '--key-name authKey1').get_output_in_json()
+        assert key['authKey1'] is not None
+        assert key['authKey2'] is None
 
         # get metric data for a self-hosted integration runtime
         self.cmd(
@@ -1151,4 +1150,4 @@ class SynapseScenarioTests(ScenarioTest):
 
         # sync credentials among integration runtime nodes
         self.cmd(
-            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+            'az synapse integration-runtime-credential sync --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
