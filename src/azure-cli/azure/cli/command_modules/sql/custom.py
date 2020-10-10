@@ -1633,7 +1633,7 @@ def _get_diagnostic_settings(
     return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
 
 
-def _get_first_audit_diagnostic_settings(diagnostic_settings):
+def _get_first_audit_diagnostic_setting(diagnostic_settings):
     return next((ds for ds in diagnostic_settings if hasattr(ds, 'logs') and
                  next((log for log in ds.logs if log.enabled and
                        log.category == 'SQLSecurityAuditEvents'), None) is not None), None)
@@ -1686,18 +1686,18 @@ def _audit_policy_show(
 
     # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
     diagnostic_settings.value.sort(key=lambda d: d.name)
-    audit_diagnostic_settings = _get_first_audit_diagnostic_settings(diagnostic_settings.value)
+    audit_diagnostic_setting = _get_first_audit_diagnostic_setting(diagnostic_settings.value)
 
     # Initialize azure monitor properties
-    if audit_diagnostic_settings is not None:
-        if audit_diagnostic_settings.workspace_id is not None:
+    if audit_diagnostic_setting is not None:
+        if audit_diagnostic_setting.workspace_id is not None:
             audit_policy.log_analytics_target_state = BlobAuditingPolicyState.enabled
-            audit_policy.log_analytics_workspace_resource_id = audit_diagnostic_settings.workspace_id
+            audit_policy.log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
 
-        if audit_diagnostic_settings.event_hub_authorization_rule_id is not None:
+        if audit_diagnostic_setting.event_hub_authorization_rule_id is not None:
             audit_policy.event_hub_target_state = BlobAuditingPolicyState.enabled
-            audit_policy.event_hub_authorization_rule_id = audit_diagnostic_settings.event_hub_authorization_rule_id
-            audit_policy.event_hub_name = audit_diagnostic_settings.event_hub_name
+            audit_policy.event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
+            audit_policy.event_hub_name = audit_diagnostic_setting.event_hub_name
 
     return audit_policy
 
@@ -1828,7 +1828,7 @@ def _audit_policy_update_diagnostic_settings(
     # Request diagnostic settings
     diagnostic_settings = _get_diagnostic_settings(cmd, resource_group_name, server_name, database_name)
 
-    # Fetch audit diagnostic settings
+    # Fetch all audit diagnostic settings
     audit_diagnostic_settings = _get_all_audit_diagnostic_settings(diagnostic_settings.value)
     num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
 
