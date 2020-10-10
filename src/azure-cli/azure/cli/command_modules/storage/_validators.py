@@ -1334,7 +1334,7 @@ def validate_service_type(services, service_type):
 
 
 def validate_logging_version(namespace):
-    if validate_service_type(namespace.services, 'table') and namespace.version != 1.0:
+    if validate_service_type(namespace.services, 'table') and namespace.version and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
             'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
