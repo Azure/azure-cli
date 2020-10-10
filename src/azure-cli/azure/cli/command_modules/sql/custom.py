@@ -1807,6 +1807,56 @@ def _audit_policy_validate_arguments(
         raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
 
 
+def _audit_policy_create_diagnostic_setting(
+        cmd,
+        resource_group_name,
+        server_name,
+        database_name=None,
+        log_analytics_target_state=None,
+        log_analytics_workspace_resource_id=None,
+        event_hub_target_state=None,
+        event_hub_authorization_rule_id=None,
+        event_hub_name=None):
+    '''
+    Create audit diagnostic setting, i.e. containing single category - "SQLSecurityAuditEvents"
+    '''
+
+    from azure.mgmt.monitor import MonitorManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
+    from azure.mgmt.monitor.models import (RetentionPolicy, LogSettings)
+    import uuid
+
+    # Generate diagnostic settings name to be created
+    name = "SQLSecurityAuditEvents"
+
+    import inspect
+    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt" or
+                      e.function == "test_sql_server_security_mgmt"), None) is not None
+
+    # For test environment the name should be constant, i.e. match the name written in recorded yaml file
+    if test_mode:
+        name += '_LogAnalytics' if log_analytics_target_state is not None else ''
+        name += '_EventHub' if event_hub_target_state is not None else ''
+    else:
+        name += '_' + str(uuid.uuid4())
+
+    diagnostic_settings_url = _get_diagnostic_settings_url(cmd, resource_group_name, server_name, database_name)
+    azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
+
+    return create_diagnostics_settings(
+        client=azure_monitor_client.diagnostic_settings,
+        name=name,
+        resource_uri=diagnostic_settings_url,
+        logs=[LogSettings(category="SQLSecurityAuditEvents", enabled=True,
+                          retention_policy=RetentionPolicy(enabled=False, days=0))],
+        metrics=None,
+        event_hub=event_hub_name,
+        event_hub_rule=event_hub_authorization_rule_id,
+        storage_account=None,
+        workspace=log_analytics_workspace_resource_id)
+
+
 def _audit_policy_update_diagnostic_settings(
         cmd,
         server_name,
@@ -1840,7 +1890,6 @@ def _audit_policy_update_diagnostic_settings(
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
     from azure.mgmt.monitor.models import (RetentionPolicy, LogSettings)
-    import uuid
 
     diagnostic_settings_url = _get_diagnostic_settings_url(cmd, resource_group_name, server_name, database_name)
     azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
@@ -1848,38 +1897,22 @@ def _audit_policy_update_diagnostic_settings(
     is_azure_monitor_target_enabled = _is_audit_policy_state_enabled(log_analytics_target_state) or\
         _is_audit_policy_state_enabled(event_hub_target_state)
 
-    # Generate diagnostic settings name to be created
-    name = "SQLSecurityAuditEvents"
-
-    import inspect
-    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt" or
-                      e.function == "test_sql_server_security_mgmt"), None) is not None
-
-    # For test environment the name should be constant, i.e. match the name written in recorded yaml file
-    if test_mode:
-        if is_azure_monitor_target_enabled:
-            name += '_LogAnalytics' if log_analytics_target_state is not None else ''
-            name += '_EventHub' if event_hub_target_state is not None else ''
-    else:
-        name += '_' + str(uuid.uuid4())
-
     # If no audit diagnostic settings found then create one if azure monitor is enabled
     if num_of_audit_diagnostic_settings == 0:
         if is_azure_monitor_target_enabled:
-            created_diagnostic_settings = create_diagnostics_settings(
-                client=azure_monitor_client.diagnostic_settings,
-                name=name,
-                resource_uri=diagnostic_settings_url,
-                logs=[LogSettings(category="SQLSecurityAuditEvents", enabled=True,
-                                  retention_policy=RetentionPolicy(enabled=False, days=0))],
-                metrics=None,
-                event_hub=event_hub_name,
-                event_hub_rule=event_hub_authorization_rule_id,
-                storage_account=None,
-                workspace=log_analytics_workspace_resource_id)
+            created_diagnostic_setting = _audit_policy_create_diagnostic_setting(
+                cmd=cmd,
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                database_name=database_name,
+                log_analytics_target_state=log_analytics_target_state,
+                log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+                event_hub_target_state=event_hub_target_state,
+                event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+                event_hub_name=event_hub_name)
 
             # Return roolback data tuple
-            return [("delete", created_diagnostic_settings)]
+            return [("delete", created_diagnostic_setting)]
 
         # azure monitor is disabled - there is nothing to do
         return None
@@ -1887,32 +1920,22 @@ def _audit_policy_update_diagnostic_settings(
     # This leaves us with case when num_of_audit_diagnostic_settings is 1
     audit_diagnostic_setting = audit_diagnostic_settings[0]
 
-    if audit_diagnostic_setting.logs is not None:
-        has_other_categories = next((log for log in audit_diagnostic_setting.logs if log.enabled and
-                                     log.category != 'SQLSecurityAuditEvents'), None) is not None
-    else:
-        has_other_categories = False
-
-    # Initialize actually updated fields
-    u_log_analytics_workspace_resource_id = None
-    u_event_hub_authorization_rule_id = None
-    u_event_hub_name = None
-
+    # Initialize actually updated azure monitor fields
     if log_analytics_target_state is None:
-        u_log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
-    elif _is_audit_policy_state_enabled(log_analytics_target_state):
-        u_log_analytics_workspace_resource_id = log_analytics_workspace_resource_id
+        log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
+    elif not _is_audit_policy_state_enabled(log_analytics_target_state):
+        log_analytics_workspace_resource_id = None
 
     if event_hub_target_state is None:
-        u_event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
-        u_event_hub_name = audit_diagnostic_setting.event_hub_name
-    elif _is_audit_policy_state_enabled(event_hub_target_state):
-        u_event_hub_authorization_rule_id = event_hub_authorization_rule_id
-        u_event_hub_name = event_hub_name
+        event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
+        event_hub_name = audit_diagnostic_setting.event_hub_name
+    elif not _is_audit_policy_state_enabled(event_hub_target_state):
+        event_hub_authorization_rule_id = None
+        event_hub_name = None
 
     # If there is no other categories except SQLSecurityAuditEvents update or delete
     # the existing single diagnostic settings
-    if not has_other_categories:
+    if len(audit_diagnostic_setting.logs) == 1:
         # If azure monitor is enabled then update existing single audit diagnostic setting
         if is_azure_monitor_target_enabled:
             create_diagnostics_settings(
@@ -1921,10 +1944,10 @@ def _audit_policy_update_diagnostic_settings(
                 resource_uri=diagnostic_settings_url,
                 logs=audit_diagnostic_setting.logs,
                 metrics=audit_diagnostic_setting.metrics,
-                event_hub=u_event_hub_name,
-                event_hub_rule=u_event_hub_authorization_rule_id,
+                event_hub=event_hub_name,
+                event_hub_rule=event_hub_authorization_rule_id,
                 storage_account=audit_diagnostic_setting.storage_account_id,
-                workspace=u_log_analytics_workspace_resource_id)
+                workspace=log_analytics_workspace_resource_id)
 
             # Return roolback data tuple
             return [("update", audit_diagnostic_setting)]
@@ -1961,25 +1984,24 @@ def _audit_policy_update_diagnostic_settings(
         storage_account=audit_diagnostic_setting.storage_account_id,
         workspace=audit_diagnostic_setting.workspace_id)
 
-    # Add 'audit_diagnostic_settings' in rollback_data list
+    # Add original 'audit_diagnostic_settings' to rollback_data list
     rollback_data = [("update", audit_diagnostic_setting)]
 
     # Create new diagnostic settings with enabled 'SQLSecurityAuditEvents' category only if azure monitor is enabled
     if is_azure_monitor_target_enabled:
-        created_diagnostic_settings = create_diagnostics_settings(
-            client=azure_monitor_client.diagnostic_settings,
-            name=name,
-            resource_uri=diagnostic_settings_url,
-            logs=[LogSettings(category="SQLSecurityAuditEvents", enabled=True,
-                              retention_policy=RetentionPolicy(enabled=False, days=0))],
-            metrics=audit_diagnostic_setting.metrics,
-            event_hub=u_event_hub_name,
-            event_hub_rule=u_event_hub_authorization_rule_id,
-            storage_account=audit_diagnostic_setting.storage_account_id,
-            workspace=u_log_analytics_workspace_resource_id)
+        created_diagnostic_setting = _audit_policy_create_diagnostic_setting(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name,
+            log_analytics_target_state=log_analytics_target_state,
+            log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+            event_hub_target_state=event_hub_target_state,
+            event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+            event_hub_name=event_hub_name)
 
-        # Add 'created_diagnostic_settings' in rollback_data list in reverse order
-        rollback_data.insert(0, ("delete", created_diagnostic_settings))
+        # Add 'created_diagnostic_settings' to rollback_data list in reverse order
+        rollback_data.insert(0, ("delete", created_diagnostic_setting))
 
     return rollback_data
 
