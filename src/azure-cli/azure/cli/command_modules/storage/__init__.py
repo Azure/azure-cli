@@ -10,6 +10,7 @@ from azure.cli.core.commands import AzCommandGroup, AzArgumentContext
 import azure.cli.command_modules.storage._help  # pylint: disable=unused-import
 from knack.util import CLIError
 
+
 class StorageCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
@@ -212,7 +213,8 @@ class StorageCommandGroup(AzCommandGroup):
         _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
         self.storage_custom_command(*args, oauth=True, **kwargs)
 
-    def get_handler_suppress_some_400(self):
+    @classmethod
+    def get_handler_suppress_some_400(cls):
         def handler(ex):
             if hasattr(ex, 'status_code') and ex.status_code == 403 and hasattr(ex, 'error_code'):
                 # TODO: Revisit the logic here once the service team updates their response
@@ -244,13 +246,15 @@ Authentication failure. This may be caused by either invalid account key, connec
 
         return handler
 
-    def account_key_exception_handler(self):
+    @classmethod
+    def account_key_exception_handler(cls):
         def handler(ex):
             from azure.common import AzureException
             from azure.core.exceptions import ClientAuthenticationError
-            if isinstance(ex, AzureException) and 'incorrect padding' in ex.args[0]:
+
+            if isinstance(ex, AzureException) and 'incorrect padding' in ex.args[0].lower():
                 raise CLIError('incorrect usage: the given account key may be not valid.')
-            if isinstance(ex, ClientAuthenticationError) and 'incorrect padding' in ex.args[0]:
+            if isinstance(ex, ClientAuthenticationError) and 'incorrect padding' in ex.args[0].lower():
                 raise CLIError('incorrect usage: the given account key may be not valid.')
 
         return handler
