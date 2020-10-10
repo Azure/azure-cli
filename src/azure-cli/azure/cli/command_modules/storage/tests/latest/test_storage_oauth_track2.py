@@ -356,7 +356,7 @@ class StorageBlobSetTierOauthTests(StorageScenarioMixin, ScenarioTest):
         self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Archive --account-name {} '.format(
                        container_name, blob_name, storage_account))
 
-        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format( container_name, blob_name,
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
                        storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
 
         self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Cool -r High --account-name {} '.format(
