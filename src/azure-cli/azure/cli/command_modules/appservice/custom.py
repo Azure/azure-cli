@@ -1973,6 +1973,7 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
                 new[key.lstrip('@')] = profile[key]
             converted.append(new)
         return converted
+    cmd.cli_ctx.invocation.data['output'] = 'tsv'
     return full_xml
 
 
