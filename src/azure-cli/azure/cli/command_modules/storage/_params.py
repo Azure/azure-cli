@@ -633,9 +633,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from azure.cli.command_modules.storage._validators import (blob_tier_validator,
                                                                    blob_rehydrate_priority_validator)
         c.register_blob_arguments()
+
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
         c.argument('tier', validator=blob_tier_validator)
-        c.argument('timeout', type=int)
         c.argument('rehydrate_priority', options_list=('--rehydrate-priority', '-r'),
                    arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
                    is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
