@@ -1280,7 +1280,6 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', key),
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1297,14 +1296,12 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
         # update audit policy - specify storage account and resource group. use secondary key
-        key2 = self._get_storage_key(storage_account_2, resource_group_2)
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --blob-storage-target-state {} --storage-account {}'
                  .format(resource_group, server, database_name, state_enabled, storage_account_2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', key2),
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1363,7 +1360,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
         # create log analytics workspace
-        log_analytics_workspace_name = "clilaworkspacedb20"
+        log_analytics_workspace_name = "clilaworkspacedb21"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                                               .format(resource_group, log_analytics_workspace_name),
@@ -1530,7 +1527,6 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', key),
                      JMESPathCheck('storageEndpoint', storage_endpoint),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1547,14 +1543,12 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
         # update audit policy - specify storage account and resource group. use secondary key
-        key_2 = self._get_storage_key(storage_account_2, resource_group_2)
         storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
         self.cmd('sql server audit-policy update -g {} -n {} --blob-storage-target-state {} --storage-account {}'
                  .format(resource_group, server, state_enabled, storage_account_2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('state', state_enabled),
-                     JMESPathCheck('storageAccountAccessKey', key_2),
                      JMESPathCheck('storageEndpoint', storage_endpoint_2),
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
@@ -1569,7 +1563,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # create log analytics workspace
-        log_analytics_workspace_name = "clilaworkspacesrv11"
+        log_analytics_workspace_name = "clilaworkspacesrv12"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                                               .format(resource_group, log_analytics_workspace_name),

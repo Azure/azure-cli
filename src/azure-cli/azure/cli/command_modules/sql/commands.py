@@ -272,7 +272,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_server_blob_auditing_policies_operations) as g:
 
         g.custom_show_command('show', 'server_audit_policy_show')
-        g.custom_command('update', 'server_audit_policy_update')
+        g.custom_command('update', 'server_audit_policy_update', supports_no_wait=True)
 
     database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#BackupLongTermRetentionPoliciesOperations.{}',

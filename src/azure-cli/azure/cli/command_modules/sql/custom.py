@@ -1886,7 +1886,7 @@ def _audit_policy_update_diagnostic_settings(
 
     # This leaves us with case when num_of_audit_diagnostic_settings is 1
     audit_diagnostic_setting = audit_diagnostic_settings[0]
-    print("Oleg " + str(audit_diagnostic_setting))
+
     if audit_diagnostic_setting.logs is not None:
         has_other_categories = next((log for log in audit_diagnostic_setting.logs if log.enabled and
                                      log.category != 'SQLSecurityAuditEvents'), None) is not None
@@ -1990,6 +1990,7 @@ def _audit_policy_update_global_settings(
         server_name,
         resource_group_name,
         database_name=None,
+        no_wait=None,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -2084,14 +2085,11 @@ def _audit_policy_update_global_settings(
                 (event_hub_target_state is not None and
                  event_hub_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower())
 
-    # Update audit policy
+    # Update audit policy - for server operation 'no_wait' argument is taken into account
     if database_name is None:
-        # For server operation 'client.create_or_update' returns 'LROPoller' object which we should wait on
-        client.create_or_update(resource_group_name, server_name, audit_policy).wait()
-    else:
-        client.create_or_update(resource_group_name, server_name, database_name, audit_policy)
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, server_name, audit_policy)
 
-    return audit_policy
+    return client.create_or_update(resource_group_name, server_name, database_name, audit_policy)
 
 
 def _audit_policy_update_rollback(
@@ -2135,6 +2133,7 @@ def _audit_policy_update(
         server_name,
         resource_group_name,
         database_name=None,
+        no_wait=None,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -2181,6 +2180,7 @@ def _audit_policy_update(
             server_name,
             resource_group_name,
             database_name,
+            no_wait,
             state,
             blob_storage_target_state,
             storage_account,
@@ -2210,6 +2210,7 @@ def server_audit_policy_update(
         client,
         server_name,
         resource_group_name,
+        no_wait=False,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -2232,6 +2233,7 @@ def server_audit_policy_update(
         server_name,
         resource_group_name,
         None,
+        no_wait,
         state,
         blob_storage_target_state,
         storage_account,
@@ -2274,6 +2276,7 @@ def db_audit_policy_update(
         server_name,
         resource_group_name,
         database_name,
+        None,
         state,
         blob_storage_target_state,
         storage_account,
