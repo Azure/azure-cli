@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 
+import os
 import sys
 import difflib
 
@@ -221,9 +222,12 @@ class AzCliCommandParser(CLICommandParser):
                                           is_group)
 
     def enable_autocomplete(self):
+        output_stream = None
+        if "_ARGCOMPLETE_POWERSHELL" in os.environ:
+            output_stream = sys.stdout.buffer
         argcomplete.autocomplete = AzCompletionFinder()
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
-                                 default_completer=lambda _: ())
+                                 default_completer=lambda _: (), output_stream=output_stream)
 
     def _get_failure_recovery_arguments(self, action=None):
         # Strip the leading "az " and any extraneous whitespace.
