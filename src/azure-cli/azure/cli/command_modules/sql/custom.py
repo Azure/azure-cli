@@ -1633,13 +1633,13 @@ def _get_diagnostic_settings(
     return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
 
 
-def _get_first_audit_diagnostic_setting(diagnostic_settings):
+def _fetch_first_audit_diagnostic_setting(diagnostic_settings):
     return next((ds for ds in diagnostic_settings if hasattr(ds, 'logs') and
                  next((log for log in ds.logs if log.enabled and
                        log.category == 'SQLSecurityAuditEvents'), None) is not None), None)
 
 
-def _get_all_audit_diagnostic_settings(diagnostic_settings):
+def _fetch_all_audit_diagnostic_settings(diagnostic_settings):
     return [ds for ds in diagnostic_settings if hasattr(ds, 'logs') and
             next((log for log in ds.logs if log.enabled and
                   log.category == 'SQLSecurityAuditEvents'), None) is not None]
@@ -1688,7 +1688,7 @@ def _audit_policy_show(
 
     # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
     diagnostic_settings.value.sort(key=lambda d: d.name)
-    audit_diagnostic_setting = _get_first_audit_diagnostic_setting(diagnostic_settings.value)
+    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value)
 
     # Initialize azure monitor properties
     if audit_diagnostic_setting is not None:
@@ -1881,7 +1881,7 @@ def _audit_policy_update_diagnostic_settings(
     diagnostic_settings = _get_diagnostic_settings(cmd, resource_group_name, server_name, database_name)
 
     # Fetch all audit diagnostic settings
-    audit_diagnostic_settings = _get_all_audit_diagnostic_settings(diagnostic_settings.value)
+    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value)
     num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
 
     # If more than 1 audit diagnostic settings found then throw error
