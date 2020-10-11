@@ -46,6 +46,11 @@ from azure.mgmt.sql.models import (
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
 
+from azure.mgmt.monitor import MonitorManagementClient
+from azure.mgmt.monitor.models import (RetentionPolicy, LogSettings)
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
+
 from ._util import (
     get_sql_capabilities_operations,
     get_sql_servers_operations,
@@ -1451,7 +1456,6 @@ def _find_storage_account_resource_group(cli_ctx, name):
     the customer.
     '''
     from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     storage_type = 'Microsoft.Storage/storageAccounts'
     classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
@@ -1496,7 +1500,6 @@ def _get_storage_endpoint(
     Gets storage account endpoint by querying storage ARM API.
     '''
     from azure.mgmt.storage import StorageManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # Get storage account
     client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
@@ -1523,7 +1526,6 @@ def _get_storage_key(
     Gets storage account key by querying storage ARM API.
     '''
     from azure.mgmt.storage import StorageManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # Get storage keys
     client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
@@ -1623,9 +1625,6 @@ def _get_diagnostic_settings(
     '''
     Common code to get server or database diagnostic settings
     '''
-
-    from azure.mgmt.monitor import MonitorManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     diagnostic_settings_url = _get_diagnostic_settings_url(cmd, resource_group_name, server_name, database_name)
     azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
@@ -1823,12 +1822,6 @@ def _audit_policy_create_diagnostic_setting(
     Create audit diagnostic setting, i.e. containing single category - "SQLSecurityAuditEvents"
     '''
 
-    from azure.mgmt.monitor import MonitorManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
-    from azure.mgmt.monitor.models import (RetentionPolicy, LogSettings)
-    import uuid
-
     # Generate diagnostic settings name to be created
     name = "SQLSecurityAuditEvents"
 
@@ -1841,6 +1834,7 @@ def _audit_policy_create_diagnostic_setting(
         name += '_LogAnalytics' if log_analytics_target_state is not None else ''
         name += '_EventHub' if event_hub_target_state is not None else ''
     else:
+        import uuid
         name += '_' + str(uuid.uuid4())
 
     diagnostic_settings_url = _get_diagnostic_settings_url(cmd, resource_group_name, server_name, database_name)
@@ -1864,6 +1858,7 @@ def _audit_policy_update_diagnostic_settings(
         server_name,
         resource_group_name,
         database_name=None,
+        diagnostic_settings=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
         event_hub_target_state=None,
@@ -1872,14 +1867,7 @@ def _audit_policy_update_diagnostic_settings(
     '''
     Update audit policy's diagnostic settings
     '''
-
-    # If neither log_analytics_target_state nor event_hub_target_state provided there is nothing to do
-    if log_analytics_target_state is None and event_hub_target_state is None:
-        return None
-
-    # Request diagnostic settings
-    diagnostic_settings = _get_diagnostic_settings(cmd, resource_group_name, server_name, database_name)
-
+    
     # Fetch all audit diagnostic settings
     audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value)
     num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
@@ -1888,20 +1876,13 @@ def _audit_policy_update_diagnostic_settings(
     if num_of_audit_diagnostic_settings > 1:
         raise CLIError('Multiple audit diagnostics settings are already enabled')
 
-    from azure.mgmt.monitor import MonitorManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
-    from azure.mgmt.monitor.models import (RetentionPolicy, LogSettings)
-
     diagnostic_settings_url = _get_diagnostic_settings_url(cmd, resource_group_name, server_name, database_name)
     azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
 
-    is_azure_monitor_target_enabled = _is_audit_policy_state_enabled(log_analytics_target_state) or\
-        _is_audit_policy_state_enabled(event_hub_target_state)
-
     # If no audit diagnostic settings found then create one if azure monitor is enabled
     if num_of_audit_diagnostic_settings == 0:
-        if is_azure_monitor_target_enabled:
+        if _is_audit_policy_state_enabled(log_analytics_target_state) or\
+                _is_audit_policy_state_enabled(event_hub_target_state):
             created_diagnostic_setting = _audit_policy_create_diagnostic_setting(
                 cmd=cmd,
                 resource_group_name=resource_group_name,
@@ -1925,13 +1906,13 @@ def _audit_policy_update_diagnostic_settings(
     # Initialize actually updated azure monitor fields
     if log_analytics_target_state is None:
         log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
-    elif not _is_audit_policy_state_enabled(log_analytics_target_state):
+    elif _is_audit_policy_state_disabled(log_analytics_target_state):
         log_analytics_workspace_resource_id = None
 
     if event_hub_target_state is None:
         event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
         event_hub_name = audit_diagnostic_setting.event_hub_name
-    elif not _is_audit_policy_state_enabled(event_hub_target_state):
+    elif _is_audit_policy_state_disabled(event_hub_target_state):
         event_hub_authorization_rule_id = None
         event_hub_name = None
 
@@ -1939,7 +1920,7 @@ def _audit_policy_update_diagnostic_settings(
     # the existing single diagnostic settings
     if len(audit_diagnostic_setting.logs) == 1:
         # If azure monitor is enabled then update existing single audit diagnostic setting
-        if is_azure_monitor_target_enabled:
+        if log_analytics_workspace_resource_id is not None or event_hub_authorization_rule_id is not None:
             create_diagnostics_settings(
                 client=azure_monitor_client.diagnostic_settings,
                 name=audit_diagnostic_setting.name,
@@ -2015,6 +1996,7 @@ def _audit_policy_update_global_settings(
         resource_group_name,
         database_name=None,
         no_wait=None,
+        diagnostic_settings=None,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -2103,11 +2085,30 @@ def _audit_policy_update_global_settings(
 
         # Apply is_azure_monitor_target_enabled
         if log_analytics_target_state is not None or event_hub_target_state is not None:
-            audit_policy.is_azure_monitor_target_enabled =\
-                (log_analytics_target_state is not None and
-                 log_analytics_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower()) or\
-                (event_hub_target_state is not None and
-                 event_hub_target_state.lower() == BlobAuditingPolicyState.enabled.value.lower())
+            if _is_audit_policy_state_enabled(log_analytics_target_state) or\
+                    _is_audit_policy_state_enabled(event_hub_target_state):
+                audit_policy.is_azure_monitor_target_enabled = True
+            else:
+                # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
+                diagnostic_settings.value.sort(key=lambda d: d.name)
+                audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value)
+
+                # Determine value of is_azure_monitor_target_enabled
+                if audit_diagnostic_setting is None:
+                    updated_log_analytics_workspace_id = None
+                    updated_event_hub_authorization_rule_id = None
+                else:                    
+                    updated_log_analytics_workspace_id = audit_diagnostic_setting.workspace_id
+                    updated_event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
+
+                if _is_audit_policy_state_disabled(log_analytics_target_state):
+                    updated_log_analytics_workspace_id = None
+
+                if _is_audit_policy_state_disabled(event_hub_target_state):
+                    updated_event_hub_authorization_rule_id = None
+
+                audit_policy.is_azure_monitor_target_enabled = updated_log_analytics_workspace_id is not None or\
+                        updated_event_hub_authorization_rule_id is not None
 
     # Update audit policy - for server operation 'no_wait' argument is taken into account
     if database_name is None:
@@ -2125,10 +2126,6 @@ def _audit_policy_update_rollback(
     '''
     Rollback diagnostic settings change
     '''
-
-    from azure.mgmt.monitor import MonitorManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
 
     diagnostic_settings_url = _get_diagnostic_settings_url(cmd, resource_group_name, server_name, database_name)
     azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
@@ -2184,17 +2181,25 @@ def _audit_policy_update(
         event_hub_authorization_rule_id,
         event_hub_name)
 
-    # Update diagnostic settings
-    rollback_data = _audit_policy_update_diagnostic_settings(
-        cmd,
-        server_name,
-        resource_group_name,
-        database_name,
-        log_analytics_target_state,
-        log_analytics_workspace_resource_id,
-        event_hub_target_state,
-        event_hub_authorization_rule_id,
-        event_hub_name)
+    # Get diagnostic settings only if log_analytics_target_state or event_hub_target_state is provided
+    if log_analytics_target_state is not None or event_hub_target_state is not None:
+        diagnostic_settings = _get_diagnostic_settings(cmd, resource_group_name, server_name, database_name)
+
+        # Update diagnostic settings
+        rollback_data = _audit_policy_update_diagnostic_settings(
+            cmd,
+            server_name,
+            resource_group_name,
+            database_name,
+            diagnostic_settings,
+            log_analytics_target_state,
+            log_analytics_workspace_resource_id,
+            event_hub_target_state,
+            event_hub_authorization_rule_id,
+            event_hub_name)
+    else:
+        diagnostic_settings = None
+        rollback_data = None
 
     # Update auditing global settings
     try:
@@ -2205,6 +2210,7 @@ def _audit_policy_update(
             resource_group_name,
             database_name,
             no_wait,
+            diagnostic_settings,
             state,
             blob_storage_target_state,
             storage_account,
@@ -2602,7 +2608,6 @@ def db_sensitivity_label_update(
     '''
 
     # Get the information protection policy
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.security import SecurityCenter
     from msrestazure.azure_exceptions import CloudError
 
