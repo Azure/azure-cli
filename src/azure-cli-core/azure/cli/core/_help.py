@@ -183,6 +183,26 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             if not nouns:
                 print(UX_SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else UX_SURVEY_PROMPT)
 
+    def get_examples(self, command, parser, is_group):
+        """Get examples of a certain command from the help file.
+        Get the text of the example, strip the newline character and
+        return a list of commands which start with the given command name.
+        """
+        nouns = command.split(' ')[1:]
+        self.update_loaders_with_help_file_contents(nouns)
+
+        delimiters = ' '.join(nouns)
+        help_file = self.command_help_cls(self, delimiters, parser) if not is_group \
+            else self.group_help_cls(self, delimiters, parser)
+        help_file.load(parser)
+
+        def strip_command(command):
+            command = command.replace('\\\n', '')
+            contents = [item for item in command.split(' ') if item]
+            return ' '.join(contents).strip()
+
+        return [strip_command(example.command) for example in help_file.examples]
+
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders
         import inspect

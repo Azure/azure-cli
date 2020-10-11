@@ -36,7 +36,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    outbound_public_network_access_type=None, encryption_in_transit=None,
                    autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
-                   encryption_at_host=None, esp=False, no_validation_timeout=False):
+                   encryption_at_host=None, esp=False, idbroker=False, no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
@@ -253,6 +253,15 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                 target_instance_count=kafka_management_node_count,
                 hardware_profile=HardwareProfile(vm_size=kafka_management_node_size),
                 os_profile=os_profile,
+                virtual_network_profile=virtual_network_profile
+            )
+        )
+
+    if esp and idbroker:
+        roles.append(
+            Role(
+                name="idbrokernode",
+                target_instance_count=2,
                 virtual_network_profile=virtual_network_profile
             )
         )

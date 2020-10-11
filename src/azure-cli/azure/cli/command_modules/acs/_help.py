@@ -222,6 +222,9 @@ parameters:
   - name: --windows-admin-password
     type: string
     short-summary: Password to create on Windows node VMs.
+  - name: --enable-ahub
+    type: bool
+    short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
   - name: --enable-aad
     type: bool
     short-summary: Enable managed AAD feature for cluster.
@@ -298,6 +301,11 @@ parameters:
             monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
                          Specify "--workspace-resource-id" to use an existing workspace.
                          If monitoring addon is enabled --no-wait argument will have no effect
+            azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                         Learn more at aka.ms/aks/policy.
+            virtual-node - enable AKS Virtual Node.
+                         Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+                         aci-subnet-name must be in the same vent which is specified by --vnet-subnet-id (required as well).
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -358,6 +366,9 @@ parameters:
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
+  - name: --aci-subnet-name
+    type: string
+    short-summary: The name of a subnet in an existing VNet into which to deploy the virtual nodes.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -387,6 +398,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --outbound-type userDefinedRouting --load-balancer-sku standard --vnet-subnet-id customUserSubnetVnetID
   - name: Create a kubernetes cluster with supporting Windows agent pools.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$'
+  - name: Create a kubernetes cluster with supporting Windows agent pools with AHUB enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$' --enable-ahub
   - name: Create a kubernetes cluster with managed AAD enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
   - name: Create a kubernetes cluster with server side encryption using your owned key.
@@ -453,6 +466,12 @@ parameters:
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.
+  - name: --enable-ahub
+    type: bool
+    short-summary: Enable Azure Hybrid User Benefits (AHUB) feature for cluster.
+  - name: --disable-ahub
+    type: bool
+    short-summary: Disable Azure Hybrid User Benefits (AHUB) feature for cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -474,6 +493,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
   - name: Migrate a AKS AAD-Integrated cluster or a non-AAD cluster to a AKS-managed AAD cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Enable Azure Hybrid User Benefits featture for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-ahub
+  - name: Disable Azure Hybrid User Benefits featture for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
 """
 
 helps['aks delete'] = """
@@ -507,6 +530,8 @@ long-summary: |-
         monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
                      If monitoring addon is enabled --no-wait argument will have no effect
         virtual-node - enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+        azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                     Learn more at aka.ms/aks/policy.
 parameters:
   - name: --addons -a
     type: string
@@ -516,7 +541,7 @@ parameters:
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
 examples:
   - name: Enable Kubernetes addons. (autogenerated)
-    text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup
+    text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup --subnet MySubnetName
     crafted: true
 """
 
@@ -563,58 +588,6 @@ examples:
 helps['aks install-cli'] = """
 type: command
 short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
-"""
-
-helps['aks install-connector'] = """
-type: command
-short-summary: Install the ACI Connector on a managed Kubernetes cluster.
-parameters:
-  - name: --chart-url
-    type: string
-    short-summary: URL of a Helm chart that installs ACI Connector.
-  - name: --connector-name
-    type: string
-    short-summary: Name of the ACI Connector.
-  - name: --os-type
-    type: string
-    short-summary: Install support for deploying ACIs of this operating system type.
-  - name: --service-principal
-    type: string
-    short-summary: Service principal used for authentication to Azure APIs.
-    long-summary: If not specified, use the AKS service principal defined in the file /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
-  - name: --client-secret
-    type: string
-    short-summary: Secret associated with the service principal. This argument is required if `--service-principal` is specified.
-  - name: --image-tag
-    type: string
-    short-summary: The image tag of the virtual kubelet. Use 'latest' if it is not specified
-  - name: --aci-resource-group
-    type: string
-    short-summary: The resource group to create the ACI container groups. Use the MC_* resource group if it is not specified.
-  - name: --location -l
-    type: string
-    short-summary: The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
-examples:
-  - name: Install the virtual Kubelet for Linux to a managed Kubernetes cluster.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup
-  - name: Install the virtual Kubelet for Windows to a managed Kubernetes cluster.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-           --connector-name virtual-kubelet --os-type Windows
-  - name: Install the virtual Kubelet for both Windows and Linux to a managed Kubernetes cluster.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --os-type Both
-  - name: Install the virtual Kubelet using a specific service principal in a specific resource group.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
-          --aci-resource-group ACI-resource-group
-  - name: Install the virtual Kubelet from a custom Helm chart with custom tag.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
 """
 
 helps['aks list'] = """
@@ -679,6 +652,15 @@ parameters:
   - name: --mode
     type: string
     short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
+  - name: --priority
+    type: string
+    short-summary: The priority of the node pool.
+  - name: --eviction-policy
+    type: string
+    short-summary: The eviction policy of the Spot node pool. It can only be set when --priority is Spot.
+  - name: --spot-max-price
+    type: float
+    short-summary: It can only be set when --priority is Spot. Specify the maximum price you are willing to pay in US Dollars. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand. It can only include up to 5 decimal places.
 """
 
 helps['aks nodepool delete'] = """
@@ -756,29 +738,9 @@ parameters:
   - name: --kubernetes-version -k
     type: string
     short-summary: Version of Kubernetes to upgrade the node pool to, such as "1.16.9".
-"""
-
-helps['aks remove-connector'] = """
-type: command
-short-summary: Remove the ACI Connector from a managed Kubernetes cluster.
-parameters:
-  - name: --connector-name
-    type: string
-    short-summary: Name of the ACI Connector.
-  - name: --graceful
+  - name: --node-image-only
     type: bool
-    short-summary: Use a "cordon and drain" strategy to evict pods safely before removing the ACI node.
-  - name: --os-type
-    type: string
-    short-summary: Remove support for deploying ACIs of this operating system type.
-examples:
-  - name: Remove the ACI Connector from a cluster using the graceful mode.
-    text: |-
-        az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name MyConnector --graceful
-  - name: Remove the ACI Connector from a managed Kubernetes cluster. (autogenerated)
-    text: az aks remove-connector --connector-name MyConnector --name MyManagedCluster --os-type Windows --resource-group MyResourceGroup
-    crafted: true
+    short-summary: Only upgrade agent pool's node image.
 """
 
 helps['aks remove-dev-spaces'] = """
@@ -864,63 +826,13 @@ parameters:
   - name: --control-plane-only
     type: bool
     short-summary: Upgrade the cluster control plane only. If not specified, both control plane AND all node pools will be upgraded.
+  - name: --node-image-only
+    type: bool
+    short-summary: Only upgrade node image for agent pools.
 examples:
   - name: Upgrade a managed Kubernetes cluster to a newer version. (autogenerated)
     text: az aks upgrade --kubernetes-version 1.12.6 --name MyManagedCluster --resource-group MyResourceGroup
     crafted: true
-"""
-
-helps['aks upgrade-connector'] = """
-type: command
-short-summary: Upgrade the ACI Connector on a managed Kubernetes cluster.
-parameters:
-  - name: --chart-url
-    type: string
-    short-summary: URL of a Helm chart that installs ACI Connector.
-  - name: --connector-name
-    type: string
-    short-summary: Name of the ACI Connector.
-  - name: --os-type
-    type: string
-    short-summary: Install support for deploying ACIs of this operating system type.
-  - name: --service-principal
-    type: string
-    short-summary: Service principal used for authentication to Azure APIs.
-    long-summary: If not specified, use the AKS service principal defined in the file /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
-  - name: --client-secret
-    type: string
-    short-summary: Secret associated with the service principal. This argument is required if `--service-principal` is specified.
-  - name: --image-tag
-    type: string
-    short-summary: The image tag of the virtual kubelet. Use 'latest' if it is not specified
-  - name: --aci-resource-group
-    type: string
-    short-summary: The resource group to create the ACI container groups. Use the MC_* resource group if it is not specified.
-  - name: --location -l
-    type: string
-    short-summary: The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
-examples:
-  - name: Upgrade the ACI Connector for Linux to a managed Kubernetes cluster.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet
-  - name: Upgrade the ACI Connector for Windows to a managed Kubernetes cluster.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-           --connector-name virtual-kubelet --os-type Windows
-  - name: Upgrade the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --os-type Both
-  - name: Upgrade the ACI Connector to use a specific service principal in a specific resource group.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
-          --aci-resource-group ACI-resource-group
-  - name: Upgrade the ACI Connector from a custom Helm chart with custom tag.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
 """
 
 helps['aks use-dev-spaces'] = """

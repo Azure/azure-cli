@@ -911,6 +911,11 @@ short-summary: Get the details of an SSL certificate.
 examples:
   - name: Get the details of an SSL certificate.
     text: az network application-gateway ssl-cert show -g MyResourceGroup --gateway-name MyAppGateway -n MySslCert
+  - name: Display the expiry date of SSL certificate. The certificate is returned in PKCS7 format from which the expiration date needs to be retrieved.
+    text: |
+        publiccert=`az network application-gateway ssl-cert show -g MyResourceGroup --gateway-name MyAppGateway --name mywebsite.com --query publicCertData -o tsv`
+        echo "-----BEGIN CERTIFICATE-----" >> public.cert; echo "${publiccert}" >> public.cert; echo "-----END CERTIFICATE-----" >> public.cert
+        cat public.cert | fold -w 64 | openssl pkcs7 -print_certs | openssl x509 -noout -enddate
 """
 
 helps['network application-gateway ssl-cert update'] = """
@@ -1339,13 +1344,25 @@ type: command
 short-summary: >
   Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
   https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+examples:
+  - name: Disable an attack protection rule
+    text: |
+      az network application-gateway waf-policy managed-rule rule-set add --policy-name MyPolicy -g MyResourceGroup --type OWASP --version 3.1 --group-name REQUEST-921-PROTOCOL-ATTACK --rules 921110
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set update'] = """
 type: command
 short-summary: >
-  Update(Override) existing rule set of a WAF policy managed rules. For rule set and rules, please visit:
-  https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  Manage rules of a WAF policy.
+  If --group-name and --rules are provided, override existing rules. If --group-name is provided, clear all rules under a certain rule group. If neither of them are provided, update rule set and clear all rules under itself.
+  For rule set and rules, please visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+examples:
+  - name: Override rules under rule group EQUEST-921-PROTOCOL-ATTACK
+    text: |
+      az network application-gateway waf-policy managed-rule rule-set update --policy-name MyPolicy -g MyResourceGroup --type OWASP --version 3.1 --group-name REQUEST-921-PROTOCOL-ATTACK --rules 921130 921160
+  - name: Update the OWASP protocol version from 3.1 to 3.0 which will clear the old rules
+    text: |
+      az network application-gateway waf-policy managed-rule rule-set update --policy-name MyPolicy -g MyResourceGroup --type OWASP --version 3.0
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set remove'] = """
@@ -1355,7 +1372,7 @@ short-summary: >
 examples:
   - name: Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     text: |
-        az network application-gateway waf-policy managed-rule rule-set remove --policy-name MyPolicy --resource-group MyResourceGroup --type Permanent --version IPv4
+        az network application-gateway waf-policy managed-rule rule-set remove --policy-name MyPolicy --resource-group MyResourceGroup --type OWASP --version 3.1
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set list'] = """
@@ -5366,7 +5383,7 @@ examples:
 
 helps['network vrouter'] = """
 type: group
-short-summary: Manage the virtual router.
+short-summary: Manage the virtual router. This feature supports both VirtualHub and VirtualRouter. Considering VirtualRouter is deprecated, we recommend to create VirtualRouter with --hosted-subnet instead
 """
 
 helps['network vrouter create'] = """
@@ -5379,9 +5396,19 @@ type: command
 short-summary: Update a virtual router.
 """
 
+helps['network vrouter show'] = """
+type: command
+short-summary: Show a virtual router.
+"""
+
 helps['network vrouter list'] = """
 type: command
 short-summary: List all virtual routers under a subscription or a resource group.
+"""
+
+helps['network vrouter delete'] = """
+type: command
+short-summary: Delete a virtual router under a resource group.
 """
 
 helps['network vrouter peering'] = """
@@ -5397,6 +5424,21 @@ short-summary: Create a virtual router peering.
 helps['network vrouter peering update'] = """
 type: command
 short-summary: Update a virtual router peering.
+"""
+
+helps['network vrouter peering list'] = """
+type: command
+short-summary: List all virtual router peerings under a resource group.
+"""
+
+helps['network vrouter peering show'] = """
+type: command
+short-summary: Show a virtual router peering
+"""
+
+helps['network vrouter peering delete'] = """
+type: command
+short-summary: Delete a virtual router peering.
 """
 
 helps['network watcher'] = """
@@ -5531,33 +5573,35 @@ helps['network watcher connection-monitor endpoint add'] = """
 type: command
 short-summary: Add an endpoint to a connection monitor
 examples:
-  - name: Add an endpoint as destination
+  - name: Add an external address as a destination endpoint
     text: >
       az network watcher connection-monitor endpoint add
       --connection-monitor MyConnectionMonitor
       --location westus
-      --name MyEndpoint
+      --name MyExternalEndpoint
       --address "bing.com"
       --dest-test-groups DefaultTestGroup
-  - name: Add an endpoint as source
+      --type ExternalAddress
+  - name: Add an Azure VM as a source endpoint
     text: >
       az network watcher connection-monitor endpoint add
       --connection-monitor MyConnectionMonitor
       --location westus
-      --name MyEndpoint
+      --name MyVMEndpoint
       --resource-id MyVMResourceID
       --source-test-groups DefaultTestGroup
-  - name: Add an endpoint with filter
+      --type AzureVM
+  - name: Add a Subnet as a source endpoint with addresses excluded
     text: >
       az network watcher connection-monitor endpoint add
       --connection-monitor MyConnectionMonitor
       --location westus
-      --name MyEndpoint
-      --resource-id MyLogAnalysisWorkSpaceID
+      --name MySubnetEndpoint
+      --resource-id MySubnetID
       --source-test-groups DefaultTestGroup
-      --filter-type Include
-      --filter-item type=AgentAddress address=npmuser
-      --filter-item type=AgentAddress address=pypiuser
+      --type AzureSubnet
+      --address-exclude 10.0.0.25 10.0.0.30
+      --coverage-level BelowAverage
 """
 
 helps['network watcher connection-monitor endpoint remove'] = """

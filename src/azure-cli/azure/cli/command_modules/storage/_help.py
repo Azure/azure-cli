@@ -811,6 +811,16 @@ type: group
 short-summary: Manage blob metadata.
 """
 
+helps['storage blob query'] = """
+type: command
+short-summary: Enable users to select/project on blob or blob snapshot data by providing simple query expressions.
+examples:
+  - name: Enable users to select/project on blob by providing simple query expressions.
+    text: az storage blob query -c mycontainer -n myblob --query-expression "SELECT _2 from BlobStorage"
+  - name: Enable users to select/project on blob by providing simple query expressions and save in target file.
+    text: az storage blob query -c mycontainer -n myblob --query-expression "SELECT _2 from BlobStorage" --result-file result.csv
+"""
+
 helps['storage blob restore'] = """
 type: command
 short-summary: Restore blobs in the specified blob ranges.
@@ -995,6 +1005,81 @@ examples:
     crafted: true
 """
 
+helps['storage container-rm'] = """
+type: group
+short-summary: Manage Azure containers using the Microsoft.Storage resource provider.
+"""
+
+helps['storage container-rm create'] = """
+type: command
+short-summary: Create a new container under the specified storage account.
+examples:
+  - name: Create a new container under the specified storage account.
+    text: az storage container-rm create --storage-account myaccount --name mycontainer
+  - name: Create a new container with metadata and public-access as blob under the specified storage account(account id).
+    text: az storage container-rm create --storage-account myaccountid --name mycontainer --public-access blob --metada key1=value1 key2=value2
+"""
+
+helps['storage container-rm delete'] = """
+type: command
+short-summary: Delete the specified container under its account.
+examples:
+  - name: Delete the specified container under its account.
+    text: az storage container-rm delete --storage-account myAccount --name myContainer
+  - name: Delete the specified container under its account(account id).
+    text: az storage container-rm delete --storage-account myaccountid --name mycontainer
+  - name: Delete the specified container by resource id.
+    text: az storage container-rm delete --ids mycontainerid
+"""
+
+helps['storage container-rm exists'] = """
+type: command
+short-summary: Check for the existence of a container.
+examples:
+  - name: Check for the existence of a container under the specified storage account.
+    text: az storage container-rm exists --storage-account myaccount --name mycontainer
+  - name: Check for the existence of a container under the specified storage account(account id).
+    text: az storage container-rm exists --storage-account myaccountid --name mycontainer
+  - name: Check for the existence of a container by resource id.
+    text: az storage container-rm exists --ids mycontainerid
+"""
+
+helps['storage container-rm list'] = """
+type: command
+short-summary: List all containers under the specified storage account.
+examples:
+  - name: List all containers under the specified storage account.
+    text: az storage container-rm list --storage-account myaccount
+  - name: List all containers under the specified storage account(account id).
+    text: az storage container-rm list --storage-account myaccountid
+  - name: List all containers under the specified storage account, including deleted ones.
+    text: az storage container-rm list --storage-account myaccount --include-deleted
+"""
+
+helps['storage container-rm show'] = """
+type: command
+short-summary: Show the properties for a specified container.
+examples:
+  - name: Show the properties for a container under the specified storage account.
+    text: az storage container-rm show --storage-account myaccount --name mycontainer
+  - name: Show the properties for a container under the specified storage account(account id).
+    text: az storage container-rm show --storage-account myaccountid --name mycontainer
+  - name: Show the properties for a container by resource id.
+    text: az storage container-rm show --ids mycontainerid
+"""
+
+helps['storage container-rm update'] = """
+type: command
+short-summary: Update the properties for a container.
+examples:
+  - name: Update the public access level to 'blob' for a container under the specified storage account.
+    text: az storage container-rm update --storage-account myaccount --name mycontainer --public-access blob
+  - name: Update the metadata for a container under the specified storage account(account id).
+    text: az storage container-rm update --storage-account myaccountid --name mycontainer --metadata newkey1=newvalue1 newkey2=newvalue2
+  - name: Update the default encryption scope for a container by resource id.
+    text: az storage container-rm update --ids mycontainerid --default-encryption-scope myencryptionscope
+"""
+
 helps['storage container'] = """
 type: group
 short-summary: Manage blob storage containers.
@@ -1108,21 +1193,21 @@ examples:
   - name: Upload a single file to Azure Blob using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob]
   - name: Upload a single file to Azure Blob using account name and container name.
-    text: az storage copy --source-local-path /path/to/file.txt --destination-account-name mystorageaccount --destination-container mycontainer
+    text: az storage copy -s /path/to/file.txt --destination-account-name mystorageaccount --destination-container mycontainer
   - name: Upload a single file to Azure Blob with MD5 hash of the file content and save it as the blob's Content-MD5 property.
     text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob] --put-md5
   - name: Upload an entire directory to Azure Blob using url.
     text: az storage copy -s /path/to/dir -d https://[account].blob.core.windows.net/[container]/[path/to/directory] --recursive
   - name: Upload an entire directory to Azure Blob using account name and container name.
-    text: az storage copy --source-local-path /path/to/dir --destination-account-name mystorageaccount --destination-container mycontainer --recursive
+    text: az storage copy -s /path/to/dir --destination-account-name mystorageaccount --destination-container mycontainer --recursive
   - name: Upload a set of files to Azure Blob using wildcards with url.
     text: az storage copy -s /path/*foo/*bar/*.pdf -d https://[account].blob.core.windows.net/[container]/[path/to/directory]
   - name: Upload a set of files to Azure Blob using wildcards with account name and container name.
-    text: az storage copy --source-local-path /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-container mycontainer
+    text: az storage copy -s /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-container mycontainer
   - name: Upload files and directories to Azure Blob using wildcards with url.
     text: az storage copy -s /path/*foo/*bar* -d https://[account].blob.core.windows.net/[container]/[path/to/directory] --recursive
   - name: Upload files and directories to Azure Blob using wildcards with account name and container name.
-    text: az storage copy --source-local-path /path/*foo/*bar* --destination-account-name mystorageaccount --destination-container mycontainer --recursive
+    text: az storage copy -s /path/*foo/*bar* --destination-account-name mystorageaccount --destination-container mycontainer --recursive
   - name: Download a single file from Azure Blob using url, and you can also specify your storage account and container information as above.
     text: az storage copy -s https://[account].blob.core.windows.net/[container]/[path/to/blob] -d /path/to/file.txt
   - name: Download an entire directory from Azure Blob, and you can also specify your storage account and container information as above.
@@ -1146,17 +1231,17 @@ examples:
   - name: Upload a single file to Azure File Share using url.
     text: az storage copy -s /path/to/file.txt -d https://[account].file.core.windows.net/[share]/[path/to/file]
   - name: Upload a single file to Azure File Share using account name and share name.
-    text: az storage copy --source-local-path /path/to/file.txt --destination-account-name mystorageaccount --destination-share myshare
+    text: az storage copy -s /path/to/file.txt --destination-account-name mystorageaccount --destination-share myshare
   - name: Upload an entire directory to Azure File Share using url.
     text: az storage copy -s /path/to/dir -d https://[account].file.core.windows.net/[share]/[path/to/directory] --recursive
   - name: Upload an entire directory to Azure File Share using account name and container name.
-    text: az storage copy --source-local-path /path/to/dir --destination-account-name mystorageaccount --destination-share myshare --recursive
+    text: az storage copy -s /path/to/dir --destination-account-name mystorageaccount --destination-share myshare --recursive
   - name: Upload a set of files to Azure File Share using wildcards with account name and share name.
-    text: az storage copy --source-local-path /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-share myshare
+    text: az storage copy -s /path/*foo/*bar/*.pdf --destination-account-name mystorageaccount --destination-share myshare
   - name: Upload files and directories to Azure File Share using wildcards with url.
     text: az storage copy -s /path/*foo/*bar* -d https://[account].file.core.windows.net/[share]/[path/to/directory] --recursive
   - name: Upload files and directories to Azure File Share using wildcards with account name and share name.
-    text: az storage copy --source-local-path /path/*foo/*bar* --destination-account-name mystorageaccount --destination-share myshare --recursive
+    text: az storage copy -s /path/*foo/*bar* --destination-account-name mystorageaccount --destination-share myshare --recursive
   - name: Download a single file from Azure File Share using url, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/[path/to/file] -d /path/to/file.txt
   - name: Download an entire directory from Azure File Share, and you can also specify your storage account and share information as above.
@@ -2030,6 +2115,18 @@ examples:
     text: az storage share-rm list -g MyResourceGroup --storage-account mystorageaccount
   - name: List the Azure file shares under the storage account 'mystorageaccount' (account id).
     text: az storage share-rm list --storage-account mystorageaccount
+  - name: List all file shares include deleted under the storage account 'mystorageaccount' .
+    text: az storage share-rm list --storage-account mystorageaccount --include-deleted
+"""
+
+helps['storage share-rm restore'] = """
+type: command
+short-summary: Restore a file share within a valid retention days if share soft delete is enabled.
+examples:
+  - name: Restore a file share within a valid retention days if share soft delete is enabled.
+    text: az storage share-rm restore -n deletedshare --deleted-version 01D64EB9886F00C4 -g MyResourceGroup --storage-account mystorageaccount
+  - name: Restore a file share within a valid retention days if share soft delete is enabled to a new name.
+    text: az storage share-rm restore -n deletedshare --deleted-version 01D64EB9886F00C4 --restored-name newname -g MyResourceGroup --storage-account mystorageaccount
 """
 
 helps['storage share-rm show'] = """
