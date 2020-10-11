@@ -43,13 +43,13 @@ from azure.mgmt.sql.models import (
     ServerPublicNetworkAccess
 )
 
-from knack.log import get_logger
-from knack.prompting import prompt_y_n
-
 from azure.mgmt.monitor import MonitorManagementClient
 from azure.mgmt.monitor.models import (RetentionPolicy, LogSettings)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
+
+from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 from ._util import (
     get_sql_capabilities_operations,
@@ -1867,7 +1867,7 @@ def _audit_policy_update_diagnostic_settings(
     '''
     Update audit policy's diagnostic settings
     '''
-    
+
     # Fetch all audit diagnostic settings
     audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value)
     num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
@@ -1916,11 +1916,14 @@ def _audit_policy_update_diagnostic_settings(
         event_hub_authorization_rule_id = None
         event_hub_name = None
 
+    is_azure_monitor_target_enabled = log_analytics_workspace_resource_id is not None or\
+        event_hub_authorization_rule_id is not None
+
     # If there is no other categories except SQLSecurityAuditEvents update or delete
     # the existing single diagnostic settings
     if len(audit_diagnostic_setting.logs) == 1:
         # If azure monitor is enabled then update existing single audit diagnostic setting
-        if log_analytics_workspace_resource_id is not None or event_hub_authorization_rule_id is not None:
+        if is_azure_monitor_target_enabled:
             create_diagnostics_settings(
                 client=azure_monitor_client.diagnostic_settings,
                 name=audit_diagnostic_setting.name,
@@ -1987,6 +1990,46 @@ def _audit_policy_update_diagnostic_settings(
         rollback_data.insert(0, ("delete", created_diagnostic_setting))
 
     return rollback_data
+
+
+def _apply_azure_monitor_target_enabled(
+        audit_policy,
+        diagnostic_settings,
+        log_analytics_target_state,
+        event_hub_target_state):
+    '''
+    Apply value of is_azure_monitor_target_enabled on policy update
+    '''
+
+    # If log_analytics_target_state and event_hub_target_state are None there is nothing to do
+    if log_analytics_target_state is None and event_hub_target_state is None:
+        return
+
+    if _is_audit_policy_state_enabled(log_analytics_target_state) or\
+            _is_audit_policy_state_enabled(event_hub_target_state):
+        audit_policy.is_azure_monitor_target_enabled = True
+    else:
+        # Sort received diagnostic settings by name and get first element to ensure consistency
+        # between command executions
+        diagnostic_settings.value.sort(key=lambda d: d.name)
+        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value)
+
+        # Determine value of is_azure_monitor_target_enabled
+        if audit_diagnostic_setting is None:
+            updated_log_analytics_workspace_id = None
+            updated_event_hub_authorization_rule_id = None
+        else:
+            updated_log_analytics_workspace_id = audit_diagnostic_setting.workspace_id
+            updated_event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
+
+        if _is_audit_policy_state_disabled(log_analytics_target_state):
+            updated_log_analytics_workspace_id = None
+
+        if _is_audit_policy_state_disabled(event_hub_target_state):
+            updated_event_hub_authorization_rule_id = None
+
+        audit_policy.is_azure_monitor_target_enabled = updated_log_analytics_workspace_id is not None or\
+            updated_event_hub_authorization_rule_id is not None
 
 
 def _audit_policy_update_global_settings(
@@ -2084,31 +2127,11 @@ def _audit_policy_update_global_settings(
             audit_policy.retention_days = retention_days
 
         # Apply is_azure_monitor_target_enabled
-        if log_analytics_target_state is not None or event_hub_target_state is not None:
-            if _is_audit_policy_state_enabled(log_analytics_target_state) or\
-                    _is_audit_policy_state_enabled(event_hub_target_state):
-                audit_policy.is_azure_monitor_target_enabled = True
-            else:
-                # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
-                diagnostic_settings.value.sort(key=lambda d: d.name)
-                audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value)
-
-                # Determine value of is_azure_monitor_target_enabled
-                if audit_diagnostic_setting is None:
-                    updated_log_analytics_workspace_id = None
-                    updated_event_hub_authorization_rule_id = None
-                else:                    
-                    updated_log_analytics_workspace_id = audit_diagnostic_setting.workspace_id
-                    updated_event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
-
-                if _is_audit_policy_state_disabled(log_analytics_target_state):
-                    updated_log_analytics_workspace_id = None
-
-                if _is_audit_policy_state_disabled(event_hub_target_state):
-                    updated_event_hub_authorization_rule_id = None
-
-                audit_policy.is_azure_monitor_target_enabled = updated_log_analytics_workspace_id is not None or\
-                        updated_event_hub_authorization_rule_id is not None
+        _apply_azure_monitor_target_enabled(
+            audit_policy,
+            diagnostic_settings,
+            log_analytics_target_state,
+            event_hub_target_state)
 
     # Update audit policy - for server operation 'no_wait' argument is taken into account
     if database_name is None:
