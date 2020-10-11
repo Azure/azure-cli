@@ -37,12 +37,6 @@ examples:
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb \\
             --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
-  - name: Add an audit action.
-    text: |
-        az sql db audit-policy update -g mygroup -s myserver -n mydb \\
-            --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
-  - name: Remove an audit action by list index.
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --remove auditActionsAndGroups 0
   - name: Disable an auditing policy.
     text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Disabled
   - name: Disable a blob storage auditing policy.
@@ -1026,12 +1020,6 @@ examples:
     text: |
         az sql server audit-policy update -g mygroup -n myserver \\
             --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on server::myserver by public'
-  - name: Add an audit action.
-    text: |
-        az sql server audit-policy update -g mygroup -n myserver \\
-            --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
-  - name: Remove an audit action by list index.
-    text: az sql server audit-policy update -g mygroup -n myserver --remove auditActionsAndGroups 0
   - name: Disable an auditing policy.
     text: az sql server audit-policy update -g mygroup -n myserver --state Disabled
     text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Disabled
