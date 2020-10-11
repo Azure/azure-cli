@@ -28,11 +28,14 @@ short-summary: Update a database's auditing policy.
 long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
 examples:
   - name: Enable by storage account name.
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled --storage-account mystorage
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --bsts Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
-            --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb \\
@@ -40,18 +43,15 @@ examples:
   - name: Disable an auditing policy.
     text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Disabled
   - name: Disable a blob storage auditing policy.
-    text: |
-        az sql db audit-policy update -g mygroup -s myserver -n mydb \\
-            --blob-storage-target-state Disabled
+    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --bsts Disabled
   - name: Enable a log analytics auditing policy.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
-            --log-analytics-target-state Enabled \\
-            --log-analytics-workspace-resource-id myworkspaceresourceid
+            --lats Enabled --lawri myworkspaceresourceid
   - name: Disable a log analytics auditing policy.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb
-            --log-analytics-target-state Disabled
+            --lats Disabled
   - name: Enable an event hub auditing policy.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
@@ -1010,32 +1010,28 @@ examples:
   - name: Enable by storage account name.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
-            --blob-storage-target-state Enabled --storage-account mystorage
+            --bsts Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
-            --blob-storage-target-state Enabled \\
-            --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az sql server audit-policy update -g mygroup -n myserver \\
             --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on server::myserver by public'
   - name: Disable an auditing policy.
     text: az sql server audit-policy update -g mygroup -n myserver --state Disabled
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Disabled
   - name: Disable a blob storage auditing policy.
-    text: |
-        az sql server audit-policy update -g mygroup -n myserver \\
-            --blob-storage-target-state Disabled
+    text: az sql server audit-policy update -g mygroup -n myserver --bsts Disabled
   - name: Enable a log analytics auditing policy.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
-            --log-analytics-target-state Enabled \\
-            --log-analytics-workspace-resource-id myworkspaceresourceid
+            --lats Enabled --lawri myworkspaceresourceid
   - name: Disable a log analytics auditing policy.
     text: |
         az sql server audit-policy update -g mygroup -n myserver
-            --log-analytics-target-state Disabled
+            --lats Disabled
   - name: Enable an event hub auditing policy.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
