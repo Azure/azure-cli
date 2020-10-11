@@ -1674,8 +1674,10 @@ def _audit_policy_show(
     if _is_audit_policy_state_disabled(audit_policy.state):
         return audit_policy
 
-    audit_policy.blob_storage_target_state =\
-        BlobAuditingPolicyState.disabled if not audit_policy.storage_endpoint else BlobAuditingPolicyState.enabled
+    if not audit_policy.storage_endpoint:
+        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.disabled
+    else:
+        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.enabled
 
     # If 'is_azure_monitor_target_enabled' is false there is no reason to request diagnostic settings
     if not audit_policy.is_azure_monitor_target_enabled:
