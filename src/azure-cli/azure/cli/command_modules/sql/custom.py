@@ -1809,7 +1809,7 @@ def _audit_policy_validate_arguments(
         raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
 
     if retention_days is not None and (not retention_days.isdigit() or int(retention_days) <= 0):
-        raise CLIError('--retention-days must be a positive number greater than zero')
+        raise CLIError('retention-days must be a positive number greater than zero')
 
 
 def _audit_policy_create_diagnostic_setting(
