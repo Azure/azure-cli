@@ -12,12 +12,12 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        from ._client_factory import keyvault_client_factory
-        from ._command_type import KeyVaultCommandGroup, KeyVaultArgumentContext
+        from azure.cli.command_modules.keyvault._client_factory import keyvault_mgmt_client_factory
+        from azure.cli.command_modules.keyvault._command_type import KeyVaultCommandGroup, KeyVaultArgumentContext
         from azure.cli.core import ModExtensionSuppress
         keyvault_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
-            client_factory=keyvault_client_factory
+            client_factory=keyvault_mgmt_client_factory
         )
 
         super(KeyVaultCommandsLoader, self).__init__(
@@ -33,12 +33,12 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
                                                     recommend_remove=True))
 
     def load_command_table(self, args):
-        from .commands import load_command_table
+        from azure.cli.command_modules.keyvault.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        from ._params import load_arguments
+        from azure.cli.command_modules.keyvault._params import load_arguments
         load_arguments(self, command)
 
 

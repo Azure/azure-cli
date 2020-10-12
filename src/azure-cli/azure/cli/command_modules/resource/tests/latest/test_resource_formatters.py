@@ -273,9 +273,9 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
   - p6/foo
   - p7/foo{Color.RESET}{Color.GREEN}
   + p2/foo{Color.RESET}{Color.BLUE}
-  ! p4/foo{Color.RESET}{Color.GRAY}
-  * p1/foo{Color.RESET}{Color.RESET}
-  = p3/foo
+  ! p4/foo{Color.RESET}{Color.RESET}
+  = p3/foo{Color.RESET}{Color.GRAY}
+  * p1/foo
 {Color.RESET}"""
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes))
 

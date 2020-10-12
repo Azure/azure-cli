@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
+import time
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.core.profiles import ResourceType
@@ -403,11 +404,36 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('table.retentionPolicy.days', None)
         ])
 
+        # Table service
         with self.assertRaisesRegexp(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
             self.cmd('storage logging update --services t --log r --retention 1 '
                      '--version 2.0 --connection-string {}'.format(connection_string))
-        self.cmd('storage logging update --services t --log r --retention 1 '
-                 '--version 1.0 --connection-string {}'.format(connection_string))
+
+        # Set version to 1.0
+        self.cmd('storage logging update --services t --log r --retention 1 --version 1.0 --connection-string {} '
+                 .format(connection_string))
+        time.sleep(10)
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('table.version', '1.0'),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', True),
+            JMESPathCheck('table.retentionPolicy.enabled', True),
+            JMESPathCheck('table.retentionPolicy.days', 1)
+        ])
+
+        # Use default version
+        self.cmd('storage logging update --services t --log r --retention 1 --connection-string {}'.format(
+            connection_string))
+        time.sleep(10)
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('table.version', '1.0'),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', True),
+            JMESPathCheck('table.retentionPolicy.enabled', True),
+            JMESPathCheck('table.retentionPolicy.days', 1)
+        ])
 
     @live_only()
     @ResourceGroupPreparer()
@@ -948,44 +974,6 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
 
-    class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
-        @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
-        @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
-        def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
-            self.kwargs.update({
-                'sa': storage_account,
-                'rg': resource_group,
-                'cmd': 'storage account file-service-properties'
-            })
-            self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy', None))
-
-            with self.assertRaises(SystemExit):
-                self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
-
-            with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
-                self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
-
-            with self.assertRaises(SystemExit):
-                self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
-
-            self.cmd(
-                '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
-                JMESPathCheck('shareDeleteRetentionPolicy.days', 10))
-
-            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
-                JMESPathCheck('shareDeleteRetentionPolicy.days', 1))
-
-            self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
-                JMESPathCheck('shareDeleteRetentionPolicy.days', None))
-
-            self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
-                JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
-
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
     @StorageAccountPreparer(location="eastus2euap", kind="StorageV2")
@@ -1001,6 +989,89 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['isVersioningEnabled'], True)
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix='cli_storage_account_update_delete_retention_policy')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
+    def test_storage_account_update_container_delete_retention_policy(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account blob-service-properties update'
+        })
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention true -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention false --container-delete-retention-days 365 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --container-delete-retention-days 1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days -1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 0 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 366 -n {sa} -g {rg}')
+
+        result = self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['containerDeleteRetentionPolicy']['days'], 1)
+
+        result = self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 100 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['containerDeleteRetentionPolicy']['days'], 100)
+
+        result = self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['containerDeleteRetentionPolicy']['days'], 365)
+
+        result = self.cmd('{cmd} --enable-container-delete-retention false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], False)
+        self.assertEqual(result['containerDeleteRetentionPolicy']['days'], None)
+
+
+class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
+    @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
+    def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account file-service-properties'
+        })
+        self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy', None))
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
+
+        with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
+            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
+
+        self.cmd(
+            '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 10))
+
+        self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 1))
+
+        self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+
+        self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
 
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):

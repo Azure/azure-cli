@@ -83,7 +83,7 @@ class WebappBasicE2ETest(ScenarioTest):
         ])
         # turn on diagnostics
         test_cmd = ('webapp log config -g {} -n {} --level verbose'.format(resource_group, webapp_name) + ' '
-                    '--application-logging true --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
+                    '--application-logging filesystem --detailed-error-messages true --failed-request-tracing true --web-server-logging filesystem')
         self.cmd(test_cmd)
         self.cmd('webapp log show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('detailedErrorMessages.enabled', True),
@@ -151,12 +151,12 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|10.15"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|10.14"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '10.15'),
+            JMESPathCheck('[0].value', '10.14'),
         ])
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "DOTNETCORE|3.1"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
@@ -167,7 +167,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|10.15"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|10.14"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -285,6 +285,7 @@ class WebappQuickCreateTest(ScenarioTest):
 
 
 class BackupWithName(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_backup_with_name(self, resource_group):
         plan = self.create_random_name(prefix='plan-backup', length=24)
@@ -313,7 +314,7 @@ class AppServiceLogTest(ScenarioTest):
             prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|10.15"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|10.14"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -464,7 +465,7 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
         # site azure storage account configurations tests
-        runtime = 'node|10.16'
+        runtime = 'node|10.14'
         linux_plan = self.create_random_name(
             prefix='webapp-linux-plan', length=24)
         linux_webapp = self.create_random_name(
@@ -714,7 +715,7 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
 class LinuxWebappScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp(self, resource_group):
-        runtime = 'node|10.16'
+        runtime = 'node|10.14'
         plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-linux', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
@@ -894,7 +895,7 @@ class WebappACRScenarioTest(ScenarioTest):
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
         webapp = self.create_random_name(prefix='webappacrtest', length=24)
-        runtime = 'node|10.16'
+        runtime = 'node|10.14'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
             resource_group, acr_registry_name))
@@ -991,7 +992,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck(
-                "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+                "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", None),
             JMESPathCheck(
                 "[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", username)
         ])
@@ -1008,7 +1009,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         self.assertNotIn('DOCKER_REGISTRY_SERVER_USERNAME', all_settings)
         self.assertNotIn('DOCKER_REGISTRY_SERVER_URL', all_settings)
         self.assertNotIn('DOCKER_REGISTRY_SERVER_PASSWORD', all_settings)
-        self.assertIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
+        self.assertNotIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
 
 
 class FunctionappACRDeploymentScenarioTest(ScenarioTest):
@@ -1379,7 +1380,6 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
-            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
@@ -1414,7 +1414,6 @@ class WebappSSLImportCertTest(ScenarioTest):
             cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_id, cert_name), checks=[
-            JMESPathCheck('keyVaultSecretStatus', 'Initialized'),
             JMESPathCheck('thumbprint', cert_thumbprint)
         ])
 
@@ -1745,6 +1744,22 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
                  JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')])
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_windows_runtime_custom_handler(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 40)
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 3 --os-type Windows --runtime custom'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+                 JMESPathCheck("[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
+                 JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'custom')])
+
 
 class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
@@ -1932,6 +1947,25 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck(
                 "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
         ])
+
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_custom_handler(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            # this weird field means it is a linux
+            JMESPathCheck('reserved', True),
+            JMESPathCheck('sku.name', 'S1')
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime custom'
+                 .format(resource_group, functionapp, plan, storage_account), checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'custom')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2970,6 +3004,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_vnetE2E(self, resource_group):
         webapp_name = self.create_random_name('swiftwebapp', 24)
@@ -2995,6 +3030,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_vnetDelegation(self, resource_group):
         webapp_name = self.create_random_name('swiftwebapp', 24)
@@ -3025,6 +3061,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_vnetSameName(self, resource_group):
         resource_group_2 = self.create_random_name('swiftwebapp', 24)

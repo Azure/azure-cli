@@ -24,6 +24,58 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
+def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
+                        metadata=None, public_access=None, fail_on_exist=False,
+                        default_encryption_scope=None, deny_encryption_scope_override=None):
+    if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
+                                             account_name=account_name, container_name=container_name):
+        raise CLIError('The specified container already exists.')
+
+    if cmd.supported_api_version(min_api='2019-06-01', resource_type=ResourceType.MGMT_STORAGE):
+        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+        blob_container = BlobContainer(public_access=public_access,
+                                       default_encryption_scope=default_encryption_scope,
+                                       deny_encryption_scope_override=deny_encryption_scope_override,
+                                       metadata=metadata)
+        return client.create(resource_group_name=resource_group_name, account_name=account_name,
+                             container_name=container_name, blob_container=blob_container)
+    return client.create(resource_group_name=resource_group_name, account_name=account_name,
+                         container_name=container_name, public_access=public_access, metadata=metadata)
+
+
+def update_container_rm(cmd, instance, metadata=None, public_access=None,
+                        default_encryption_scope=None, deny_encryption_scope_override=None):
+    BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+    blob_container = BlobContainer(
+        metadata=metadata if metadata is not None else instance.metadata,
+        public_access=public_access if public_access is not None else instance.public_access,
+        default_encryption_scope=default_encryption_scope
+        if default_encryption_scope is not None else instance.default_encryption_scope,
+        deny_encryption_scope_override=deny_encryption_scope_override
+        if deny_encryption_scope_override is not None else instance.deny_encryption_scope_override,
+    )
+    return blob_container
+
+
+def list_container_rm(cmd, client, resource_group_name, account_name, include_deleted=None):
+    ListContainersInclude = cmd.get_models('ListContainersInclude', resource_type=ResourceType.MGMT_STORAGE)
+    include = ListContainersInclude("deleted") if include_deleted is not None else None
+
+    return client.list(resource_group_name=resource_group_name, account_name=account_name, include=include)
+
+
+def container_rm_exists(client, resource_group_name, account_name, container_name):
+    from msrestazure.azure_exceptions import CloudError
+    try:
+        container = client.get(resource_group_name=resource_group_name,
+                               account_name=account_name, container_name=container_name)
+        return container is not None
+    except CloudError as err:
+        if err.status_code == 404:
+            return False
+        raise err
+
+
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
                      default_encryption_scope=None, prevent_encryption_scope_override=None, **kwargs):
@@ -48,7 +100,8 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
                      if_unmodified_since=None, timeout=None, bypass_immutability_policy=False,
                      processed_resource_group=None, processed_account_name=None, mgmt_client=None):
     if bypass_immutability_policy:
-        return mgmt_client.blob_containers.delete(processed_resource_group, processed_account_name, container_name)
+        mgmt_client.blob_containers.delete(processed_resource_group, processed_account_name, container_name)
+        return True
     return client.delete_container(
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
@@ -656,3 +709,40 @@ def acquire_blob_lease(client, lease_duration=-1, **kwargs):
 def renew_blob_lease(client, **kwargs):
     client.renew(**kwargs)
     return client.id
+
+
+def add_progress_callback_v2(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def query_blob(client, query_expression, input_config=None, output_config=None, result_file=None, **kwargs):
+
+    reader = client.query_blob(query_expression=query_expression, blob_format=input_config, output_format=output_config,
+                               **kwargs)
+
+    if result_file is not None:
+        with open(result_file, 'wb') as stream:
+            reader.readinto(stream)
+        stream.close()
+        return None
+
+    return reader.readall().decode("utf-8")
