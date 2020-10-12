@@ -1664,7 +1664,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
             raise CLIError('Windows containers is not yet supported in app service environment')
         ase_list = client.app_service_environments.list()
         ase_found = False
-        ase = None
+        ase = ""
         for ase in ase_list:
             if ase.name.lower() == app_service_environment.lower():
                 ase_def = HostingEnvironmentProfile(id=ase.id)
