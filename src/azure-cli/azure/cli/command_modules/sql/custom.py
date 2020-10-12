@@ -1743,6 +1743,7 @@ def _audit_policy_validate_arguments(
         storage_account=None,
         storage_endpoint=None,
         storage_account_access_key=None,
+        retention_days=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
         event_hub_target_state=None,
@@ -1806,6 +1807,9 @@ def _audit_policy_validate_arguments(
 
     if _is_audit_policy_state_enabled(event_hub_target_state) and event_hub_authorization_rule_id is None:
         raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
+
+    if retention_days is not None and (not retention_days.isdigit() or int(retention_days) <= 0):
+        raise CLIError('--retention-days must be a positive number greater than zero')
 
 
 def _audit_policy_create_diagnostic_setting(
@@ -2218,6 +2222,7 @@ def _audit_policy_update(
         storage_account,
         storage_endpoint,
         storage_account_access_key,
+        retention_days,
         log_analytics_target_state,
         log_analytics_workspace_resource_id,
         event_hub_target_state,
