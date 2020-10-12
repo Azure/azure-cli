@@ -732,6 +732,11 @@ class TemplateSpecsTest(ScenarioTest):
             self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json')
         ]).get_output_in_json()
 
+        self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes', checks=[
+            self.check('description', None),
+            self.check('display_name', None),
+        ])
+
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
