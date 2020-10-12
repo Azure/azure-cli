@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.6.0
+++++++
+* Remove module iotcentral.
+
 0.5.0
 ++++++
 * Update index.html design.
