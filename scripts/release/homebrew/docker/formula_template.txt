@@ -9,6 +9,11 @@ class AzureCli < Formula
   license "MIT"
   head "https://github.com/Azure/azure-cli.git"
 
+  livecheck do
+    url "https://github.com/Azure/azure-cli/releases/latest"
+    regex(%r{href=.*?/tag/azure-cli[._-]v?(\d+(?:\.\d+)+)["' >]}i)
+  end
+
 {{ bottle_hash }}
 
   depends_on "openssl@1.1"
