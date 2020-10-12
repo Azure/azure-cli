@@ -1662,17 +1662,17 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     if app_service_environment:
         if hyper_v:
             raise CLIError('Windows containers is not yet supported in app service environment')
-        ase_id = _validate_app_service_environment_id(cmd.cli_ctx, app_service_environment, resource_group_name)
-        ase_def = HostingEnvironmentProfile(id=ase_id)
         ase_list = client.app_service_environments.list()
         ase_found = False
+        ase = None
         for ase in ase_list:
-            if ase.id.lower() == ase_id.lower():
+            if ase.name.lower() == app_service_environment.lower():
+                ase_def = HostingEnvironmentProfile(id=ase.id)
                 location = ase.location
                 ase_found = True
                 break
         if not ase_found:
-            raise CLIError("App service environment '{}' not found in subscription.".format(ase_id))
+            raise CLIError("App service environment '{}' not found in subscription.".format(ase.id))
     else:  # Non-ASE
         ase_def = None
         if location is None:
