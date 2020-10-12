@@ -1808,8 +1808,12 @@ def _audit_policy_validate_arguments(
     if _is_audit_policy_state_enabled(event_hub_target_state) and event_hub_authorization_rule_id is None:
         raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
 
-    if retention_days is not None and (not retention_days.isdigit() or int(retention_days) <= 0):
-        raise CLIError('retention-days must be a positive number greater than zero')
+    max_retention_days = 3285
+
+    if retention_days is not None and\
+            (not retention_days.isdigit() or int(retention_days) <= 0 or int(retention_days) >= max_retention_days):
+        raise CLIError('retention-days must be a positive number greater than zero and lower than {}'
+                       .format(max_retention_days))
 
 
 def _audit_policy_create_diagnostic_setting(
