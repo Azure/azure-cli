@@ -29,10 +29,13 @@ def web_client_factory(cli_ctx, **_):
 
 
 def zip_contents_from_dir(dirPath, lang):
-    relroot = os.path.abspath(os.path.join(dirPath, os.pardir))
+    import tempfile
+    import uuid
+    relroot = os.path.abspath(tempfile.gettempdir())
     path_and_file = os.path.splitdrive(dirPath)[1]
     file_val = os.path.split(path_and_file)[1]
-    zip_file_path = relroot + os.path.sep + file_val + ".zip"
+    file_val_unique = file_val + str(uuid.uuid4())[:259]
+    zip_file_path = relroot + os.path.sep + file_val_unique + ".zip"
     abs_src = os.path.abspath(dirPath)
     try:
         with zipfile.ZipFile("{}".format(zip_file_path), "w", zipfile.ZIP_DEFLATED) as zf:

@@ -7,10 +7,12 @@
 
 import random
 from knack.log import get_logger
+from msrest.paging import Paged
+
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.util import CLIError
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory
+from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, cf_postgres_flexible_location_capabilities
 
 logger = get_logger(__name__)
 
@@ -152,6 +154,99 @@ def parse_maintenance_window(maintenance_window_string):
     elif len(parsed_input) == 3:
         return _map_maintenance_window(parsed_input[0]), parsed_input[1], parsed_input[2]
     return None, None, None
+
+
+def get_mysql_versions(sku_info, tier):
+    return _get_available_values(sku_info, 'versions', tier)
+
+
+def get_mysql_skus(sku_info, tier):
+    return _get_available_values(sku_info, 'skus', tier)
+
+
+def get_mysql_storage_size(sku_info, tier):
+    return _get_available_values(sku_info, 'storage_sizes', tier)
+
+
+def get_mysql_backup_retention(sku_info, tier):
+    return _get_available_values(sku_info, 'backup_retention', tier)
+
+
+def get_mysql_tiers(sku_info):
+    return list(sku_info.keys())
+
+
+def get_postgres_versions(sku_info, tier):
+    return _get_available_values(sku_info, 'versions', tier)
+
+
+def get_postgres_skus(sku_info, tier):
+    return _get_available_values(sku_info, 'skus', tier)
+
+
+def get_postgres_storage_sizes(sku_info, tier):
+    return _get_available_values(sku_info, 'storage_sizes', tier)
+
+
+def get_postgres_tiers(sku_info):
+    return list(sku_info.keys())
+
+
+def get_postgres_list_skus_info(cmd, location):
+    list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
+    list_skus_result = list_skus_client.execute(location)
+    return _parse_list_skus(list_skus_result, 'postgres')
+
+
+def get_mysql_list_skus_info(cmd, location):
+    list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
+    list_skus_result = list_skus_client.list(location)
+    return _parse_list_skus(list_skus_result, 'mysql')
+
+
+def _parse_list_skus(result, database_engine):
+    result = _get_list_from_paged_response(result)
+    if not result:
+        raise CLIError("No available SKUs in this location")
+
+    tiers = result[0].supported_flexible_server_editions
+    tiers_dict = {}
+    for tier_info in tiers:
+        tier_name = tier_info.name
+        tier_dict = {}
+
+        skus = set()
+        versions = set()
+        for version in tier_info.supported_server_versions:
+            versions.add(version.name)
+            for vcores in version.supported_vcores:
+                skus.add(vcores.name)
+        tier_dict["skus"] = skus
+        tier_dict["versions"] = versions
+
+        storage_info = tier_info.supported_storage_editions[0]
+        if database_engine == 'mysql':
+            tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
+            tier_dict["storage_sizes"] = (int(storage_info.min_storage_size.storage_size_mb) // 1024,
+                                          int(storage_info.max_storage_size.storage_size_mb) // 1024)
+        elif database_engine == 'postgres':
+            storage_sizes = set()
+            for size in storage_info.supported_storage_mb:
+                storage_sizes.add(int(size.storage_size_mb // 1024))
+            tier_dict["storage_sizes"] = storage_sizes
+
+        tiers_dict[tier_name] = tier_dict
+
+    return tiers_dict
+
+
+def _get_available_values(sku_info, argument, tier=None):
+    result = {key: val[argument] for key, val in sku_info.items()}
+    return result[tier]
+
+
+def _get_list_from_paged_response(obj_list):
+    return list(obj_list) if isinstance(obj_list, Paged) else obj_list
 
 
 def _update_location(cmd, resource_group_name):

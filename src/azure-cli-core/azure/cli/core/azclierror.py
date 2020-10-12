@@ -12,6 +12,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 # pylint: disable=unnecessary-pass
 
+
 # Error types in AzureCLI are from different sources, and there are many general error types like CLIError, AzureError.
 # Besides, many error types with different names are actually showing the same kind of error.
 # For example, CloudError, CLIError and ValidtionError all could be a resource-not-found error.
