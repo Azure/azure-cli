@@ -19,6 +19,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mariadb_replica,
     cf_mariadb_private_endpoint_connections_operations,
     cf_mariadb_private_link_resources_operations,
+    cf_mariadb_location_based_performance_tier_operations,
     cf_mysql_servers,
     cf_mysql_db,
     cf_mysql_firewall_rules,
@@ -30,6 +31,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_private_link_resources_operations,
     cf_mysql_server_keys_operations,
     cf_mysql_server_ad_administrators_operations,
+    cf_mysql_location_based_performance_tier_operations,
     cf_postgres_servers,
     cf_postgres_db,
     cf_postgres_firewall_rules,
@@ -41,12 +43,11 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_private_link_resources_operations,
     cf_postgres_server_keys_operations,
     cf_postgres_server_ad_administrators_operations,
-    cf_mysql_location_based_performance_tier_operations,
     cf_postgres_location_based_performance_tier_operations)
 
 from ._transformers import (
     table_transform_output_list_skus_single_server,
-    table_transform_output_list_servers_single_server)
+    table_transform_output_list_servers)
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
@@ -230,13 +231,19 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RDBMS
     )
 
+    mariadb_location_based_performance_tier_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mariadb.operations#LocationBasedPerformanceTierOperations.{}',
+        client_factory=cf_mariadb_location_based_performance_tier_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
     with self.command_group('mariadb server', mariadb_servers_sdk, client_factory=cf_mariadb_servers) as g:
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func')
+        g.custom_command('list', '_server_list_custom_func', table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
@@ -252,7 +259,7 @@ def load_command_table(self, _):
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func', table_transformer=table_transform_output_list_servers_single_server)
+        g.custom_command('list', '_server_list_custom_func', table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
@@ -268,7 +275,7 @@ def load_command_table(self, _):
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
-        g.custom_command('list', '_server_list_custom_func', table_transformer=table_transform_output_list_servers_single_server)
+        g.custom_command('list', '_server_list_custom_func', table_transformer=table_transform_output_list_servers)
         g.generic_update_command('update',
                                  getter_name='_server_update_get', getter_type=rdbms_custom,
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
@@ -486,5 +493,11 @@ def load_command_table(self, _):
     with self.command_group('postgres server',
                             postgres_location_based_performance_tier_sdk,
                             client_factory=cf_postgres_location_based_performance_tier_operations,
+                            is_preview=True) as g:
+        g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)
+
+    with self.command_group('mariadb server',
+                            mariadb_location_based_performance_tier_sdk,
+                            client_factory=cf_mariadb_location_based_performance_tier_operations,
                             is_preview=True) as g:
         g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)

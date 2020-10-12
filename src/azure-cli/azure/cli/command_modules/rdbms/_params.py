@@ -178,6 +178,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server private-link-resource'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], required=True, help='Name of the Server.')
 
+        with self.argument_context('{} server list-skus'.format(command_group)) as c:
+            c.argument('location_name', options_list=['--location', '-l'])
+
         if command_group != 'mariadb':
             with self.argument_context('{} server key'.format(command_group)) as c:
                 c.argument('server_name', options_list=['--name', '-s'])
@@ -187,9 +190,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                 c.argument('server_name', options_list=['--server-name', '-s'])
                 c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
                 c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')
-
-            with self.argument_context('{} server list-skus'.format(command_group)) as c:
-                c.argument('location_name', options_list=['--location', '-l'])
 
     _complex_params('mariadb')
     _complex_params('mysql')

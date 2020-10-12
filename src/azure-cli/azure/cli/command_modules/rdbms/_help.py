@@ -1237,3 +1237,11 @@ examples:
   - name: Lists available sku's in the given region.
     text: az mysql server list-skus -l eastus
 """
+
+helps['mariadb server list-skus'] = """
+type: command
+short-summary: Lists available sku's in the given region.
+examples:
+  - name: Lists available sku's in the given region.
+    text: az mariadb server list-skus -l eastus
+"""
