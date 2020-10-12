@@ -1992,6 +1992,59 @@ def _audit_policy_update_diagnostic_settings(
     return rollback_data
 
 
+def _apply_blob_storage_details(
+        cmd,
+        audit_policy,
+        blob_storage_target_state,
+        storage_account,
+        storage_endpoint,
+        storage_account_access_key):
+    '''
+    Apply blob storage details on policy update
+    '''
+
+    if blob_storage_target_state is None:
+        # Original audit policy has no storage_endpoint
+        if not audit_policy.storage_endpoint:
+            audit_policy.storage_endpoint = None
+            audit_policy.storage_account_access_key = None
+        else:
+            # Resolve storage_account_access_key based on original storage_endpoint
+            storage_account = _get_storage_account_name(audit_policy.storage_endpoint)
+            storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
+
+            audit_policy.storage_account_access_key = _get_storage_key(
+                cmd.cli_ctx,
+                storage_account,
+                storage_resource_group,
+                audit_policy.is_storage_secondary_key_in_use)
+    elif _is_audit_policy_state_enabled(blob_storage_target_state):
+        # Resolve storage_endpoint using provided storgae_account
+        if storage_account is not None:
+            storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
+            storage_endpoint = _get_storage_endpoint(cmd.cli_ctx, storage_account, storage_resource_group)
+
+        audit_policy.storage_endpoint = storage_endpoint
+
+        if storage_account_access_key is not None:
+            audit_policy.storage_account_access_key = storage_account_access_key
+        else:
+            # Resolve storage_account if not provided
+            if storage_account is None:
+                storage_account = _get_storage_account_name(storage_endpoint)
+                storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
+
+            # Resolve storage_account_access_key based on storage_account
+            audit_policy.storage_account_access_key = _get_storage_key(
+                cmd.cli_ctx,
+                storage_account,
+                storage_resource_group,
+                audit_policy.is_storage_secondary_key_in_use)
+    else:
+        audit_policy.storage_endpoint = None
+        audit_policy.storage_account_access_key = None
+
+
 def _apply_azure_monitor_target_enabled(
         audit_policy,
         diagnostic_settings,
@@ -2071,46 +2124,13 @@ def _audit_policy_update_global_settings(
     # Apply additional command line arguments only if policy's state is enabled
     if _is_audit_policy_state_enabled(audit_policy.state):
         # Apply blob_storage_target_state and all storage account details
-        if blob_storage_target_state is None:
-            # Original audit policy has no storage_endpoint
-            if not audit_policy.storage_endpoint:
-                audit_policy.storage_endpoint = None
-                audit_policy.storage_account_access_key = None
-            else:
-                # Resolve storage_account_access_key based on original storage_endpoint
-                storage_account = _get_storage_account_name(audit_policy.storage_endpoint)
-                storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
-
-                audit_policy.storage_account_access_key = _get_storage_key(
-                    cmd.cli_ctx,
-                    storage_account,
-                    storage_resource_group,
-                    False)
-        elif _is_audit_policy_state_enabled(blob_storage_target_state):
-            # Resolve storage_endpoint using provided storgae_account
-            if storage_account is not None:
-                storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
-                storage_endpoint = _get_storage_endpoint(cmd.cli_ctx, storage_account, storage_resource_group)
-
-            audit_policy.storage_endpoint = storage_endpoint
-
-            if storage_account_access_key is not None:
-                audit_policy.storage_account_access_key = storage_account_access_key
-            else:
-                # Resolve storage_account if not provided
-                if storage_account is None:
-                    storage_account = _get_storage_account_name(storage_endpoint)
-                    storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
-
-                # Resolve storage_account_access_key based on storage_account
-                audit_policy.storage_account_access_key = _get_storage_key(
-                    cmd.cli_ctx,
-                    storage_account,
-                    storage_resource_group,
-                    False)
-        else:
-            audit_policy.storage_endpoint = None
-            audit_policy.storage_account_access_key = None
+        _apply_blob_storage_details(
+            cmd,
+            audit_policy,
+            blob_storage_target_state,
+            storage_account,
+            storage_endpoint,
+            storage_account_access_key)
 
         # Apply audit_actions_and_groups
         if audit_actions_and_groups is not None:
