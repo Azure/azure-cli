@@ -1808,6 +1808,7 @@ def _audit_policy_validate_arguments(
     if _is_audit_policy_state_enabled(event_hub_target_state) and event_hub_authorization_rule_id is None:
         raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
 
+    # Server upper limit
     max_retention_days = 3285
 
     if retention_days is not None and\
@@ -1927,9 +1928,12 @@ def _audit_policy_update_diagnostic_settings(
     is_azure_monitor_target_enabled = log_analytics_workspace_resource_id is not None or\
         event_hub_authorization_rule_id is not None
 
+    has_other_categories = next((log for log in audit_diagnostic_setting.logs
+                                 if log.enabled and log.category != 'SQLSecurityAuditEvents'), None) is not None
+
     # If there is no other categories except SQLSecurityAuditEvents update or delete
     # the existing single diagnostic settings
-    if len(audit_diagnostic_setting.logs) == 1:
+    if not has_other_categories:
         # If azure monitor is enabled then update existing single audit diagnostic setting
         if is_azure_monitor_target_enabled:
             create_diagnostics_settings(
