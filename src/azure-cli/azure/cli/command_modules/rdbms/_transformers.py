@@ -43,7 +43,7 @@ def table_transform_output_list_sku(result):
         for skus in skus_tiers:
             tier_name = skus["name"]
             try:
-                keys = skus["supportedServerVersions"][1]["supportedVcores"]
+                keys = skus["supportedServerVersions"][0]["supportedVcores"]
                 for key in keys:
                     new_entry = OrderedDict()
                     new_entry['SKU'] = key['name']

@@ -301,3 +301,88 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.oauth_cmd('storage blob list -c {container} --delimiter "/" --account-name {account} ') \
             .assert_with_checks(JMESPathCheck('length(@)', 1),
                                 JMESPathCheck('[0].name', 'dir/'))
+
+
+@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
+class StorageBlobSetTierOauthTests(StorageScenarioMixin, ScenarioTest):
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2', sku='Premium_LRS')
+    def test_storage_page_blob_set_tier_oauth(self, resource_group, storage_account):
+
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+        container_name = self.create_container(account_info)
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.oauth_cmd('storage blob upload -c {} -n {} -f "{}" -t page --tier P10 --account-name {} '.format(
+                       container_name, blob_name, source_file, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
+                       storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'P10'))
+
+        with self.assertRaises(SystemExit):
+            self.oauth_cmd('storage blob set-tier -c {} -n {} --tier P20 -r High -t page --account-name {} '.format(
+                           container_name, blob_name, storage_account))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier P20 -t page --account-name {} '.format(
+                       container_name, blob_name, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
+                       storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'P20'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_block_blob_set_tier_oauth(self, resource_group, storage_account):
+
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+        container_name = self.create_container(account_info)
+
+        # test rehydrate from Archive to Cool by High priority
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.oauth_cmd('storage blob upload -c {} -n {} -f "{}" --account-name {} '.format(
+                       container_name, blob_name, source_file, storage_account))
+
+        with self.assertRaises(SystemExit):
+            self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Cool -r Middle --account-name {} '.format(
+                           container_name, blob_name, storage_account))
+
+        with self.assertRaises(SystemExit):
+            self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Archive -r High --account-name {} '.format(
+                           container_name, blob_name, storage_account))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Archive --account-name {} '.format(
+                       container_name, blob_name, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
+                       storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Cool -r High --account-name {} '.format(
+                       container_name, blob_name, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
+                       storage_account)).assert_with_checks(
+            JMESPathCheck('properties.blobTier', 'Archive'),
+            JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
+
+        # test rehydrate from Archive to Hot by Standard priority
+        blob_name2 = self.create_random_name(prefix='blob', length=24)
+
+        self.oauth_cmd('storage blob upload -c {} -n {} -f "{}" --account-name {} '.format(
+                       container_name, blob_name2, source_file, storage_account))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Archive --account-name {} '.format(
+                       container_name, blob_name2, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name2,
+                       storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Hot --account-name {} '.format(
+                       container_name, blob_name2, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name2,
+                       storage_account)) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
+                                JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-hot'))

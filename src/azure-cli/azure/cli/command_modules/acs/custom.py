@@ -2429,8 +2429,12 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
         if addon == 'aciConnector':
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
-        # addon name is case insensitive
-        addon = next((x for x in addon_profiles.keys() if x.lower() == addon.lower()), addon)
+
+        # honor addon names defined in Azure CLI
+        for key in list(addon_profiles):
+            if key.lower() == addon.lower() and key != addon:
+                addon_profiles[addon] = addon_profiles.pop(key)
+
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
@@ -2740,8 +2744,9 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
     # Workaround for this addon key which has been seen lowercased in the wild.
-    if 'loganalyticsworkspaceresourceid' in addon.config:
-        addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop('loganalyticsworkspaceresourceid')
+    for key in list(addon.config):
+        if key.lower() == 'loganalyticsworkspaceresourceid' and key != 'logAnalyticsWorkspaceResourceID':
+            addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop(key)
 
     workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
 
