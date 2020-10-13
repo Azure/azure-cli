@@ -78,6 +78,14 @@ def cf_synapse_client_integrationruntimecredentials_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).integration_runtime_credentials
 
 
+def cf_synapse_client_integrationruntimeconnectioninfos_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_connection_infos
+
+
+def cf_synapse_client_integrationruntimestatus_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_status
+
+
 def cf_synapse_client_operations_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).operations
 

@@ -1071,12 +1071,12 @@ class SynapseScenarioTests(ScenarioTest):
 
     def test_integration_runtime(self):
         self.kwargs.update({
-            'rg': 'zzy-test-rg',
+            'rg': 'rg',
             'workspace': 'testsynapseworkspace',
             'name': 'integrationruntime',
             'type': 'Managed',
             'selfhosted-integration-runtime': 'SelfHostedIntegrationRuntime',
-            'node': 'T-WAYANG'})
+            'node': 'testnode'})
 
         # create integration runtime
         self.cmd(
@@ -1109,20 +1109,20 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get keys for a self-hosted integration runtime
         key = self.cmd(
-            'az synapse integration-runtime-key show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}').get_output_in_json()
+            'az synapse integration-runtime list-auth-key --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}').get_output_in_json()
         assert key['authKey1'] is not None
         assert key['authKey2'] is not None
 
         # regenerate self-hosted integration runtime key
         key = self.cmd(
-            'az synapse integration-runtime-key regenerate --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            'az synapse integration-runtime regenerate-auth-key --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
             '--key-name authKey1').get_output_in_json()
         assert key['authKey1'] is not None
         assert key['authKey2'] is None
 
         # get metric data for a self-hosted integration runtime
         self.cmd(
-            'az synapse integration-runtime-metric show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}',
+            'az synapse integration-runtime get-monitoring-data --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}',
             checks=[
                 self.check('name', self.kwargs['selfhosted-integration-runtime'])
             ])
@@ -1145,9 +1145,20 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get self-hosted integration runtime node ip
         self.cmd(
-            'az synapse integration-runtime-node show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            'az synapse integration-runtime-node get-ip-address --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
             '--node-name {node}')
 
         # sync credentials among integration runtime nodes
         self.cmd(
-            'az synapse integration-runtime-credential sync --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+            'az synapse integration-runtime sync-credentials --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+
+        # get connection info
+        self.cmd(
+            'az synapse integration-runtime get-connection-info --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+
+        # get status
+        self.cmd(
+            'az synapse integration-runtime get-status --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}',
+            checks=[
+                self.check('name', self.kwargs['selfhosted-integration-runtime'])
+            ])

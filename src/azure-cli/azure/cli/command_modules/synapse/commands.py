@@ -26,6 +26,8 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_integrationruntimenodeipaddress_factory
     from ._client_factory import cf_synapse_client_integrationruntimenodes_factory
     from ._client_factory import cf_synapse_client_integrationruntimecredentials_factory
+    from ._client_factory import cf_synapse_client_integrationruntimeconnectioninfos_factory
+    from ._client_factory import cf_synapse_client_integrationruntimestatus_factory
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -110,6 +112,14 @@ def load_command_table(self, _):
     synapse_integrationruntimecredentials_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimeCredentialsOperations.{}',
         client_factory=cf_synapse_client_integrationruntimecredentials_factory)
+
+    synapse_integrationruntimeconnectioninfos_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimeConnectionInfosOperations.{}',
+        client_factory=cf_synapse_client_integrationruntimeconnectioninfos_factory)
+
+    synapse_integrationruntimestatus_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimeStatusOperations.{}',
+        client_factory=cf_synapse_client_integrationruntimestatus_factory)
 
     synapse_spark_session_sdk = CliCommandType(
         operations_tmpl='azure.synapse.spark.operations#SparkSessionOperations.{}',
@@ -287,29 +297,26 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.command('update', 'update')
         g.command('upgrade', 'upgrade')
-
-    with self.command_group('synapse integration-runtime-key', command_type=synapse_integrationruntimeauthkeys_sdk,
-                            client_factory=cf_synapse_client_integrationruntimeauthkeys_factory) as g:
-        g.show_command('show', 'list')
-        g.command('regenerate', 'regenerate')
-
-    with self.command_group('synapse integration-runtime-metric', command_type=synapse_integrationruntimemonitoringdata_sdk,
-                            client_factory=cf_synapse_client_integrationruntimemonitoringdata_factory) as g:
-        g.show_command('show', 'get')
+        g.command('list-auth-key', 'list', command_type=synapse_integrationruntimeauthkeys_sdk,
+                  client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
+        g.command('regenerate-auth-key', 'regenerate', command_type=synapse_integrationruntimeauthkeys_sdk,
+                  client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
+        g.command('get-monitoring-data', 'get', command_type=synapse_integrationruntimemonitoringdata_sdk,
+                  client_factory=cf_synapse_client_integrationruntimemonitoringdata_factory)
+        g.command('sync-credentials', 'sync', command_type=synapse_integrationruntimecredentials_sdk,
+                  client_factory=cf_synapse_client_integrationruntimecredentials_factory)
+        g.command('get-connection-info', 'get', command_type=synapse_integrationruntimeconnectioninfos_sdk,
+                  client_factory=cf_synapse_client_integrationruntimeconnectioninfos_factory)
+        g.command('get-status', 'get', command_type=synapse_integrationruntimestatus_sdk,
+                  client_factory=cf_synapse_client_integrationruntimestatus_factory)
 
     with self.command_group('synapse integration-runtime-node', command_type=synapse_integrationruntimenodes_sdk,
                             client_factory=cf_synapse_client_integrationruntimenodes_factory) as g:
         g.show_command('show', 'get')
         g.command('update', 'update')
         g.command('delete', 'delete', confirmation=True)
-
-    with self.command_group('synapse integration-runtime-node-ip', command_type=synapse_integrationruntimenodeipaddress_sdk,
-                            client_factory=cf_synapse_client_integrationruntimenodeipaddress_factory) as g:
-        g.show_command('show', 'get')
-
-    with self.command_group('synapse integration-runtime-credential', command_type=synapse_integrationruntimecredentials_sdk,
-                            client_factory=cf_synapse_client_integrationruntimecredentials_factory) as g:
-        g.show_command('sync', 'sync')
+        g.command('get-ip-address', 'get', command_type=synapse_integrationruntimenodeipaddress_sdk,
+                  client_factory=cf_synapse_client_integrationruntimenodeipaddress_factory)
 
     # Data Plane Commands --Spark batch opertions
     with self.command_group('synapse spark job', command_type=synapse_spark_batch_sdk,

@@ -1356,7 +1356,7 @@ helps['synapse integration-runtime create'] = """
 type: command
 short-summary: Create an integration runtime.
 examples:
-  - name: Create a integration runtime.
+  - name: Create an integration runtime.
     text: |-
         az synapse integration-runtime create --workspace-name testsynapseworkspace --resource-group rg \\
           --name testintegrationruntime --type Managed
@@ -1374,9 +1374,9 @@ examples:
 
 helps['synapse integration-runtime show'] = """
 type: command
-short-summary: Get a integration runtime.
+short-summary: Get an integration runtime.
 examples:
-  - name: Get a integration runtime.
+  - name: Get an integration runtime.
     text: |-
         az synapse integration-runtime show --workspace-name testsynapseworkspace --resource-group rg \\
           --name testintegrationruntime
@@ -1393,7 +1393,7 @@ examples:
 
 helps['synapse integration-runtime delete'] = """
 type: command
-short-summary: Delete a integration runtime.
+short-summary: Delete an integration runtime.
 examples:
   - name: Delete a integration runtime.
     text: |-
@@ -1411,43 +1411,63 @@ examples:
           --name testintegrationruntime
 """
 
-helps['synapse integration-runtime-key'] = """
-type: group
-short-summary: Manage Synapse's self-hosted integration runtime keys.
-"""
-
-helps['synapse integration-runtime-key show'] = """
+helps['synapse integration-runtime list-auth-key'] = """
 type: command
 short-summary: Get keys for a self-hosted integration runtime.
 examples:
   - name: Get keys for a self-hosted integration runtime.
     text: |-
-        az synapse integration-runtime-key show --workspace-name testsynapseworkspace --resource-group rg \\
+        az synapse integration-runtime list-auth-key --workspace-name testsynapseworkspace --resource-group rg \\
           --name selfhostedintegrationruntime
 """
 
-helps['synapse integration-runtime-key regenerate'] = """
+helps['synapse integration-runtime regenerate-auth-key'] = """
 type: command
 short-summary: Regenerate self-hosted integration runtime key.
 examples:
   - name: Regenerate self-hosted integration runtime key.
     text: |-
-        az synapse integration-runtime-key regenerate --workspace-name testsynapseworkspace --resource-group rg \\
+        az synapse integration-runtime regenerate-auth-key --workspace-name testsynapseworkspace --resource-group rg \\
           --name selfhostedintegrationruntime --key-name authKey1
 """
 
-helps['synapse integration-runtime-metric'] = """
-type: group
-short-summary: Manage Synapse's self-hosted integration runtime metric data.
-"""
-
-helps['synapse integration-runtime-metric show'] = """
+helps['synapse integration-runtime get-monitoring-data'] = """
 type: command
 short-summary: Get metric data for a self-hosted integration runtime.
 examples:
   - name: Get metric data for a self-hosted integration runtime.
     text: |-
-        az synapse integration-runtime-metric show --workspace-name testsynapseworkspace --resource-group rg \\
+        az synapse integration-runtime get-monitoring-data --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime sync-credentials'] = """
+type: command
+short-summary: Synchronize credentials among integration runtime nodes.
+examples:
+  - name: Synchronize credentials among integration runtime nodes.
+    text: |-
+        az synapse integration-runtime sync-credentials --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime get-connection-info'] = """
+type: command
+short-summary: Get the integration runtime connection infomation.
+examples:
+  - name: Get the integration runtime connection infomation.
+    text: |-
+        az synapse integration-runtime get-connection-info --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime get-status'] = """
+type: command
+short-summary: Gets detailed status information for an integration runtime.
+examples:
+  - name: Gets detailed status information for an integration runtime.
+    text: |-
+        az synapse integration-runtime get-status --workspace-name testsynapseworkspace --resource-group rg \\
           --name selfhostedintegrationruntime
 """
 
@@ -1486,32 +1506,12 @@ examples:
           --name selfhostedintegrationruntime --node-name testnode
 """
 
-helps['synapse integration-runtime-node-ip'] = """
-type: group
-short-summary: Manage Synapse's self-hosted integration runtime node ip.
-"""
-
-helps['synapse integration-runtime-node-ip show'] = """
+helps['synapse integration-runtime-node get-ip-address'] = """
 type: command
 short-summary: Get self-hosted integration runtime node ip.
 examples:
   - name: Get self-hosted integration runtime node ip.
     text: |-
-        az synapse integration-runtime-node-ip show --workspace-name testsynapseworkspace --resource-group rg \\
+        az synapse integration-runtime-node get-ip-address --workspace-name testsynapseworkspace --resource-group rg \\
           --name selfhostedintegrationruntime --node-name testnode
-"""
-
-helps['synapse integration-runtime-credential'] = """
-type: group
-short-summary: Manage Synapse's self-hosted integration runtime credential.
-"""
-
-helps['synapse integration-runtime-credential sync'] = """
-type: command
-short-summary: Synchronize credentials among integration runtime nodes.
-examples:
-  - name: Synchronize credentials among integration runtime nodes.
-    text: |-
-        az synapse integration-runtime-credential sync --workspace-name testsynapseworkspace --resource-group rg \\
-          --name selfhostedintegrationruntime
 """
