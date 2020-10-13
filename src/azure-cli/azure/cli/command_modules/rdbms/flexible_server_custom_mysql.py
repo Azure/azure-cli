@@ -14,9 +14,11 @@ from azure.cli.core.local_context import ALL
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
     cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window
+    parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
+    DEFAULT_LOCATION_MySQL
 from .flexible_server_custom_common import user_confirmation, server_list_custom_func
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
+from .validators import mysql_arguments_validator
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -25,12 +27,20 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 
 # region create without args
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                            location=None, storage_mb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
                            backup_retention=None, tags=None, public_access=None, database_name=None,
                            subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
                            vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None):
+    # validator
+    if location is None:
+        location = DEFAULT_LOCATION_MySQL
+    sku_info = get_mysql_list_skus_info(cmd, location)
+    mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
+    storage_mb *= 1024
+
     from azure.mgmt.rdbms import mysql_flexibleservers
     try:
         db_context = DbContext(
@@ -56,7 +66,8 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                                 server_name)
+                                                                                 server_name, 'mysql')
+        server_name = server_name.lower()
 
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
@@ -116,8 +127,8 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         sku = server_result.sku.name
         host = server_result.fully_qualified_domain_name
 
-        logger.warning('Make a note of your password. If you forget, you would have to reset your password with \
-             \'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
+        logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
+                       '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
                        server_name, resource_group_name)
 
         _update_local_contexts(cmd, server_name, resource_group_name, location, user)
@@ -163,7 +174,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
-def flexible_server_update_custom_func(instance,
+def flexible_server_update_custom_func(cmd, instance,
                                        sku_name=None,
                                        tier=None,
                                        storage_mb=None,
@@ -177,7 +188,13 @@ def flexible_server_update_custom_func(instance,
                                        ha_enabled=None,
                                        replication_role=None,
                                        maintenance_window=None):
+    # validator
+    location = ''.join(instance.location.lower().split())
+    sku_info = get_mysql_list_skus_info(cmd, location)
+    mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, instance=instance)
+
     from importlib import import_module
+
     server_module_path = instance.__module__
     module = import_module(server_module_path)  # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
@@ -189,7 +206,7 @@ def flexible_server_update_custom_func(instance,
         instance.sku.tier = tier
 
     if storage_mb:
-        instance.storage_profile.storage_mb = storage_mb
+        instance.storage_profile.storage_mb = storage_mb * 1024
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
@@ -302,13 +319,20 @@ def flexible_replica_create(cmd, client, resource_group_name, server_name, sourc
     except CloudError as e:
         raise CLIError('Unable to get source server: {}.'.format(str(e)))
 
-    if location is None:
-        location = source_server_object.location
+    # if location is None:
+    #     location = source_server_object.location
 
-    if sku_name is None:
-        sku_name = source_server_object.sku.name
-    if tier is None:
-        tier = source_server_object.sku.tier
+    # if sku_name is None:
+    #     sku_name = source_server_object.sku.name
+    # if tier is None:
+    #     tier = source_server_object.sku.tier
+    location = source_server_object.location
+    sku_name = source_server_object.sku.name
+    tier = source_server_object.sku.tier
+
+    # validation
+    # sku_info = get_mysql_list_skus_info(cmd, location)
+    # mysql_arguments_validator(tier, sku_name, None, None, sku_info)
 
     from azure.mgmt.rdbms import mysql_flexibleservers
 

@@ -65,7 +65,7 @@ from .custom import (
 from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
-    validate_managed_instance_backup_storage_redundancy,
+    validate_backup_storage_redundancy,
     validate_subnet
 )
 
@@ -106,10 +106,11 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
 def get_internal_backup_storage_redundancy(self):
     return {
-        'Local': 'LRS',
-        'Zone': 'ZRS',
-        'Geo': 'GRS',
-    }.get(self, 'Invalid')
+        'local': 'LRS',
+        'zone': 'ZRS',
+        'geo': 'GRS',
+    }.get(self.lower(), 'Invalid')
+
 
 #####
 #        Reusable param type definitions
@@ -221,7 +222,7 @@ backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
     help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
-    validator=validate_managed_instance_backup_storage_redundancy)
+    validator=validate_backup_storage_redundancy)
 
 grace_period_param_type = CLIArgumentType(
     help='Interval in hours before automatic failover is initiated '
@@ -325,6 +326,9 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
 
+    arg_ctx.argument('storage_account_type',
+                     arg_type=backup_storage_redundancy_param_type)
+
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -414,7 +418,8 @@ def _configure_db_dw_create_params(
             'min_capacity',
             'compute_model',
             'read_scale',
-            'read_replica_count'
+            'read_replica_count',
+            'storage_account_type'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -538,6 +543,13 @@ def load_arguments(self, _):
     with self.argument_context('sql db create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
+
     with self.argument_context('sql db copy') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.copy)
 
@@ -553,6 +565,9 @@ def load_arguments(self, _):
                    options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -581,6 +596,9 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified. ' +
                    time_format_help)
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -634,6 +652,9 @@ def load_arguments(self, _):
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -753,6 +774,9 @@ def load_arguments(self, _):
                    options_list=['--partner-server'],
                    help='Name of the server to create the new replica in.')
 
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
+
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
                    help='Name of the database to fail over.')
@@ -779,6 +803,7 @@ def load_arguments(self, _):
     #           sql db audit-policy & threat-policy
     #####
     def _configure_security_policy_storage_params(arg_ctx):
+
         storage_arg_group = 'Storage'
 
         arg_ctx.argument('storage_account',
@@ -950,6 +975,10 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
+
+        c.argument('storage_account_type',
+                   required=False,
+                   arg_type=backup_storage_redundancy_param_type)
 
     ###############################################
     #                sql dw                       #
@@ -1555,9 +1584,7 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault.')
 
         c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type,
-                   options_list=['--backup-storage-redundancy', '--bsr'],
-                   help='Backup storage redundancy used to store backups')
+                   arg_type=backup_storage_redundancy_param_type)
 
         c.argument('yes',
                    options_list=['--yes', '-y'],
@@ -1838,6 +1865,50 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
+
+    with self.argument_context('sql midb log-replay start') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'auto_complete',
+                'last_backup_name',
+                'storage_container_uri',
+                'storage_container_sas_token'
+            ])
+
+        c.argument('auto_complete',
+                   required=False,
+                   options_list=['--auto-complete', '-a'],
+                   action='store_true',
+                   help='The flag that in usage with last_backup_name automatically completes log replay servise.')
+
+        c.argument('last_backup_name',
+                   required=False,
+                   options_list=['--last-backup-name', '--last-bn'],
+                   help='The name of the last backup to restore.')
+
+        c.argument('storage_container_uri',
+                   required=True,
+                   options_list=['--storage-uri', '--su'],
+                   help='The URI of the storage container where backups are.')
+
+        c.argument('storage_container_sas_token',
+                   required=True,
+                   options_list=['--storage-sas', '--ss'],
+                   help='The authorization Sas token to access storage container where backups are.')
+
+    with self.argument_context('sql midb log-replay complete') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'last_backup_name'
+            ])
+
+        c.argument('last_backup_name',
+                   required=False,
+                   options_list=['--last-backup-name', '--last-bn'],
+                   help='The name of the last backup to restore.')
 
     ###############################################
     #                sql virtual cluster          #

@@ -556,8 +556,6 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
         from azure.mgmt.core.tools import is_valid_resource_id
         if scope.startswith('/subscriptions/') and not is_valid_resource_id(scope):
             raise CLIError('Invalid scope. Please use --help to view the valid format.')
-    elif scope == '':
-        raise CLIError('Invalid scope. Please use --help to view the valid format.')
     elif resource_group_name:
         scope = subscription_scope + '/resourceGroups/' + resource_group_name
     else:

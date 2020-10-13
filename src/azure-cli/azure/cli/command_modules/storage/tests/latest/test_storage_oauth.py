@@ -12,9 +12,6 @@ from ..storage_test_util import StorageScenarioMixin
 
 @api_version_constraint(ResourceType.DATA_STORAGE, min_api='2017-11-09')
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
-    def oauth_cmd(self, cmd, *args, **kwargs):
-        return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_storage_oauth')
     @StorageAccountPreparer()

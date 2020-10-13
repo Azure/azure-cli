@@ -142,8 +142,9 @@ def process_storage_uri(ns):
             raise CLIError('Incorrect usage: [--storage-resource-uri URI | '
                            '--storage-account-name NAME --blob-container-name NAME]')
     else:
-        raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
-                       'if --storage-resource-uri is specified.')
+        if ns.storage_account_name or ns.blob_container_name:
+            raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
+                           'if --storage-resource-uri is specified.')
 
 
 def process_sas_token_parameter(cmd, ns):
@@ -387,7 +388,11 @@ def _get_base_url_type(cli_ctx, service):
     if service == 'vault':
         suffix = cli_ctx.cloud.suffixes.keyvault_dns
     elif service == 'hsm':
-        suffix = cli_ctx.cloud.suffixes.mhsm_dns
+        from azure.cli.core.cloud import CloudSuffixNotSetException
+        try:
+            suffix = cli_ctx.cloud.suffixes.mhsm_dns
+        except CloudSuffixNotSetException:  # For Azure Stack and Air-Gaped Cloud
+            suffix = ''
 
     def base_url_type(name):
         return 'https://{}{}'.format(name, suffix)

@@ -16,9 +16,9 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
-from ._completers import (
+from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
-from ._validators import (
+from azure.cli.command_modules.keyvault._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, get_hsm_base_url_type,
     process_storage_uri, validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
@@ -316,7 +316,7 @@ def load_arguments(self, _):
 
     # SDK functions
     for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover',
-                 'set-attributes', 'show', 'show-deleted']:
+                 'set-attributes', 'show', 'show-deleted', 'encrypt', 'decrypt']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             c.ignore('cls')
             if item in ['list', 'list-deleted']:
