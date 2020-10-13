@@ -8,7 +8,6 @@ import base64
 import binascii
 from datetime import datetime
 import re
-import sys
 
 from enum import Enum
 from knack.deprecation import Deprecated
@@ -16,6 +15,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -435,6 +435,13 @@ def validate_subnet(cmd, namespace):
         namespace.subnet = _construct_vnet(cmd, namespace.resource_group_name, vnet, subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+
+
+def validate_role_assignment_args(ns):
+    if not any([ns.role_assignment_name, ns.scope, ns.assignee, ns.assignee_object_id, ns.role, ns.ids]):
+        raise RequiredArgumentMissingError(
+            'Please specify at least one of these parameters: '
+            '--name, --scope, --assignee, --assignee-object-id, --role, --ids')
 
 
 def validate_vault_or_hsm(ns):
