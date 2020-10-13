@@ -649,16 +649,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.multiapi.storagev2.queue._queue_service_client#QueueServiceClient.{}',
         client_factory=cf_queue_service, resource_type=ResourceType.DATA_STORAGE_QUEUE)
 
-    queue_client_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storagev2.queue._queue_client#QueueClient.{}',
-        client_factory=cf_queue_client, resource_type=ResourceType.DATA_STORAGE_QUEUE)
-
     with self.command_group('storage queue', queue_service_sdk,
                             resource_type=ResourceType.DATA_STORAGE_QUEUE, min_api='2018-03-28',
                             custom_command_type=get_custom_sdk('queue', client_factory=cf_queue_service,
                                                                resource_type=ResourceType.DATA_STORAGE_QUEUE)) as g:
         g.storage_custom_command_oauth('list', 'list_queues', transform=transform_storage_list_output)
-
 
     if cosmosdb_table_exists(self.cli_ctx):
         table_sdk = CliCommandType(operations_tmpl='azure.multiapi.cosmosdb.table.tableservice#TableService.{}',
