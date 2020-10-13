@@ -419,9 +419,10 @@ def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, admi
             'password': administrator_login_password
         }
         connection = mysql_connector.connect(**connection_kwargs)
-        logger.warning('Successfully Connected to MySQL.')
+        logger.warning('Successfully connected to MySQL.')
     except Exception as e:
-        raise CLIError("Unable to connect to MySQL Server: {0}".format(e))
+        logger.warning('Failed connection to MySQL. Check error and validate firewall and public access settings.')
+        raise CLIError("Unable to connect to MySQL Server: {0}.".format(e))
 
     # execute query if passed in
     if mysql_query is not None:

@@ -329,7 +329,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
         with self.argument_context('{} flexible-server connect'.format(command_group)) as c:
-            c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the server.')
+            c.argument('server_name', id_part=None, options_list=['--name', '-n'], arg_type=server_name_arg_type)
             c.argument('administrator_login', arg_group='Authentication', arg_type=administrator_login_arg_type, options_list=['--admin-user', '-u'],
                        help='The login username of the administrator.')
             c.argument('administrator_login_password', arg_group='Authentication', options_list=['--admin-password', '-p'],

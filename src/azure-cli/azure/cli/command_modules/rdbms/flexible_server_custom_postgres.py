@@ -346,9 +346,11 @@ def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login,
         }
         connection = psycopg2.connect(**connection_kwargs)
         connection.set_session(autocommit=True)
-        logger.warning('Successfully Connected to PostgreSQL.')
+        logger.warning('Successfully connected to PostgreSQL.')
     except Exception as e:
+        logger.warning('Failed connection to MySQL. Check error and validate firewall and public access settings.')
         raise CLIError("Unable to connect to PostgreSQL Server: {}".format(e))
+    
     # execute query if passed in
     if postgres_query is not None:
         try:
