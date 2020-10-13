@@ -8,6 +8,7 @@ import base64
 import binascii
 from datetime import datetime
 import re
+import sys
 
 from enum import Enum
 from knack.deprecation import Deprecated
