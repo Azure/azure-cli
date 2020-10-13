@@ -45,13 +45,13 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 4.  Open the folder containing the clone of this repository in VS Code
 5. Set the [Python Interpreter](https://code.visualstudio.com/docs/python/environments#_select-and-activate-an-environment) to use as the python.exe located in your virtual environment
     - If your virtual environment's Python Interpreter is not shown, you may need to add the root folder it's located in to the extension's venv path. This will be under File -> Preferences -> Settings -> Python: Venv Path.
-    - You can also use your workspace or user `settings.json`, or `launch.json` file to specify the interpreter's path. This approach is detailed in the Environments section of the Python VS Code extension [documentation](https://code.visualstudio.com/docs/python/environments#_choose-a-debugging-environment). An example in `settings.json`:
+    - You can also use your workspace or user `settings.json`, or `launch.json` file to specify the interpreter's path. Details can be found in the Environments section of the Python VS Code extension [documentation](https://code.visualstudio.com/docs/python/environments#_choose-a-debugging-environment). An example in `settings.json`:
     ```
       {
           "python.pythonPath": "C:\\repo\\env\\Scripts\\python.exe"
       }
     ```
-      or in `launch.json`
+        or in `launch.json`:
     ```
       {
           "pythonPath": "C:\\repo\\env\\Scripts\\python.exe"
