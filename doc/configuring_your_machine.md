@@ -51,7 +51,7 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
           "python.pythonPath": "C:\\repo\\env\\Scripts\\python.exe"
       }
     ```
-    or in `launch.json`
+      or in `launch.json`
     ```
       {
           "pythonPath": "C:\\repo\\env\\Scripts\\python.exe"
