@@ -342,19 +342,20 @@ def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login,
             'host': host,
             'database': database_name,
             'user': administrator_login,
-            'password': administrator_login_password if administrator_login_password is not None else '{administrator_login_password}'
+            'password': administrator_login_password
         }
         connection = psycopg2.connect(**connection_kwargs)
         connection.set_session(autocommit=True)
         logger.warning('Successfully Connected to PostgreSQL.')
-        cursor = connection.cursor()
     except Exception as e:
         raise CLIError("Unable to connect to PostgreSQL Server: {}".format(e))
     # execute query if passed in
     if postgres_query is not None:
         try:
+            cursor = connection.cursor()
             cursor.execute(postgres_query)
             logger.warning("Ran Database Query: '%s'", postgres_query)
+            logger.warning("Retrieving first 30 rows of query output.")
             result = cursor.fetchmany(30)  # limit to 30 rows of output for now
             row_headers = [x[0] for x in cursor.description]  # this will extract row headers
             # format the result for a clean display
@@ -363,12 +364,13 @@ def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login,
                 json_data.append(dict(zip(row_headers, rv)))
         except Exception as e:
             raise CLIError("Unable to execute query '{0}' on PostgreSQL Server: {1}".format(postgres_query, e))
-    if cursor is not None:
-        try:
-            cursor.close()
-            logger.warning("Closed the connection to %s", host)
-        except Exception:  # pylint: disable=broad-except
-            logger.warning('Unable to close connection cursor.')
+        finally:
+            if cursor is not None:
+                try:
+                    cursor.close()
+                    logger.warning("Closed the connection to %s", host)
+                except Exception:  # pylint: disable=broad-except
+                    logger.warning('Unable to close connection cursor.')
     return json_data
 
 
