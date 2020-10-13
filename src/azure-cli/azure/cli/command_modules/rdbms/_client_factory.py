@@ -278,6 +278,18 @@ def cf_postgres_server_ad_administrators_operations(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).server_administrators
 
 
+def cf_mariadb_check_resource_availability_sterling(cli_ctx, _):
+    return get_mariadb_management_client(cli_ctx).check_name_availability
+
+
+def cf_mysql_check_resource_availability_sterling(cli_ctx, _):
+    return get_mysql_management_client(cli_ctx).check_name_availability
+
+
+def cf_postgres_check_resource_availability_sterling(cli_ctx, _):
+    return get_postgresql_management_client(cli_ctx).check_name_availability
+
+
 # Meru operations for flexible servers
 def cf_mysql_flexible_servers(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).servers
