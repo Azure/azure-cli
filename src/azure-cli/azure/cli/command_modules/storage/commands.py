@@ -17,7 +17,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
                                                                cf_or_policy, cf_container_client,
-                                                               cf_queue_service, cf_queue_client)
+                                                               cf_queue_service)
 
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
