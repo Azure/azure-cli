@@ -419,9 +419,9 @@ def _form_response(username, sku, location, server_id, host, version, password, 
 
 def _update_local_contexts(cmd, server_name, resource_group_name, location, user):
     if cmd.cli_ctx.local_context.is_on:
-        cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'server_name',
+        cmd.cli_ctx.local_context.set([ALL], 'server_name',
                                       server_name)  # Setting the server name in the local context
-        cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'administrator_login',
+        cmd.cli_ctx.local_context.set([ALL], 'administrator_login',
                                       user)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                       location)  # Setting the location in the local context
