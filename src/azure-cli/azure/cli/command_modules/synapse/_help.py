@@ -1395,7 +1395,7 @@ helps['synapse integration-runtime delete'] = """
 type: command
 short-summary: Delete an integration runtime.
 examples:
-  - name: Delete a integration runtime.
+  - name: Delete an integration runtime.
     text: |-
         az synapse integration-runtime delete --workspace-name testsynapseworkspace --resource-group rg \\
           --name testintegrationruntime
