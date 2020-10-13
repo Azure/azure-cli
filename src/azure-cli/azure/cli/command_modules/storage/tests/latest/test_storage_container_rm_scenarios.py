@@ -35,8 +35,8 @@ class StorageContainerRmScenarios(ScenarioTest):
         self.kwargs.update({'container_id': container_id})
 
         # Create container using existing name while setting fail-on-exist true
-        from azure.cli.core.azclierror import AzCLIError
-        with self.assertRaisesRegexp(AzCLIError, 'The specified container already exists.'):
+        from knack.util import CLIError
+        with self.assertRaisesRegexp(CLIError, 'The specified container already exists.'):
             self.cmd(
                 'storage container-rm create --storage-account {sa} -g {rg} -n {container_name} --fail-on-exist').get_output_in_json()
 
