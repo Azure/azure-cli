@@ -776,7 +776,6 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         })
 
         # test update long term retention on live database
-        print('Creating MI...\n')
         self.cmd(
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name} --weekly-retention {weekly_retention} --monthly-retention {monthly_retention} --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
             checks=[
